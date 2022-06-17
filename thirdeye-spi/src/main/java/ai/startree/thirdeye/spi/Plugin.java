@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
+import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import java.util.Collections;
 
 public interface Plugin {
@@ -34,6 +35,10 @@ public interface Plugin {
   }
 
   default Iterable<NotificationServiceFactory> getNotificationServiceFactories() {
+    return Collections.emptyList();
+  }
+
+  default Iterable<ContributorsFinderFactory> getContributorsFinderFactories() {
     return Collections.emptyList();
   }
 }

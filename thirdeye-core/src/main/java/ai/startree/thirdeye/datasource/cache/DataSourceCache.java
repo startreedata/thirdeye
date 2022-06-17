@@ -31,9 +31,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
@@ -147,30 +145,9 @@ public class DataSourceCache {
     }
   }
 
-  @Deprecated
-  public ThirdEyeResponse getQueryResult(final ThirdEyeRequest request) throws Exception {
-    datasourceCallCounter.inc();
-    final long tStart = System.nanoTime();
-    try {
-      final String dataSource = request.getDataSource();
-
-      return getDataSource(dataSource).execute(request);
-    } catch (final Exception e) {
-      datasourceExceptionCounter.inc();
-      throw e;
-    } finally {
-      datasourceCallDuration.update(System.nanoTime() - tStart);
-    }
-  }
-
   public Future<DataFrame> getQueryResultAsync(final CalciteRequest request,
       final String dataSource) {
     return executorService.submit(() -> getQueryResult(request, dataSource));
-  }
-
-  @Deprecated
-  public Future<ThirdEyeResponse> getQueryResultAsync(final ThirdEyeRequest request) {
-    return executorService.submit(() -> getQueryResult(request));
   }
 
   public Map<CalciteRequest, Future<DataFrame>> getQueryResultsAsync(
@@ -178,16 +155,6 @@ public class DataSourceCache {
     final Map<CalciteRequest, Future<DataFrame>> responseFuturesMap = new LinkedHashMap<>();
     for (final CalciteRequest request : requests) {
       responseFuturesMap.put(request, getQueryResultAsync(request, dataSource));
-    }
-    return responseFuturesMap;
-  }
-
-  @Deprecated
-  public Map<ThirdEyeRequest, Future<ThirdEyeResponse>> getQueryResultsAsync(
-      final List<ThirdEyeRequest> requests) {
-    final Map<ThirdEyeRequest, Future<ThirdEyeResponse>> responseFuturesMap = new LinkedHashMap<>();
-    for (final ThirdEyeRequest request : requests) {
-      responseFuturesMap.put(request, getQueryResultAsync(request));
     }
     return responseFuturesMap;
   }

@@ -138,4 +138,6 @@ spec:
           secret:
             secretName: thirdeye-secrets
         {{- end }}
+  strategy:
+    {{- toYaml .Values.scheduler.strategy | nindent 4 }}
 {{ end }}

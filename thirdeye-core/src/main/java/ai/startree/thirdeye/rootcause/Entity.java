@@ -15,7 +15,6 @@ package ai.startree.thirdeye.rootcause;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,13 +38,6 @@ public class Entity {
   private final String urn;
   private final double score;
   private final List<Entity> related;
-
-  public static final Comparator<Entity> HIGHEST_SCORE_FIRST = new Comparator<Entity>() {
-    @Override
-    public int compare(Entity o1, Entity o2) {
-      return -1 * Double.compare(o1.score, o2.score);
-    }
-  };
 
   public Entity(String urn, double score, List<? extends Entity> related) {
     this.urn = urn;

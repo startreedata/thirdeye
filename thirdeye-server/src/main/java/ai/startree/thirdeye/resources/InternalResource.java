@@ -115,12 +115,6 @@ public class InternalResource {
   }
 
   @GET
-  @Path("version")
-  public Response getVersion() {
-    return Response.ok(InternalResource.class.getPackage().getImplementationVersion()).build();
-  }
-
-  @GET
   @Path("email/html")
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateHtmlEmail(
@@ -212,7 +206,7 @@ public class InternalResource {
   @GET
   @Path("worker/id")
   public Response workerId(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
-    if(taskDriverConfiguration.isEnabled()) {
+    if (taskDriverConfiguration.isEnabled()) {
       return Response.ok(taskDriver.getWorkerId()).build();
     } else {
       return Response.ok(-1).build();

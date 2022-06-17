@@ -26,6 +26,7 @@ import {
     getUiAlert,
     omitNonUpdatableData,
 } from "../../utils/alerts/alerts.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -376,7 +377,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                                     displayInline
                                                     enablePadding
                                                     externalLink
-                                                    href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
+                                                    href={`${THIRDEYE_DOC_LINK}/concepts/alert-configuration`}
                                                 />
                                             </span>
                                         </TooltipV1>

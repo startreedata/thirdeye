@@ -16,7 +16,6 @@ package ai.startree.thirdeye.detection.anomaly.detection.trigger;
 import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
 
 import ai.startree.thirdeye.CoreConstants;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
@@ -70,7 +69,6 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private final TaskManager taskDAO;
   private final AlertManager alertManager;
   private final DatasetConfigManager datasetConfigManager;
-  private final ThirdEyeCacheRegistry thirdEyeCacheRegistry;
   private final MetricConfigManager metricConfigManager;
 
   @Inject
@@ -79,7 +77,6 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       final TaskManager taskDAO,
       final AlertManager alertManager,
       final DatasetConfigManager datasetConfigManager,
-      final ThirdEyeCacheRegistry thirdEyeCacheRegistry,
       final MetricConfigManager metricConfigManager) {
     this.sleepPerRunInSec = config.getSchedulerDelayInSec();
     this.fallBackTimeInSec = config.getTaskTriggerFallBackTimeInSec();
@@ -91,7 +88,6 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     this.taskDAO = taskDAO;
     this.alertManager = alertManager;
     this.datasetConfigManager = datasetConfigManager;
-    this.thirdEyeCacheRegistry = thirdEyeCacheRegistry;
     this.metricConfigManager = metricConfigManager;
   }
 

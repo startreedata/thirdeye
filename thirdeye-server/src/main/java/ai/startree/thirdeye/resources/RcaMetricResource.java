@@ -16,16 +16,12 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
-import static ai.startree.thirdeye.util.BaselineParsingUtils.parseOffset;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
-import ai.startree.thirdeye.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rootcause.BaselineAggregate;
-import ai.startree.thirdeye.rootcause.entity.MetricEntity;
-import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.DatasetApi;
@@ -39,10 +35,10 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.Baseline;
 import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import ai.startree.thirdeye.util.BaselineParsingUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -54,7 +50,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -86,8 +81,6 @@ import org.slf4j.LoggerFactory;
  * <p>RcaMetricResource is a central endpoint for querying different views on metrics as used
  * by the
  * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).</p>
- *
- * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
  */
 @Api(authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
@@ -134,11 +127,11 @@ public class RcaMetricResource {
    * @param offset offset identifier (e.g. "current", "wo2w")
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
    */
   @GET
   @Path("/aggregate")
   @ApiOperation(value = "Returns an aggregate value for the specified metric and time range, and (optionally) offset.")
+  @Deprecated
   public Response getAggregate(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
@@ -146,13 +139,7 @@ public class RcaMetricResource {
       @ApiParam(value = "offset identifier (e.g. \"current\", \"wo2w\")") @QueryParam("offset") @DefaultValue(OFFSET_DEFAULT) String offset)
       throws Exception {
 
-    MetricEntity metricEntity = MetricEntity.fromURN(urn);
-    long metricId = metricEntity.getId();
-    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
-
-    double aggregate = computeAggregate(metricId, filters, start, end, offset, DateTimeZone.UTC);
-
-    return Response.ok(aggregate).build();
+    throw new UnsupportedOperationException("Deprecated route");
   }
 
   /**
@@ -167,29 +154,18 @@ public class RcaMetricResource {
    * @param offsets A list of offset identifier (e.g. "current", "wo2w")
    * @return aggregate value, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, String) supported offsets
    */
   @GET
   @Path("/aggregate/batch")
   @ApiOperation(value = "Returns a list of aggregate value for the specified metric and time range, and (optionally) offset.")
+  @Deprecated
   public Response getAggregateBatch(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urn", required = true) @QueryParam("urn") @NotNull String urn,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "A list of offset identifier separated by comma (e.g. \"current\", \"wo2w\")") @QueryParam("offsets") List<String> offsets)
       throws Exception {
-    MetricEntity metricEntity = MetricEntity.fromURN(urn);
-    long metricId = metricEntity.getId();
-    List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
-
-    List<Double> aggregates = computeAggregatesForOffsets(metricId,
-        filters,
-        start,
-        end,
-        offsets,
-        DateTimeZone.UTC);
-
-    return Response.ok(aggregates).build();
+    throw new UnsupportedOperationException("Deprecated route");
   }
 
   /**
@@ -204,27 +180,18 @@ public class RcaMetricResource {
    * @param offsets A list of offset identifiers (e.g. "current", "wo2w")
    * @return map of lists (keyed by urn) of aggregate values, or NaN if data not available
    * @throws Exception on catch-all execution failure
-   * @see BaselineParsingUtils#parseOffset(String, DateTimeZone) supported offsets
    */
   @GET
   @Path("/aggregate/chunk")
   @ApiOperation(value = "Returns a map of lists (keyed by urn) of aggregate value for the specified metrics and time range, and offsets.")
+  @Deprecated
   public Response getAggregateChunk(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @ApiParam(value = "metric urns", required = true) @QueryParam("urns") @NotNull List<String> urns,
       @ApiParam(value = "start time (in millis)", required = true) @QueryParam("start") @NotNull long start,
       @ApiParam(value = "end time (in millis)", required = true) @QueryParam("end") @NotNull long end,
       @ApiParam(value = "A list of offset identifier separated by comma (e.g. \"current\", \"wo2w\")") @QueryParam("offsets") List<String> offsets)
       throws Exception {
-    Map<String, List<Double>> urnToAggregates = new HashMap<>();
-    for (String urn : urns) {
-      MetricEntity metricEntity = MetricEntity.fromURN(urn);
-      long metricId = metricEntity.getId();
-      List<String> filters = EntityUtils.encodeDimensions(metricEntity.getFilters());
-      urnToAggregates.put(urn,
-          computeAggregatesForOffsets(metricId, filters, start, end, offsets, DateTimeZone.UTC));
-    }
-
-    return Response.ok(urnToAggregates).build();
+    throw new UnsupportedOperationException("Deprecated route");
   }
 
   @GET
@@ -360,36 +327,6 @@ public class RcaMetricResource {
     DataFrame resultAggregate = range.gather(baseSlice, dataAggregate);
 
     return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
-  }
-
-  private double computeAggregate(final long metricId, final List<String> filters, final long start,
-      final long end, final String offset, final DateTimeZone dateTimeZone) throws Exception {
-    DatasetConfigDTO datasetConfigDTO = findDataset(metricId);
-    List<Predicate> predicates = parseAndCombinePredicates(filters);
-    MetricSlice baseSlice = MetricSlice.from(findMetricConfig(metricId),
-        new Interval(start, end, dateTimeZone),
-        predicates,
-        datasetConfigDTO);
-    Baseline range = parseOffset(offset, dateTimeZone);
-    List<MetricSlice> slices = range.scatter(baseSlice);
-    logSlices(baseSlice, slices);
-    Map<MetricSlice, DataFrame> data = fetchAggregates(slices);
-    DataFrame result = range.gather(baseSlice, data);
-    if (result.isEmpty()) {
-      return Double.NaN;
-    }
-    return result.getDouble(Constants.COL_VALUE, 0);
-  }
-
-  private List<Double> computeAggregatesForOffsets(final long metricId, final List<String> filters,
-      final long start, final long end, final List<String> offsets, final DateTimeZone dateTimeZone)
-      throws Exception {
-    List<Double> aggregateValues = new ArrayList<>();
-    for (String offset : offsets) {
-      double value = computeAggregate(metricId, filters, start, end, offset, dateTimeZone);
-      aggregateValues.add(value);
-    }
-    return aggregateValues;
   }
 
   /**

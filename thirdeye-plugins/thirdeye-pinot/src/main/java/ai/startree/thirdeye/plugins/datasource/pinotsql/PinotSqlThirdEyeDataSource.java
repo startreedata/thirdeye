@@ -21,10 +21,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.RelationalQuery;
-import ai.startree.thirdeye.spi.datasource.RelationalThirdEyeResponse;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import com.google.common.base.Preconditions;
@@ -70,11 +68,6 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public String getName() {
     return this.name;
-  }
-
-  @Override
-  public RelationalThirdEyeResponse execute(ThirdEyeRequest request) throws Exception {
-    throw new UnsupportedOperationException();
   }
 
   /**
@@ -139,12 +132,6 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public long getMinDataTime(final DatasetConfigDTO datasetConfig) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
-      throws Exception {
     throw new UnsupportedOperationException();
   }
 

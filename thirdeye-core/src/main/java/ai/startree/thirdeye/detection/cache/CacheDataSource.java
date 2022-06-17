@@ -19,10 +19,10 @@ import java.util.Map;
  * Config for a single centralized cache data source.
  * For example, this class could be for Couchbase, or Redis, or Cassandra, etc.
  */
+@Deprecated // todo cache needs reimplementation with v2 query system
 public class CacheDataSource {
 
   /**
-   * class name, e.g. ai.startree.thirdeye.detection.cache.CouchbaseCacheDAO
    */
   private String className;
 

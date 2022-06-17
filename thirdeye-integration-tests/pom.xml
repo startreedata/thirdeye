@@ -54,6 +54,10 @@
       <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-notification-slack</artifactId>
     </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-contributors-cube</artifactId>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>

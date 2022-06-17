@@ -16,10 +16,11 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 
-import ai.startree.thirdeye.rca.DataCubeSummaryCalculator;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
+import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
@@ -68,14 +69,14 @@ public class RcaDimensionAnalysisResource {
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
-  private final DataCubeSummaryCalculator dataCubeSummaryCalculator;
+  private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
 
   @Inject
   public RcaDimensionAnalysisResource(
-      final DataCubeSummaryCalculator dataCubeSummaryCalculator,
+      final ContributorsFinderRunner contributorsFinderRunner,
       final RcaInfoFetcher rcaInfoFetcher) {
-    this.dataCubeSummaryCalculator = dataCubeSummaryCalculator;
+    this.contributorsFinderRunner = contributorsFinderRunner;
     this.rcaInfoFetcher = rcaInfoFetcher;
   }
 
@@ -135,9 +136,11 @@ public class RcaDimensionAnalysisResource {
           summarySize,
           depth,
           doOneSideError,
-          filters,
+          Predicate.parseAndCombinePredicates(filters),
           hierarchies);
-      final ContributorsFinderResult result = dataCubeSummaryCalculator.search(searchConfiguration);
+
+      final ContributorsFinderResult result = contributorsFinderRunner.run(searchConfiguration);
+
       return Response.ok(result.getDimensionAnalysisResult()).build();
     } catch (final WebApplicationException e) {
       throw e;

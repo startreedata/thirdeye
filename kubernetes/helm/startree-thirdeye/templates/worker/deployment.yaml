@@ -131,4 +131,6 @@ spec:
         - name: keystore
           emptyDir: {}
         {{- end }}
+  strategy:
+    {{- toYaml .Values.worker.strategy | nindent 4 }}
 {{ end }}

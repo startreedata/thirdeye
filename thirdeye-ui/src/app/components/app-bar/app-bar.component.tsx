@@ -14,6 +14,7 @@ import {
     NavBarV1,
     useAuthProviderV1,
 } from "../../platform/components";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     AppRoute,
     getAlertsPath,
@@ -92,7 +93,7 @@ export const AppBar: FunctionComponent = () => {
                 {/* Documentation */}
                 <NavBarLinkV1
                     externalLink
-                    href="https://dev.startree.ai/docs/thirdeye/"
+                    href={THIRDEYE_DOC_LINK}
                     target="_blank"
                 >
                     <NavBarLinkIconV1>

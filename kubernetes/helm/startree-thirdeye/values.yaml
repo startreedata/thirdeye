@@ -119,6 +119,12 @@ prometheus:
 time:
   timezone: UTC
 
+rca:
+  topContributors:
+    # todo cyril replace by source available algorithm once implemented
+    algorithm: cube
+    params: {}
+
 auth:
   enabled: false
   oauth:

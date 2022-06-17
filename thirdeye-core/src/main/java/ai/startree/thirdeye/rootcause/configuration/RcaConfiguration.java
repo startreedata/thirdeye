@@ -11,8 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.rootcause;
 
+package ai.startree.thirdeye.rootcause.configuration;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,6 +27,8 @@ public class RcaConfiguration {
 
   private List<String> formatters = Collections.emptyList();
   private int parallelism = 1;
+  @JsonProperty("topContributors")
+  private ContributorsFinderConfiguration contributorsFinderConfiguration = new ContributorsFinderConfiguration();
 
   public int getParallelism() {
     return parallelism;
@@ -41,6 +45,16 @@ public class RcaConfiguration {
 
   public RcaConfiguration setFormatters(final List<String> formatters) {
     this.formatters = formatters;
+    return this;
+  }
+
+  public ContributorsFinderConfiguration getContributorsFinderConfiguration() {
+    return contributorsFinderConfiguration;
+  }
+
+  public RcaConfiguration setContributorsFinderConfiguration(
+      final ContributorsFinderConfiguration contributorsFinderConfiguration) {
+    this.contributorsFinderConfiguration = contributorsFinderConfiguration;
     return this;
   }
 }

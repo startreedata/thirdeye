@@ -87,6 +87,12 @@ taskDriver:
   # must be omitted when `randomWorkerIdEnabled` is set `true`
   id: 0
 
+rca:
+  # default values - for structure example - todo cyril replace by source available algorithm
+  topContributors:
+    algorithm: cube
+    params: {}
+
 time:
   timezone: UTC
 

@@ -117,6 +117,8 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
     const brushRef = useRef<BaseBrush>(null);
     const theme = useTheme();
 
+    const brushHeightToUse = props.hideBrush ? 0 : HEIGHT_BRUSH;
+
     // Legend height
     // Legend items wrap to new line when parent container width is roughly equal to screen width xs
     const legendHeight =
@@ -133,12 +135,12 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
         svgHeight -
         PADDING_TOP_SVG -
         HEIGHT_SEPARATOR_TIME_SERIES_BRUSH -
-        HEIGHT_BRUSH; // Available SVG height - top SVG padding - separator height between time series and brush - space for brush
+        brushHeightToUse; // Available SVG height - top SVG padding - separator height between time series and brush - space for brush
     const timeSeriesXMax = svgWidth - PADDING_LEFT_SVG - PADDING_RIGHT_SVG; // Available SVG width - left and right SVG padding
     const timeSeriesYMax = timeSeriesHeight;
 
     // Brush bounds
-    const brushHeight = HEIGHT_BRUSH - PADDING_BOTTOM_SVG; // Brush height - bottom SVG padding
+    const brushHeight = brushHeightToUse - PADDING_BOTTOM_SVG; // Brush height - bottom SVG padding
     const brushXMax = svgWidth - PADDING_LEFT_SVG - PADDING_RIGHT_SVG; // Available SVG width - left and right SVG padding
     const brushYMax = brushHeight;
 
@@ -554,66 +556,68 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
                     </Group>
 
                     {/* Brush */}
-                    <Group
-                        left={PADDING_LEFT_SVG}
-                        top={
-                            timeSeriesHeight +
-                            HEIGHT_SEPARATOR_TIME_SERIES_BRUSH
-                        }
-                    >
-                        <Group opacity={0.5}>
-                            {/* Time series plot */}
-                            <AlertEvaluationTimeSeriesPlot
-                                alertEvaluationAnomalies={
-                                    alertEvaluationAnomalies
-                                }
-                                alertEvaluationTimeSeriesPoints={
-                                    alertEvaluationTimeSeriesPoints
-                                }
-                                anomalies={anomaliesPlotVisible}
-                                baseline={baselinePlotVisible}
-                                current={currentPlotVisible}
-                                upperAndLowerBound={
-                                    upperAndLowerBoundPlotVisible
-                                }
+                    {!props.hideBrush && (
+                        <Group
+                            left={PADDING_LEFT_SVG}
+                            top={
+                                timeSeriesHeight +
+                                HEIGHT_SEPARATOR_TIME_SERIES_BRUSH
+                            }
+                        >
+                            <Group opacity={0.5}>
+                                {/* Time series plot */}
+                                <AlertEvaluationTimeSeriesPlot
+                                    alertEvaluationAnomalies={
+                                        alertEvaluationAnomalies
+                                    }
+                                    alertEvaluationTimeSeriesPoints={
+                                        alertEvaluationTimeSeriesPoints
+                                    }
+                                    anomalies={anomaliesPlotVisible}
+                                    baseline={baselinePlotVisible}
+                                    current={currentPlotVisible}
+                                    upperAndLowerBound={
+                                        upperAndLowerBoundPlotVisible
+                                    }
+                                    xScale={brushXScale}
+                                    yScale={brushYScale}
+                                />
+                            </Group>
+
+                            {/* Brush */}
+                            <Brush
+                                height={brushYMax}
+                                innerRef={brushRef}
+                                margin={{
+                                    top:
+                                        timeSeriesHeight +
+                                        HEIGHT_SEPARATOR_TIME_SERIES_BRUSH,
+                                    left: PADDING_LEFT_SVG,
+                                    right: PADDING_RIGHT_SVG,
+                                    bottom: 0,
+                                }}
+                                selectedBoxStyle={{
+                                    fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                                    fillOpacity: 0.4,
+                                    strokeOpacity: 1,
+                                    stroke: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+                                    strokeWidth:
+                                        Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
+                                }}
+                                width={brushXMax}
                                 xScale={brushXScale}
                                 yScale={brushYScale}
+                                onChange={handleBrushChangeDebounced}
+                            />
+
+                            {/* X axis */}
+                            <TimeAxisBottom
+                                parentWidth={props.parentWidth}
+                                scale={brushXScale}
+                                top={brushYMax}
                             />
                         </Group>
-
-                        {/* Brush */}
-                        <Brush
-                            height={brushYMax}
-                            innerRef={brushRef}
-                            margin={{
-                                top:
-                                    timeSeriesHeight +
-                                    HEIGHT_SEPARATOR_TIME_SERIES_BRUSH,
-                                left: PADDING_LEFT_SVG,
-                                right: PADDING_RIGHT_SVG,
-                                bottom: 0,
-                            }}
-                            selectedBoxStyle={{
-                                fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
-                                fillOpacity: 0.4,
-                                strokeOpacity: 1,
-                                stroke: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
-                                strokeWidth:
-                                    Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
-                            }}
-                            width={brushXMax}
-                            xScale={brushXScale}
-                            yScale={brushYScale}
-                            onChange={handleBrushChangeDebounced}
-                        />
-
-                        {/* X axis */}
-                        <TimeAxisBottom
-                            parentWidth={props.parentWidth}
-                            scale={brushXScale}
-                            top={brushYMax}
-                        />
-                    </Group>
+                    )}
                 </svg>
             </Box>
 

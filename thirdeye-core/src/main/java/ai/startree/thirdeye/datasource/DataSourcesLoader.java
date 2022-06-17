@@ -66,7 +66,7 @@ public class DataSourcesLoader {
       final ThirdEyeDataSource ds = dataSourceFactoryMap
           .get(factoryName)
           .build(buildContext(dataSource));
-      metricRegistry.register(String.format("%sDatasource_HEALTH", ds.getName()),
+      metricRegistry.register(String.format("datasource_health_%s", ds.getName()),
           new Gauge<Boolean>() {
             @Override
             public Boolean getValue() {

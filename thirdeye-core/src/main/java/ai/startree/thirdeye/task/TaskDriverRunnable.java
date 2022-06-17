@@ -50,6 +50,7 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskExceptionCounter;
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
+  private final Counter taskRunningCounter;
 
   public TaskDriverRunnable(final TaskManager taskManager,
       final TaskContext taskContext,
@@ -72,6 +73,7 @@ public class TaskDriverRunnable implements Runnable {
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
+    taskRunningCounter = metricRegistry.counter("taskRunningCounter");
   }
 
   public void run() {
@@ -94,7 +96,8 @@ public class TaskDriverRunnable implements Runnable {
 
     final long tStart = System.currentTimeMillis();
     taskCounter.inc();
-
+    taskRunningCounter.inc();
+    
     Future<List<TaskResult>> future = null;
     try {
       future = runTaskAsync(taskDTO);
@@ -117,6 +120,7 @@ public class TaskDriverRunnable implements Runnable {
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       taskDuration.update(elapsedTime);
+      taskRunningCounter.dec();
     }
   }
 

@@ -12,7 +12,7 @@ import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.notification.NotificationConfiguration;
-import ai.startree.thirdeye.rootcause.RcaConfiguration;
+import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.google.inject.AbstractModule;

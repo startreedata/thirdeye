@@ -58,6 +58,10 @@
       <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-contributors-cube</artifactId>
     </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-contributors-shallow</artifactId>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>

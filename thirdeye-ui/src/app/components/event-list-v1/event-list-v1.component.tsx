@@ -143,8 +143,12 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             <PageContentsCardV1 disablePadding fullHeight>
                 <DataGridV1<Event>
                     hideBorder
+                    showPagination
                     columns={eventColumns}
                     data={props.events as Event[]}
+                    pagination={{
+                        rowsPerPage: 25,
+                    }}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchDataKeys={searchDataKeys}

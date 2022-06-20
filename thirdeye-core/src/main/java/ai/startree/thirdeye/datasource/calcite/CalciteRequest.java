@@ -47,6 +47,7 @@ import org.joda.time.Period;
 public class CalciteRequest {
 
   public static final String TIME_AGGREGATION_ALIAS = "teTimeGroup";
+  public static final boolean QUOTE_IDENTIFIERS = true;
 
   // SELECT clause
   final private List<QueryProjection> selectProjections;
@@ -165,7 +166,7 @@ public class CalciteRequest {
     SqlDialect sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
 
     SqlNode sqlNode = getSqlNode(sqlParserConfig, expressionBuilder, sqlDialect);
-    return nodeToQuery(sqlNode, sqlDialect);
+    return nodeToQuery(sqlNode, sqlDialect, QUOTE_IDENTIFIERS);
   }
 
   protected SqlNode getSqlNode(final SqlParser.Config sqlParserConfig,

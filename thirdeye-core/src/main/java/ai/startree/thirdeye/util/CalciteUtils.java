@@ -106,9 +106,10 @@ public class CalciteUtils {
       // other predicates not supported for filters for the moment
   );
 
-  public static String nodeToQuery(final SqlNode node, final SqlDialect sqlDialect) {
-    // maybe quote all identifiers
-    return node.toSqlString(c -> c.withDialect(sqlDialect).withQuoteAllIdentifiers(false)).getSql();
+  public static String nodeToQuery(final SqlNode node, final SqlDialect sqlDialect,
+      final boolean quoteIdentifiers) {
+    return node.toSqlString(c -> c.withDialect(sqlDialect)
+        .withQuoteAllIdentifiers(quoteIdentifiers)).getSql();
   }
 
   public static SqlNode queryToNode(final String sql, final SqlParser.Config sqlParserConfig)

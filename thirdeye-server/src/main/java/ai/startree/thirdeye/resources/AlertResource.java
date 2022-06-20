@@ -46,6 +46,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +105,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   protected void validate(final AlertApi api, final AlertDTO existing) {
     super.validate(api, existing);
     ensureExists(api.getName(), "Name must be present");
+    ensure(!StringUtils.containsWhitespace(api.getName()), "Name must not contain white space");
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
     if (existing == null) {

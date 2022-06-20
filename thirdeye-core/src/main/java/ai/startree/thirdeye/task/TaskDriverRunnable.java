@@ -16,8 +16,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -95,6 +98,13 @@ public class TaskDriverRunnable implements Runnable {
     final long tStart = System.currentTimeMillis();
     taskCounter.inc();
 
+    Thread heartbeat = null;
+    if(config.isRandomWorkerIdEnabled()) {
+      heartbeat = new Thread(() -> taskExecutionHeartbeat(taskDTO),
+          String.format("HEARTBEAT_%s", taskDTO.getJobName()));
+      heartbeat.start();
+    }
+
     Future<List<TaskResult>> future = null;
     try {
       future = runTaskAsync(taskDTO);
@@ -117,6 +127,20 @@ public class TaskDriverRunnable implements Runnable {
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       taskDuration.update(elapsedTime);
+      Optional.ofNullable(heartbeat).ifPresent(Thread::interrupt);
+    }
+  }
+
+  private void taskExecutionHeartbeat(final TaskDTO taskDTO) {
+    LOG.info("Heartbeat started for task {}", taskDTO.getTaskInfo());
+    try {
+      while(true) {
+        taskManager.updateLastModified(taskDTO.getId(), new Timestamp(System.currentTimeMillis()));
+        LOG.info("Last active time updated");
+        Thread.sleep(config.getHeartbeatInterval().toMillis());
+      }
+    } catch (InterruptedException e) {
+      LOG.info("Heartbeat stopped for task {}", taskDTO.getTaskInfo());
     }
   }
 

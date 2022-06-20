@@ -5,7 +5,7 @@
 
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.FileUtils.readJsonObjectsFromResourcesFolder;
+import static ai.startree.thirdeye.util.FileUtils.readJsonObjectsFromFolder;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -41,11 +41,10 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertTemplateDTO> {
 
-  private static final String RESOURCES_TEMPLATES_PATH = "alert-templates";
+  private static final String TEMPLATES_FOLDER_PATH = "alert-templates";
 
   @Inject
-  public AlertTemplateResource(
-      final AlertTemplateManager alertTemplateManager) {
+  public AlertTemplateResource(final AlertTemplateManager alertTemplateManager) {
     super(alertTemplateManager, ImmutableMap.of());
   }
 
@@ -75,9 +74,7 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("updateExisting") boolean updateExisting) {
 
-    List<AlertTemplateApi> alertTemplates = readJsonObjectsFromResourcesFolder(
-        RESOURCES_TEMPLATES_PATH,
-        this.getClass(),
+    List<AlertTemplateApi> alertTemplates = readJsonObjectsFromFolder(TEMPLATES_FOLDER_PATH,
         AlertTemplateApi.class);
     List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();

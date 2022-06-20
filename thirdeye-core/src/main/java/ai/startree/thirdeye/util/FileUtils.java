@@ -1,6 +1,7 @@
 package ai.startree.thirdeye.util;
 
 import static com.google.api.client.util.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -60,8 +61,7 @@ public class FileUtils {
    * This methods reads every files in a jar. Avoid running on a big jar.
    */
   public static <T> List<T> readJsonObjectsFromResourcesFolderInJar(String folder,
-      Class<?> loaderClazz, Class<T> targetClazz)
-      throws IOException {
+      Class<?> loaderClazz, Class<T> targetClazz) throws IOException {
     List<T> elements = new ArrayList<>();
     String folderPrefix = folder.endsWith("/") ? folder : folder + "/";
     final JarFile jar = new JarFile(new File(loaderClazz.getProtectionDomain()
@@ -85,12 +85,24 @@ public class FileUtils {
       Class<?> loaderClazz, Class<T> targetClazz) {
     URL url = loaderClazz.getClassLoader().getResource(folder);
     checkArgument(url != null, String.format("%s folder not found in resources.", folder));
-    String path = url.getPath();
-    final File[] files = new File(path).listFiles();
+    final String folderPath = url.getPath();
+
+    return readJsonObjectsFromFolder(folderPath, targetClazz);
+  }
+
+  /**
+   * Read all files in a given folder. Does not read recursively.
+   */
+  public static <T> List<T> readJsonObjectsFromFolder(final String folderPath, Class<T> targetClazz) {
+    final File folderFile = new File(folderPath);
+    if (!folderFile.exists() || !folderFile.isDirectory()) {
+      throw new IllegalArgumentException("Folder not found: " + folderPath);
+    }
+    final File[] files = requireNonNull(folderFile.listFiles());
     List<T> elements = new ArrayList<>();
-    if (files != null) {
-      for (int i = 0; i < files.length; i++) {
-        elements.add(readJsonObject(files[i], targetClazz));
+    for (File jsonFile : files) {
+      if (jsonFile.isFile()) {
+        elements.add(readJsonObject(jsonFile, targetClazz));
       }
     }
     return elements;

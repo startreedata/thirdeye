@@ -24,6 +24,10 @@
       <fileMode>0755</fileMode>
     </fileSet>
     <fileSet>
+      <directory>${thirdeye.root}/alert-templates</directory>
+      <outputDirectory>alert-templates/</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${thirdeye.root}/config</directory>
       <outputDirectory>config/</outputDirectory>
     </fileSet>

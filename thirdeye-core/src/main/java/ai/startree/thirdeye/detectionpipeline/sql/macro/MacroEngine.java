@@ -41,6 +41,7 @@ public class MacroEngine {
       new TimeFilterFunction(),
       new TimeGroupFunction()
   );
+  public static final boolean QUOTE_IDENTIFIERS = false;
 
   private final SqlParser.Config sqlParserConfig;
   private final SqlDialect sqlDialect;
@@ -72,7 +73,7 @@ public class MacroEngine {
   public ThirdEyeRequestV2 prepareRequest() throws SqlParseException {
     SqlNode rootNode = queryToNode(query, sqlParserConfig);
     SqlNode appliedMacrosNode = applyMacros(rootNode);
-    String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect);
+    String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
 
     return new ThirdEyeRequestV2(tableName, preparedQuery, properties);
   }
@@ -83,7 +84,8 @@ public class MacroEngine {
 
   private List<String> paramsFromCall(final SqlCall call) {
     return call.getOperandList().stream()
-        .map(n -> nodeToQuery(n, sqlDialect))
+        // don't quote identifiers to make parsing simpler - but datasource sql expression generators have to manage quoting downstream
+        .map(n -> nodeToQuery(n, sqlDialect, false))
         .collect(Collectors.toList());
   }
 

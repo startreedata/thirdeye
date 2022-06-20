@@ -207,7 +207,8 @@
         "show-count-more": "Show {{count}} more",
         "hide-count-optional-properties": "Hide {{count}} optional properties",
         "fields-with-default-values": "Fields with Default Values",
-        "reload-preview": "Reload preview"
+        "reload-preview": "Reload preview",
+        "create-new-template": "Create new template"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

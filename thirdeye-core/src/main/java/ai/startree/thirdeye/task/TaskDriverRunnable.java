@@ -136,7 +136,6 @@ public class TaskDriverRunnable implements Runnable {
     try {
       while(true) {
         taskManager.updateLastModified(taskDTO.getId(), new Timestamp(System.currentTimeMillis()));
-        LOG.info("Last active time updated");
         Thread.sleep(config.getHeartbeatInterval().toMillis());
       }
     } catch (InterruptedException e) {

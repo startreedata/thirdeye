@@ -1008,6 +1008,7 @@ export function DataGridV1<T>({
                             showPagination ? HEIGHT_DATA_GRID_TOOLBAR : 0
                         }
                         footerRenderer={paginationRenderer}
+                        headerHeight={HEIGHT_DATA_GRID_HEADER_ROW}
                         height={
                             hideToolbar
                                 ? height

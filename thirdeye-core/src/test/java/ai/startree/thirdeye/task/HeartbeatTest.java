@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.mockito.Mockito;
@@ -70,6 +71,7 @@ public class HeartbeatTest {
         null,
         shutdown,
         getExecutorService(),
+        getHeartbeatExecutorService(),
         config,
         0,
         getTaskRunnerFactory(),
@@ -89,6 +91,13 @@ public class HeartbeatTest {
     return Executors.newFixedThreadPool(1,
         new ThreadFactoryBuilder()
             .setNameFormat("test-executor-%d")
+            .build());
+  }
+
+  private ScheduledExecutorService getHeartbeatExecutorService() {
+    return Executors.newScheduledThreadPool(1,
+        new ThreadFactoryBuilder()
+            .setNameFormat("test-heartbeat-%d")
             .build());
   }
 

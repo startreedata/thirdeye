@@ -24,6 +24,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,11 +53,13 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskExceptionCounter;
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
+  private final ScheduledExecutorService heartbeatExecutorService;
 
   public TaskDriverRunnable(final TaskManager taskManager,
       final TaskContext taskContext,
       final AtomicBoolean shutdown,
       final ExecutorService taskExecutorService,
+      final ScheduledExecutorService heartbeatExecutorService,
       final TaskDriverConfiguration config,
       final long workerId,
       final TaskRunnerFactory taskRunnerFactory,
@@ -69,6 +72,7 @@ public class TaskDriverRunnable implements Runnable {
     this.config = config;
     this.workerId = workerId;
     this.taskRunnerFactory = taskRunnerFactory;
+    this.heartbeatExecutorService = heartbeatExecutorService;
 
     taskDuration = metricRegistry.histogram("taskDuration");
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
@@ -97,11 +101,13 @@ public class TaskDriverRunnable implements Runnable {
     final long tStart = System.currentTimeMillis();
     taskCounter.inc();
 
-    Thread heartbeat = null;
+    Future heartbeat = null;
     if(config.isRandomWorkerIdEnabled()) {
-      heartbeat = new Thread(() -> taskExecutionHeartbeat(taskDTO),
-          String.format("HEARTBEAT_%s", taskDTO.getJobName()));
-      heartbeat.start();
+      heartbeat = heartbeatExecutorService
+          .scheduleAtFixedRate(() -> taskExecutionHeartbeat(taskDTO),
+              0,
+              config.getHeartbeatInterval().toMillis(),
+              TimeUnit.MILLISECONDS);
     }
 
     Future<List<TaskResult>> future = null;
@@ -126,20 +132,12 @@ public class TaskDriverRunnable implements Runnable {
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       taskDuration.update(elapsedTime);
-      Optional.ofNullable(heartbeat).ifPresent(Thread::interrupt);
+      Optional.ofNullable(heartbeat).ifPresent(pulse -> pulse.cancel(false));
     }
   }
 
   private void taskExecutionHeartbeat(final TaskDTO taskDTO) {
-    LOG.info("Heartbeat started for task {}", taskDTO.getTaskInfo());
-    try {
-      while(true) {
-        taskManager.updateLastModified(taskDTO.getId(), new Timestamp(System.currentTimeMillis()));
-        Thread.sleep(config.getHeartbeatInterval().toMillis());
-      }
-    } catch (InterruptedException e) {
-      LOG.info("Heartbeat stopped for task {}", taskDTO.getTaskInfo());
-    }
+    taskManager.updateLastModified(taskDTO.getId(), new Timestamp(System.currentTimeMillis()));
   }
 
   private Future<List<TaskResult>> runTaskAsync(final TaskDTO taskDTO) throws IOException {

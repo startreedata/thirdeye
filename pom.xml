@@ -401,6 +401,11 @@
               <!-- files from IntelliJ -->
               <exclude>.idea/**</exclude>
             </excludes>
+            <mapping>
+              <ts>JAVADOC_STYLE</ts>
+              <tsx>JAVADOC_STYLE</tsx>
+              <js>JAVADOC_STYLE</js>
+            </mapping>
           </configuration>
         </plugin>
       </plugins>

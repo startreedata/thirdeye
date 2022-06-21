@@ -45,7 +45,7 @@ public class HeartbeatTest {
     when(taskManager.findByStatusOrderByCreateTime(any(TaskStatus.class), anyInt(), anyBoolean())).thenReturn(List.of(taskDTO));
     doNothing().when(taskManager).updateStatusAndTaskEndTime(anyLong(), any(), any(), anyLong(), any());
     doAnswer(invocation -> {
-      taskDTO.setLastModified(invocation.getArgument(1));
+      taskDTO.setLastModified(new Timestamp(System.currentTimeMillis()));
       pulseCount.getAndIncrement();
       // to ensure the worker stops after executing one task
       shutdown.set(true);

@@ -143,5 +143,6 @@ public class TaskDriver {
     shutdown.set(true);
     AnomalyUtils.safelyShutdownExecutionService(taskExecutorService, this.getClass());
     AnomalyUtils.safelyShutdownExecutionService(taskWatcherExecutorService, this.getClass());
+    AnomalyUtils.safelyShutdownExecutionService(heartbeatExecutorService, this.getClass());
   }
 }

@@ -393,6 +393,7 @@
               <exclude>src/main/resources/**</exclude>
               <exclude>thirdeye-ui/build</exclude>
               <exclude>thirdeye-ui/dist</exclude>
+              <exclude>thirdeye-ui/scripts/verify-version-replacement.js</exclude>
 
               <!-- files from Eclipse -->
               <exclude>**/maven-eclipse.xml</exclude>

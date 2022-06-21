@@ -50,7 +50,7 @@ public class HeartbeatTest {
       // to ensure the worker stops after executing one task
       shutdown.set(true);
       return null;
-    }).when(taskManager).updateLastModified(anyLong(), any());
+    }).when(taskManager).updateLastModified(anyLong());
 
     TaskDriverConfiguration config = new TaskDriverConfiguration()
         .setRandomWorkerIdEnabled(true)

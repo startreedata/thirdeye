@@ -137,7 +137,7 @@ public class TaskDriverRunnable implements Runnable {
   }
 
   private void taskExecutionHeartbeat(final TaskDTO taskDTO) {
-    taskManager.updateLastModified(taskDTO.getId(), new Timestamp(System.currentTimeMillis()));
+    taskManager.updateLastModified(taskDTO.getId());
   }
 
   private Future<List<TaskResult>> runTaskAsync(final TaskDTO taskDTO) throws IOException {

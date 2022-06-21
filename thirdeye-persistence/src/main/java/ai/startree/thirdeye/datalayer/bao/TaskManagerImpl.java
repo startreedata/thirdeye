@@ -149,9 +149,9 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public void updateLastModified(final Long id, final Timestamp lastModified) {
+  public void updateLastModified(final Long id) {
     final TaskDTO task = findById(id);
-    task.setLastModified(lastModified);
+    task.setLastModified(new Timestamp(System.currentTimeMillis()));
     save(task);
   }
 

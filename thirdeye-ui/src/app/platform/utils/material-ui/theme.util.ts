@@ -1,3 +1,17 @@
+///
+/// Copyright 2022 StarTree Inc
+///
+/// Licensed under the StarTree Community License (the "License"); you may not use
+/// this file except in compliance with the License. You may obtain a copy of the
+/// License at http://www.startree.ai/legal/startree-community-license
+///
+/// Unless required by applicable law or agreed to in writing, software distributed under the
+/// License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+/// either express or implied.
+/// See the License for the specific language governing permissions and limitations under
+/// the License.
+///
+
 // Copyright 2021 StarTree Inc.
 // All rights reserved. Confidential and proprietary information of StarTree Inc.
 import { createTheme, Theme } from "@material-ui/core";
@@ -31,6 +45,7 @@ import { popoverClassesV1, popoverPropsV1 } from "./popover.util";
 import { radioPropsV1 } from "./radio.util";
 import { shapeOptionsV1 } from "./shape.util";
 import { switchPropsV1 } from "./switch.util";
+import { tablePaginationClassesV1 } from "./table-pagination.util";
 import { tabClassesV1, tabsClassesV1, tabsPropsV1 } from "./tabs.util";
 import { textFieldPropsV1 } from "./text-field.util";
 import { typographyOptionsV1 } from "./typography.util";
@@ -73,6 +88,7 @@ export const lightV1: Theme = createTheme({
         MuiOutlinedInput: outlinedInputClassesV1,
         MuiPopover: popoverClassesV1,
         MuiTab: tabClassesV1,
+        MuiTablePagination: tablePaginationClassesV1,
         MuiTabs: tabsClassesV1,
     },
     shape: shapeOptionsV1,

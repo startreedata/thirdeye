@@ -46,6 +46,7 @@ import org.apache.calcite.sql.util.SqlShuttle;
 public class FiltersEngine {
 
   private static final List<OPER> SUPPORTED_FILTER_OPERATIONS = List.of(OPER.EQ, OPER.NEQ, OPER.IN);
+  public static final boolean QUOTE_IDENTIFIERS = false;
 
   private final SqlParser.Config sqlParserConfig;
   private final SqlDialect sqlDialect;
@@ -63,7 +64,7 @@ public class FiltersEngine {
   public String prepareQuery() throws SqlParseException {
     SqlNode rootNode = queryToNode(query, sqlParserConfig);
     SqlNode rootNodeWithFilters = rootNode.accept(new FilterVisitor());
-    String preparedQuery = nodeToQuery(rootNodeWithFilters, sqlDialect);
+    String preparedQuery = nodeToQuery(rootNodeWithFilters, sqlDialect, QUOTE_IDENTIFIERS);
 
     return preparedQuery;
   }

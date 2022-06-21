@@ -7,14 +7,14 @@ package ai.startree.thirdeye.plugins.rca.contributors.shallow;
 
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOT_ENOUGH_DATA_FOR_RCA;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_NAME;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_VALUE;
 import static ai.startree.thirdeye.spi.rca.Stats.computeContributionChangePercentage;
 import static ai.startree.thirdeye.spi.rca.Stats.computeContributionToOverallChangePercentage;
 import static ai.startree.thirdeye.spi.rca.Stats.computeValueChangePercentage;
-import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.spi.api.DatasetApi;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Series.DoubleConditional;
@@ -39,7 +39,6 @@ public class ShallowContributorsFinder implements ContributorsFinder {
   private static final String CURRENT_SUFFIX = "current_";
   public static final String COL_CURRENT_VALUE = CURRENT_SUFFIX + COL_VALUE;
   public static final String COL_COST = "cost";
-  public static final int NUM_RESPONSE_ROWS = 5;
   public static final String COL_VALUE_CHANGE_PERCENTAGE = "value_change_percentage";
   public static final String COL_CONTRIBUTION_CHANGE_PERCENTAGE = "contribution_change_percentage";
   public static final String COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE = "contribution_to_overall_change_percentage";
@@ -65,17 +64,19 @@ public class ShallowContributorsFinder implements ContributorsFinder {
         searchConfiguration.getFilters(),
         searchConfiguration.getDatasetConfigDTO());
 
-    final DataFrame baseline = aggregationLoader.loadBreakdown(baselineSlice, LIMIT_DEFAULT)
-        .dropSeries(COL_TIME);
-    checkState(baseline.size() > 0,
-        "No data on baseline timeframe. Cannot compute top contributors.");
+    final DataFrame baseline = aggregationLoader.loadBreakdown(baselineSlice, LIMIT_DEFAULT);
+    if (baseline.size() <= 0) {
+      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA, "No data on baseline timeframe. Cannot compute top contributors.");
+    }
+    baseline.dropSeries(COL_TIME);
     final double baselineTotal = getTotalFromBreakdown(baseline);
     final DoubleSeries baselineValues = baseline.getDoubles(COL_VALUE);
 
-    final DataFrame current = aggregationLoader.loadBreakdown(currentSlice, LIMIT_DEFAULT)
-        .dropSeries(COL_TIME);
-    checkState(current.size() > 0,
-        "No data on analysis timeframe. Cannot compute top contributors.");
+    final DataFrame current = aggregationLoader.loadBreakdown(currentSlice, LIMIT_DEFAULT);
+    if (current.size() <= 0) {
+      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA, "No data on analysis timeframe. Cannot compute top contributors.");
+    }
+    current.dropSeries(COL_TIME);
     final double currentTotal = getTotalFromBreakdown(current);
     final DoubleSeries currentValues = current.getDoubles(COL_VALUE);
 
@@ -107,7 +108,7 @@ public class ShallowContributorsFinder implements ContributorsFinder {
 
     stats = stats.addSeries(COL_COST, computeCost(stats))
         .sortedBy(COL_COST)
-        .slice(stats.size() - NUM_RESPONSE_ROWS, stats.size());
+        .slice(stats.size() - searchConfiguration.getSummarySize(), stats.size());
 
     return new ShallowContributorsFinderResult(stats,
         searchConfiguration.getMetricConfigDTO().getName(),

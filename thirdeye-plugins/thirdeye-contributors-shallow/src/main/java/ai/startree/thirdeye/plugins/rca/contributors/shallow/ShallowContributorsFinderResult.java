@@ -6,6 +6,7 @@ import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContr
 import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_COST;
 import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_CURRENT_VALUE;
 import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_VALUE_CHANGE_PERCENTAGE;
+import static ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi.ALL;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_NAME;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_VALUE;
 
@@ -53,8 +54,7 @@ public class ShallowContributorsFinderResult implements ContributorsFinderResult
 
     for (int i = 0; i < stats.size(); i++) {
       final SummaryResponseRow row = new SummaryResponseRow();
-      final List<String> names = new ArrayList<>(Collections.nCopies(dimensions.size(),
-          DimensionAnalysisResultApi.ALL));
+      final List<String> names = new ArrayList<>(Collections.nCopies(dimensions.size(),ALL));
       final String dimensionName = stats.getString(COL_DIMENSION_NAME, i);
       final int dimensionIndex = dimensionToIndex.get(dimensionName);
       final String dimensionValue = stats.getString(COL_DIMENSION_VALUE, i);

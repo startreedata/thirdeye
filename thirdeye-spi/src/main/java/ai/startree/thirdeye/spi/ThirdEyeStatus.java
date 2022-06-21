@@ -43,6 +43,7 @@ public enum ThirdEyeStatus {
   ERR_UNKNOWN("%s"),
   HEALTHY("Healthy"),
   ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
+  ERR_NOT_ENOUGH_DATA_FOR_RCA("Not enough data for RCA algorithm: %s"),
   ERR_AUTH_SERVER_NOT_RESPONDING("Auth server is not responding. Auth Server URL : %s"),
   UNHEALTHY("Unhealthy %s : %s");
 

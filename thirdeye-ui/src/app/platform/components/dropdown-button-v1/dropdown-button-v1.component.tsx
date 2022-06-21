@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2021 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 import { Button } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";

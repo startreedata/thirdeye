@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2022 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import classNames from "classnames";
 import React, { FunctionComponent } from "react";

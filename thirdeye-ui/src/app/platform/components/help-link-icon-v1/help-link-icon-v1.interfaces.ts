@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2022 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 export interface HelpLinkIconV1Props {
     href: string;
     externalLink?: boolean;

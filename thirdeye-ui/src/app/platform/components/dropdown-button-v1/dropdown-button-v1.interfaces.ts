@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2021 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 import { PropTypes } from "@material-ui/core";
 import { ReactNode } from "react";
 import { DropdownMenuItemV1 } from "../dropdown-menu-v1/dropdown-menu-v1.interfaces";

@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2022 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 import { Popover } from "@material-ui/core";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import classNames from "classnames";

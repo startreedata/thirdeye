@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2021 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 import InterExtraLight200 from "../../assets/fonts/inter/inter-extra-light-200.ttf";
 import InterLight300 from "../../assets/fonts/inter/inter-light-300.ttf";
 import InterMedium500 from "../../assets/fonts/inter/inter-medium-500.ttf";

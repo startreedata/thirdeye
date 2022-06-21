@@ -11,9 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2021 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
-// Material UI theme dimensions
 export const DimensionV1 = {
     PageHeaderHeight: 140,
     NavBarWidthMinimized: 64,

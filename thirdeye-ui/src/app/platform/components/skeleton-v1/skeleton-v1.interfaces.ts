@@ -11,9 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2022 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
-
 import { SkeletonProps } from "@material-ui/lab";
 
 export interface SkeletonV1Props extends SkeletonProps {

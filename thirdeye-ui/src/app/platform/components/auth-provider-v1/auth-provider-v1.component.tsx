@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2021 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 import axios from "axios";
 import classNames from "classnames";
 import { indexOf } from "lodash";

@@ -11,8 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// Copyright 2021 StarTree Inc.
-// All rights reserved. Confidential and proprietary information of StarTree Inc.
 import { makeStyles } from "@material-ui/core";
 import { DimensionV1 } from "../../../../utils/material-ui/dimension.util";
 import { PADDING_NAV_BAR_LINK } from "../nav-bar-link-v1/nav-bar-link-v1.styles";

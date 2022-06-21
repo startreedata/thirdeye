@@ -1,8 +1,15 @@
 import { Box, Card, CardContent, Link, Typography } from "@material-ui/core";
-import { cloneDeep, isEmpty } from "lodash";
+import { cloneDeep, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useParams, useSearchParams } from "react-router-dom";
+import {
+    Outlet,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from "react-router-dom";
+import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
+import { HistoryBackButton } from "../../components/history-back-button/history-back-button";
 import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
     AppLoadingIndicatorV1,
@@ -19,6 +26,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { useGetInvestigation } from "../../rest/rca/rca.actions";
+import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     createNewInvestigation,
@@ -27,6 +35,7 @@ import {
 } from "../../utils/investigation/investigation.util";
 import {
     getAlertsViewPath,
+    getAnomaliesAllPath,
     getAnomaliesAnomalyViewPath,
 } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
@@ -45,6 +54,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { anomaly, getAnomaly } = useGetAnomaly();
+    const navigate = useNavigate();
 
     const {
         getInvestigation,
@@ -171,6 +181,11 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         <PageV1>
             <PageHeaderV1>
                 <Box display="inline">
+                    <HistoryBackButton
+                        preventDefault
+                        buttonText="Back to anomalies"
+                        onClick={() => navigate(getAnomaliesAllPath())}
+                    />
                     <div>
                         <PageHeaderTextV1>
                             {anomaly && (
@@ -213,6 +228,17 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                             </TooltipV1>
                         </PageHeaderTextV1>
                     </div>
+
+                    {anomaly && (
+                        <AnomalyFeedback
+                            anomalyFeedback={
+                                (anomaly && anomaly.feedback) || {
+                                    ...DEFAULT_FEEDBACK,
+                                }
+                            }
+                            anomalyId={toNumber(anomalyId)}
+                        />
+                    )}
                     {investigationId && (
                         <div>
                             <Typography variant="subtitle1">

@@ -1,4 +1,13 @@
-import { Box, Button, Grid, MenuItem, TextField } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Grid,
+    MenuItem,
+    Popover,
+    TextField,
+} from "@material-ui/core";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
@@ -6,7 +15,6 @@ import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
-    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -30,7 +38,6 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     anomalyId,
     anomalyFeedback,
     className,
-    isLoading,
 }) => {
     const [currentlySelected, setCurrentlySelected] =
         useState<AnomalyFeedbackType>(anomalyFeedback.type);
@@ -46,6 +53,18 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
      * does not update the value through onChange callback
      */
     const commentRef = useRef<HTMLInputElement>();
+
+    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+        null
+    );
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = (): void => {
+        setAnchorEl(null);
+    };
 
     const handleLabelChange = (
         event: React.ChangeEvent<{ value: unknown }>
@@ -150,6 +169,9 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     : errMessages.map((err) =>
                           notify(NotificationTypeV1.Error, err)
                       );
+            })
+            .finally(() => {
+                handleClose();
             });
     };
 
@@ -158,45 +180,66 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         setModifiedFeedbackComment(anomalyFeedback.comment);
     }, [anomalyFeedback]);
 
-    if (isLoading) {
-        return (
-            <PageContentsCardV1 className={className}>
-                <SkeletonV1 height={150} variant="rect" />
-            </PageContentsCardV1>
-        );
-    }
+    const open = Boolean(anchorEl);
 
     return (
-        <PageContentsCardV1 className={className}>
-            <Grid container>
-                <Grid item xs={12}>
-                    <label>
-                        <strong>Is this an anomaly?</strong>
-                    </label>
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                        fullWidth
-                        select
-                        id="anomaly-feedback-select"
-                        value={currentlySelected}
-                        onChange={handleLabelChange}
-                    >
-                        {Object.keys(OPTION_TO_DESCRIPTIONS).map(
-                            (optionKey: string) => (
-                                <MenuItem key={optionKey} value={optionKey}>
-                                    {OPTION_TO_DESCRIPTIONS[optionKey]}
-                                </MenuItem>
-                            )
-                        )}
-                    </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                    <Button onClick={handleCommentUpdateClick}>
-                        View / Edit comment
-                    </Button>
-                </Grid>
-            </Grid>
-        </PageContentsCardV1>
+        <>
+            <Box marginTop="10px">
+                <Button
+                    endIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+                    size="small"
+                    variant="text"
+                    onClick={handleClick}
+                >
+                    Is this an anomaly?
+                </Button>
+            </Box>
+
+            <Popover
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                }}
+                id="anomaly-feedback"
+                open={open}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                }}
+                onClose={handleClose}
+            >
+                <PageContentsCardV1 className={className}>
+                    <Grid container direction="column" spacing={2}>
+                        <Grid item>
+                            <TextField
+                                fullWidth
+                                select
+                                id="anomaly-feedback-select"
+                                value={currentlySelected}
+                                onChange={handleLabelChange}
+                            >
+                                {Object.keys(OPTION_TO_DESCRIPTIONS).map(
+                                    (optionKey: string) => (
+                                        <MenuItem
+                                            key={optionKey}
+                                            value={optionKey}
+                                        >
+                                            {OPTION_TO_DESCRIPTIONS[optionKey]}
+                                        </MenuItem>
+                                    )
+                                )}
+                            </TextField>
+                        </Grid>
+
+                        <Grid item>
+                            <Button onClick={handleCommentUpdateClick}>
+                                View / Edit comment
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </PageContentsCardV1>
+            </Popover>
+        </>
     );
 };

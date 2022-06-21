@@ -1,5 +1,4 @@
 import {
-    Button,
     Card,
     CardContent,
     CardHeader,
@@ -15,10 +14,7 @@ import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import {
-    getAnomaliesAnomalyPath,
-    getRootCauseAnalysisForAnomalyInvestigatePath,
-} from "../../../utils/routes/routes.util";
+import { getAnomaliesAnomalyPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";
 import { NameValueDisplayCard } from "../name-value-display-card/name-value-display-card.component";
@@ -76,50 +72,37 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             {props.uiAnomaly && (
                 <CardHeader
                     action={
-                        <>
-                            <Button
-                                color="primary"
-                                component="button"
-                                href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
-                                    props.uiAnomaly.id
-                                )}?${searchParams.toString()}`}
-                                variant="contained"
-                            >
-                                {t("label.investigate-entity", {
-                                    entity: t("label.anomaly"),
-                                })}
-                            </Button>
-                            {/* Anomaly options button */}
-                            <IconButton
-                                color="secondary"
-                                onClick={handleAnomalyOptionsClick}
-                            >
-                                <MoreVertIcon />
-                            </IconButton>
+                        props.showViewDetails ? (
+                            <>
+                                {/* Anomaly options button */}
+                                <IconButton
+                                    color="secondary"
+                                    onClick={handleAnomalyOptionsClick}
+                                >
+                                    <MoreVertIcon />
+                                </IconButton>
 
-                            {/* Anomaly options */}
-                            <Menu
-                                anchorEl={anomalyOptionsAnchorElement}
-                                open={Boolean(anomalyOptionsAnchorElement)}
-                                onClose={handleAnomalyOptionsClose}
-                            >
-                                {/* View details */}
-                                {props.showViewDetails && (
+                                {/* Anomaly options */}
+                                <Menu
+                                    anchorEl={anomalyOptionsAnchorElement}
+                                    open={Boolean(anomalyOptionsAnchorElement)}
+                                    onClose={handleAnomalyOptionsClose}
+                                >
+                                    {/* View details */}
                                     <MenuItem
                                         onClick={handleAnomalyViewDetails}
                                     >
                                         {t("label.view-details")}
                                     </MenuItem>
-                                )}
-
-                                {/* Delete anomaly */}
-                                <MenuItem onClick={handleAnomalyDelete}>
-                                    {t("label.delete-entity", {
-                                        entity: t("label.anomaly"),
-                                    })}
-                                </MenuItem>
-                            </Menu>
-                        </>
+                                    {/* Delete anomaly */}
+                                    <MenuItem onClick={handleAnomalyDelete}>
+                                        {t("label.delete-entity", {
+                                            entity: t("label.anomaly"),
+                                        })}
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                        ) : null
                     }
                     title={
                         <>

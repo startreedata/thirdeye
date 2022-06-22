@@ -19,6 +19,7 @@ export interface TemplatePropertiesObject {
 }
 
 export interface EditableAlert {
+    id?: number;
     name: string;
     description: string;
     cron: string;

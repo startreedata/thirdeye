@@ -111,7 +111,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                                 data-testid={`textfield-${item.key}`}
                                 defaultValue={item.value}
                                 inputProps={{ tabIndex: idx + 1 }}
-                                placeholder="label.add-property-value"
+                                placeholder={t("label.add-property-value")}
                                 onChange={(e) => {
                                     handlePropertyValueChange(
                                         item.key,

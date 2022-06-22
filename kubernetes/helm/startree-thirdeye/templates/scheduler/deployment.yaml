@@ -46,6 +46,11 @@ spec:
         - /bin/sh
         - -c
         - >
+          {{- if .Values.scheduler.tls.enabled }}
+          echo "importing internal tls key" &&
+          openssl pkcs12 -export -name internalTls -in /opt/thirdeye/server/tls-internal/tls.crt -inkey /opt/thirdeye/server/tls-internal/tls.key -out /opt/thirdeye/server/keystore-internal.p12 -password pass:changeit &&
+          keytool -noprompt  -importkeystore -alias internalTls -srckeystore /opt/thirdeye/server/keystore-internal.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/thirdeye/server/keystore/keystore &&
+          {{- end }}
           echo "importing ca cert" &&
           if [ -e /opt/thirdeye/server/tls-internal/ca.crt ];
           then 
@@ -56,6 +61,10 @@ spec:
         - name: tls-internal
           mountPath: /opt/thirdeye/server/tls-internal
           readOnly: true
+        {{- if .Values.scheduler.tls.enabled }}
+        - name: keystore
+          mountPath: /opt/thirdeye/server/keystore
+        {{- end }}
         - name: truststore
           mountPath: /opt/thirdeye/server/truststore
       containers:
@@ -76,6 +85,10 @@ spec:
           {{- end }}
           - name: JAVA_OPTS
             value: >
+              {{- if .Values.scheduler.tls.enabled }}
+              -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
+              -Djavax.net.ssl.keyStorePassword=changeit
+              {{- end }}
               -Djavax.net.ssl.trustStore=/opt/thirdeye/server/truststore/truststore
               -Djavax.net.ssl.trustStorePassword=changeit
         ports:
@@ -94,6 +107,11 @@ spec:
             subPath: holidayLoaderKey
             readOnly: true
           {{- end }}
+          {{- if .Values.scheduler.tls.enabled }}
+          - name: keystore
+            mountPath: /opt/thirdeye/server/keystore
+            readOnly: true
+          {{- end }}
           - name: truststore
             mountPath: /opt/thirdeye/server/truststore
             readOnly: true
@@ -110,6 +128,10 @@ spec:
             optional: true
         - name: truststore
           emptyDir: {}
+        {{- if .Values.scheduler.tls.enabled }}
+        - name: keystore
+          emptyDir: {}
+        {{- end }}
         {{- if .Values.secrets.holidayLoaderKey }}
         - name: holiday-loader-key
           secret:

@@ -14,14 +14,21 @@ spec:
   type: {{ .Values.worker.serviceType }}
   ports:
     # [pod_name].[service_name].[namespace].svc.cluster.local
-    - name: http
-      protocol: TCP
-      port: {{ .Values.worker.port }}
-      targetPort: {{ .Values.worker.port }}
     - name: admin
       protocol: TCP
       port: 8081
       targetPort: 8081
+    {{- if .Values.tls.enabled }}
+    - name: https
+      protocol: TCP
+      port: {{ .Values.worker.tlsPort }}
+      targetPort: {{ .Values.worker.tlsPort }}
+    {{- else }}
+    - name: http
+      protocol: TCP
+      port: {{ .Values.worker.port }}
+      targetPort: {{ .Values.worker.port }}
+    {{- end }}
   selector:
     app: {{ include "thirdeye.name" . }}
     release: {{ .Release.Name }}

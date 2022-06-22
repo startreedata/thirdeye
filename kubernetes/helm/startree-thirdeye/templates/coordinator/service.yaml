@@ -13,10 +13,6 @@ spec:
   type: {{ .Values.coordinator.serviceType }}
   ports:
     # [pod_name].[service_name].[namespace].svc.cluster.local
-    - name: http
-      protocol: TCP
-      port: {{ .Values.coordinator.port }}
-      targetPort: {{ .Values.coordinator.port }}
     - name: admin
       protocol: TCP
       port: 8081
@@ -26,6 +22,11 @@ spec:
       protocol: TCP
       port: {{ .Values.coordinator.tlsPort }}
       targetPort: {{ .Values.coordinator.tlsPort }}
+    {{- else }}
+    - name: http
+      protocol: TCP
+      port: {{ .Values.coordinator.port }}
+      targetPort: {{ .Values.coordinator.port }}
     {{- end }}
   selector:
     app: {{ include "thirdeye.name" . }}

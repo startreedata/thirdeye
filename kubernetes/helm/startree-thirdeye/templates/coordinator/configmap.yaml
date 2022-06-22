@@ -22,10 +22,11 @@ data:
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
           keyStoreType: {{ .Values.tls.type }}
-        {{- end }}
+        {{- else }}
         - type: http
           port: {{ .Values.coordinator.port }}
           idleTimeout: 620s
+        {{- end }}
   
       requestLog:
         appenders:
@@ -55,9 +56,10 @@ data:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
       enabled: true
       schemes:
-        - http
         {{- if .Values.tls.enabled }}
         - https
+        {{- else }}
+        - http
         {{- end }}
 
       # package to scan for jersey resources

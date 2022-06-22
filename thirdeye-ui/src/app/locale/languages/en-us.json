@@ -208,7 +208,8 @@
         "hide-count-optional-properties": "Hide {{count}} optional properties",
         "fields-with-default-values": "Fields with Default Values",
         "reload-preview": "Reload preview",
-        "create-new-template": "Create new template"
+        "create-new-template": "Create new template",
+        "create-notifications": "Create notifications"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -268,6 +269,7 @@
         "select-a-template-to-preview-alert": "Select a template to detect anomalies",
         "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
         "select-template-to-preview-alert": "Select a template to preview the alert",
-        "enter-value-to-override-defaults": "Enter a value to override the defaults"
+        "enter-value-to-override-defaults": "Enter a value to override the defaults",
+        "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups"
     }
 }

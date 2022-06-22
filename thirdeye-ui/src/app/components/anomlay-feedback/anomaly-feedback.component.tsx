@@ -67,15 +67,18 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
      */
     const commentRef = useRef<HTMLInputElement>();
 
+    // Popover
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
         null
     );
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    const handleFeedbackClick = (
+        event: React.MouseEvent<HTMLButtonElement>
+    ): void => {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = (): void => {
+    const handlePopoverClose = (): void => {
         setAnchorEl(null);
     };
 
@@ -184,7 +187,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                       );
             })
             .finally(() => {
-                handleClose();
+                handlePopoverClose();
             });
     };
 
@@ -202,7 +205,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     endIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
                     size="small"
                     variant="text"
-                    onClick={handleClick}
+                    onClick={handleFeedbackClick}
                 >
                     Is this an anomaly?
                 </Button>
@@ -220,7 +223,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     vertical: "top",
                     horizontal: "left",
                 }}
-                onClose={handleClose}
+                onClose={handlePopoverClose}
             >
                 <PageContentsCardV1 className={className}>
                     <Grid container direction="column" spacing={2}>

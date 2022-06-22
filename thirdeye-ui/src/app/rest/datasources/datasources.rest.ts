@@ -64,9 +64,12 @@ export const updateDatasources = async (
 export const onboardAllDatasets = async (
     datasourceName: string
 ): Promise<Dataset[]> => {
-    const response = await axios.post(`${BASE_URL_DATASOURCES}/onboard-all`, {
-        name: datasourceName,
-    });
+    const response = await axios.post(
+        `${BASE_URL_DATASOURCES}/onboard-all`,
+        new URLSearchParams({
+            name: datasourceName,
+        })
+    );
 
     return response.data;
 };

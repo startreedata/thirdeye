@@ -60,7 +60,7 @@
     </dependency>
     <dependency>
       <groupId>ai.startree.thirdeye.plugins</groupId>
-      <artifactId>thirdeye-contributors-shallow</artifactId>
+      <artifactId>thirdeye-contributors-simple</artifactId>
     </dependency>
 
     <!-- test dependencies -->

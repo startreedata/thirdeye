@@ -1,4 +1,4 @@
-package ai.startree.thirdeye.plugins.rca.contributors.shallow;
+package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
@@ -34,7 +34,7 @@ import org.joda.time.Interval;
 import org.mockito.ArgumentMatchers;
 import org.testng.annotations.Test;
 
-public class ShallowContributorsFinderTest {
+public class SimpleContributorsFinderTest {
 
   public static final DataFrame EMPTY_DATA_FRAME = DataFrame.builder(COL_TIME + ":LONG").build();
   private static final DateTime BASELINE_START = new DateTime(2022,
@@ -90,9 +90,9 @@ public class ShallowContributorsFinderTest {
     when(aggregationLoader.loadBreakdown(ArgumentMatchers.eq(CURRENT_SLICE), anyInt())).thenReturn(
         CURRENT_DATAFRAME.get());
 
-    final ShallowContributorsFinder contributorsFinder = new ShallowContributorsFinder(
+    final SimpleContributorsFinder contributorsFinder = new SimpleContributorsFinder(
         aggregationLoader,
-        new ShallowConfiguration());
+        new SimpleConfiguration());
 
     final ContributorsFinderResult output = contributorsFinder.search(new ContributorsSearchConfiguration(
         METRIC_CONFIG_DTO,
@@ -124,9 +124,9 @@ public class ShallowContributorsFinderTest {
 
     when(aggregationLoader.loadBreakdown(ArgumentMatchers.eq(BASELINE_SLICE), anyInt())).thenReturn(
         EMPTY_DATA_FRAME);
-    final ShallowContributorsFinder contributorsFinder = new ShallowContributorsFinder(
+    final SimpleContributorsFinder contributorsFinder = new SimpleContributorsFinder(
         aggregationLoader,
-        new ShallowConfiguration());
+        new SimpleConfiguration());
 
     assertThatThrownBy(() -> contributorsFinder.search(new ContributorsSearchConfiguration(
         METRIC_CONFIG_DTO,
@@ -148,9 +148,9 @@ public class ShallowContributorsFinderTest {
         BASELINE_DATAFRAME.get());
     when(aggregationLoader.loadBreakdown(ArgumentMatchers.eq(CURRENT_SLICE), anyInt())).thenReturn(
         EMPTY_DATA_FRAME);
-    final ShallowContributorsFinder contributorsFinder = new ShallowContributorsFinder(
+    final SimpleContributorsFinder contributorsFinder = new SimpleContributorsFinder(
         aggregationLoader,
-        new ShallowConfiguration());
+        new SimpleConfiguration());
 
     assertThatThrownBy(() -> contributorsFinder.search(new ContributorsSearchConfiguration(
         METRIC_CONFIG_DTO,

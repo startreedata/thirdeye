@@ -1,4 +1,4 @@
-package ai.startree.thirdeye.plugins.rca.contributors.shallow;
+package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
 public enum Cost {
   VALUE_CHANGE {

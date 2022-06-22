@@ -3,7 +3,7 @@
  * Confidential and Proprietary Information of StarTree Inc.
  */
 
-package ai.startree.thirdeye.plugins.rca.contributors.shallow;
+package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
  * Breakdown by one dimension, for each dimension. Same as the heatmap.
  * Then uses a cost function to determine which changes are important.
  */
-public class ShallowContributorsFinder implements ContributorsFinder {
+public class SimpleContributorsFinder implements ContributorsFinder {
 
   private static final int LIMIT_DEFAULT = 100;
-  private static final Logger LOG = LoggerFactory.getLogger(ShallowContributorsFinder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SimpleContributorsFinder.class);
   public static final String BASELINE_SUFFIX = "baseline_";
   public static final String COL_BASELINE_VALUE = BASELINE_SUFFIX + COL_VALUE;
   private static final String CURRENT_SUFFIX = "current_";
@@ -43,13 +43,13 @@ public class ShallowContributorsFinder implements ContributorsFinder {
   public static final String COL_CONTRIBUTION_CHANGE_PERCENTAGE = "contribution_change_percentage";
   public static final String COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE = "contribution_to_overall_change_percentage";
 
-  private final ShallowConfiguration shallowConfiguration;
+  private final SimpleConfiguration simpleConfiguration;
   private final AggregationLoader aggregationLoader;
 
-  public ShallowContributorsFinder(final AggregationLoader aggregationLoader,
-      final ShallowConfiguration shallowConfiguration) {
+  public SimpleContributorsFinder(final AggregationLoader aggregationLoader,
+      final SimpleConfiguration simpleConfiguration) {
     this.aggregationLoader = aggregationLoader;
-    this.shallowConfiguration = shallowConfiguration;
+    this.simpleConfiguration = simpleConfiguration;
   }
 
   public ContributorsFinderResult search(final ContributorsSearchConfiguration searchConfiguration)
@@ -110,13 +110,13 @@ public class ShallowContributorsFinder implements ContributorsFinder {
         .sortedBy(COL_COST)
         .slice(stats.size() - searchConfiguration.getSummarySize(), stats.size());
 
-    return new ShallowContributorsFinderResult(stats,
+    return new SimpleContributorsFinderResult(stats,
         searchConfiguration.getMetricConfigDTO().getName(),
         searchConfiguration.getDatasetConfigDTO().getDataset());
   }
 
   private DoubleSeries computeCost(final DataFrame stats) {
-    final Cost costFunction = shallowConfiguration.getCostFunction();
+    final Cost costFunction = simpleConfiguration.getCostFunction();
     DoubleSeries.Builder builder = DoubleSeries.builder();
     for (int i = 0; i < stats.size(); i++) {
       final double valueChangePercentage = stats.getDouble(COL_VALUE_CHANGE_PERCENTAGE, i);

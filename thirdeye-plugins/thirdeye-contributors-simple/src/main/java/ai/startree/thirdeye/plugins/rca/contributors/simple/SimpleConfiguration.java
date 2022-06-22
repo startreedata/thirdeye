@@ -1,11 +1,11 @@
-package ai.startree.thirdeye.plugins.rca.contributors.shallow;
+package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
-import static ai.startree.thirdeye.plugins.rca.contributors.shallow.Cost.BAlANCED_SIMPLE;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.Cost.BAlANCED_SIMPLE;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ShallowConfiguration {
+public class SimpleConfiguration {
 
   private Cost costFunction = BAlANCED_SIMPLE;
 
@@ -13,7 +13,7 @@ public class ShallowConfiguration {
     return costFunction;
   }
 
-  public ShallowConfiguration setCostFunction(
+  public SimpleConfiguration setCostFunction(
       final Cost costFunction) {
     this.costFunction = costFunction;
     return this;

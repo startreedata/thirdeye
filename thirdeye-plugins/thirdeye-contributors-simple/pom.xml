@@ -9,7 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>thirdeye-contributors-shallow</artifactId>
+  <artifactId>thirdeye-contributors-simple</artifactId>
 
   <dependencies>
     <dependency>

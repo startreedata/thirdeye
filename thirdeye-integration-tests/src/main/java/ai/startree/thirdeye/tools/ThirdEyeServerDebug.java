@@ -27,7 +27,7 @@ import ai.startree.thirdeye.plugins.notification.email.EmailSmtpNotificationServ
 import ai.startree.thirdeye.plugins.notification.slack.SlackNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.notification.webhook.WebhookNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.rca.contributors.cube.CubeContributorsFinderPlugin;
-import ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinderPlugin;
+import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import com.google.inject.Injector;
 import java.util.stream.Stream;
@@ -56,7 +56,7 @@ public class ThirdEyeServerDebug {
       final ContributorsFinderRunner contributorsFinderRunner) {
     Stream.of(
             new CubeContributorsFinderPlugin(),
-            new ShallowContributorsFinderPlugin()
+            new SimpleContributorsFinderPlugin()
         )
         .forEach(plugin -> plugin.getContributorsFinderFactories()
             .forEach(contributorsFinderRunner::addContributorsFinderFactory));

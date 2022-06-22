@@ -1,11 +1,11 @@
-package ai.startree.thirdeye.plugins.rca.contributors.shallow;
+package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
-import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_BASELINE_VALUE;
-import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_CONTRIBUTION_CHANGE_PERCENTAGE;
-import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE;
-import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_COST;
-import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_CURRENT_VALUE;
-import static ai.startree.thirdeye.plugins.rca.contributors.shallow.ShallowContributorsFinder.COL_VALUE_CHANGE_PERCENTAGE;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_BASELINE_VALUE;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_CONTRIBUTION_CHANGE_PERCENTAGE;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_COST;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_CURRENT_VALUE;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_VALUE_CHANGE_PERCENTAGE;
 import static ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi.ALL;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_NAME;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_VALUE;
@@ -22,13 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ShallowContributorsFinderResult implements ContributorsFinderResult {
+public class SimpleContributorsFinderResult implements ContributorsFinderResult {
 
   private final DataFrame stats;
   private final String metricName;
   private final String datasetName;
 
-  public ShallowContributorsFinderResult(final DataFrame stats, final String metricName,
+  public SimpleContributorsFinderResult(final DataFrame stats, final String metricName,
       final String datasetName) {
     this.stats = stats;
     this.metricName = metricName;

@@ -29,7 +29,7 @@
 
   <modules>
     <module>thirdeye-contributors-cube</module>
-    <module>thirdeye-contributors-shallow</module>
+    <module>thirdeye-contributors-simple</module>
     <module>thirdeye-datasources</module>
     <module>thirdeye-plugin-example</module>
     <module>thirdeye-detection-components</module>

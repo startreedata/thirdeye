@@ -11,9 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { CreateAlertConfigurationSection } from "../../../pages/alerts-create-page/alerts-create-page.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 
-export interface AlertDetailsProps<NewOrExistingAlert> {
-    alert: NewOrExistingAlert;
+export interface AlertDetailsProps {
+    alert: EditableAlert;
     onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+    onValidationChange: (
+        key: CreateAlertConfigurationSection,
+        isValid: boolean
+    ) => void;
 }

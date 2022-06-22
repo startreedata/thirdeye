@@ -57,7 +57,7 @@ scheduler:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-#  truststoreSecretName: truststore-name
+#  tlsSecretName: tls-secret-name
   tls:
     enabled: false
   strategy:
@@ -76,7 +76,7 @@ worker:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-#  truststoreSecretName: truststore-name
+#  tlsSecretName: tls-secret-name
   tls:
     enabled: false
   strategy:

@@ -124,7 +124,7 @@ spec:
             name: thirdeye-scheduler
         - name: tls-internal
           secret:
-            secretName: {{ .Values.scheduler.truststoreSecretName | default (printf "%s-internal-tls" (include "thirdeye.coordinator.fullname" .)) }}
+            secretName: {{ .Values.scheduler.tlsSecretName | default (printf "%s-internal-tls" (include "thirdeye.scheduler.fullname" .)) }}
             optional: true
         - name: truststore
           emptyDir: {}

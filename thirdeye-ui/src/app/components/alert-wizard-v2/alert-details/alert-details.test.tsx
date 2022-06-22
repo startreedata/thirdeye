@@ -13,6 +13,7 @@
  */
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { CreateAlertConfigurationSection } from "../../../pages/alerts-create-page/alerts-create-page.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { AlertDetails } from "./alert-details.component";
 
@@ -24,25 +25,34 @@ jest.mock("react-i18next", () => ({
 
 describe("AlertDetails", () => {
     it("should render name and description from passed alert", async () => {
+        const mockValidationCallback = jest.fn();
+
         render(
-            <AlertDetails<EditableAlert>
+            <AlertDetails
                 alert={MOCK_ALERT}
                 onAlertPropertyChange={() => {
                     return;
                 }}
+                onValidationChange={mockValidationCallback}
             />
         );
 
         expect(screen.getByDisplayValue("hello-world")).toBeInTheDocument();
         expect(screen.getByDisplayValue("foo bar")).toBeInTheDocument();
+        expect(mockValidationCallback).toHaveBeenCalledWith(
+            CreateAlertConfigurationSection.NAME,
+            true
+        );
     });
 
     it("should render error state if name is empty and should not have called callback", async () => {
         const mockCallback = jest.fn();
+        const mockValidationCallback = jest.fn();
         render(
-            <AlertDetails<EditableAlert>
+            <AlertDetails
                 alert={MOCK_ALERT}
                 onAlertPropertyChange={mockCallback}
+                onValidationChange={mockValidationCallback}
             />
         );
 
@@ -57,16 +67,24 @@ describe("AlertDetails", () => {
 
         expect(screen.getByTestId("name-input-label")).toHaveClass("Mui-error");
 
-        expect(screen.getByText("message.cannot-be-empty")).toBeInTheDocument();
+        expect(
+            screen.getByText("message.please-enter-valid-name")
+        ).toBeInTheDocument();
         expect(mockCallback).toHaveBeenCalledTimes(0);
+        expect(mockValidationCallback).toHaveBeenLastCalledWith(
+            CreateAlertConfigurationSection.NAME,
+            false
+        );
     });
 
     it("should have called callback if valid input for name and description", async () => {
         const mockCallback = jest.fn();
+        const mockValidationCallback = jest.fn();
         render(
-            <AlertDetails<EditableAlert>
+            <AlertDetails
                 alert={MOCK_ALERT}
                 onAlertPropertyChange={mockCallback}
+                onValidationChange={mockValidationCallback}
             />
         );
 
@@ -87,6 +105,10 @@ describe("AlertDetails", () => {
         expect(mockCallback).toHaveBeenCalledWith({
             description: "new-value-123",
         });
+        expect(mockValidationCallback).toHaveBeenLastCalledWith(
+            CreateAlertConfigurationSection.NAME,
+            true
+        );
     });
 });
 

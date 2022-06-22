@@ -13,6 +13,7 @@
  */
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { CreateAlertConfigurationSection } from "../../../../../pages/alerts-create-page/alerts-create-page.interfaces";
 import { AlertDateTimeCronAdvance } from "./alert-date-time-cron-advance.component";
 
 jest.mock("react-i18next", () => ({
@@ -23,38 +24,43 @@ jest.mock("react-i18next", () => ({
 
 describe("AlertDateTimeCronAdvance", () => {
     it("should render error message if given invalid cron and colored error", async () => {
+        const mockValidationCallback = jest.fn();
+
         render(
             <AlertDateTimeCronAdvance
                 cron={INVALID_CRON}
                 onCronChange={() => {
                     return;
                 }}
+                onValidationChange={mockValidationCallback}
             />
         );
 
         expect(
-            screen.getByText(
-                "Expected 5 values, but got 4. (Input cron: '0 6 * *')"
-            )
+            screen.getByText("Unexpected end of expression")
         ).toBeInTheDocument();
 
         expect(screen.getByTestId("cron-input-label")).toHaveClass("Mui-error");
+        expect(mockValidationCallback).toHaveBeenCalledWith(
+            CreateAlertConfigurationSection.CRON,
+            false
+        );
     });
 
     it("should remove error message if input valid cron and callback function called", async () => {
         const mockCallback = jest.fn();
+        const mockValidationCallback = jest.fn();
         render(
             <AlertDateTimeCronAdvance
                 cron={INVALID_CRON}
                 onCronChange={mockCallback}
+                onValidationChange={mockValidationCallback}
             />
         );
 
         // Verify error state
         expect(
-            screen.getByText(
-                "Expected 5 values, but got 4. (Input cron: '0 6 * *')"
-            )
+            screen.getByText("Unexpected end of expression")
         ).toBeInTheDocument();
 
         expect(screen.getByTestId("cron-input-label")).toHaveClass("Mui-error");
@@ -67,21 +73,35 @@ describe("AlertDateTimeCronAdvance", () => {
             "Mui-error"
         );
 
-        expect(screen.getByText("At 06:00 AM, every day")).toBeInTheDocument();
+        expect(
+            screen.getByText(
+                "At 0 minutes past the hour, every 2 hours, every day"
+            )
+        ).toBeInTheDocument();
         expect(mockCallback).toHaveBeenCalledWith(VALID_CRON);
+        expect(mockValidationCallback).toHaveBeenCalledWith(
+            CreateAlertConfigurationSection.CRON,
+            true
+        );
     });
 
     it("should render error message if input invalid cron and callback function is not called", async () => {
         const mockCallback = jest.fn();
+        const mockValidationCallback = jest.fn();
         render(
             <AlertDateTimeCronAdvance
                 cron={VALID_CRON}
                 onCronChange={mockCallback}
+                onValidationChange={mockValidationCallback}
             />
         );
 
         // Verify valid state
-        expect(screen.getByText("At 06:00 AM, every day")).toBeInTheDocument();
+        expect(
+            screen.getByText(
+                "At 0 minutes past the hour, every 2 hours, every day"
+            )
+        ).toBeInTheDocument();
 
         expect(screen.getByTestId("cron-input-label")).not.toHaveClass(
             "Mui-error"
@@ -94,13 +114,15 @@ describe("AlertDateTimeCronAdvance", () => {
         expect(screen.getByTestId("cron-input-label")).toHaveClass("Mui-error");
 
         expect(
-            screen.getByText(
-                "Expected 5 values, but got 4. (Input cron: '0 6 * *')"
-            )
+            screen.getByText("Unexpected end of expression")
         ).toBeInTheDocument();
         expect(mockCallback).toHaveBeenCalledTimes(0);
+        expect(mockValidationCallback).toHaveBeenCalledWith(
+            CreateAlertConfigurationSection.CRON,
+            false
+        );
     });
 });
 
-const VALID_CRON = "0 6 * * *";
+const VALID_CRON = "0 0 0/2 1/1 * ? *";
 const INVALID_CRON = "0 6 * *";

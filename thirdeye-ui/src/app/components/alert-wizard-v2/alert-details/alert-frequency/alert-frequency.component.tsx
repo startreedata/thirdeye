@@ -18,16 +18,12 @@ import { Alert, EditableAlert } from "../../../../rest/dto/alert.interfaces";
 import { AlertDateTimeCronAdvance } from "./alert-date-time-cron-advance/alert-date-time-cron-advance.component";
 import { AlertFrequencyProps } from "./alert-frequency.interfaces";
 
-// 6AM Everyday
-const DEFAULT_CRON = "0 6 * * *";
-
 function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
     alert,
     onAlertPropertyChange,
+    onValidationChange,
 }: AlertFrequencyProps<NewOrExistingAlert>): JSX.Element {
-    const [currentCron, setCurrentCron] = useState<string>(
-        alert.cron ? alert.cron : DEFAULT_CRON
-    );
+    const [currentCron, setCurrentCron] = useState<string>(alert.cron);
 
     const { t } = useTranslation();
 
@@ -54,6 +50,7 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
             <AlertDateTimeCronAdvance
                 cron={currentCron}
                 onCronChange={handleCronChange}
+                onValidationChange={onValidationChange}
             />
         </>
     );

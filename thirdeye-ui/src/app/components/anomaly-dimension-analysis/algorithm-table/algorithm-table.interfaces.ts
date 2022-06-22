@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AnomalyBreakdownAPIOffsetValues } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
     AnomalyDimensionAnalysisData,
@@ -22,7 +21,7 @@ import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 export interface AlgorithmTableProps {
     anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;
     anomaly: Anomaly;
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
     onCheckClick?: (filters: AnomalyFilterOption[]) => void;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
 }
@@ -31,7 +30,7 @@ export interface AlgorithmRowProps {
     alertId: number;
     startTime: number;
     endTime: number;
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
     dataset: string;
     metric: string;
     row: AnomalyDimensionAnalysisMetricRow;
@@ -47,5 +46,5 @@ export interface AlgorithmRowExpandedProps {
     alertId: number;
     row: AnomalyDimensionAnalysisMetricRow;
     dimensionColumns: string[];
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
 }

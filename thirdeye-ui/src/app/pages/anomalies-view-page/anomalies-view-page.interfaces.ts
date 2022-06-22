@@ -15,42 +15,35 @@ export type AnomaliesViewPageParams = {
     id: string;
 };
 
-export enum AnomalyBreakdownAPIOffsetValues {
-    CURRENT = "current",
-    ONE_WEEK_AGO = "P1W",
-    TWO_WEEKS_AGO = "P2W",
-    THREE_WEEKS_AGO = "P3W",
-    FOUR_WEEKS_AGO = "P4W",
+export enum BaselineOffsetUnitsKey {
+    DAY = "D",
+    WEEK = "W",
+    MONTH = "M",
+    YEAR = "Y",
 }
 
-export const AnomalyBreakdownAPIOffsetsToWeeks = {
-    [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
-    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: 1,
-    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: 2,
-    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: 3,
-    [AnomalyBreakdownAPIOffsetValues.FOUR_WEEKS_AGO]: 4,
-};
+export type BaselineOffsetUnitsValues = "Day" | "Week" | "Month" | "Year";
 
-export const OFFSET_TO_HUMAN_READABLE = {
-    [AnomalyBreakdownAPIOffsetValues.CURRENT]: "",
-    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: "One Week Ago",
-    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: "Two Weeks Ago",
-    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: "Three Weeks Ago",
-    [AnomalyBreakdownAPIOffsetValues.FOUR_WEEKS_AGO]: "Four Weeks Ago",
+export const OFFSET_TO_HUMAN_READABLE: Record<
+    BaselineOffsetUnitsKey,
+    BaselineOffsetUnitsValues
+> = {
+    [BaselineOffsetUnitsKey.DAY]: "Day",
+    [BaselineOffsetUnitsKey.WEEK]: "Week",
+    [BaselineOffsetUnitsKey.MONTH]: "Month",
+    [BaselineOffsetUnitsKey.YEAR]: "Year",
 };
 
 export const BASELINE_OPTIONS: {
-    key: AnomalyBreakdownAPIOffsetValues;
-    description: string;
+    key: BaselineOffsetUnitsKey;
+    description: BaselineOffsetUnitsValues;
 }[] = [];
 
-Object.values(AnomalyBreakdownAPIOffsetValues).forEach(
-    (offsetKey: AnomalyBreakdownAPIOffsetValues) => {
-        if (offsetKey !== AnomalyBreakdownAPIOffsetValues.CURRENT) {
-            BASELINE_OPTIONS.push({
-                key: offsetKey,
-                description: OFFSET_TO_HUMAN_READABLE[offsetKey],
-            });
-        }
+Object.values(BaselineOffsetUnitsKey).forEach(
+    (offsetKey: BaselineOffsetUnitsKey) => {
+        BASELINE_OPTIONS.push({
+            key: offsetKey,
+            description: OFFSET_TO_HUMAN_READABLE[offsetKey],
+        });
     }
 );

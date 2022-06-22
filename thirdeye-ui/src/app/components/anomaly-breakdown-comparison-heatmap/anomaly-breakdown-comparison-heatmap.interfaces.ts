@@ -11,12 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 
 export interface AnomalyBreakdownComparisonHeatmapProps {
     anomalyId: number;
     shouldTruncateText?: boolean;
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
     onAddFilterSetClick: (filters: AnomalyFilterOption[]) => void;
 }

@@ -24,13 +24,12 @@ import {
     Typography,
 } from "@material-ui/core";
 import { toNumber } from "lodash";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
-    AnomalyBreakdownAPIOffsetValues,
+    BaselineOffsetUnitsKey,
     BASELINE_OPTIONS,
-    OFFSET_TO_HUMAN_READABLE,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import {
     PageContentsCardV1,
@@ -39,6 +38,10 @@ import {
 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import {
+    baselineComparisonOffsetToHumanReadable,
+    parseBaselineComparisonOffset,
+} from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
 import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
@@ -65,22 +68,17 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 0
     );
     const [eventsSearchValue, setEventsSearchValue] = useState("");
-    const [comparisonOffset, setComparisonWeekOffset] =
-        useState<AnomalyBreakdownAPIOffsetValues>(
-            (searchParams.get(
-                ANALYSIS_TAB_OFFSET
-            ) as AnomalyBreakdownAPIOffsetValues) ||
-                AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO
-        );
+    const { value, unit } = parseBaselineComparisonOffset(
+        searchParams.get(ANALYSIS_TAB_OFFSET) ?? ""
+    );
+    const [baselineOffsetUnit, setBaselineOffsetUnit] =
+        useState<BaselineOffsetUnitsKey>(unit);
+    const [baselineValue, setBaselineValue] = useState(value);
 
-    const onHandleComparisonOffsetSelection = (
-        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+    const handleBaselineOffsetUnitChange = (
+        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
     ): void => {
-        setComparisonWeekOffset(
-            e.target.value as AnomalyBreakdownAPIOffsetValues
-        );
-        searchParams.set(ANALYSIS_TAB_OFFSET, e.target.value);
-        setSearchParams(searchParams);
+        setBaselineOffsetUnit(event.target.value as BaselineOffsetUnitsKey);
     };
 
     const handleTabIndexChange = (_event: unknown, newValue: number): void => {
@@ -88,6 +86,19 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         searchParams.set(ANALYSIS_TAB_IDX_KEY, newValue.toString());
         setSearchParams(searchParams);
     };
+
+    const comparisonOffset = useMemo(() => {
+        if (baselineValue && baselineOffsetUnit) {
+            return `P${baselineValue}${baselineOffsetUnit}`;
+        }
+
+        return "P1W";
+    }, [baselineValue, baselineOffsetUnit]);
+
+    useEffect(() => {
+        searchParams.set(ANALYSIS_TAB_OFFSET, comparisonOffset);
+        setSearchParams(searchParams);
+    }, [comparisonOffset]);
 
     if (isLoading) {
         return (
@@ -101,7 +112,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         <Card variant="outlined">
             <CardContent>
                 <Grid container justifyContent="space-between">
-                    <Grid item md={7} sm={6} xs={12}>
+                    <Grid item md={5} sm={6} xs={12}>
                         <Tabs
                             value={selectedTabIndex}
                             onChange={handleTabIndexChange}
@@ -116,9 +127,13 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                     </Grid>
                     {/* Hide baseline offset selector if events tab is selected */}
                     {selectedTabIndex !== 2 ? (
-                        <Grid item md={5} sm={6} xs={12}>
-                            <Grid container spacing={0}>
-                                <Grid item sm={6} xs={12}>
+                        <Grid item md={7} sm={6} xs={12}>
+                            <Grid
+                                container
+                                justifyContent="flex-end"
+                                spacing={1}
+                            >
+                                <Grid item>
                                     <Box
                                         className={
                                             classes.baselineWeekOffsetLabelContainer
@@ -135,25 +150,47 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                         </label>
                                     </Box>
                                 </Grid>
-                                <Grid item sm={6} xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        select
-                                        size="small"
-                                        value={comparisonOffset}
-                                        onChange={
-                                            onHandleComparisonOffsetSelection
-                                        }
+                                <Grid item>
+                                    <Grid
+                                        container
+                                        direction="row"
+                                        justifyContent="flex-end"
+                                        spacing={2}
                                     >
-                                        {BASELINE_OPTIONS.map((option) => (
-                                            <MenuItem
-                                                key={option.key}
-                                                value={option.key}
+                                        <Grid item>
+                                            <TextField
+                                                required
+                                                type="number"
+                                                value={baselineValue}
+                                                onChange={(e) =>
+                                                    setBaselineValue(
+                                                        Number(e.target.value)
+                                                    )
+                                                }
+                                            />
+                                        </Grid>
+                                        <Grid item>
+                                            <TextField
+                                                select
+                                                size="small"
+                                                value={baselineOffsetUnit}
+                                                onChange={
+                                                    handleBaselineOffsetUnitChange
+                                                }
                                             >
-                                                {option.description}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                                {BASELINE_OPTIONS.map(
+                                                    (option) => (
+                                                        <MenuItem
+                                                            key={option.key}
+                                                            value={option.key}
+                                                        >
+                                                            {option.description}
+                                                        </MenuItem>
+                                                    )
+                                                )}
+                                            </TextField>
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -198,19 +235,28 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                 <span>
                                     {" "}
                                     Data Date Range (
-                                    {OFFSET_TO_HUMAN_READABLE[comparisonOffset]}
+                                    {baselineComparisonOffsetToHumanReadable(
+                                        baselineValue,
+                                        baselineOffsetUnit
+                                    )}
                                     )
                                 </span>
                             </div>
                             <div>
                                 {formatDateAndTimeV1(
                                     anomaly.startTime -
-                                        OFFSET_TO_MILLISECONDS[comparisonOffset]
+                                        baselineValue *
+                                            OFFSET_TO_MILLISECONDS[
+                                                baselineOffsetUnit
+                                            ]
                                 )}
                                 <strong> to </strong>
                                 {formatDateAndTimeV1(
                                     anomaly.endTime -
-                                        OFFSET_TO_MILLISECONDS[comparisonOffset]
+                                        baselineValue *
+                                            OFFSET_TO_MILLISECONDS[
+                                                baselineOffsetUnit
+                                            ]
                                 )}
                             </div>
                         </Grid>

@@ -12,9 +12,14 @@
  * the License.
  */
 import { isEmpty, map } from "lodash";
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { BaselineOffsetUnitsKey } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
-import { WEEK_IN_MILLISECONDS } from "../../utils/time/time.util";
+import {
+    DAY_IN_MILLISECONDS,
+    MONTH_IN_MILLISECONDS,
+    WEEK_IN_MILLISECONDS,
+    YEAR_IN_MILLISECONDS,
+} from "../../utils/time/time.util";
 import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
 import {
     AnomalyBreakdownComparisonData,
@@ -26,11 +31,10 @@ import {
 } from "./anomaly-breakdown-comparison-heatmap.interfaces";
 
 export const OFFSET_TO_MILLISECONDS = {
-    [AnomalyBreakdownAPIOffsetValues.CURRENT]: 0,
-    [AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO]: WEEK_IN_MILLISECONDS,
-    [AnomalyBreakdownAPIOffsetValues.TWO_WEEKS_AGO]: 2 * WEEK_IN_MILLISECONDS,
-    [AnomalyBreakdownAPIOffsetValues.THREE_WEEKS_AGO]: 3 * WEEK_IN_MILLISECONDS,
-    [AnomalyBreakdownAPIOffsetValues.FOUR_WEEKS_AGO]: 4 * WEEK_IN_MILLISECONDS,
+    [BaselineOffsetUnitsKey.DAY]: DAY_IN_MILLISECONDS,
+    [BaselineOffsetUnitsKey.WEEK]: WEEK_IN_MILLISECONDS,
+    [BaselineOffsetUnitsKey.MONTH]: MONTH_IN_MILLISECONDS,
+    [BaselineOffsetUnitsKey.YEAR]: YEAR_IN_MILLISECONDS,
 };
 
 export function summarizeDimensionValueData(

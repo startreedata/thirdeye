@@ -13,7 +13,6 @@
  */
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "./anomaly-breakdown-comparison-heatmap.component";
 
 jest.mock("../../platform/components", () => ({
@@ -69,7 +68,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 chartTimeSeriesFilterSet={[]}
-                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                comparisonOffset={mockComparisonOffset}
                 onAddFilterSetClick={() => null}
             />
         );
@@ -108,7 +107,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 chartTimeSeriesFilterSet={[]}
-                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                comparisonOffset={mockComparisonOffset}
                 shouldTruncateText={false}
                 onAddFilterSetClick={() => null}
             />
@@ -146,7 +145,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 chartTimeSeriesFilterSet={[]}
-                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                comparisonOffset={mockComparisonOffset}
                 onAddFilterSetClick={() => null}
             />
         );
@@ -222,3 +221,4 @@ let mockedGetAnomalyMetricBreakdownResponse = Promise.resolve(
 const mockSearchParamsGet = jest.fn();
 const mockSearchParamsSet = jest.fn();
 const mockSearchParamsDelete = jest.fn();
+const mockComparisonOffset = "P1W";

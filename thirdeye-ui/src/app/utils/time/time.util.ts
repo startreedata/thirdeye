@@ -12,3 +12,6 @@
  * the License.
  */
 export const WEEK_IN_MILLISECONDS = 604800000;
+export const DAY_IN_MILLISECONDS = 86400000;
+export const YEAR_IN_MILLISECONDS = 31557600000;
+export const MONTH_IN_MILLISECONDS = 2629800000;

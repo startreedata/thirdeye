@@ -12,7 +12,6 @@
  * the License.
  */
 import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { Anomaly } from "./anomaly.interfaces";
 import { Event } from "./event.interfaces";
 
@@ -40,7 +39,7 @@ export interface AnomalyBreakdown {
 }
 
 export interface AnomalyBreakdownRequest {
-    baselineOffset?: AnomalyBreakdownAPIOffsetValues;
+    baselineOffset?: string;
     timezone?: string;
     filters?: string[];
     limit?: number;
@@ -109,7 +108,7 @@ export interface AnomalyDimensionAnalysisData {
  *                      Parameter format is [["continent","country"], ["dim1", "dim2", "dim3"]]
  */
 export interface AnomalyDimensionAnalysisRequest {
-    baselineOffset?: AnomalyBreakdownAPIOffsetValues;
+    baselineOffset?: string;
     filters?: string[];
     summarySize?: number;
     depth?: number;

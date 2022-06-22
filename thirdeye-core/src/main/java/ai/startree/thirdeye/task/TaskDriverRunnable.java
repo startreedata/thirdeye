@@ -5,6 +5,8 @@
 
 package ai.startree.thirdeye.task;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
@@ -16,10 +18,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -132,7 +132,7 @@ public class TaskDriverRunnable implements Runnable {
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       taskDuration.update(elapsedTime);
-      Optional.ofNullable(heartbeat).ifPresent(pulse -> pulse.cancel(false));
+      optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));
     }
   }
 

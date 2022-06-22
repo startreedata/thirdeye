@@ -14,12 +14,17 @@
 import { DetectionEvaluation } from "./detection.interfaces";
 import { User } from "./user.interfaces";
 
+export interface TemplatePropertiesObject {
+    [index: string]: string;
+}
+
 export interface EditableAlert {
+    id?: number;
     name: string;
     description: string;
     cron: string;
     template?: {
-        nodes: Array<
+        nodes?: Array<
             | AlertDataFetcherNode
             | AlertTimeIndexFillerNode
             | AlertAnomalyDetectorNode
@@ -27,10 +32,9 @@ export interface EditableAlert {
         metadata?: {
             [index: string]: { [index: string]: string };
         };
+        name?: string;
     };
-    templateProperties: {
-        [index: string]: string;
-    };
+    templateProperties: TemplatePropertiesObject;
     lastTimestamp?: number;
     active?: boolean;
     owner?: User;

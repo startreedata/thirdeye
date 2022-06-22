@@ -34,6 +34,8 @@ export interface NewAlertTemplate {
             name: string;
         };
     };
+
+    defaultProperties?: { [index: string]: string };
 }
 
 export interface AlertTemplate extends NewAlertTemplate {

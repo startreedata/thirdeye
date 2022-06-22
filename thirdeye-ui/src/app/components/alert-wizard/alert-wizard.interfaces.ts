@@ -24,7 +24,11 @@ export interface AlertWizardProps<NewOrExistingAlert> {
     showCancel?: boolean;
     getAllSubscriptionGroups: () => Promise<SubscriptionGroup[]>;
     getAllAlerts: () => Promise<Alert[]>;
-    getAlertEvaluation: (alert: NewOrExistingAlert) => Promise<AlertEvaluation>;
+    getAlertEvaluation: (
+        alert: NewOrExistingAlert,
+        start?: number,
+        end?: number
+    ) => Promise<AlertEvaluation>;
     onCancel?: () => void;
     onSubscriptionGroupWizardFinish: (
         sub: SubscriptionGroup

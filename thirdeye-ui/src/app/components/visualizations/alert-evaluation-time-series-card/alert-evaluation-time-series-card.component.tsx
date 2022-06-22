@@ -20,7 +20,7 @@ import {
     FormHelperText,
     Grid,
 } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useCallback } from "react";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertEvaluationTimeSeries } from "../alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.component";
@@ -33,6 +33,10 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
 > = (props: AlertEvaluationTimeSeriesCardProps) => {
     const alertEvaluationTimeSeriesCardClasses =
         useAlertEvaluationTimeSeriesCardStyles();
+
+    const handlePreview = useCallback(() => {
+        props.onRefresh && props.onRefresh();
+    }, [props.onRefresh]);
 
     if (props.isLoading) {
         return (
@@ -62,7 +66,15 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                         )}
 
                         <Grid item>
-                            <TimeRangeButtonWithContext />
+                            <TimeRangeButtonWithContext
+                                onTimeRangeChange={(
+                                    start: number,
+                                    end: number
+                                ) =>
+                                    props.onRefresh &&
+                                    props.onRefresh(start, end)
+                                }
+                            />
                         </Grid>
 
                         {/* Preview button */}
@@ -72,7 +84,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                                     <Button
                                         color="primary"
                                         variant="contained"
-                                        onClick={props.onRefresh}
+                                        onClick={handlePreview}
                                     >
                                         Preview
                                     </Button>

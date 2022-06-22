@@ -230,11 +230,20 @@ export const AlertsCreatePage: FunctionComponent = () => {
         return fetchedAlerts;
     };
 
+    // Respect start & end time provided
+    // fix for: TE-678 (https://cortexdata.atlassian.net/browse/TE-678)
     const fetchAlertEvaluation = async (
-        alert: EditableAlert
+        alert: EditableAlert,
+        start?: number,
+        end?: number
     ): Promise<AlertEvaluation> => {
+        const params: [Alert | EditableAlert, number, number] = [
+            alert,
+            start ?? startTime,
+            end ?? endTime,
+        ];
         const fetchedAlertEvaluation = await getEvaluation(
-            createAlertEvaluation(alert, startTime, endTime)
+            createAlertEvaluation(...params)
         );
 
         if (fetchedAlertEvaluation === undefined) {

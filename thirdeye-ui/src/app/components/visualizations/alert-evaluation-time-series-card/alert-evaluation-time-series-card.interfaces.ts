@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2022 StarTree Inc
  *
@@ -24,7 +25,7 @@ export interface AlertEvaluationTimeSeriesCardProps {
     helperText?: string;
     showPreviewButton?: boolean;
     showDatePicker?: boolean;
-    onRefresh?: () => void;
+    onRefresh?: (start?: number, end?: number) => void;
     onAnomalyBarClick?: (anomaly: Anomaly) => void;
     isLoading?: boolean;
 }

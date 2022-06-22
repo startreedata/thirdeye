@@ -1,3 +1,16 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
@@ -217,11 +230,20 @@ export const AlertsCreatePage: FunctionComponent = () => {
         return fetchedAlerts;
     };
 
+    // Respect start & end time provided
+    // fix for: TE-678 (https://cortexdata.atlassian.net/browse/TE-678)
     const fetchAlertEvaluation = async (
-        alert: EditableAlert
+        alert: EditableAlert,
+        start?: number,
+        end?: number
     ): Promise<AlertEvaluation> => {
+        const params: [Alert | EditableAlert, number, number] = [
+            alert,
+            start ?? startTime,
+            end ?? endTime,
+        ];
         const fetchedAlertEvaluation = await getEvaluation(
-            createAlertEvaluation(alert, startTime, endTime)
+            createAlertEvaluation(...params)
         );
 
         if (fetchedAlertEvaluation === undefined) {

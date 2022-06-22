@@ -1,10 +1,22 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { AxiosError } from "axios";
 import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     HelpLinkIconV1,
@@ -33,7 +45,6 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 import { validateJSON } from "../../utils/validation/validation.util";
 import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscription-group-wizard.component";
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
-import { TimeRangeQueryStringKey } from "../time-range/time-range-provider/time-range-provider.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -79,15 +90,6 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
     ] = useState(DEFAULT_ALERT_TEMPLATE_ID);
     const [wizard, setWizard] = useState("");
     const { t } = useTranslation();
-    const [searchParams] = useSearchParams();
-
-    const [startTime, endTime] = useMemo(
-        () => [
-            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
-            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
-        ],
-        [searchParams]
-    );
 
     useEffect(() => {
         initSubs();
@@ -99,11 +101,6 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
             refreshAlertEvaluation();
         }
     }, []);
-
-    useEffect(() => {
-        // Refresh evaluation on startTime or endTime change
-        refreshAlertEvaluation();
-    }, [startTime, endTime]);
 
     useEffect(() => {
         if (currentWizardStep !== AlertWizardStep.SUBSCRIPTION_GROUPS) {
@@ -131,7 +128,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                 });
     }, [currentWizardStep]);
 
-    const refreshAlertEvaluation = (): void => {
+    const refreshAlertEvaluation = (start?: number, end?: number): void => {
         setAlertEvaluation({} as AlertEvaluation);
         if (!validateDetectionConfiguration()) {
             return;
@@ -140,7 +137,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
         let fetchedAlertEvaluation = {} as AlertEvaluation;
         props.getAlertEvaluation &&
             props
-                .getAlertEvaluation(JSON.parse(newAlertJSON))
+                .getAlertEvaluation(JSON.parse(newAlertJSON), start, end)
                 .then((alertEvaluation: AlertEvaluation): void => {
                     fetchedAlertEvaluation = alertEvaluation;
                 })

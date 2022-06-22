@@ -1,10 +1,21 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package ai.startree.thirdeye.plugins.rca.contributors.cube.summary;
 
+import static ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi.ALL_OTHERS;
+import static ai.startree.thirdeye.spi.rca.Stats.roundUp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.plugins.rca.contributors.cube.cost.BalancedCostFunction;
@@ -40,7 +51,7 @@ public class DimensionAnalysisResultApiTest {
         .setCurrentTotal(currentTotal)
         .setBaselineTotalSize(baselineSize)
         .setCurrentTotalSize(currentSize)
-        .setGlobalRatio(Summary.roundUp(currentTotal / baselineTotal));
+        .setGlobalRatio(roundUp(currentTotal / baselineTotal));
     Summary.buildDiffSummary(response, cubeNodes, new BalancedCostFunction());
     response.setMetric(new MetricApi().setName("testMetric"));
 
@@ -140,7 +151,7 @@ public class DimensionAnalysisResultApiTest {
    */
   private List<SummaryResponseRow> buildExpectedResponseRows() {
     SummaryResponseRow root = new SummaryResponseRow();
-    root.setNames(Collections.singletonList(NameTag.ALL_OTHERS));
+    root.setNames(Collections.singletonList(ALL_OTHERS));
     root.setOtherDimensionValues(List.of("IN", "FR"));
     root.setCost(0d); // root doesn't have cost
     root.setBaselineValue(25d);

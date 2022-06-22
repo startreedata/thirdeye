@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.detectionpipeline.sql.filter;
 
 import static ai.startree.thirdeye.util.CalciteUtils.addPredicates;
@@ -38,6 +46,7 @@ import org.apache.calcite.sql.util.SqlShuttle;
 public class FiltersEngine {
 
   private static final List<OPER> SUPPORTED_FILTER_OPERATIONS = List.of(OPER.EQ, OPER.NEQ, OPER.IN);
+  public static final boolean QUOTE_IDENTIFIERS = false;
 
   private final SqlParser.Config sqlParserConfig;
   private final SqlDialect sqlDialect;
@@ -55,7 +64,7 @@ public class FiltersEngine {
   public String prepareQuery() throws SqlParseException {
     SqlNode rootNode = queryToNode(query, sqlParserConfig);
     SqlNode rootNodeWithFilters = rootNode.accept(new FilterVisitor());
-    String preparedQuery = nodeToQuery(rootNodeWithFilters, sqlDialect);
+    String preparedQuery = nodeToQuery(rootNodeWithFilters, sqlDialect, QUOTE_IDENTIFIERS);
 
     return preparedQuery;
   }

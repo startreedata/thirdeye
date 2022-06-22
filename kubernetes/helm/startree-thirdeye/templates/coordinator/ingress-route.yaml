@@ -1,3 +1,4 @@
+{{- if and .Values.traefik.coordinator.enabled ( not .Values.tls.enabled ) -}}
 #
 # Copyright 2022 StarTree Inc
 #
@@ -12,7 +13,6 @@
 # the License.
 #
 
-{{- if and .Values.traefik.coordinator.enabled ( not .Values.tls.enabled ) -}}
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:

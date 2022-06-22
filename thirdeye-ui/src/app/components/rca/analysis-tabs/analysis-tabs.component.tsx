@@ -157,8 +157,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                         justifyContent="flex-end"
                                         spacing={2}
                                     >
-                                        <Grid item>
+                                        <Grid item xs={4}>
                                             <TextField
+                                                fullWidth
                                                 required
                                                 type="number"
                                                 value={baselineValue}
@@ -169,8 +170,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                                 }
                                             />
                                         </Grid>
-                                        <Grid item>
+                                        <Grid item xs={8}>
                                             <TextField
+                                                fullWidth
                                                 select
                                                 size="small"
                                                 value={baselineOffsetUnit}

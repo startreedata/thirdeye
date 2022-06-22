@@ -21,12 +21,21 @@ import java.util.List;
 
 public class DimensionAnalysisResultApi {
 
+  /**keyword for no filter on a dimension*/
+  public static final String ALL = "(ALL)";
+  /**keyword for a list of values for a dimension*/
+  public static final String ALL_OTHERS = "(ALL_OTHERS)";
+  /**keyword for no filter after an (ALL_OTHERS) keyword*/
+  public static final String EMPTY = "(NO_FILTER)";
+
+  // fixme cyril is this really required ? remove if possible
   private MetricApi metric;
   private Double baselineTotal = 0d;
   private Double currentTotal = 0d;
   private Double baselineTotalSize = 0d;
   private Double currentTotalSize = 0d;
   private Double globalRatio = 1d;
+  // fixme cyril dimensions is to complex to build - should be a map<dimensionName, dimensionValue> in the response rows
   private List<String> dimensions = new ArrayList<>();
   private List<SummaryResponseRow> responseRows = new ArrayList<>();
   private List<SummaryGainerLoserResponseRow> gainer = new ArrayList<>();

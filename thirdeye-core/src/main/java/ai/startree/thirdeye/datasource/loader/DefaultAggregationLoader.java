@@ -45,8 +45,6 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultAggregationLoader.class);
 
-  private static final String COL_DIMENSION_NAME = "dimName";
-  private static final String COL_DIMENSION_VALUE = "dimValue";
   private static final long TIMEOUT = 600000;
   private static final String ROLLUP_NAME = "OTHER";
 

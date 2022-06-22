@@ -24,7 +24,7 @@ public class ContributorsSearchConfiguration {
   private final MetricConfigDTO metricConfigDTO;
   private final DatasetConfigDTO datasetConfigDTO;
   private final Interval currentInterval;
-  private final Interval currentBaseline;
+  private final Interval baselineInterval;
   private final int summarySize;
   private final int depth;
   private final boolean doOneSideError;
@@ -32,13 +32,13 @@ public class ContributorsSearchConfiguration {
   private final List<List<String>> hierarchies;
 
   public ContributorsSearchConfiguration(final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO,
-      final Interval currentInterval, final Interval currentBaseline, final int summarySize,
+      final Interval currentInterval, final Interval baselineInterval, final int summarySize,
       final int depth, final boolean doOneSideError, final List<Predicate> filters,
       final List<List<String>> hierarchies) {
     this.metricConfigDTO = metricConfigDTO;
     this.datasetConfigDTO = datasetConfigDTO;
     this.currentInterval = currentInterval;
-    this.currentBaseline = currentBaseline;
+    this.baselineInterval = baselineInterval;
     this.summarySize = summarySize;
     this.depth = depth;
     this.doOneSideError = doOneSideError;
@@ -58,8 +58,8 @@ public class ContributorsSearchConfiguration {
     return currentInterval;
   }
 
-  public Interval getCurrentBaseline() {
-    return currentBaseline;
+  public Interval getBaselineInterval() {
+    return baselineInterval;
   }
 
   public int getSummarySize() {

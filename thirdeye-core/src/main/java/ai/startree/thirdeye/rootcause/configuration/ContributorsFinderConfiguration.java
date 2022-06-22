@@ -19,7 +19,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ContributorsFinderConfiguration {
 
-  // todo cyril change this default value to a source available algorithm
+  // todo cyril replace by "simple" contributors algorithm
   private static final String DEFAULT_CONTRIBUTORS_ALGORITHM = "cube";
   private static final Map<String, Object> DEFAULT_ALGORITHM_PARAMS = Map.of();
 

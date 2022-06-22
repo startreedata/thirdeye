@@ -14,6 +14,10 @@
 
 package ai.startree.thirdeye.plugins.rca.contributors.cube.summary;
 
+import static ai.startree.thirdeye.spi.rca.Stats.computeContributionChangePercentage;
+import static ai.startree.thirdeye.spi.rca.Stats.computeContributionToOverallChangePercentage;
+import static ai.startree.thirdeye.spi.rca.Stats.computeValueChangePercentage;
+import static ai.startree.thirdeye.spi.rca.Stats.roundUp;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.plugins.rca.contributors.cube.cost.CostFunction;
@@ -96,12 +100,12 @@ public class Summary {
     row.setSizeFactor(costEntry.getSizeFactor());
     row.setDimensionName(costEntry.getDimName());
     row.setDimensionValue(costEntry.getDimValue());
-    row.setChangePercentage(computePercentageChange(row.getBaselineValue(), row.getCurrentValue()));
-    row.setContributionChangePercentage(computeContributionChange(row.getBaselineValue(),
+    row.setChangePercentage(computeValueChangePercentage(row.getBaselineValue(), row.getCurrentValue()));
+    row.setContributionChangePercentage(computeContributionChangePercentage(row.getBaselineValue(),
         row.getCurrentValue(),
         baselineTotal,
         currentTotal));
-    row.setContributionToOverallChangePercentage(computeContributionToOverallChange(row.getBaselineValue(),
+    row.setContributionToOverallChangePercentage(computeContributionToOverallChangePercentage(row.getBaselineValue(),
         row.getCurrentValue(),
         baselineTotal,
         currentTotal));
@@ -171,16 +175,16 @@ public class Summary {
       row.setNames(nameTags.get(node).getNames());
       row.setBaselineValue(node.getBaselineSize());
       row.setCurrentValue(node.getCurrentSize());
-      row.setChangePercentage(computePercentageChange(row.getBaselineValue(),
+      row.setChangePercentage(computeValueChangePercentage(row.getBaselineValue(),
           row.getCurrentValue()));
       row.setSizeFactor((node.getBaselineSize() + node.getCurrentSize()) / (
           dimensionAnalysisResultApi.getBaselineTotalSize()
               + dimensionAnalysisResultApi.getCurrentTotalSize()));
-      row.setContributionChangePercentage(computeContributionChange(row.getBaselineValue(),
+      row.setContributionChangePercentage(computeContributionChangePercentage(row.getBaselineValue(),
           row.getCurrentValue(),
           dimensionAnalysisResultApi.getBaselineTotal(),
           dimensionAnalysisResultApi.getCurrentTotal()));
-      row.setContributionToOverallChangePercentage(computeContributionToOverallChange(row.getBaselineValue(),
+      row.setContributionToOverallChangePercentage(computeContributionToOverallChangePercentage(row.getBaselineValue(),
           row.getCurrentValue(),
           dimensionAnalysisResultApi.getBaselineTotal(),
           dimensionAnalysisResultApi.getCurrentTotal()));
@@ -195,42 +199,6 @@ public class Summary {
       }
       dimensionAnalysisResultApi.getResponseRows().add(row);
     }
-  }
-
-  public static double computePercentageChange(double baseline, double current) {
-    if (baseline != 0d) {
-      double percentageChange = ((current - baseline) / baseline) * 100d;
-      return roundUp(percentageChange);
-    } else {
-      return Double.NaN;
-    }
-  }
-
-  public static double computeContributionChange(double baseline, double current,
-      double baselineTotal,
-      double currentTotal) {
-    if (currentTotal != 0d && baselineTotal != 0d) {
-      double contributionChange = ((current / currentTotal) - (baseline / baselineTotal)) * 100d;
-      return roundUp(contributionChange);
-    } else {
-      return Double.NaN;
-    }
-  }
-
-  public static double computeContributionToOverallChange(double baseline, double current,
-      double baselineTotal,
-      double currentTotal) {
-    if (baselineTotal != 0d) {
-      double contributionToOverallChange =
-          ((current - baseline) / Math.abs(currentTotal - baselineTotal)) * 100d;
-      return roundUp(contributionToOverallChange);
-    } else {
-      return Double.NaN;
-    }
-  }
-
-  public static double roundUp(double number) {
-    return Math.round(number * 10000d) / 10000d;
   }
 
   // TODO: Need a better definition for "a node is thinned out by its children."

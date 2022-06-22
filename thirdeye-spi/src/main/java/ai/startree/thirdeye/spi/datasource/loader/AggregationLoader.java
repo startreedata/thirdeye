@@ -21,10 +21,13 @@ import java.util.concurrent.Future;
 
 public interface AggregationLoader {
 
+  String COL_DIMENSION_NAME = "dimName";
+  String COL_DIMENSION_VALUE = "dimValue";
+
   /**
    * Returns a de-aggregation data frame for a given slice with 3 columns:
    * dimension name, dimension value, and metric value.
-   *
+   * Values are in COL_DIMENSION_NAME, COL_DIMENSION_VALUE, Constants.COL_VALUE
    * @param slice metric slice
    * @param limit top k element limit per dimension name ({@code -1} for default)
    * @return de-aggregation data frame

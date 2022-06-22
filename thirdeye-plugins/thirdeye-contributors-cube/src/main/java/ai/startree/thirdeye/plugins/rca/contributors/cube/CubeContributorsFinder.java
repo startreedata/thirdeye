@@ -60,7 +60,7 @@ public class CubeContributorsFinder implements ContributorsFinder {
     final CubeAlgorithmRunner cubeAlgorithmRunner = new CubeAlgorithmRunner(searchConfiguration.getDatasetConfigDTO(),
         searchConfiguration.getMetricConfigDTO(),
         searchConfiguration.getCurrentInterval(),
-        searchConfiguration.getCurrentBaseline(),
+        searchConfiguration.getBaselineInterval(),
         new Dimensions(searchConfiguration.getDatasetConfigDTO().getDimensions()),
         searchConfiguration.getFilters(),
         searchConfiguration.getSummarySize(),

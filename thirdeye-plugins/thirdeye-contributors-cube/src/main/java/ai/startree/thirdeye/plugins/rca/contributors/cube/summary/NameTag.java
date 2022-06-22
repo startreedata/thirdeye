@@ -14,15 +14,15 @@
 
 package ai.startree.thirdeye.plugins.rca.contributors.cube.summary;
 
+import static ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi.ALL;
+import static ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi.ALL_OTHERS;
+import static ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi.EMPTY;
+
 import ai.startree.thirdeye.plugins.rca.contributors.cube.data.DimensionValues;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NameTag {
-
-  public static final String ALL = "(ALL)";
-  public static final String ALL_OTHERS = "(ALL_OTHERS)";
-  public static final String EMPTY = "(NO_FILTER)";
 
   public final List<String> names;
 

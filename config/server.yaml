@@ -88,8 +88,9 @@ taskDriver:
   id: 0
 
 rca:
-  # default values - for structure example - todo cyril replace by source available algorithm
+  # default values - structure example
   topContributors:
+    # todo replace by "simple" algorithm
     algorithm: cube
     params: {}
 

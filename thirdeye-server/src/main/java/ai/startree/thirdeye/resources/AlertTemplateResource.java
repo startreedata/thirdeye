@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.FileUtils.readJsonObjectsFromResourcesFolder;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
+import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -49,12 +49,13 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertTemplateDTO> {
 
-  private static final String RESOURCES_TEMPLATES_PATH = "alert-templates";
+  private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
 
   @Inject
-  public AlertTemplateResource(
-      final AlertTemplateManager alertTemplateManager) {
+  public AlertTemplateResource(final AlertTemplateManager alertTemplateManager,
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
     super(alertTemplateManager, ImmutableMap.of());
+    this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
   }
 
   @Override
@@ -83,15 +84,14 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("updateExisting") boolean updateExisting) {
 
-    List<AlertTemplateApi> alertTemplates = readJsonObjectsFromResourcesFolder(
-        RESOURCES_TEMPLATES_PATH,
-        this.getClass(),
-        AlertTemplateApi.class);
+    List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
     List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
     for (AlertTemplateApi templateApi : alertTemplates) {
       AlertTemplateDTO existingTemplate = dtoManager.findByName(templateApi.getName())
-          .stream().findFirst().orElse(null);
+          .stream()
+          .findFirst()
+          .orElse(null);
       if (existingTemplate == null) {
         toCreateTemplates.add(templateApi);
       } else {

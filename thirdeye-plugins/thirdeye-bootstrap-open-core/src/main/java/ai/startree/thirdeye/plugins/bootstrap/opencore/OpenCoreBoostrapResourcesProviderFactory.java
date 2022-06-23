@@ -11,27 +11,26 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.rca.contributors.cube;
+package ai.startree.thirdeye.plugins.bootstrap.opencore;
 
-import ai.startree.thirdeye.spi.rca.ContributorsFinder;
-import ai.startree.thirdeye.spi.rca.ContributorsFinderContext;
+import ai.startree.thirdeye.spi.Plugin;
+import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProvider;
+import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auto.service.AutoService;
+import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class CubeContributorsFinderFactory implements ContributorsFinderFactory {
+@AutoService(Plugin.class)
+public class OpenCoreBoostrapResourcesProviderFactory implements BootstrapResourcesProviderFactory {
 
   @Override
   public String name() {
-    return "cube";
+    return "opencore";
   }
 
   @Override
-  public @NonNull ContributorsFinder build(final ContributorsFinderContext context) {
-    final CubeConfiguration configuration = new ObjectMapper().convertValue(context.getParams(), CubeConfiguration.class);
-
-    return new CubeContributorsFinder(
-        context.getAggregationLoader(),
-        configuration);
+  public @NonNull BootstrapResourcesProvider build() {
+    return new OpenCoreBoostrapResourcesProvider();
   }
 }

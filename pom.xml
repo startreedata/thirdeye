@@ -485,6 +485,11 @@
         <artifactId>thirdeye-contributors-simple</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
+        <artifactId>thirdeye-bootstrap-open-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <!-- project dependencies -->
       <dependency>

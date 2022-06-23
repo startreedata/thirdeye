@@ -87,6 +87,10 @@
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-contributors-simple/target/thirdeye-contributors-simple-${project.version}-dist</directory>
       <outputDirectory>plugins/contributors-simple/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-bootstrap-open-core/target/thirdeye-bootstrap-open-core-${project.version}-dist</directory>
+      <outputDirectory>plugins/bootstrap-open-core/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

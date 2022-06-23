@@ -16,12 +16,14 @@ package ai.startree.thirdeye;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
+import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
@@ -58,6 +60,7 @@ public class PluginLoader {
   private final DetectionRegistry detectionRegistry;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final ContributorsFinderRunner contributorsFinderRunner;
+  private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -68,11 +71,13 @@ public class PluginLoader {
       final DetectionRegistry detectionRegistry,
       final NotificationServiceRegistry notificationServiceRegistry,
       final ContributorsFinderRunner contributorsFinderRunner,
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.contributorsFinderRunner = contributorsFinderRunner;
+    this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -122,6 +127,9 @@ public class PluginLoader {
     }
     for (ContributorsFinderFactory f: plugin.getContributorsFinderFactories()) {
       contributorsFinderRunner.addContributorsFinderFactory(f);
+    }
+    for (BootstrapResourcesProviderFactory f: plugin.getBootstrapResourcesProviderFactories()) {
+      bootstrapResourcesRegistry.addBootstrapResourcesProviderFactory(f);
     }
   }
 

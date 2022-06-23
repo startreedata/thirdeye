@@ -38,6 +38,7 @@
     <module>thirdeye-notification-email</module>
     <module>thirdeye-notification-webhook</module>
     <module>thirdeye-notification-slack</module>
+    <module>thirdeye-bootstrap-open-core</module>
   </modules>
 
   <dependencies>

@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.util;
+package ai.startree.thirdeye.spi.util;
 
-import static com.google.api.client.util.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -25,13 +25,13 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FileUtils {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  @NotNull
+  @NonNull
   public static <T> T readJsonObject(File file, Class<T> clazz) {
     try {
       return OBJECT_MAPPER.readValue(file, clazz);
@@ -42,7 +42,7 @@ public class FileUtils {
     }
   }
 
-  @NotNull
+  @NonNull
   public static <T> T readJsonObject(InputStream file, Class<T> clazz) {
     try {
       return OBJECT_MAPPER.readValue(file, clazz);
@@ -73,8 +73,7 @@ public class FileUtils {
    * This methods reads every files in a jar. Avoid running on a big jar.
    */
   public static <T> List<T> readJsonObjectsFromResourcesFolderInJar(String folder,
-      Class<?> loaderClazz, Class<T> targetClazz)
-      throws IOException {
+      Class<?> loaderClazz, Class<T> targetClazz) throws IOException {
     List<T> elements = new ArrayList<>();
     String folderPrefix = folder.endsWith("/") ? folder : folder + "/";
     final JarFile jar = new JarFile(new File(loaderClazz.getProtectionDomain()
@@ -97,13 +96,27 @@ public class FileUtils {
   public static <T> List<T> readJsonObjectsFromResourcesFolderInIDE(String folder,
       Class<?> loaderClazz, Class<T> targetClazz) {
     URL url = loaderClazz.getClassLoader().getResource(folder);
-    checkArgument(url != null, String.format("%s folder not found in resources.", folder));
-    String path = url.getPath();
-    final File[] files = new File(path).listFiles();
+    if (url == null) {
+      throw new IllegalArgumentException(String.format("%s folder not found in resources.", folder));
+    }
+    final String folderPath = url.getPath();
+
+    return readJsonObjectsFromFolder(folderPath, targetClazz);
+  }
+
+  /**
+   * Read all files in a given folder. Does not read recursively.
+   */
+  public static <T> List<T> readJsonObjectsFromFolder(final String folderPath, Class<T> targetClazz) {
+    final File folderFile = new File(folderPath);
+    if (!folderFile.exists() || !folderFile.isDirectory()) {
+      throw new IllegalArgumentException("Folder not found: " + folderPath);
+    }
+    final File[] files = requireNonNull(folderFile.listFiles());
     List<T> elements = new ArrayList<>();
-    if (files != null) {
-      for (int i = 0; i < files.length; i++) {
-        elements.add(readJsonObject(files[i], targetClazz));
+    for (File jsonFile : files) {
+      if (jsonFile.isFile()) {
+        elements.add(readJsonObject(jsonFile, targetClazz));
       }
     }
     return elements;

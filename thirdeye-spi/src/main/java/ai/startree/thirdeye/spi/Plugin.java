@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi;
 
+import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
@@ -39,6 +40,10 @@ public interface Plugin {
   }
 
   default Iterable<ContributorsFinderFactory> getContributorsFinderFactories() {
+    return Collections.emptyList();
+  }
+
+  default Iterable<BootstrapResourcesProviderFactory> getBootstrapResourcesProviderFactories() {
     return Collections.emptyList();
   }
 }

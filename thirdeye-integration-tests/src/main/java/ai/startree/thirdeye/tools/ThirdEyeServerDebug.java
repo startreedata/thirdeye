@@ -16,9 +16,11 @@ package ai.startree.thirdeye.tools;
 import static ai.startree.thirdeye.AppUtils.logJvmSettings;
 
 import ai.startree.thirdeye.ThirdEyeServer;
+import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
+import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProviderPlugin;
 import ai.startree.thirdeye.plugins.datasource.DefaultDataSourcesPlugin;
 import ai.startree.thirdeye.plugins.datasource.PinotDataSourcePlugin;
 import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
@@ -50,6 +52,16 @@ public class ThirdEyeServerDebug {
     loadDetectors(injector.getInstance(DetectionRegistry.class));
     loadNotificationServiceFactories(injector.getInstance(NotificationServiceRegistry.class));
     loadContributorsFinderFactories(injector.getInstance(ContributorsFinderRunner.class));
+    loadBootstrapResourcesProviderFactories(injector.getInstance(BootstrapResourcesRegistry.class));
+  }
+
+  private static void loadBootstrapResourcesProviderFactories(
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
+    Stream.of(
+            new OpenCoreBoostrapResourcesProviderPlugin()
+        )
+        .forEach(plugin -> plugin.getBootstrapResourcesProviderFactories()
+            .forEach(bootstrapResourcesRegistry::addBootstrapResourcesProviderFactory));
   }
 
   private static void loadContributorsFinderFactories(

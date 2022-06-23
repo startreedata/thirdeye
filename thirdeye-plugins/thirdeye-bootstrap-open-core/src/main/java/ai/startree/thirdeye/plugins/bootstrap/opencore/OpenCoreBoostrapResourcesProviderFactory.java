@@ -13,15 +13,10 @@
  */
 package ai.startree.thirdeye.plugins.bootstrap.opencore;
 
-import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProvider;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
-import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
-import com.google.auto.service.AutoService;
-import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-@AutoService(Plugin.class)
 public class OpenCoreBoostrapResourcesProviderFactory implements BootstrapResourcesProviderFactory {
 
   @Override

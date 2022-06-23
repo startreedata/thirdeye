@@ -62,6 +62,10 @@
       <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-contributors-simple</artifactId>
     </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-bootstrap-open-core</artifactId>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>

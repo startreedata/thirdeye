@@ -15,6 +15,9 @@ data:
       adminContextPath: /admin
 
       applicationConnectors:
+        - type: http
+          port: {{ .Values.coordinator.port }}
+          idleTimeout: 620s
         {{- if .Values.tls.enabled }}
         - type: https
           port: {{ .Values.coordinator.tlsPort }}
@@ -22,10 +25,6 @@ data:
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
           keyStoreType: {{ .Values.tls.type }}
-        {{- else }}
-        - type: http
-          port: {{ .Values.coordinator.port }}
-          idleTimeout: 620s
         {{- end }}
   
       requestLog:
@@ -58,9 +57,8 @@ data:
       schemes:
         {{- if .Values.tls.enabled }}
         - https
-        {{- else }}
-        - http
         {{- end }}
+        - http
 
       # package to scan for jersey resources
       resourcePackage: ai.startree.thirdeye.resources

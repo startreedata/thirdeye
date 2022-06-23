@@ -100,6 +100,10 @@ spec:
             protocol: TCP
           - containerPort: 8081
             protocol: TCP
+          {{- if .Values.worker.tls.enabled }}
+          - containerPort: {{ .Values.worker.tlsPort }}
+            protocol: TCP
+          {{- end }}
         volumeMounts:
           - name: thirdeye-config
             mountPath: "/home/thirdeye/thirdeye/config/server.yaml"

@@ -23,11 +23,10 @@ data:
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
           keyStoreType: {{ .Values.tls.type }}
-        {{- else }}
+        {{- end }}
         - type: http
           port: {{ .Values.scheduler.port }}
           idleTimeout: 620s
-        {{- end }}
   
       requestLog:
         appenders:
@@ -69,9 +68,8 @@ data:
       schemes:
         {{- if .Values.scheduler.tls.enabled }}
         - https
-        {{- else }}
-        - http
         {{- end }}
+        - http
 
       # package to scan for jersey resources
       resourcePackage: ai.startree.thirdeye.resources

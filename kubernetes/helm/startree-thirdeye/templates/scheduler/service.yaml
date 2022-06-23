@@ -14,6 +14,10 @@ spec:
   type: {{ .Values.scheduler.serviceType }}
   ports:
     # [pod_name].[service_name].[namespace].svc.cluster.local
+    - name: http
+      protocol: TCP
+      port: {{ .Values.scheduler.port }}
+      targetPort: {{ .Values.scheduler.port }}
     - name: admin
       protocol: TCP
       port: 8081
@@ -23,11 +27,6 @@ spec:
       protocol: TCP
       port: {{ .Values.scheduler.tlsPort }}
       targetPort: {{ .Values.scheduler.tlsPort }}
-    {{- else }}
-    - name: http
-      protocol: TCP
-      port: {{ .Values.scheduler.port }}
-      targetPort: {{ .Values.scheduler.port }}
     {{- end }}
   selector:
     app: {{ include "thirdeye.name" . }}

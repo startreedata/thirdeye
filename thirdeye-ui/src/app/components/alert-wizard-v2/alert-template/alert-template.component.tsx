@@ -140,7 +140,7 @@ function AlertTemplate({
                             {t("label.detection-template")}
                         </Typography>
                         <Typography variant="body2">
-                            {t("message.select-a-template-to-preview-alert")}
+                            {t("message.select-template-to-preview-alert")}
                         </Typography>
                     </Box>
                 </Grid>

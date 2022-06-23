@@ -29,6 +29,7 @@ public class TaskDTO extends AbstractDTO {
   // The task results, which could contain the error messages of tasks' execution.
   private String message;
   private Timestamp lastModified;
+  private Timestamp lastActive;
 
   public Long getWorkerId() {
     return workerId;
@@ -108,6 +109,15 @@ public class TaskDTO extends AbstractDTO {
 
   public TaskDTO setLastModified(Timestamp lastModified) {
     this.lastModified = lastModified;
+    return this;
+  }
+
+  public Timestamp getLastActive() {
+    return lastActive;
+  }
+
+  public TaskDTO setLastActive(final Timestamp lastActive) {
+    this.lastActive = lastActive;
     return this;
   }
 

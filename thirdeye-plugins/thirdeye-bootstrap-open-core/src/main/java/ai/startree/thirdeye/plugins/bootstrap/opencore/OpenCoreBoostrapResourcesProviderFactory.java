@@ -21,7 +21,7 @@ public class OpenCoreBoostrapResourcesProviderFactory implements BootstrapResour
 
   @Override
   public String name() {
-    return "opencore";
+    return "open-core";
   }
 
   @Override

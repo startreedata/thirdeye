@@ -161,6 +161,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                             <TextField
                                                 fullWidth
                                                 required
+                                                className={classes.input}
                                                 type="number"
                                                 value={baselineValue}
                                                 onChange={(e) =>

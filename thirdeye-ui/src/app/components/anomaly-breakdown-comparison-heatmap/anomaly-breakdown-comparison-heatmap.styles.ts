@@ -30,5 +30,10 @@ export const useAnomalyBreakdownComparisonHeatmapStyles = makeStyles(
                 marginRight: theme.spacing(1),
             },
         },
+        input: {
+            "& .MuiInputBase-input": {
+                height: "1.5em",
+            },
+        },
     })
 );

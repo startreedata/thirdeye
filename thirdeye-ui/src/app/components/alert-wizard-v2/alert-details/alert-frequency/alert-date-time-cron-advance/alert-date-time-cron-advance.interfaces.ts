@@ -11,13 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { CreateAlertConfigurationSection } from "../../../../../pages/alerts-create-page/alerts-create-page.interfaces";
 
 export interface AlertDateTimeCronAdvanceProps {
     cron: string;
     onCronChange: (newCron: string) => void;
-    onValidationChange: (
-        key: CreateAlertConfigurationSection,
-        isValid: boolean
-    ) => void;
 }

@@ -15,35 +15,23 @@ import { FormHelperText, Grid, InputLabel, TextField } from "@material-ui/core";
 import CronValidator from "cron-expression-validator";
 import cronstrue from "cronstrue";
 import { uniq } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CreateAlertConfigurationSection } from "../../../../../pages/alerts-create-page/alerts-create-page.interfaces";
 import { ensureArrayOfStrings } from "../../../alert-template/alert-template.utils";
 import { useAlertWizardV2Styles } from "../../../alert-wizard-v2.styles";
 import { AlertDateTimeCronAdvanceProps } from "./alert-date-time-cron-advance.interfaces";
 
 export const AlertDateTimeCronAdvance: FunctionComponent<
     AlertDateTimeCronAdvanceProps
-> = ({ cron, onCronChange, onValidationChange }): JSX.Element => {
+> = ({ cron, onCronChange }): JSX.Element => {
     const [currentCron, setCurrentCron] = useState<string>(cron);
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
     const isCronValid = CronValidator.isValidCronExpression(currentCron);
 
-    // Ensure the parent always has an entry for cron
-    useEffect(() => {
-        onValidationChange(CreateAlertConfigurationSection.CRON, isCronValid);
-    }, [currentCron]);
-
     const handleCronInputChange = (newCron: string): void => {
         setCurrentCron(newCron);
-
-        // no guarantee the new cron has been put in state
-        const isNewCronValid = CronValidator.isValidCronExpression(newCron);
-
-        if (isNewCronValid) {
-            onCronChange(newCron);
-        }
+        onCronChange(newCron);
     };
 
     return (

@@ -19,9 +19,8 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CreateAlertConfigurationSection } from "../../../pages/alerts-create-page/alerts-create-page.interfaces";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertDetailsProps } from "./alert-details.interfaces";
@@ -30,21 +29,12 @@ import { AlertFrequency } from "./alert-frequency/alert-frequency.component";
 function AlertDetails({
     alert,
     onAlertPropertyChange,
-    onValidationChange,
 }: AlertDetailsProps): JSX.Element {
     const [name, setName] = useState(alert.name);
     const [description, setDescription] = useState(alert.description);
     const [nameHasError, setNameHasError] = useState(false);
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
-
-    // Ensure the parent always has an entry for name
-    useEffect(() => {
-        onValidationChange(
-            CreateAlertConfigurationSection.NAME,
-            name.length > 0
-        );
-    }, [name]);
 
     const handleNameChange = (
         e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
@@ -136,7 +126,6 @@ function AlertDetails({
                 <AlertFrequency
                     alert={alert}
                     onAlertPropertyChange={onAlertPropertyChange}
-                    onValidationChange={onValidationChange}
                 />
             </Grid>
         </PageContentsCardV1>

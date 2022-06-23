@@ -21,7 +21,6 @@ import { AlertFrequencyProps } from "./alert-frequency.interfaces";
 function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
     alert,
     onAlertPropertyChange,
-    onValidationChange,
 }: AlertFrequencyProps<NewOrExistingAlert>): JSX.Element {
     const [currentCron, setCurrentCron] = useState<string>(alert.cron);
 
@@ -50,7 +49,6 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
             <AlertDateTimeCronAdvance
                 cron={currentCron}
                 onCronChange={handleCronChange}
-                onValidationChange={onValidationChange}
             />
         </>
     );

@@ -13,7 +13,6 @@
  */
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { CreateAlertConfigurationSection } from "../../../../../pages/alerts-create-page/alerts-create-page.interfaces";
 import { AlertDateTimeCronAdvance } from "./alert-date-time-cron-advance.component";
 
 jest.mock("react-i18next", () => ({
@@ -24,15 +23,12 @@ jest.mock("react-i18next", () => ({
 
 describe("AlertDateTimeCronAdvance", () => {
     it("should render error message if given invalid cron and colored error", async () => {
-        const mockValidationCallback = jest.fn();
-
         render(
             <AlertDateTimeCronAdvance
                 cron={INVALID_CRON}
                 onCronChange={() => {
                     return;
                 }}
-                onValidationChange={mockValidationCallback}
             />
         );
 
@@ -41,20 +37,14 @@ describe("AlertDateTimeCronAdvance", () => {
         ).toBeInTheDocument();
 
         expect(screen.getByTestId("cron-input-label")).toHaveClass("Mui-error");
-        expect(mockValidationCallback).toHaveBeenCalledWith(
-            CreateAlertConfigurationSection.CRON,
-            false
-        );
     });
 
     it("should remove error message if input valid cron and callback function called", async () => {
         const mockCallback = jest.fn();
-        const mockValidationCallback = jest.fn();
         render(
             <AlertDateTimeCronAdvance
                 cron={INVALID_CRON}
                 onCronChange={mockCallback}
-                onValidationChange={mockValidationCallback}
             />
         );
 
@@ -79,20 +69,14 @@ describe("AlertDateTimeCronAdvance", () => {
             )
         ).toBeInTheDocument();
         expect(mockCallback).toHaveBeenCalledWith(VALID_CRON);
-        expect(mockValidationCallback).toHaveBeenCalledWith(
-            CreateAlertConfigurationSection.CRON,
-            true
-        );
     });
 
-    it("should render error message if input invalid cron and callback function is not called", async () => {
+    it("should render error message if input invalid cron and callback function is called", async () => {
         const mockCallback = jest.fn();
-        const mockValidationCallback = jest.fn();
         render(
             <AlertDateTimeCronAdvance
                 cron={VALID_CRON}
                 onCronChange={mockCallback}
-                onValidationChange={mockValidationCallback}
             />
         );
 
@@ -116,11 +100,7 @@ describe("AlertDateTimeCronAdvance", () => {
         expect(
             screen.getByText("Unexpected end of expression")
         ).toBeInTheDocument();
-        expect(mockCallback).toHaveBeenCalledTimes(0);
-        expect(mockValidationCallback).toHaveBeenCalledWith(
-            CreateAlertConfigurationSection.CRON,
-            false
-        );
+        expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 });
 

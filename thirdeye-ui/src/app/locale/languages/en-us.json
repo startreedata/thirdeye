@@ -209,7 +209,8 @@
         "fields-with-default-values": "Fields with Default Values",
         "reload-preview": "Reload preview",
         "create-new-template": "Create new template",
-        "create-notifications": "Create notifications"
+        "create-notifications": "Create notifications",
+        "advanced-template-configuration-json-editor": "Advanced template configuration (Json editor)"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -270,6 +271,7 @@
         "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
         "select-template-to-preview-alert": "Select a template to preview the alert",
         "enter-value-to-override-defaults": "Enter a value to override the defaults",
-        "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups"
+        "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
+        "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view "
     }
 }

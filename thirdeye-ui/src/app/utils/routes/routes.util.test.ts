@@ -16,7 +16,9 @@ import {
     createPathWithRecognizedQueryString,
     generateDateRangeMonthsFromNow,
     getAlertsAllPath,
+    getAlertsCreateAdvancedPath,
     getAlertsCreatePath,
+    getAlertsCreateSimplePath,
     getAlertsPath,
     getAlertsUpdatePath,
     getAlertsViewPath,
@@ -76,6 +78,18 @@ describe("Routes Util", () => {
 
     it("getAlertsCreatePath should return appropriate path with appropriate query string", () => {
         expect(getAlertsCreatePath()).toEqual("/alerts/create?testQueryString");
+    });
+
+    it("getAlertsCreateSimplePath should return appropriate path with appropriate query string", () => {
+        expect(getAlertsCreateSimplePath()).toEqual(
+            "/alerts/create/simple?testQueryString"
+        );
+    });
+
+    it("getAlertsCreateAdvancedPath should return appropriate path with appropriate query string", () => {
+        expect(getAlertsCreateAdvancedPath()).toEqual(
+            "/alerts/create/advanced?testQueryString"
+        );
     });
 
     it("getAlertsUpdatePath should return appropriate path with appropriate query string for id", () => {

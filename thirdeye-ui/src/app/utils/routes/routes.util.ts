@@ -28,6 +28,8 @@ export const AppRouteRelative = {
     ALERTS_ALERT: `${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_VIEW: `view`,
     ALERTS_CREATE: "create",
+    ALERTS_CREATE_SIMPLE: "simple",
+    ALERTS_CREATE_ADVANCED: "advanced",
     ALERTS_UPDATE: `update`,
     ANOMALIES: "anomalies",
     ANOMALIES_ALL: "all",
@@ -79,6 +81,8 @@ export const AppRoute = {
     ALERTS: `/${AppRouteRelative.ALERTS}`,
     ALERTS_ALL: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALL}`,
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
+    ALERTS_CREATE_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
+    ALERTS_CREATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
     ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
@@ -154,6 +158,14 @@ export const getAlertsViewPath = (id: number): string => {
 
 export const getAlertsCreatePath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE);
+};
+
+export const getAlertsCreateSimplePath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE_SIMPLE);
+};
+
+export const getAlertsCreateAdvancedPath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE_ADVANCED);
 };
 
 export const getAlertsUpdatePath = (id: number): string => {

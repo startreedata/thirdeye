@@ -45,12 +45,12 @@ public class HeartbeatTest {
     when(taskManager.findByStatusOrderByCreateTime(any(TaskStatus.class), anyInt(), anyBoolean())).thenReturn(List.of(taskDTO));
     doNothing().when(taskManager).updateStatusAndTaskEndTime(anyLong(), any(), any(), anyLong(), any());
     doAnswer(invocation -> {
-      taskDTO.setLastModified(new Timestamp(System.currentTimeMillis()));
+      taskDTO.setLastActive(new Timestamp(System.currentTimeMillis()));
       pulseCount.getAndIncrement();
       // to ensure the worker stops after executing one task
       shutdown.set(true);
       return null;
-    }).when(taskManager).updateLastModified(anyLong());
+    }).when(taskManager).updateLastActive(anyLong());
 
     TaskDriverConfiguration config = new TaskDriverConfiguration()
         .setRandomWorkerIdEnabled(true)
@@ -59,7 +59,7 @@ public class HeartbeatTest {
     TaskDriverRunnable taskDriverRunnable = getTaskDriverRunnable(taskManager, shutdown, config);
     taskDriverRunnable.run();
 
-    assertThat(taskDTO.getLastModified()).isAfter(new Timestamp(startTime.getTime() + taskDelay));
+    assertThat(taskDTO.getLastActive()).isAfter(new Timestamp(startTime.getTime() + taskDelay));
     // heartbeat should tick for aleast 5 times as task delay is heartbeatInterval*5 (5 seconds)
     assertThat(pulseCount.get()).isGreaterThanOrEqualTo(5);
   }

@@ -8,7 +8,6 @@ package ai.startree.thirdeye.spi.datalayer.bao;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +37,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void updateTaskStartTime(Long id, Long taskStartTime);
 
-  void updateLastModified(Long id);
+  void updateLastActive(Long id);
 
   int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
 

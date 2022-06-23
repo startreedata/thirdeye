@@ -37,6 +37,7 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+#  Uncomment the below config to override the default tls secret name ({coordinator full name}-internal-tls)
 #  tlsSecretName: tls-secret-name
   strategy:
     type: RollingUpdate
@@ -57,6 +58,7 @@ scheduler:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+#  Uncomment the below config to override the default tls secret name ({scheduler full name}-internal-tls)
 #  tlsSecretName: tls-secret-name
   tls:
     enabled: false
@@ -76,6 +78,7 @@ worker:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+#  Uncomment the below config to override the default tls secret name ({worker full name}-internal-tls)
 #  tlsSecretName: tls-secret-name
   tls:
     enabled: false

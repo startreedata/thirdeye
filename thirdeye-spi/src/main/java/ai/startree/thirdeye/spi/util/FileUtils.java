@@ -11,9 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.util;
+package ai.startree.thirdeye.spi.util;
 
-import static com.google.api.client.util.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,13 +25,13 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FileUtils {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  @NotNull
+  @NonNull
   public static <T> T readJsonObject(File file, Class<T> clazz) {
     try {
       return OBJECT_MAPPER.readValue(file, clazz);
@@ -43,7 +42,7 @@ public class FileUtils {
     }
   }
 
-  @NotNull
+  @NonNull
   public static <T> T readJsonObject(InputStream file, Class<T> clazz) {
     try {
       return OBJECT_MAPPER.readValue(file, clazz);
@@ -97,7 +96,9 @@ public class FileUtils {
   public static <T> List<T> readJsonObjectsFromResourcesFolderInIDE(String folder,
       Class<?> loaderClazz, Class<T> targetClazz) {
     URL url = loaderClazz.getClassLoader().getResource(folder);
-    checkArgument(url != null, String.format("%s folder not found in resources.", folder));
+    if (url == null) {
+      throw new IllegalArgumentException(String.format("%s folder not found in resources.", folder));
+    }
     final String folderPath = url.getPath();
 
     return readJsonObjectsFromFolder(folderPath, targetClazz);

@@ -266,9 +266,8 @@
         "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
         "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system",
         "please-enter-valid-name": "Please enter valid name",
-        "select-a-template-to-preview-alert": "Select a template to detect anomalies",
         "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
-        "select-template-to-preview-alert": "Select a template to preview the alert",
+        "select-template-to-preview-alert": "Please select a template to preview the alert",
         "enter-value-to-override-defaults": "Enter a value to override the defaults",
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups"
     }

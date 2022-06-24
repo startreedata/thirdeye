@@ -50,7 +50,7 @@ jest.mock("../../pages/alerts-view-page/alerts-view-page.component", () => ({
 }));
 
 jest.mock(
-    "../../pages/alerts-create-page/alerts-create-page.component",
+    "../../pages/alerts-legacy-create-page/alerts-legacy-create-page.component",
     () => ({
         AlertsCreatePage: jest.fn().mockReturnValue("testAlertsCreatePage"),
     })

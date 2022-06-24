@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import {
     AnomalyDimensionAnalysisData,
@@ -20,7 +19,7 @@ import {
 
 export interface AnomalyDimensionAnalysisProps {
     anomalyId: number;
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
     anomaly: Anomaly;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
     onCheckClick: (filters: AnomalyFilterOption[]) => void;

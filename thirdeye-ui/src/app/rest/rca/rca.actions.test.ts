@@ -13,7 +13,6 @@
  */
 import { act, renderHook } from "@testing-library/react-hooks";
 import axios from "axios";
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { ActionStatus } from "../actions.interfaces";
 import {
     useGetAnomalyDimensionAnalysis,
@@ -44,8 +43,7 @@ describe("RCA Actions", () => {
 
             await act(async () => {
                 const promise = result.current.getMetricBreakdown(123, {
-                    baselineOffset:
-                        AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
+                    baselineOffset: mockBaselineOffset,
                 });
 
                 // Wait for state update
@@ -94,8 +92,7 @@ describe("RCA Actions", () => {
 
             await act(async () => {
                 const promise = result.current.getDimensionAnalysisData(123, {
-                    baselineOffset:
-                        AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO,
+                    baselineOffset: mockBaselineOffset,
                 });
 
                 // Wait for state update
@@ -288,3 +285,5 @@ const mockInvestigation = {
         principal: "no-auth-user",
     },
 };
+
+const mockBaselineOffset = "P1W";

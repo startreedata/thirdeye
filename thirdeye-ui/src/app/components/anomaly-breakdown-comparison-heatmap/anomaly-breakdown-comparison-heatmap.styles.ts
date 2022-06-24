@@ -30,5 +30,8 @@ export const useAnomalyBreakdownComparisonHeatmapStyles = makeStyles(
                 marginRight: theme.spacing(1),
             },
         },
+        input: {
+            minHeight: "auto",
+        },
     })
 );

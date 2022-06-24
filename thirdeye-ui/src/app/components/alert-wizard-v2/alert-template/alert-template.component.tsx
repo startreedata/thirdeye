@@ -158,7 +158,6 @@ function AlertTemplate({
                         </Grid>
                         <Grid item lg={3} md={5} sm={12} xs={12}>
                             <Autocomplete<AlertTemplateType>
-                                disableClearable
                                 fullWidth
                                 getOptionLabel={(option) =>
                                     option.name as string

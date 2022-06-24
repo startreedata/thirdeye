@@ -241,7 +241,6 @@ export const AlertsCreatePage: FunctionComponent = () => {
                     <Box padding={1}>View:</Box>
                     <ButtonGroup color="primary" variant="outlined">
                         <Button
-                            className={classes.btnActive}
                             component={NavLink}
                             to={{
                                 pathname: AppRoute.ALERTS_CREATE_SIMPLE,
@@ -251,7 +250,6 @@ export const AlertsCreatePage: FunctionComponent = () => {
                             Simple
                         </Button>
                         <Button
-                            className={classes.btnActive}
                             component={NavLink}
                             to={{
                                 pathname: AppRoute.ALERTS_CREATE_ADVANCED,

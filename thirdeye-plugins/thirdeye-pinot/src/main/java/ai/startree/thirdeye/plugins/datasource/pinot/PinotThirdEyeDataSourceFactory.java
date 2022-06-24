@@ -26,10 +26,11 @@ public class PinotThirdEyeDataSourceFactory implements ThirdEyeDataSourceFactory
 
   @Override
   public ThirdEyeDataSource build(final ThirdEyeDataSourceContext context) {
-    final ThirdEyeDataSource ds = new PinotThirdEyeDataSource(new PinotSqlExpressionBuilder(),
+    final ThirdEyeDataSource dataSource = new PinotThirdEyeDataSource(
+        new PinotSqlExpressionBuilder(),
         new PinotSqlLanguage());
-    ds.init(context);
+    dataSource.init(context);
 
-    return ds;
+    return dataSource;
   }
 }

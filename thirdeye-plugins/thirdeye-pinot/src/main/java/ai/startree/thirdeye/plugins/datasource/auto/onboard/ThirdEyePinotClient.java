@@ -13,8 +13,10 @@
  */
 package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
+
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
-import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfigFactory;
 import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlDataSourceConfigFactory;
 import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlThirdEyeDataSourceConfig;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
@@ -79,7 +81,8 @@ public class ThirdEyePinotClient {
       controllerHost = config.getControllerHost();
       controllerPort = config.getControllerPort();
     } else {
-      final PinotThirdEyeDataSourceConfig config = PinotThirdEyeDataSourceConfigFactory.createFromProperties(dataSourceMeta.getProperties());
+      final PinotThirdEyeDataSourceConfig config = buildConfig(dataSourceMeta.getProperties());
+
       controllerConnectionScheme = config.getControllerConnectionScheme();
       controllerHost = config.getControllerHost();
       controllerPort = config.getControllerPort();
@@ -100,7 +103,7 @@ public class ThirdEyePinotClient {
       );
       customClient.setDefaultHeaders(headers);
     }
-    if (PinotThirdEyeDataSourceConfigFactory.HTTPS_SCHEME.equals(controllerConnectionScheme)) {
+    if (HTTPS_SCHEME.equals(controllerConnectionScheme)) {
       try {
         // Accept all SSL certificate because we assume that the Pinot broker are setup in the
         // same internal network

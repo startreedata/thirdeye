@@ -31,6 +31,9 @@ public class PinotThirdEyeDataSourceConfig {
   private String tag;
   private String name;
   private Map<String, String> headers;
+  private Integer readTimeoutMs;
+  private Integer connectTimeoutMs;
+  private Integer brokerResponseTimeoutMs;
 
   public String getZookeeperUrl() {
     return zookeeperUrl;
@@ -111,6 +114,34 @@ public class PinotThirdEyeDataSourceConfig {
 
   public PinotThirdEyeDataSourceConfig setHeaders(final Map<String, String> headers) {
     this.headers = headers;
+    return this;
+  }
+
+  public Integer getReadTimeoutMs() {
+    return readTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setReadTimeoutMs(final Integer readTimeoutMs) {
+    this.readTimeoutMs = readTimeoutMs;
+    return this;
+  }
+
+  public Integer getConnectTimeoutMs() {
+    return connectTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setConnectTimeoutMs(final Integer connectTimeoutMs) {
+    this.connectTimeoutMs = connectTimeoutMs;
+    return this;
+  }
+
+  public Integer getBrokerResponseTimeoutMs() {
+    return brokerResponseTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setBrokerResponseTimeoutMs(
+      final Integer brokerResponseTimeoutMs) {
+    this.brokerResponseTimeoutMs = brokerResponseTimeoutMs;
     return this;
   }
 

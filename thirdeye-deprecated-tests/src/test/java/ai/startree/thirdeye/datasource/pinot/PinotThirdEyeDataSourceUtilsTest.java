@@ -13,7 +13,8 @@
  */
 package ai.startree.thirdeye.datasource.pinot;
 
-import ai.startree.thirdeye.plugins.datasource.pinot.ResultSetUtils;
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.fromPinotResultSet;
+
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.ObjectSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
@@ -31,7 +32,7 @@ import org.apache.pinot.client.ResultSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class ResultSetUtilsTest {
+public class PinotThirdEyeDataSourceUtilsTest {
   @Test
   public void testFromPinotSelectResultSet() {
     List<String> columnArray = new ArrayList<>();
@@ -60,7 +61,7 @@ public class ResultSetUtilsTest {
         resultArray);
 
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ResultSetUtils.fromPinotResultSet(selectResultSet);
+        fromPinotResultSet(selectResultSet);
 
     DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries("col1", 0, 10, 20);
@@ -82,7 +83,7 @@ public class ResultSetUtilsTest {
     ResultSet singleAggregationResultSet = new MockedSingleAggregationResultSet(functionName,
         new ColumnType(ColumnDataType.DOUBLE), "150.33576");
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ResultSetUtils.fromPinotResultSet(singleAggregationResultSet);
+        fromPinotResultSet(singleAggregationResultSet);
 
     ThirdEyeResultSetMetaData metaData =
         new ThirdEyeResultSetMetaData(Collections.emptyList(),
@@ -124,7 +125,7 @@ public class ResultSetUtilsTest {
     ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
         functionName, columnTypes, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ResultSetUtils.fromPinotResultSet(singleGroupByResultSet);
+        fromPinotResultSet(singleGroupByResultSet);
 
     ThirdEyeResultSetMetaData metaData =
         new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName),
@@ -158,7 +159,7 @@ public class ResultSetUtilsTest {
     ResultSet singleGroupByResultSet = new MockedSingleGroupByResultSet(groupByColumnNames,
         functionName, columnTypes, resultArray);
     ThirdEyeDataFrameResultSet actualDataFrameResultSet =
-        ResultSetUtils.fromPinotResultSet(singleGroupByResultSet);
+        fromPinotResultSet(singleGroupByResultSet);
 
     ThirdEyeResultSetMetaData metaData =
         new ThirdEyeResultSetMetaData(groupByColumnNames, Collections.singletonList(functionName),

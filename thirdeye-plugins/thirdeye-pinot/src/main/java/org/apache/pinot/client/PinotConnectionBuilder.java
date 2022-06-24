@@ -40,7 +40,7 @@ public class PinotConnectionBuilder {
       final PinotClientTransport transport) {
     final Connection[] connections = new Connection[MAX_CONNECTIONS];
     for (int i = 0; i < MAX_CONNECTIONS; ++i) {
-      connections[i++] = ConnectionFactory.fromHostList(thirdeyeBrokers, transport);
+      connections[i] = ConnectionFactory.fromHostList(thirdeyeBrokers, transport);
     }
     return connections;
   }

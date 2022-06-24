@@ -73,11 +73,15 @@
       "where": "${queryFilters}"
     },
     "timezone": "${timezone}",
+    "mergeMaxGap": "${mergeMaxGap}",
+    "mergeMaxDuration": "${mergeMaxDuration}",
     "granularity": "${monitoringGranularity}"
   },
   "defaultProperties": {
     "timezone": "UTC",
     "completenessDelay": "P0D",
+    "mergeMaxGap": "",
+    "mergeMaxDuration": "",
     "rcaAggregationFunction": "",
     "queryFilters": "",
     "queryLimit": "100000000"

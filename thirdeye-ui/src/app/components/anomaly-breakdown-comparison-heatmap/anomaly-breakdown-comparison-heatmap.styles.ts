@@ -31,9 +31,7 @@ export const useAnomalyBreakdownComparisonHeatmapStyles = makeStyles(
             },
         },
         input: {
-            "& .MuiInputBase-input": {
-                height: "1.5em",
-            },
+            minHeight: "auto",
         },
     })
 );

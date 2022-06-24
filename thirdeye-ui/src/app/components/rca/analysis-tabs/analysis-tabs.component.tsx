@@ -17,18 +17,18 @@ import {
     CardContent,
     Divider,
     Grid,
-    MenuItem,
     Tab,
     Tabs,
     TextField,
     Typography,
 } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
-    BaselineOffsetUnitsKey,
+    BaselineOptionsType,
     BASELINE_OPTIONS,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import {
@@ -72,13 +72,17 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         searchParams.get(ANALYSIS_TAB_OFFSET) ?? ""
     );
     const [baselineOffsetUnit, setBaselineOffsetUnit] =
-        useState<BaselineOffsetUnitsKey>(unit);
+        useState<BaselineOptionsType>(
+            BASELINE_OPTIONS.find((baseline) => baseline.key === unit) ||
+                BASELINE_OPTIONS[0]
+        );
     const [baselineValue, setBaselineValue] = useState(value);
 
     const handleBaselineOffsetUnitChange = (
-        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+        _event: React.ChangeEvent<Record<string, unknown>> | null,
+        value: BaselineOptionsType | null
     ): void => {
-        setBaselineOffsetUnit(event.target.value as BaselineOffsetUnitsKey);
+        value && setBaselineOffsetUnit(value);
     };
 
     const handleTabIndexChange = (_event: unknown, newValue: number): void => {
@@ -89,7 +93,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
 
     const comparisonOffset = useMemo(() => {
         if (baselineValue && baselineOffsetUnit) {
-            return `P${baselineValue}${baselineOffsetUnit}`;
+            return `P${baselineValue}${baselineOffsetUnit.key}`;
         }
 
         return "P1W";
@@ -131,9 +135,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             <Grid
                                 container
                                 justifyContent="flex-end"
-                                spacing={1}
+                                spacing={2}
                             >
-                                <Grid item>
+                                <Grid item xs={6}>
                                     <Box
                                         className={
                                             classes.baselineWeekOffsetLabelContainer
@@ -150,18 +154,17 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                         </label>
                                     </Box>
                                 </Grid>
-                                <Grid item>
+                                <Grid item xs={6}>
                                     <Grid
                                         container
                                         direction="row"
                                         justifyContent="flex-end"
                                         spacing={2}
                                     >
-                                        <Grid item xs={4}>
+                                        <Grid item xs={6}>
                                             <TextField
-                                                fullWidth
                                                 required
-                                                className={classes.input}
+                                                size="small"
                                                 type="number"
                                                 value={baselineValue}
                                                 onChange={(e) =>
@@ -171,27 +174,30 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                                 }
                                             />
                                         </Grid>
-                                        <Grid item xs={8}>
-                                            <TextField
-                                                fullWidth
-                                                select
-                                                size="small"
+                                        <Grid item xs={6}>
+                                            <Autocomplete<BaselineOptionsType>
+                                                autoSelect
+                                                classes={{
+                                                    inputRoot: classes.input,
+                                                }}
+                                                getOptionLabel={(option) =>
+                                                    option.description
+                                                }
+                                                options={BASELINE_OPTIONS}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        InputProps={{
+                                                            ...params.InputProps,
+                                                        }}
+                                                        variant="outlined"
+                                                    />
+                                                )}
                                                 value={baselineOffsetUnit}
                                                 onChange={
                                                     handleBaselineOffsetUnitChange
                                                 }
-                                            >
-                                                {BASELINE_OPTIONS.map(
-                                                    (option) => (
-                                                        <MenuItem
-                                                            key={option.key}
-                                                            value={option.key}
-                                                        >
-                                                            {option.description}
-                                                        </MenuItem>
-                                                    )
-                                                )}
-                                            </TextField>
+                                            />
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -240,7 +246,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                     Data Date Range (
                                     {baselineComparisonOffsetToHumanReadable(
                                         baselineValue,
-                                        baselineOffsetUnit
+                                        baselineOffsetUnit.key
                                     )}
                                     )
                                 </span>
@@ -250,7 +256,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                     anomaly.startTime -
                                         baselineValue *
                                             OFFSET_TO_MILLISECONDS[
-                                                baselineOffsetUnit
+                                                baselineOffsetUnit.key
                                             ]
                                 )}
                                 <strong> to </strong>
@@ -258,7 +264,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                     anomaly.endTime -
                                         baselineValue *
                                             OFFSET_TO_MILLISECONDS[
-                                                baselineOffsetUnit
+                                                baselineOffsetUnit.key
                                             ]
                                 )}
                             </div>

@@ -34,10 +34,7 @@ export const OFFSET_TO_HUMAN_READABLE: Record<
     [BaselineOffsetUnitsKey.YEAR]: "Year",
 };
 
-export const BASELINE_OPTIONS: {
-    key: BaselineOffsetUnitsKey;
-    description: BaselineOffsetUnitsValues;
-}[] = [];
+export const BASELINE_OPTIONS: BaselineOptionsType[] = [];
 
 Object.values(BaselineOffsetUnitsKey).forEach(
     (offsetKey: BaselineOffsetUnitsKey) => {
@@ -47,3 +44,8 @@ Object.values(BaselineOffsetUnitsKey).forEach(
         });
     }
 );
+
+export interface BaselineOptionsType {
+    key: BaselineOffsetUnitsKey;
+    description: BaselineOffsetUnitsValues;
+}

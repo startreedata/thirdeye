@@ -16,7 +16,7 @@ import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 export const useAlertCreatePageStyles = makeStyles((theme) => ({
     btnActive: {
-        "&.MuiButton-outlinedPrimary.active": {
+        "&.active": {
             background: lighten(theme.palette.primary.light, 0.8),
         },
     },

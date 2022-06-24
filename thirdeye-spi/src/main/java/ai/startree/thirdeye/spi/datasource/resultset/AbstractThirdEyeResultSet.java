@@ -15,18 +15,20 @@ package ai.startree.thirdeye.spi.datasource.resultset;
 
 public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
 
+  private static final String NULL_STRING = "null";
+
   @Override
-  public boolean getBoolean(final int rowIndex) {
+  public Boolean getBoolean(final int rowIndex) {
     return getBoolean(rowIndex, 0);
   }
 
   @Override
-  public long getLong(final int rowIndex) {
+  public Long getLong(final int rowIndex) {
     return getLong(rowIndex, 0);
   }
 
   @Override
-  public double getDouble(final int rowIndex) {
+  public Double getDouble(final int rowIndex) {
     return getDouble(rowIndex, 0);
   }
 
@@ -36,22 +38,26 @@ public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
   }
 
   @Override
-  public int getInteger(final int rowIndex, final int columnIndex) {
-    return Integer.parseInt(getString(rowIndex, columnIndex));
+  public Integer getInteger(final int rowIndex, final int columnIndex) {
+    final String stringValue = getString(rowIndex, columnIndex);
+    return NULL_STRING.equals(stringValue) ? null : Integer.parseInt(stringValue);
   }
 
   @Override
-  public boolean getBoolean(final int rowIndex, final int columnIndex) {
-    return Boolean.parseBoolean(getString(rowIndex, columnIndex));
+  public Boolean getBoolean(final int rowIndex, final int columnIndex) {
+    final String stringValue = getString(rowIndex, columnIndex);
+    return NULL_STRING.equals(stringValue) ? null : Boolean.parseBoolean(stringValue);
   }
 
   @Override
-  public long getLong(final int rowIndex, final int columnIndex) {
-    return Long.parseLong(getString(rowIndex, columnIndex));
+  public Long getLong(final int rowIndex, final int columnIndex) {
+    final String stringValue = getString(rowIndex, columnIndex);
+    return NULL_STRING.equals(stringValue) ? null : Long.parseLong(stringValue);
   }
 
   @Override
-  public double getDouble(final int rowIndex, final int columnIndex) {
-    return Double.parseDouble(getString(rowIndex, columnIndex));
+  public Double getDouble(final int rowIndex, final int columnIndex) {
+    final String stringValue = getString(rowIndex, columnIndex);
+    return NULL_STRING.equals(stringValue) ? null : Double.parseDouble(stringValue);
   }
 }

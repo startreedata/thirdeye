@@ -262,6 +262,28 @@ public class AnomalyMergerTest {
   }
 
   @Test
+  public void testMergeNoMergeWithZeroMergeGapPeriod() {
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H);
+
+    final long expectedId = existing1.getId();
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime);
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
+        List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        // zero period here
+        Period.ZERO, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(2);
+  }
+
+  @Test
   public void testMergeExistingInNew() {
     final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);

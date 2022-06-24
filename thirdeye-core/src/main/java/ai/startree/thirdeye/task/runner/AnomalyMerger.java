@@ -258,6 +258,8 @@ public class AnomalyMerger {
   protected Period getMaxGap(final AlertTemplateDTO templateWithProperties) {
     return Optional.ofNullable(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getMergeMaxGap)
+        // templates can have an empty string as default property
+        .filter(StringUtils::isNotEmpty)
         .map(TimeUtils::isoPeriod)
         .orElse(DEFAULT_MERGE_MAX_GAP);
   }
@@ -265,6 +267,8 @@ public class AnomalyMerger {
   private Period getMaxDuration(final AlertTemplateDTO templateWithProperties) {
     return Optional.ofNullable(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getMergeMaxDuration)
+        // templates can have an empty string as default property
+        .filter(StringUtils::isNotEmpty)
         .map(TimeUtils::isoPeriod)
         .orElse(DEFAULT_ANOMALY_MAX_DURATION);
   }

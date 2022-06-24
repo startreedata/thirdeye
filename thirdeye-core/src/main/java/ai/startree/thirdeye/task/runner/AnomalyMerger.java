@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
@@ -99,8 +100,15 @@ public class AnomalyMerger {
     if (anomalies.isEmpty()) {
       return;
     }
-    final DateTimeZone dateTimeZone = getDateTimezone(alert);
-    final Period maxGap = getMaxGap(alert);
+    final AlertTemplateDTO templateWithProperties;
+    try {
+      templateWithProperties = alertTemplateRenderer.renderAlert(alert, DUMMY_INTERVAL);
+    } catch (ClassNotFoundException | IOException e) {
+      throw new ThirdEyeException(ERR_ALERT_PIPELINE_EXECUTION, e.getCause());
+    }
+
+    final DateTimeZone dateTimeZone = getDateTimezone(templateWithProperties);
+    final Period maxGap = getMaxGap(templateWithProperties);
     final long alertId = Objects.requireNonNull(alert.getId(),
         "Alert must be an existing alert for merging.");
 
@@ -113,7 +121,7 @@ public class AnomalyMerger {
     final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = combineAndSort(anomalies,
         existingAnomalies);
 
-    final Period maxDurationMillis = getMaxDuration(alert);
+    final Period maxDurationMillis = getMaxDuration(templateWithProperties);
     final List<MergedAnomalyResultDTO> mergedAnomalies = merge(sortedRelevantAnomalies,
         maxGap,
         maxDurationMillis,
@@ -247,33 +255,27 @@ public class AnomalyMerger {
     return patternKey;
   }
 
-  @VisibleForTesting
-  protected Period getMaxGap(final AlertDTO alert) {
-    return Optional.ofNullable(alert.getProperties())
-        // todo cyril move this to metadata
-        .map(m -> (String) m.get("maxGap"))
+  protected Period getMaxGap(final AlertTemplateDTO templateWithProperties) {
+    return Optional.ofNullable(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getMergeMaxGap)
+        // templates can have an empty string as default property
+        .filter(StringUtils::isNotEmpty)
         .map(TimeUtils::isoPeriod)
         .orElse(DEFAULT_MERGE_MAX_GAP);
   }
 
-  private Period getMaxDuration(final AlertDTO alert) {
-    return Optional.ofNullable(alert.getProperties())
-        // todo cyril move this to field metadata
-        .map(m -> (String) m.get("maxDuration"))
+  private Period getMaxDuration(final AlertTemplateDTO templateWithProperties) {
+    return Optional.ofNullable(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getMergeMaxDuration)
+        // templates can have an empty string as default property
+        .filter(StringUtils::isNotEmpty)
         .map(TimeUtils::isoPeriod)
         .orElse(DEFAULT_ANOMALY_MAX_DURATION);
   }
 
-  private DateTimeZone getDateTimezone(final AlertDTO alertDTO) {
-    try {
-      // todo cyril move rendering to upper level once above methods are using template metadata
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-          DUMMY_INTERVAL);
-      return Optional.ofNullable(getDateTimeZone(templateWithProperties))
-          .orElse(Constants.DEFAULT_TIMEZONE);
-    } catch (ClassNotFoundException | IOException e) {
-      throw new ThirdEyeException(ERR_ALERT_PIPELINE_EXECUTION, e.getCause());
-    }
+  private DateTimeZone getDateTimezone(final AlertTemplateDTO templateWithProperties) {
+    return Optional.ofNullable(getDateTimeZone(templateWithProperties))
+        .orElse(Constants.DEFAULT_TIMEZONE);
   }
 
   private List<MergedAnomalyResultDTO> retrieveRelevantAnomaliesFromDatabase(final long alertId,

@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
@@ -152,6 +153,8 @@ public class AlertDetectionIntervalCalculator {
   public static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
     return Optional.ofNullable(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getTimezone)
+        // templates can have an empty string as default property
+        .filter(StringUtils::isNotEmpty)
         .map(DateTimeZone::forID)
         .orElse(null);
   }

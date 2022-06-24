@@ -28,8 +28,8 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { AppRoute, getAlertsViewPath } from "../../utils/routes/routes.util";
-import { useAlertCreatePageStyles } from "./alert-create-page-component.styles";
 import { validateConfiguration } from "./alerts-create-advance-page/alerts-create-advance-page.util";
+import { useAlertCreatePageStyles } from "./alerts-create-page-component.styles";
 import { CreateAlertConfigurationSection } from "./alerts-create-page.interfaces";
 
 // 6AM Everyday

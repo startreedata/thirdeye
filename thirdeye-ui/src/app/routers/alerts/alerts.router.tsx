@@ -35,10 +35,22 @@ const AlertsViewPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsViewPage }))
 );
 
+const AlertsCreateAdvancePage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.component"
+    ).then((module) => ({ default: module.AlertsCreateAdvancePage }))
+);
+
 const AlertsCreatePage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-page.component"
     ).then((module) => ({ default: module.AlertsCreatePage }))
+);
+
+const AlertsCreateSimplePage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component"
+    ).then((module) => ({ default: module.AlertsCreateSimplePage }))
 );
 
 const AlertsUpdatePage = lazy(() =>
@@ -75,8 +87,29 @@ export const AlertsRouter: FunctionComponent = () => {
                 {/* Alerts create path */}
                 <Route
                     element={<AlertsCreatePage />}
-                    path={AppRouteRelative.ALERTS_CREATE}
-                />
+                    path={`${AppRouteRelative.ALERTS_CREATE}/*`}
+                >
+                    <Route
+                        index
+                        element={
+                            <RedirectWithDefaultParams
+                                customDurationGenerator={() => {
+                                    return generateDateRangeMonthsFromNow(1);
+                                }}
+                                to={AppRouteRelative.ALERTS_CREATE_SIMPLE}
+                            />
+                        }
+                    />
+
+                    <Route
+                        element={<AlertsCreateSimplePage />}
+                        path={AppRouteRelative.ALERTS_CREATE_SIMPLE}
+                    />
+                    <Route
+                        element={<AlertsCreateAdvancePage />}
+                        path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                    />
+                </Route>
 
                 {/* Alert paths */}
                 <Route

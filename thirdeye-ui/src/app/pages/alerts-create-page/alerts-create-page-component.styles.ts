@@ -12,14 +12,8 @@
  * the License.
  */
 import { makeStyles } from "@material-ui/core";
-import { lighten } from "@material-ui/core/styles/colorManipulator";
 
 export const useAlertCreatePageStyles = makeStyles((theme) => ({
-    btnActive: {
-        "&.active": {
-            background: lighten(theme.palette.primary.light, 0.8),
-        },
-    },
     footerBtn: {
         marginLeft: theme.spacing(1),
     },

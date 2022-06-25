@@ -44,18 +44,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
         name: "",
         description: "",
         cron: DEFAULT_CRON,
-        templateProperties: {
-            dataSource: "pinot",
-            dataset: "TrialTaxiData",
-            timeColumn: "trip_timestamp",
-            timeColumnFormat: "1:MILLISECONDS:EPOCH",
-            aggregationFunction: "sum",
-            aggregationColumn: "total_amount",
-            seasonalityPeriod: "P7D",
-            lookback: "P60D",
-            monitoringGranularity: "P1D",
-            sensitivity: "3",
-        },
+        templateProperties: {},
     });
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]

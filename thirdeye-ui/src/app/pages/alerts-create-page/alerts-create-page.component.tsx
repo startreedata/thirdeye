@@ -245,11 +245,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
                     <>
                         <Typography variant="body1">
                             <strong>
-                                Do you want to continue and leave this page?
+                                {t("message.do-you-want-to-leave-this-page")}
                             </strong>
                         </Typography>
                         <ul>
-                            <li>Your changes won’t be saved.</li>
+                            <li>{t("message.your-changes-wont-save")}</li>
                         </ul>
                     </>
                 ),

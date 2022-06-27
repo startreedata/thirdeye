@@ -275,6 +275,8 @@
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
         "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view ",
         "redirected-to-another-page": "You’re about to be redirected to another page.",
-        "setup-properties-based-on-your-needs": "Setup properties based on your needs"
+        "setup-properties-based-on-your-needs": "Setup properties based on your needs",
+        "do-you-want-to-leave-this-page": "Do you want to continue and leave this page?",
+        "your-changes-wont-save": "Your changes won’t be saved."
     }
 }

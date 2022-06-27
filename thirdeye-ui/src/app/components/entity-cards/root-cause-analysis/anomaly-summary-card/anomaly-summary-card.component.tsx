@@ -27,8 +27,8 @@ import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../../rest/alerts/alerts.actions";
 import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
+import { AnomalySummaryCardDetail } from "./anomaly-summary-card-deatil.component";
 import { AnomalySummaryCardProps } from "./anomaly-summary-card.interfaces";
-import { useAnomalySummaryCardStyles } from "./anomaly-summary-card.styles";
 
 export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     uiAnomaly,
@@ -36,7 +36,6 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     className,
 }) => {
     const { alert, getAlert, status, errorMessages } = useGetAlert();
-    const anomalySummaryCardStyles = useAnomalySummaryCardStyles();
     const commonClasses = useCommonStyles();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -93,85 +92,76 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
             {uiAnomaly && (
                 <Grid container spacing={4}>
                     {/* Metric */}
-                    <Grid item lg={3} sm={6} xs={12}>
-                        <div className={anomalySummaryCardStyles.valueText}>
-                            {status === ActionStatus.Working && (
-                                <span>Loading ...</span>
-                            )}
-                            {status === ActionStatus.Done && metricName}
-                        </div>
-                        <div className={anomalySummaryCardStyles.label}>
-                            {t("label.metric")}{" "}
-                            {status === ActionStatus.Done && alert && (
-                                <span>
-                                    from{" "}
-                                    <strong>
-                                        {alert.templateProperties.dataset}
-                                    </strong>
-                                </span>
-                            )}
-                        </div>
+                    <Grid item lg={2} sm={6} xs={12}>
+                        <AnomalySummaryCardDetail
+                            label={`${t("label.metric")} ${
+                                status === ActionStatus.Done &&
+                                alert &&
+                                alert.templateProperties.dataset
+                            }`}
+                            value={
+                                status === ActionStatus.Working
+                                    ? "Loading ..."
+                                    : status === ActionStatus.Done && metricName
+                                    ? metricName
+                                    : t("label.no-data-marker")
+                            }
+                        />
                     </Grid>
 
                     {/* Current and Predicted */}
-                    <Grid container item lg={4} sm={6} xs={12}>
-                        <Grid item>
-                            <div className={anomalySummaryCardStyles.valueText}>
-                                {uiAnomaly.current}
-                            </div>
-                            <div className={anomalySummaryCardStyles.label}>
-                                {t("label.current")}
-                            </div>
-                        </Grid>
-                        <Grid item>
-                            <Grid
-                                container
-                                className={
-                                    uiAnomaly.negativeDeviation
-                                        ? commonClasses.decreased
-                                        : commonClasses.increased
-                                }
-                                spacing={0}
-                            >
-                                <Grid item>{uiAnomaly.deviation}</Grid>
-                                <Grid item>
-                                    {uiAnomaly.negativeDeviation && (
-                                        <ArrowDownwardIcon fontSize="small" />
-                                    )}
-                                    {!uiAnomaly.negativeDeviation && (
-                                        <ArrowUpwardIcon fontSize="small" />
-                                    )}
+                    <Grid item lg={3} sm={6} xs={12}>
+                        <Grid container spacing={4}>
+                            <Grid item>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.current")}
+                                    value={uiAnomaly.current}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <Grid
+                                    container
+                                    className={
+                                        uiAnomaly.negativeDeviation
+                                            ? commonClasses.decreased
+                                            : commonClasses.increased
+                                    }
+                                    spacing={0}
+                                >
+                                    <Grid item>{uiAnomaly.deviation}</Grid>
+                                    <Grid item>
+                                        {uiAnomaly.negativeDeviation && (
+                                            <ArrowDownwardIcon fontSize="small" />
+                                        )}
+                                        {!uiAnomaly.negativeDeviation && (
+                                            <ArrowUpwardIcon fontSize="small" />
+                                        )}
+                                    </Grid>
                                 </Grid>
                             </Grid>
-                        </Grid>
-                        <Grid item>
-                            <div className={anomalySummaryCardStyles.valueText}>
-                                {uiAnomaly.predicted}
-                            </div>
-                            <div className={anomalySummaryCardStyles.label}>
-                                {t("label.baseline")}
-                            </div>
+                            <Grid item>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.baseline")}
+                                    value={uiAnomaly.predicted}
+                                />
+                            </Grid>
                         </Grid>
                     </Grid>
 
                     {/* Start */}
-                    <Grid item lg={4} sm={6} xs={12}>
-                        <div className={anomalySummaryCardStyles.valueText}>
-                            {uiAnomaly.startTime}
-                        </div>
-                        <div className={anomalySummaryCardStyles.label}>
-                            {t("label.start")}
-                        </div>
+                    <Grid item lg={2} sm={6} xs={12}>
+                        <AnomalySummaryCardDetail
+                            label={t("label.start")}
+                            value={uiAnomaly.startTime}
+                        />
                     </Grid>
 
                     {/* Duration */}
                     <Grid item lg sm={6} xs={12}>
-                        <div className={anomalySummaryCardStyles.valueText}>
-                            {uiAnomaly.duration}
-                        </div>
-                        <div className={anomalySummaryCardStyles.label}>
-                            {t("label.duration")}
-                        </div>
+                        <AnomalySummaryCardDetail
+                            label={t("label.duration")}
+                            value={uiAnomaly.duration}
+                        />
                     </Grid>
                 </Grid>
             )}

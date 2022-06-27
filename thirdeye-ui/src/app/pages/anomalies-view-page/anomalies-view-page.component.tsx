@@ -11,14 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Link } from "@material-ui/core";
+import { Box, Button, Grid, Link, useTheme } from "@material-ui/core";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { HistoryBackButton } from "../../components/history-back-button/history-back-button";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
@@ -87,6 +87,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const style = useAnomaliesViewPageStyles();
+    const theme = useTheme();
 
     useEffect(() => {
         anomalyId && getInvestigations(Number(anomalyId));
@@ -203,10 +204,15 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         <PageV1>
             <PageHeaderV1>
                 <Box display="inline">
-                    <HistoryBackButton
-                        buttonText="Back to anomalies"
-                        onClick={() => navigate(getAnomaliesAllPath())}
-                    />
+                    <Link
+                        className={style.linkButton}
+                        component="button"
+                        href={getAnomaliesAllPath()}
+                    >
+                        <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
+                        Back to Anomalies
+                    </Link>
+
                     <PageHeaderTextV1>
                         {anomaly && uiAnomaly && (
                             <>
@@ -286,7 +292,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                                 anomalyRequestStatus === ActionStatus.Working
                             }
                             uiAnomaly={uiAnomaly}
-                            onDelete={handleAnomalyDelete}
                         />
                     </Grid>
                 </Grid>

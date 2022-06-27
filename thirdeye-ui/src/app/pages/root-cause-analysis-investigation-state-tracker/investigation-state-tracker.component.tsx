@@ -11,18 +11,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Card, CardContent, Link, Typography } from "@material-ui/core";
+import {
+    Box,
+    Card,
+    CardContent,
+    Link,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { cloneDeep, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    Outlet,
-    useNavigate,
-    useParams,
-    useSearchParams,
-} from "react-router-dom";
+import { Outlet, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
-import { HistoryBackButton } from "../../components/history-back-button/history-back-button";
 import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
     AppLoadingIndicatorV1,
@@ -52,6 +54,7 @@ import {
     getAnomaliesAnomalyViewPath,
 } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
+import { useInvestigationStateTrackerStyles } from "./investigation-state-tracker.styles";
 
 export const InvestigationStateTracker: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -67,7 +70,8 @@ export const InvestigationStateTracker: FunctionComponent = () => {
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { anomaly, getAnomaly } = useGetAnomaly();
-    const navigate = useNavigate();
+    const theme = useTheme();
+    const classes = useInvestigationStateTrackerStyles();
 
     const {
         getInvestigation,
@@ -194,11 +198,14 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         <PageV1>
             <PageHeaderV1>
                 <Box display="inline">
-                    <HistoryBackButton
-                        preventDefault
-                        buttonText="Back to anomalies"
-                        onClick={() => navigate(getAnomaliesAllPath())}
-                    />
+                    <Link
+                        className={classes.linkButton}
+                        component="button"
+                        href={getAnomaliesAllPath()}
+                    >
+                        <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
+                        Back to Anomalies
+                    </Link>
                     <div>
                         <PageHeaderTextV1>
                             {anomaly && (

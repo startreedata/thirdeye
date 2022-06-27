@@ -14,12 +14,10 @@ export const AnomalySummaryCardDetail: FC<Props> = ({
 }: Props) => {
     return (
         <>
-            <Typography variant="subtitle1">{value}</Typography>
-            <Typography
-                className={valueClassName}
-                color="textSecondary"
-                variant="body2"
-            >
+            <Typography className={valueClassName} variant="subtitle1">
+                {value}
+            </Typography>
+            <Typography color="textSecondary" variant="body2">
                 {label}
             </Typography>
         </>

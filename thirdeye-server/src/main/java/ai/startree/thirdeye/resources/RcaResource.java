@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -28,7 +30,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -129,11 +130,11 @@ public class RcaResource {
       List<String> excludedDimensions,
       DatasetConfigDTO datasetConfigDTO) {
     if (dimensions.isEmpty()) {
-      dimensions = Optional.ofNullable(datasetConfigDTO.getDimensions()).orElse(List.of());
+      dimensions = optional(datasetConfigDTO.getDimensions()).orElse(List.of());
     }
     dimensions = cleanDimensionStrings(dimensions);
     if (excludedDimensions.isEmpty()) {
-      excludedDimensions = Optional.ofNullable(datasetConfigDTO.getRcaExcludedDimensions())
+      excludedDimensions = optional(datasetConfigDTO.getRcaExcludedDimensions())
           .orElse(List.of());
     }
     excludedDimensions = cleanDimensionStrings(excludedDimensions);

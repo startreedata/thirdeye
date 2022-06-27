@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.OBJECT;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -34,7 +35,6 @@ import ai.startree.thirdeye.util.TimeUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -84,8 +84,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     Map<String, String> properties = dataTable.getProperties();
     timeColumn = Objects.requireNonNull(spec.getTimestamp());
 
-    String granularitySpec = Optional.ofNullable(spec.getMonitoringGranularity())
-        .orElseGet(() -> Optional.ofNullable(properties.get(GRANULARITY.toString()))
+    String granularitySpec = optional(spec.getMonitoringGranularity())
+        .orElseGet(() -> optional(properties.get(GRANULARITY.toString()))
             .orElseThrow(() -> new IllegalArgumentException(
                 "monitoringGranularity is missing from spec and DataTable properties")));
     granularity = isoPeriod(granularitySpec);

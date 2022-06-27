@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.rootcause;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Grouping;
@@ -28,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -270,7 +271,7 @@ public class BaselineAggregate implements Baseline {
     Map<MetricSlice, DataFrame> filtered = this.filter(referenceSlice, data);
     Map<String, DataFrame> preparedSlices = new HashMap<>();
     for (Map.Entry<MetricSlice, DataFrame> entry : filtered.entrySet()) {
-      Optional.ofNullable(prepareSliceData(entry.getKey(), entry.getValue(), referenceSlice))
+      optional(prepareSliceData(entry.getKey(), entry.getValue(), referenceSlice))
           .ifPresent(e -> preparedSlices.put(e.getKey(), e.getValue()));
     }
 

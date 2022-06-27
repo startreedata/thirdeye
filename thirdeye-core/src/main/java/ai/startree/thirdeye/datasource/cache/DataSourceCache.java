@@ -19,6 +19,7 @@
 
 package ai.startree.thirdeye.datasource.cache;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -87,7 +88,7 @@ public class DataSourceCache {
   }
 
   public void removeDataSource(final String name) {
-    Optional.ofNullable(cache.remove(name)).ifPresent(entry -> {
+    optional(cache.remove(name)).ifPresent(entry -> {
       try {
         entry.getDataSource().close();
       } catch (Exception e) {

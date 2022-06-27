@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -32,7 +33,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.joda.time.Interval;
 
 @Singleton
@@ -124,7 +124,7 @@ public class AlertTemplateRenderer {
       final Map<String, Object> templateProperties,
       final Interval detectionInterval,
       final String alertName) throws IOException, ClassNotFoundException {
-    final Map<String, Object> properties = Optional.ofNullable(template.getDefaultProperties()).orElse(new HashMap<>());
+    final Map<String, Object> properties = optional(template.getDefaultProperties()).orElse(new HashMap<>());
     if (templateProperties != null) {
       properties.putAll(templateProperties);
     }

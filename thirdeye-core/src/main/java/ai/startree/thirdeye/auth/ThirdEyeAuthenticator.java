@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
@@ -36,7 +38,7 @@ public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrin
   public Optional<ThirdEyePrincipal> authenticate(final String authToken)
     throws AuthenticationException {
     try {
-      return Optional.ofNullable(bindingsCache.get(authToken));
+      return optional(bindingsCache.get(authToken));
     } catch (final Exception exception) {
       LOG.info("Authentication failed. ", exception);
       return Optional.empty();

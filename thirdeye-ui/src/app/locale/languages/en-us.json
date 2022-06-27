@@ -210,7 +210,8 @@
         "reload-preview": "Reload preview",
         "create-new-template": "Create new template",
         "create-notifications": "Create notifications",
-        "advanced-template-configuration-json-editor": "Advanced template configuration (Json editor)"
+        "advanced-template-configuration-json-editor": "Advanced template configuration (Json editor)",
+        "back-to-anomalies": "Back to Anomalies"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

@@ -11,7 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Link } from "@material-ui/core";
+import { Box, Button, Grid, Link, useTheme } from "@material-ui/core";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +21,6 @@ import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedb
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
@@ -28,6 +28,9 @@ import {
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
+    PageHeaderActionsV1,
+    PageHeaderTextV1,
+    PageHeaderV1,
     PageV1,
     TooltipV1,
     useDialogProviderV1,
@@ -51,6 +54,7 @@ import { isValidNumberId } from "../../utils/params/params.util";
 import {
     getAlertsViewPath,
     getAnomaliesAllPath,
+    getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
@@ -83,6 +87,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const style = useAnomaliesViewPageStyles();
+    const theme = useTheme();
 
     useEffect(() => {
         anomalyId && getInvestigations(Number(anomalyId));
@@ -153,7 +158,10 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         );
     };
 
-    const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
+    const handleAnomalyDelete = (): void => {
+        if (!uiAnomaly) {
+            return;
+        }
         showDialog({
             type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
@@ -194,33 +202,80 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader title="">
-                {anomaly && uiAnomaly && (
-                    <>
-                        <Link href={getAlertsViewPath(anomaly.alert.id)}>
-                            {anomaly.alert.name}
-                        </Link>
-                        : {uiAnomaly.name}
-                    </>
-                )}
-                <TooltipV1
-                    placement="top"
-                    title={
-                        t(
-                            "label.how-to-perform-root-cause-analysis-doc"
-                        ) as string
-                    }
-                >
-                    <span>
-                        <HelpLinkIconV1
-                            displayInline
-                            enablePadding
-                            externalLink
-                            href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
+            <PageHeaderV1>
+                <Box display="inline">
+                    <Link
+                        className={style.linkButton}
+                        component="button"
+                        href={getAnomaliesAllPath()}
+                    >
+                        <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
+                        Back to Anomalies
+                    </Link>
+
+                    <PageHeaderTextV1>
+                        {anomaly && uiAnomaly && (
+                            <>
+                                <Link
+                                    href={getAlertsViewPath(anomaly.alert.id)}
+                                >
+                                    {anomaly.alert.name}
+                                </Link>
+                                : {uiAnomaly.name}
+                            </>
+                        )}
+                        <TooltipV1
+                            placement="top"
+                            title={
+                                t(
+                                    "label.how-to-perform-root-cause-analysis-doc"
+                                ) as string
+                            }
+                        >
+                            <span>
+                                <HelpLinkIconV1
+                                    displayInline
+                                    enablePadding
+                                    externalLink
+                                    href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
+                                />
+                            </span>
+                        </TooltipV1>
+                    </PageHeaderTextV1>
+                    <div>
+                        <AnomalyFeedback
+                            anomalyFeedback={
+                                (anomaly && anomaly.feedback) || {
+                                    ...DEFAULT_FEEDBACK,
+                                }
+                            }
+                            anomalyId={Number(anomalyId)}
                         />
-                    </span>
-                </TooltipV1>
-            </PageHeader>
+                    </div>
+                </Box>
+                <PageHeaderActionsV1>
+                    <Button
+                        color="primary"
+                        component="button"
+                        href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
+                            Number(anomalyId)
+                        )}?${searchParams.toString()}`}
+                        variant="contained"
+                    >
+                        {t("label.investigate-entity", {
+                            entity: t("label.anomaly"),
+                        })}
+                    </Button>
+                    <Button
+                        component="button"
+                        variant="contained"
+                        onClick={handleAnomalyDelete}
+                    >
+                        {t("label.delete")}
+                    </Button>
+                </PageHeaderActionsV1>
+            </PageHeaderV1>
+
             <PageContentsGridV1>
                 {/* Anomaly */}
                 <Grid
@@ -230,28 +285,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     justifyContent="space-between"
                     xs={12}
                 >
-                    <Grid item lg={9} md={8} sm={12} xs={12}>
+                    <Grid item xs={12}>
                         <AnomalyCard
                             className={style.fullHeight}
                             isLoading={
                                 anomalyRequestStatus === ActionStatus.Working
                             }
                             uiAnomaly={uiAnomaly}
-                            onDelete={handleAnomalyDelete}
-                        />
-                    </Grid>
-                    <Grid item lg={3} md={4} sm={12} xs={12}>
-                        <AnomalyFeedback
-                            anomalyFeedback={
-                                (anomaly && anomaly.feedback) || {
-                                    ...DEFAULT_FEEDBACK,
-                                }
-                            }
-                            anomalyId={Number(anomalyId)}
-                            className={style.fullHeight}
-                            isLoading={
-                                anomalyRequestStatus === ActionStatus.Working
-                            }
                         />
                     </Grid>
                 </Grid>

@@ -20,7 +20,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeFilterFunction;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeGroupFunction;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -78,12 +78,12 @@ public class MacroEngine {
     }
   }
 
-  public ThirdEyeRequestV2 prepareRequest() throws SqlParseException {
+  public DataSourceRequest prepareRequest() throws SqlParseException {
     SqlNode rootNode = queryToNode(query, sqlParserConfig);
     SqlNode appliedMacrosNode = applyMacros(rootNode);
     String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
 
-    return new ThirdEyeRequestV2(tableName, preparedQuery, properties);
+    return new DataSourceRequest(tableName, preparedQuery, properties);
   }
 
   private SqlNode applyMacros(SqlNode rootNode) {

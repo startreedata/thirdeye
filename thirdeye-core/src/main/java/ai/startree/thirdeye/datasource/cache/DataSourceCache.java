@@ -30,15 +30,14 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -126,7 +125,7 @@ public class DataSourceCache {
     return thirdEyeDataSource;
   }
 
-  public DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
+  private DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
       throws Exception {
     datasourceCallCounter.inc();
     final long tStart = System.nanoTime();
@@ -135,7 +134,7 @@ public class DataSourceCache {
       final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),
           thirdEyeDataSource.getSqlExpressionBuilder());
       // table info is only used with legacy Pinot client - should be removed
-      final ThirdEyeRequestV2 requestV2 = new ThirdEyeRequestV2(null, query, Map.of());
+      final DataSourceRequest requestV2 = new DataSourceRequest(null, query, Map.of());
       return thirdEyeDataSource.fetchDataTable(requestV2).getDataFrame();
     } catch (final Exception e) {
       datasourceExceptionCounter.inc();
@@ -148,15 +147,6 @@ public class DataSourceCache {
   public Future<DataFrame> getQueryResultAsync(final CalciteRequest request,
       final String dataSource) {
     return executorService.submit(() -> getQueryResult(request, dataSource));
-  }
-
-  public Map<CalciteRequest, Future<DataFrame>> getQueryResultsAsync(
-      final List<CalciteRequest> requests, final String dataSource) {
-    final Map<CalciteRequest, Future<DataFrame>> responseFuturesMap = new LinkedHashMap<>();
-    for (final CalciteRequest request : requests) {
-      responseFuturesMap.put(request, getQueryResultAsync(request, dataSource));
-    }
-    return responseFuturesMap;
   }
 
   public void clear() throws Exception {

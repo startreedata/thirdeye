@@ -277,6 +277,7 @@
         "redirected-to-another-page": "You’re about to be redirected to another page.",
         "setup-properties-based-on-your-needs": "Setup properties based on your needs",
         "do-you-want-to-leave-this-page": "Do you want to continue and leave this page?",
-        "your-changes-wont-save": "Your changes won’t be saved."
+        "your-changes-wont-save": "Your changes won’t be saved.",
+        "click-here-to-select-alert-template": "Click here to select alert template"
     }
 }

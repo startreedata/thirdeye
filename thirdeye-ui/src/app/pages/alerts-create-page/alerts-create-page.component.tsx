@@ -70,7 +70,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const [validationEntries, setValidationEntries] = useState<{
         [key: string]: boolean;
     }>({});
-    const { showDialog, hideDialog, visible } = useDialogProviderV1();
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
 
     const {

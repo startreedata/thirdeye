@@ -34,6 +34,7 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
   // The task results, which could contain the error messages of tasks' execution.
   private String message;
   private Timestamp lastModified;
+  private Timestamp lastActive;
 
   @Override
   public Long getId() {
@@ -133,6 +134,15 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
 
   public TaskApi setLastModified(Timestamp lastModified) {
     this.lastModified = lastModified;
+    return this;
+  }
+
+  public Timestamp getLastActive() {
+    return lastActive;
+  }
+
+  public TaskApi setLastActive(final Timestamp lastActive) {
+    this.lastActive = lastActive;
     return this;
   }
 

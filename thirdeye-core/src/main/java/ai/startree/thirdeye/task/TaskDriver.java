@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ public class TaskDriver {
 
   private final ExecutorService taskExecutorService;
   private final ExecutorService taskWatcherExecutorService;
+  private final ScheduledExecutorService heartbeatExecutorService;
 
   private final TaskManager taskManager;
   private final TaskContext taskContext;
@@ -71,6 +73,11 @@ public class TaskDriver {
         new ThreadFactoryBuilder()
             .setNameFormat("task-watcher-%d")
             .setDaemon(true)
+            .build());
+
+    heartbeatExecutorService = Executors.newScheduledThreadPool(config.getMaxParallelTasks(),
+        new ThreadFactoryBuilder()
+            .setNameFormat("task-heartbeat-%d")
             .build());
 
     taskContext = new TaskContext().setThirdEyeWorkerConfiguration(thirdEyeServerConfiguration);
@@ -113,6 +120,7 @@ public class TaskDriver {
         taskContext,
         shutdown,
         taskExecutorService,
+        heartbeatExecutorService,
         config,
         workerId,
         taskRunnerFactory,
@@ -143,5 +151,6 @@ public class TaskDriver {
     shutdown.set(true);
     AnomalyUtils.safelyShutdownExecutionService(taskExecutorService, this.getClass());
     AnomalyUtils.safelyShutdownExecutionService(taskWatcherExecutorService, this.getClass());
+    AnomalyUtils.safelyShutdownExecutionService(heartbeatExecutorService, this.getClass());
   }
 }

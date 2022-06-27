@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.task;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
@@ -30,6 +32,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,11 +61,13 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskExceptionCounter;
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
+  private final ScheduledExecutorService heartbeatExecutorService;
 
   public TaskDriverRunnable(final TaskManager taskManager,
       final TaskContext taskContext,
       final AtomicBoolean shutdown,
       final ExecutorService taskExecutorService,
+      final ScheduledExecutorService heartbeatExecutorService,
       final TaskDriverConfiguration config,
       final long workerId,
       final TaskRunnerFactory taskRunnerFactory,
@@ -75,6 +80,7 @@ public class TaskDriverRunnable implements Runnable {
     this.config = config;
     this.workerId = workerId;
     this.taskRunnerFactory = taskRunnerFactory;
+    this.heartbeatExecutorService = heartbeatExecutorService;
 
     taskDuration = metricRegistry.histogram("taskDuration");
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
@@ -103,6 +109,15 @@ public class TaskDriverRunnable implements Runnable {
     final long tStart = System.currentTimeMillis();
     taskCounter.inc();
 
+    Future heartbeat = null;
+    if(config.isRandomWorkerIdEnabled()) {
+      heartbeat = heartbeatExecutorService
+          .scheduleAtFixedRate(() -> taskExecutionHeartbeat(taskDTO),
+              0,
+              config.getHeartbeatInterval().toMillis(),
+              TimeUnit.MILLISECONDS);
+    }
+
     Future<List<TaskResult>> future = null;
     try {
       future = runTaskAsync(taskDTO);
@@ -125,7 +140,12 @@ public class TaskDriverRunnable implements Runnable {
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       taskDuration.update(elapsedTime);
+      optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));
     }
+  }
+
+  private void taskExecutionHeartbeat(final TaskDTO taskDTO) {
+    taskManager.updateLastActive(taskDTO.getId());
   }
 
   private Future<List<TaskResult>> runTaskAsync(final TaskDTO taskDTO) throws IOException {

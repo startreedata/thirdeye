@@ -20,6 +20,8 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
 import InfoIcon from "@material-ui/icons/Info";
 import Alert from "@material-ui/lab/Alert";
 import { debounce } from "lodash";
@@ -83,48 +85,52 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
         <>
             <Grid container item xs={12}>
                 <Grid item xs={12}>
-                    <Alert
-                        className={classes.infoAlert}
-                        icon={<InfoIcon />}
-                        severity="info"
-                    >
-                        {t("message.changes-added-to-template-properties")}
-                        <Link
-                            href={getAlertTemplatesUpdatePath(alertTemplateId)}
-                            target="_blank"
-                        >
-                            {t("label.template-configuration").toLowerCase()}
-                        </Link>
-                    </Alert>
                     <Box paddingBottom={2} paddingTop={2}>
-                        <Divider />
+                        <Alert
+                            className={classes.infoAlert}
+                            icon={<InfoIcon />}
+                            severity="info"
+                        >
+                            {t("message.changes-added-to-template-properties")}
+                            <Link
+                                href={getAlertTemplatesUpdatePath(
+                                    alertTemplateId
+                                )}
+                                target="_blank"
+                            >
+                                {t(
+                                    "label.template-configuration"
+                                ).toLowerCase()}
+                            </Link>
+                        </Alert>
                     </Box>
                 </Grid>
-                <Grid item xs={6}>
-                    <Box paddingBottom={1}>Property name</Box>
-                </Grid>
-                <Grid item xs={6}>
-                    <Box paddingBottom={1}>Property value</Box>
-                </Grid>
+            </Grid>
+            <Grid item xs={12}>
+                <Box paddingBottom={2}>
+                    <Typography variant="h6">
+                        {t("label.template-properties")}
+                    </Typography>
+                    <Typography variant="body2">
+                        {t("message.setup-properties-based-on-your-needs")}
+                    </Typography>
+                </Box>
             </Grid>
             {requiredKeys.map((item, idx) => {
                 return (
                     <Grid container item key={item.key} xs={12}>
-                        <Grid item xs={5}>
-                            <TextField
-                                fullWidth
-                                inputProps={{ tabIndex: -1 }}
-                                value={item.key}
-                            />
+                        <Grid item lg={2} md={4} xs={12}>
+                            <label>{item.key}</label>
                         </Grid>
-                        <Grid item xs={1} />
-                        <Grid item xs={5}>
+                        <Grid item lg={3} md={5} xs={12}>
                             <TextField
                                 fullWidth
                                 data-testid={`textfield-${item.key}`}
                                 defaultValue={item.value}
                                 inputProps={{ tabIndex: idx + 1 }}
-                                placeholder={t("label.add-property-value")}
+                                placeholder={t("label.add-property-value", {
+                                    key: item.key,
+                                })}
                                 onChange={(e) => {
                                     handlePropertyValueChange(
                                         item.key,
@@ -133,51 +139,53 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                                 }}
                             />
                         </Grid>
-                        <Grid item xs={1} />
-                        <Grid item xs={12}>
-                            <Divider />
-                        </Grid>
                     </Grid>
                 );
             })}
             {!showMore && optionalKeys.length > 0 && (
-                <Grid item xs={12}>
-                    <Box marginBottom={3}>
+                <>
+                    <Grid item xs={12}>
+                        <Divider />
+                    </Grid>
+                    <Grid item xs={12}>
                         <Button
                             color="primary"
                             data-testid="show-more-btn"
                             variant="text"
                             onClick={() => setShowMore(true)}
                         >
-                            {t("label.show-count-more", {
+                            {t("label.show-count-default-properties", {
                                 count: optionalKeys.length,
                             })}
+                            <ExpandMore />
                         </Button>
-                    </Box>
-                </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginBottom={5}>
+                            <Divider />
+                        </Box>
+                    </Grid>
+                </>
             )}
             {showMore && (
                 <>
                     <Grid item xs={12}>
-                        <Typography variant="h6">
-                            {t("label.fields-with-default-values")}
-                        </Typography>
-                        <Typography variant="body2">
-                            {t("message.enter-value-to-override-defaults")}
-                        </Typography>
+                        <Divider />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box paddingBottom={2} paddingTop={3}>
+                            <Typography variant="body2">
+                                {t("message.enter-value-to-override-defaults")}
+                            </Typography>
+                        </Box>
                     </Grid>
                     {optionalKeys.map((item, idx) => {
                         return (
                             <Grid container item key={item.key} xs={12}>
-                                <Grid item xs={5}>
-                                    <TextField
-                                        fullWidth
-                                        inputProps={{ tabIndex: -1 }}
-                                        value={item.key}
-                                    />
+                                <Grid item lg={2} md={4} xs={12}>
+                                    <label>{item.key}</label>
                                 </Grid>
-                                <Grid item xs={1} />
-                                <Grid item xs={5}>
+                                <Grid item lg={3} md={5} xs={12}>
                                     <TextField
                                         fullWidth
                                         data-testid={`textfield-${item.key}`}
@@ -195,30 +203,32 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                                         }
                                     />
                                 </Grid>
-                                <Grid item xs={1} />
-                                <Grid item xs={12}>
-                                    <Divider />
-                                </Grid>
                             </Grid>
                         );
                     })}
                 </>
             )}
             {showMore && optionalKeys.length > 0 && (
-                <Grid item xs={12}>
-                    <Box marginBottom={3}>
+                <>
+                    <Grid item xs={12}>
                         <Button
                             color="primary"
                             data-testid="hide-more-btn"
                             variant="text"
                             onClick={() => setShowMore(false)}
                         >
-                            {t("label.hide-count-optional-properties", {
+                            {t("label.hide-count-default-properties", {
                                 count: optionalKeys.length,
                             })}
+                            <ExpandLess />
                         </Button>
-                    </Box>
-                </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginBottom={5}>
+                            <Divider />
+                        </Box>
+                    </Grid>
+                </>
             )}
         </>
     );

@@ -12,10 +12,15 @@
  * the License.
  */
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
-import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
+import {
+    EditableAlert,
+    TemplatePropertiesObject,
+} from "../../../rest/dto/alert.interfaces";
 import { PropertyRenderConfig } from "./alert-template-properties-builder/alert-template-properties-builder.interfaces";
 
 const PROPERTY_CAPTURE = /\${(\w*)}/g;
+// 6AM Everyday
+const DEFAULT_CRON = "0 0 0/2 1/1 * ? *";
 
 export function findRequiredFields(alertTemplate: AlertTemplate): string[] {
     const matches = new Set<string>();
@@ -80,4 +85,13 @@ export function ensureArrayOfStrings(candidate: string | string[]): string[] {
     }
 
     return candidate;
+}
+
+export function createNewStartingAlert(): EditableAlert {
+    return {
+        name: "",
+        description: "",
+        cron: DEFAULT_CRON,
+        templateProperties: {},
+    };
 }

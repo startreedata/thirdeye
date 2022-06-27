@@ -202,15 +202,17 @@
         "detection-template": "Detection template",
         "template-type": "Template type",
         "template-configuration": "Template configuration",
+        "template-properties": "Template properties",
         "alert-preview": "Alert preview",
-        "add-property-value": "Add property value",
-        "show-count-more": "Show {{count}} more",
-        "hide-count-optional-properties": "Hide {{count}} optional properties",
-        "fields-with-default-values": "Fields with Default Values",
+        "add-property-value": "Add property value for {{key}}",
+        "show-count-default-properties": "Show {{count}} default properties",
+        "hide-count-default-properties": "Hide {{count}} default properties",
         "reload-preview": "Reload preview",
         "create-new-template": "Create new template",
         "create-notifications": "Create notifications",
-        "advanced-template-configuration-json-editor": "Advanced template configuration (Json editor)"
+        "advanced-template-configuration-json-editor": "Advanced template configuration (Json editor)",
+        "no-stay": "No, stay",
+        "yes-leave-page": "Yes, leave page"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -269,8 +271,10 @@
         "please-enter-valid-name": "Please enter valid name",
         "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
         "select-template-to-preview-alert": "Please select a template to preview the alert",
-        "enter-value-to-override-defaults": "Enter a value to override the defaults",
+        "enter-value-to-override-defaults": "Fields with default values, enter a value to override the defaults",
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
-        "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view "
+        "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view ",
+        "redirected-to-another-page": "You’re about to be redirected to another page.",
+        "setup-properties-based-on-your-needs": "Setup properties based on your needs"
     }
 }

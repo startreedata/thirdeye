@@ -30,9 +30,11 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import ai.startree.thirdeye.spi.util.Pair;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +49,9 @@ public class DataSourceCache {
 
   private final DataSourceManager dataSourceManager;
   private final DataSourcesLoader dataSourcesLoader;
+  private final MetricRegistry metricRegistry;
 
-  private final Map<String, DataSourceWrapper> cache = new HashMap<>();
+  private final Map<String, Pair<DataSourceWrapper, Timestamp>> cache = new HashMap<>();
 
   @Inject
   public DataSourceCache(
@@ -57,6 +60,7 @@ public class DataSourceCache {
       final MetricRegistry metricRegistry) {
     this.dataSourceManager = dataSourceManager;
     this.dataSourcesLoader = dataSourcesLoader;
+    this.metricRegistry = metricRegistry;
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {
@@ -68,15 +72,17 @@ public class DataSourceCache {
       removeDataSource(name);
       throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
     }
-    final DataSourceWrapper cachedEntry = cache.get(name);
+    final Pair<DataSourceWrapper, Timestamp> cachedEntry = cache.get(name);
+    final DataSourceDTO dataSourceDTO = dataSource.get();
     if (cachedEntry != null) {
-      if (cachedEntry.getUpdateTime().equals(dataSource.get().getUpdateTime())) {
-        // cache hit
-        return cachedEntry.getDataSource();
+      final Timestamp updateTimeCached = cachedEntry.getSecond();
+      if (updateTimeCached.equals(dataSourceDTO.getUpdateTime())) {
+        return cachedEntry.getFirst(); // cache hit
       }
     }
+
     // cache miss
-    return loadDataSource(dataSource.get());
+    return loadDataSource(dataSourceDTO);
   }
 
   private Optional<DataSourceDTO> findByName(final String name) {
@@ -87,31 +93,41 @@ public class DataSourceCache {
     return results.stream().findFirst();
   }
 
-  public void removeDataSource(final String name) {
-    optional(cache.remove(name)).ifPresent(entry -> {
-      try {
-        entry.getDataSource().close();
-      } catch (Exception e) {
-        LOG.error("Datasource {} was not flushed gracefully.", entry.getDataSource().getName());
-      }
-    });
-  }
-
   private ThirdEyeDataSource loadDataSource(final DataSourceDTO dataSource) {
     requireNonNull(dataSource);
-    final String dsName = dataSource.getName();
+    final String dataSourceName = dataSource.getName();
     final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource);
-    requireNonNull(thirdEyeDataSource, "Failed to construct a data source object! " + dsName);
+    requireNonNull(thirdEyeDataSource,
+        "Failed to construct a data source object! " + dataSourceName);
+
     // remove outdated cached datasource
-    removeDataSource(dsName);
-    cache.put(dsName, new DataSourceWrapper(thirdEyeDataSource, dataSource.getUpdateTime()));
+    removeDataSource(dataSourceName);
+    cache.put(dataSourceName, new Pair<>(wrap(thirdEyeDataSource), dataSource.getUpdateTime()));
     return thirdEyeDataSource;
   }
 
-  public void clear() throws Exception {
-    for (final DataSourceWrapper dataSourceWrapper : cache.values()) {
-      dataSourceWrapper.getDataSource().close();
-    }
+  private DataSourceWrapper wrap(final ThirdEyeDataSource thirdEyeDataSource) {
+    return new DataSourceWrapper(thirdEyeDataSource, metricRegistry);
+  }
+
+  public void removeDataSource(final String name) {
+    optional(cache.remove(name))
+        .map(Pair::getFirst)
+        .ifPresent(this::close);
+  }
+
+  public void clear() {
+    cache.values().stream()
+        .map(Pair::getFirst)
+        .forEach(this::close);
     cache.clear();
+  }
+
+  private void close(final ThirdEyeDataSource dataSource) {
+    try {
+      dataSource.close();
+    } catch (Exception e) {
+      LOG.error("Datasource {} was not flushed gracefully.", dataSource.getName());
+    }
   }
 }

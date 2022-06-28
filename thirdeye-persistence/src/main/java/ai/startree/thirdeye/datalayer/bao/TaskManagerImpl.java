@@ -238,4 +238,21 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
         tasksToBeDeleted.size(),
         totalTime));
   }
+
+  @Override
+  public List<TaskDTO> findScheduledTasks(final String jobName, final Timestamp activeThreshold) {
+    final Predicate runningPredicate = activeThreshold == null ?
+        Predicate.EQ("status", TaskStatus.RUNNING.toString()) :
+        Predicate.AND(Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+            Predicate.GT("lastActive", activeThreshold)
+        );
+    return findByPredicate(Predicate.AND(
+            Predicate.EQ("name", jobName),
+            Predicate.OR(
+                Predicate.EQ("status", TaskStatus.WAITING.toString()),
+                runningPredicate
+            )
+        )
+    );
+  }
 }

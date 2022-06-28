@@ -92,6 +92,19 @@ export function createNewStartingAlert(): EditableAlert {
         name: "",
         description: "",
         cron: DEFAULT_CRON,
-        templateProperties: {},
+        template: {
+            name: "startree-holt-winters",
+        },
+        templateProperties: {
+            dataSource: "sample_datasource",
+            dataset: "sample_dataset",
+            timeColumn: "report_date",
+            timeColumnFormat: "EPOCH",
+            aggregationFunction: "sum",
+            seasonalityPeriod: "P7D",
+            lookback: "P90D",
+            monitoringGranularity: "P1D",
+            sensitivity: "3",
+        },
     };
 }

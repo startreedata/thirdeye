@@ -13,6 +13,7 @@
  */
 import { Box, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { AlertJson } from "../../../components/alert-wizard-v2/alert-json/alert-json.component";
 import { AlertNotifications } from "../../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
@@ -28,6 +29,7 @@ import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export const AlertsCreateAdvancePage: FunctionComponent = () => {
+    const { t } = useTranslation();
     const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
         useState(false);
     const [
@@ -85,6 +87,9 @@ export const AlertsCreateAdvancePage: FunctionComponent = () => {
                                         : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
                                     : MessageDisplayState.SELECT_TEMPLATE
                             }
+                            subtitle={t(
+                                "message.configure-or-input-template-to-preview-alert"
+                            )}
                         />
                     </Box>
                 </PageContentsCardV1>

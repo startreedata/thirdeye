@@ -153,11 +153,21 @@ export const AlertsCreatePage: FunctionComponent = () => {
             contentsToReplace.template &&
             contentsToReplace.template.name
         ) {
+            // If the alert template refers to an alert template
             const selectedAlertTemplateName = contentsToReplace.template.name;
             const match = alertTemplateOptions.find(
                 (candidate) => candidate.name === selectedAlertTemplateName
             );
             setSelectedAlertTemplate(match === undefined ? null : match);
+        } else if (
+            contentsToReplace.template &&
+            contentsToReplace.template.name === undefined
+        ) {
+            // If user just throws template into the configuration, treat is as custom
+            setSelectedAlertTemplate({
+                name: t("message.custom-alert-template-used"),
+                ...(contentsToReplace.template as Partial<AlertTemplateType>),
+            } as AlertTemplateType);
         }
     };
 

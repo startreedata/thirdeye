@@ -269,8 +269,10 @@
         "please-enter-valid-name": "Please enter valid name",
         "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
         "select-template-to-preview-alert": "Please select a template to preview the alert",
+        "configure-or-input-template-to-preview-alert": "Please input name of a template or a template itself with its properties to preview the alert",
         "enter-value-to-override-defaults": "Enter a value to override the defaults",
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
-        "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view "
+        "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view",
+        "custom-alert-template-used": "Custom alert template used in alert configuration"
     }
 }

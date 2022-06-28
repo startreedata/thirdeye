@@ -191,6 +191,9 @@ function AlertTemplate({
                                             className:
                                                 classes.autoCompleteInput,
                                         }}
+                                        placeholder={t(
+                                            "message.click-here-to-select-alert-template"
+                                        )}
                                         variant="outlined"
                                     />
                                 )}

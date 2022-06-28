@@ -18,9 +18,9 @@ import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import com.google.common.collect.Collections2;
@@ -136,7 +136,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+  public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     // fixme cyril implement this
     LOG.error(
         "fetchDataTable not implemented in CSVThirdEyeDataSource but returns an empty Df for e2e tests.");

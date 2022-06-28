@@ -189,8 +189,10 @@ To enable SSL/TLS on ThirdEye components the prerequisite is to have the certifi
 
 SSL/TLS can be configured using
 ```bash
-  --set tls.enabled=true
+  --set tls.enabled=true # for tls on coordinator and UI
   --set tls.password=<default is changeit>
+  --set worker.tls.enabled=true # for tls on worker
+  --set scheduler.tls.enabled=true # for tls on scheduler
 ```
 
 ### OAuth2 Support
@@ -241,5 +243,8 @@ Details
 | `mysql.persistence.size`                  | Size of persistent volume created for database storage                                                               |
 | `config.jdbcParameters`                   | Config to pass additional parameters to the jdbc connection string                                                   |
 | `[coordinator/worker/scheduler].strategy` | Specifies the strategy used to replace old Pods by new ones.                                                         |
+| `[worker/scheduler].tls.secretName`       | When provided it will override the default secret names referred for tls keys                                        |
+| `tls.coordinatorSecretName`               | When provided it will override the default secret name referred for tls key                                          |
+| `tls.uiSecretName`                        | When provided it will override the default secret name referred for tls key                                          |
 
 Please refer [values.yaml](values.yaml) for default values.

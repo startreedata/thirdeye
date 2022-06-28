@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinotsql;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -23,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -69,7 +69,7 @@ public class PinotSqlDataSourceConfigFactory {
     if (StringUtils.isNotBlank(controllerConnectionScheme)) {
       builder.setControllerConnectionScheme(controllerConnectionScheme);
     }
-    Optional.ofNullable(headers).ifPresent(h -> builder.setHeaders(h));
+    optional(headers).ifPresent(builder::setHeaders);
     return builder.build();
   }
 

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
@@ -60,7 +60,7 @@ public class MacroEngineTest {
         TABLE_NAME,
         inputQuery);
     try {
-      ThirdEyeRequestV2 output = macroEngine.prepareRequest();
+      DataSourceRequest output = macroEngine.prepareRequest();
       Assert.assertEquals(TABLE_NAME, output.getTable());
       Assertions.assertThat(SqlUtils.cleanSql(output.getQuery())).isEqualTo(SqlUtils.cleanSql(
           expectedQuery));

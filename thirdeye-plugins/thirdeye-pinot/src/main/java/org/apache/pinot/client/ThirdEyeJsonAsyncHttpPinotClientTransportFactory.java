@@ -30,6 +30,7 @@ public class ThirdEyeJsonAsyncHttpPinotClientTransportFactory implements PinotCl
   private SSLContext sslContext = null;
 
   private int readTimeoutMs = 60000;
+  private int requestTimeoutMs = 60000;
   private int connectTimeoutMs = 2000;
   private int brokerResponseTimeoutMs = 60000;
 
@@ -55,6 +56,12 @@ public class ThirdEyeJsonAsyncHttpPinotClientTransportFactory implements PinotCl
     return this;
   }
 
+  public ThirdEyeJsonAsyncHttpPinotClientTransportFactory setRequestTimeoutMs(
+      final int requestTimeoutMs) {
+    this.requestTimeoutMs = requestTimeoutMs;
+    return this;
+  }
+
   public ThirdEyeJsonAsyncHttpPinotClientTransportFactory setConnectTimeoutMs(
       final int connectTimeoutMs) {
     this.connectTimeoutMs = connectTimeoutMs;
@@ -76,6 +83,7 @@ public class ThirdEyeJsonAsyncHttpPinotClientTransportFactory implements PinotCl
 
     builder
         .setReadTimeout(readTimeoutMs)
+        .setRequestTimeout(requestTimeoutMs)
         .setConnectTimeout(connectTimeoutMs);
     final AsyncHttpClient _httpClient = Dsl.asyncHttpClient(builder.build());
 

@@ -13,8 +13,9 @@
  */
 package ai.startree.thirdeye.util;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
@@ -28,7 +29,7 @@ public class TimeUtils {
   }
 
   public static Period isoPeriod(@Nullable final String period, final Period defaultIfNull) {
-    return Optional.ofNullable(period)
+    return optional(period)
         .map(p -> Period.parse(p, ISOPeriodFormat.standard()))
         .orElse(defaultIfNull);
   }

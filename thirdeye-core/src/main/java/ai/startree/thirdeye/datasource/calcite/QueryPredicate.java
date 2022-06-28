@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datasource.calcite;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.FILTER_PREDICATE_OPER_TO_CALCITE;
 import static ai.startree.thirdeye.util.CalciteUtils.booleanLiteralOf;
 import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlBasicCall;
@@ -75,7 +75,7 @@ public class QueryPredicate {
     SqlNode rightOperand = prepareRightOperand();
     SqlNode[] operands = List.of(leftOperand, rightOperand).toArray(new SqlNode[0]);
 
-    SqlOperator operator = Optional.ofNullable(FILTER_PREDICATE_OPER_TO_CALCITE.get(predicate.getOper()))
+    SqlOperator operator = optional(FILTER_PREDICATE_OPER_TO_CALCITE.get(predicate.getOper()))
         .orElseThrow();
 
     return new SqlBasicCall(operator, operands, SqlParserPos.ZERO);
@@ -119,7 +119,7 @@ public class QueryPredicate {
   @NonNull
   private SqlIdentifier prepareLeftOperand() {
     List<String> identifiers = new ArrayList<>();
-    Optional.ofNullable(dataset).ifPresent(identifiers::add);
+    optional(dataset).ifPresent(identifiers::add);
     identifiers.add(predicate.getLhs());
     return new SqlIdentifier(identifiers, SqlParserPos.ZERO);
   }

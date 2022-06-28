@@ -54,7 +54,7 @@ public interface ThirdEyeDataSource {
     throw new UnsupportedOperationException();
   }
 
-  DataTable fetchDataTable(ThirdEyeRequestV2 request) throws Exception;
+  DataTable fetchDataTable(DataSourceRequest request) throws Exception;
 
   /**
    * Returns max dateTime in millis for the dataset

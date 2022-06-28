@@ -25,7 +25,7 @@ spec:
     services:
     - name: {{ include "thirdeye.coordinator.headless" . }}
       namespace: {{ .Release.Namespace }}
-      port: {{ .Values.coordinator.tlsPort }}
+      port: {{ .Values.tls.port }}
   tls:
     passthrough: true
 {{- end }}

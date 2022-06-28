@@ -22,6 +22,8 @@ import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
 import com.google.inject.Inject;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,17 +53,19 @@ public class DefaultAggregationLoader implements AggregationLoader {
   private static final String ROLLUP_NAME = "OTHER";
 
   private final DataSourceCache dataSourceCache;
+  private final ExecutorService executorService;
 
   @Inject
   public DefaultAggregationLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
+    executorService = Executors.newCachedThreadPool();
   }
 
   @Override
-  public DataFrame loadBreakdown(MetricSlice slice, int limit) throws Exception {
+  public DataFrame loadBreakdown(final MetricSlice slice, final int limit) throws Exception {
     final DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
 
-    List<String> dimensions = new ArrayList<>(datasetConfigDTO.getDimensions());
+    final List<String> dimensions = new ArrayList<>(datasetConfigDTO.getDimensions());
     dimensions.removeAll(slice.getPredicates()
         .stream()
         .map(Predicate::getLhs)
@@ -68,17 +74,17 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     LOG.info("Querying breakdown '{}' for dimensions '{}'", slice, dimensions);
 
-    DataFrame dfAll = DataFrame
+    final DataFrame dfAll = DataFrame
         .builder(COL_DIMENSION_NAME + ":STRING",
             COL_DIMENSION_VALUE + ":STRING",
             Constants.COL_VALUE + ":DOUBLE")
         .build()
         .setIndex(COL_DIMENSION_NAME, COL_DIMENSION_VALUE);
 
-    Map<String, Future<DataFrame>> responses = new HashMap<>();
+    final Map<String, Future<DataFrame>> responses = new HashMap<>();
 
     // submit requests
-    for (String dimension : dimensions) {
+    for (final String dimension : dimensions) {
       final QueryProjection dimensionProjection = QueryProjection.of(dimension);
       final CalciteRequest request = CalciteRequest
           .newBuilderFrom(slice)
@@ -87,17 +93,17 @@ public class DefaultAggregationLoader implements AggregationLoader {
           // ensure multiple runs return the same values when num rows > limit - see te-636
           .addOrderByProjection(QueryProjection.of(Constants.COL_VALUE).withDescOrder())
           .withLimit(limit).build();
-      Future<DataFrame> res = dataSourceCache.getQueryResultAsync(request,
+      final Future<DataFrame> res = getQueryResultAsync(request,
           datasetConfigDTO.getDataSource());
 
       responses.put(dimension, res);
     }
 
     // collect responses
-    List<DataFrame> results = new ArrayList<>();
-    for (String dimension : dimensions) {
-      DataFrame res = responses.get(dimension).get(TIMEOUT, TimeUnit.MILLISECONDS);
-      DataFrame dfResult = new DataFrame()
+    final List<DataFrame> results = new ArrayList<>();
+    for (final String dimension : dimensions) {
+      final DataFrame res = responses.get(dimension).get(TIMEOUT, TimeUnit.MILLISECONDS);
+      final DataFrame dfResult = new DataFrame()
           .addSeries(COL_DIMENSION_NAME, StringSeries.fillValues(res.size(), dimension))
           .addSeries(COL_DIMENSION_VALUE, res.get(dimension))
           .addSeries(Constants.COL_VALUE, res.get(Constants.COL_VALUE));
@@ -113,7 +119,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
   }
 
   @Override
-  public DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit)
+  public DataFrame loadAggregate(final MetricSlice slice, final List<String> dimensions, final int limit)
       throws ExecutionException, InterruptedException, TimeoutException {
     final Future<DataFrame> future = loadAggregateAsync(slice, dimensions, limit);
 
@@ -127,15 +133,31 @@ public class DefaultAggregationLoader implements AggregationLoader {
     final CalciteRequest.Builder requestBuilder = CalciteRequest
         .newBuilderFrom(slice)
         .withLimit(limit);
-    for (String dimension : dimensions) {
+    for (final String dimension : dimensions) {
       final QueryProjection dimensionProjection = QueryProjection.of(dimension);
       requestBuilder
           .addSelectProjection(dimensionProjection)
           .addGroupByProjection(dimensionProjection);
     }
-    return dataSourceCache.getQueryResultAsync(requestBuilder.build(),
-        slice.getDatasetConfigDTO().getDataSource());
+    final String dataSource = slice.getDatasetConfigDTO().getDataSource();
+    return getQueryResultAsync(requestBuilder.build(), dataSource);
   }
+
+  private Future<DataFrame> getQueryResultAsync(final CalciteRequest request,
+      final String dataSource) {
+    return executorService.submit(() -> getQueryResult(request, dataSource));
+  }
+
+  private DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
+      throws Exception {
+    final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
+    final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),
+        thirdEyeDataSource.getSqlExpressionBuilder());
+    // table info is only used with legacy Pinot client - should be removed
+    final DataSourceRequest requestV2 = new DataSourceRequest(null, query, Map.of());
+    return thirdEyeDataSource.fetchDataTable(requestV2).getDataFrame();
+  }
+
 
   /**
    * Returns a map of maps (keyed by dimension name, keyed by dimension value) derived from the
@@ -147,12 +169,12 @@ public class DefaultAggregationLoader implements AggregationLoader {
    */
   public static Map<String, Map<String, Double>> makeBreakdownMap(DataFrame dataBreakdown,
       DataFrame dataAggregate) {
-    Map<String, Map<String, Double>> output = new TreeMap<>();
+    final Map<String, Map<String, Double>> output = new TreeMap<>();
 
     dataBreakdown = dataBreakdown.dropNull();
     dataAggregate = dataAggregate.dropNull();
 
-    Map<String, Double> dimensionTotals = new HashMap<>();
+    final Map<String, Double> dimensionTotals = new HashMap<>();
 
     for (int i = 0; i < dataBreakdown.size(); i++) {
       final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
@@ -171,8 +193,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // add rollup column
     if (!dataAggregate.isEmpty()) {
-      double total = dataAggregate.getDouble(Constants.COL_VALUE, 0);
-      for (Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
+      final double total = dataAggregate.getDouble(Constants.COL_VALUE, 0);
+      for (final Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
         if (entry.getValue() < total) {
           output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
         }

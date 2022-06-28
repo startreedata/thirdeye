@@ -79,9 +79,6 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
                 <Typography variant="body1">
                     <SkeletonV1 preventDelay />
                     <SkeletonV1 preventDelay />
-                    <SkeletonV1 preventDelay />
-                    <SkeletonV1 preventDelay />
-                    <SkeletonV1 preventDelay />
                 </Typography>
             </PageContentsCardV1>
         );

@@ -21,13 +21,14 @@ import java.util.Objects;
  * Request object containing all information for a {@link ThirdEyeDataSource} to retrieve {@link
  * DataTable}.
  */
-public class ThirdEyeRequestV2 {
+public class DataSourceRequest {
 
   private final String table;
   private final String query;
   private final Map<String, String> properties;
 
-  public ThirdEyeRequestV2(final String table, final String query,
+  public DataSourceRequest(final String table,
+      final String query,
       final Map<String, String> properties) {
     this.table = table;
     this.query = query;
@@ -54,8 +55,9 @@ public class ThirdEyeRequestV2 {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final ThirdEyeRequestV2 that = (ThirdEyeRequestV2) o;
-    return Objects.equals(table, that.table) && Objects.equals(query, that.query)
+    final DataSourceRequest that = (DataSourceRequest) o;
+    return Objects.equals(table, that.table)
+        && Objects.equals(query, that.query)
         && Objects.equals(properties, that.properties);
   }
 
@@ -66,7 +68,7 @@ public class ThirdEyeRequestV2 {
 
   @Override
   public String toString() {
-    return "ThirdEyeRequestV2{" +
+    return "DataSourceRequest{" +
         "table='" + table + '\'' +
         ", query='" + query + '\'' +
         ", properties=" + properties +

@@ -46,7 +46,7 @@ spec:
         - /bin/sh
         - -c
         - >
-          {{- if .Values.tls.enabled }}
+          {{- if .Values.worker.tls.enabled }}
           echo "importing internal tls key" &&
           openssl pkcs12 -export -name internalTls -in /opt/thirdeye/server/tls-internal/tls.crt -inkey /opt/thirdeye/server/tls-internal/tls.key -out /opt/thirdeye/server/keystore-internal.p12 -password pass:changeit &&
           keytool -noprompt  -importkeystore -alias internalTls -srckeystore /opt/thirdeye/server/keystore-internal.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/thirdeye/server/keystore/keystore &&
@@ -101,7 +101,7 @@ spec:
           - containerPort: 8081
             protocol: TCP
           {{- if .Values.worker.tls.enabled }}
-          - containerPort: {{ .Values.worker.tlsPort }}
+          - containerPort: {{ .Values.worker.tls.port }}
             protocol: TCP
           {{- end }}
         volumeMounts:
@@ -126,7 +126,7 @@ spec:
             name: thirdeye-worker
         - name: tls-internal
           secret:
-            secretName: {{ .Values.worker.tlsSecretName | default (printf "%s-internal-tls" (include "thirdeye.worker.fullname" .)) }}
+            secretName: {{ .Values.worker.tls.secretName | default (printf "%s-internal-tls" (include "thirdeye.worker.fullname" .)) }}
             optional: true
         - name: truststore
           emptyDir: {}

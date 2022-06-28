@@ -20,7 +20,7 @@ data:
           idleTimeout: 620s
         {{- if .Values.tls.enabled }}
         - type: https
-          port: {{ .Values.coordinator.tlsPort }}
+          port: {{ .Values.tls.port }}
           idleTimeout: 620s
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}

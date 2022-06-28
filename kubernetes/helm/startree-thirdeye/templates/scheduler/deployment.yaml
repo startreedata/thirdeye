@@ -97,7 +97,7 @@ spec:
           - containerPort: 8081
             protocol: TCP
           {{- if .Values.scheduler.tls.enabled }}
-          - containerPort: {{ .Values.scheduler.tlsPort }}
+          - containerPort: {{ .Values.scheduler.tls.port }}
             protocol: TCP
           {{- end }}
         volumeMounts:
@@ -128,7 +128,7 @@ spec:
             name: thirdeye-scheduler
         - name: tls-internal
           secret:
-            secretName: {{ .Values.scheduler.tlsSecretName | default (printf "%s-internal-tls" (include "thirdeye.scheduler.fullname" .)) }}
+            secretName: {{ .Values.scheduler.tls.secretName | default (printf "%s-internal-tls" (include "thirdeye.scheduler.fullname" .)) }}
             optional: true
         - name: truststore
           emptyDir: {}

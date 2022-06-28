@@ -128,7 +128,7 @@ spec:
         {{- if .Values.tls.enabled }}
         - name: tls
           secret:
-            secretName: {{ include "thirdeye.ui.fullname" . }}-tls
+            secretName: {{ .Values.tls.uiSecretName | default (printf "%s-tls" (include "thirdeye.ui.fullname" .)) }}
         - name: tls-pass
           emptyDir: {}
         {{- end }}

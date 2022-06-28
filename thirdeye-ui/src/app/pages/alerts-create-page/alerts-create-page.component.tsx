@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, ButtonGroup } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
+import { isEmpty, isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -22,6 +22,7 @@ import {
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
+import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
@@ -30,8 +31,10 @@ import {
     PageHeaderTextV1,
     PageHeaderV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import { createAlert } from "../../rest/alerts/alerts.rest";
@@ -40,25 +43,21 @@ import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { AppRoute, getAlertsViewPath } from "../../utils/routes/routes.util";
+import {
+    AppRoute,
+    getAlertsAllPath,
+    getAlertsViewPath,
+} from "../../utils/routes/routes.util";
 import { validateConfiguration } from "./alerts-create-advance-page/alerts-create-advance-page.util";
 import { useAlertCreatePageStyles } from "./alerts-create-page-component.styles";
 import { CreateAlertConfigurationSection } from "./alerts-create-page.interfaces";
-
-// 6AM Everyday
-const DEFAULT_CRON = "0 0 0/2 1/1 * ? *";
 
 export const AlertsCreatePage: FunctionComponent = () => {
     const classes = useAlertCreatePageStyles();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
-    const [alert, setAlert] = useState<EditableAlert>({
-        name: "",
-        description: "",
-        cron: DEFAULT_CRON,
-        templateProperties: {},
-    });
+    const [alert, setAlert] = useState<EditableAlert>(createNewStartingAlert());
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
@@ -71,6 +70,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const [validationEntries, setValidationEntries] = useState<{
         [key: string]: boolean;
     }>({});
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
 
     const {
@@ -230,6 +230,38 @@ export const AlertsCreatePage: FunctionComponent = () => {
             });
     };
 
+    /**
+     * Prompt the user if they are sure they want to leave
+     */
+    const handlePageExitChecks = (): void => {
+        // If user has not input anything navigate to all alerts page
+        if (isEqual(alert, createNewStartingAlert())) {
+            navigate(getAlertsAllPath());
+        } else {
+            showDialog({
+                type: DialogType.ALERT,
+                headerText: t("message.redirected-to-another-page"),
+                contents: (
+                    <>
+                        <Typography variant="body1">
+                            <strong>
+                                {t("message.do-you-want-to-leave-this-page")}
+                            </strong>
+                        </Typography>
+                        <ul>
+                            <li>{t("message.your-changes-wont-save")}</li>
+                        </ul>
+                    </>
+                ),
+                okButtonText: t("label.yes-leave-page"),
+                cancelButtonText: t("label.no-stay"),
+                onOk: () => {
+                    navigate(getAlertsAllPath());
+                },
+            });
+        }
+    };
+
     return (
         <PageV1>
             <PageHeaderV1>
@@ -277,7 +309,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
                 />
                 <Box textAlign="right" width="100%">
                     <PageContentsCardV1>
-                        <Button className={classes.footerBtn} color="secondary">
+                        <Button
+                            className={classes.footerBtn}
+                            color="secondary"
+                            onClick={handlePageExitChecks}
+                        >
                             Cancel
                         </Button>
                         <Button

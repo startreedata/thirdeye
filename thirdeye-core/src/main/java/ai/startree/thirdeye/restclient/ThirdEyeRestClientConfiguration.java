@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.restclient;
 
-import java.util.Optional;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 public class ThirdEyeRestClientConfiguration {
 
@@ -24,7 +24,7 @@ public class ThirdEyeRestClientConfiguration {
   private String sessionKey;
 
   public String getAdminUser() {
-    return Optional.ofNullable(adminUser).orElse(DEFAULT_THIRDEYE_SERVICE_NAME);
+    return optional(adminUser).orElse(DEFAULT_THIRDEYE_SERVICE_NAME);
   }
 
   public void setAdminUser(String adminUser) {
@@ -32,7 +32,7 @@ public class ThirdEyeRestClientConfiguration {
   }
 
   public String getSessionKey() {
-    return Optional.ofNullable(sessionKey).orElse(DEFAULT_THIRDEYE_SERVICE_KEY);
+    return optional(sessionKey).orElse(DEFAULT_THIRDEYE_SERVICE_KEY);
   }
 
   public void setSessionKey(String sessionKey) {

@@ -105,6 +105,9 @@ public class PinotConnectionBuilder {
     optional(config.getReadTimeoutMs())
         .ifPresent(factory::setReadTimeoutMs);
 
+    optional(config.getRequestTimeoutMs())
+        .ifPresent(factory::setRequestTimeoutMs);
+
     optional(config.getConnectTimeoutMs())
         .ifPresent(factory::setConnectTimeoutMs);
 

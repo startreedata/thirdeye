@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -25,7 +27,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -94,7 +95,7 @@ public class AlertDetectionIntervalCalculator {
   @VisibleForTesting
   protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
-    final DateTimeZone dateTimeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
+    final DateTimeZone dateTimeZone = optional(getDateTimeZone(templateWithProperties))
         .orElse(Constants.DEFAULT_TIMEZONE);
     final DateTime taskStart = new DateTime(taskStartMillis, dateTimeZone);
     final DateTime taskEnd = new DateTime(taskEndMillis, dateTimeZone);
@@ -151,7 +152,7 @@ public class AlertDetectionIntervalCalculator {
   // todo cyril move below to a utils class
   @Nullable
   public static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getTimezone)
         // templates can have an empty string as default property
         .filter(StringUtils::isNotEmpty)
@@ -161,7 +162,7 @@ public class AlertDetectionIntervalCalculator {
 
   @Nullable
   private static Period getDelay(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getDataset)
         .map(DatasetConfigDTO::getCompletenessDelay)
         .map(delayString -> Period.parse(delayString, ISOPeriodFormat.standard()))
@@ -170,7 +171,7 @@ public class AlertDetectionIntervalCalculator {
 
   @Nullable
   private static Period getGranularity(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getGranularity)
         .map(granularityString -> Period.parse(granularityString, ISOPeriodFormat.standard()))
         .orElse(null);

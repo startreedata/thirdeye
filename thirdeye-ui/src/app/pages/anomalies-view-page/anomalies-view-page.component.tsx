@@ -206,11 +206,10 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 <Box display="inline">
                     <Link
                         className={style.linkButton}
-                        component="button"
                         href={getAnomaliesAllPath()}
                     >
                         <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
-                        Back to Anomalies
+                        {t("label.back-to-anomalies")}
                     </Link>
 
                     <PageHeaderTextV1>

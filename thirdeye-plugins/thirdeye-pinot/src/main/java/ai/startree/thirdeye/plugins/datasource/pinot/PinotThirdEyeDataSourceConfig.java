@@ -32,6 +32,7 @@ public class PinotThirdEyeDataSourceConfig {
   private String name;
   private Map<String, String> headers;
   private Integer readTimeoutMs;
+  private Integer requestTimeoutMs;
   private Integer connectTimeoutMs;
   private Integer brokerResponseTimeoutMs;
 
@@ -123,6 +124,15 @@ public class PinotThirdEyeDataSourceConfig {
 
   public PinotThirdEyeDataSourceConfig setReadTimeoutMs(final Integer readTimeoutMs) {
     this.readTimeoutMs = readTimeoutMs;
+    return this;
+  }
+
+  public Integer getRequestTimeoutMs() {
+    return requestTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setRequestTimeoutMs(final Integer requestTimeoutMs) {
+    this.requestTimeoutMs = requestTimeoutMs;
     return this;
   }
 

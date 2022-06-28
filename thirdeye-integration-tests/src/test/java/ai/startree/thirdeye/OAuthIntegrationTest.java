@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.utils.AuthTestUtils.getJWKS;
 import static ai.startree.thirdeye.utils.AuthTestUtils.getToken;
 import static io.dropwizard.testing.ConfigOverride.config;
@@ -30,7 +31,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Optional;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -105,7 +105,9 @@ public class OAuthIntegrationTest {
     SUPPORT.after();
     db.stop();
 
-    Optional.ofNullable(dir.listFiles()).map(Arrays::stream).ifPresent(files -> files.forEach(File::delete));
+    optional(dir.listFiles())
+        .map(Arrays::stream)
+        .ifPresent(files -> files.forEach(File::delete));
     dir.delete();
   }
 

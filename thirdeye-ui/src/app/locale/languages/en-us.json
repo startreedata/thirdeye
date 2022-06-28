@@ -212,7 +212,8 @@
         "create-notifications": "Create notifications",
         "advanced-template-configuration-json-editor": "Advanced template configuration (Json editor)",
         "no-stay": "No, stay",
-        "yes-leave-page": "Yes, leave page"
+        "yes-leave-page": "Yes, leave page",
+        "back-to-anomalies": "Back to Anomalies"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

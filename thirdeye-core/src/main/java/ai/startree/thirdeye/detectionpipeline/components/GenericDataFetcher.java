@@ -20,8 +20,8 @@ import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.detectionpipeline.sql.filter.FiltersEngine;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.MacroEngine;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
@@ -79,7 +79,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   @Override
   public DataTable getDataTable(Interval detectionInterval) throws Exception {
     String queryWithFilters = injectFilters(query);
-    ThirdEyeRequestV2 preparedRequest = applyMacros(detectionInterval, queryWithFilters);
+    DataSourceRequest preparedRequest = applyMacros(detectionInterval, queryWithFilters);
     DataTable result = thirdEyeDataSource.fetchDataTable(preparedRequest);
     result.addProperties(preparedRequest.getProperties());
     return result;
@@ -97,7 +97,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     return new FiltersEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
   }
 
-  private ThirdEyeRequestV2 applyMacros(final Interval detectionInterval,
+  private DataSourceRequest applyMacros(final Interval detectionInterval,
       final String queryWithFilters)
       throws SqlParseException {
     SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
@@ -110,6 +110,6 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           tableName,
           queryWithFilters).prepareRequest();
     }
-    return new ThirdEyeRequestV2(tableName, query, ImmutableMap.of());
+    return new DataSourceRequest(tableName, query, ImmutableMap.of());
   }
 }

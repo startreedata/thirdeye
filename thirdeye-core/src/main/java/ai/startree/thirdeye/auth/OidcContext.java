@@ -15,12 +15,12 @@ package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.auth.CacheConfig.DEFAULT_SIZE;
 import static ai.startree.thirdeye.auth.CacheConfig.DEFAULT_TTL;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 public class OidcContext implements SecurityContext {
@@ -35,9 +35,11 @@ public class OidcContext implements SecurityContext {
     this.keysUrl = config.getKeysUrl();
     this.requiredClaims = new HashSet<>(config.getRequired());
     final Builder builder = new JWTClaimsSet.Builder();
-    config.getExactMatch().forEach((name, value) -> builder.claim(name, value));
+    config.getExactMatch().forEach(builder::claim);
+
     this.exactMatchClaimsSet = builder.build();
-    Optional.ofNullable(config.getCache()).ifPresent(cache -> {
+
+    optional(config.getCache()).ifPresent(cache -> {
       this.cacheSize = config.getCache().getSize();
       this.cacheTtl = config.getCache().getTtl();
     });

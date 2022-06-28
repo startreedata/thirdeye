@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.restclient.InfoService;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
@@ -93,10 +95,10 @@ public class OAuthManager {
 
   private OidcContext generateOidcContext(final OAuthConfiguration config) {
     final AuthInfoApi info = getInfo();
-    Optional.ofNullable(info.getOpenidConfiguration()).ifPresent(oidcConfig -> {
-      Optional.ofNullable(oidcConfig.get(ISSUER_KEY))
+    optional(info.getOpenidConfiguration()).ifPresent(oidcConfig -> {
+      optional(oidcConfig.get(ISSUER_KEY))
           .ifPresent(iss -> config.getExactMatch().put("iss", iss.toString()));
-      Optional.ofNullable(oidcConfig.get(JWKS_KEY))
+      optional(oidcConfig.get(JWKS_KEY))
           .ifPresent(jwkUrl -> config.setKeysUrl(jwkUrl.toString()));
     });
     return new OidcContext(config);

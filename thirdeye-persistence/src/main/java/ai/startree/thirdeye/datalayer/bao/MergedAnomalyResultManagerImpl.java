@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
@@ -35,7 +36,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -354,12 +354,12 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
 
   @Override
   public MergedAnomalyResultDTO convertMergeAnomalyDTO2Bean(MergedAnomalyResultDTO entity) {
-    Optional.ofNullable(entity.getFeedback())
+    optional(entity.getFeedback())
         .map(feedback -> (AnomalyFeedbackDTO) feedback)
         .map(AnomalyFeedbackDTO::getId)
         .ifPresent(entity::setAnomalyFeedbackId);
 
-    Optional.ofNullable(entity.getAnomalyFunction())
+    optional(entity.getAnomalyFunction())
         .map(AnomalyFunctionDTO::getId)
         .ifPresent(entity::setFunctionId);
 

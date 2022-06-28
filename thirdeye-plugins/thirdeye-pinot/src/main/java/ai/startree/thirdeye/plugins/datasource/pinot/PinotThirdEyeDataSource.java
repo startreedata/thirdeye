@@ -21,11 +21,11 @@ import ai.startree.thirdeye.plugins.datasource.auto.onboard.ThirdEyePinotClient;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.RelationalQuery;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
@@ -136,7 +136,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+  public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     try {
       // Use pinot SQL.
       ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(

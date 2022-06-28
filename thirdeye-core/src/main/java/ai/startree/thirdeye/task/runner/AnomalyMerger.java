@@ -15,6 +15,7 @@ package ai.startree.thirdeye.task.runner;
 
 import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detection.algorithm.AnomalyKey;
@@ -39,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -256,7 +256,7 @@ public class AnomalyMerger {
   }
 
   protected Period getMaxGap(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getMergeMaxGap)
         // templates can have an empty string as default property
         .filter(StringUtils::isNotEmpty)
@@ -265,7 +265,7 @@ public class AnomalyMerger {
   }
 
   private Period getMaxDuration(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getMergeMaxDuration)
         // templates can have an empty string as default property
         .filter(StringUtils::isNotEmpty)
@@ -274,7 +274,7 @@ public class AnomalyMerger {
   }
 
   private DateTimeZone getDateTimezone(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(getDateTimeZone(templateWithProperties))
+    return optional(getDateTimeZone(templateWithProperties))
         .orElse(Constants.DEFAULT_TIMEZONE);
   }
 

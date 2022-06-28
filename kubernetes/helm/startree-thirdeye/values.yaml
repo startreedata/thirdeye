@@ -42,7 +42,6 @@ coordinator:
   name: coordinator
   replicaCount: 1
   port: 8080
-  tlsPort: 8443
   serviceType: LoadBalancer
 
   resources: {}
@@ -61,7 +60,6 @@ scheduler:
   enabled: true
   name: scheduler
   port: 8082
-  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}
@@ -72,6 +70,9 @@ scheduler:
     prometheus.io/path: "/admin/prometheus"
   tls:
     enabled: false
+    port: 8443
+#  Uncomment the below config to override the default tls secret name ({scheduler full name}-internal-tls)
+#  secretName: tls-secret-name
   strategy:
     type: Recreate
 
@@ -79,7 +80,6 @@ worker:
   enabled: true
   name: worker
   port: 8083
-  tlsPort: 8443
   serviceType: ClusterIP
 
   resources: {}
@@ -90,6 +90,9 @@ worker:
     prometheus.io/path: "/admin/prometheus"
   tls:
     enabled: false
+    port: 8443
+#  Uncomment the below config to override the default tls secret name ({worker full name}-internal-tls)
+#  secretName: tls-secret-name
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -111,6 +114,11 @@ tls:
   enabled: false
   password: changeit
   type: PKCS12
+  port: 8443
+#  Uncomment the below config to override the default coordinator tls secret name ({coordinator full name}-internal-tls)
+#  coordinatorSecretName: tls-secret-name
+#  Uncomment the below config to override the default ui tls secret name ({ui full name}-tls)
+#  uiSecretName: tls-secret-name
 
 # Expose prometheus metrics.
 prometheus:

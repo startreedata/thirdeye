@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datalayer.entity;
 
+import java.sql.Timestamp;
+
 public class TaskIndex extends AbstractIndexEntity {
 
   String name;
@@ -23,6 +25,7 @@ public class TaskIndex extends AbstractIndexEntity {
   long jobId;
   long workerId;
   int version;
+  Timestamp lastActive;
 
   public long getEndTime() {
     return endTime;
@@ -86,5 +89,14 @@ public class TaskIndex extends AbstractIndexEntity {
 
   public void setWorkerId(long workerId) {
     this.workerId = workerId;
+  }
+
+  public Timestamp getLastActive() {
+    return lastActive;
+  }
+
+  public TaskIndex setLastActive(final Timestamp lastActive) {
+    this.lastActive = lastActive;
+    return this;
   }
 }

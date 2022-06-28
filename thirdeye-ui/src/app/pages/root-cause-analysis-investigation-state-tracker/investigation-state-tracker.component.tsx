@@ -200,11 +200,10 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                 <Box display="inline">
                     <Link
                         className={classes.linkButton}
-                        component="button"
                         href={getAnomaliesAllPath()}
                     >
                         <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
-                        Back to Anomalies
+                        {t("label.back-to-anomalies")}
                     </Link>
                     <div>
                         <PageHeaderTextV1>

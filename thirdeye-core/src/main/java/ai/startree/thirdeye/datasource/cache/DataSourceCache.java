@@ -96,14 +96,14 @@ public class DataSourceCache {
   private ThirdEyeDataSource loadDataSource(final DataSourceDTO dataSource) {
     requireNonNull(dataSource);
     final String dataSourceName = dataSource.getName();
-    final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource);
-    requireNonNull(thirdEyeDataSource,
-        "Failed to construct a data source object! " + dataSourceName);
+    final DataSourceWrapper wrapped = wrap(
+        requireNonNull(dataSourcesLoader.loadDataSource(dataSource),
+            "Failed to construct a data source object! " + dataSourceName));
 
     // remove outdated cached datasource
     removeDataSource(dataSourceName);
-    cache.put(dataSourceName, new Pair<>(wrap(thirdEyeDataSource), dataSource.getUpdateTime()));
-    return thirdEyeDataSource;
+    cache.put(dataSourceName, new Pair<>(wrapped, dataSource.getUpdateTime()));
+    return wrapped;
   }
 
   private DataSourceWrapper wrap(final ThirdEyeDataSource thirdEyeDataSource) {

@@ -30,7 +30,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
     if (props.isLoading) {
         return (
             <PageContentsCardV1 className={props.className}>
-                <SkeletonV1 height={150} variant="rect" />
+                <SkeletonV1 height={75} variant="rect" />
             </PageContentsCardV1>
         );
     }

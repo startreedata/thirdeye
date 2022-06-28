@@ -25,10 +25,11 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionAlertTaskInfo;
+import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.quartz.JobExecutionContext;
@@ -53,6 +54,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationDAO =
         getInstance(ctx, AnomalySubscriptionGroupNotificationManager.class);
     final TaskManager taskDAO = getInstance(ctx, TaskManager.class);
+    final TaskDriverConfiguration configuration = getInstance(ctx, TaskDriverConfiguration.class);
 
     final String jobKey = ctx.getJobDetail().getKey().getName();
     final long detectionAlertConfigId = TaskUtils.getIdFromJobKey(jobKey);
@@ -65,7 +67,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     // if a task is pending and not time out yet, don't schedule more
     String jobName = String.format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
-    if (taskAlreadyRunning(taskDAO, jobName)) {
+    if (taskAlreadyRunning(taskDAO, jobName, configuration)) {
       LOG.trace("Skip scheduling subscription task {}. Already queued", jobName);
       return;
     }
@@ -85,16 +87,15 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     }
   }
 
-  private boolean taskAlreadyRunning(final TaskManager taskDAO, final String jobName) {
+  private boolean taskAlreadyRunning(final TaskManager taskDAO, final String jobName,
+      final TaskDriverConfiguration config) {
+    Timestamp orphanTime = null;
+    if(config.isRandomWorkerIdEnabled()) {
+      orphanTime = new Timestamp(System.currentTimeMillis() - config.getHeartbeatInterval().toMillis()*3);
+    }
     // check if a notification task for the job is already scheduled and not timed-out
     // todo cyril current implementation does not check the timeout
-    List<TaskDTO> scheduledTasks = taskDAO.findByPredicate(Predicate.AND(
-        Predicate.EQ("name", jobName),
-        Predicate.OR(
-            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
-            Predicate.EQ("status", TaskStatus.WAITING.toString())
-        ))
-    );
+    List<TaskDTO> scheduledTasks = taskDAO.findScheduledTasks(jobName, orphanTime);
     return !scheduledTasks.isEmpty();
   }
 

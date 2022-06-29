@@ -56,7 +56,7 @@ import {
     CreateAlertConfigurationSection,
 } from "./alerts-create-page.interfaces";
 
-export const AlertsCreatePage: FunctionComponent<AlertsCreatePageProps> = ({
+export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
     startingAlertConfiguration,
 }) => {
     const classes = useAlertCreatePageStyles();

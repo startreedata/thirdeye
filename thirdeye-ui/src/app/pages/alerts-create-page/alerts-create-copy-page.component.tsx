@@ -17,7 +17,7 @@ import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useGetAlert } from "../../rest/alerts/alerts.actions";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { AlertsViewPageParams } from "../alerts-view-page/alerts-view-page.interfaces";
-import { AlertsCreatePage } from "./alerts-create-page.component";
+import { AlertsCreateBasePage } from "./alerts-create-base-page.component";
 
 export const AlertsCreateCopyPage: FunctionComponent = () => {
     const { id: alertId } = useParams<AlertsViewPageParams>();
@@ -30,8 +30,9 @@ export const AlertsCreateCopyPage: FunctionComponent = () => {
             if (alert) {
                 const editableVersion: EditableAlert = { ...alert };
                 delete editableVersion.id;
-                editableVersion.name = "";
-                editableVersion.description = "";
+                delete editableVersion.lastTimestamp;
+                delete editableVersion.active;
+                delete editableVersion.owner;
                 setAlertToCopy(editableVersion);
                 setIsLoading(false);
             }
@@ -43,7 +44,7 @@ export const AlertsCreateCopyPage: FunctionComponent = () => {
     }
 
     return (
-        <AlertsCreatePage
+        <AlertsCreateBasePage
             startingAlertConfiguration={alertToCopy as EditableAlert}
         />
     );

@@ -362,6 +362,13 @@ export const getEventsCreatePath = (): string => {
     return AppRoute.EVENTS_CREATE;
 };
 
+export const getAlertsCreateCopyPath = (id: number): string => {
+    let path: string = AppRoute.ALERTS_CREATE_EXISTING;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
 export const getEventsPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.EVENTS);
 };

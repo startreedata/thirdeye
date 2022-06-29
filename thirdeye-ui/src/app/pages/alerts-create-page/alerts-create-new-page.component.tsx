@@ -13,11 +13,11 @@
  */
 import React, { FunctionComponent } from "react";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
-import { AlertsCreatePage } from "./alerts-create-page.component";
+import { AlertsCreateBasePage } from "./alerts-create-base-page.component";
 
 export const AlertsCreateNewPage: FunctionComponent = () => {
     return (
-        <AlertsCreatePage
+        <AlertsCreateBasePage
             startingAlertConfiguration={createNewStartingAlert()}
         />
     );

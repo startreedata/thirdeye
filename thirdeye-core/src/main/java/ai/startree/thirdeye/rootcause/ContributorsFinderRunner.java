@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.rootcause;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.rootcause.configuration.ContributorsFinderConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
@@ -49,8 +50,11 @@ public class ContributorsFinderRunner {
     this.defaultParams = configuration.getParams();
   }
 
-  public void addContributorsFinderFactory(final ContributorsFinderFactory factory) {
-    factoryMap.put(factory.name(), factory);
+  public void addContributorsFinderFactory(final ContributorsFinderFactory f) {
+    checkState(!factoryMap.containsKey(f.name()),
+        "Duplicate ContributorsFinderFactory: " + f.name());
+
+    factoryMap.put(f.name(), f);
   }
 
   private int cacheHash(final String name, final Map<String, Object> params) {

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detection.annotation.registry;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
@@ -118,10 +119,16 @@ public class DetectionRegistry {
   }
 
   public void addAnomalyDetectorFactory(final AnomalyDetectorFactory f) {
+    checkState(!anomalyDetectorFactoryMap.containsKey(f.name()),
+        "Duplicate AnomalyDetectorFactory: " + f.name());
+
     anomalyDetectorFactoryMap.put(f.name(), f);
   }
 
   public void addEventTriggerFactory(final EventTriggerFactory f) {
+    checkState(!triggerFactoryMap.containsKey(f.name()),
+        "Duplicate EventTriggerFactory: " + f.name());
+
     triggerFactoryMap.put(f.name(), f);
   }
 

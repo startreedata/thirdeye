@@ -117,8 +117,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
                 datasetConfigMap)) {
               try {
                 TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
-                final long taskId = taskDAO.save(taskDTO);
-                LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
+                LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
               } catch (JsonProcessingException e) {
                 LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
               }
@@ -139,8 +138,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
                 detectionConfigId);
             try {
               TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
-              final long taskId = taskDAO.save(taskDTO);
-              LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
+              LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
             } catch (JsonProcessingException e) {
               LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
             }

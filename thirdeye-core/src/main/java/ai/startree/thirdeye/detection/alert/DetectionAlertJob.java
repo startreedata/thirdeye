@@ -64,8 +64,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     try {
       TaskDTO taskDTO = service.createTaskDto(detectionAlertConfigId, taskInfo, TaskType.NOTIFICATION);
-      final long taskId = service.saveTask(taskDTO);
-      LOG.info("Created {} task {} with settings {}", TaskType.NOTIFICATION, taskId, taskDTO);
+      LOG.info("Created {} task {} with settings {}", TaskType.NOTIFICATION, taskDTO.getId(), taskDTO);
     } catch (JsonProcessingException e) {
       LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
     }

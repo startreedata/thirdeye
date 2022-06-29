@@ -60,17 +60,18 @@ public class JobSchedulerService {
     return !scheduledTasks.isEmpty();
   }
 
-  public TaskDTO createTaskDto(final long id, final TaskInfo taskInfo,
-      final TaskType taskType)
+  public TaskDTO createTaskDto(final long id, final TaskInfo taskInfo, final TaskType taskType)
       throws JsonProcessingException {
     final String taskInfoJson;
     taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
 
-    return new TaskDTO()
+    TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
         .setJobName(taskType.toString() + "_" + id)
         .setStatus(TaskStatus.WAITING)
         .setTaskInfo(taskInfoJson);
+    taskManager.save(task);
+    return task;
   }
 
   public DetectionPipelineTaskInfo buildTaskInfo(final JobKey jobKey, final long endTime) {
@@ -91,10 +92,6 @@ public class JobSchedulerService {
     final String[] tokens = jobKey.split("_");
     final String id = tokens[tokens.length - 1];
     return Long.valueOf(id);
-  }
-
-  public long saveTask(final TaskDTO taskDTO) {
-    return taskManager.save(taskDTO);
   }
 
   /**

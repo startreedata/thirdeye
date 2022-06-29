@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 public class PlanNodeFactory {
 
   public static final String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
+  public static final String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
   private static final Logger LOG = LoggerFactory.getLogger(PlanNodeFactory.class);
 
   /* List of plan node classes that are built in with thirdeye */
@@ -55,10 +57,13 @@ public class PlanNodeFactory {
    */
   private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap;
   private final DataSourceCache dataSourceCache;
+  private final DetectionRegistry detectionRegistry;
 
   @Inject
-  public PlanNodeFactory(final DataSourceCache dataSourceCache) {
+  public PlanNodeFactory(final DataSourceCache dataSourceCache,
+      final DetectionRegistry detectionRegistry) {
     this.dataSourceCache = dataSourceCache;
+    this.detectionRegistry = detectionRegistry;
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
   }
 
@@ -92,7 +97,10 @@ public class PlanNodeFactory {
         .setPlanNodeBean(planNodeBean)
         .setDetectionInterval(detectionInterval)
         .setPipelinePlanNodes(pipelinePlanNodes)
-        .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache));
+        .setProperties(ImmutableMap.of(
+            DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
+            DETECTION_REGISTRY_REF_KEY, detectionRegistry
+        ));
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");
     final Class<? extends PlanNode> planNodeClass = requireNonNull(planNodeTypeToClassMap.get(type),

@@ -104,6 +104,10 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         setSearchParams(searchParams);
     }, [comparisonOffset]);
 
+    useEffect(() => {
+        setBaselineValue(value);
+    }, [value]);
+
     if (isLoading) {
         return (
             <PageContentsCardV1>

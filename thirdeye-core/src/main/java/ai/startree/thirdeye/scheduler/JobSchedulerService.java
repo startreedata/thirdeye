@@ -1,6 +1,5 @@
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
@@ -75,7 +74,7 @@ public class JobSchedulerService {
   }
 
   public DetectionPipelineTaskInfo buildTaskInfo(final JobKey jobKey, final long endTime) {
-    final Long id = TaskUtils.getIdFromJobKey(jobKey.getName());
+    final Long id = getIdFromJobKey(jobKey.getName());
     final AlertDTO alert = alertManager.findById(id);
 
     if (alert == null) {
@@ -86,6 +85,12 @@ public class JobSchedulerService {
     // start and end are corrected with delay and granularity at execution time
     long start = alert.getLastTimestamp();
     return new DetectionPipelineTaskInfo(alert.getId(), start, endTime);
+  }
+
+  public Long getIdFromJobKey(String jobKey) {
+    final String[] tokens = jobKey.split("_");
+    final String id = tokens[tokens.length - 1];
+    return Long.valueOf(id);
   }
 
   public long saveTask(final TaskDTO taskDTO) {

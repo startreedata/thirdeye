@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.detection.alert;
 
-import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.scheduler.ThirdEyeAbstractJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -43,7 +42,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     final JobSchedulerService service = getInstance(ctx, JobSchedulerService.class);
 
     final String jobKey = ctx.getJobDetail().getKey().getName();
-    final long detectionAlertConfigId = TaskUtils.getIdFromJobKey(jobKey);
+    final long detectionAlertConfigId = service.getIdFromJobKey(jobKey);
     final SubscriptionGroupDTO configDTO = alertConfigDAO.findById(detectionAlertConfigId);
     if (configDTO == null) {
       LOG.error("Subscription config {} does not exist", detectionAlertConfigId);

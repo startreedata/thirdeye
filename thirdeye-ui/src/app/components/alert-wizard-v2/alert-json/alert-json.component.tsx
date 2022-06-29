@@ -14,7 +14,7 @@
 import { Box, Divider, Grid, Link, Typography } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import Alert from "@material-ui/lab/Alert";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SAMPLE_ALERT_CONFIGURATION } from "../../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.util";
 import {
@@ -34,6 +34,8 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
+    // proxy the given alert so users can freely type in the json editor
+    const [initialAlert] = useState<EditableAlert>(alert);
 
     const handleJSONChange = (json: string): void => {
         onAlertPropertyChange(JSON.parse(json), true);
@@ -107,7 +109,7 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
             <Grid item xs={12}>
                 <JSONEditorV1<EditableAlert>
                     hideValidationSuccessIcon
-                    value={alert}
+                    value={initialAlert}
                     onChange={handleJSONChange}
                 />
             </Grid>

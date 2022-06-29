@@ -96,7 +96,7 @@ export const AlertsRouter: FunctionComponent = () => {
                                 customDurationGenerator={() => {
                                     return generateDateRangeMonthsFromNow(1);
                                 }}
-                                to={AppRouteRelative.ALERTS_CREATE_SIMPLE}
+                                to={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                             />
                         }
                     />

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datasource;
 
+import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -37,6 +38,7 @@ public class DAORegistry {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EvaluationManager evaluationManager;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
+  private final JobSchedulerService jobSchedulerService;
 
   @Inject
   public DAORegistry(
@@ -48,7 +50,8 @@ public class DAORegistry {
       final AlertManager alertManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EvaluationManager evaluationManager,
-      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
+      final JobSchedulerService jobSchedulerService) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.taskManager = taskManager;
     this.datasetConfigManager = datasetConfigManager;
@@ -58,6 +61,7 @@ public class DAORegistry {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.evaluationManager = evaluationManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
+    this.jobSchedulerService = jobSchedulerService;
   }
 
   public MergedAnomalyResultManager getMergedAnomalyResultDAO() {
@@ -94,5 +98,9 @@ public class DAORegistry {
 
   public AnomalySubscriptionGroupNotificationManager getAnomalySubscriptionGroupNotificationManager() {
     return anomalySubscriptionGroupNotificationManager;
+  }
+
+  public JobSchedulerService getJobSchedulerService() {
+    return jobSchedulerService;
   }
 }

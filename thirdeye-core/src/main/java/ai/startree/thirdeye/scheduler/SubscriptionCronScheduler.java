@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.detection.alert.DetectionAlertJob;
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -62,10 +61,13 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   private final Scheduler scheduler;
   private final ScheduledExecutorService scheduledExecutorService;
   private final SubscriptionGroupManager alertConfigDAO;
+  private final JobSchedulerService jobSchedulerService;
 
   @Inject
-  public SubscriptionCronScheduler(final SubscriptionGroupManager detectionAlertConfigManager) {
+  public SubscriptionCronScheduler(final SubscriptionGroupManager detectionAlertConfigManager,
+      final JobSchedulerService jobSchedulerService) {
     this.alertConfigDAO = detectionAlertConfigManager;
+    this.jobSchedulerService = jobSchedulerService;
     this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     try {
       this.scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -162,7 +164,7 @@ public class SubscriptionCronScheduler implements ThirdEyeCronScheduler {
   }
 
   private void deleteAlertJob(JobKey scheduledJobKey) throws SchedulerException {
-    Long configId = TaskUtils.getIdFromJobKey(scheduledJobKey.getName());
+    Long configId = jobSchedulerService.getIdFromJobKey(scheduledJobKey.getName());
     SubscriptionGroupDTO alertConfigSpec = alertConfigDAO.findById(configId);
     if (alertConfigSpec == null) {
       LOG.info("Found scheduled, but not in database {}", configId);

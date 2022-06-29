@@ -13,15 +13,19 @@
  */
 package ai.startree.thirdeye.detectionpipeline.plan;
 
+import static java.util.Objects.requireNonNull;
+
+import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.EventTriggerOperator;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
 
-  private static final String PROP_TRIGGER = "trigger";
+  private DetectionRegistry detectionRegistry;
 
   public EventTriggerPlanNode() {
     super();
@@ -30,6 +34,9 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
+    detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
+        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
+    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 
   @Override
@@ -48,6 +55,8 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
     eventTriggerOperator.init(new OperatorContext()
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
+        .setProperties(ImmutableMap.of(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY,
+            detectionRegistry))
     );
     return eventTriggerOperator;
   }

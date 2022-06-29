@@ -16,7 +16,12 @@ import InfoIcon from "@material-ui/icons/Info";
 import Alert from "@material-ui/lab/Alert";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { JSONEditorV1 } from "../../../platform/components";
+import { SAMPLE_ALERT_CONFIGURATION } from "../../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.util";
+import {
+    JSONEditorV1,
+    useDialogProviderV1,
+} from "../../../platform/components";
+import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { getAlertTemplatesAllPath } from "../../../utils/routes/routes.util";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
@@ -26,6 +31,7 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     alert,
     onAlertPropertyChange,
 }) => {
+    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
     // proxy the given alert so users can freely type in the json editor
@@ -35,17 +41,36 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
         onAlertPropertyChange(JSON.parse(json), true);
     };
 
+    const handleQuickStartClick = (): void => {
+        showDialog({
+            type: DialogType.CUSTOM,
+            headerText: t("label.alert-json-template"),
+            cancelButtonText: t("label.close"),
+            contents: (
+                <>
+                    <Box paddingBottom={2}>
+                        <Typography variant="body2">
+                            {t("message.properties-and-values-may-differ")}
+                        </Typography>
+                    </Box>
+                    <JSONEditorV1<EditableAlert>
+                        hideValidationSuccessIcon
+                        readOnly
+                        value={SAMPLE_ALERT_CONFIGURATION}
+                    />
+                </>
+            ),
+            hideOkButton: true,
+            width: "md",
+        });
+    };
+
     return (
         <Grid container item xs={12}>
             <Grid item xs={12}>
                 <Box marginBottom={2}>
                     <Typography variant="h5">
                         {t("label.advanced-template-configuration-json-editor")}
-                    </Typography>
-                    <Typography variant="body2">
-                        {t(
-                            "message.attributes-different-from-simple-view-may-not-reflect"
-                        )}
                     </Typography>
                 </Box>
                 <Alert
@@ -58,6 +83,19 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
                         {t("label.template-configuration").toLowerCase()}
                     </Link>
                 </Alert>
+                <Box paddingTop={2}>
+                    <Typography variant="body2">
+                        {t("message.you-can-use-our")}
+                        <Link
+                            color="primary"
+                            underline="always"
+                            onClick={handleQuickStartClick}
+                        >
+                            “Quick Start complex Website JSON template”
+                        </Link>
+                        . {t("message.properties-and-values-may-differ")}
+                    </Typography>
+                </Box>
                 <Box paddingBottom={2} paddingTop={2}>
                     <Divider />
                 </Box>

@@ -11,14 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
+import React, { FunctionComponent } from "react";
+import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { AlertsCreatePage } from "./alerts-create-page.component";
 
-export enum CreateAlertConfigurationSection {
-    NAME,
-    CRON,
-    TEMPLATE_PROPERTIES,
-}
-
-export interface AlertsCreatePageProps {
-    startingAlertConfiguration: EditableAlert;
-}
+export const AlertsCreateNewPage: FunctionComponent = () => {
+    return (
+        <AlertsCreatePage
+            startingAlertConfiguration={createNewStartingAlert()}
+        />
+    );
+};

@@ -13,12 +13,11 @@
  */
 package ai.startree.thirdeye.detection.anomaly.detection.trigger;
 
-import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
-
 import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -70,6 +69,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private final AlertManager alertManager;
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
+  private final JobSchedulerService jobSchedulerService;
 
   @Inject
   public DataAvailabilityTaskScheduler(
@@ -77,6 +77,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       final TaskManager taskDAO,
       final AlertManager alertManager,
       final DatasetConfigManager datasetConfigManager,
+      final JobSchedulerService jobSchedulerService,
       final MetricConfigManager metricConfigManager) {
     this.sleepPerRunInSec = config.getSchedulerDelayInSec();
     this.fallBackTimeInSec = config.getTaskTriggerFallBackTimeInSec();
@@ -89,6 +90,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     this.alertManager = alertManager;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
+    this.jobSchedulerService = jobSchedulerService;
   }
 
   /**
@@ -114,7 +116,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             if (isWithinSchedulingWindow(detection2DatasetMap.get(detectionConfig),
                 datasetConfigMap)) {
               try {
-                TaskDTO taskDTO = createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+                TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
                 final long taskId = taskDAO.save(taskDTO);
                 LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
               } catch (JsonProcessingException e) {
@@ -136,7 +138,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             LOG.info("Scheduling a task for detection {} due to the fallback mechanism.",
                 detectionConfigId);
             try {
-              TaskDTO taskDTO = createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+              TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
               final long taskId = taskDAO.save(taskDTO);
               LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
             } catch (JsonProcessingException e) {

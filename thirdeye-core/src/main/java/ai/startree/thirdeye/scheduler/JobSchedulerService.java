@@ -10,9 +10,13 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
+import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.task.TaskDriverConfiguration;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -21,6 +25,8 @@ import org.quartz.JobKey;
 
 @Singleton
 public class JobSchedulerService {
+
+  private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final TaskManager taskManager;
   private final AlertManager alertManager;
@@ -53,6 +59,19 @@ public class JobSchedulerService {
         Predicate.GE("startTime", taskRunTimeThreshold))
     );
     return !scheduledTasks.isEmpty();
+  }
+
+  public TaskDTO createTaskDto(final long id, final TaskInfo taskInfo,
+      final TaskType taskType)
+      throws JsonProcessingException {
+    final String taskInfoJson;
+    taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+
+    return new TaskDTO()
+        .setTaskType(taskType)
+        .setJobName(taskType.toString() + "_" + id)
+        .setStatus(TaskStatus.WAITING)
+        .setTaskInfo(taskInfoJson);
   }
 
   public DetectionPipelineTaskInfo buildTaskInfo(final JobKey jobKey, final long endTime) {

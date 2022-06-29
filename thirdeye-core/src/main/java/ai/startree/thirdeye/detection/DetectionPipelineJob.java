@@ -13,15 +13,12 @@
  */
 package ai.startree.thirdeye.detection;
 
-import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
-
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.scheduler.ThirdEyeAbstractJob;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.concurrent.TimeUnit;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +26,6 @@ import org.slf4j.LoggerFactory;
 public class DetectionPipelineJob extends ThirdEyeAbstractJob {
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineJob.class);
-  private static final long DETECTION_TASK_TIMEOUT = TimeUnit.DAYS.toMillis(1);
 
   @Override
   public void execute(JobExecutionContext ctx) {
@@ -43,8 +39,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
     }
 
     // if a task is pending and not time out yet, don't schedule more
-    String jobName = String.format("%s_%d", TaskType.DETECTION, taskInfo.getConfigId());
-//    String jobName = ctx.getJobDetail().getKey().getName();
+    String jobName = ctx.getJobDetail().getKey().getName();
     if (service.taskAlreadyRunning(jobName)) {
       LOG.info(
           "Skip scheduling detection task for {} with start time {} and end time {}. Task is already in the queue.",
@@ -55,7 +50,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
     }
 
     try {
-      final TaskDTO taskDTO = createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+      final TaskDTO taskDTO = service.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
       final long taskId = service.saveTask(taskDTO);
       LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
     } catch (JsonProcessingException e) {

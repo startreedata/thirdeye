@@ -284,7 +284,6 @@
         "do-you-want-to-leave-this-page": "Do you want to continue and leave this page?",
         "your-changes-wont-save": "Your changes won’t be saved.",
         "click-here-to-select-alert-template": "Click here to select alert template",
-        "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view",
         "custom-alert-template-used": "Custom alert template used in alert configuration"
     }
 }

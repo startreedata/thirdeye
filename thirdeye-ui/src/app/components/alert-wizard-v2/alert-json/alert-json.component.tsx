@@ -72,11 +72,6 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
                     <Typography variant="h5">
                         {t("label.advanced-template-configuration-json-editor")}
                     </Typography>
-                    <Typography variant="body2">
-                        {t(
-                            "message.attributes-different-from-simple-view-may-not-reflect"
-                        )}
-                    </Typography>
                 </Box>
                 <Alert
                     className={classes.infoAlert}

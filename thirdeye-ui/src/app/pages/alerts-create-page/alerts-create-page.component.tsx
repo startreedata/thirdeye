@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import {
     NavLink,
     Outlet,
+    useLocation,
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
@@ -56,6 +57,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
     const classes = useAlertCreatePageStyles();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const location = useLocation();
     const { notify } = useNotificationProviderV1();
     const [alert, setAlert] = useState<EditableAlert>(createNewStartingAlert());
     const [subscriptionGroups, setSubscriptionGroups] = useState<
@@ -290,6 +292,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
                                 pathname: AppRoute.ALERTS_CREATE_SIMPLE,
                                 search: searchParams.toString(),
                             }}
+                            variant={
+                                location.pathname.includes("simple")
+                                    ? "contained"
+                                    : "outlined"
+                            }
                         >
                             Simple
                         </Button>
@@ -299,6 +306,11 @@ export const AlertsCreatePage: FunctionComponent = () => {
                                 pathname: AppRoute.ALERTS_CREATE_ADVANCED,
                                 search: searchParams.toString(),
                             }}
+                            variant={
+                                location.pathname.includes("advanced")
+                                    ? "contained"
+                                    : "outlined"
+                            }
                         >
                             Advanced
                         </Button>

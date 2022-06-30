@@ -32,7 +32,7 @@ export const comparisonOffsetReadableValue = (
 
 export const parseBaselineComparisonOffset = (
     offset: string
-): { value: number; unit: BaselineOffsetUnitsKey } => {
+): { baselineOffsetValue: number; unit: BaselineOffsetUnitsKey } => {
     const value = Number(offset.slice(1, 2));
     const unit = offset.slice(2) as BaselineOffsetUnitsKey;
 
@@ -41,7 +41,7 @@ export const parseBaselineComparisonOffset = (
         : BaselineOffsetUnitsKey.WEEK;
     const validOffsetValue = isNaN(value) ? 1 : value;
 
-    return { value: validOffsetValue, unit: validBaselineUnit };
+    return { baselineOffsetValue: validOffsetValue, unit: validBaselineUnit };
 };
 
 export const baselineComparisonOffsetToHumanReadable = (

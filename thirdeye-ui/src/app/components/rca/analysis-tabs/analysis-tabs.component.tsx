@@ -68,7 +68,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 0
     );
     const [eventsSearchValue, setEventsSearchValue] = useState("");
-    const { value, unit } = parseBaselineComparisonOffset(
+    const { baselineOffsetValue, unit } = parseBaselineComparisonOffset(
         searchParams.get(ANALYSIS_TAB_OFFSET) ?? ""
     );
     const [baselineOffsetUnit, setBaselineOffsetUnit] =
@@ -76,7 +76,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             BASELINE_OPTIONS.find((baseline) => baseline.key === unit) ||
                 BASELINE_OPTIONS[0]
         );
-    const [baselineValue, setBaselineValue] = useState(value);
+    const [baselineValue, setBaselineValue] = useState(baselineOffsetValue);
 
     const handleBaselineOffsetUnitChange = (
         _event: React.ChangeEvent<Record<string, unknown>> | null,
@@ -103,6 +103,10 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         searchParams.set(ANALYSIS_TAB_OFFSET, comparisonOffset);
         setSearchParams(searchParams);
     }, [comparisonOffset]);
+
+    useEffect(() => {
+        setBaselineValue(baselineOffsetValue);
+    }, [baselineOffsetValue]);
 
     if (isLoading) {
         return (

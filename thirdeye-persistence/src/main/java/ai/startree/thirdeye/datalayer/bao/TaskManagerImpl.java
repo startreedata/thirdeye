@@ -240,7 +240,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   }
 
   @Override
-  public List<TaskDTO> findScheduledTasks(final String jobName, final Timestamp activeThreshold) {
+  public List<TaskDTO> findScheduledTasks(final String jobName, final Timestamp activeThreshold, final Timestamp timeoutThreshold) {
     final Predicate runningPredicate = activeThreshold == null ?
         Predicate.EQ("status", TaskStatus.RUNNING.toString()) :
         Predicate.AND(Predicate.EQ("status", TaskStatus.RUNNING.toString()),
@@ -251,7 +251,9 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
             Predicate.OR(
                 Predicate.EQ("status", TaskStatus.WAITING.toString()),
                 runningPredicate
-            )
+            ),
+            // filter timed out tasks
+            Predicate.GE("startTime", timeoutThreshold)
         )
     );
   }

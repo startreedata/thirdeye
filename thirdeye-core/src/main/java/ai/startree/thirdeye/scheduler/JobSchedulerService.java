@@ -1,5 +1,7 @@
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.spi.Constants.ACTIVE_THRESHOLD_MULTIPLIER;
+
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.quartz.JobKey;
@@ -47,17 +50,25 @@ public class JobSchedulerService {
   }
 
   public boolean taskAlreadyRunning(final String jobName) {
-    final long taskRunTimeThreshold = System.currentTimeMillis() - taskDriverConfiguration.getMaxTaskRunTime().toMillis();
-    List<TaskDTO> scheduledTasks = taskManager.findByPredicate(Predicate.AND(
-        Predicate.EQ("name", jobName),
-        Predicate.OR(
-            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
-            Predicate.EQ("status", TaskStatus.WAITING.toString())
-        ),
-        // filter timed out tasks
-        Predicate.GE("startTime", taskRunTimeThreshold))
-    );
+    final List<TaskDTO> scheduledTasks = taskManager.findScheduledTasks(
+        jobName,
+        getOrphanThreshold(),
+        getTaskRunTimeThreshold());
     return !scheduledTasks.isEmpty();
+  }
+
+  public Timestamp getOrphanThreshold() {
+    // A task is considered orphan after a threshold duration post the lastActive time
+    // The threshold is a multiplier of the heartbeat interval
+    return taskDriverConfiguration.isRandomWorkerIdEnabled() ?
+        new Timestamp(System.currentTimeMillis() - ACTIVE_THRESHOLD_MULTIPLIER *
+          taskDriverConfiguration.getHeartbeatInterval().toMillis()) :
+        null;
+  }
+
+  public Timestamp getTaskRunTimeThreshold() {
+    return new Timestamp(System.currentTimeMillis() -
+        taskDriverConfiguration.getMaxTaskRunTime().toMillis());
   }
 
   public TaskDTO createTaskDto(final long id, final TaskInfo taskInfo, final TaskType taskType)
@@ -65,7 +76,7 @@ public class JobSchedulerService {
     final String taskInfoJson;
     taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
 
-    TaskDTO task = new TaskDTO()
+    final TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
         .setJobName(taskType.toString() + "_" + id)
         .setStatus(TaskStatus.WAITING)
@@ -84,11 +95,11 @@ public class JobSchedulerService {
     }
 
     // start and end are corrected with delay and granularity at execution time
-    long start = alert.getLastTimestamp();
+    final long start = alert.getLastTimestamp();
     return new DetectionPipelineTaskInfo(alert.getId(), start, endTime);
   }
 
-  public Long getIdFromJobKey(String jobKey) {
+  public Long getIdFromJobKey(final String jobKey) {
     final String[] tokens = jobKey.split("_");
     final String id = tokens[tokens.length - 1];
     return Long.valueOf(id);
@@ -114,13 +125,13 @@ public class JobSchedulerService {
    * @return true if it needs notification task. false otherwise.
    */
   public boolean needNotification(final SubscriptionGroupDTO configDTO) {
-    Map<Long, Long> vectorClocks = configDTO.getVectorClocks();
+    final Map<Long, Long> vectorClocks = configDTO.getVectorClocks();
     if (vectorClocks == null || vectorClocks.size() == 0) {
       return true;
     }
-    for (Map.Entry<Long, Long> e : vectorClocks.entrySet()) {
-      long configId = e.getKey();
-      long lastNotifiedTime = e.getValue();
+    for (final Map.Entry<Long, Long> e : vectorClocks.entrySet()) {
+      final long configId = e.getKey();
+      final long lastNotifiedTime = e.getValue();
       if (anomalyManager.findByCreatedTimeInRangeAndDetectionConfigId(lastNotifiedTime,
               System.currentTimeMillis(), configId)
           .stream().anyMatch(x -> !x.isChild())) {
@@ -128,7 +139,7 @@ public class JobSchedulerService {
       }
     }
     // in addition to checking the watermarks, check if any anomalies need to be re-notified by querying the anomaly subscription group notification table
-    List<AnomalySubscriptionGroupNotificationDTO> anomalySubscriptionGroupNotifications =
+    final List<AnomalySubscriptionGroupNotificationDTO> anomalySubscriptionGroupNotifications =
         notificationManager.findByPredicate(
             Predicate.IN("detectionConfigId", vectorClocks.keySet().toArray()));
     return !anomalySubscriptionGroupNotifications.isEmpty();

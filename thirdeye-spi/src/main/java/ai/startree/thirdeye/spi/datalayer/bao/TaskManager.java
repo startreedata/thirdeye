@@ -52,5 +52,5 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void purge(Duration expiryDuration, Integer limitOptional);
 
-  List<TaskDTO> findScheduledTasks(String jobName, Timestamp activeThreshold);
+  List<TaskDTO> findScheduledTasks(String jobName, Timestamp activeThreshold, Timestamp timeoutThreshold);
 }

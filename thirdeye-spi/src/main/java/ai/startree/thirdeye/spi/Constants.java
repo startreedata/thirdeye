@@ -83,6 +83,7 @@ public interface Constants {
   String COL_DIFF_VIOLATION = "diff_violation";
   String COL_IN_WINDOW = "is_in_window";
 
+  int ACTIVE_THRESHOLD_MULTIPLIER = 3;
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

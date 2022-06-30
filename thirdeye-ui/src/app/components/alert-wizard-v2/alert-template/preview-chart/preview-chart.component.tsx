@@ -39,6 +39,7 @@ import {
 export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
     displayState,
+    subtitle,
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
@@ -103,9 +104,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     <Typography variant="h6">
                         {t("label.alert-preview")}
                     </Typography>
-                    <Typography variant="body2">
-                        {t("message.select-template-to-preview-alert")}
-                    </Typography>
+                    <Typography variant="body2">{subtitle}</Typography>
                 </Box>
             </Grid>
             <Grid item xs={12}>

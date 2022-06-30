@@ -20,6 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator;
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator.CombinerResult;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
@@ -50,7 +51,9 @@ public class PlanExecutorTest {
 
   @BeforeMethod
   public void setUp() {
-    final PlanNodeFactory planNodeFactory = new PlanNodeFactory(mock(DataSourceCache.class));
+    final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
+        mock(DataSourceCache.class),
+        mock(DetectionRegistry.class));
     planExecutor = new PlanExecutor(planNodeFactory);
   }
 

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.bootstrap;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProvider;
@@ -37,9 +38,12 @@ public class BootstrapResourcesRegistry {
   public BootstrapResourcesRegistry() {
   }
 
-  public void addBootstrapResourcesProviderFactory(final BootstrapResourcesProviderFactory factory) {
-    checkArgument(factory.name() != null, "name is null");
-    factoryMap.put(factory.name(), factory);
+  public void addBootstrapResourcesProviderFactory(final BootstrapResourcesProviderFactory f) {
+    checkArgument(f.name() != null, "name is null");
+    checkState(!factoryMap.containsKey(f.name()),
+        "Duplicate BootstrapResourcesProviderFactory: " + f.name());
+
+    factoryMap.put(f.name(), f);
   }
 
   private @NonNull BootstrapResourcesProvider get(final String name) {

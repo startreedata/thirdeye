@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.notification;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.notification.NotificationService;
@@ -26,8 +27,11 @@ public class NotificationServiceRegistry {
 
   private final Map<String, NotificationServiceFactory> factoryMap = new HashMap<>();
 
-  public void addNotificationServiceFactory(NotificationServiceFactory factory) {
-    factoryMap.put(factory.name(), factory);
+  public void addNotificationServiceFactory(NotificationServiceFactory f) {
+    checkState(!factoryMap.containsKey(f.name()),
+        "Duplicate NotificationServiceFactory: " + f.name());
+
+    factoryMap.put(f.name(), f);
   }
 
   public NotificationService get(

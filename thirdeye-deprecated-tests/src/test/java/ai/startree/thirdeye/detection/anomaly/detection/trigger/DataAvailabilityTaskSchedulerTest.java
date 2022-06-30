@@ -86,6 +86,7 @@ public class DataAvailabilityTaskSchedulerTest {
         TestDbEnv.getInstance().getTaskDAO(),
         TestDbEnv.getInstance().getDetectionConfigManager(),
         TestDbEnv.getInstance().getDatasetConfigDAO(),
+        TestDbEnv.getInstance().getJobSchedulerService(),
         TestDbEnv.getInstance().getMetricConfigDAO()
     );
   }

@@ -19,8 +19,10 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
@@ -61,11 +63,15 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    detector = createDetector(planNode.getParams());
+    final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
+        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
+    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
+    detector = createDetector(planNode.getParams(), detectionRegistry);
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
-      final Map<String, Object> params) {
+      final Map<String, Object> params,
+      final DetectionRegistry detectionRegistry) {
     final String type = ensureExists(MapUtils.getString(params, PROP_TYPE),
         ERR_MISSING_CONFIGURATION_FIELD,
         "'type' in detector config");
@@ -79,7 +85,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         "'monitoringGranularity' in detector config");
     monitoringGranularity = isoPeriod(genericDetectorSpec.getMonitoringGranularity());
 
-    return new DetectionRegistry()
+    return detectionRegistry
         .buildDetector(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 

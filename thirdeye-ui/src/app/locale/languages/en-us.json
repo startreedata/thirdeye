@@ -202,16 +202,20 @@
         "detection-template": "Detection template",
         "template-type": "Template type",
         "template-configuration": "Template configuration",
+        "template-properties": "Template properties",
         "alert-preview": "Alert preview",
-        "add-property-value": "Add property value",
-        "show-count-more": "Show {{count}} more",
-        "hide-count-optional-properties": "Hide {{count}} optional properties",
-        "fields-with-default-values": "Fields with Default Values",
+        "add-property-value": "Add property value for {{key}}",
+        "show-count-default-properties": "Show {{count}} default properties",
+        "hide-count-default-properties": "Hide {{count}} default properties",
         "reload-preview": "Reload preview",
         "create-new-template": "Create new template",
         "create-notifications": "Create notifications",
         "advanced-template-configuration-json-editor": "Advanced template configuration (Json editor)",
-        "back-to-anomalies": "Back to Anomalies"
+        "no-stay": "No, stay",
+        "yes-leave-page": "Yes, leave page",
+        "back-to-anomalies": "Back to Anomalies",
+        "close": "Close",
+        "alert-json-template": "Alert JSON Template"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -268,10 +272,18 @@
         "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
         "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system",
         "please-enter-valid-name": "Please enter valid name",
-        "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
+        "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to",
         "select-template-to-preview-alert": "Please select a template to preview the alert",
-        "enter-value-to-override-defaults": "Enter a value to override the defaults",
+        "configure-or-input-template-to-preview-alert": "Please input name of a template or a template itself with its properties to preview the alert",
+        "enter-value-to-override-defaults": "Fields with default values, enter a value to override the defaults",
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
-        "attributes-different-from-simple-view-may-not-reflect": "Attributes different from the alert details and the template properties may not be reflected in the simple view "
+        "properties-and-values-may-differ": "The properties and values may differ from your environment so the template may show some errors when copied.",
+        "you-can-use-our": "You can use our {{entity}}",
+        "redirected-to-another-page": "You’re about to be redirected to another page.",
+        "setup-properties-based-on-your-needs": "Setup properties based on your needs",
+        "do-you-want-to-leave-this-page": "Do you want to continue and leave this page?",
+        "your-changes-wont-save": "Your changes won’t be saved.",
+        "click-here-to-select-alert-template": "Click here to select alert template",
+        "custom-alert-template-used": "Custom alert template used in alert configuration"
     }
 }

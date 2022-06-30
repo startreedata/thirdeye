@@ -13,15 +13,20 @@
  */
 package ai.startree.thirdeye.detectionpipeline.plan;
 
+import static java.util.Objects.requireNonNull;
+
+import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperator;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
   public static final String TYPE = "AnomalyDetector";
+  private DetectionRegistry detectionRegistry;
 
   public AnomalyDetectorPlanNode() {
     super();
@@ -30,6 +35,9 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
+    detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
+        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
+    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 
   @Override
@@ -49,6 +57,8 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
         .setDetectionInterval(this.detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
+        .setProperties(ImmutableMap.of(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY,
+            detectionRegistry))
     );
     return anomalyDetectorOperator;
   }

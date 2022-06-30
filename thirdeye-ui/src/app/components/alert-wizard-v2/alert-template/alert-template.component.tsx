@@ -191,6 +191,9 @@ function AlertTemplate({
                                             className:
                                                 classes.autoCompleteInput,
                                         }}
+                                        placeholder={t(
+                                            "message.click-here-to-select-alert-template"
+                                        )}
                                         variant="outlined"
                                     />
                                 )}
@@ -229,6 +232,7 @@ function AlertTemplate({
                                 : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
                             : MessageDisplayState.SELECT_TEMPLATE
                     }
+                    subtitle={t("message.select-template-to-preview-alert")}
                 />
             </Grid>
         </PageContentsCardV1>

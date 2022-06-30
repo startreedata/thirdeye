@@ -131,6 +131,7 @@ public class PluginLoader {
     for (BootstrapResourcesProviderFactory f: plugin.getBootstrapResourcesProviderFactories()) {
       bootstrapResourcesRegistry.addBootstrapResourcesProviderFactory(f);
     }
+    log.info("Installed plugin: " + plugin.getClass().getName());
   }
 
   private URLClassLoader createPluginClassLoader(File dir) {

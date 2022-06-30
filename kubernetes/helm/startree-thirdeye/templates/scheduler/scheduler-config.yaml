@@ -29,9 +29,9 @@ data:
       adminContextPath: /admin
 
       applicationConnectors:
-        {{- if .Values.scheduler.tls.enabled }}
+        {{- if .Values.tls.scheduler.enabled }}
         - type: https
-          port: {{ .Values.scheduler.tls.port }}
+          port: {{ .Values.tls.port }}
           idleTimeout: 620s
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
@@ -79,7 +79,7 @@ data:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
       enabled: true
       schemes:
-        {{- if .Values.scheduler.tls.enabled }}
+        {{- if .Values.tls.scheduler.enabled }}
         - https
         {{- end }}
         - http
@@ -90,6 +90,8 @@ data:
     # Start the Task Driver. This module runs the detection and notification tasks
     taskDriver:
       enabled: false
+      # When enabled generates a random id which overrides taskDriver.id (below) to achieve unique worker id in multi worker setup
+      randomWorkerIdEnabled: {{ .Values.worker.randomWorkerIdEnabled }}
       id: 0 # must be a non-negative integer unique per instance/worker
     
     time:

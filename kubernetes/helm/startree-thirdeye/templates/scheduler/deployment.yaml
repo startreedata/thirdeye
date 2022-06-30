@@ -59,7 +59,7 @@ spec:
         - /bin/sh
         - -c
         - >
-          {{- if .Values.scheduler.tls.enabled }}
+          {{- if .Values.tls.scheduler.enabled }}
           echo "importing internal tls key" &&
           openssl pkcs12 -export -name internalTls -in /opt/thirdeye/server/tls-internal/tls.crt -inkey /opt/thirdeye/server/tls-internal/tls.key -out /opt/thirdeye/server/keystore-internal.p12 -password pass:changeit &&
           keytool -noprompt  -importkeystore -alias internalTls -srckeystore /opt/thirdeye/server/keystore-internal.p12 -srcstoretype PKCS12 -srcstorepass changeit -deststorepass changeit -destkeystore /opt/thirdeye/server/keystore/keystore &&
@@ -74,7 +74,7 @@ spec:
         - name: tls-internal
           mountPath: /opt/thirdeye/server/tls-internal
           readOnly: true
-        {{- if .Values.scheduler.tls.enabled }}
+        {{- if .Values.tls.scheduler.enabled }}
         - name: keystore
           mountPath: /opt/thirdeye/server/keystore
         {{- end }}
@@ -98,7 +98,7 @@ spec:
           {{- end }}
           - name: JAVA_OPTS
             value: >
-              {{- if .Values.scheduler.tls.enabled }}
+              {{- if .Values.tls.scheduler.enabled }}
               -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
               -Djavax.net.ssl.keyStorePassword=changeit
               {{- end }}
@@ -109,8 +109,8 @@ spec:
             protocol: TCP
           - containerPort: 8081
             protocol: TCP
-          {{- if .Values.scheduler.tls.enabled }}
-          - containerPort: {{ .Values.scheduler.tls.port }}
+          {{- if .Values.tls.scheduler.enabled }}
+          - containerPort: {{ .Values.tls.port }}
             protocol: TCP
           {{- end }}
         volumeMounts:
@@ -124,7 +124,7 @@ spec:
             subPath: holidayLoaderKey
             readOnly: true
           {{- end }}
-          {{- if .Values.scheduler.tls.enabled }}
+          {{- if .Values.tls.scheduler.enabled }}
           - name: keystore
             mountPath: /opt/thirdeye/server/keystore
             readOnly: true
@@ -141,11 +141,11 @@ spec:
             name: thirdeye-scheduler
         - name: tls-internal
           secret:
-            secretName: {{ .Values.scheduler.tls.secretName | default (printf "%s-internal-tls" (include "thirdeye.scheduler.fullname" .)) }}
+            secretName: {{ .Values.tls.scheduler.secretName | default (printf "%s-internal-tls" (include "thirdeye.scheduler.fullname" .)) }}
             optional: true
         - name: truststore
           emptyDir: {}
-        {{- if .Values.scheduler.tls.enabled }}
+        {{- if .Values.tls.scheduler.enabled }}
         - name: keystore
           emptyDir: {}
         {{- end }}

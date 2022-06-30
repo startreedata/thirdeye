@@ -88,7 +88,7 @@ public class JobSchedulerService {
     return new DetectionPipelineTaskInfo(alert.getId(), start, endTime);
   }
 
-  public Long getIdFromJobKey(String jobKey) {
+  public static Long getIdFromJobKey(String jobKey) {
     final String[] tokens = jobKey.split("_");
     final String id = tokens[tokens.length - 1];
     return Long.valueOf(id);

@@ -28,6 +28,8 @@ export const AppRouteRelative = {
     ALERTS_ALERT: `${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_VIEW: `view`,
     ALERTS_CREATE: "create",
+    ALERTS_CREATE_NEW: "new",
+    ALERTS_CREATE_COPY: `copy/${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_CREATE_SIMPLE: "simple",
     ALERTS_CREATE_ADVANCED: "advanced",
     ALERTS_UPDATE: `update`,
@@ -81,6 +83,8 @@ export const AppRoute = {
     ALERTS: `/${AppRouteRelative.ALERTS}`,
     ALERTS_ALL: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALL}`,
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
+    ALERTS_CREATE_NEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}`,
+    ALERTS_CREATE_EXISTING: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}`,
     ALERTS_CREATE_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
     ALERTS_CREATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
@@ -356,6 +360,13 @@ export const getEventsViewPath = (id: number): string => {
 
 export const getEventsCreatePath = (): string => {
     return AppRoute.EVENTS_CREATE;
+};
+
+export const getAlertsCreateCopyPath = (id: number): string => {
+    let path: string = AppRoute.ALERTS_CREATE_EXISTING;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
 };
 
 export const getEventsPath = (): string => {

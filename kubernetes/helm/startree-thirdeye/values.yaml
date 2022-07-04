@@ -81,6 +81,7 @@ worker:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  replicas: 1
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
   strategy:

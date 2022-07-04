@@ -28,6 +28,7 @@ import {
 } from "../../platform/components";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
+    getAlertsCreateCopyPath,
     getAlertsUpdatePath,
     getAlertsViewPath,
 } from "../../utils/routes/routes.util";
@@ -115,6 +116,15 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
         navigate(getAlertsUpdatePath(selectedAlertId));
     };
 
+    const handleAlertDuplicate = (): void => {
+        if (!selectedAlert) {
+            return;
+        }
+        const selectedAlertId = selectedAlert.rowKeyValues[0] as number;
+
+        navigate(getAlertsCreateCopyPath(selectedAlertId));
+    };
+
     const alertGroupColumns = [
         {
             key: "name",
@@ -157,6 +167,17 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
                     })}
                     toolbarComponent={
                         <Grid container alignItems="center" spacing={2}>
+                            {/* Duplicate */}
+                            <Grid item>
+                                <Button
+                                    disabled={isActionButtonDisable}
+                                    variant="contained"
+                                    onClick={handleAlertDuplicate}
+                                >
+                                    {t("label.duplicate")}
+                                </Button>
+                            </Grid>
+
                             {/* Edit */}
                             <Grid item>
                                 <Button

@@ -45,21 +45,28 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
-    AppRoute,
+    AppRouteRelative,
     getAlertsAllPath,
     getAlertsViewPath,
 } from "../../utils/routes/routes.util";
 import { validateConfiguration } from "./alerts-create-advance-page/alerts-create-advance-page.util";
 import { useAlertCreatePageStyles } from "./alerts-create-page-component.styles";
-import { CreateAlertConfigurationSection } from "./alerts-create-page.interfaces";
+import {
+    AlertsCreatePageProps,
+    CreateAlertConfigurationSection,
+} from "./alerts-create-page.interfaces";
 
-export const AlertsCreatePage: FunctionComponent = () => {
+export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
+    startingAlertConfiguration,
+}) => {
     const classes = useAlertCreatePageStyles();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const location = useLocation();
     const { notify } = useNotificationProviderV1();
-    const [alert, setAlert] = useState<EditableAlert>(createNewStartingAlert());
+    const [alert, setAlert] = useState<EditableAlert>(
+        startingAlertConfiguration
+    );
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
@@ -289,7 +296,7 @@ export const AlertsCreatePage: FunctionComponent = () => {
                         <Button
                             component={NavLink}
                             to={{
-                                pathname: AppRoute.ALERTS_CREATE_SIMPLE,
+                                pathname: AppRouteRelative.ALERTS_CREATE_SIMPLE,
                                 search: searchParams.toString(),
                             }}
                             variant={
@@ -303,7 +310,8 @@ export const AlertsCreatePage: FunctionComponent = () => {
                         <Button
                             component={NavLink}
                             to={{
-                                pathname: AppRoute.ALERTS_CREATE_ADVANCED,
+                                pathname:
+                                    AppRouteRelative.ALERTS_CREATE_ADVANCED,
                                 search: searchParams.toString(),
                             }}
                             variant={

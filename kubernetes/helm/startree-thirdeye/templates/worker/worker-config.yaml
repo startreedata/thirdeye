@@ -29,9 +29,9 @@ data:
       adminContextPath: /admin
 
       applicationConnectors:
-        {{- if .Values.worker.tls.enabled }}
+        {{- if .Values.tls.worker.enabled }}
         - type: https
-          port: {{ .Values.worker.tls.port }}
+          port: {{ .Values.tls.port }}
           idleTimeout: 620s
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
@@ -79,7 +79,7 @@ data:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
       enabled: true
       schemes:
-        {{- if .Values.worker.tls.enabled }}
+        {{- if .Values.tls.worker.enabled }}
         - https
         {{- end }}
         - http

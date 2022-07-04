@@ -35,11 +35,11 @@ spec:
       protocol: TCP
       port: 8081
       targetPort: 8081
-    {{- if .Values.worker.tls.enabled }}
+    {{- if .Values.tls.worker.enabled }}
     - name: https
       protocol: TCP
-      port: {{ .Values.worker.tls.port }}
-      targetPort: {{ .Values.worker.tls.port }}
+      port: {{ .Values.tls.port }}
+      targetPort: {{ .Values.tls.port }}
     {{- end }}
   selector:
     app: {{ include "thirdeye.name" . }}

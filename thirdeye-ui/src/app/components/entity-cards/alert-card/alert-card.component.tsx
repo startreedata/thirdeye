@@ -30,6 +30,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
+    getAlertsCreateCopyPath,
     getAlertsUpdatePath,
     getAlertsViewPath,
     getAnomaliesAllRangePath,
@@ -71,6 +72,15 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
 
         props.uiAlert.alert.active = !props.uiAlert.alert.active;
         props.onChange && props.onChange(props.uiAlert);
+        handleAlertOptionsClose();
+    };
+
+    const handleAlertDuplicate = (): void => {
+        if (!props.uiAlert) {
+            return;
+        }
+
+        navigate(getAlertsCreateCopyPath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 
@@ -155,6 +165,13 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
                                             : t("label.activate-entity", {
                                                   entity: t("label.alert"),
                                               })}
+                                    </MenuItem>
+
+                                    {/* Duplicate alert */}
+                                    <MenuItem onClick={handleAlertDuplicate}>
+                                        {t("label.duplicate-entity", {
+                                            entity: t("label.alert"),
+                                        })}
                                     </MenuItem>
 
                                     {/* Edit alert */}

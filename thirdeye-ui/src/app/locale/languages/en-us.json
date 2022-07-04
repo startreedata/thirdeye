@@ -38,6 +38,7 @@
         "update-entity": "Update {{entity}}",
         "edit": "Edit",
         "edit-entity": "Edit {{entity}}",
+        "duplicate-entity": "Duplicate {{entity}}",
         "delete": "Delete",
         "delete-entity": "Delete {{entity}}",
         "active": "Active",
@@ -215,7 +216,8 @@
         "yes-leave-page": "Yes, leave page",
         "back-to-anomalies": "Back to Anomalies",
         "close": "Close",
-        "alert-json-template": "Alert JSON Template"
+        "alert-json-template": "Alert JSON Template",
+        "duplicate": "Duplicate"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

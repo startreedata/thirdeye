@@ -145,7 +145,7 @@ spec:
             name: thirdeye-config
         - name: tls-internal
           secret:
-            secretName: {{ .Values.tls.coordinatorSecretName | default (printf "%s-internal-tls" (include "thirdeye.coordinator.fullname" .)) }}
+            secretName: {{ .Values.tls.coordinator.secretName | default (printf "%s-internal-tls" (include "thirdeye.coordinator.fullname" .)) }}
             optional: true
         - name: truststore
           emptyDir: {}

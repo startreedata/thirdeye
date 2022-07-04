@@ -59,7 +59,7 @@ coordinator:
 scheduler:
   enabled: true
   name: scheduler
-  port: 8082
+  port: 8080
   serviceType: ClusterIP
 
   resources: {}
@@ -68,18 +68,13 @@ scheduler:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-  tls:
-    enabled: false
-    port: 8443
-#  Uncomment the below config to override the default tls secret name ({scheduler full name}-internal-tls)
-#  secretName: tls-secret-name
   strategy:
     type: Recreate
 
 worker:
   enabled: true
   name: worker
-  port: 8083
+  port: 8080
   serviceType: ClusterIP
 
   resources: {}
@@ -88,11 +83,6 @@ worker:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
-  tls:
-    enabled: false
-    port: 8443
-#  Uncomment the below config to override the default tls secret name ({worker full name}-internal-tls)
-#  secretName: tls-secret-name
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -115,10 +105,20 @@ tls:
   password: changeit
   type: PKCS12
   port: 8443
-#  Uncomment the below config to override the default coordinator tls secret name ({coordinator full name}-internal-tls)
-#  coordinatorSecretName: tls-secret-name
-#  Uncomment the below config to override the default ui tls secret name ({ui full name}-tls)
-#  uiSecretName: tls-secret-name
+  ui: {}
+  # Uncomment the below config to override the default ui tls secret name ({ui full name}-tls)
+  #  secretName: tls-secret-name
+  coordinator: {}
+  # Uncomment the below config to override the default coordinator tls secret name ({coordinator full name}-internal-tls)
+  #  secretName: tls-secret-name
+  worker:
+    enabled: false
+  # Uncomment the below config to override the default worker tls secret name ({worker full name}-internal-tls)
+  #  secretName: tls-secret-name
+  scheduler:
+    enabled: false
+  # Uncomment the below config to override the default scheduler tls secret name ({scheduler full name}-internal-tls)
+  #  secretName: tls-secret-name
 
 # Expose prometheus metrics.
 prometheus:

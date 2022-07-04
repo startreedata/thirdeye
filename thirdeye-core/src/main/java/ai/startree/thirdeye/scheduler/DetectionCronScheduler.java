@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
+
 import ai.startree.thirdeye.detection.DetectionPipelineJob;
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -122,7 +124,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
       Set<JobKey> scheduledJobs = getScheduledJobs();
       for (JobKey jobKey : scheduledJobs) {
         try {
-          Long id = jobSchedulerService.getIdFromJobKey(jobKey.getName());
+          Long id = getIdFromJobKey(jobKey.getName());
           AlertDTO detectionDTO = detectionDAO.findById(id);
           if (detectionDTO == null) {
             LOG.info("Found a scheduled detection config task, but not found in the database {}",

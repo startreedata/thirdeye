@@ -137,7 +137,8 @@ export const generateComparisonChartOptions = (
         },
     ];
 
-    const { value, unit } = parseBaselineComparisonOffset(comparisonOffset);
+    const { baselineOffsetValue, unit } =
+        parseBaselineComparisonOffset(comparisonOffset);
 
     return {
         brush: true,
@@ -154,9 +155,15 @@ export const generateComparisonChartOptions = (
                 },
                 {
                     start:
-                        startTime - baselineOffsetToMilliseconds(value, unit),
-                    end: endTime - baselineOffsetToMilliseconds(value, unit),
-                    name: baselineComparisonOffsetToHumanReadable(value, unit),
+                        startTime -
+                        baselineOffsetToMilliseconds(baselineOffsetValue, unit),
+                    end:
+                        endTime -
+                        baselineOffsetToMilliseconds(baselineOffsetValue, unit),
+                    name: baselineComparisonOffsetToHumanReadable(
+                        baselineOffsetValue,
+                        unit
+                    ),
                     color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
                     opacity: 0.2,
                 },

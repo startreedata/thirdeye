@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.plugins.datasource.mock;
 
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
@@ -20,11 +28,9 @@ import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -428,12 +434,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public ThirdEyeResponse execute(ThirdEyeRequest request) throws Exception {
-    return this.delegate.execute(request);
-  }
-
-  @Override
-  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+  public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     return this.delegate.fetchDataTable(request);
   }
 
@@ -455,12 +456,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
     return this.delegate.getMaxDataTime(datasetConfig);
-  }
-
-  @Override
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
-      throws Exception {
-    return this.delegate.getDimensionFilters(datasetConfig);
   }
 
   /**

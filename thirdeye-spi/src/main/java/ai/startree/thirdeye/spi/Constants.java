@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.spi;
 
 import java.time.Duration;
@@ -39,7 +47,6 @@ public interface Constants {
   int DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 100;
   int DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 8192;
 
-  // timestamp field used to get timestamp in RelationalThirdEyeResponse
   String TIMESTAMP = "timestamp";
 
   // System property var to check for plugins. Default is "plugins"

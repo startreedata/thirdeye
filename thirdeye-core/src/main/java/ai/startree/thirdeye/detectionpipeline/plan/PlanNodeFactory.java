@@ -1,13 +1,22 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.detectionpipeline.plan;
 
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -27,6 +36,7 @@ import org.slf4j.LoggerFactory;
 public class PlanNodeFactory {
 
   public static final String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
+  public static final String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
   private static final Logger LOG = LoggerFactory.getLogger(PlanNodeFactory.class);
 
   /* List of plan node classes that are built in with thirdeye */
@@ -47,10 +57,13 @@ public class PlanNodeFactory {
    */
   private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap;
   private final DataSourceCache dataSourceCache;
+  private final DetectionRegistry detectionRegistry;
 
   @Inject
-  public PlanNodeFactory(final DataSourceCache dataSourceCache) {
+  public PlanNodeFactory(final DataSourceCache dataSourceCache,
+      final DetectionRegistry detectionRegistry) {
     this.dataSourceCache = dataSourceCache;
+    this.detectionRegistry = detectionRegistry;
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
   }
 
@@ -84,7 +97,10 @@ public class PlanNodeFactory {
         .setPlanNodeBean(planNodeBean)
         .setDetectionInterval(detectionInterval)
         .setPipelinePlanNodes(pipelinePlanNodes)
-        .setProperties(ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY, dataSourceCache));
+        .setProperties(ImmutableMap.of(
+            DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
+            DETECTION_REGISTRY_REF_KEY, detectionRegistry
+        ));
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");
     final Class<? extends PlanNode> planNodeClass = requireNonNull(planNodeTypeToClassMap.get(type),

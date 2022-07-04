@@ -1,22 +1,34 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
+import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
+import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
+import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.File;
@@ -47,6 +59,8 @@ public class PluginLoader {
   private final DataSourcesLoader dataSourcesLoader;
   private final DetectionRegistry detectionRegistry;
   private final NotificationServiceRegistry notificationServiceRegistry;
+  private final ContributorsFinderRunner contributorsFinderRunner;
+  private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -56,10 +70,14 @@ public class PluginLoader {
       final DataSourcesLoader dataSourcesLoader,
       final DetectionRegistry detectionRegistry,
       final NotificationServiceRegistry notificationServiceRegistry,
+      final ContributorsFinderRunner contributorsFinderRunner,
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
+    this.contributorsFinderRunner = contributorsFinderRunner;
+    this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -107,6 +125,13 @@ public class PluginLoader {
     for (NotificationServiceFactory f : plugin.getNotificationServiceFactories()) {
       notificationServiceRegistry.addNotificationServiceFactory(f);
     }
+    for (ContributorsFinderFactory f: plugin.getContributorsFinderFactories()) {
+      contributorsFinderRunner.addContributorsFinderFactory(f);
+    }
+    for (BootstrapResourcesProviderFactory f: plugin.getBootstrapResourcesProviderFactories()) {
+      bootstrapResourcesRegistry.addBootstrapResourcesProviderFactory(f);
+    }
+    log.info("Installed plugin: " + plugin.getClass().getName());
   }
 
   private URLClassLoader createPluginClassLoader(File dir) {

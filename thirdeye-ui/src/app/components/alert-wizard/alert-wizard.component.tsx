@@ -1,3 +1,16 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
 import { AxiosError } from "axios";
@@ -25,6 +38,7 @@ import {
     getUiAlert,
     omitNonUpdatableData,
 } from "../../utils/alerts/alerts.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -114,7 +128,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                 });
     }, [currentWizardStep]);
 
-    const refreshAlertEvaluation = (): void => {
+    const refreshAlertEvaluation = (start?: number, end?: number): void => {
         setAlertEvaluation({} as AlertEvaluation);
         if (!validateDetectionConfiguration()) {
             return;
@@ -123,7 +137,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
         let fetchedAlertEvaluation = {} as AlertEvaluation;
         props.getAlertEvaluation &&
             props
-                .getAlertEvaluation(JSON.parse(newAlertJSON))
+                .getAlertEvaluation(JSON.parse(newAlertJSON), start, end)
                 .then((alertEvaluation: AlertEvaluation): void => {
                     fetchedAlertEvaluation = alertEvaluation;
                 })
@@ -360,7 +374,7 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                                     displayInline
                                                     enablePadding
                                                     externalLink
-                                                    href="https://dev.startree.ai/docs/thirdeye/concepts/alert-configuration"
+                                                    href={`${THIRDEYE_DOC_LINK}/concepts/alert-configuration`}
                                                 />
                                             </span>
                                         </TooltipV1>

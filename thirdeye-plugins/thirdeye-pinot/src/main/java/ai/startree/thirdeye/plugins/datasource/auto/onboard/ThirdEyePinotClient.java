@@ -1,12 +1,22 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
+
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
-import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfigFactory;
 import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlDataSourceConfigFactory;
 import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlThirdEyeDataSourceConfig;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
@@ -71,7 +81,8 @@ public class ThirdEyePinotClient {
       controllerHost = config.getControllerHost();
       controllerPort = config.getControllerPort();
     } else {
-      final PinotThirdEyeDataSourceConfig config = PinotThirdEyeDataSourceConfigFactory.createFromProperties(dataSourceMeta.getProperties());
+      final PinotThirdEyeDataSourceConfig config = buildConfig(dataSourceMeta.getProperties());
+
       controllerConnectionScheme = config.getControllerConnectionScheme();
       controllerHost = config.getControllerHost();
       controllerPort = config.getControllerPort();
@@ -92,7 +103,7 @@ public class ThirdEyePinotClient {
       );
       customClient.setDefaultHeaders(headers);
     }
-    if (PinotThirdEyeDataSourceConfigFactory.HTTPS_SCHEME.equals(controllerConnectionScheme)) {
+    if (HTTPS_SCHEME.equals(controllerConnectionScheme)) {
       try {
         // Accept all SSL certificate because we assume that the Pinot broker are setup in the
         // same internal network

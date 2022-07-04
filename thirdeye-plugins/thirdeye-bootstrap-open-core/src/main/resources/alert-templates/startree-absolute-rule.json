@@ -1,0 +1,128 @@
+{
+  "name": "startree-absolute-rule",
+  "description": "Absolute rule template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "nodes": [
+    {
+      "name": "root",
+      "type": "AnomalyDetector",
+      "params": {
+        "component.absoluteChange": "${absoluteChange}",
+        "component.monitoringGranularity": "${monitoringGranularity}",
+        "component.metric": "met",
+        "component.timestamp": "ts",
+        "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
+        "anomaly.source": "absolute-change-template/root",
+        "type": "ABSOLUTE_CHANGE",
+        "component.pattern": "${pattern}"
+      },
+      "inputs": [
+        {
+          "targetProperty": "baseline",
+          "sourcePlanNode": "baselineMissingDataManager",
+          "sourceProperty": "baselineOutput"
+        },
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "currentMissingDataManager",
+          "sourceProperty": "currentOutput"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "baselineMissingDataManager",
+      "type": "TimeIndexFiller",
+      "params": {
+        "component.timestamp": "ts"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "baselineDataFetcher",
+          "sourceProperty": "baselineOutput"
+        }
+      ],
+      "outputs": [
+        {
+          "outputName": "baselineOutput"
+        }
+      ]
+    },
+    {
+      "name": "baselineDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.dataSource": "${dataSource}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${baselineOffset}', '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "pinot",
+          "outputName": "baselineOutput"
+        }
+      ]
+    },
+    {
+      "name": "currentMissingDataManager",
+      "type": "TimeIndexFiller",
+      "params": {
+        "component.timestamp": "ts"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentOutput"
+        }
+      ],
+      "outputs": [
+        {
+          "outputName": "currentOutput"
+        }
+      ]
+    },
+    {
+      "name": "currentDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.dataSource": "${dataSource}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "pinot",
+          "outputName": "currentOutput"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "datasource": {
+      "name": "${dataSource}"
+    },
+    "dataset": {
+      "name": "${dataset}",
+      "completenessDelay": "${completenessDelay}"
+    },
+    "metric": {
+      "name": "${aggregationColumn}",
+      "aggregationFunction": "${rcaAggregationFunction}",
+      "where": "${queryFilters}"
+    },
+    "timezone": "${timezone}",
+    "mergeMaxGap": "${mergeMaxGap}",
+    "mergeMaxDuration": "${mergeMaxDuration}",
+    "granularity": "${monitoringGranularity}"
+  },
+  "defaultProperties": {
+    "timezone": "UTC",
+    "pattern": "UP_OR_DOWN",
+    "completenessDelay": "P0D",
+    "mergeMaxGap": "",
+    "mergeMaxDuration": "",
+    "rcaAggregationFunction": "",
+    "queryFilters": "",
+    "queryLimit": "100000000"
+  }
+}

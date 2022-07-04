@@ -1,14 +1,23 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.detectionpipeline.components;
 
 import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.OBJECT;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -26,7 +35,6 @@ import ai.startree.thirdeye.util.TimeUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -76,8 +84,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     Map<String, String> properties = dataTable.getProperties();
     timeColumn = Objects.requireNonNull(spec.getTimestamp());
 
-    String granularitySpec = Optional.ofNullable(spec.getMonitoringGranularity())
-        .orElseGet(() -> Optional.ofNullable(properties.get(GRANULARITY.toString()))
+    String granularitySpec = optional(spec.getMonitoringGranularity())
+        .orElseGet(() -> optional(properties.get(GRANULARITY.toString()))
             .orElseThrow(() -> new IllegalArgumentException(
                 "monitoringGranularity is missing from spec and DataTable properties")));
     granularity = isoPeriod(granularitySpec);

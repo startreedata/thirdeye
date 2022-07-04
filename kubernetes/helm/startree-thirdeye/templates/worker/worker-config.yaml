@@ -1,5 +1,18 @@
-
 {{ if .Values.worker.enabled }}
+#
+# Copyright 2022 StarTree Inc
+#
+# Licensed under the StarTree Community License (the "License"); you may not use
+# this file except in compliance with the License. You may obtain a copy of the
+# License at http://www.startree.ai/legal/startree-community-license
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the
+# License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+# either express or implied.
+# See the License for the specific language governing permissions and limitations under
+# the License.
+#
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -16,9 +29,9 @@ data:
       adminContextPath: /admin
 
       applicationConnectors:
-        {{- if .Values.tls.enabled }}
+        {{- if .Values.tls.worker.enabled }}
         - type: https
-          port: {{ .Values.worker.tlsPort }}
+          port: {{ .Values.tls.port }}
           idleTimeout: 620s
           keyStorePath: /opt/thirdeye/server/keystore/keystore
           keyStorePassword: {{ .Values.tls.password }}
@@ -66,10 +79,10 @@ data:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
       enabled: true
       schemes:
-        - http
-        {{- if .Values.tls.enabled }}
+        {{- if .Values.tls.worker.enabled }}
         - https
         {{- end }}
+        - http
 
       # package to scan for jersey resources
       resourcePackage: ai.startree.thirdeye.resources
@@ -85,6 +98,11 @@ data:
     
     time:
       timezone: {{ .Values.time.timezone }}
+    
+    rca:
+      topContributors:
+        algorithm: {{ .Values.rca.topContributors.algorithm }}
+        params: {{ toYaml .Values.rca.topContributors.params | nindent 10}}
 
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}

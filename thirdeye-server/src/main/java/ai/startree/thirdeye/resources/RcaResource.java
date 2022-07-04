@@ -1,20 +1,20 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.rca.RootCauseAnalysisService;
-import ai.startree.thirdeye.rca.RootCauseEntityFormatter;
-import ai.startree.thirdeye.rootcause.Entity;
-import ai.startree.thirdeye.rootcause.RCAFramework;
-import ai.startree.thirdeye.rootcause.RCAFrameworkExecutionResult;
-import ai.startree.thirdeye.rootcause.entity.TimeRangeEntity;
-import ai.startree.thirdeye.rootcause.util.EntityUtils;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -29,15 +29,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -57,16 +49,6 @@ public class RcaResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(RcaResource.class);
 
-  private static final int DEFAULT_FORMATTER_DEPTH = 1;
-
-  private static final long ANALYSIS_RANGE_MAX = TimeUnit.DAYS.toMillis(32);
-  private static final long ANOMALY_RANGE_MAX = TimeUnit.DAYS.toMillis(32);
-  private static final long BASELINE_RANGE_MAX = ANOMALY_RANGE_MAX;
-
-  private final List<RootCauseEntityFormatter> formatters;
-  // todo cyril remove frameworks
-  private final Map<String, RCAFramework> frameworks;
-  private final RootCauseTemplateResource rootCauseTemplateResource;
   private final RcaInvestigationResource rcaInvestigationResource;
   private final RcaMetricResource rcaMetricResource;
   private final RcaDimensionAnalysisResource rcaDimensionAnalysisResource;
@@ -74,15 +56,10 @@ public class RcaResource {
 
   @Inject
   public RcaResource(
-      final RootCauseAnalysisService rootCauseAnalysisService,
-      final RootCauseTemplateResource rootCauseTemplateResource,
       final RcaInvestigationResource rcaInvestigationResource,
       final RcaMetricResource rcaMetricResource,
       final RcaDimensionAnalysisResource rcaDimensionAnalysisResource,
       final RcaRelatedResource rcaRelatedResource) {
-    this.frameworks = rootCauseAnalysisService.getFrameworks();
-    this.formatters = rootCauseAnalysisService.getFormatters();
-    this.rootCauseTemplateResource = rootCauseTemplateResource;
     this.rcaInvestigationResource = rcaInvestigationResource;
     this.rcaMetricResource = rcaMetricResource;
     this.rcaDimensionAnalysisResource = rcaDimensionAnalysisResource;
@@ -92,11 +69,6 @@ public class RcaResource {
   @Path(value = "/dim-analysis")
   public RcaDimensionAnalysisResource getDimensionAnalysisResource() {
     return rcaDimensionAnalysisResource;
-  }
-
-  @Path(value = "/template")
-  public RootCauseTemplateResource getRootCauseTemplateResource() {
-    return rootCauseTemplateResource;
   }
 
   @Path(value = "/investigations")
@@ -138,70 +110,7 @@ public class RcaResource {
       @ApiParam(value = "URNs of metrics to analyze")
       @QueryParam("urns") List<String> urns) throws Exception {
 
-    // configuration validation
-    ensure(frameworks.containsKey(framework),
-        String.format("Could not resolve framework '%s'. Allowed values: %s",
-            framework,
-            frameworks.keySet()));
-
-    // input validation
-    ensureExists(analysisStart,
-        "Must provide analysis start timestamp (in milliseconds)");
-
-    ensureExists(analysisEnd,
-        "Must provide analysis end timestamp (in milliseconds)");
-
-    if (anomalyStart == null) {
-      anomalyStart = analysisStart;
-    }
-
-    if (anomalyEnd == null) {
-      anomalyEnd = analysisEnd;
-    }
-
-    if (baselineStart == null) {
-      baselineStart = anomalyStart - TimeUnit.DAYS.toMillis(7);
-    }
-
-    if (baselineEnd == null) {
-      baselineEnd = anomalyEnd - TimeUnit.DAYS.toMillis(7);
-    }
-
-    if (formatterDepth == null) {
-      formatterDepth = DEFAULT_FORMATTER_DEPTH;
-    }
-
-    ensure(analysisEnd - analysisStart <= ANALYSIS_RANGE_MAX,
-        String.format("Analysis range cannot be longer than %d", ANALYSIS_RANGE_MAX));
-
-    ensure(anomalyEnd - anomalyStart <= ANOMALY_RANGE_MAX,
-        String.format("Anomaly range cannot be longer than %d", ANOMALY_RANGE_MAX));
-
-    ensure(baselineEnd - baselineStart <= BASELINE_RANGE_MAX,
-        String.format("Baseline range cannot be longer than %d", BASELINE_RANGE_MAX));
-
-    // validate window size
-    long anomalyWindow = anomalyEnd - anomalyStart;
-    long baselineWindow = baselineEnd - baselineStart;
-    ensure(anomalyWindow == baselineWindow,
-        "Must provide equal-sized anomaly and baseline periods");
-
-    // format inputs
-    Set<Entity> inputs = new HashSet<>(Arrays.asList(
-        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANOMALY, anomalyStart, anomalyEnd),
-        TimeRangeEntity.fromRange(0.8, TimeRangeEntity.TYPE_BASELINE, baselineStart, baselineEnd),
-        TimeRangeEntity.fromRange(1.0, TimeRangeEntity.TYPE_ANALYSIS, analysisStart, analysisEnd)
-    ));
-
-    for (String urn : urns) {
-      inputs.add(EntityUtils.parseURN(urn, 1.0));
-    }
-
-    // run root-cause analysis
-    RCAFrameworkExecutionResult result = frameworks.get(framework).run(inputs);
-
-    // apply formatters
-    return applyFormatters(result.getResultsSorted(), formatterDepth);
+    throw new UnsupportedOperationException("Deprecated route");
   }
 
   @GET
@@ -213,60 +122,7 @@ public class RcaResource {
       @QueryParam("framework") String framework,
       @QueryParam("formatterDepth") Integer formatterDepth,
       @QueryParam("urns") List<String> urns) throws Exception {
-
-    // configuration validation
-    ensure(frameworks.containsKey(framework),
-        String.format("Could not resolve framework '%s'. Allowed values: %s",
-            framework,
-            frameworks.keySet()));
-
-    if (formatterDepth == null) {
-      formatterDepth = DEFAULT_FORMATTER_DEPTH;
-    }
-
-    // format input
-    Set<Entity> input = new HashSet<>();
-    for (String urn : urns) {
-      input.add(EntityUtils.parseURNRaw(urn, 1.0));
-    }
-
-    // run root-cause analysis
-    RCAFrameworkExecutionResult result = this.frameworks.get(framework).run(input);
-
-    // apply formatters
-    return applyFormatters(result.getResultsSorted(), formatterDepth);
-  }
-
-  private List<RootCauseEntity> applyFormatters(Iterable<Entity> entities, int maxDepth) {
-    List<RootCauseEntity> output = new ArrayList<>();
-    for (Entity e : entities) {
-      output.add(this.applyFormatters(e, maxDepth));
-    }
-    return output;
-  }
-
-  private RootCauseEntity applyFormatters(Entity e, int remainingDepth) {
-    for (RootCauseEntityFormatter formatter : this.formatters) {
-      if (formatter.applies(e)) {
-        try {
-          RootCauseEntity rce = formatter.format(e);
-
-          if (remainingDepth > 1) {
-            for (Entity re : e.getRelated()) {
-              rce.addRelatedEntity(this.applyFormatters(re, remainingDepth - 1));
-            }
-          } else {
-            // clear out any related entities added by the formatter by default
-            rce.setRelatedEntities(Collections.emptyList());
-          }
-
-          return rce;
-        } catch (Exception ex) {
-          LOG.warn("Error applying formatter '{}'. Skipping.", formatter.getClass().getName(), ex);
-        }
-      }
-    }
-    throw new IllegalArgumentException(String.format("No formatter for Entity '%s'", e.getUrn()));
+    throw new UnsupportedOperationException("Deprecated route");
   }
 
   @NonNull
@@ -274,11 +130,11 @@ public class RcaResource {
       List<String> excludedDimensions,
       DatasetConfigDTO datasetConfigDTO) {
     if (dimensions.isEmpty()) {
-      dimensions = Optional.ofNullable(datasetConfigDTO.getDimensions()).orElse(List.of());
+      dimensions = optional(datasetConfigDTO.getDimensions()).orElse(List.of());
     }
     dimensions = cleanDimensionStrings(dimensions);
     if (excludedDimensions.isEmpty()) {
-      excludedDimensions = Optional.ofNullable(datasetConfigDTO.getRcaExcludedDimensions())
+      excludedDimensions = optional(datasetConfigDTO.getRcaExcludedDimensions())
           .orElse(List.of());
     }
     excludedDimensions = cleanDimensionStrings(excludedDimensions);

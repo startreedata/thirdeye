@@ -1,0 +1,89 @@
+{
+  "name": "startree-threshold",
+  "description": "Threshold template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "nodes": [
+    {
+      "name": "root",
+      "type": "AnomalyDetector",
+      "params": {
+        "component.min": "${min}",
+        "component.max": "${max}",
+        "component.metric": "met",
+        "component.monitoringGranularity": "${monitoringGranularity}",
+        "component.timestamp": "ts",
+        "anomaly.metric": "${aggregationColumn}",
+        "anomaly.dataset": "${dataset}",
+        "anomaly.source": "threshold-template/root",
+        "type": "THRESHOLD"
+      },
+      "inputs": [
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "missingDataPointsFiller",
+          "sourceProperty": "preparedCurrentData"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "missingDataPointsFiller",
+      "type": "TimeIndexFiller",
+      "params": {
+        "component.timestamp": "ts"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentData"
+        }
+      ],
+      "outputs": [
+        {
+          "outputName": "preparedCurrentData"
+        }
+      ]
+    },
+    {
+      "name": "currentDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.dataSource": "${dataSource}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\") as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "currentData",
+          "outputName": "currentData"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "datasource": {
+      "name": "${dataSource}"
+    },
+    "dataset": {
+      "name": "${dataset}",
+      "completenessDelay": "${completenessDelay}"
+    },
+    "metric": {
+      "name": "${aggregationColumn}",
+      "aggregationFunction": "${rcaAggregationFunction}",
+      "where": "${queryFilters}"
+    },
+    "timezone": "${timezone}",
+    "mergeMaxGap": "${mergeMaxGap}",
+    "mergeMaxDuration": "${mergeMaxDuration}",
+    "granularity": "${monitoringGranularity}"
+  },
+  "defaultProperties": {
+    "timezone": "UTC",
+    "completenessDelay": "P0D",
+    "mergeMaxGap": "",
+    "mergeMaxDuration": "",
+    "rcaAggregationFunction": "",
+    "queryFilters": "",
+    "queryLimit": "100000000"
+  }
+}

@@ -1,11 +1,19 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package ai.startree.thirdeye.detection.anomaly.detection.trigger;
 
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -74,9 +82,12 @@ public class DataAvailabilityTaskSchedulerTest {
             .setScheduleDelayInSec(60)
             .setTaskTriggerFallBackTimeInSec(TimeUnit.DAYS.toSeconds(1))
             .setSchedulingWindowInSec(TimeUnit.MINUTES.toSeconds(30))
-            .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)), TestDbEnv.getInstance().getTaskDAO(),
-        TestDbEnv.getInstance().getDetectionConfigManager(), TestDbEnv.getInstance().getDatasetConfigDAO(),
-        TestDbEnv.getInstance(ThirdEyeCacheRegistry.class), TestDbEnv.getInstance().getMetricConfigDAO()
+            .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)),
+        TestDbEnv.getInstance().getTaskDAO(),
+        TestDbEnv.getInstance().getDetectionConfigManager(),
+        TestDbEnv.getInstance().getDatasetConfigDAO(),
+        TestDbEnv.getInstance().getJobSchedulerService(),
+        TestDbEnv.getInstance().getMetricConfigDAO()
     );
   }
 

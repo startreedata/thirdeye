@@ -60,6 +60,8 @@
         "binary-search-bounds": "^2.0.5",
         "classnames": "^2.2.6",
         "codemirror": "^5.59.1",
+        "cron-expression-validator": "^1.0.20",
+        "cronstrue": "^2.9.0",
         "d3-array": "^3.1.4",
         "flat": "^5.0.2",
         "i18next": "^19.8.4",

@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.resources;
 
 import javax.inject.Inject;
@@ -10,6 +18,7 @@ import javax.ws.rs.Path;
 
 public class ApiResource {
 
+  private final AppAnalyticsResource appAnalyticsResource;
   private final AuthResource authResource;
   private final AuthInfoResource authInfoResource;
   private final DataSourceResource dataSourceResource;
@@ -26,7 +35,8 @@ public class ApiResource {
   private final UiResource uiResource;
 
   @Inject
-  public ApiResource(final AuthResource authResource,
+  public ApiResource(final AppAnalyticsResource appAnalyticsResource,
+      final AuthResource authResource,
       final AuthInfoResource authInfoResource,
       final DataSourceResource dataSourceResource,
       final DatasetResource datasetResource,
@@ -40,6 +50,7 @@ public class ApiResource {
       final EventResource eventResource,
       final TaskResource taskResource,
       final UiResource uiResource) {
+    this.appAnalyticsResource = appAnalyticsResource;
     this.authResource = authResource;
     this.authInfoResource = authInfoResource;
     this.dataSourceResource = dataSourceResource;
@@ -54,6 +65,11 @@ public class ApiResource {
     this.eventResource = eventResource;
     this.taskResource = taskResource;
     this.uiResource = uiResource;
+  }
+
+  @Path("app-analytics")
+  public AppAnalyticsResource getAnalyticsResource() {
+    return appAnalyticsResource;
   }
 
   @Path("auth")

@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
@@ -11,8 +19,10 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
@@ -53,11 +63,15 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    detector = createDetector(planNode.getParams());
+    final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
+        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
+    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
+    detector = createDetector(planNode.getParams(), detectionRegistry);
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
-      final Map<String, Object> params) {
+      final Map<String, Object> params,
+      final DetectionRegistry detectionRegistry) {
     final String type = ensureExists(MapUtils.getString(params, PROP_TYPE),
         ERR_MISSING_CONFIGURATION_FIELD,
         "'type' in detector config");
@@ -71,7 +85,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         "'monitoringGranularity' in detector config");
     monitoringGranularity = isoPeriod(genericDetectorSpec.getMonitoringGranularity());
 
-    return new DetectionRegistry()
+    return detectionRegistry
         .buildDetector(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 

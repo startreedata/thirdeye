@@ -1,3 +1,17 @@
+#
+# Copyright 2022 StarTree Inc
+#
+# Licensed under the StarTree Community License (the "License"); you may not use
+# this file except in compliance with the License. You may obtain a copy of the
+# License at http://www.startree.ai/legal/startree-community-license
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the
+# License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+# either express or implied.
+# See the License for the specific language governing permissions and limitations under
+# the License.
+#
+
 # Default values for ThirdEye Deployment
 
 image:
@@ -28,7 +42,6 @@ coordinator:
   name: coordinator
   replicaCount: 1
   port: 8080
-  tlsPort: 8443
   serviceType: LoadBalancer
 
   resources: {}
@@ -37,12 +50,16 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
 
 scheduler:
   enabled: true
   name: scheduler
-  port: 8082
-  tlsPort: 8443
+  port: 8080
   serviceType: ClusterIP
 
   resources: {}
@@ -51,20 +68,27 @@ scheduler:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  strategy:
+    type: Recreate
 
 worker:
   enabled: true
   name: worker
-  port: 8083
-  tlsPort: 8443
+  port: 8080
   serviceType: ClusterIP
 
   resources: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  replicas: 1
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
   randomWorkerIdEnabled: false
 
 persistence:
@@ -81,6 +105,21 @@ tls:
   enabled: false
   password: changeit
   type: PKCS12
+  port: 8443
+  ui: {}
+  # Uncomment the below config to override the default ui tls secret name ({ui full name}-tls)
+  #  secretName: tls-secret-name
+  coordinator: {}
+  # Uncomment the below config to override the default coordinator tls secret name ({coordinator full name}-internal-tls)
+  #  secretName: tls-secret-name
+  worker:
+    enabled: false
+  # Uncomment the below config to override the default worker tls secret name ({worker full name}-internal-tls)
+  #  secretName: tls-secret-name
+  scheduler:
+    enabled: false
+  # Uncomment the below config to override the default scheduler tls secret name ({scheduler full name}-internal-tls)
+  #  secretName: tls-secret-name
 
 # Expose prometheus metrics.
 prometheus:
@@ -88,6 +127,12 @@ prometheus:
 
 time:
   timezone: UTC
+
+rca:
+  topContributors:
+    # todo cyril replace by source available algorithm once implemented
+    algorithm: cube
+    params: {}
 
 auth:
   enabled: false

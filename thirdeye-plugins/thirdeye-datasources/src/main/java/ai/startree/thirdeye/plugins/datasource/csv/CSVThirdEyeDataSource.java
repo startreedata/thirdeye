@@ -1,34 +1,29 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.plugins.datasource.csv;
 
-import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.STRING;
-
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.Grouping;
-import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
-import ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
-import ai.startree.thirdeye.spi.dataframe.Series.StringConditional;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datasource.MetricFunction;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequest;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeResponse;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
-import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Multimap;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -40,7 +35,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,131 +135,8 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     return this.name;
   }
 
-  /**
-   * Execute the request of querying CSV ThirdEye data source.
-   * Supports filter operation using time stamp and dimensions.
-   * Supports group by time stamp and dimensions.
-   * Only supports SUM as the aggregation function for now.
-   *
-   * @return a ThirdEyeResponse that contains the result of executing the request.
-   */
   @Override
-  public ThirdEyeResponse execute(final ThirdEyeRequest request) throws Exception {
-    DataFrame df = new DataFrame();
-    MetricFunction function = request.getMetricFunction();
-    final String inputName = translator.translate(function.getMetricId());
-    final String outputName = function.toString();
-
-    final MetricAggFunction aggFunction = function.getFunctionName();
-    if (aggFunction != MetricAggFunction.SUM) {
-      throw new IllegalArgumentException(
-          String.format("Aggregation function '%s' not supported yet.", aggFunction));
-    }
-
-    DataFrame data = datasets.get(function.getDataset());
-
-    // filter constraints
-    if (request.getStartTimeInclusive() != null) {
-      data = data.filter(
-          (LongConditional) values -> values[0] >= request.getStartTimeInclusive().getMillis(),
-          COL_TIMESTAMP);
-    }
-
-    if (request.getEndTimeExclusive() != null) {
-      data = data.filter(
-          (LongConditional) values -> values[0] < request.getEndTimeExclusive().getMillis(),
-          COL_TIMESTAMP);
-    }
-
-    if (request.getFilterSet() != null) {
-      Multimap<String, String> filters = request.getFilterSet();
-      for (final Map.Entry<String, Collection<String>> filter : filters.asMap().entrySet()) {
-        data = data.filter(makeFilter(filter.getValue()), filter.getKey());
-      }
-    }
-
-    data = data.dropNull(inputName);
-
-    //
-    // with grouping
-    //
-    if (request.getGroupBy() != null && request.getGroupBy().size() != 0) {
-      Grouping.DataFrameGrouping dataFrameGrouping = data.groupByValue(request.getGroupBy());
-      List<String> aggregationExps = new ArrayList<>();
-      final String[] groupByColumns = request.getGroupBy().toArray(new String[0]);
-      for (String groupByCol : groupByColumns) {
-        aggregationExps.add(groupByCol + ":first");
-      }
-      aggregationExps.add(inputName + ":sum");
-
-      if (request.getGroupByTimeGranularity() != null) {
-        // group by both time granularity and column
-        List<DataFrame.Tuple> tuples =
-            dataFrameGrouping.aggregate(aggregationExps).getSeries().get("key").getObjects()
-                .toListTyped();
-        for (final DataFrame.Tuple key : tuples) {
-          DataFrame filteredData = data.filter((StringConditional) values -> {
-            for (int i = 0; i < groupByColumns.length; i++) {
-              if (values[i] != key.getValues()[i]) {
-                return false;
-              }
-            }
-            return true;
-          }, groupByColumns);
-          filteredData = filteredData.dropNull()
-              .groupByInterval(COL_TIMESTAMP, request.getGroupByTimeGranularity().toMillis())
-              .aggregate(aggregationExps);
-          if (df.size() == 0) {
-            df = filteredData;
-          } else {
-            df = df.append(filteredData);
-          }
-        }
-        df.renameSeries(inputName, outputName);
-      } else {
-        // group by columns only
-        df = dataFrameGrouping.aggregate(aggregationExps);
-        df.dropSeries("key");
-        df.renameSeries(inputName, outputName);
-        df = df.sortedBy(outputName).reverse();
-
-        if (request.getLimit() > 0) {
-          df = df.head(request.getLimit());
-        }
-      }
-
-      //
-      // without dimension grouping
-      //
-    } else {
-      if (request.getGroupByTimeGranularity() != null) {
-        // group by time granularity only
-        // TODO handle non-UTC time zone gracefully
-        df = data.groupByInterval(COL_TIMESTAMP, request.getGroupByTimeGranularity().toMillis())
-            .aggregate(inputName + ":sum");
-        df.renameSeries(inputName, outputName);
-      } else {
-        // aggregation only
-        df.addSeries(outputName, data.getDoubles(inputName).sum());
-        df.addSeries(COL_TIMESTAMP, LongSeries.buildFrom(-1));
-      }
-    }
-
-    df = df.dropNull(outputName);
-
-    // TODO handle non-dataset granularity gracefully
-    TimeSpec timeSpec = new TimeSpec("timestamp", new TimeGranularity(1, TimeUnit.HOURS),
-        TimeSpec.SINCE_EPOCH_FORMAT);
-    if (request.getGroupByTimeGranularity() != null) {
-      timeSpec = new TimeSpec("timestamp", request.getGroupByTimeGranularity(),
-          TimeSpec.SINCE_EPOCH_FORMAT);
-    }
-
-    return new CSVThirdEyeResponse(request, timeSpec, df);
-  }
-
-  @Override
-  public DataTable fetchDataTable(final ThirdEyeRequestV2 request) throws Exception {
+  public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     // fixme cyril implement this
     LOG.error(
         "fetchDataTable not implemented in CSVThirdEyeDataSource but returns an empty Df for e2e tests.");
@@ -296,23 +167,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
       throw new IllegalArgumentException();
     }
     return datasets.get(datasetConfig.getName()).getLongs(COL_TIMESTAMP).max().longValue();
-  }
-
-  @Override
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
-      throws Exception {
-    String dataset = datasetConfig.getName();
-    if (!datasets.containsKey(dataset)) {
-      throw new IllegalArgumentException();
-    }
-    Map<String, Series> data = datasets.get(dataset).getSeries();
-    Map<String, List<String>> output = new HashMap<>();
-    for (Map.Entry<String, Series> entry : data.entrySet()) {
-      if (entry.getValue().type() == STRING) {
-        output.put(entry.getKey(), entry.getValue().unique().getStrings().toList());
-      }
-    }
-    return output;
   }
 
   private URL makeUrlFromPath(String input) {

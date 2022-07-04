@@ -189,8 +189,10 @@ To enable SSL/TLS on ThirdEye components the prerequisite is to have the certifi
 
 SSL/TLS can be configured using
 ```bash
-  --set tls.enabled=true
+  --set tls.enabled=true # for tls on coordinator and UI
   --set tls.password=<default is changeit>
+  --set tls.worker.enabled=true # for tls on worker
+  --set tls.scheduler.enabled=true # for tls on scheduler
 ```
 
 ### OAuth2 Support
@@ -225,20 +227,24 @@ Details
 
 ### Other useful configurations
 
-| Property                 | Description                                                                                                          |
-|--------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `image.repository`       | Docker repository where ThirdEye server image is present                                                             |
-| `image.tag`              | Docker image tag of ThirdEye server image                                                                            |
-| `ui.image.repository`    | Docker repository where ThirdEye UI image is present                                                                 |
-| `ui.image.tag`           | Docker image tag of ThirdEye UI image                                                                                |
-| `ui.port`                | UI service port                                                                                                      |
-| `ui.publicUrl`           | Url on which ThirdEye UI is exposed publicly. All the notifications will use this url to share the anomaly page link |
-| `scheduler.enabled`      | Flag to run a separate scheduler. If not enabled then coordinator itself will take care of scheduling tasks          |
-| `worker.enabled`         | Flag to run a separate worker. If not enabled then coordinator itself will take care of running tasks                |
-| `prometheus.enabled`     | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
-| `mysql.mysqlUser`        | Database username                                                                                                    |
-| `mysql.mysqlPassword`    | Database password                                                                                                    |
-| `mysql.persistence.size` | Size of persistent volume created for database storage                                                               |
-| `config.jdbcParameters`  | Config to pass additional parameters to the jdbc connection string                                                   |
+| Property                                           | Description                                                                                                          |
+|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `image.repository`                                 | Docker repository where ThirdEye server image is present                                                             |
+| `image.tag`                                        | Docker image tag of ThirdEye server image                                                                            |
+| `ui.image.repository`                              | Docker repository where ThirdEye UI image is present                                                                 |
+| `ui.image.tag`                                     | Docker image tag of ThirdEye UI image                                                                                |
+| `ui.port`                                          | UI service port                                                                                                      |
+| `ui.publicUrl`                                     | Url on which ThirdEye UI is exposed publicly. All the notifications will use this url to share the anomaly page link |
+| `scheduler.enabled`                                | Flag to run a separate scheduler. If not enabled then coordinator itself will take care of scheduling tasks          |
+| `worker.enabled`                                   | Flag to run a separate worker. If not enabled then coordinator itself will take care of running tasks                |
+| `worker.replicas`                                  | Number of worker pods required                                                                                       |
+| `worker.randomWorkerIdEnabled`                     | Flag to enable assigning random worker ids to worker pods. Must be set true for multiple workers.                    |
+| `prometheus.enabled`                               | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
+| `mysql.mysqlUser`                                  | Database username                                                                                                    |
+| `mysql.mysqlPassword`                              | Database password                                                                                                    |
+| `mysql.persistence.size`                           | Size of persistent volume created for database storage                                                               |
+| `config.jdbcParameters`                            | Config to pass additional parameters to the jdbc connection string                                                   |
+| `[coordinator/worker/scheduler].strategy`          | Specifies the strategy used to replace old Pods by new ones.                                                         |
+| `tls.[coordinator/worker/scheduler/ui].secretName` | When provided it will override the default secret names referred for tls keys                                        |
 
 Please refer [values.yaml](values.yaml) for default values.

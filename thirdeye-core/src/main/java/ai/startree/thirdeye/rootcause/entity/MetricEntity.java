@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.rootcause.entity;
 
 import ai.startree.thirdeye.rootcause.Entity;
@@ -69,17 +77,8 @@ public class MetricEntity extends Entity {
         new ArrayList<>(related), id, TreeMultimap.create(filters));
   }
 
-  public static MetricEntity fromMetric(double score, Collection<? extends Entity> related,
-      long id) {
-    return fromMetric(score, related, id, TreeMultimap.create());
-  }
-
   public static MetricEntity fromMetric(double score, long id, Multimap<String, String> filters) {
     return fromMetric(score, new ArrayList<>(), id, filters);
-  }
-
-  public static MetricEntity fromMetric(double score, long id) {
-    return fromMetric(score, new ArrayList<>(), id, TreeMultimap.create());
   }
 
   public static MetricEntity fromMetric(Map<String, Collection<String>> filterMaps, long id) {

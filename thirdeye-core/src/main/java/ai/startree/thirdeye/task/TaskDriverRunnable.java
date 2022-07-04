@@ -1,9 +1,19 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.task;
+
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -22,6 +32,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,11 +62,13 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
   private final Counter taskRunningCounter;
+  private final ScheduledExecutorService heartbeatExecutorService;
 
   public TaskDriverRunnable(final TaskManager taskManager,
       final TaskContext taskContext,
       final AtomicBoolean shutdown,
       final ExecutorService taskExecutorService,
+      final ScheduledExecutorService heartbeatExecutorService,
       final TaskDriverConfiguration config,
       final long workerId,
       final TaskRunnerFactory taskRunnerFactory,
@@ -68,6 +81,7 @@ public class TaskDriverRunnable implements Runnable {
     this.config = config;
     this.workerId = workerId;
     this.taskRunnerFactory = taskRunnerFactory;
+    this.heartbeatExecutorService = heartbeatExecutorService;
 
     taskDuration = metricRegistry.histogram("taskDuration");
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
@@ -97,7 +111,16 @@ public class TaskDriverRunnable implements Runnable {
     final long tStart = System.currentTimeMillis();
     taskCounter.inc();
     taskRunningCounter.inc();
-    
+
+    Future heartbeat = null;
+    if(config.isRandomWorkerIdEnabled()) {
+      heartbeat = heartbeatExecutorService
+          .scheduleAtFixedRate(() -> taskExecutionHeartbeat(taskDTO),
+              0,
+              config.getHeartbeatInterval().toMillis(),
+              TimeUnit.MILLISECONDS);
+    }
+
     Future<List<TaskResult>> future = null;
     try {
       future = runTaskAsync(taskDTO);
@@ -121,7 +144,12 @@ public class TaskDriverRunnable implements Runnable {
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       taskDuration.update(elapsedTime);
       taskRunningCounter.dec();
+      optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));
     }
+  }
+
+  private void taskExecutionHeartbeat(final TaskDTO taskDTO) {
+    taskManager.updateLastActive(taskDTO.getId());
   }
 
   private Future<List<TaskResult>> runTaskAsync(final TaskDTO taskDTO) throws IOException {

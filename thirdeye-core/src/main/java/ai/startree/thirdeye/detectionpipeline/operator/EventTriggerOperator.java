@@ -1,13 +1,22 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
@@ -28,7 +37,11 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    eventTrigger = createEventTrigger(planNode.getParams());
+    final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
+        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
+    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
+
+    eventTrigger = createEventTrigger(planNode.getParams(), detectionRegistry);
   }
 
   @Override
@@ -51,11 +64,12 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
   }
 
   protected EventTrigger<? extends AbstractSpec> createEventTrigger(
-      final Map<String, Object> params) {
+      final Map<String, Object> params,
+      final DetectionRegistry detectionRegistry) {
     final String type = requireNonNull(MapUtils.getString(params, PROP_TYPE),
         "Must have 'type' in trigger config");
     final Map<String, Object> componentSpec = getComponentSpec(params);
-    return new DetectionRegistry().buildTrigger(type, new EventTriggerFactoryContext()
+    return detectionRegistry.buildTrigger(type, new EventTriggerFactoryContext()
         .setProperties(componentSpec));
   }
 }

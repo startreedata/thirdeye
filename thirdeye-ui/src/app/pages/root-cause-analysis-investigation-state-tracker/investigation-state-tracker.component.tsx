@@ -1,8 +1,30 @@
-import { Box, Card, CardContent, Link, Typography } from "@material-ui/core";
-import { cloneDeep, isEmpty } from "lodash";
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+import {
+    Box,
+    Card,
+    CardContent,
+    Link,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { cloneDeep, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams, useSearchParams } from "react-router-dom";
+import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
     AppLoadingIndicatorV1,
@@ -19,6 +41,8 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { useGetInvestigation } from "../../rest/rca/rca.actions";
+import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     createNewInvestigation,
     determineInvestigationIDFromSearchParams,
@@ -26,9 +50,11 @@ import {
 } from "../../utils/investigation/investigation.util";
 import {
     getAlertsViewPath,
+    getAnomaliesAllPath,
     getAnomaliesAnomalyViewPath,
 } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
+import { useInvestigationStateTrackerStyles } from "./investigation-state-tracker.styles";
 
 export const InvestigationStateTracker: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -44,6 +70,8 @@ export const InvestigationStateTracker: FunctionComponent = () => {
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { anomaly, getAnomaly } = useGetAnomaly();
+    const theme = useTheme();
+    const classes = useInvestigationStateTrackerStyles();
 
     const {
         getInvestigation,
@@ -170,6 +198,13 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         <PageV1>
             <PageHeaderV1>
                 <Box display="inline">
+                    <Link
+                        className={classes.linkButton}
+                        href={getAnomaliesAllPath()}
+                    >
+                        <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
+                        {t("label.back-to-anomalies")}
+                    </Link>
                     <div>
                         <PageHeaderTextV1>
                             {anomaly && (
@@ -206,12 +241,23 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                         displayInline
                                         enablePadding
                                         externalLink
-                                        href="https://dev.startree.ai/docs/thirdeye/how-tos/perform-root-cause-analysis"
+                                        href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
                                     />
                                 </span>
                             </TooltipV1>
                         </PageHeaderTextV1>
                     </div>
+
+                    {anomaly && (
+                        <AnomalyFeedback
+                            anomalyFeedback={
+                                (anomaly && anomaly.feedback) || {
+                                    ...DEFAULT_FEEDBACK,
+                                }
+                            }
+                            anomalyId={toNumber(anomalyId)}
+                        />
+                    )}
                     {investigationId && (
                         <div>
                             <Typography variant="subtitle1">

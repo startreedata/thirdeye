@@ -1,6 +1,18 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { AnomalyBreakdownAPIOffsetValues } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdownComparisonHeatmap } from "./anomaly-breakdown-comparison-heatmap.component";
 
 jest.mock("../../platform/components", () => ({
@@ -56,7 +68,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 chartTimeSeriesFilterSet={[]}
-                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                comparisonOffset={mockComparisonOffset}
                 onAddFilterSetClick={() => null}
             />
         );
@@ -95,7 +107,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 chartTimeSeriesFilterSet={[]}
-                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                comparisonOffset={mockComparisonOffset}
                 shouldTruncateText={false}
                 onAddFilterSetClick={() => null}
             />
@@ -133,7 +145,7 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             <AnomalyBreakdownComparisonHeatmap
                 anomalyId={451751}
                 chartTimeSeriesFilterSet={[]}
-                comparisonOffset={AnomalyBreakdownAPIOffsetValues.ONE_WEEK_AGO}
+                comparisonOffset={mockComparisonOffset}
                 onAddFilterSetClick={() => null}
             />
         );
@@ -209,3 +221,4 @@ let mockedGetAnomalyMetricBreakdownResponse = Promise.resolve(
 const mockSearchParamsGet = jest.fn();
 const mockSearchParamsSet = jest.fn();
 const mockSearchParamsDelete = jest.fn();
+const mockComparisonOffset = "P1W";

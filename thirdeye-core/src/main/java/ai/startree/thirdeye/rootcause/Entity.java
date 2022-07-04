@@ -1,13 +1,20 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.rootcause;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,13 +38,6 @@ public class Entity {
   private final String urn;
   private final double score;
   private final List<Entity> related;
-
-  public static final Comparator<Entity> HIGHEST_SCORE_FIRST = new Comparator<Entity>() {
-    @Override
-    public int compare(Entity o1, Entity o2) {
-      return -1 * Double.compare(o1.score, o2.score);
-    }
-  };
 
   public Entity(String urn, double score, List<? extends Entity> related) {
     this.urn = urn;

@@ -1,12 +1,21 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
+
 import ai.startree.thirdeye.detection.DetectionPipelineJob;
-import ai.startree.thirdeye.detection.TaskUtils;
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -47,10 +56,13 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
   final AlertManager detectionDAO;
   final Scheduler scheduler;
   final ScheduledExecutorService executorService;
+  final JobSchedulerService jobSchedulerService;
 
   @Inject
-  public DetectionCronScheduler(AlertManager detectionDAO) {
+  public DetectionCronScheduler(final AlertManager detectionDAO,
+      final JobSchedulerService jobSchedulerService) {
     this.detectionDAO = detectionDAO;
+    this.jobSchedulerService = jobSchedulerService;
     this.executorService = Executors.newSingleThreadScheduledExecutor();
     try {
       this.scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -112,7 +124,7 @@ public class DetectionCronScheduler implements ThirdEyeCronScheduler {
       Set<JobKey> scheduledJobs = getScheduledJobs();
       for (JobKey jobKey : scheduledJobs) {
         try {
-          Long id = TaskUtils.getIdFromJobKey(jobKey.getName());
+          Long id = getIdFromJobKey(jobKey.getName());
           AlertDTO detectionDTO = detectionDAO.findById(id);
           if (detectionDTO == null) {
             LOG.info("Found a scheduled detection config task, but not found in the database {}",

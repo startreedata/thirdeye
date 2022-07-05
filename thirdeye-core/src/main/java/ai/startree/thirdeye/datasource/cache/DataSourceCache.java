@@ -32,6 +32,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.util.Pair;
 import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -70,6 +71,7 @@ public class DataSourceCache {
         return Math.toIntExact(getHealthyCount());
       }
     });
+    metricRegistry.register("loadedDatasourceCount", (Gauge<Integer>) cache::size);
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {

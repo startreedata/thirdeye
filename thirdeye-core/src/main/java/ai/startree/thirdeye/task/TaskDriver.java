@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.task;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -22,6 +30,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +42,7 @@ public class TaskDriver {
 
   private final ExecutorService taskExecutorService;
   private final ExecutorService taskWatcherExecutorService;
+  private final ScheduledExecutorService heartbeatExecutorService;
 
   private final TaskManager taskManager;
   private final TaskContext taskContext;
@@ -63,6 +73,11 @@ public class TaskDriver {
         new ThreadFactoryBuilder()
             .setNameFormat("task-watcher-%d")
             .setDaemon(true)
+            .build());
+
+    heartbeatExecutorService = Executors.newScheduledThreadPool(config.getMaxParallelTasks(),
+        new ThreadFactoryBuilder()
+            .setNameFormat("task-heartbeat-%d")
             .build());
 
     taskContext = new TaskContext().setThirdEyeWorkerConfiguration(thirdEyeServerConfiguration);
@@ -105,6 +120,7 @@ public class TaskDriver {
         taskContext,
         shutdown,
         taskExecutorService,
+        heartbeatExecutorService,
         config,
         workerId,
         taskRunnerFactory,
@@ -135,5 +151,6 @@ public class TaskDriver {
     shutdown.set(true);
     AnomalyUtils.safelyShutdownExecutionService(taskExecutorService, this.getClass());
     AnomalyUtils.safelyShutdownExecutionService(taskWatcherExecutorService, this.getClass());
+    AnomalyUtils.safelyShutdownExecutionService(heartbeatExecutorService, this.getClass());
   }
 }

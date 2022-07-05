@@ -1,6 +1,15 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package ai.startree.thirdeye.spi.datasource.loader;
@@ -12,10 +21,13 @@ import java.util.concurrent.Future;
 
 public interface AggregationLoader {
 
+  String COL_DIMENSION_NAME = "dimName";
+  String COL_DIMENSION_VALUE = "dimValue";
+
   /**
    * Returns a de-aggregation data frame for a given slice with 3 columns:
    * dimension name, dimension value, and metric value.
-   *
+   * Values are in COL_DIMENSION_NAME, COL_DIMENSION_VALUE, Constants.COL_VALUE
    * @param slice metric slice
    * @param limit top k element limit per dimension name ({@code -1} for default)
    * @return de-aggregation data frame

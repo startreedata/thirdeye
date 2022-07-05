@@ -1,10 +1,19 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.datasource;
 
+import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -29,6 +38,7 @@ public class DAORegistry {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EvaluationManager evaluationManager;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
+  private final JobSchedulerService jobSchedulerService;
 
   @Inject
   public DAORegistry(
@@ -40,7 +50,8 @@ public class DAORegistry {
       final AlertManager alertManager,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EvaluationManager evaluationManager,
-      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
+      final JobSchedulerService jobSchedulerService) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.taskManager = taskManager;
     this.datasetConfigManager = datasetConfigManager;
@@ -50,6 +61,7 @@ public class DAORegistry {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.evaluationManager = evaluationManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
+    this.jobSchedulerService = jobSchedulerService;
   }
 
   public MergedAnomalyResultManager getMergedAnomalyResultDAO() {
@@ -86,5 +98,9 @@ public class DAORegistry {
 
   public AnomalySubscriptionGroupNotificationManager getAnomalySubscriptionGroupNotificationManager() {
     return anomalySubscriptionGroupNotificationManager;
+  }
+
+  public JobSchedulerService getJobSchedulerService() {
+    return jobSchedulerService;
   }
 }

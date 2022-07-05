@@ -1,13 +1,21 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.FileUtils.readJsonObjectsFromResourcesFolder;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
+import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -41,12 +49,13 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertTemplateDTO> {
 
-  private static final String RESOURCES_TEMPLATES_PATH = "alert-templates";
+  private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
 
   @Inject
-  public AlertTemplateResource(
-      final AlertTemplateManager alertTemplateManager) {
+  public AlertTemplateResource(final AlertTemplateManager alertTemplateManager,
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
     super(alertTemplateManager, ImmutableMap.of());
+    this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
   }
 
   @Override
@@ -75,15 +84,14 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("updateExisting") boolean updateExisting) {
 
-    List<AlertTemplateApi> alertTemplates = readJsonObjectsFromResourcesFolder(
-        RESOURCES_TEMPLATES_PATH,
-        this.getClass(),
-        AlertTemplateApi.class);
+    List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
     List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
     for (AlertTemplateApi templateApi : alertTemplates) {
       AlertTemplateDTO existingTemplate = dtoManager.findByName(templateApi.getName())
-          .stream().findFirst().orElse(null);
+          .stream()
+          .findFirst()
+          .orElse(null);
       if (existingTemplate == null) {
         toCreateTemplates.add(templateApi);
       } else {

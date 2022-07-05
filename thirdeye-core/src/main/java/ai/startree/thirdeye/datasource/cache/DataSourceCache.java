@@ -1,3 +1,16 @@
+/*
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 /*
  * Copyright (c) 2022 StarTree Inc. All rights reserved.
@@ -6,32 +19,26 @@
 
 package ai.startree.thirdeye.datasource.cache;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
-import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
+import ai.startree.thirdeye.spi.util.Pair;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,13 +49,9 @@ public class DataSourceCache {
 
   private final DataSourceManager dataSourceManager;
   private final DataSourcesLoader dataSourcesLoader;
-  private final ExecutorService executorService;
+  private final MetricRegistry metricRegistry;
 
-  private final Map<String, DataSourceWrapper> cache = new HashMap<>();
-
-  private final Counter datasourceExceptionCounter;
-  private final Histogram datasourceCallDuration;
-  private final Counter datasourceCallCounter;
+  private final Map<String, Pair<DataSourceWrapper, Timestamp>> cache = new HashMap<>();
 
   @Inject
   public DataSourceCache(
@@ -57,11 +60,7 @@ public class DataSourceCache {
       final MetricRegistry metricRegistry) {
     this.dataSourceManager = dataSourceManager;
     this.dataSourcesLoader = dataSourcesLoader;
-    executorService = Executors.newCachedThreadPool();
-
-    datasourceExceptionCounter = metricRegistry.counter("datasourceExceptionCounter");
-    datasourceCallDuration = metricRegistry.histogram("datasourceCallDuration");
-    datasourceCallCounter = metricRegistry.counter("datasourceCallCounter");
+    this.metricRegistry = metricRegistry;
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {
@@ -73,15 +72,17 @@ public class DataSourceCache {
       removeDataSource(name);
       throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
     }
-    final DataSourceWrapper cachedEntry = cache.get(name);
+    final Pair<DataSourceWrapper, Timestamp> cachedEntry = cache.get(name);
+    final DataSourceDTO dataSourceDTO = dataSource.get();
     if (cachedEntry != null) {
-      if (cachedEntry.getUpdateTime().equals(dataSource.get().getUpdateTime())) {
-        // cache hit
-        return cachedEntry.getDataSource();
+      final Timestamp updateTimeCached = cachedEntry.getSecond();
+      if (updateTimeCached.equals(dataSourceDTO.getUpdateTime())) {
+        return cachedEntry.getFirst(); // cache hit
       }
     }
+
     // cache miss
-    return loadDataSource(dataSource.get());
+    return loadDataSource(dataSourceDTO);
   }
 
   private Optional<DataSourceDTO> findByName(final String name) {
@@ -92,64 +93,41 @@ public class DataSourceCache {
     return results.stream().findFirst();
   }
 
-  public void removeDataSource(final String name) {
-    Optional.ofNullable(cache.remove(name)).ifPresent(entry -> {
-      try {
-        entry.getDataSource().close();
-      } catch (Exception e) {
-        LOG.error("Datasource {} was not flushed gracefully.", entry.getDataSource().getName());
-      }
-    });
-  }
-
   private ThirdEyeDataSource loadDataSource(final DataSourceDTO dataSource) {
     requireNonNull(dataSource);
-    final String dsName = dataSource.getName();
-    final ThirdEyeDataSource thirdEyeDataSource = dataSourcesLoader.loadDataSource(dataSource);
-    requireNonNull(thirdEyeDataSource, "Failed to construct a data source object! " + dsName);
+    final String dataSourceName = dataSource.getName();
+    final DataSourceWrapper wrapped = wrap(
+        requireNonNull(dataSourcesLoader.loadDataSource(dataSource),
+            "Failed to construct a data source object! " + dataSourceName));
+
     // remove outdated cached datasource
-    removeDataSource(dsName);
-    cache.put(dsName, new DataSourceWrapper(thirdEyeDataSource, dataSource.getUpdateTime()));
-    return thirdEyeDataSource;
+    removeDataSource(dataSourceName);
+    cache.put(dataSourceName, new Pair<>(wrapped, dataSource.getUpdateTime()));
+    return wrapped;
   }
 
-  public DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
-      throws Exception {
-    datasourceCallCounter.inc();
-    final long tStart = System.nanoTime();
-    try {
-      final ThirdEyeDataSource thirdEyeDataSource = getDataSource(dataSource);
-      final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),
-          thirdEyeDataSource.getSqlExpressionBuilder());
-      // table info is only used with legacy Pinot client - should be removed
-      final ThirdEyeRequestV2 requestV2 = new ThirdEyeRequestV2(null, query, Map.of());
-      return thirdEyeDataSource.fetchDataTable(requestV2).getDataFrame();
-    } catch (final Exception e) {
-      datasourceExceptionCounter.inc();
-      throw e;
-    } finally {
-      datasourceCallDuration.update(System.nanoTime() - tStart);
-    }
+  private DataSourceWrapper wrap(final ThirdEyeDataSource thirdEyeDataSource) {
+    return new DataSourceWrapper(thirdEyeDataSource, metricRegistry);
   }
 
-  public Future<DataFrame> getQueryResultAsync(final CalciteRequest request,
-      final String dataSource) {
-    return executorService.submit(() -> getQueryResult(request, dataSource));
+  public void removeDataSource(final String name) {
+    optional(cache.remove(name))
+        .map(Pair::getFirst)
+        .ifPresent(this::close);
   }
 
-  public Map<CalciteRequest, Future<DataFrame>> getQueryResultsAsync(
-      final List<CalciteRequest> requests, final String dataSource) {
-    final Map<CalciteRequest, Future<DataFrame>> responseFuturesMap = new LinkedHashMap<>();
-    for (final CalciteRequest request : requests) {
-      responseFuturesMap.put(request, getQueryResultAsync(request, dataSource));
-    }
-    return responseFuturesMap;
-  }
-
-  public void clear() throws Exception {
-    for (final DataSourceWrapper dataSourceWrapper : cache.values()) {
-      dataSourceWrapper.getDataSource().close();
-    }
+  public void clear() {
+    cache.values().stream()
+        .map(Pair::getFirst)
+        .forEach(this::close);
     cache.clear();
+  }
+
+  private void close(final ThirdEyeDataSource dataSource) {
+    try {
+      dataSource.close();
+    } catch (Exception e) {
+      LOG.error("Datasource {} was not flushed gracefully.", dataSource.getName());
+    }
   }
 }

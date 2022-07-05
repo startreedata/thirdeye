@@ -1,16 +1,26 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.tools;
 
 import static ai.startree.thirdeye.AppUtils.logJvmSettings;
 
 import ai.startree.thirdeye.ThirdEyeServer;
+import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
+import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProviderPlugin;
 import ai.startree.thirdeye.plugins.datasource.DefaultDataSourcesPlugin;
 import ai.startree.thirdeye.plugins.datasource.PinotDataSourcePlugin;
 import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
@@ -19,6 +29,7 @@ import ai.startree.thirdeye.plugins.notification.email.EmailSmtpNotificationServ
 import ai.startree.thirdeye.plugins.notification.slack.SlackNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.notification.webhook.WebhookNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.rca.contributors.cube.CubeContributorsFinderPlugin;
+import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import com.google.inject.Injector;
 import java.util.stream.Stream;
@@ -41,12 +52,23 @@ public class ThirdEyeServerDebug {
     loadDetectors(injector.getInstance(DetectionRegistry.class));
     loadNotificationServiceFactories(injector.getInstance(NotificationServiceRegistry.class));
     loadContributorsFinderFactories(injector.getInstance(ContributorsFinderRunner.class));
+    loadBootstrapResourcesProviderFactories(injector.getInstance(BootstrapResourcesRegistry.class));
+  }
+
+  private static void loadBootstrapResourcesProviderFactories(
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
+    Stream.of(
+            new OpenCoreBoostrapResourcesProviderPlugin()
+        )
+        .forEach(plugin -> plugin.getBootstrapResourcesProviderFactories()
+            .forEach(bootstrapResourcesRegistry::addBootstrapResourcesProviderFactory));
   }
 
   private static void loadContributorsFinderFactories(
       final ContributorsFinderRunner contributorsFinderRunner) {
     Stream.of(
-            new CubeContributorsFinderPlugin()
+            new CubeContributorsFinderPlugin(),
+            new SimpleContributorsFinderPlugin()
         )
         .forEach(plugin -> plugin.getContributorsFinderFactories()
             .forEach(contributorsFinderRunner::addContributorsFinderFactory));

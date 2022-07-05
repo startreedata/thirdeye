@@ -1,8 +1,23 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { FormHelperText, Grid, InputLabel, TextField } from "@material-ui/core";
-import cronValidator from "cron-validate";
+import CronValidator from "cron-expression-validator";
 import cronstrue from "cronstrue";
+import { uniq } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ensureArrayOfStrings } from "../../../alert-template/alert-template.utils";
 import { useAlertWizardV2Styles } from "../../../alert-wizard-v2.styles";
 import { AlertDateTimeCronAdvanceProps } from "./alert-date-time-cron-advance.interfaces";
 
@@ -12,15 +27,11 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
     const [currentCron, setCurrentCron] = useState<string>(cron);
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
-    const cronIsValidateResults = cronValidator(currentCron);
+    const isCronValid = CronValidator.isValidCronExpression(currentCron);
 
     const handleCronInputChange = (newCron: string): void => {
         setCurrentCron(newCron);
-
-        // no guarantee the new cron has been put in state
-        if (cronValidator(newCron).isValid()) {
-            onCronChange(newCron);
-        }
+        onCronChange(newCron);
     };
 
     return (
@@ -30,7 +41,7 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
                     shrink
                     className={classes.label}
                     data-testid="cron-input-label"
-                    error={!cronIsValidateResults.isValid()}
+                    error={!isCronValid}
                 >
                     {t("label.cron")}
                 </InputLabel>
@@ -39,7 +50,7 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
                 <TextField
                     fullWidth
                     data-testid="cron-input"
-                    error={!cronIsValidateResults.isValid()}
+                    error={!isCronValid}
                     value={currentCron}
                     variant="outlined"
                     onChange={(e) =>
@@ -47,7 +58,7 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
                     }
                 />
 
-                {cronIsValidateResults.isValid() && (
+                {isCronValid && (
                     <FormHelperText className={classes.label}>
                         {cronstrue.toString(currentCron, {
                             verbose: true,
@@ -56,8 +67,14 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
                 )}
 
                 {/* If there are errors, render them */}
-                {!cronIsValidateResults.isValid() &&
-                    cronIsValidateResults.getError().map((item, idx) => {
+                {!isCronValid &&
+                    uniq(
+                        ensureArrayOfStrings(
+                            CronValidator.isValidCronExpression(currentCron, {
+                                error: true,
+                            }).errorMessage as string[]
+                        )
+                    ).map((item, idx) => {
                         return (
                             <FormHelperText
                                 error

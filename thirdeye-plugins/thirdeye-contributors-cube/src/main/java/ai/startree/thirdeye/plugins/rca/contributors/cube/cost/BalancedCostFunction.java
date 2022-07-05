@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.plugins.rca.contributors.cube.cost;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -20,9 +28,9 @@ public class BalancedCostFunction implements CostFunction {
 
   @VisibleForTesting
   protected static final String CHANGE_CONTRIBUTION_THRESHOLD_PARAM = "threshold";
+  private static final double FLOATING_POINT_ERROR_EPSILON = 0.00001;
   // The threshold to the contribution to overall changes in percentage
   private double changeContributionThreshold = 3;
-  private final double epsilon = 0.00001;
 
   public BalancedCostFunction() {
   }
@@ -72,13 +80,8 @@ public class BalancedCostFunction implements CostFunction {
     }
     // Contribution is the size of the node
     double contribution = (baselineSize + currentSize) / (topBaselineSize + topCurrentSize);
-    if (Math.abs(0d - contribution) < epsilon) {
-      contribution = 0d;
-    }
-    //fixme cyril do better logging
-    if (Double.compare(contribution, 1) > 0 || Double.compare(contribution, 0) < 0) {
-      System.out.println("Here");
-    }
+    // fixme cyril chekState here - contribution can be nan ?
+    contribution = correctFloatingPointArithmeticError(contribution);
     Preconditions
         .checkState(Double.compare(contribution, 0) >= 0, "Contribution {} is smaller than 0.",
             contribution);
@@ -87,6 +90,17 @@ public class BalancedCostFunction implements CostFunction {
             contribution);
     // The cost function considers change difference, change changeRatio, and node size (i.e., contribution)
     return fillEmptyValuesAndGetError(baselineValue, currentValue, parentChangeRatio, contribution);
+  }
+
+  @VisibleForTesting
+  protected static double correctFloatingPointArithmeticError(double contribution) {
+    // fixme cyril no need to round if contribution is in [0,1] - see checks after call to this function
+    if (Math.abs(0d - contribution) < FLOATING_POINT_ERROR_EPSILON) {
+      contribution = 0d;
+    } else if (Math.abs(1d - contribution) < FLOATING_POINT_ERROR_EPSILON) {
+      contribution = 1d;
+    }
+    return contribution;
   }
 
   private static double error(double baselineValue, double currentValue, double parentRatio,

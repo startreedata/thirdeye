@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import com.google.common.base.MoreObjects;
@@ -23,6 +31,10 @@ public class PinotThirdEyeDataSourceConfig {
   private String tag;
   private String name;
   private Map<String, String> headers;
+  private Integer readTimeoutMs;
+  private Integer requestTimeoutMs;
+  private Integer connectTimeoutMs;
+  private Integer brokerResponseTimeoutMs;
 
   public String getZookeeperUrl() {
     return zookeeperUrl;
@@ -103,6 +115,43 @@ public class PinotThirdEyeDataSourceConfig {
 
   public PinotThirdEyeDataSourceConfig setHeaders(final Map<String, String> headers) {
     this.headers = headers;
+    return this;
+  }
+
+  public Integer getReadTimeoutMs() {
+    return readTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setReadTimeoutMs(final Integer readTimeoutMs) {
+    this.readTimeoutMs = readTimeoutMs;
+    return this;
+  }
+
+  public Integer getRequestTimeoutMs() {
+    return requestTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setRequestTimeoutMs(final Integer requestTimeoutMs) {
+    this.requestTimeoutMs = requestTimeoutMs;
+    return this;
+  }
+
+  public Integer getConnectTimeoutMs() {
+    return connectTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setConnectTimeoutMs(final Integer connectTimeoutMs) {
+    this.connectTimeoutMs = connectTimeoutMs;
+    return this;
+  }
+
+  public Integer getBrokerResponseTimeoutMs() {
+    return brokerResponseTimeoutMs;
+  }
+
+  public PinotThirdEyeDataSourceConfig setBrokerResponseTimeoutMs(
+      final Integer brokerResponseTimeoutMs) {
+    this.brokerResponseTimeoutMs = brokerResponseTimeoutMs;
     return this;
   }
 

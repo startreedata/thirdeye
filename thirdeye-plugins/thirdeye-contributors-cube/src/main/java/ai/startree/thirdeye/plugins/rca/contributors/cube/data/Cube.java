@@ -1,9 +1,20 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package ai.startree.thirdeye.plugins.rca.contributors.cube.data;
+
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.plugins.rca.contributors.cube.cost.CostFunction;
 import ai.startree.thirdeye.spi.api.cube.DimensionCost;
@@ -299,6 +310,8 @@ public class Cube {
             cost));
       }
     }
+    // fixme cyril do better error management after refactoring
+    checkState(!costSet.isEmpty(), "No data found. Cannot run top contributors algorithm. No data in baseline/current timeframe?");
 
     costSet.sort(Collections.reverseOrder());
     LOG.info("Top {} nodes (depth=1):", TOP_COST_ENTRIES_TO_LOG);

@@ -1,4 +1,16 @@
-import { AnomalyBreakdownAPIOffsetValues } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
     AnomalyDimensionAnalysisData,
@@ -9,7 +21,7 @@ import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 export interface AlgorithmTableProps {
     anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;
     anomaly: Anomaly;
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
     onCheckClick?: (filters: AnomalyFilterOption[]) => void;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
 }
@@ -18,7 +30,7 @@ export interface AlgorithmRowProps {
     alertId: number;
     startTime: number;
     endTime: number;
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
     dataset: string;
     metric: string;
     row: AnomalyDimensionAnalysisMetricRow;
@@ -34,5 +46,5 @@ export interface AlgorithmRowExpandedProps {
     alertId: number;
     row: AnomalyDimensionAnalysisMetricRow;
     dimensionColumns: string[];
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues;
+    comparisonOffset: string;
 }

@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.task.runner;
 
 import static ai.startree.thirdeye.task.runner.AnomalyMerger.DEFAULT_ANOMALY_MAX_DURATION;
@@ -251,6 +259,28 @@ public class AnomalyMergerTest {
     assertThat(parent.getEndTime()).isEqualTo(newEndTime);
     assertThat(parent.getId()).isEqualTo(expectedId);
     assertThat(parent.getChildren().size()).isEqualTo(2);
+  }
+
+  @Test
+  public void testMergeNoMergeWithZeroMergeGapPeriod() {
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H);
+
+    final long expectedId = existing1.getId();
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime);
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
+        List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        // zero period here
+        Period.ZERO, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(2);
   }
 
   @Test

@@ -1,16 +1,23 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.detection.anomaly.detection.trigger;
-
-import static ai.startree.thirdeye.detection.TaskUtils.createTaskDto;
 
 import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -62,6 +69,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   private final AlertManager alertManager;
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
+  private final JobSchedulerService jobSchedulerService;
 
   @Inject
   public DataAvailabilityTaskScheduler(
@@ -69,6 +77,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
       final TaskManager taskDAO,
       final AlertManager alertManager,
       final DatasetConfigManager datasetConfigManager,
+      final JobSchedulerService jobSchedulerService,
       final MetricConfigManager metricConfigManager) {
     this.sleepPerRunInSec = config.getSchedulerDelayInSec();
     this.fallBackTimeInSec = config.getTaskTriggerFallBackTimeInSec();
@@ -81,6 +90,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     this.alertManager = alertManager;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
+    this.jobSchedulerService = jobSchedulerService;
   }
 
   /**
@@ -106,9 +116,8 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             if (isWithinSchedulingWindow(detection2DatasetMap.get(detectionConfig),
                 datasetConfigMap)) {
               try {
-                TaskDTO taskDTO = createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
-                final long taskId = taskDAO.save(taskDTO);
-                LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
+                TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+                LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
               } catch (JsonProcessingException e) {
                 LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
               }
@@ -128,9 +137,8 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             LOG.info("Scheduling a task for detection {} due to the fallback mechanism.",
                 detectionConfigId);
             try {
-              TaskDTO taskDTO = createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
-              final long taskId = taskDAO.save(taskDTO);
-              LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskId, taskDTO);
+              TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+              LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
             } catch (JsonProcessingException e) {
               LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
             }

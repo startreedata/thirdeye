@@ -1,3 +1,16 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import {
     Box,
     Button,
@@ -21,6 +34,7 @@ import {
     TooltipV1,
 } from "../../platform/components";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";
@@ -198,7 +212,7 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = (
                                             displayInline
                                             enablePadding
                                             externalLink
-                                            href="https://dev.startree.ai/docs/thirdeye/how-tos/database/"
+                                            href={`${THIRDEYE_DOC_LINK}/how-tos/database/`}
                                         />
                                     </span>
                                 </TooltipV1>

@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.task;
 
 import java.time.Duration;
@@ -16,6 +24,7 @@ public class TaskDriverConfiguration {
   private Duration taskFailureDelay = Duration.ofSeconds(30);
   private Duration randomDelayCap = Duration.ofSeconds(15);
   private Duration maxTaskRunTime = Duration.ofHours(6);
+  private Duration heartbeatInterval = Duration.ofSeconds(30);
 
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
@@ -98,6 +107,15 @@ public class TaskDriverConfiguration {
 
   public TaskDriverConfiguration setMaxParallelTasks(final int maxParallelTasks) {
     this.maxParallelTasks = maxParallelTasks;
+    return this;
+  }
+
+  public Duration getHeartbeatInterval() {
+    return heartbeatInterval;
+  }
+
+  public TaskDriverConfiguration setHeartbeatInterval(final Duration heartbeatInterval) {
+    this.heartbeatInterval = heartbeatInterval;
     return this;
   }
 }

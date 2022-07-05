@@ -1,12 +1,21 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -27,7 +36,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -114,7 +122,7 @@ public class RcaInfoFetcher {
     addCustomFields(metricConfigDTO, metadataMetricDTO);
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
-    final DateTimeZone timeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
+    final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties))
         .orElse(Constants.DEFAULT_TIMEZONE);
 
     return new RootCauseAnalysisInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone);
@@ -123,16 +131,16 @@ public class RcaInfoFetcher {
   private void addCustomFields(final DatasetConfigDTO datasetConfigDTO,
       final DatasetConfigDTO metadataDatasetDTO) {
     // fields that can be configured at the alert level can be added here
-    Optional.ofNullable(metadataDatasetDTO.getDimensions())
+    optional(metadataDatasetDTO.getDimensions())
         .ifPresent(datasetConfigDTO::setDimensions);
-    Optional.ofNullable(metadataDatasetDTO.getRcaExcludedDimensions())
+    optional(metadataDatasetDTO.getRcaExcludedDimensions())
         .ifPresent(datasetConfigDTO::setRcaExcludedDimensions);
   }
 
   private void addCustomFields(final MetricConfigDTO metricConfigDTO,
       final MetricConfigDTO metadataMetricDTO) {
     // fields that can be configured at the alert level can be added here
-    Optional.ofNullable(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
+    optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
     if (StringUtils.isNotBlank(metadataMetricDTO.getDefaultAggFunction())) {
       metricConfigDTO.setDefaultAggFunction(metadataMetricDTO.getDefaultAggFunction());
     }

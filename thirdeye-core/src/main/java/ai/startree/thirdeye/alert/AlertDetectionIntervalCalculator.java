@@ -1,9 +1,19 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.alert;
+
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -17,7 +27,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
@@ -85,7 +95,7 @@ public class AlertDetectionIntervalCalculator {
   @VisibleForTesting
   protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
-    final DateTimeZone dateTimeZone = Optional.ofNullable(getDateTimeZone(templateWithProperties))
+    final DateTimeZone dateTimeZone = optional(getDateTimeZone(templateWithProperties))
         .orElse(Constants.DEFAULT_TIMEZONE);
     final DateTime taskStart = new DateTime(taskStartMillis, dateTimeZone);
     final DateTime taskEnd = new DateTime(taskEndMillis, dateTimeZone);
@@ -142,15 +152,17 @@ public class AlertDetectionIntervalCalculator {
   // todo cyril move below to a utils class
   @Nullable
   public static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getTimezone)
+        // templates can have an empty string as default property
+        .filter(StringUtils::isNotEmpty)
         .map(DateTimeZone::forID)
         .orElse(null);
   }
 
   @Nullable
   private static Period getDelay(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getDataset)
         .map(DatasetConfigDTO::getCompletenessDelay)
         .map(delayString -> Period.parse(delayString, ISOPeriodFormat.standard()))
@@ -159,7 +171,7 @@ public class AlertDetectionIntervalCalculator {
 
   @Nullable
   private static Period getGranularity(final AlertTemplateDTO templateWithProperties) {
-    return Optional.ofNullable(templateWithProperties.getMetadata())
+    return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getGranularity)
         .map(granularityString -> Period.parse(granularityString, ISOPeriodFormat.standard()))
         .orElse(null);

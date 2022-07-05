@@ -1,3 +1,16 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Description, ExitToApp, Home, LockOpen } from "@material-ui/icons";
 import ErrorIcon from "@material-ui/icons/Error";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -14,6 +27,7 @@ import {
     NavBarV1,
     useAuthProviderV1,
 } from "../../platform/components";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     AppRoute,
     getAlertsPath,
@@ -92,7 +106,7 @@ export const AppBar: FunctionComponent = () => {
                 {/* Documentation */}
                 <NavBarLinkV1
                     externalLink
-                    href="https://dev.startree.ai/docs/thirdeye/"
+                    href={THIRDEYE_DOC_LINK}
                     target="_blank"
                 >
                     <NavBarLinkIconV1>

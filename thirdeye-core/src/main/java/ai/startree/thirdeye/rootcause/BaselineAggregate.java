@@ -1,9 +1,19 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.rootcause;
+
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
@@ -20,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -262,7 +271,7 @@ public class BaselineAggregate implements Baseline {
     Map<MetricSlice, DataFrame> filtered = this.filter(referenceSlice, data);
     Map<String, DataFrame> preparedSlices = new HashMap<>();
     for (Map.Entry<MetricSlice, DataFrame> entry : filtered.entrySet()) {
-      Optional.ofNullable(prepareSliceData(entry.getKey(), entry.getValue(), referenceSlice))
+      optional(prepareSliceData(entry.getKey(), entry.getValue(), referenceSlice))
           .ifPresent(e -> preparedSlices.put(e.getKey(), e.getValue()));
     }
 

@@ -1,17 +1,29 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Chip } from "@material-ui/core";
 import React from "react";
-import {
-    AnomalyBreakdownAPIOffsetsToWeeks,
-    AnomalyBreakdownAPIOffsetValues,
-    OFFSET_TO_HUMAN_READABLE,
-} from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
+import {
+    baselineComparisonOffsetToHumanReadable,
+    baselineOffsetToMilliseconds,
+    parseBaselineComparisonOffset,
+} from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
-import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import {
     SeriesType,
     TimeSeriesChartProps,
@@ -64,22 +76,12 @@ export const generateOtherDimensionTooltipString = (
     )}`;
 };
 
-export const offsetMilliseconds = (
-    timestamp: number,
-    offset: AnomalyBreakdownAPIOffsetValues
-): number => {
-    return (
-        timestamp -
-        WEEK_IN_MILLISECONDS * AnomalyBreakdownAPIOffsetsToWeeks[offset]
-    );
-};
-
 export const generateComparisonChartOptions = (
     nonFiltered: AlertEvaluation,
     filtered: AlertEvaluation,
     startTime: number,
     endTime: number,
-    comparisonOffset: AnomalyBreakdownAPIOffsetValues,
+    comparisonOffset: string,
     translation: (labelName: string) => string = (s) => s
 ): TimeSeriesChartProps => {
     const filteredTimeSeriesData =
@@ -135,6 +137,9 @@ export const generateComparisonChartOptions = (
         },
     ];
 
+    const { baselineOffsetValue, unit } =
+        parseBaselineComparisonOffset(comparisonOffset);
+
     return {
         brush: true,
         height: 400,
@@ -149,9 +154,16 @@ export const generateComparisonChartOptions = (
                     opacity: 0.2,
                 },
                 {
-                    start: offsetMilliseconds(startTime, comparisonOffset),
-                    end: offsetMilliseconds(endTime, comparisonOffset),
-                    name: OFFSET_TO_HUMAN_READABLE[comparisonOffset],
+                    start:
+                        startTime -
+                        baselineOffsetToMilliseconds(baselineOffsetValue, unit),
+                    end:
+                        endTime -
+                        baselineOffsetToMilliseconds(baselineOffsetValue, unit),
+                    name: baselineComparisonOffsetToHumanReadable(
+                        baselineOffsetValue,
+                        unit
+                    ),
                     color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
                     opacity: 0.2,
                 },

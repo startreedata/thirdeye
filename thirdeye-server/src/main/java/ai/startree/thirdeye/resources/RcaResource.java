@@ -1,9 +1,19 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.resources;
+
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
@@ -20,7 +30,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -121,11 +130,11 @@ public class RcaResource {
       List<String> excludedDimensions,
       DatasetConfigDTO datasetConfigDTO) {
     if (dimensions.isEmpty()) {
-      dimensions = Optional.ofNullable(datasetConfigDTO.getDimensions()).orElse(List.of());
+      dimensions = optional(datasetConfigDTO.getDimensions()).orElse(List.of());
     }
     dimensions = cleanDimensionStrings(dimensions);
     if (excludedDimensions.isEmpty()) {
-      excludedDimensions = Optional.ofNullable(datasetConfigDTO.getRcaExcludedDimensions())
+      excludedDimensions = optional(datasetConfigDTO.getRcaExcludedDimensions())
           .orElse(List.of());
     }
     excludedDimensions = cleanDimensionStrings(excludedDimensions);

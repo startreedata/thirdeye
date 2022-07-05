@@ -1,10 +1,22 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Grid } from "@material-ui/core";
 import { clone, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
 import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
-import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
@@ -20,7 +32,6 @@ import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Event } from "../../rest/dto/event.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../utils/anomalies/anomalies.util";
 import { getFromSavedInvestigationOrDefault } from "../../utils/investigation/investigation.util";
 import {
@@ -153,27 +164,13 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     alignItems="stretch"
                     justifyContent="space-between"
                 >
-                    <Grid item lg={9} md={8} sm={12} xs={12}>
+                    <Grid item lg={12} md={12} sm={12} xs={12}>
                         <AnomalySummaryCard
                             className={style.fullHeight}
                             isLoading={
                                 getAnomalyRequestStatus === ActionStatus.Working
                             }
                             uiAnomaly={uiAnomaly}
-                        />
-                    </Grid>
-                    <Grid item lg={3} md={4} sm={12} xs={12}>
-                        <AnomalyFeedback
-                            anomalyFeedback={
-                                (anomaly && anomaly.feedback) || {
-                                    ...DEFAULT_FEEDBACK,
-                                }
-                            }
-                            anomalyId={toNumber(anomalyId)}
-                            className={style.fullHeight}
-                            isLoading={
-                                getAnomalyRequestStatus === ActionStatus.Working
-                            }
                         />
                     </Grid>
                 </Grid>

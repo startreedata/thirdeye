@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2022 StarTree Inc. All rights reserved.
- * Confidential and Proprietary Information of StarTree Inc.
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
@@ -12,7 +20,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeFilterFunction;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeGroupFunction;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeRequestV2;
+import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -41,6 +49,7 @@ public class MacroEngine {
       new TimeFilterFunction(),
       new TimeGroupFunction()
   );
+  public static final boolean QUOTE_IDENTIFIERS = false;
 
   private final SqlParser.Config sqlParserConfig;
   private final SqlDialect sqlDialect;
@@ -69,12 +78,12 @@ public class MacroEngine {
     }
   }
 
-  public ThirdEyeRequestV2 prepareRequest() throws SqlParseException {
+  public DataSourceRequest prepareRequest() throws SqlParseException {
     SqlNode rootNode = queryToNode(query, sqlParserConfig);
     SqlNode appliedMacrosNode = applyMacros(rootNode);
-    String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect);
+    String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
 
-    return new ThirdEyeRequestV2(tableName, preparedQuery, properties);
+    return new DataSourceRequest(tableName, preparedQuery, properties);
   }
 
   private SqlNode applyMacros(SqlNode rootNode) {
@@ -83,7 +92,8 @@ public class MacroEngine {
 
   private List<String> paramsFromCall(final SqlCall call) {
     return call.getOperandList().stream()
-        .map(n -> nodeToQuery(n, sqlDialect))
+        // don't quote identifiers to make parsing simpler - but datasource sql expression generators have to manage quoting downstream
+        .map(n -> nodeToQuery(n, sqlDialect, false))
         .collect(Collectors.toList());
   }
 

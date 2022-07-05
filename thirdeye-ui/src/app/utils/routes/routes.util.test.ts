@@ -1,9 +1,24 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { DateTime } from "luxon";
 import {
     createPathWithRecognizedQueryString,
     generateDateRangeMonthsFromNow,
     getAlertsAllPath,
+    getAlertsCreateAdvancedPath,
     getAlertsCreatePath,
+    getAlertsCreateSimplePath,
     getAlertsPath,
     getAlertsUpdatePath,
     getAlertsViewPath,
@@ -63,6 +78,18 @@ describe("Routes Util", () => {
 
     it("getAlertsCreatePath should return appropriate path with appropriate query string", () => {
         expect(getAlertsCreatePath()).toEqual("/alerts/create?testQueryString");
+    });
+
+    it("getAlertsCreateSimplePath should return appropriate path with appropriate query string", () => {
+        expect(getAlertsCreateSimplePath()).toEqual(
+            "/alerts/create/simple?testQueryString"
+        );
+    });
+
+    it("getAlertsCreateAdvancedPath should return appropriate path with appropriate query string", () => {
+        expect(getAlertsCreateAdvancedPath()).toEqual(
+            "/alerts/create/advanced?testQueryString"
+        );
     });
 
     it("getAlertsUpdatePath should return appropriate path with appropriate query string for id", () => {

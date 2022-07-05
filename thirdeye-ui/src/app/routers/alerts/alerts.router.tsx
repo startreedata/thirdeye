@@ -1,3 +1,16 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
@@ -22,10 +35,28 @@ const AlertsViewPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsViewPage }))
 );
 
-const AlertsCreatePage = lazy(() =>
+const AlertsCreateAdvancePage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-page.component"
-    ).then((module) => ({ default: module.AlertsCreatePage }))
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.component"
+    ).then((module) => ({ default: module.AlertsCreateAdvancePage }))
+);
+
+const AlertsCreatePageNew = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-new-page" */ "../../pages/alerts-create-page/alerts-create-new-page.component"
+    ).then((module) => ({ default: module.AlertsCreateNewPage }))
+);
+
+const AlertsCreatePageCopy = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-copy-page" */ "../../pages/alerts-create-page/alerts-create-copy-page.component"
+    ).then((module) => ({ default: module.AlertsCreateCopyPage }))
+);
+
+const AlertsCreateSimplePage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component"
+    ).then((module) => ({ default: module.AlertsCreateSimplePage }))
 );
 
 const AlertsUpdatePage = lazy(() =>
@@ -60,10 +91,73 @@ export const AlertsRouter: FunctionComponent = () => {
                 />
 
                 {/* Alerts create path */}
-                <Route
-                    element={<AlertsCreatePage />}
-                    path={AppRouteRelative.ALERTS_CREATE}
-                />
+                <Route path={`${AppRouteRelative.ALERTS_CREATE}/*`}>
+                    <Route
+                        index
+                        element={
+                            <Navigate
+                                replace
+                                to={AppRouteRelative.ALERTS_CREATE_NEW}
+                            />
+                        }
+                    />
+
+                    <Route
+                        element={<AlertsCreatePageNew />}
+                        path={`${AppRouteRelative.ALERTS_CREATE_NEW}/*`}
+                    >
+                        <Route
+                            index
+                            element={
+                                <RedirectWithDefaultParams
+                                    customDurationGenerator={() => {
+                                        return generateDateRangeMonthsFromNow(
+                                            1
+                                        );
+                                    }}
+                                    to={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                                />
+                            }
+                        />
+
+                        <Route
+                            element={<AlertsCreateSimplePage />}
+                            path={AppRouteRelative.ALERTS_CREATE_SIMPLE}
+                        />
+                        <Route
+                            element={<AlertsCreateAdvancePage />}
+                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                        />
+                    </Route>
+
+                    <Route
+                        element={<AlertsCreatePageCopy />}
+                        path={`${AppRouteRelative.ALERTS_CREATE_COPY}/*`}
+                    >
+                        <Route
+                            index
+                            element={
+                                <RedirectWithDefaultParams
+                                    customDurationGenerator={() => {
+                                        return generateDateRangeMonthsFromNow(
+                                            1
+                                        );
+                                    }}
+                                    to={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                                />
+                            }
+                        />
+
+                        <Route
+                            element={<AlertsCreateSimplePage />}
+                            path={AppRouteRelative.ALERTS_CREATE_SIMPLE}
+                        />
+                        <Route
+                            element={<AlertsCreateAdvancePage />}
+                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                        />
+                    </Route>
+                </Route>
 
                 {/* Alert paths */}
                 <Route

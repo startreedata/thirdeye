@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
+import ai.startree.thirdeye.alert.AlertMonitoringService;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
@@ -28,8 +29,11 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AppAnalyticsResource {
 
+  private final AlertMonitoringService alertMonitoringService;
+
   @Inject
-  public AppAnalyticsResource() {
+  public AppAnalyticsResource(final AlertMonitoringService alertMonitoringService) {
+    this.alertMonitoringService = alertMonitoringService;
   }
 
   public static String appVersion() {
@@ -40,6 +44,7 @@ public class AppAnalyticsResource {
   public Response getAnalyticsPayload() {
     return Response.ok(new AppAnalyticsApi()
         .setVersion(appVersion())
+        .setUniqueMonitoredMetrics(getUniqueMonitoredMetrics())
     ).build();
   }
 
@@ -47,5 +52,15 @@ public class AppAnalyticsResource {
   @Path("version")
   public Response getVersion() {
     return Response.ok(appVersion()).build();
+  }
+
+  @GET
+  @Path("monitored-metrics")
+  public Response getMonitoredMetrics() {
+    return Response.ok(getUniqueMonitoredMetrics()).build();
+  }
+
+  private Integer getUniqueMonitoredMetrics() {
+    return alertMonitoringService.getUniqueMonitoredMetrics().size();
   }
 }

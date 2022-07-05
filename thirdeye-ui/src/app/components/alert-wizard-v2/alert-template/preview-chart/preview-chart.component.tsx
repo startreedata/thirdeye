@@ -18,6 +18,7 @@ import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
+import { ReactComponent as ChartSkeleton } from "../../../../../assets/images/chart-skeleton.svg";
 import {
     NotificationTypeV1,
     SkeletonV1,
@@ -35,13 +36,15 @@ import {
     MessageDisplayState,
     PreviewChartProps,
 } from "./preview-chart.interfaces";
+import { usePreviewChartStyles } from "./preview-chart.styles";
 
 export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
     displayState,
     subtitle,
 }) => {
-    const classes = useAlertWizardV2Styles();
+    const sharedWizardClasses = useAlertWizardV2Styles();
+    const previewChartClasses = usePreviewChartStyles();
     const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const [startTime, endTime] = useMemo(
@@ -109,22 +112,50 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             </Grid>
             <Grid item xs={12}>
                 {displayState === MessageDisplayState.SELECT_TEMPLATE && (
-                    <Box padding={5} paddingTop={0}>
-                        <Alert className={classes.infoAlert} severity="info">
-                            Select a template to preview the alert
-                        </Alert>
+                    <Box position="relative">
+                        <Box className={previewChartClasses.alertContainer}>
+                            <Grid container justifyContent="space-around">
+                                <Grid item>
+                                    <Alert
+                                        className={
+                                            sharedWizardClasses.infoAlert
+                                        }
+                                        severity="info"
+                                    >
+                                        {t(
+                                            "message.select-a-template-to-preview"
+                                        )}
+                                    </Alert>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                        <Box width="100%">
+                            <ChartSkeleton />
+                        </Box>
                     </Box>
                 )}
                 {displayState ===
                     MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES && (
-                    <Box padding={5} paddingTop={0}>
-                        <Alert
-                            className={classes.warningAlert}
-                            severity="warning"
-                        >
-                            The template is not completed. Please complete the
-                            missing information to see the preview.
-                        </Alert>
+                    <Box position="relative">
+                        <Box className={previewChartClasses.alertContainer}>
+                            <Grid container justifyContent="space-around">
+                                <Grid item>
+                                    <Alert
+                                        className={
+                                            sharedWizardClasses.warningAlert
+                                        }
+                                        severity="warning"
+                                    >
+                                        {t(
+                                            "message.complete-missing-information-to-see-preview"
+                                        )}
+                                    </Alert>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                        <Box width="100%">
+                            <ChartSkeleton />
+                        </Box>
                     </Box>
                 )}
                 {displayState === MessageDisplayState.GOOD_TO_PREVIEW && (
@@ -140,24 +171,39 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                         {getEvaluationStatus !== ActionStatus.Working && (
                             <>
                                 {!currentAlertEvaluation && (
-                                    <Box
-                                        padding={4}
-                                        position="absolute"
-                                        textAlign="center"
-                                        width="100%"
-                                    >
-                                        <Button
-                                            color="primary"
-                                            variant="text"
-                                            onClick={() => {
-                                                fetchAlertEvaluation(
-                                                    startTime,
-                                                    endTime
-                                                );
-                                            }}
+                                    <Box position="relative">
+                                        <Box
+                                            className={
+                                                previewChartClasses.alertContainer
+                                            }
                                         >
-                                            <RefreshIcon fontSize="large" />
-                                        </Button>
+                                            <Grid
+                                                container
+                                                alignItems="center"
+                                                className={
+                                                    previewChartClasses.heightWholeContainer
+                                                }
+                                                justifyContent="space-around"
+                                            >
+                                                <Grid item>
+                                                    <Button
+                                                        color="primary"
+                                                        variant="text"
+                                                        onClick={() => {
+                                                            fetchAlertEvaluation(
+                                                                startTime,
+                                                                endTime
+                                                            );
+                                                        }}
+                                                    >
+                                                        <RefreshIcon fontSize="large" />
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                        <Box width="100%">
+                                            <ChartSkeleton />
+                                        </Box>
                                     </Box>
                                 )}
 

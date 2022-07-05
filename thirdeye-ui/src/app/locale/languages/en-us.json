@@ -217,7 +217,8 @@
         "back-to-anomalies": "Back to Anomalies",
         "close": "Close",
         "alert-json-template": "Alert JSON Template",
-        "duplicate": "Duplicate"
+        "duplicate": "Duplicate",
+        "event-metadata": "Event Metadata"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

@@ -11,8 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Link } from "@material-ui/core";
-import { map } from "lodash";
+import { Button, Grid, Link } from "@material-ui/core";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -32,6 +31,7 @@ import { formatDateAndTimeV1 } from "../../platform/utils";
 import { Event } from "../../rest/dto/event.interfaces";
 import { getSearchDataKeysForEvents } from "../../utils/events/events.util";
 import { getEventsViewPath } from "../../utils/routes/routes.util";
+import { EventCardV1 } from "../entity-cards/event-card-v1/event-card-v1.component";
 import { TimeRangeButtonWithContext } from "../time-range/time-range-button-with-context/time-range-button.component";
 import { EventListV1Props } from "./event-list-v1.interfaces";
 
@@ -45,11 +45,27 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
     const [searchDataKeys, setSearchDataKeys] = useState<string[]>(
         getSearchDataKeysForEvents([])
     );
+    const [uiEvents, setUIEvents] = useState<Event[] | null>(null);
+
+    const generateDataWithChildren = (data: Event[]): Event[] => {
+        return data?.map((event, index) => ({
+            ...event,
+            children: [
+                {
+                    id: index,
+                    expandPanelContents: <EventCardV1 event={event} />,
+                },
+            ],
+        }));
+    };
 
     useEffect(() => {
         if (!props.events) {
             return;
         }
+
+        const newEvents = generateDataWithChildren(props.events);
+        setUIEvents(newEvents);
 
         setSearchDataKeys(getSearchDataKeysForEvents(props.events));
     }, [props.events]);
@@ -94,22 +110,6 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
         []
     );
 
-    const metadataRenderer = useCallback(
-        (_: Record<string, unknown>, data: Event): ReactNode => (
-            <Box marginY={0.5}>
-                {map(
-                    data.targetDimensionMap,
-                    (value: string[], key: string) => (
-                        <div key={key}>
-                            {key}: {value.join(", ")}
-                        </div>
-                    )
-                )}
-            </Box>
-        ),
-        []
-    );
-
     const eventColumns = [
         {
             key: "name",
@@ -142,55 +142,47 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
             sortable: true,
             customCellRenderer: endTimeRenderer,
         },
-        {
-            key: "targetDimensionMap",
-            dataKey: "targetDimensionMap",
-            header: t("label.metadata"),
-            minWidth: 300,
-            customCellRenderer: metadataRenderer,
-        },
     ];
 
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<Event>
-                    hideBorder
-                    showPagination
-                    columns={eventColumns}
-                    data={props.events as Event[]}
-                    pagination={{
-                        rowsPerPage: 25,
-                    }}
-                    rowKey="id"
-                    scroll={DataGridScrollV1.Contents}
-                    searchDataKeys={searchDataKeys}
-                    searchPlaceholder={t("label.search-entity", {
-                        entity: t("label.event"),
-                    })}
-                    toolbarComponent={
-                        <Grid
-                            container
-                            alignItems="center"
-                            justifyContent="space-between"
-                            spacing={2}
-                        >
-                            <Grid item>
-                                <Button
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleEventDelete}
-                                >
-                                    {t("label.delete")}
-                                </Button>
+                {uiEvents && (
+                    <DataGridV1<Event>
+                        hideBorder
+                        columns={eventColumns}
+                        data={uiEvents as Event[]}
+                        expandColumnKey="name"
+                        rowKey="id"
+                        scroll={DataGridScrollV1.Contents}
+                        searchDataKeys={searchDataKeys}
+                        searchPlaceholder={t("label.search-entity", {
+                            entity: t("label.event"),
+                        })}
+                        toolbarComponent={
+                            <Grid
+                                container
+                                alignItems="center"
+                                justifyContent="space-between"
+                                spacing={2}
+                            >
+                                <Grid item>
+                                    <Button
+                                        disabled={isActionButtonDisable}
+                                        variant="contained"
+                                        onClick={handleEventDelete}
+                                    >
+                                        {t("label.delete")}
+                                    </Button>
+                                </Grid>
+                                <Grid item>
+                                    <TimeRangeButtonWithContext />
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <TimeRangeButtonWithContext />
-                            </Grid>
-                        </Grid>
-                    }
-                    onSelectionChange={setSelectedEvent}
-                />
+                        }
+                        onSelectionChange={setSelectedEvent}
+                    />
+                )}
             </PageContentsCardV1>
         </Grid>
     );

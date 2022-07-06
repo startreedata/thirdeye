@@ -62,9 +62,14 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
+  private final MetricRegistry metricRegistry;
+
   @Inject
-  public TaskManagerImpl(final GenericPojoDao genericPojoDao) {
+  public TaskManagerImpl(final GenericPojoDao genericPojoDao,
+      final MetricRegistry metricRegistry) {
     super(TaskDTO.class, genericPojoDao);
+    this.metricRegistry = metricRegistry;
+    registerMetrics();
   }
 
   @Override
@@ -234,5 +239,26 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
 
   public long countByStatus(final TaskStatus status) {
     return count(Predicate.EQ("status", status.toString()));
+  }
+
+  private void registerMetrics() {
+    metricRegistry.register("taskCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return count();
+      }
+    });
+    for(TaskStatus status : TaskStatus.values()) {
+      registerStatusMetric(status);
+    }
+  }
+
+  private void registerStatusMetric(final TaskStatus status) {
+    metricRegistry.register(String.format("taskCount_%s", status.toString()), new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return countByStatus(status);
+      }
+    });
   }
 }

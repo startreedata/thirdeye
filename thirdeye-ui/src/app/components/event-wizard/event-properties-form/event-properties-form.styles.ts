@@ -17,4 +17,15 @@ export const useEventPropertiesFormStyles = makeStyles({
     datePickerContainer: {
         display: "flex",
     },
+    propertyValue: {
+        '& .MuiAutocomplete-inputRoot[class*="MuiOutlinedInput-root"][class*="MuiOutlinedInput-marginDense"] ':
+            {
+                paddingTop: "0px",
+                paddingBottom: "0px",
+            },
+        "& .MuiAutocomplete-inputRoot": {
+            maxHeight: "37.625px",
+            minHeight: "37.625px",
+        },
+    },
 });

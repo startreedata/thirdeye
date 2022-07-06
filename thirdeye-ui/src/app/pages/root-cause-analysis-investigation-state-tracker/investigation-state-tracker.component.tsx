@@ -247,6 +247,16 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                             </TooltipV1>
                         </PageHeaderTextV1>
                     </div>
+                    {investigationId && (
+                        <div>
+                            <Typography variant="subtitle1">
+                                Viewing saved investigation (#
+                                {investigationId}):{" "}
+                                {investigationFromServer &&
+                                    investigationFromServer.name}
+                            </Typography>
+                        </div>
+                    )}
 
                     {anomaly && (
                         <AnomalyFeedback
@@ -257,16 +267,6 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                             }
                             anomalyId={toNumber(anomalyId)}
                         />
-                    )}
-                    {investigationId && (
-                        <div>
-                            <Typography variant="subtitle1">
-                                Viewing saved investigation (#
-                                {investigationId}):{" "}
-                                {investigationFromServer &&
-                                    investigationFromServer.name}
-                            </Typography>
-                        </div>
                     )}
                 </Box>
 

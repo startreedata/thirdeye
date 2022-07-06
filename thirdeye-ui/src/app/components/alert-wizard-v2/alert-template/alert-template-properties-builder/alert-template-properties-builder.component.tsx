@@ -185,7 +185,9 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                         return (
                             <Grid container item key={item.key} xs={12}>
                                 <Grid item lg={2} md={4} xs={12}>
-                                    <label>{item.key}</label>
+                                    <Box paddingBottom={1} paddingTop={1}>
+                                        <label>{item.key}</label>
+                                    </Box>
                                 </Grid>
                                 <Grid item lg={3} md={5} xs={12}>
                                     <TextField

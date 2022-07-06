@@ -219,7 +219,8 @@
         "alert-json-template": "Alert JSON Template",
         "duplicate": "Duplicate",
         "add-property-key": "Add property key",
-        "event-metadata": "Event Metadata"
+        "event-metadata": "Event Metadata",
+        "cron-documentation": "cron documentation"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -288,6 +289,8 @@
         "do-you-want-to-leave-this-page": "Do you want to continue and leave this page?",
         "your-changes-wont-save": "Your changes won’t be saved.",
         "click-here-to-select-alert-template": "Click here to select alert template",
-        "custom-alert-template-used": "Custom alert template used in alert configuration"
+        "custom-alert-template-used": "Custom alert template used in alert configuration",
+        "invalid-cron-input-1": "Invalid cron input, See ",
+        "invalid-cron-input-2": " for more details on the expected format"
     }
 }

@@ -23,11 +23,11 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
-    AppLoadingIndicatorV1,
     JSONEditorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -272,16 +272,15 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
     }, [anomaliesRequestStatus, anomaliesRequestErrors]);
 
-    return !uiAlert || evaluationRequestStatus === ActionStatus.Working ? (
-        <AppLoadingIndicatorV1 />
-    ) : (
+    return (
         <PageV1>
-            <PageHeader showCreateButton title={uiAlert.name} />
-
+            <PageHeader showCreateButton title={uiAlert?.name ?? ""}>
+                {!uiAlert && <SkeletonV1 width="512px" />}
+            </PageHeader>
             <PageContentsGridV1>
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    {evaluationRequestStatus === ActionStatus.Error && (
+                    {evaluationRequestStatus === ActionStatus.Error ? (
                         <Card variant="outlined">
                             <CardContent>
                                 <Box pb={20} pt={20}>
@@ -289,48 +288,84 @@ export const AlertsViewPage: FunctionComponent = () => {
                                 </Box>
                             </CardContent>
                         </Card>
-                    )}
-
-                    {evaluationRequestStatus === ActionStatus.Done && (
-                        <AlertEvaluationTimeSeriesCard
-                            alertEvaluation={alertEvaluation}
-                            alertEvaluationTimeSeriesHeight={500}
-                            title={uiAlert.name}
-                            onAnomalyBarClick={onAnomalyBarClick}
-                            onRefresh={fetchAlertEvaluation}
-                        />
+                    ) : (
+                        uiAlert && (
+                            <AlertEvaluationTimeSeriesCard
+                                alertEvaluation={alertEvaluation}
+                                alertEvaluationTimeSeriesHeight={500}
+                                isLoading={
+                                    evaluationRequestStatus ===
+                                    ActionStatus.Working
+                                }
+                                title={uiAlert.name}
+                                onAnomalyBarClick={onAnomalyBarClick}
+                                onRefresh={fetchAlertEvaluation}
+                            />
+                        )
                     )}
                 </Grid>
 
                 {/* Alert Details Card*/}
                 <Grid item xs={12}>
-                    <AlertCard
-                        anomalies={anomalies}
-                        uiAlert={uiAlert}
-                        onChange={handleAlertChange}
-                        onDelete={handleAlertDelete}
-                    />
+                    {uiAlert ? (
+                        <AlertCard
+                            anomalies={anomalies}
+                            uiAlert={uiAlert}
+                            onChange={handleAlertChange}
+                            onDelete={handleAlertDelete}
+                        />
+                    ) : (
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Box width="100%">
+                                    <SkeletonV1
+                                        animation="pulse"
+                                        height={196}
+                                        variant="rect"
+                                        width="100%"
+                                    />
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    )}
                 </Grid>
 
                 {/* Readonly detection configuration */}
-                <Grid item sm={12}>
+                <Grid item xs={12}>
                     <Card variant="outlined">
-                        <CardHeader
-                            title={t("label.detection-configuration")}
-                            titleTypographyProps={{ variant: "h6" }}
-                        />
-                        <CardContent>
-                            <JSONEditorV1
-                                disableValidation
-                                readOnly
-                                value={
-                                    uiAlert.alert as unknown as Record<
-                                        string,
-                                        unknown
-                                    >
-                                }
-                            />
-                        </CardContent>
+                        {uiAlert ? (
+                            <>
+                                <CardHeader
+                                    title={t("label.detection-configuration")}
+                                    titleTypographyProps={{
+                                        variant: "h6",
+                                    }}
+                                />
+                                <CardContent>
+                                    <JSONEditorV1
+                                        disableValidation
+                                        readOnly
+                                        value={
+                                            uiAlert.alert as unknown as Record<
+                                                string,
+                                                unknown
+                                            >
+                                        }
+                                    />
+                                </CardContent>
+                            </>
+                        ) : (
+                            <CardContent>
+                                <Box width="100%">
+                                    <SkeletonV1
+                                        animation="pulse"
+                                        height={196}
+                                        variant="rect"
+                                        width="100%"
+                                    />
+                                </Box>
+                            </CardContent>
+                        )}
                     </Card>
                 </Grid>
             </PageContentsGridV1>

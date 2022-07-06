@@ -11,13 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { FormHelperText, Grid, InputLabel, TextField } from "@material-ui/core";
+import {
+    FormHelperText,
+    Grid,
+    InputLabel,
+    Link,
+    TextField,
+    Typography,
+} from "@material-ui/core";
 import CronValidator from "cron-expression-validator";
 import cronstrue from "cronstrue";
-import { uniq } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ensureArrayOfStrings } from "../../../alert-template/alert-template.utils";
 import { useAlertWizardV2Styles } from "../../../alert-wizard-v2.styles";
 import { AlertDateTimeCronAdvanceProps } from "./alert-date-time-cron-advance.interfaces";
 
@@ -45,6 +50,14 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
                 >
                     {t("label.cron")}
                 </InputLabel>
+                <Typography variant="caption">
+                    <Link
+                        href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html"
+                        target="_blank"
+                    >
+                        {t("label.documentation")}
+                    </Link>
+                </Typography>
             </Grid>
             <Grid item lg={3} md={5} sm={12} xs={12}>
                 <TextField
@@ -67,24 +80,18 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
                 )}
 
                 {/* If there are errors, render them */}
-                {!isCronValid &&
-                    uniq(
-                        ensureArrayOfStrings(
-                            CronValidator.isValidCronExpression(currentCron, {
-                                error: true,
-                            }).errorMessage as string[]
-                        )
-                    ).map((item, idx) => {
-                        return (
-                            <FormHelperText
-                                error
-                                className={classes.label}
-                                key={`${idx}`}
-                            >
-                                {item}
-                            </FormHelperText>
-                        );
-                    })}
+                {!isCronValid && (
+                    <FormHelperText error className={classes.label}>
+                        {t("message.invalid-cron-input-1")}
+                        <Link
+                            href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html"
+                            target="_blank"
+                        >
+                            {t("label.cron-documentation")}
+                        </Link>
+                        {t("message.invalid-cron-input-2")}
+                    </FormHelperText>
+                )}
             </Grid>
         </Grid>
     );

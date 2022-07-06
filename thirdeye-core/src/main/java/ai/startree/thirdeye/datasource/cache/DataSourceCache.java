@@ -68,10 +68,17 @@ public class DataSourceCache {
     metricRegistry.register("healthyDatasourceCount", new CachedGauge<Integer>(1, TimeUnit.MINUTES) {
       @Override
       protected Integer loadValue() {
-        return Math.toIntExact(getHealthyCount());
+        return getHealthyDatasourceCount();
       }
     });
     metricRegistry.register("loadedDatasourceCount", (Gauge<Integer>) cache::size);
+  }
+
+  private Integer getHealthyDatasourceCount() {
+    return Math.toIntExact(dataSourceManager.findAll().stream()
+        .map(dto -> getDataSource(dto.getName()))
+        .filter(ThirdEyeDataSource::validate)
+        .count());
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {
@@ -125,13 +132,6 @@ public class DataSourceCache {
     optional(cache.remove(name))
         .map(Pair::getFirst)
         .ifPresent(this::close);
-  }
-
-  private long getHealthyCount() {
-    return cache.values().stream()
-        .map(Pair::getFirst)
-        .filter(DataSourceWrapper::validate)
-        .count();
   }
 
   public void clear() {

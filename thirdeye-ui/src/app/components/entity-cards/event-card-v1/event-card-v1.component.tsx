@@ -1,9 +1,11 @@
 import { Grid, Typography } from "@material-ui/core";
 import { map } from "lodash";
-import React, { FC } from "react";
+import React, { FunctionComponent } from "react";
 import { EventCardProps } from "../event-card/event-card.interfaces";
 
-export const EventCardV1: FC<EventCardProps> = ({ event }: EventCardProps) => {
+export const EventCardV1: FunctionComponent<EventCardProps> = ({
+    event,
+}: EventCardProps) => {
     return event?.targetDimensionMap ? (
         <Grid container spacing={2}>
             {map(event.targetDimensionMap, (value: string[], key: string) => (

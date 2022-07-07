@@ -31,6 +31,8 @@ import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.util.Pair;
+import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +64,21 @@ public class DataSourceCache {
     this.dataSourceManager = dataSourceManager;
     this.dataSourcesLoader = dataSourcesLoader;
     this.metricRegistry = metricRegistry;
+
+    metricRegistry.register("healthyDatasourceCount", new CachedGauge<Integer>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Integer loadValue() {
+        return getHealthyDatasourceCount();
+      }
+    });
+    metricRegistry.register("loadedDatasourceCount", (Gauge<Integer>) cache::size);
+  }
+
+  private Integer getHealthyDatasourceCount() {
+    return Math.toIntExact(dataSourceManager.findAll().stream()
+        .map(dto -> getDataSource(dto.getName()))
+        .filter(ThirdEyeDataSource::validate)
+        .count());
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {

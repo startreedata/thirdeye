@@ -349,6 +349,14 @@
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
           <version>4.0</version>
+          <executions>
+            <execution>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
           <configuration>
             <header>HEADER</header>
             <excludes>
@@ -389,11 +397,11 @@
 
               <exclude>**/node_modules/**</exclude>
               <exclude>**/dist/**</exclude>
+              <exclude>**/webpack/**</exclude>
               <exclude>src/test/resources/**</exclude>
               <exclude>src/main/resources/**</exclude>
-              <exclude>thirdeye-ui/build</exclude>
-              <exclude>thirdeye-ui/dist</exclude>
-              <exclude>thirdeye-ui/scripts/verify-version-replacement.js</exclude>
+              <exclude>**/build/**</exclude>
+              <exclude>**/verify-version-replacement.js</exclude>
 
               <!-- files from Eclipse -->
               <exclude>**/maven-eclipse.xml</exclude>

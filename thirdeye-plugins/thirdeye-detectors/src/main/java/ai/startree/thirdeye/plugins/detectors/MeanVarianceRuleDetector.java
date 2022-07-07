@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.detection.components.detectors;
+package ai.startree.thirdeye.plugins.detectors;
 
 import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
@@ -27,7 +27,6 @@ import static ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.detection.components.SimpleAnomalyDetectorResult;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
@@ -79,6 +78,28 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     return 0.5 + 0.1 * (10 - sensitivity);
   }
 
+  protected static int computeSteps(final String periodString,
+      final String monitoringGranularityString) {
+    // mind that computing lookback only once is not exactly correct when a day has 25 hours or 23 hours - but very minor issue
+    final Period lookbackPeriod = Period.parse(periodString, ISOPeriodFormat.standard());
+    final Period monitoringGranularity = Period.parse(monitoringGranularityString,
+        ISOPeriodFormat.standard());
+
+    return (int) (lookbackPeriod.toStandardDuration().getMillis()
+        / monitoringGranularity.toStandardDuration().getMillis());
+  }
+
+  //todo cyril move this as utils/shared method
+  public static BooleanSeries patternMatch(final Pattern pattern, final DataFrame dfInput) {
+    // series of boolean that are true if the anomaly direction matches the pattern
+    if (pattern.equals(Pattern.UP_OR_DOWN)) {
+      return BooleanSeries.fillValues(dfInput.size(), true);
+    }
+    return pattern.equals(Pattern.UP) ?
+        dfInput.getDoubles(COL_DIFF).gt(0) :
+        dfInput.getDoubles(COL_DIFF).lt(0);
+  }
+
   @Override
   public void init(final MeanVarianceRuleDetectorSpec spec) {
     this.spec = spec;
@@ -121,17 +142,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         String.format("Lookback is %d. Lookback should be greater than 5.", lookback));
   }
 
-  protected static int computeSteps(final String periodString,
-      final String monitoringGranularityString) {
-    // mind that computing lookback only once is not exactly correct when a day has 25 hours or 23 hours - but very minor issue
-    final Period lookbackPeriod = Period.parse(periodString, ISOPeriodFormat.standard());
-    final Period monitoringGranularity = Period.parse(monitoringGranularityString,
-        ISOPeriodFormat.standard());
-
-    return (int) (lookbackPeriod.toStandardDuration().getMillis()
-        / monitoringGranularity.toStandardDuration().getMillis());
-  }
-
   @Override
   public AnomalyDetectorResult runDetection(final Interval window,
       final Map<String, DataTable> timeSeriesMap
@@ -161,17 +171,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
 
     return new SimpleAnomalyDetectorResult(inputDf);
-  }
-
-  //todo cyril move this as utils/shared method
-  public static BooleanSeries patternMatch(final Pattern pattern, final DataFrame dfInput) {
-    // series of boolean that are true if the anomaly direction matches the pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      return BooleanSeries.fillValues(dfInput.size(), true);
-    }
-    return pattern.equals(Pattern.UP) ?
-        dfInput.getDoubles(COL_DIFF).gt(0) :
-        dfInput.getDoubles(COL_DIFF).lt(0);
   }
 
   private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {

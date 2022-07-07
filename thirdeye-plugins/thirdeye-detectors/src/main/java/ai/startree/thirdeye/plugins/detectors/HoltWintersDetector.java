@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.detection.components.detectors;
+package ai.startree.thirdeye.plugins.detectors;
 
-import static ai.startree.thirdeye.plugins.detection.components.detectors.MeanVarianceRuleDetector.computeSteps;
-import static ai.startree.thirdeye.plugins.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
+import static ai.startree.thirdeye.plugins.detectors.MeanVarianceRuleDetector.computeSteps;
+import static ai.startree.thirdeye.plugins.detectors.MeanVarianceRuleDetector.patternMatch;
 import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
@@ -27,7 +27,6 @@ import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.detection.components.SimpleAnomalyDetectorResult;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
@@ -81,6 +80,114 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
   private double sensitivity;
   private HoltWintersDetectorSpec spec;
   private int lookback = 60;
+
+  private static double calculateInitialLevel(final double[] y) {
+    return y[0];
+  }
+
+  /**
+   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
+   *
+   * @return - Initial trend - Bt[1]
+   */
+  private static double calculateInitialTrend(final double[] y, final int period) {
+    double sum = 0;
+
+    for (int i = 0; i < period; i++) {
+      sum += y[period + i] - y[i];
+    }
+
+    return sum / (period * period);
+  }
+
+  /**
+   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
+   *
+   * @return - Seasonal Indices.
+   */
+  private static double[] calculateSeasonalIndices(final double[] y, final int period,
+      final int seasons) {
+    final double[] seasonalMean = new double[seasons];
+    final double[] seasonalIndices = new double[period];
+
+    final double[] averagedObservations = new double[y.length];
+
+    for (int i = 0; i < seasons; i++) {
+      for (int j = 0; j < period; j++) {
+        seasonalMean[i] += y[(i * period) + j];
+      }
+      seasonalMean[i] /= period;
+    }
+
+    for (int i = 0; i < seasons; i++) {
+      for (int j = 0; j < period; j++) {
+        // zero case
+        if (seasonalMean[i] == 0 && y[(i * period) + j] == 0) {
+          // no seasonality
+          averagedObservations[(i * period) + j] = 1;
+        }
+        // case seasonalMean = 0 and y[(i * period) + j] != 0 cannot happen if all values are positive
+        // very unlikely to happen if at least one value is not null
+        // fixme cyril add logging if this happens (or reimplement HW) - for the moment returns a nan
+        else {
+          averagedObservations[(i * period) + j] = y[(i * period) + j] / seasonalMean[i];
+        }
+      }
+    }
+
+    for (int i = 0; i < period; i++) {
+      for (int j = 0; j < seasons; j++) {
+        seasonalIndices[i] += averagedObservations[(j * period) + i];
+      }
+      seasonalIndices[i] /= seasons;
+    }
+
+    return seasonalIndices;
+  }
+
+  /**
+   * Returns the error bound of given list based on mean, std and given zscore
+   *
+   * @param givenNumbers double list
+   * @param zscore zscore used to multiply by std
+   * @return the error bound
+   */
+  private static double calculateErrorBound(final List<Double> givenNumbers, final double zscore) {
+    // no data: cannot compute mean and variance
+    if (givenNumbers.size() == 0) {
+      return 0;
+    }
+    // one point: cannot compute variance - apply rule of thumb
+    if (givenNumbers.size() == 1) {
+      return Math.abs(givenNumbers.get(0)) / 2;
+    }
+    // calculate the mean value (= average)
+    double sum = 0.0;
+    for (final double num : givenNumbers) {
+      sum += num;
+    }
+    final double mean = sum / givenNumbers.size();
+
+    // calculate standard deviation
+    double squaredDifferenceSum = 0.0;
+    for (final double num : givenNumbers) {
+      squaredDifferenceSum += (num - mean) * (num - mean);
+    }
+    final double variance = squaredDifferenceSum / givenNumbers.size();
+    final double standardDeviation = Math.sqrt(variance);
+
+    return zscore * standardDeviation;
+  }
+
+  /**
+   * Mapping of sensitivity to zscore on range of 1 - 3
+   *
+   * @param sensitivity double from 0 to 10. Values outside this range are clipped to 0, 10
+   * @return zscore
+   */
+  private static double zscore(double sensitivity) {
+    return 1 + 0.2 * (10 - Math.max(Math.min(sensitivity, 10), 0));
+  }
 
   @Override
   public void init(final HoltWintersDetectorSpec spec) {
@@ -390,7 +497,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
       return gamma;
     }
 
-
     @Override
     public String toString() {
       return "{alpha=" + alpha +
@@ -399,114 +505,6 @@ public class HoltWintersDetector implements BaselineProvider<HoltWintersDetector
           ", optimizationIterations=" + optimizationIterations +
           '}';
     }
-  }
-
-  private static double calculateInitialLevel(final double[] y) {
-    return y[0];
-  }
-
-  /**
-   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-   *
-   * @return - Initial trend - Bt[1]
-   */
-  private static double calculateInitialTrend(final double[] y, final int period) {
-    double sum = 0;
-
-    for (int i = 0; i < period; i++) {
-      sum += y[period + i] - y[i];
-    }
-
-    return sum / (period * period);
-  }
-
-  /**
-   * See: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc435.htm
-   *
-   * @return - Seasonal Indices.
-   */
-  private static double[] calculateSeasonalIndices(final double[] y, final int period,
-      final int seasons) {
-    final double[] seasonalMean = new double[seasons];
-    final double[] seasonalIndices = new double[period];
-
-    final double[] averagedObservations = new double[y.length];
-
-    for (int i = 0; i < seasons; i++) {
-      for (int j = 0; j < period; j++) {
-        seasonalMean[i] += y[(i * period) + j];
-      }
-      seasonalMean[i] /= period;
-    }
-
-    for (int i = 0; i < seasons; i++) {
-      for (int j = 0; j < period; j++) {
-        // zero case
-        if (seasonalMean[i] == 0 && y[(i * period) + j] == 0) {
-          // no seasonality
-          averagedObservations[(i * period) + j] = 1;
-        }
-        // case seasonalMean = 0 and y[(i * period) + j] != 0 cannot happen if all values are positive
-        // very unlikely to happen if at least one value is not null
-        // fixme cyril add logging if this happens (or reimplement HW) - for the moment returns a nan
-        else {
-          averagedObservations[(i * period) + j] = y[(i * period) + j] / seasonalMean[i];
-        }
-      }
-    }
-
-    for (int i = 0; i < period; i++) {
-      for (int j = 0; j < seasons; j++) {
-        seasonalIndices[i] += averagedObservations[(j * period) + i];
-      }
-      seasonalIndices[i] /= seasons;
-    }
-
-    return seasonalIndices;
-  }
-
-  /**
-   * Returns the error bound of given list based on mean, std and given zscore
-   *
-   * @param givenNumbers double list
-   * @param zscore zscore used to multiply by std
-   * @return the error bound
-   */
-  private static double calculateErrorBound(final List<Double> givenNumbers, final double zscore) {
-    // no data: cannot compute mean and variance
-    if (givenNumbers.size() == 0) {
-      return 0;
-    }
-    // one point: cannot compute variance - apply rule of thumb
-    if (givenNumbers.size() == 1) {
-      return Math.abs(givenNumbers.get(0)) / 2;
-    }
-    // calculate the mean value (= average)
-    double sum = 0.0;
-    for (final double num : givenNumbers) {
-      sum += num;
-    }
-    final double mean = sum / givenNumbers.size();
-
-    // calculate standard deviation
-    double squaredDifferenceSum = 0.0;
-    for (final double num : givenNumbers) {
-      squaredDifferenceSum += (num - mean) * (num - mean);
-    }
-    final double variance = squaredDifferenceSum / givenNumbers.size();
-    final double standardDeviation = Math.sqrt(variance);
-
-    return zscore * standardDeviation;
-  }
-
-  /**
-   * Mapping of sensitivity to zscore on range of 1 - 3
-   *
-   * @param sensitivity double from 0 to 10. Values outside this range are clipped to 0, 10
-   * @return zscore
-   */
-  private static double zscore(double sensitivity) {
-    return 1 + 0.2 * (10 - Math.max(Math.min(sensitivity, 10), 0));
   }
 
   /**

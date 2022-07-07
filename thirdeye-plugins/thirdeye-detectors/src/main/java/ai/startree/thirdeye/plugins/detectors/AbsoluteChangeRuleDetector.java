@@ -11,10 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.detection.components.detectors;
+package ai.startree.thirdeye.plugins.detectors;
 
-import static ai.startree.thirdeye.plugins.detection.components.detectors.AbsoluteChangeRuleDetector.windowMatch;
-import static ai.startree.thirdeye.plugins.detection.components.detectors.MeanVarianceRuleDetector.patternMatch;
 import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
@@ -26,20 +24,17 @@ import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static ai.startree.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
-import static ai.startree.thirdeye.spi.dataframe.Series.DoubleFunction;
-import static ai.startree.thirdeye.spi.dataframe.Series.map;
 import static ai.startree.thirdeye.spi.detection.Pattern.DOWN;
 import static ai.startree.thirdeye.spi.detection.Pattern.UP;
 import static ai.startree.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
-import static ai.startree.thirdeye.spi.detection.Pattern.valueOf;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.detection.components.SimpleAnomalyDetectorResult;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
-import ai.startree.thirdeye.spi.dataframe.Series;
+import ai.startree.thirdeye.spi.dataframe.LongSeries;
+import ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.BaselineProvider;
@@ -51,22 +46,27 @@ import org.joda.time.Interval;
 import org.joda.time.ReadableInterval;
 
 /**
- * Computes a multi-week aggregate baseline and compares the current value based on relative change.
+ * Absolute change rule detection
  */
-public class PercentageChangeRuleDetector implements
-    AnomalyDetector<PercentageChangeRuleDetectorSpec>,
-    BaselineProvider<PercentageChangeRuleDetectorSpec> {
+public class AbsoluteChangeRuleDetector implements
+    AnomalyDetector<AbsoluteChangeRuleDetectorSpec>,
+    BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
 
-  private double percentageChange;
+  private double absoluteChange;
   private Pattern pattern;
-  private PercentageChangeRuleDetectorSpec spec;
+  private AbsoluteChangeRuleDetectorSpec spec;
+
+  public static BooleanSeries windowMatch(LongSeries times, ReadableInterval window) {
+    // only check start for consistency with other detectors
+    return times.map((LongConditional) values -> values[0] >= window.getStartMillis());
+  }
 
   @Override
-  public void init(final PercentageChangeRuleDetectorSpec spec) {
+  public void init(final AbsoluteChangeRuleDetectorSpec spec) {
     this.spec = spec;
-    checkArgument(!Double.isNaN(spec.getPercentageChange()), "Percentage change is not set.");
-    percentageChange = spec.getPercentageChange();
-    pattern = valueOf(spec.getPattern().toUpperCase());
+    checkArgument(!Double.isNaN(spec.getAbsoluteChange()), "Absolute change is not set.");
+    absoluteChange = spec.getAbsoluteChange();
+    pattern = Pattern.valueOf(spec.getPattern().toUpperCase());
   }
 
   @Override
@@ -76,6 +76,7 @@ public class PercentageChangeRuleDetector implements
     final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
     final DataFrame baselineDf = baseline.getDataFrame();
     final DataFrame currentDf = current.getDataFrame();
+
     currentDf
         .renameSeries(spec.getTimestamp(), COL_TIME)
         .renameSeries(spec.getMetric(), COL_CURRENT)
@@ -87,11 +88,11 @@ public class PercentageChangeRuleDetector implements
 
   private AnomalyDetectorResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
+    // calculate absolute change
     inputDf
-        // calculate percentage change
-        .addSeries(COL_DIFF, percentageChanges(inputDf))
-        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
-        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(percentageChange))
+        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
+        .addSeries(COL_PATTERN, MeanVarianceRuleDetector.patternMatch(pattern, inputDf))
+        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(absoluteChange))
         .addSeries(COL_IN_WINDOW, windowMatch(inputDf.getLongs(COL_TIME), window))
         .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY,
             COL_PATTERN,
@@ -103,33 +104,16 @@ public class PercentageChangeRuleDetector implements
         new SimpleAnomalyDetectorResult(inputDf);
   }
 
-  private Series percentageChanges(final DataFrame inputDf) {
-    return map((DoubleFunction) this::percentageChangeLambda,
-        inputDf.getDoubles(COL_CURRENT),
-        inputDf.getDoubles(COL_VALUE));
-  }
-
-  private double percentageChangeLambda(final double[] values) {
-    final double first = values[0];
-    final double second = values[1];
-
-    if (Double.compare(second, 0.0) == 0) {
-      return Double.compare(first, 0.0) == 0 ? 0.0
-          : (first > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
-    }
-    return (first - second) / second;
-  }
-
   private void addBoundaries(final DataFrame inputDf) {
     //default bounds
     DoubleSeries upperBound = DoubleSeries.fillValues(inputDf.size(), POSITIVE_INFINITY);
     //fixme cyril this not consistent with threshold rule detector default values
     DoubleSeries lowerBound = DoubleSeries.zeros(inputDf.size());
     if (pattern == UP || pattern == UP_OR_DOWN) {
-      upperBound = inputDf.getDoubles(COL_VALUE).multiply(1 + percentageChange);
+      upperBound = inputDf.getDoubles(COL_VALUE).add(absoluteChange);
     }
     if (pattern == DOWN || pattern == UP_OR_DOWN) {
-      lowerBound = inputDf.getDoubles(COL_VALUE).multiply(1 - percentageChange);
+      lowerBound = inputDf.getDoubles(COL_VALUE).add(-absoluteChange);
     }
     inputDf.addSeries(COL_UPPER_BOUND, upperBound);
     inputDf.addSeries(COL_LOWER_BOUND, lowerBound);

@@ -455,6 +455,11 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
+        <artifactId>thirdeye-detectors</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-core</artifactId>
         <version>${project.version}</version>

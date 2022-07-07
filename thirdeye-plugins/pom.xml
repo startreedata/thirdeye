@@ -32,6 +32,7 @@
     <module>thirdeye-datasources</module>
     <module>thirdeye-plugin-example</module>
     <module>thirdeye-detection-components</module>
+    <module>thirdeye-detectors</module>
     <module>thirdeye-pinot</module>
     <module>thirdeye-kafka</module>
     <module>thirdeye-notification-email</module>

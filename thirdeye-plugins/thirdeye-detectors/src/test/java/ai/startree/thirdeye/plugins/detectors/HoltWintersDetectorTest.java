@@ -11,12 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.detection.components.detectors;
+package ai.startree.thirdeye.plugins.detectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.plugins.detection.components.detectors.HoltWintersDetector;
-import ai.startree.thirdeye.plugins.detection.components.detectors.HoltWintersDetectorSpec;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;

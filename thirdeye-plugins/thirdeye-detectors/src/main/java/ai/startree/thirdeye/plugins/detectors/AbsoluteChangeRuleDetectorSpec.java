@@ -11,23 +11,22 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.detection.components.detectors;
+package ai.startree.thirdeye.plugins.detectors;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 
-public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
+public class AbsoluteChangeRuleDetectorSpec extends AbstractSpec {
 
-  private double percentageChange = Double.NaN;
+  private double absoluteChange = Double.NaN;
   private String offset = "wo1w";
   private String pattern = "UP_OR_DOWN";
-  private String weekStart = "WEDNESDAY";
 
-  public double getPercentageChange() {
-    return percentageChange;
+  public double getAbsoluteChange() {
+    return absoluteChange;
   }
 
-  public PercentageChangeRuleDetectorSpec setPercentageChange(final double percentageChange) {
-    this.percentageChange = percentageChange;
+  public AbsoluteChangeRuleDetectorSpec setAbsoluteChange(final double absoluteChange) {
+    this.absoluteChange = absoluteChange;
     return this;
   }
 
@@ -35,7 +34,7 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
     return offset;
   }
 
-  public PercentageChangeRuleDetectorSpec setOffset(final String offset) {
+  public AbsoluteChangeRuleDetectorSpec setOffset(final String offset) {
     this.offset = offset;
     return this;
   }
@@ -44,17 +43,8 @@ public class PercentageChangeRuleDetectorSpec extends AbstractSpec {
     return pattern;
   }
 
-  public PercentageChangeRuleDetectorSpec setPattern(final String pattern) {
+  public AbsoluteChangeRuleDetectorSpec setPattern(final String pattern) {
     this.pattern = pattern;
-    return this;
-  }
-
-  public String getWeekStart() {
-    return weekStart;
-  }
-
-  public PercentageChangeRuleDetectorSpec setWeekStart(final String weekStart) {
-    this.weekStart = weekStart;
     return this;
   }
 }

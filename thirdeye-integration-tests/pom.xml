@@ -44,6 +44,10 @@
     </dependency>
     <dependency>
       <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-detectors</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-notification-email</artifactId>
     </dependency>
     <dependency>

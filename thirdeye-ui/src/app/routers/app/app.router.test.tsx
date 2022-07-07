@@ -17,8 +17,8 @@ import { MemoryRouter } from "react-router-dom";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { AppRouter } from "./app.router";
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
+jest.mock("@startree-ui/platform-ui", () => ({
+    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
         string,
         unknown
     >),

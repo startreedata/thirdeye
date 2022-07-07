@@ -12,9 +12,9 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
+import { formatDateAndTimeV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { EventRendererProps } from "./event-renderer.interfaces";
 
 export const EventRenderer: FunctionComponent<EventRendererProps> = (

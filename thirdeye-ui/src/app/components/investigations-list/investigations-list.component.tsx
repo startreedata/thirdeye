@@ -13,15 +13,15 @@
  */
 import { Box, Grid, Link, Typography } from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import React, { FunctionComponent, ReactElement } from "react";
-import { useTranslation } from "react-i18next";
 import {
     DataGridScrollV1,
     DataGridV1,
+    formatDateAndTimeV1,
     PageContentsCardV1,
     SkeletonV1,
-} from "../../platform/components";
-import { formatDateAndTimeV1 } from "../../platform/utils";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { INVESTIGATION_ID_QUERY_PARAM } from "../../utils/investigation/investigation.util";

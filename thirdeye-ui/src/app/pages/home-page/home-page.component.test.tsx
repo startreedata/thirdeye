@@ -11,30 +11,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { PageContentsGridV1 } from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
-import { PageContentsGridV1 } from "../../platform/components/page-v1/page-contents-grid-v1/page-contents-grid-v1";
 import { HomePage } from "./home-page.component";
 
-jest.mock(
-    "../../platform/components/page-v1/page-contents-grid-v1/page-contents-grid-v1/page-contents-grid-v1.component",
-    () => ({
-        PageContentsGridV1: jest
-            .fn()
-            .mockImplementation((props) => props.children),
-    })
-);
-
-jest.mock(
-    "../../platform/components/page-v1/page-v1/page-v1.component",
-    () => ({
-        PageV1: jest.fn().mockImplementation((props) => props.children),
-    })
-);
-
-jest.mock("../../platform/components/tile-button-v1", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     TileButtonIconV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonTextV1: jest.fn().mockImplementation((props) => props.children),
+    PageV1: jest.fn().mockImplementation((props) => props.children),
+    PageContentsGridV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonV1: jest.fn().mockImplementation((props) => (
         <a data-testid={props.href} href={props.href}>
             {props.children}

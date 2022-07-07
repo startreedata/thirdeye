@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, lazy, Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
 import { AppRoute } from "../../utils/routes/routes.util";
 
 const AlertsRouter = lazy(() =>

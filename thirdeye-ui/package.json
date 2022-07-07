@@ -54,6 +54,7 @@
         "@material-ui/icons": "^4.11.2",
         "@material-ui/lab": "4.0.0-alpha.60",
         "@material-ui/pickers": "^3.2.10",
+        "@startree-ui/platform-ui": "1.27.0",
         "@tippyjs/react": "^4.2.6",
         "@visx/visx": "^2.9.0",
         "axios": "^0.21.1",
@@ -107,9 +108,9 @@
         "@typescript-eslint/eslint-plugin": "^4.12.0",
         "@typescript-eslint/parser": "^4.12.0",
         "clean-webpack-plugin": "^3.0.0",
+        "conventional-changelog-conventionalcommits": "^4.6.3",
         "copy-webpack-plugin": "^7.0.0",
         "css-loader": "^5.0.1",
-        "conventional-changelog-conventionalcommits": "^4.6.3",
         "cypress": "^7.4.0",
         "eslint": "^7.32.0",
         "eslint-config-prettier": "^8.3.0",
@@ -150,6 +151,5 @@
         "webpack-cli": "^4.3.1",
         "webpack-dev-server": "^3.11.1",
         "webpackbar": "^5.0.0-3"
-    },
-    "peerDependencies": {}
+    }
 }

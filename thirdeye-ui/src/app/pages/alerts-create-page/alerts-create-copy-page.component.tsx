@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useGetAlert } from "../../rest/alerts/alerts.actions";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { AlertsViewPageParams } from "../alerts-view-page/alerts-view-page.interfaces";

@@ -12,13 +12,13 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
     DataGridV1,
     SkeletonV1,
-} from "../../../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
 import { useGetSubscriptionGroups } from "../../../../rest/subscription-groups/subscription-groups.actions";

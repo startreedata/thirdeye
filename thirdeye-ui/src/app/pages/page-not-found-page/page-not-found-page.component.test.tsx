@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { PageContentsGridV1 } from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
-import { PageContentsGridV1 } from "../../platform/components";
 import { PageNotFoundPage } from "./page-not-found-page.component";
 
 jest.mock("react-i18next", () => ({
@@ -22,8 +22,8 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
+jest.mock("@startree-ui/platform-ui", () => ({
+    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
         string,
         unknown
     >),

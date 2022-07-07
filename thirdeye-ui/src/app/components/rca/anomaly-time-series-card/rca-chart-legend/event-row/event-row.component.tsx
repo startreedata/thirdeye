@@ -14,10 +14,9 @@
 import { Button, Checkbox, Typography } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
+import { lightV1, LocalThemeProviderV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { LocalThemeProviderV1 } from "../../../../../platform/components";
-import { lightV1 } from "../../../../../platform/utils";
 import { useFilteredTimeSeriesRowStyles } from "../filtered-time-series-row/filtered-time-series-row.styles";
 import { EventRowProps } from "./event-row.interfaces";
 

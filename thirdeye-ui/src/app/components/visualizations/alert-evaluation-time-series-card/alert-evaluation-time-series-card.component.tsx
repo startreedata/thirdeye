@@ -20,8 +20,8 @@ import {
     FormHelperText,
     Grid,
 } from "@material-ui/core";
+import { PageContentsCardV1, SkeletonV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useCallback } from "react";
-import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertEvaluationTimeSeries } from "../alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.component";
 import { VisualizationCard } from "../visualization-card/visualization-card.component";

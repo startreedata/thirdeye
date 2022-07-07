@@ -19,9 +19,9 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
+import { PageContentsCardV1 } from "@startree-ui/platform-ui";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1 } from "../../../platform/components";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertDetailsProps } from "./alert-details.interfaces";
 import { AlertFrequency } from "./alert-frequency/alert-frequency.component";

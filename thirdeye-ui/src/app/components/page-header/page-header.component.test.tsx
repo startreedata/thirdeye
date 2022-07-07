@@ -17,8 +17,8 @@ import { BrowserRouter } from "react-router-dom";
 import { TimeRangeProvider } from "../time-range/time-range-provider/time-range-provider.component";
 import { PageHeader } from "./page-header.component";
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
+jest.mock("@startree-ui/platform-ui", () => ({
+    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
         string,
         unknown
     >),

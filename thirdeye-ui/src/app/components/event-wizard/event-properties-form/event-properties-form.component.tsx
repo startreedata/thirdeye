@@ -277,17 +277,18 @@ export const EventPropertiesForm: FunctionComponent<
                             {t("label.event-metadata")}
                         </Typography>
                         <Typography variant="body2">
-                            Create custom Event properties and corresponding
-                            values
+                            {t(
+                                "message.create-custom-event-properties-and-values"
+                            )}
                         </Typography>
                     </Box>
                 </Grid>
 
                 <Grid item xs={6}>
-                    <Box paddingBottom={1}>Property name</Box>
+                    <Box paddingBottom={1}>{t("label.property-name")}</Box>
                 </Grid>
                 <Grid item xs={6}>
-                    <Box paddingBottom={1}>Property value</Box>
+                    <Box paddingBottom={1}>{t("label.property-value")}</Box>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -313,13 +314,7 @@ export const EventPropertiesForm: FunctionComponent<
                                     />
                                 </Grid>
                                 <Grid item xs={1} />
-                                <Grid
-                                    item
-                                    className={
-                                        eventPropertiesFormStyles.propertyValue
-                                    }
-                                    xs={5}
-                                >
+                                <Grid item xs={5}>
                                     <Controller
                                         control={control}
                                         name="propertyValue"
@@ -327,6 +322,11 @@ export const EventPropertiesForm: FunctionComponent<
                                             <Autocomplete
                                                 freeSolo
                                                 multiple
+                                                classes={{
+                                                    inputRoot:
+                                                        eventPropertiesFormStyles.autoCompleteInput,
+                                                    tag: eventPropertiesFormStyles.autoCompleteTag,
+                                                }}
                                                 defaultValue={
                                                     item.propertyValue.length >
                                                     0
@@ -338,7 +338,9 @@ export const EventPropertiesForm: FunctionComponent<
                                                     <TextField
                                                         {...params}
                                                         name="propertyValue"
-                                                        placeholder="Type and press enter to add values"
+                                                        placeholder={t(
+                                                            "message.property-value-placeholder"
+                                                        )}
                                                         variant="outlined"
                                                     />
                                                 )}
@@ -406,7 +408,7 @@ export const EventPropertiesForm: FunctionComponent<
                     })}
                     <Grid item xs={12}>
                         <Button variant="contained" onClick={handleAddListItem}>
-                            Add metadata
+                            {t("label.add-metadata-entry")}
                         </Button>
                     </Grid>
                 </Grid>

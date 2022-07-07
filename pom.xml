@@ -389,6 +389,7 @@
               <exclude>thirdeye-*/target/**</exclude>
               <exclude>**/mem.script</exclude>
               <exclude>**/mem.properties</exclude>
+              <exclude>**/m2/**</exclude>
 
               <!-- Top level files -->
               <exclude>HEADER</exclude>

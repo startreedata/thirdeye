@@ -250,17 +250,18 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
             Predicate.LT("lastActive", activeThreshold)
         )
     ).forEach(task -> {
-        updateStatusAndTaskEndTime(
-            task.getId(),
-            TaskStatus.RUNNING,
-            TaskStatus.FAILED,
-            current,
-            String.format("Orphan Task. Worker id : %s", task.getWorkerId())
-        );
-        orphanTasksCount.mark();
-      }
+          updateStatusAndTaskEndTime(
+              task.getId(),
+              TaskStatus.RUNNING,
+              TaskStatus.FAILED,
+              current,
+              String.format("Orphan Task. Worker id : %s", task.getWorkerId())
+          );
+          orphanTasksCount.mark();
+        }
     );
-
+  }
+    
   public long countByStatus(final TaskStatus status) {
     return count(Predicate.EQ("status", status.toString()));
   }

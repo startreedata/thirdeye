@@ -21,8 +21,8 @@ import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -57,10 +57,10 @@ public class TaskDriverRunnable implements Runnable {
   private final TaskDriverConfiguration config;
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
-  private final Histogram taskDuration;
   private final Counter taskExceptionCounter;
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
+  private final Timer taskRunningTimer;
   private final ScheduledExecutorService heartbeatExecutorService;
 
   public TaskDriverRunnable(final TaskManager taskManager,
@@ -82,10 +82,10 @@ public class TaskDriverRunnable implements Runnable {
     this.taskRunnerFactory = taskRunnerFactory;
     this.heartbeatExecutorService = heartbeatExecutorService;
 
-    taskDuration = metricRegistry.histogram("taskDuration");
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
+    taskRunningTimer = metricRegistry.timer("taskRunningTimer");
   }
 
   public void run() {
@@ -97,7 +97,7 @@ public class TaskDriverRunnable implements Runnable {
       }
 
       // a task has acquired and we must finish executing it before termination
-      runAcquiredTask(taskDTO);
+      taskRunningTimer.time(() -> runAcquiredTask(taskDTO));
     }
     LOG.info("Thread safely quiting");
   }
@@ -139,7 +139,6 @@ public class TaskDriverRunnable implements Runnable {
       MDC.clear();
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
-      taskDuration.update(elapsedTime);
       optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));
     }
   }

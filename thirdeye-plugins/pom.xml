@@ -34,7 +34,6 @@
     <module>thirdeye-detection-components</module>
     <module>thirdeye-detectors</module>
     <module>thirdeye-pinot</module>
-    <module>thirdeye-kafka</module>
     <module>thirdeye-notification-email</module>
     <module>thirdeye-bootstrap-open-core</module>
   </modules>

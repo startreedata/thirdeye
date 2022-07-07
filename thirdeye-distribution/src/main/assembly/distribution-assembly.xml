@@ -68,10 +68,6 @@
       <outputDirectory>plugins/detectors-default/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-kafka/target/thirdeye-kafka-${project.version}-dist</directory>
-      <outputDirectory>plugins/kafka/</outputDirectory>
-    </fileSet>
-    <fileSet>
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-email/target/thirdeye-notification-email-${project.version}-dist</directory>
       <outputDirectory>plugins/notification-email/</outputDirectory>
     </fileSet>

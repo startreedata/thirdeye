@@ -35,7 +35,6 @@
     <module>thirdeye-pinot</module>
     <module>thirdeye-kafka</module>
     <module>thirdeye-notification-email</module>
-    <module>thirdeye-notification-slack</module>
     <module>thirdeye-bootstrap-open-core</module>
   </modules>
 

@@ -237,6 +237,8 @@ Details
 | `ui.publicUrl`                                     | Url on which ThirdEye UI is exposed publicly. All the notifications will use this url to share the anomaly page link |
 | `scheduler.enabled`                                | Flag to run a separate scheduler. If not enabled then coordinator itself will take care of scheduling tasks          |
 | `worker.enabled`                                   | Flag to run a separate worker. If not enabled then coordinator itself will take care of running tasks                |
+| `worker.replicas`                                  | Number of worker pods required                                                                                       |
+| `worker.randomWorkerIdEnabled`                     | Flag to enable assigning random worker ids to worker pods. Must be set true for multiple workers.                    |
 | `prometheus.enabled`                               | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
 | `mysql.mysqlUser`                                  | Database username                                                                                                    |
 | `mysql.mysqlPassword`                              | Database password                                                                                                    |

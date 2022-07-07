@@ -27,7 +27,6 @@ import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlug
 import ai.startree.thirdeye.plugins.notification.email.EmailSendgridNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.notification.email.EmailSmtpNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.notification.slack.SlackNotificationServiceFactory;
-import ai.startree.thirdeye.plugins.notification.webhook.WebhookNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.rca.contributors.cube.CubeContributorsFinderPlugin;
 import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
@@ -109,7 +108,6 @@ public class ThirdEyeServerDebug {
 
   static void loadNotificationServiceFactories(final NotificationServiceRegistry instance) {
     Stream.of(
-        new WebhookNotificationServiceFactory(),
         new EmailSmtpNotificationServiceFactory(),
         new EmailSendgridNotificationServiceFactory(),
         new SlackNotificationServiceFactory()

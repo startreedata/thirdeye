@@ -71,7 +71,7 @@ public class DataSourceCache {
         return getHealthyDatasourceCount();
       }
     });
-    metricRegistry.register("loadedDatasourceCount", (Gauge<Integer>) cache::size);
+    metricRegistry.register("cachedDatasourceCount", (Gauge<Integer>) cache::size);
   }
 
   private Integer getHealthyDatasourceCount() {

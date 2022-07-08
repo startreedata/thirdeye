@@ -48,11 +48,6 @@ public class DetectorsPlugin implements Plugin {
             "MEAN_VARIANCE",
             MeanVarianceRuleDetectorSpec.class,
             MeanVarianceRuleDetector.class
-        ),
-        new GenericAnomalyDetectorFactory<>(
-            "REMOTE_HTTP",
-            RemoteHttpDetectorSpec.class,
-            RemoteHttpDetector.class
         )
     );
   }

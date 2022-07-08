@@ -44,7 +44,7 @@ public class AppAnalyticsResource {
   public Response getAnalyticsPayload() {
     return Response.ok(new AppAnalyticsApi()
         .setVersion(appVersion())
-        .setUniqueMonitoredMetrics(appAnalyticsService.uniqueMonitoredMetricsCount())
+        .setnMonitoredMetrics(appAnalyticsService.uniqueMonitoredMetricsCount())
     ).build();
   }
 

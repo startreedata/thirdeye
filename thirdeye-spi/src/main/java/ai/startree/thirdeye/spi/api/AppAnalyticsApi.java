@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class AppAnalyticsApi implements ThirdEyeApi {
 
   private String version;
-  private Integer uniqueMonitoredMetrics;
+  private Integer nMonitoredMetrics;
 
   public String getVersion() {
     return version;
@@ -31,12 +31,12 @@ public class AppAnalyticsApi implements ThirdEyeApi {
     return this;
   }
 
-  public Integer getUniqueMonitoredMetrics() {
-    return uniqueMonitoredMetrics;
+  public Integer getnMonitoredMetrics() {
+    return nMonitoredMetrics;
   }
 
-  public AppAnalyticsApi setUniqueMonitoredMetrics(final Integer uniqueMonitoredMetrics) {
-    this.uniqueMonitoredMetrics = uniqueMonitoredMetrics;
+  public AppAnalyticsApi setnMonitoredMetrics(final Integer nMonitoredMetrics) {
+    this.nMonitoredMetrics = nMonitoredMetrics;
     return this;
   }
 }

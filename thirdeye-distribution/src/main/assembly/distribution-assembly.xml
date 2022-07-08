@@ -64,20 +64,12 @@
       <outputDirectory>plugins/detection-components/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-kafka/target/thirdeye-kafka-${project.version}-dist</directory>
-      <outputDirectory>plugins/kafka/</outputDirectory>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-detectors/target/thirdeye-detectors-${project.version}-dist</directory>
+      <outputDirectory>plugins/detectors-default/</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-email/target/thirdeye-notification-email-${project.version}-dist</directory>
       <outputDirectory>plugins/notification-email/</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-webhook/target/thirdeye-notification-webhook-${project.version}-dist</directory>
-      <outputDirectory>plugins/notification-webhook/</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-notification-slack/target/thirdeye-notification-slack-${project.version}-dist</directory>
-      <outputDirectory>plugins/notification-slack/</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-contributors-cube/target/thirdeye-contributors-cube-${project.version}-dist</directory>

@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.57.0-SNAPSHOT</version>
+  <version>1.59.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -349,6 +349,14 @@
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
           <version>4.0</version>
+          <executions>
+            <execution>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
           <configuration>
             <header>HEADER</header>
             <excludes>
@@ -381,6 +389,7 @@
               <exclude>thirdeye-*/target/**</exclude>
               <exclude>**/mem.script</exclude>
               <exclude>**/mem.properties</exclude>
+              <exclude>**/m2/**</exclude>
 
               <!-- Top level files -->
               <exclude>HEADER</exclude>
@@ -389,11 +398,11 @@
 
               <exclude>**/node_modules/**</exclude>
               <exclude>**/dist/**</exclude>
+              <exclude>**/webpack/**</exclude>
               <exclude>src/test/resources/**</exclude>
               <exclude>src/main/resources/**</exclude>
-              <exclude>thirdeye-ui/build</exclude>
-              <exclude>thirdeye-ui/dist</exclude>
-              <exclude>thirdeye-ui/scripts/verify-version-replacement.js</exclude>
+              <exclude>**/build/**</exclude>
+              <exclude>**/verify-version-replacement.js</exclude>
 
               <!-- files from Eclipse -->
               <exclude>**/maven-eclipse.xml</exclude>
@@ -446,6 +455,11 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
+        <artifactId>thirdeye-detectors</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-core</artifactId>
         <version>${project.version}</version>
@@ -463,16 +477,6 @@
       <dependency>
         <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-notification-email</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ai.startree.thirdeye.plugins</groupId>
-        <artifactId>thirdeye-notification-webhook</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ai.startree.thirdeye.plugins</groupId>
-        <artifactId>thirdeye-notification-slack</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

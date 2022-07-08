@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.bao;
 
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
@@ -50,4 +51,6 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
 
   void purge(Duration expiryDuration, Integer limitOptional);
+
+  long countByStatus(final TaskStatus status);
 }

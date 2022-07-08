@@ -24,10 +24,9 @@ import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResources
 import ai.startree.thirdeye.plugins.datasource.DefaultDataSourcesPlugin;
 import ai.startree.thirdeye.plugins.datasource.PinotDataSourcePlugin;
 import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
+import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
 import ai.startree.thirdeye.plugins.notification.email.EmailSendgridNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.notification.email.EmailSmtpNotificationServiceFactory;
-import ai.startree.thirdeye.plugins.notification.slack.SlackNotificationServiceFactory;
-import ai.startree.thirdeye.plugins.notification.webhook.WebhookNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.rca.contributors.cube.CubeContributorsFinderPlugin;
 import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
@@ -105,14 +104,16 @@ public class ThirdEyeServerDebug {
     detectionComponentsPlugin
         .getEventTriggerFactories()
         .forEach(detectionRegistry::addEventTriggerFactory);
+
+    new DetectorsPlugin()
+        .getAnomalyDetectorFactories()
+        .forEach(detectionRegistry::addAnomalyDetectorFactory);
   }
 
   static void loadNotificationServiceFactories(final NotificationServiceRegistry instance) {
     Stream.of(
-        new WebhookNotificationServiceFactory(),
         new EmailSmtpNotificationServiceFactory(),
-        new EmailSendgridNotificationServiceFactory(),
-        new SlackNotificationServiceFactory()
+        new EmailSendgridNotificationServiceFactory()
     ).forEach(instance::addNotificationServiceFactory);
   }
 }

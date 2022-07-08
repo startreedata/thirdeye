@@ -18,11 +18,14 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AlertTemplateWizard } from "../../components/alert-template-wizard/altert-template-wizard.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import {
+    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsGridV1,
+    PageHeaderTextV1,
+    PageHeaderV1,
     PageV1,
+    TooltipV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { createAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
@@ -31,6 +34,7 @@ import {
     NewAlertTemplate,
 } from "../../rest/dto/alert-template.interfaces";
 import { createDefaultAlertTemplate } from "../../utils/alert-templates/alert-templates.util";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 
@@ -77,11 +81,26 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader
-                title={t("label.create-entity", {
-                    entity: t("label.alert-template"),
-                })}
-            />
+            <PageHeaderV1>
+                <PageHeaderTextV1>
+                    {t("label.create-entity", {
+                        entity: t("label.alert-template"),
+                    })}
+                    <TooltipV1
+                        placement="top"
+                        title={t("label.view-configuration-docs") as string}
+                    >
+                        <span>
+                            <HelpLinkIconV1
+                                displayInline
+                                enablePadding
+                                externalLink
+                                href={`${THIRDEYE_DOC_LINK}/concepts/alert-configuration`}
+                            />
+                        </span>
+                    </TooltipV1>
+                </PageHeaderTextV1>
+            </PageHeaderV1>
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <AlertTemplateWizard<NewAlertTemplate>

@@ -118,7 +118,7 @@ function AlertTemplate({
             return;
         }
 
-        if (selectedAlertTemplate.id !== -1) {
+        if (selectedAlertTemplate.id === -1) {
             return;
         }
 

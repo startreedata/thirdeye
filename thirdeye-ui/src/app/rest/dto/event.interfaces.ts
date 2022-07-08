@@ -23,6 +23,6 @@ export interface EditableEvent {
     targetDimensionMap?: TargetDimensionMap;
 }
 
-interface TargetDimensionMap {
+export interface TargetDimensionMap {
     [key: string]: string[];
 }

@@ -18,3 +18,9 @@ export interface EventPropertiesFormProps {
     event: EditableEvent;
     onSubmit?: (event: Event) => void;
 }
+
+export interface DynamicFormType {
+    key: string;
+    propertyName: string;
+    propertyValue: string[];
+}

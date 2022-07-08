@@ -12,6 +12,7 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
@@ -82,6 +83,44 @@ export const EventRenderer: FunctionComponent<EventRendererProps> = (
             <Grid item sm={9}>
                 <Typography variant="body2">{endTime}</Typography>
             </Grid>
+
+            {props.event?.targetDimensionMap && (
+                <>
+                    {/* Metadata */}
+                    <Grid item xs={12}>
+                        <Typography variant="subtitle1">
+                            {t("label.event-metadata")}
+                        </Typography>
+                    </Grid>
+
+                    {isEmpty(props.event.targetDimensionMap) ? (
+                        <Grid item xs={12}>
+                            {t("label.no-data-marker")}
+                        </Grid>
+                    ) : (
+                        Object.keys(props.event.targetDimensionMap).map(
+                            (propertyName) => (
+                                <>
+                                    <Grid item sm={3}>
+                                        <Typography variant="subtitle1">
+                                            <strong>{propertyName}</strong>
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item sm={9}>
+                                        <Typography variant="body2">
+                                            {props.event?.targetDimensionMap &&
+                                                props.event.targetDimensionMap[
+                                                    propertyName
+                                                ].join(",")}
+                                        </Typography>
+                                    </Grid>
+                                </>
+                            )
+                        )
+                    )}
+                </>
+            )}
         </Grid>
     );
 };

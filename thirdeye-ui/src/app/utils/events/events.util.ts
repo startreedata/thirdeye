@@ -12,7 +12,11 @@
  * the License.
  */
 import { flattenDeep, get, isNil, map, uniq } from "lodash";
-import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
+import {
+    EditableEvent,
+    Event,
+    TargetDimensionMap,
+} from "../../rest/dto/event.interfaces";
 import { generateDateRangeMonthsFromNow } from "../routes/routes.util";
 
 export const createEmptyEvent = (): EditableEvent => {
@@ -23,6 +27,7 @@ export const createEmptyEvent = (): EditableEvent => {
         startTime: start,
         endTime: end,
         type: "",
+        targetDimensionMap: {} as TargetDimensionMap,
     };
 };
 

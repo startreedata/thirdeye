@@ -17,4 +17,11 @@ export const useEventPropertiesFormStyles = makeStyles({
     datePickerContainer: {
         display: "flex",
     },
+    autoCompleteInput: {
+        minHeight: "auto",
+    },
+    autoCompleteTag: {
+        marginTop: 0,
+        marginBottom: 0,
+    },
 });

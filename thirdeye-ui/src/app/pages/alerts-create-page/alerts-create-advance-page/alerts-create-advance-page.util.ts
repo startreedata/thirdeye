@@ -69,24 +69,3 @@ export function validateConfiguration(
         );
     }
 }
-
-export const SAMPLE_ALERT_CONFIGURATION = {
-    name: "Sample_Holwinter_alert",
-    description: "Outlier detection using Holt-Winters",
-    template: {
-        name: "startree-holt-winters",
-    },
-    templateProperties: {
-        dataSource: "sample_datasource",
-        dataset: "sample_dataset",
-        timeColumn: "report_date",
-        timeColumnFormat: "EPOCH",
-        aggregationFunction: "sum",
-        aggregationColumn: "sample_metric_name",
-        seasonalityPeriod: "P7D",
-        lookback: "P90D",
-        monitoringGranularity: "P1D",
-        sensitivity: "3",
-    },
-    cron: "0 15 11 1/1 * ? *",
-};

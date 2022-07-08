@@ -25,6 +25,7 @@ import {
 } from "react-router-dom";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import {
+    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
@@ -32,6 +33,7 @@ import {
     PageHeaderTextV1,
     PageHeaderV1,
     PageV1,
+    TooltipV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -43,6 +45,7 @@ import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-templat
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
+import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     AppRouteRelative,
@@ -288,6 +291,19 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                     {t("label.create-entity", {
                         entity: t("label.alert"),
                     })}
+                    <TooltipV1
+                        placement="top"
+                        title={t("label.view-configuration-docs") as string}
+                    >
+                        <span>
+                            <HelpLinkIconV1
+                                displayInline
+                                enablePadding
+                                externalLink
+                                href={`${THIRDEYE_DOC_LINK}/getting-started/create-your-first-alert`}
+                            />
+                        </span>
+                    </TooltipV1>
                 </PageHeaderTextV1>
 
                 <PageHeaderActionsV1>
@@ -344,7 +360,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                             color="secondary"
                             onClick={handlePageExitChecks}
                         >
-                            Cancel
+                            {t("label.cancel")}
                         </Button>
                         <Button
                             className={classes.footerBtn}
@@ -352,7 +368,9 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                             disabled={!isAlertValid}
                             onClick={handleCreateAlertClick}
                         >
-                            Create Alert
+                            {t("label.create-entity", {
+                                entity: t("label.alert"),
+                            })}
                         </Button>
                     </PageContentsCardV1>
                 </Box>

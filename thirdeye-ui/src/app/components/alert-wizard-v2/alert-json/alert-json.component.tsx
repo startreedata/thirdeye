@@ -16,13 +16,9 @@ import InfoIcon from "@material-ui/icons/Info";
 import Alert from "@material-ui/lab/Alert";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SAMPLE_ALERT_CONFIGURATION } from "../../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.util";
-import {
-    JSONEditorV1,
-    useDialogProviderV1,
-} from "../../../platform/components";
-import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { JSONEditorV1 } from "../../../platform/components";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { THIRDEYE_DOC_LINK } from "../../../utils/constants/constants.util";
 import { getAlertTemplatesAllPath } from "../../../utils/routes/routes.util";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertJsonProps } from "./alert-json.interfaces";
@@ -31,7 +27,6 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     alert,
     onAlertPropertyChange,
 }) => {
-    const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
     // proxy the given alert so users can freely type in the json editor
@@ -39,30 +34,6 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
 
     const handleJSONChange = (json: string): void => {
         onAlertPropertyChange(JSON.parse(json), true);
-    };
-
-    const handleQuickStartClick = (): void => {
-        showDialog({
-            type: DialogType.CUSTOM,
-            headerText: t("label.alert-json-template"),
-            cancelButtonText: t("label.close"),
-            contents: (
-                <>
-                    <Box paddingBottom={2}>
-                        <Typography variant="body2">
-                            {t("message.properties-and-values-may-differ")}
-                        </Typography>
-                    </Box>
-                    <JSONEditorV1<EditableAlert>
-                        hideValidationSuccessIcon
-                        readOnly
-                        value={SAMPLE_ALERT_CONFIGURATION}
-                    />
-                </>
-            ),
-            hideOkButton: true,
-            width: "md",
-        });
     };
 
     return (
@@ -88,10 +59,11 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
                         {t("message.you-can-use-our")}
                         <Link
                             color="primary"
+                            href={`${THIRDEYE_DOC_LINK}/getting-started/alert-create-examples`}
+                            target="_blank"
                             underline="always"
-                            onClick={handleQuickStartClick}
                         >
-                            “Quick Start complex Website JSON template”
+                            {t("label.example-alert-configurations")}
                         </Link>
                         . {t("message.properties-and-values-may-differ")}
                     </Typography>

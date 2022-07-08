@@ -107,11 +107,21 @@ function AlertTemplate({
     };
 
     const handleAlertTemplateChange = (
-        selectedAlertTemplate: AlertTemplateType
+        selectedAlertTemplate: AlertTemplateType | null
     ): void => {
         if (!selectedAlertTemplate) {
+            setSelectedAlertTemplate(null);
+            onAlertPropertyChange({
+                template: {},
+            });
+
             return;
         }
+
+        if (selectedAlertTemplate.id !== -1) {
+            return;
+        }
+
         setSelectedAlertTemplate(selectedAlertTemplate);
         onAlertPropertyChange({
             template: {
@@ -200,11 +210,7 @@ function AlertTemplate({
                                 renderOption={renderAlertTemplateSelectOption}
                                 value={selectedAlertTemplate}
                                 onChange={(_, selectedValue) => {
-                                    selectedValue &&
-                                        selectedValue.id !== -1 &&
-                                        handleAlertTemplateChange(
-                                            selectedValue
-                                        );
+                                    handleAlertTemplateChange(selectedValue);
                                 }}
                             />
                         </Grid>

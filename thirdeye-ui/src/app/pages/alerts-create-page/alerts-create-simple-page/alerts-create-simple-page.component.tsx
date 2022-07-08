@@ -38,7 +38,7 @@ export const AlertsCreateSimplePage: FunctionComponent = () => {
                 SubscriptionGroup[],
                 (groups: SubscriptionGroup[]) => void,
                 AlertTemplateType,
-                (newAlertTemplate: AlertTemplateType) => void,
+                (newAlertTemplate: AlertTemplateType | null) => void,
                 AlertTemplateType[]
             ]
         >();

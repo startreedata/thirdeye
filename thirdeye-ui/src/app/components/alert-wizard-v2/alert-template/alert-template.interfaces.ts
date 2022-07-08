@@ -18,6 +18,6 @@ export interface AlertTemplateProps {
     alert: EditableAlert;
     onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
     selectedAlertTemplate: AlertTemplate;
-    setSelectedAlertTemplate: (newAlertTemplate: AlertTemplate) => void;
+    setSelectedAlertTemplate: (newAlertTemplate: AlertTemplate | null) => void;
     alertTemplateOptions: AlertTemplate[];
 }

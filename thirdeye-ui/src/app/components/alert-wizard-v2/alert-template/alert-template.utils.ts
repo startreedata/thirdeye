@@ -19,7 +19,7 @@ import {
 import { PropertyRenderConfig } from "./alert-template-properties-builder/alert-template-properties-builder.interfaces";
 
 const PROPERTY_CAPTURE = /\${(\w*)}/g;
-// 6AM Everyday
+// At 0 minutes past the hour, every 2 hours, every day
 const DEFAULT_CRON = "0 0 0/2 1/1 * ? *";
 
 export function findRequiredFields(alertTemplate: AlertTemplate): string[] {

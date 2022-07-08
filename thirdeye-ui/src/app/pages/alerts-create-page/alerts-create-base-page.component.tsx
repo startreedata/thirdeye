@@ -171,15 +171,17 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                 (candidate) => candidate.name === selectedAlertTemplateName
             );
             setSelectedAlertTemplate(match === undefined ? null : match);
-        } else if (
-            contentsToReplace.template &&
-            contentsToReplace.template.name === undefined
-        ) {
-            // If user just throws template into the configuration, treat is as custom
-            setSelectedAlertTemplate({
-                name: t("message.custom-alert-template-used"),
-                ...(contentsToReplace.template as Partial<AlertTemplateType>),
-            } as AlertTemplateType);
+        } else if (contentsToReplace.template) {
+            if (Object.keys(contentsToReplace.template).length === 0) {
+                // Set empty if user removed contents
+                setSelectedAlertTemplate(null);
+            } else if (contentsToReplace.template.name === undefined) {
+                // If user just throws template into the configuration, treat is as custom
+                setSelectedAlertTemplate({
+                    name: t("message.custom-alert-template-used"),
+                    ...(contentsToReplace.template as Partial<AlertTemplateType>),
+                } as AlertTemplateType);
+            }
         }
     };
 

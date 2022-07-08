@@ -1,4 +1,4 @@
-package ai.startree.thirdeye.analytics;
+package ai.startree.thirdeye.core;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.MonitoredMetricWrapper;
@@ -46,7 +46,7 @@ public class AppAnalyticsService {
       // Interval does not have significance in this case, just a placeholder.
       return renderer.renderAlert(alertDTO, new Interval(1L, 2L)).getMetadata();
     } catch (final IOException | ClassNotFoundException e) {
-      log.warn("Trouble while rendering alert", e);
+      log.warn(String.format("Trouble while rendering alert, %s. id : %d", alertDTO.getName(), alertDTO.getId()), e);
       return null;
     }
   }

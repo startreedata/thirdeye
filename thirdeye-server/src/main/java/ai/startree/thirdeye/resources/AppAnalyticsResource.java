@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.analytics.AppAnalyticsService;
+import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;

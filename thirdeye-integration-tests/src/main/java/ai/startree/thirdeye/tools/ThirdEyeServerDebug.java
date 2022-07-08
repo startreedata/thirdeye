@@ -27,7 +27,6 @@ import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlug
 import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
 import ai.startree.thirdeye.plugins.notification.email.EmailSendgridNotificationServiceFactory;
 import ai.startree.thirdeye.plugins.notification.email.EmailSmtpNotificationServiceFactory;
-import ai.startree.thirdeye.plugins.rca.contributors.cube.CubeContributorsFinderPlugin;
 import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import com.google.inject.Injector;
@@ -65,10 +64,8 @@ public class ThirdEyeServerDebug {
 
   private static void loadContributorsFinderFactories(
       final ContributorsFinderRunner contributorsFinderRunner) {
-    Stream.of(
-            new CubeContributorsFinderPlugin(),
-            new SimpleContributorsFinderPlugin()
-        )
+    Stream
+        .of(new SimpleContributorsFinderPlugin())
         .forEach(plugin -> plugin.getContributorsFinderFactories()
             .forEach(contributorsFinderRunner::addContributorsFinderFactory));
   }

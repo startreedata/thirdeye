@@ -52,10 +52,6 @@
     </dependency>
     <dependency>
       <groupId>ai.startree.thirdeye.plugins</groupId>
-      <artifactId>thirdeye-contributors-cube</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-contributors-simple</artifactId>
     </dependency>
     <dependency>

@@ -72,10 +72,6 @@
       <outputDirectory>plugins/notification-email/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-contributors-cube/target/thirdeye-contributors-cube-${project.version}-dist</directory>
-      <outputDirectory>plugins/contributors-cube/</outputDirectory>
-    </fileSet>
-    <fileSet>
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-contributors-simple/target/thirdeye-contributors-simple-${project.version}-dist</directory>
       <outputDirectory>plugins/contributors-simple/</outputDirectory>
     </fileSet>

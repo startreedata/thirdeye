@@ -481,11 +481,6 @@
       </dependency>
       <dependency>
         <groupId>ai.startree.thirdeye.plugins</groupId>
-        <artifactId>thirdeye-contributors-cube</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-contributors-simple</artifactId>
         <version>${project.version}</version>
       </dependency>

@@ -223,7 +223,8 @@
         "cron-documentation": "cron documentation",
         "add-metadata-entry": "Add metadata entry",
         "property-name": "Property name",
-        "property-value": "Property value"
+        "property-value": "Property value",
+        "example-alert-configurations": "example alert configurations"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -280,13 +281,13 @@
         "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
         "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system",
         "please-enter-valid-name": "Please enter valid name",
-        "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to",
+        "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
         "select-template-to-preview-alert": "Please select a template to preview the alert",
         "configure-or-input-template-to-preview-alert": "Please input name of a template or a template itself with its properties to preview the alert",
         "enter-value-to-override-defaults": "Fields with default values, enter a value to override the defaults",
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
         "properties-and-values-may-differ": "The properties and values may differ from your environment so the template may show some errors when copied.",
-        "you-can-use-our": "You can use our {{entity}}",
+        "you-can-use-our": "You can use our sample configurations as reference to build your own: ",
         "redirected-to-another-page": "You’re about to be redirected to another page.",
         "setup-properties-based-on-your-needs": "Setup properties based on your needs",
         "do-you-want-to-leave-this-page": "Do you want to continue and leave this page?",

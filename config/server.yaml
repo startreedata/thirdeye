@@ -90,8 +90,7 @@ taskDriver:
 rca:
   # default values - structure example
   topContributors:
-    # todo replace by "simple" algorithm
-    algorithm: cube
+    algorithm: simple
     params: {}
 
 time:

@@ -130,8 +130,7 @@ time:
 
 rca:
   topContributors:
-    # todo cyril replace by source available algorithm once implemented
-    algorithm: cube
+    algorithm: simple
     params: {}
 
 auth:

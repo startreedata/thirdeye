@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.core;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.alert.MonitoredMetricWrapper;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;

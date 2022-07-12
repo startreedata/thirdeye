@@ -67,21 +67,17 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
             }),
         [xBrushMax, series]
     );
-    const dataScale = useMemo(
-        () =>
-            scaleLinear<number>({
-                range: [yBrushMax, 0],
-                domain: [
-                    0,
-                    getMinMax(
-                        series.filter((s) => s.enabled),
-                        (d) => d.y
-                    )[1] || 0,
-                ],
-                nice: true,
-            }),
-        [yBrushMax, series]
-    );
+    const dataScale = useMemo(() => {
+        const minMaxValues = getMinMax(
+            series.filter((s) => s.enabled),
+            (d) => d.y
+        );
+
+        return scaleLinear<number>({
+            range: [yBrushMax, 0],
+            domain: [minMaxValues[0], minMaxValues[1] || 0],
+        });
+    }, [yBrushMax, series]);
 
     const chartOptions: ChartCoreProps = {
         series,

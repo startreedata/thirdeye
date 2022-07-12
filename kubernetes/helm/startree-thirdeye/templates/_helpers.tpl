@@ -65,6 +65,13 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+MySQL host name
+*/}}
+{{- define "thirdeye.mysql.fullname" -}}
+{{ .Release.Name }}-mysql
+{{- end -}}
+
+{{/*
 The name of the thirdeye config.
 */}}
 {{- define "thirdeye.config" -}}

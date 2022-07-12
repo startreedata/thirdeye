@@ -35,21 +35,21 @@ public interface ThirdEyeResultSet {
 
   ColumnType getColumnType(int columnIdx);
 
-  boolean getBoolean(int rowIdx);
+  Boolean getBoolean(int rowIdx);
 
-  long getLong(int rowIdx);
+  Long getLong(int rowIdx);
 
-  double getDouble(int rowIdx);
+  Double getDouble(int rowIdx);
 
   String getString(int rowIdx);
 
-  boolean getBoolean(int rowIdx, int columnIdx);
+  Boolean getBoolean(int rowIdx, int columnIdx);
 
-  int getInteger(int rowIdx, int columnIdx);
+  Integer getInteger(int rowIdx, int columnIdx);
 
-  long getLong(int rowIdx, int columnIdx);
+  Long getLong(int rowIdx, int columnIdx);
 
-  double getDouble(int rowIdx, int columnIdx);
+  Double getDouble(int rowIdx, int columnIdx);
 
   String getString(int rowIdx, int columnIdx);
 

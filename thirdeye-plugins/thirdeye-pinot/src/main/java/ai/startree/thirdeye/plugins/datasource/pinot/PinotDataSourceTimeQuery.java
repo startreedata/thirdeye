@@ -108,7 +108,7 @@ public class PinotDataSourceTimeQuery {
       } else {
         DateTimeZone timeZone = SpiUtils.getDateTimeZone(datasetConfig);
 
-        long endTime = new Double(resultSetGroup.get(0).getDouble(0)).longValue();
+        long endTime = resultSetGroup.get(0).getDouble(0).longValue();
         // endTime + 1 to make sure we cover the time range of that time value.
         String timeFormat = timeSpec.getFormat();
         if (StringUtils.isBlank(timeFormat) || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {

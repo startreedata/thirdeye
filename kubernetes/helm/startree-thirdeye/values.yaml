@@ -160,6 +160,12 @@ secrets:
   smtpPassword:
     env: SMTP_PASSWORD
     value: tobefedexternally
+#  S3BackUpId:
+#    env: AWS_ACCESS_KEY_ID
+#    value: <access key id>
+#  S3BackUpKey:
+#    env: AWS_SECRET_ACCESS_KEY
+#    value: <access key>
 
 # Optional: Enable for ingress
 traefik:
@@ -174,3 +180,11 @@ mysql:
   mysqlUser: uthirdeye
   mysqlPassword: pass
   mysqlDatabase: thirdeye
+  backup:
+    enabled: false
+    name: backup-folder-name
+    schedule: "0 2 * * *"
+#    Make sure you uncomment "S3BackUpId" and "S3BackUpKey" in the "secrets" section above when using s3 as backup location
+#    s3:
+#      bucket: thirdeye-backup
+#      region: us-west-2

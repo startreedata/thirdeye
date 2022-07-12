@@ -1,0 +1,59 @@
+{{ if .Values.mysql.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-backup
+spec:
+  schedule: {{ .Values.mysql.backup.schedule | quote }}
+  successfulJobsHistoryLimit: 0
+#  ensures the last failed Job and its pod is not cleaned and it is available for debugging
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          initContainers:
+            - name: perform-backup
+              image: mysql:{{ .Values.mysql.imageTag }}
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  mysqldump -P 3306 -h {{ include "thirdeye.mysql.fullname" . }} -u{{ .Values.mysql.mysqlUser }} -p{{ .Values.mysql.mysqlPassword }} thirdeye > /home/dump/$(date +%F-%M).sql
+              volumeMounts:
+                - name: dump
+                  mountPath: /home/dump
+          containers:
+            - name: upload-backup
+              image: amazon/aws-cli:2.0.6
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: thirdeye-secrets
+                      key: S3BackUpId
+                      optional: false
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: thirdeye-secrets
+                      key: S3BackUpKey
+                      optional: false
+                - name: AWS_DEFAULT_REGION
+                  value: {{ .Values.mysql.backup.s3.region | quote }}
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  aws s3 mv /home/dump/* s3://{{ .Values.mysql.backup.s3.bucket }}/{{ .Values.mysql.backup.name }}/
+              volumeMounts:
+                - name: dump
+                  mountPath: /home/dump
+          volumes:
+            - name: dump
+              emptyDir: {}
+          restartPolicy: Never
+      backoffLimit: 0
+{{ end }}

@@ -34,7 +34,23 @@ spec:
                 - /bin/sh
                 - -c
                 - >
-                  mysqldump -P 3306 -h {{ include "thirdeye.mysql.fullname" . }} -u{{ .Values.mysql.mysqlUser }} -p{{ .Values.mysql.mysqlPassword }} thirdeye > /home/dump/$(date +%F-%M).sql
+                  mysqldump -P 3306 -h {{ include "thirdeye.mysql.fullname" . }} -u{{ .Values.mysql.mysqlUser }} -p{{ .Values.mysql.mysqlPassword }} thirdeye > /home/dump/backup.sql
+              volumeMounts:
+                - name: dump
+                  mountPath: /home/dump
+            - name: zip-backup
+              image: alpine:3
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  mkdir /home/dump/zip &&
+                  apk --no-cache add zip &&
+                  FNAME=$(date +%F:%H-%M) &&
+                  cd /home/dump &&
+                  mv backup.sql $FNAME.sql &&
+                  zip zip/$FNAME.zip $FNAME.sql
               volumeMounts:
                 - name: dump
                   mountPath: /home/dump
@@ -61,7 +77,7 @@ spec:
                 - /bin/sh
                 - -c
                 - >
-                  aws s3 mv /home/dump/* s3://{{ .Values.mysql.backup.s3.bucket }}/{{ .Values.mysql.backup.name }}/
+                  aws s3 mv /home/dump/zip/* s3://{{ .Values.mysql.backup.s3.bucket }}/{{ .Values.mysql.backup.name }}/
               volumeMounts:
                 - name: dump
                   mountPath: /home/dump

@@ -121,7 +121,7 @@ public class SchedulerService implements Managed {
     // TODO spyne explore: consolidate all orphan maintenance tasks in a single pool
     scheduleTaskCleanUp(config.getTaskCleanUpConfiguration());
     if(taskDriverConfiguration.isRandomWorkerIdEnabled()) {
-      scheduleOrphanTaskCleanUp();
+      scheduleOrphanTaskCleanUp(config.getTaskCleanUpConfiguration());
     }
   }
 
@@ -144,8 +144,11 @@ public class SchedulerService implements Managed {
     }
   }
 
-  private void scheduleOrphanTaskCleanUp() {
-    executorService.scheduleAtFixedRate(this::handleOrphanTasks, 0, 5, TimeUnit.MINUTES);
+  private void scheduleOrphanTaskCleanUp(final TaskCleanUpConfiguration config) {
+    executorService.scheduleWithFixedDelay(this::handleOrphanTasks,
+        0,
+        config.getOrphanIntervalInSeconds(),
+        TimeUnit.SECONDS);
   }
 
   private void handleOrphanTasks() {

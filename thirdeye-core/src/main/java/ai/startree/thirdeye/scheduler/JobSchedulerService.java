@@ -26,7 +26,6 @@ import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
-import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -44,31 +43,25 @@ public class JobSchedulerService {
   private final AlertManager alertManager;
   private final MergedAnomalyResultManager anomalyManager;
   private final AnomalySubscriptionGroupNotificationManager notificationManager;
-  private final TaskDriverConfiguration taskDriverConfiguration;
 
   @Inject
   public JobSchedulerService(final TaskManager taskManager,
       final AlertManager alertManager,
       final MergedAnomalyResultManager anomalyManager,
-      final AnomalySubscriptionGroupNotificationManager notificationManager,
-      final TaskDriverConfiguration taskDriverConfiguration) {
+      final AnomalySubscriptionGroupNotificationManager notificationManager) {
     this.taskManager = taskManager;
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
     this.notificationManager = notificationManager;
-    this.taskDriverConfiguration = taskDriverConfiguration;
   }
 
   public boolean taskAlreadyRunning(final String jobName) {
-    final long taskRunTimeThreshold = System.currentTimeMillis() - taskDriverConfiguration.getMaxTaskRunTime().toMillis();
     List<TaskDTO> scheduledTasks = taskManager.findByPredicate(Predicate.AND(
         Predicate.EQ("name", jobName),
         Predicate.OR(
             Predicate.EQ("status", TaskStatus.RUNNING.toString()),
             Predicate.EQ("status", TaskStatus.WAITING.toString())
-        ),
-        // filter timed out tasks
-        Predicate.GE("startTime", taskRunTimeThreshold))
+        ))
     );
     return !scheduledTasks.isEmpty();
   }

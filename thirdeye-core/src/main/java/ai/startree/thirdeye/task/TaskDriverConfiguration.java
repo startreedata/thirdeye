@@ -25,6 +25,8 @@ public class TaskDriverConfiguration {
   private Duration randomDelayCap = Duration.ofSeconds(15);
   private Duration maxTaskRunTime = Duration.ofHours(6);
   private Duration heartbeatInterval = Duration.ofSeconds(30);
+  // The multiplies of heartbeatInterval allowed past lastActive before considering a task inactive
+  private int activeThresholdMultiplier = 3;
 
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
@@ -116,6 +118,15 @@ public class TaskDriverConfiguration {
 
   public TaskDriverConfiguration setHeartbeatInterval(final Duration heartbeatInterval) {
     this.heartbeatInterval = heartbeatInterval;
+    return this;
+  }
+
+  public int getActiveThresholdMultiplier() {
+    return activeThresholdMultiplier;
+  }
+
+  public TaskDriverConfiguration setActiveThresholdMultiplier(final int activeThresholdMultiplier) {
+    this.activeThresholdMultiplier = activeThresholdMultiplier;
     return this;
   }
 }

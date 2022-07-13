@@ -18,6 +18,7 @@ public class TaskCleanUpConfiguration {
   private Integer intervalInMinutes = 5;
   private Integer retentionInDays = 30;
   private Integer maxEntriesToDelete = 1000;
+  private Integer orphanIntervalInSeconds = 30;
 
   public Integer getIntervalInMinutes() {
     return intervalInMinutes;
@@ -43,6 +44,16 @@ public class TaskCleanUpConfiguration {
 
   public TaskCleanUpConfiguration setMaxEntriesToDelete(final Integer maxEntriesToDelete) {
     this.maxEntriesToDelete = maxEntriesToDelete;
+    return this;
+  }
+
+  public Integer getOrphanIntervalInSeconds() {
+    return orphanIntervalInSeconds;
+  }
+
+  public TaskCleanUpConfiguration setOrphanIntervalInSeconds(
+      final Integer orphanIntervalInSeconds) {
+    this.orphanIntervalInSeconds = orphanIntervalInSeconds;
     return this;
   }
 }

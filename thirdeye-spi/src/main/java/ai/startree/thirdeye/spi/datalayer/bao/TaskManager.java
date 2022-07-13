@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +52,8 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
 
   void purge(Duration expiryDuration, Integer limitOptional);
+
+  void orphanTaskCleanUp(Timestamp activeThreshold);
 
   long countByStatus(final TaskStatus status);
 }

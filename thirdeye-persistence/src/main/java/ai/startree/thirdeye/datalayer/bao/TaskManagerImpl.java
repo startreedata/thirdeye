@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -62,12 +63,15 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
+  private final Meter orphanTasksCount;
   private final MetricRegistry metricRegistry;
 
   @Inject
   public TaskManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(TaskDTO.class, genericPojoDao);
+
+    orphanTasksCount = metricRegistry.meter("orphanTasksCount");
     this.metricRegistry = metricRegistry;
     registerMetrics();
   }
@@ -237,6 +241,27 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
         totalTime));
   }
 
+  @Override
+  public void orphanTaskCleanUp(final Timestamp activeThreshold) {
+    final long current = System.currentTimeMillis();
+    findByPredicate(
+        Predicate.AND(
+            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+            Predicate.LT("lastActive", activeThreshold)
+        )
+    ).forEach(task -> {
+          updateStatusAndTaskEndTime(
+              task.getId(),
+              TaskStatus.RUNNING,
+              TaskStatus.FAILED,
+              current,
+              String.format("Orphan Task. Worker id : %s", task.getWorkerId())
+          );
+          orphanTasksCount.mark();
+        }
+    );
+  }
+    
   public long countByStatus(final TaskStatus status) {
     return count(Predicate.EQ("status", status.toString()));
   }

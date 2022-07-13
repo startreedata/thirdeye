@@ -23,9 +23,11 @@ import ai.startree.thirdeye.detection.download.ModelDownloaderManager;
 import ai.startree.thirdeye.events.HolidayEventsLoader;
 import ai.startree.thirdeye.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,6 +44,7 @@ public class SchedulerService implements Managed {
   private final ThirdEyeSchedulerConfiguration config;
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
   private final AutoOnboardConfiguration autoOnboardConfiguration;
+  private final TaskDriverConfiguration taskDriverConfiguration;
   private final MonitorJobScheduler monitorJobScheduler;
   private final AutoOnboardService autoOnboardService;
   private final HolidayEventsLoader holidayEventsLoader;
@@ -58,6 +61,7 @@ public class SchedulerService implements Managed {
   public SchedulerService(final ThirdEyeSchedulerConfiguration config,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final AutoOnboardConfiguration autoOnboardConfiguration,
+      final TaskDriverConfiguration taskDriverConfiguration,
       final MonitorJobScheduler monitorJobScheduler,
       final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
@@ -70,6 +74,7 @@ public class SchedulerService implements Managed {
     this.config = config;
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.autoOnboardConfiguration = autoOnboardConfiguration;
+    this.taskDriverConfiguration = taskDriverConfiguration;
     this.monitorJobScheduler = monitorJobScheduler;
     this.autoOnboardService = autoOnboardService;
     this.holidayEventsLoader = holidayEventsLoader;
@@ -115,6 +120,9 @@ public class SchedulerService implements Managed {
     // TODO spyne improve scheduler arch and localize
     // TODO spyne explore: consolidate all orphan maintenance tasks in a single pool
     scheduleTaskCleanUp(config.getTaskCleanUpConfiguration());
+    if(taskDriverConfiguration.isRandomWorkerIdEnabled()) {
+      scheduleOrphanTaskCleanUp(config.getTaskCleanUpConfiguration());
+    }
   }
 
   private void scheduleTaskCleanUp(final TaskCleanUpConfiguration config) {
@@ -134,6 +142,23 @@ public class SchedulerService implements Managed {
       // catching exceptions only. errors will be escalated.
       LOG.error("Error occurred during task purge", e);
     }
+  }
+
+  private void scheduleOrphanTaskCleanUp(final TaskCleanUpConfiguration config) {
+    executorService.scheduleWithFixedDelay(this::handleOrphanTasks,
+        0,
+        config.getOrphanIntervalInSeconds(),
+        TimeUnit.SECONDS);
+  }
+
+  private void handleOrphanTasks() {
+    final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - getActiveBuffer());
+    taskManager.orphanTaskCleanUp(activeThreshold);
+  }
+
+  private long getActiveBuffer() {
+    return taskDriverConfiguration.getActiveThresholdMultiplier()
+        * taskDriverConfiguration.getHeartbeatInterval().toMillis();
   }
 
   @Override

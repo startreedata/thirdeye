@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datasource.loader;
 
+import static ai.startree.thirdeye.datasource.calcite.QueryProjection.getFunctionName;
+
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
@@ -133,6 +135,15 @@ public class DefaultAggregationLoader implements AggregationLoader {
     final CalciteRequest.Builder requestBuilder = CalciteRequest
         .newBuilderFrom(slice)
         .withLimit(limit);
+    if (dimensions.isEmpty()) {
+      // add this count to help check if there is data in aggregate only queries - some aggregations can return a value even if there is no data see https://docs.pinot.apache.org/users/user-guide-query/supported-aggregations
+      // count rows non null
+      requestBuilder.addSelectProjection(QueryProjection.of("COUNT", List.of(getFunctionName(slice.getMetricConfigDTO()))).withAlias(
+          COL_AGGREGATION_ONLY_NON_NULL_ROWS_COUNT));
+      // count all rows
+      requestBuilder.addSelectProjection(QueryProjection.of("COUNT", List.of("*")).withAlias(
+          COL_AGGREGATION_ONLY_ROWS_COUNT));
+    }
     for (final String dimension : dimensions) {
       final QueryProjection dimensionProjection = QueryProjection.of(dimension);
       requestBuilder

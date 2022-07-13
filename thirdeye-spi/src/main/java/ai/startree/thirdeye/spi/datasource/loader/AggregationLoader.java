@@ -23,6 +23,8 @@ public interface AggregationLoader {
 
   String COL_DIMENSION_NAME = "dimName";
   String COL_DIMENSION_VALUE = "dimValue";
+  String COL_AGGREGATION_ONLY_ROWS_COUNT = "rowsCount";
+  String COL_AGGREGATION_ONLY_NON_NULL_ROWS_COUNT = "nonNullRowsCount";
 
   /**
    * Returns a de-aggregation data frame for a given slice with 3 columns:
@@ -36,6 +38,13 @@ public interface AggregationLoader {
 
   /**
    * Returns metric aggregates grouped by the given dimensions (or none).
+   *
+   * If there is no dimensions grouping (dimensions is empty), some datasource can have special behaviors.
+   * For Pinot, non aggregation queries can return default values. The default value depend on the aggregation function, it is not always zero.
+   * See https://docs.pinot.apache.org/users/user-guide-query/supported-aggregations.
+   *
+   * If dimensions is empty, the DataFrame returned by this method will return 2 additional columns COL_AGGREGATION_ONLY_ROWS_COUNT, COL_AGGREGATION_ONLY_NON_NULL_ROWS_COUNT.
+   * These columns are count(*) and count(metricColumn). They will return 0 if there is resp. no rows / no non-null rows.
    *
    * @param slice metric slice
    * @param dimensions dimension names to group by

@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_FAILED;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
+import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -87,7 +87,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   protected DataSourceApi toApi(final DataSourceDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }
-  
+
   @Override
   protected void deleteDto(DataSourceDTO dto) {
     super.deleteDto(dto);
@@ -96,9 +96,9 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
 
   @Override
   protected void prepareUpdatedDto(
-    final ThirdEyePrincipal principal,
-    final DataSourceDTO existing,
-    final DataSourceDTO updated) {
+      final ThirdEyePrincipal principal,
+      final DataSourceDTO existing,
+      final DataSourceDTO updated) {
     dataSourceCache.removeDataSource(existing.getName());
   }
 
@@ -147,28 +147,29 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Path("cache")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response clearDataSourceCache(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response clearDataSourceCache(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     dataSourceCache.clear();
     return Response.ok().build();
   }
 
   @GET
-  @Path("status")
+  @Path("validate")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response status(@QueryParam("name") String name) {
+  public Response validate(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @QueryParam("name") String name) {
     ensureExists(name, "name is a required field");
     try {
       // throws ThirdEyeException on datasource not found in DB
       // returns null when not able to load datasource
       if (dataSourceCache.getDataSource(name).validate()) {
-        return respondOk(new StatusApi().setCode(ThirdEyeStatus.HEALTHY));
+        return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));
       }
     } catch (ThirdEyeException e) {
-      throw badRequest(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, name);
+      return respondOk(statusResponse(e));
     } catch (Exception e) {
-      throw serverError(ThirdEyeStatus.ERR_DATASOURCE_UNREACHABLE, name);
+      return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, name, e.getMessage()));
     }
-    throw serverError(ThirdEyeStatus.UNHEALTHY, "datasource", name);
+    return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, name, "Unknown error"));
   }
 }

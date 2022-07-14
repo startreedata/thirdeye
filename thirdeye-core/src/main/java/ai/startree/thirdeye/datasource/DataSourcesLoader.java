@@ -15,6 +15,7 @@ package ai.startree.thirdeye.datasource;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -57,8 +58,8 @@ public class DataSourcesLoader {
   }
 
   public ThirdEyeDataSource loadDataSource(DataSourceDTO dataSource) {
-    final String factoryName = dataSource.getType();
     try {
+      final String factoryName = dataSource.getType();
       checkArgument(dataSourceFactoryMap.containsKey(factoryName),
           "Data Source type not loaded: " + factoryName);
 
@@ -66,13 +67,17 @@ public class DataSourcesLoader {
           factoryName,
           dataSource.getProperties());
 
-      return dataSourceFactoryMap
+      final ThirdEyeDataSource thirdEyeDataSource = dataSourceFactoryMap
           .get(factoryName)
           .build(buildContext(dataSource));
+      return requireNonNull(thirdEyeDataSource, "thirdEyeDataSource is null");
     } catch (Exception e) {
-      LOG.error("Exception in creating thirdeye data source type {}", factoryName, e);
+      LOG.error(String.format("Exception creating data source. name: %s, type: %s",
+              dataSource.getName(),
+              dataSource.getType()),
+          e);
+      throw e;
     }
-    return null;
   }
 
   private ThirdEyeDataSourceContext buildContext(final DataSourceDTO dataSource) {

@@ -32,6 +32,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import ai.startree.thirdeye.spi.util.ListUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// todo cyril move this to core
 @Singleton
 public class RcaInfoFetcher {
 
@@ -131,9 +133,14 @@ public class RcaInfoFetcher {
   private void addCustomFields(final DatasetConfigDTO datasetConfigDTO,
       final DatasetConfigDTO metadataDatasetDTO) {
     // fields that can be configured at the alert level can be added here
+    // todo cyril implement templatable includedDimensions list
     optional(metadataDatasetDTO.getDimensions())
+        .filter(ListUtils::isNotEmpty)
         .ifPresent(datasetConfigDTO::setDimensions);
+
+    // override exclusion list if metadata list is not null or empty
     optional(metadataDatasetDTO.getRcaExcludedDimensions())
+        .filter( t ->  t.match(ListUtils::isNotEmpty))
         .ifPresent(datasetConfigDTO::setRcaExcludedDimensions);
   }
 
@@ -141,8 +148,7 @@ public class RcaInfoFetcher {
       final MetricConfigDTO metadataMetricDTO) {
     // fields that can be configured at the alert level can be added here
     optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
-    if (StringUtils.isNotBlank(metadataMetricDTO.getDefaultAggFunction())) {
-      metricConfigDTO.setDefaultAggFunction(metadataMetricDTO.getDefaultAggFunction());
-    }
+    optional(metadataMetricDTO.getDefaultAggFunction()).filter(StringUtils::isNotBlank)
+        .ifPresent(metricConfigDTO::setDefaultAggFunction);
   }
 }

@@ -82,10 +82,10 @@ public class Templatable<T> {
    *
    * Used in optional/stream filter() to do check on the wrapped value without losing the Templatable wrapping
    */
-  public boolean match(Predicate<? super T> predicate) {
+  public boolean match(Predicate<? super T> predicate, final boolean defaultIfNull) {
     Objects.requireNonNull(predicate);
     if (value == null) {
-      return false;
+      return defaultIfNull;
     } else {
       return predicate.test(value);
     }

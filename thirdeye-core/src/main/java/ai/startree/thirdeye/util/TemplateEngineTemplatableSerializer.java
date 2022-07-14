@@ -24,7 +24,7 @@ import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This serializer can be used to apply template properties.
+ * This serializer can be used to apply template properties on {@link Templatable} fields.
  * Do not use for API or persistence.
  */
 public class TemplateEngineTemplatableSerializer extends JsonSerializer<Templatable> {

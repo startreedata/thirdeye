@@ -19,6 +19,18 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 
+/**
+ * This Serializer is used to simulate a union type for Templatable fields. At the json level,
+ * Templatable\<T\> behaves like Union[String, T].
+ * For field1 of type Templatable\<T\>. With this Deserializer, the json form is:
+ * "field1": "${var}"  (templated form) or "field1": T_json with T_json the json representation of
+ * T.
+ *
+ * You should not use this class directly. See {@link ThirdEyeSerialization}.
+ *
+ * For wrapped generic type inference at runtime,
+ * see https://stackoverflow.com/questions/36159677/how-to-create-a-custom-deserializer-in-jackson-for-a-generic-type
+ */
 class ApiTemplatableSerializer extends JsonSerializer<Templatable> {
 
   @Override

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.testng.annotations.Test;
 
 public class StringTemplateUtilsTest {
@@ -77,13 +78,12 @@ public class StringTemplateUtilsTest {
   public void testTemplatableReplacementValueAlreadySet()
       throws IOException, ClassNotFoundException {
     // check that the replacement does not break when a Templatable<T> has its value NOT templated
-    final String datasetKey = "datasetDto";
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
 
     final ObjectWithTemplatableFields input = new ObjectWithTemplatableFields();
     input.templatableDto = new Templatable<DatasetConfigDTO>().setValue(datasetConfigDTO);
 
-    final Map<String, Object> properties = Map.of(datasetKey, datasetConfigDTO);
+    final Map<String, Object> properties = Map.of();
     final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(
         input,
         properties);
@@ -105,6 +105,74 @@ public class StringTemplateUtilsTest {
 
     assertThatThrownBy(() -> StringTemplateUtils.applyContext(input, properties)).isInstanceOf(
         JsonMappingException.class);
+  }
+
+  @Test
+  public void testNestedTemplatableReplacementWithValuesAlreadySet()
+      throws IOException, ClassNotFoundException {
+
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
+
+    final ObjectWithTemplatableFields objectWithTemplatableFields = new ObjectWithTemplatableFields();
+    objectWithTemplatableFields.templatableDto = new Templatable<DatasetConfigDTO>().setValue(
+        datasetConfigDTO);
+
+    final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
+    objectWithNestedTemplatable.setTemplatableNested(new Templatable<ObjectWithTemplatableFields>().setValue(
+        objectWithTemplatableFields));
+
+    final Map<String, Object> properties = Map.of();
+    final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
+        objectWithNestedTemplatable,
+        properties);
+
+    assertThat(output.templatableNested.value()).isEqualTo(objectWithTemplatableFields);
+    assertThat(output.templatableNested.templatedValue()).isNull();
+  }
+
+  @Test
+  public void testNestedTemplatableReplacementWithHigherTemplatableTemplated()
+      throws IOException, ClassNotFoundException {
+    final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
+    final String templatedValueKey = "var";
+    objectWithNestedTemplatable.setTemplatableNested(new Templatable<ObjectWithTemplatableFields>().setTemplatedValue(
+        templateVariableOf(templatedValueKey)));
+
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
+    final Map<String, Object> properties = Map.of(templatedValueKey,
+        Map.of("templatableDto", new Templatable<DatasetConfigDTO>().setValue(datasetConfigDTO)));
+    final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
+        objectWithNestedTemplatable,
+        properties);
+
+    //build expected object
+    final ObjectWithTemplatableFields objectWithTemplatableFields = new ObjectWithTemplatableFields();
+    objectWithTemplatableFields.templatableDto = new Templatable<DatasetConfigDTO>().setValue(
+        datasetConfigDTO);
+
+    assertThat(output.templatableNested.value()).isEqualTo(objectWithTemplatableFields);
+    assertThat(output.templatableNested.templatedValue()).isNull();
+  }
+
+  @Test
+  public void testNestedTemplatableReplacementWithNestedTemplatableTemplated()
+      throws IOException, ClassNotFoundException {
+    final String templatedValueKey = "var";
+    final ObjectWithTemplatableFields objectWithTemplatableFields = new ObjectWithTemplatableFields().setTemplatableDto(
+        new Templatable<DatasetConfigDTO>().setTemplatedValue(
+            templateVariableOf(templatedValueKey)));
+    ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
+    objectWithNestedTemplatable.setTemplatableNested(new Templatable<ObjectWithTemplatableFields>().setValue(
+        objectWithTemplatableFields));
+
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
+    final Map<String, Object> properties = Map.of(templatedValueKey, datasetConfigDTO);
+    final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
+        objectWithNestedTemplatable,
+        properties);
+
+    assertThat(output.templatableNested.value().templatableDto.value()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableNested.value().templatableDto.templatedValue()).isNull();
   }
 
   private static String templateVariableOf(String key) {
@@ -146,6 +214,58 @@ public class StringTemplateUtilsTest {
         final Templatable<DatasetConfigDTO> templatableDto) {
       this.templatableDto = templatableDto;
       return this;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final ObjectWithTemplatableFields that = (ObjectWithTemplatableFields) o;
+      return Objects.equals(templatableList, that.templatableList)
+          && Objects.equals(templatableMap, that.templatableMap) && Objects.equals(
+          templatableDto,
+          that.templatableDto);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(templatableList, templatableMap, templatableDto);
+    }
+  }
+
+  private static class ObjectWithNestedTemplatable {
+
+    private Templatable<ObjectWithTemplatableFields> templatableNested;
+
+    public Templatable<ObjectWithTemplatableFields> getTemplatableNested() {
+      return templatableNested;
+    }
+
+    public ObjectWithNestedTemplatable setTemplatableNested(
+        final Templatable<ObjectWithTemplatableFields> templatableNested) {
+      this.templatableNested = templatableNested;
+      return this;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final ObjectWithNestedTemplatable that = (ObjectWithNestedTemplatable) o;
+      return Objects.equals(templatableNested, that.templatableNested);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(templatableNested);
     }
   }
 }

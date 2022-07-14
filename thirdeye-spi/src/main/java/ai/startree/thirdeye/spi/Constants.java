@@ -21,6 +21,7 @@ import org.joda.time.DateTimeZone;
 public interface Constants {
 
   DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
+  String CRON_TIMEZONE = "UTC";
   String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
   // tz database names that are equivalent to UTC
   List<String> UTC_LIKE_TIMEZONES = List.of("Etc/GMT",

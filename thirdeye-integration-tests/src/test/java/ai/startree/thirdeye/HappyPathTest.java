@@ -27,6 +27,7 @@ import ai.startree.thirdeye.spi.api.EmailSchemeApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -72,7 +73,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
   private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
   private static final AlertApi ALERT_API;
 
   static {

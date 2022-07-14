@@ -23,6 +23,7 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.database.ThirdEyeH2DatabaseServer;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.utils.TimeProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
@@ -69,7 +70,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   private static final String RESOURCES_PATH = "/scheduling";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/scheduling/config";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
   private static final AlertApi ALERT_API;
 
   private static final TimeProvider CLOCK = TimeProvider.instance();

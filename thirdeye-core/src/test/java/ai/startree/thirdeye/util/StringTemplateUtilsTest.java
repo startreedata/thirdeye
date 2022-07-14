@@ -63,14 +63,14 @@ public class StringTemplateUtilsTest {
         input,
         properties);
 
-    assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
-    assertThat(output.templatableDto.getTemplatedValue()).isNull();
+    assertThat(output.templatableDto.value()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableDto.templatedValue()).isNull();
 
-    assertThat(output.templatableMap.getValue()).isEqualTo(map);
-    assertThat(output.templatableMap.getTemplatedValue()).isNull();
+    assertThat(output.templatableMap.value()).isEqualTo(map);
+    assertThat(output.templatableMap.templatedValue()).isNull();
 
-    assertThat(output.templatableList.getValue()).isEqualTo(list);
-    assertThat(output.templatableList.getTemplatedValue()).isNull();
+    assertThat(output.templatableList.value()).isEqualTo(list);
+    assertThat(output.templatableList.templatedValue()).isNull();
   }
 
   @Test
@@ -88,8 +88,8 @@ public class StringTemplateUtilsTest {
         input,
         properties);
 
-    assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
-    assertThat(output.templatableDto.getTemplatedValue()).isNull();
+    assertThat(output.templatableDto.value()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableDto.templatedValue()).isNull();
   }
 
   @Test

@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,7 +32,9 @@ public class Templatable<T> {
    */
   public static final String VALUE_FIELD_STRING = "value";
 
-  public @Nullable String getTemplatedValue() {
+  @JsonProperty("templatedValue")
+  // getter is shortened for ease of use and readability
+  public @Nullable String templatedValue() {
     return templatedValue;
   }
 
@@ -43,7 +46,9 @@ public class Templatable<T> {
     return this;
   }
 
-  public @Nullable T getValue() {
+  @JsonProperty("value")
+  // getter is shortened for ease of use and readability
+  public @Nullable T value() {
     return value;
   }
 

@@ -24,10 +24,10 @@ class ApiTemplatableSerializer extends JsonSerializer<Templatable> {
   @Override
   public void serialize(final Templatable templatable, final JsonGenerator jsonGenerator,
       final SerializerProvider serializerProvider) throws IOException {
-    if (templatable.getTemplatedValue() != null) {
-      jsonGenerator.writeString(templatable.getTemplatedValue());
+    if (templatable.templatedValue() != null) {
+      jsonGenerator.writeString(templatable.templatedValue());
     } else {
-      serializerProvider.defaultSerializeValue(templatable.getValue(), jsonGenerator);
+      serializerProvider.defaultSerializeValue(templatable.value(), jsonGenerator);
     }
   }
 }

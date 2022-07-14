@@ -13,6 +13,7 @@
  */
 import { Description, ExitToApp, Home, LockOpen } from "@material-ui/icons";
 import ErrorIcon from "@material-ui/icons/Error";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
 import React, { FunctionComponent } from "react";
@@ -25,6 +26,7 @@ import {
     NavBarPrimaryContainerV1,
     NavBarSecondaryContainerV1,
     NavBarV1,
+    TooltipV1,
     useAuthProviderV1,
 } from "../../platform/components";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
@@ -103,6 +105,7 @@ export const AppBar: FunctionComponent = () => {
             <NavBarSecondaryContainerV1>
                 {/* About */}
                 <AboutDialogNavBarButton />
+
                 {/* Documentation */}
                 <NavBarLinkV1
                     externalLink
@@ -114,6 +117,30 @@ export const AppBar: FunctionComponent = () => {
                     </NavBarLinkIconV1>
                     <NavBarLinkTextV1>
                         {t("label.documentation")}
+                    </NavBarLinkTextV1>
+                </NavBarLinkV1>
+
+                {/* Support */}
+                <NavBarLinkV1
+                    externalLink
+                    href="https://support.startree.ai/"
+                    target="_blank"
+                >
+                    <NavBarLinkIconV1>
+                        <HelpOutlineIcon />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>
+                        <TooltipV1
+                            delay={0}
+                            placement="right"
+                            title={
+                                t(
+                                    "message.no-access-to-support-tooltip-msg"
+                                ) as string
+                            }
+                        >
+                            <span>{t("label.support")}</span>
+                        </TooltipV1>
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>
 

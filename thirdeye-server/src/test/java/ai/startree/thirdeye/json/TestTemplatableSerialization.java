@@ -102,6 +102,103 @@ public class TestTemplatableSerialization {
     assertThat(output).isEqualTo(expected);
   }
 
+  @Test
+  public void testSerializationOfNestedTemplatablesWithValues() throws JsonProcessingException {
+    final String listElement = "dim1";
+    final List<String> value = List.of(listElement);
+    final Templatable<List<String>> templatable = new Templatable<List<String>>().setValue(value);
+    final ObjectWithTemplatable obj = new ObjectWithTemplatable().setListOfStrings(templatable);
+    final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
+    objectWithNestedTemplatable
+        .setTemplatableNested(new Templatable<ObjectWithTemplatable>().setValue(obj));
+
+    final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
+    assertThat(output).isEqualTo(String.format(
+        "{\"templatableNested\":{\"listOfStrings\":[\"%s\"]}}",
+        listElement));
+  }
+
+  @Test
+  public void testDeSerializationOfNestedTemplatablesWithValues() throws JsonProcessingException {
+    final String listElement = "dim1";
+    final List<String> value = List.of(listElement);
+    final String jsonString = String.format("{\"templatableNested\":{\"listOfStrings\":[\"%s\"]}}",
+        listElement);
+    final ObjectWithNestedTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+        ObjectWithNestedTemplatable.class);
+
+    // build expected object
+    final ObjectWithTemplatable objectWithTemplatable = new ObjectWithTemplatable().setListOfStrings(
+        new Templatable<List<String>>().setValue(value));
+    final Templatable<ObjectWithTemplatable> templatableNested = new Templatable<ObjectWithTemplatable>().setValue(
+        objectWithTemplatable);
+    final ObjectWithNestedTemplatable expected = new ObjectWithNestedTemplatable();
+    expected.setTemplatableNested(templatableNested);
+
+    assertThat(output).isEqualTo(expected);
+  }
+
+  @Test
+  public void testSerializationOfNestedTemplatablesWithHigherTemplatableTemplated()
+      throws JsonProcessingException {
+    final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
+    objectWithNestedTemplatable
+        .setTemplatableNested(new Templatable<ObjectWithTemplatable>().setTemplatedValue("${var}"));
+
+    final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
+    assertThat(output).isEqualTo("{\"templatableNested\":\"${var}\"}");
+  }
+
+  @Test
+  public void testDeSerializationOfNestedTemplatablesWithHigherTemplatableTemplated()
+      throws JsonProcessingException {
+    final String templatedValue = "${var}";
+    final String jsonString = String.format("{\"templatableNested\":\"%s\"}", templatedValue);
+    final ObjectWithNestedTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+        ObjectWithNestedTemplatable.class);
+
+    // build expected object
+    final Templatable<ObjectWithTemplatable> templatableNested = new Templatable<ObjectWithTemplatable>().setTemplatedValue(templatedValue);
+    final ObjectWithNestedTemplatable expected = new ObjectWithNestedTemplatable();
+    expected.setTemplatableNested(templatableNested);
+
+    assertThat(output).isEqualTo(expected);
+  }
+
+  @Test
+  public void testSerializationOfNestedTemplatablesWithNestedTemplatableTemplated()
+      throws JsonProcessingException {
+    final String templatedValue = "${var}";
+    final Templatable<List<String>> templatable = new Templatable<List<String>>().setTemplatedValue(
+        templatedValue);
+    final ObjectWithTemplatable obj = new ObjectWithTemplatable().setListOfStrings(templatable);
+    final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
+    objectWithNestedTemplatable
+        .setTemplatableNested(new Templatable<ObjectWithTemplatable>().setValue(obj));
+
+    final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
+    assertThat(output).isEqualTo(String.format("{\"templatableNested\":{\"listOfStrings\":\"%s\"}}",
+        templatedValue));
+  }
+
+  @Test
+  public void testDeSerializationOfNestedTemplatablesWithNestedTemplatableTemplated() throws JsonProcessingException {
+    final String templatedValue = "${var}";
+    final String jsonString = String.format("{\"templatableNested\":{\"listOfStrings\":\"%s\"}}", templatedValue);
+    final ObjectWithNestedTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+        ObjectWithNestedTemplatable.class);
+
+    // build expected object
+    final ObjectWithTemplatable objectWithTemplatable = new ObjectWithTemplatable().setListOfStrings(
+        new Templatable<List<String>>().setTemplatedValue(templatedValue));
+    final Templatable<ObjectWithTemplatable> templatableNested = new Templatable<ObjectWithTemplatable>().setValue(
+        objectWithTemplatable);
+    final ObjectWithNestedTemplatable expected = new ObjectWithNestedTemplatable();
+    expected.setTemplatableNested(templatableNested);
+
+    assertThat(output).isEqualTo(expected);
+  }
+
   private static class ObjectWithTemplatable {
 
     Templatable<List<String>> listOfStrings;
@@ -130,6 +227,38 @@ public class TestTemplatableSerialization {
     @Override
     public int hashCode() {
       return Objects.hash(listOfStrings);
+    }
+  }
+
+  private static class ObjectWithNestedTemplatable {
+
+    Templatable<ObjectWithTemplatable> templatableNested;
+
+    public Templatable<ObjectWithTemplatable> getTemplatableNested() {
+      return templatableNested;
+    }
+
+    public ObjectWithNestedTemplatable setTemplatableNested(
+        final Templatable<ObjectWithTemplatable> templatableNested) {
+      this.templatableNested = templatableNested;
+      return this;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final ObjectWithNestedTemplatable that = (ObjectWithNestedTemplatable) o;
+      return Objects.equals(templatableNested, that.templatableNested);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(templatableNested);
     }
   }
 }

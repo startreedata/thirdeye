@@ -13,13 +13,13 @@
  */
 import { Button } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
-import { isEmpty, isEqual } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     useNotificationProviderV1,
-} from "../../../platform/components";
+} from "@startree-ui/platform-ui";
+import { isEmpty, isEqual } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
 import {
     createInvestigation,

@@ -12,6 +12,12 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
+import {
+    NotificationTypeV1,
+    PageContentsCardV1,
+    PageContentsGridV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { clone, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,12 +27,6 @@ import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-ana
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
 import { AnomalyTimeSeriesCard } from "../../components/rca/anomaly-time-series-card/anomaly-time-series-card.component";
-import {
-    NotificationTypeV1,
-    PageContentsCardV1,
-    PageContentsGridV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Event } from "../../rest/dto/event.interfaces";

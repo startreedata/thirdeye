@@ -11,26 +11,28 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import {
+    AuthExceptionCodeV1,
+    AuthExceptionCodeV1Label,
+} from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
-import { AuthExceptionCodeV1 } from "../../platform/components/auth-provider-v1/auth-provider-v1.interfaces";
-import { AuthExceptionCodeV1Label } from "../../platform/utils";
 import { LoginPage } from "./login-page.component";
 
-jest.mock("../../platform/components/app-loading-indicator-v1", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     AppLoadingIndicatorV1: jest
         .fn()
         .mockReturnValue("testAppLoadingIndicatorV1"),
 }));
 
-jest.mock("../../platform/components/auth-provider-v1", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     useAuthProviderV1: jest.fn().mockImplementation(() => ({
         authExceptionCode: mockAuthExceptionCode,
         login: mockLogin,
     })),
 }));
 
-jest.mock("../../platform/components/notification-provider-v1", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     useNotificationProviderV1: jest
         .fn()
         .mockImplementation(() => ({ notify: mockNotify })),
@@ -39,7 +41,7 @@ jest.mock("../../platform/components/notification-provider-v1", () => ({
     },
 }));
 
-jest.mock("../../platform/components/page-v1", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     PageV1: jest.fn().mockImplementation((props) => props.children),
     PageHeaderV1: jest.fn().mockImplementation((props) => props.children),
     PageHeaderTextV1: jest.fn().mockImplementation((props) => props.children),

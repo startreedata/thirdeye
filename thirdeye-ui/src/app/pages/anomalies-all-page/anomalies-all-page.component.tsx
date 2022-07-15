@@ -12,14 +12,6 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
-import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
-import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
@@ -29,8 +21,15 @@ import {
     TooltipV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
+import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
+import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
@@ -114,7 +113,6 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiAnomaly.name,
             }),

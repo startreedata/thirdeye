@@ -12,16 +12,16 @@
  * the License.
  */
 import { Box, Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    formatLargeNumberV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "../../../platform/components";
-import { formatLargeNumberV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";

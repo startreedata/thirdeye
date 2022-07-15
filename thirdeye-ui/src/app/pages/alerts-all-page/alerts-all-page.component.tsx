@@ -11,20 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     deleteAlert,
     getAllAlerts,
@@ -126,7 +125,7 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
         showDialog({
-            type: DialogType.ALERT,
+            type: DialogType,
             contents: t("message.delete-confirmation", {
                 name: uiAlert.name,
             }),

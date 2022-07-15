@@ -11,6 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,12 +24,7 @@ import {
     TimeRange,
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { ActionStatus } from "../../platform/rest/actions.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getRootCauseAnalysisForAnomalyInvestigatePath } from "../../utils/routes/routes.util";

@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
 import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { AnomaliesRouter } from "./anomalies.router";
 
@@ -32,14 +32,9 @@ jest.mock("../../utils/routes/routes.util", () => ({
     getAnomaliesPath: jest.fn().mockReturnValue("testAnomaliesPath"),
 }));
 
-jest.mock(
-    "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component",
-    () => ({
-        AppLoadingIndicatorV1: jest
-            .fn()
-            .mockReturnValue("testLoadingIndicatorV1"),
-    })
-);
+jest.mock("@startree-ui/platform-ui", () => ({
+    AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
+}));
 
 jest.mock(
     "../../pages/anomalies-all-page/anomalies-all-page.component",

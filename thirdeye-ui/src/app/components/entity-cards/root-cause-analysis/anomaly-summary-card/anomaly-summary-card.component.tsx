@@ -14,15 +14,15 @@
 import { Grid, Typography } from "@material-ui/core";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
     SkeletonV1,
     useNotificationProviderV1,
-} from "../../../../platform/components";
+} from "@startree-ui/platform-ui";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../../rest/alerts/alerts.actions";
 import { useCommonStyles } from "../../../../utils/material-ui/common.styles";

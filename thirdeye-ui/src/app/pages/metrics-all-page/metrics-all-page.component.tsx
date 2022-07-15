@@ -11,18 +11,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { MetricListV1 } from "../../components/metric-list-v1/metric-list-v1.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { MetricListV1 } from "../../components/metric-list-v1/metric-list-v1.component";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
@@ -52,7 +51,6 @@ export const MetricsAllPage: FunctionComponent = () => {
 
     const handleMetricDelete = (uiMetric: UiMetric): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiMetric.name,
             }),

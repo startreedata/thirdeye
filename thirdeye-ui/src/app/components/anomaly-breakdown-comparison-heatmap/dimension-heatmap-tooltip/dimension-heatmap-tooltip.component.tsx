@@ -19,9 +19,9 @@ import {
     ListItem,
     ListItemText,
 } from "@material-ui/core";
+import { formatLargeNumberV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { formatLargeNumberV1 } from "../../../platform/utils";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import { useCommonStyles } from "../../../utils/material-ui/common.styles";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";

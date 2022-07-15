@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { formatNumberV1 } from "@startree-ui/platform-ui";
 import i18n from "i18next";
 import { isEmpty } from "lodash";
-import { formatNumberV1 } from "../../platform/utils";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import {
     LogicalMetric,

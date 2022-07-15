@@ -37,7 +37,7 @@ import {
 const systemLocale = Settings.defaultLocale;
 const systemZoneName = Settings.defaultZoneName;
 
-jest.mock("../../platform/utils", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
     formatYearV1: jest
         .fn()

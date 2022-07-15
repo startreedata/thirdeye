@@ -11,6 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import {
+    ActionStatus,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useDialogProviderV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo } from "react";
@@ -19,15 +27,6 @@ import { useSearchParams } from "react-router-dom";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { EventListV1 } from "../../components/event-list-v1/event-list-v1.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useDialogProviderV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { useGetEvents } from "../../rest/event/event.actions";
 import { deleteEvent } from "../../rest/event/events.rest";
@@ -81,7 +80,6 @@ export const EventsAllPage: FunctionComponent = () => {
 
     const handleEventDelete = (event: Event): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: event.name,
             }),

@@ -20,12 +20,6 @@ import {
     useTheme,
 } from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { cloneDeep, isEmpty, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Outlet, useParams, useSearchParams } from "react-router-dom";
-import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
-import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
     AppLoadingIndicatorV1,
     HelpLinkIconV1,
@@ -36,7 +30,13 @@ import {
     PageV1,
     TooltipV1,
     useNotificationProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import { cloneDeep, isEmpty, toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Outlet, useParams, useSearchParams } from "react-router-dom";
+import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
+import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";

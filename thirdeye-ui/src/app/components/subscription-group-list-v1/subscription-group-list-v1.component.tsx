@@ -12,15 +12,15 @@
  * the License.
  */
 import { Button, Grid, Link } from "@material-ui/core";
-import React, { FunctionComponent, ReactElement, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, ReactElement, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
     getSubscriptionGroupsUpdatePath,

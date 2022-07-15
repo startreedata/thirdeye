@@ -18,15 +18,15 @@ import {
     MenuItem,
     Select,
 } from "@material-ui/core";
-import { isEmpty, omit } from "lodash";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
+    ActionStatus,
     JSONEditorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { ActionStatus } from "../../platform/rest/actions.interfaces";
+} from "@startree-ui/platform-ui";
+import { isEmpty, omit } from "lodash";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";

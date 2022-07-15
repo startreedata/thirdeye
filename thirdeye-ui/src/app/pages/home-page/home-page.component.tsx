@@ -15,16 +15,16 @@ import { Grid } from "@material-ui/core";
 import ErrorIcon from "@material-ui/icons/Error";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
-import { default as React, FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     PageContentsGridV1,
     PageV1,
     TileButtonIconV1,
     TileButtonTextV1,
     TileButtonV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     getAlertsPath,
     getAnomaliesPath,

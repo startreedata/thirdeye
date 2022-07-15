@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { formatLargeNumberV1 } from "../../../platform/utils";
+import { formatLargeNumberV1 } from "@startree-ui/platform-ui";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { Dimension } from "../../../utils/material-ui/dimension.util";

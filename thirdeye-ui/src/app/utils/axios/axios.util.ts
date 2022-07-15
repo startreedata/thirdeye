@@ -11,17 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
-import { codeTypographyOptionsV1 } from "@startree-ui/platform-ui";
 
-export const useMetricCardStyles = makeStyles((theme) => ({
-    active: {
-        color: theme.palette.success.main,
-    },
-    inactive: {
-        color: theme.palette.text.disabled,
-    },
-    query: {
-        ...codeTypographyOptionsV1.body2,
-    },
-}));
+export const duplicateKeyForArrayQueryParams = (params: {
+    [key: string]: number | string | string[] | boolean;
+}): string => {
+    const searchStringParts: string[] = [];
+
+    Object.entries(params).forEach(([queryParamKey, value]) => {
+        if (Array.isArray(value)) {
+            value.forEach((val) => {
+                searchStringParts.push(`${queryParamKey}=${val}`);
+            });
+        } else {
+            searchStringParts.push(`${queryParamKey}=${value}`);
+        }
+    });
+
+    return searchStringParts.length > 0 ? searchStringParts.join("&") : "";
+};

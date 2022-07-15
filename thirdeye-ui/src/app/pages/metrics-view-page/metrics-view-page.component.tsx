@@ -12,20 +12,19 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
-import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
 import { getUiMetric } from "../../utils/metrics/metrics.util";
@@ -78,7 +77,6 @@ export const MetricsViewPage: FunctionComponent = () => {
 
     const handleMetricDelete = (uiMetric: UiMetric): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiMetric.name,
             }),

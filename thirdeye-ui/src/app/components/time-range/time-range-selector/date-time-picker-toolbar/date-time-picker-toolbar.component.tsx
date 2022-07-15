@@ -13,9 +13,6 @@
  */
 import { Link, Toolbar } from "@material-ui/core";
 import { ToolbarComponentProps } from "@material-ui/pickers/Picker/Picker";
-import classnames from "classnames";
-import { DateTime } from "luxon";
-import React, { FunctionComponent } from "react";
 import {
     formatDayV1,
     formatHourV1,
@@ -24,7 +21,10 @@ import {
     formatMonthV1,
     formatYearV1,
     switchMeridiemV1,
-} from "../../../../platform/utils";
+} from "@startree-ui/platform-ui";
+import classnames from "classnames";
+import { DateTime } from "luxon";
+import React, { FunctionComponent } from "react";
 import { useDateTimePickerToolbarStyles } from "./date-time-picker-toolbar.styles";
 
 export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (

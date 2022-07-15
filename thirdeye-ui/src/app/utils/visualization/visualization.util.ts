@@ -11,18 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import bounds from "binary-search-bounds";
-import { ScaleTime } from "d3-scale";
-import { isEmpty, isNil } from "lodash";
-import { Interval } from "luxon";
-import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import {
     formatDateV1,
     formatLargeNumberV1,
     formatMonthOfYearV1,
     formatTimeV1,
     formatYearV1,
-} from "../../platform/utils";
+} from "@startree-ui/platform-ui";
+import bounds from "binary-search-bounds";
+import { ScaleTime } from "d3-scale";
+import { isEmpty, isNil } from "lodash";
+import { Interval } from "luxon";
+import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 

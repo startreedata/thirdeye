@@ -13,16 +13,6 @@
  */
 import { Box, Button, Grid, Link, useTheme } from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { isEmpty, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
-import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
-import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
@@ -35,8 +25,17 @@ import {
     TooltipV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { isEmpty, toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
+import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
@@ -163,7 +162,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             return;
         }
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiAnomaly.name,
             }),

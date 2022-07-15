@@ -12,18 +12,18 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";

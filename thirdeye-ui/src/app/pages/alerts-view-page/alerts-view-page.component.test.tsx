@@ -17,8 +17,8 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AppRoute, getAlertsViewPath } from "../../utils/routes/routes.util";
 import { AlertsViewPage } from "./alerts-view-page.component";
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
+jest.mock("@startree-ui/platform-ui", () => ({
+    ...(jest.requireActual("@startree-ui/platform-ui") as Record<
         string,
         unknown
     >),

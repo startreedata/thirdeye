@@ -22,10 +22,10 @@ import {
     MenuItem,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { formatDateAndTimeV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { getEventsViewPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TextHighlighter } from "../../text-highlighter/text-highlighter.component";

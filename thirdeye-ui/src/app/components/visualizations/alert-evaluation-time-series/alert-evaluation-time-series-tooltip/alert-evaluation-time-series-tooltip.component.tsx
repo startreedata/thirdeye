@@ -12,14 +12,14 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
 import {
     formatDateAndTimeV1,
     formatLargeNumberV1,
     formatNumberV1,
-} from "../../../../platform/utils";
+} from "@startree-ui/platform-ui";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import { getAnomalyName } from "../../../../utils/anomalies/anomalies.util";
 import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { AlertEvaluationTimeSeriesTooltipProps } from "./alert-evaluation-time-series-tooltip.interfaces";

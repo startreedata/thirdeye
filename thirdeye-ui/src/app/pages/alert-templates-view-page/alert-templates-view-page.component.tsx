@@ -21,6 +21,15 @@ import {
     MenuItem,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import {
+    AppLoadingIndicatorV1,
+    JSONEditorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useDialogProviderV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { isEmpty, isNumber } from "lodash";
 import React, {
     FunctionComponent,
@@ -32,16 +41,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    AppLoadingIndicatorV1,
-    JSONEditorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useDialogProviderV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplate } from "../../rest/alert-templates/alert-templates.actions";
 import { deleteAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
@@ -109,7 +108,6 @@ export const AlertTemplatesViewPage: FunctionComponent = () => {
     const handleAlertTemplateDelete = (): void => {
         alertTemplate &&
             showDialog({
-                type: DialogType.ALERT,
                 contents: t("message.delete-confirmation", {
                     name: alertTemplate.name,
                 }),

@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { formatNumberV1 } from "@startree-ui/platform-ui";
 import flatten from "flat";
 import i18n from "i18next";
 import { isEmpty, isNil } from "lodash";
-import { formatNumberV1 } from "../../platform/utils";
 
 // Traverses all the properties of object, including those nested, in arrays and maps until it finds
 // a string property for which match function returns true

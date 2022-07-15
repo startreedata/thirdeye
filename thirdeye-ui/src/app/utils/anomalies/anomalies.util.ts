@@ -11,15 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import bounds from "binary-search-bounds";
-import i18n from "i18next";
-import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
 import {
     formatDateAndTimeV1,
     formatDurationV1,
     formatLargeNumberV1,
     formatPercentageV1,
-} from "../../platform/utils";
+} from "@startree-ui/platform-ui";
+import bounds from "binary-search-bounds";
+import i18n from "i18next";
+import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";

@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { formatDateAndTimeV1 } from "@startree-ui/platform-ui";
 import i18n from "i18next";
 import { kebabCase } from "lodash";
 import { DateTime } from "luxon";
@@ -18,7 +19,6 @@ import {
     TimeRange,
     TimeRangeDuration,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { formatDateAndTimeV1 } from "../../platform/utils";
 
 export const createTimeRangeDuration = (
     timeRange: TimeRange,

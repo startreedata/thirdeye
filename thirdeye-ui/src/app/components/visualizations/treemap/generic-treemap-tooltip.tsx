@@ -12,8 +12,8 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
+import { formatLargeNumberV1 } from "@startree-ui/platform-ui";
 import React from "react";
-import { formatLargeNumberV1 } from "../../../platform/utils";
 import { SafariMuiGridFix } from "../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "../alert-evaluation-time-series/alert-evaluation-time-series-tooltip/alert-evaluation-time-series-tooltip.styles";
 import { TreemapData } from "./treemap.interfaces";

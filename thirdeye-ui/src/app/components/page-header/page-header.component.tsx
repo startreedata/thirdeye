@@ -12,13 +12,13 @@
  * the License.
  */
 import { useMediaQuery, useTheme } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
-import { useSearchParams } from "react-router-dom";
 import {
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageHeaderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getTimeRangeDuration } from "../../utils/time-range/time-range.util";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";

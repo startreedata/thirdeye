@@ -23,16 +23,16 @@ import {
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import { Alert as MuiAlert } from "@material-ui/lab";
-import { kebabCase } from "lodash";
-import React, { FunctionComponent, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     HelpLinkIconV1,
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
     TooltipV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import { kebabCase } from "lodash";
+import React, { FunctionComponent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";

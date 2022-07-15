@@ -12,6 +12,13 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -20,13 +27,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";

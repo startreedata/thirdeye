@@ -12,6 +12,13 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useDialogProviderV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -19,14 +26,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { EventCard } from "../../components/entity-cards/event-card/event-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useDialogProviderV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { useGetEvent } from "../../rest/event/event.actions";
@@ -75,7 +74,6 @@ export const EventsViewPage: FunctionComponent = () => {
 
     const handleEventDelete = (event: Event): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: event.name,
             }),

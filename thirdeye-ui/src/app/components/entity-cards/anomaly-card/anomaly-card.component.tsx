@@ -12,10 +12,10 @@
  * the License.
  */
 import { Card, CardContent, Grid } from "@material-ui/core";
+import { PageContentsCardV1, SkeletonV1 } from "@startree-ui/platform-ui";
 import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card/anomaly-summary-card-deatil.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";

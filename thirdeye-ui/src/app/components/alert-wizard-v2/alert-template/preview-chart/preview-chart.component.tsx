@@ -14,16 +14,16 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
+import {
+    NotificationTypeV1,
+    SkeletonV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { ReactComponent as ChartSkeleton } from "../../../../../assets/images/chart-skeleton.svg";
-import {
-    NotificationTypeV1,
-    SkeletonV1,
-    useNotificationProviderV1,
-} from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { AlertEvaluation } from "../../../../rest/dto/alert.interfaces";

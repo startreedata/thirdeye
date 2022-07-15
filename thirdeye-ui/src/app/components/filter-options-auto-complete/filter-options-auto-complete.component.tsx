@@ -13,12 +13,12 @@
  */
 import TextField from "@material-ui/core/TextField";
 import { Autocomplete } from "@material-ui/lab";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     useNotificationProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     FilterOption,
     FilterOptionsAutoCompleteProps,

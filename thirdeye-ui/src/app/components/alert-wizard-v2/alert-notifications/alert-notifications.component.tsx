@@ -12,9 +12,9 @@
  * the License.
  */
 import { Box, Grid, Switch, Typography } from "@material-ui/core";
+import { PageContentsCardV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1 } from "../../../platform/components";
 import { AlertNotificationsProps } from "./alert-notifications.interfaces";
 import { SubscriptionGroups } from "./subscription-groups/subscription-groups.component";
 

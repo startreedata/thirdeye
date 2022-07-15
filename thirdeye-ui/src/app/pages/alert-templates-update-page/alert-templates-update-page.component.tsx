@@ -12,6 +12,13 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { assign, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
@@ -19,13 +26,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertTemplateWizard } from "../../components/alert-template-wizard/altert-template-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplate } from "../../rest/alert-templates/alert-templates.actions";
 import { updateAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";

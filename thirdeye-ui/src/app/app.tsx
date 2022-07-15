@@ -11,17 +11,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { delay } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { AppBar } from "./components/app-bar/app-bar.component";
 import {
     AppContainerV1,
     NotificationScopeV1,
     NotificationTypeV1,
     useAuthProviderV1,
     useNotificationProviderV1,
-} from "./platform/components";
+} from "@startree-ui/platform-ui";
+import { delay } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { AppBar } from "./components/app-bar/app-bar.component";
 import { AppRouter } from "./routers/app/app.router";
 
 // ThirdEye UI app

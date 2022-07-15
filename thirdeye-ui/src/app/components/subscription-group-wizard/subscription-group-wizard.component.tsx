@@ -12,10 +12,10 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { PageContentsCardV1, StepperV1 } from "@startree-ui/platform-ui";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,

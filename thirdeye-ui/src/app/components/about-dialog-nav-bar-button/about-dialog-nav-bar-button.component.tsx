@@ -13,17 +13,16 @@
  */
 import { Grid, Typography } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
-import { ReactComponent as StarTreeIcon } from "../../platform/assets/images/startree-icon-light.svg";
 import {
     LinkV1,
     NavBarLinkIconV1,
     NavBarLinkTextV1,
     NavBarLinkV1,
     useDialogProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { ReactComponent as StarTreeIcon } from "@startree-ui/platform-ui/assets/images/startree-icon-light.svg";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import { getThirdEyeUiVersion } from "../../utils/version/version.util";
 import { useAboutDialogNavBarButtonStyles } from "./about-dialog-nav-bar-button.styles";
 
@@ -34,7 +33,6 @@ export const AboutDialogNavBarButton: FunctionComponent = () => {
 
     const handleButtonClick = (): void => {
         showDialog({
-            type: DialogType.CUSTOM,
             headerText: t("label.thirdeye"),
             contents: (
                 <Grid container alignItems="center">

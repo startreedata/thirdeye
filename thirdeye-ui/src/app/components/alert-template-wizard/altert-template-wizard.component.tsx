@@ -13,14 +13,14 @@
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
-import { kebabCase } from "lodash";
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     JSONEditorV1,
     PageContentsCardV1,
     StepperV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import { kebabCase } from "lodash";
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { createDefaultAlertTemplate } from "../../utils/alert-templates/alert-templates.util";
 import { Dimension } from "../../utils/material-ui/dimension.util";
 import { Palette } from "../../utils/material-ui/palette.util";

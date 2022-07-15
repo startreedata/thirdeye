@@ -19,6 +19,13 @@ import {
     CardContent,
     Grid,
 } from "@material-ui/core";
+import {
+    NotificationTypeV1,
+    PageContentsCardV1,
+    SkeletonV1,
+    TooltipV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { debounce, isEmpty } from "lodash";
 import React, {
     FunctionComponent,
@@ -29,13 +36,6 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import {
-    NotificationTypeV1,
-    PageContentsCardV1,
-    SkeletonV1,
-    TooltipV1,
-    useNotificationProviderV1,
-} from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../rest/alerts/alerts.rest";

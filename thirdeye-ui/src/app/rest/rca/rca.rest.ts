@@ -12,7 +12,7 @@
  * the License.
  */
 import axios from "axios";
-import { duplicateKeyForArrayQueryParams } from "../../platform/utils/axios/axios.util";
+import { duplicateKeyForArrayQueryParams } from "../../utils/axios/axios.util";
 import {
     AnomalyBreakdown,
     AnomalyBreakdownRequest,

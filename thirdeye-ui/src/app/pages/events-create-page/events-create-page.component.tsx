@@ -12,6 +12,12 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
@@ -19,12 +25,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { EventsWizard } from "../../components/event-wizard/event-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
 import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
 import { createEvent } from "../../rest/event/events.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";

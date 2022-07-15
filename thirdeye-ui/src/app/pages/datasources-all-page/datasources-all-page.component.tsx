@@ -11,20 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import { DatasourceListV1 } from "../../components/datasource-list-v1/datasource-list-v1.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { DatasourceListV1 } from "../../components/datasource-list-v1/datasource-list-v1.component";
 import {
     deleteDatasource,
     getAllDatasources,
@@ -76,7 +75,6 @@ export const DatasourcesAllPage: FunctionComponent = () => {
 
     const handleDatasourceDelete = (uiDatasource: UiDatasource): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiDatasource.name,
             }),

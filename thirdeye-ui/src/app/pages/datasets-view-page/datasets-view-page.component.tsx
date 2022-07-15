@@ -12,6 +12,13 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useDialogProviderV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -19,14 +26,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useDialogProviderV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
@@ -93,7 +92,6 @@ export const DatasetsViewPage: FunctionComponent = () => {
 
     const handleDatasetDelete = (uiDataset: UiDataset): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiDataset.name,
             }),

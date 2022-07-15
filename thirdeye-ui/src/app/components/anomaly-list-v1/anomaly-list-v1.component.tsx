@@ -12,6 +12,11 @@
  * the License.
  */
 import { Box, Button, Typography } from "@material-ui/core";
+import {
+    DataGridSelectionModelV1,
+    DataGridV1,
+    linkRendererV1,
+} from "@startree-ui/platform-ui";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -20,11 +25,6 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    DataGridSelectionModelV1,
-    DataGridV1,
-} from "../../platform/components";
-import { linkRendererV1 } from "../../platform/utils";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsViewPath,

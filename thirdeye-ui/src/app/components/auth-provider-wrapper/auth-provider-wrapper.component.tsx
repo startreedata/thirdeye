@@ -11,13 +11,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { isNull } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
 import {
     AppLoadingIndicatorV1,
     AuthProviderV1,
     AuthRedirectMethodV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import { isNull } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAppConfiguration } from "../../rest/app-config/app-config.action";
 import { AppRoute } from "../../utils/routes/routes.util";

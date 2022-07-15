@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { DataGridColumnV1 } from "@startree-ui/platform-ui";
 import {
     act,
     cleanup,
@@ -19,7 +20,6 @@ import {
     screen,
 } from "@testing-library/react";
 import React from "react";
-import { DataGridColumnV1 } from "../../platform/components/data-grid-v1/data-grid-v1";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { AnomalyListV1 } from "./anomaly-list-v1.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
@@ -30,11 +30,11 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
-jest.mock("../../platform/components/page-v1", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     PageContentsCardV1: jest.fn().mockImplementation((props) => props.children),
 }));
 
-jest.mock("../../platform/utils", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     linkRendererV1: jest
         .fn()
         .mockImplementation((value: string, id: number) => (
@@ -46,7 +46,7 @@ jest.mock("../anomaly-quick-filters/anomaly-quick-filters.component", () => ({
     AnomalyQuickFilters: jest.fn().mockImplementation(() => <>testFilters</>),
 }));
 
-jest.mock("../../platform/components/data-grid-v1", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     DataGridV1: jest.fn().mockImplementation((props) => (
         <>
             {Array.isArray(props.data) && props.data.length ? (

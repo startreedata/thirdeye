@@ -12,10 +12,9 @@
  * the License.
  */
 import { ThemeProvider } from "@material-ui/core";
+import { ColorV1, lightV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { lightV1 } from "../../platform/utils";
-import { ColorV1 } from "../../platform/utils/material-ui/color.util";
 import { ActiveIndicator } from "./active-indicator.component";
 import { ActiveIndicatorProps } from "./active-indicator.interfaces";
 

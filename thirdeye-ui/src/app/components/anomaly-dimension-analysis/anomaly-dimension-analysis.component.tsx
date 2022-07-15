@@ -12,14 +12,14 @@
  * the License.
  */
 import { CardContent } from "@material-ui/core";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     SkeletonV1,
     useNotificationProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { AnomalyDimensionAnalysisData } from "../../rest/dto/rca.interfaces";
 import { useGetAnomalyDimensionAnalysis } from "../../rest/rca/rca.actions";

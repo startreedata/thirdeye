@@ -12,8 +12,8 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
+import { formatDateAndTimeV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent } from "react";
-import { formatDateAndTimeV1 } from "../../../../platform/utils";
 import { useAlertEvaluationTimeSeriesTooltipStyles } from "../../alert-evaluation-time-series/alert-evaluation-time-series-tooltip/alert-evaluation-time-series-tooltip.styles";
 import {
     DataPoint,

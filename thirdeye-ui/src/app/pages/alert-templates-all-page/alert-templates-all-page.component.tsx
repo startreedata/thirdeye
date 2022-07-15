@@ -11,21 +11,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import {
+    ActionStatus,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useDialogProviderV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTemplateListV1 } from "../../components/alert-template-list-v1/alert-template-list-v1.component";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
-import {
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    useDialogProviderV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import {
     deleteAlertTemplate,
@@ -71,7 +70,6 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
 
     const handleAlertTemplateDelete = (alertTemplate: AlertTemplate): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: alertTemplate.name,
             }),

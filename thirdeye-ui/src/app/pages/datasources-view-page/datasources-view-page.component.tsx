@@ -12,13 +12,6 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
-import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     JSONEditorV1,
     NotificationTypeV1,
@@ -26,8 +19,14 @@ import {
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { AxiosError } from "axios";
+import { isEmpty, toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     deleteDatasource,
     getDatasource,
@@ -97,7 +96,6 @@ export const DatasourcesViewPage: FunctionComponent = () => {
 
     const handleDatasourceDelete = (uiDatasource: UiDatasource): void => {
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiDatasource.name,
             }),

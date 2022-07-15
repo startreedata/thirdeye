@@ -13,10 +13,6 @@
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
-import { AxiosError } from "axios";
-import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
     HelpLinkIconV1,
@@ -26,7 +22,11 @@ import {
     StepperV1,
     TooltipV1,
     useNotificationProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import { AxiosError } from "axios";
+import { cloneDeep, isEmpty, kebabCase, xor } from "lodash";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Alert,
     AlertEvaluation,

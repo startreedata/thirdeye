@@ -15,9 +15,6 @@ import { Description, ExitToApp, Home, LockOpen } from "@material-ui/icons";
 import ErrorIcon from "@material-ui/icons/Error";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
-import React, { FunctionComponent } from "react";
-import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
 import {
     NavBarLinkIconV1,
     NavBarLinkTextV1,
@@ -26,7 +23,10 @@ import {
     NavBarSecondaryContainerV1,
     NavBarV1,
     useAuthProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     AppRoute,

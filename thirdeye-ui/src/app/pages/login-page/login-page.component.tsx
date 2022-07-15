@@ -11,22 +11,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
     AuthExceptionCodeV1,
+    AuthExceptionCodeV1Label,
+    isBlockingAuthExceptionV1,
     NotificationTypeV1,
     PageHeaderTextV1,
     PageHeaderV1,
     PageV1,
     useAuthProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import {
-    AuthExceptionCodeV1Label,
-    isBlockingAuthExceptionV1,
-} from "../../platform/utils";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const LoginPage: FunctionComponent = () => {
     const [exceptionCode, setExceptionCode] = useState("");

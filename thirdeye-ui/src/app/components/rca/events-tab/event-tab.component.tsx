@@ -12,6 +12,15 @@
  * the License.
  */
 import { Box, CardContent } from "@material-ui/core";
+import {
+    DataGridScrollV1,
+    DataGridSelectionModelV1,
+    DataGridV1,
+    formatDateAndTimeV1,
+    NotificationTypeV1,
+    SkeletonV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { isEmpty, map } from "lodash";
 import React, {
     FunctionComponent,
@@ -22,15 +31,6 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    NotificationTypeV1,
-    SkeletonV1,
-    useNotificationProviderV1,
-} from "../../../platform/components";
-import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
 import { useGetEventsForAnomaly } from "../../../rest/event/event.actions";

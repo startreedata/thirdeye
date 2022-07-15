@@ -21,17 +21,16 @@ import {
 } from "@material-ui/core";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
-import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -93,7 +92,6 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             newSelectedFeedbackType !== currentlySelected
         ) {
             showDialog({
-                type: DialogType.ALERT,
                 contents: t("message.change-confirmation-to", {
                     value: `"${OPTION_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
                 }),
@@ -110,7 +108,6 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
 
     const handleCommentUpdateClick = (): void => {
         showDialog({
-            type: DialogType.CUSTOM,
             headerText: t("label.update-entity", {
                 entity: t("label.comment"),
             }),

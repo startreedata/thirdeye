@@ -29,7 +29,7 @@ jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
 }));
 
-jest.mock("../../platform/utils", () => ({
+jest.mock("@startree-ui/platform-ui", () => ({
     formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
     formatPercentageV1: jest.fn().mockImplementation((num) => num.toString()),
     formatDateAndTimeV1: jest

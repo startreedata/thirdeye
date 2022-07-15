@@ -12,6 +12,7 @@
  * the License.
  */
 import { Box, Grid } from "@material-ui/core";
+import { PageContentsCardV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
@@ -23,7 +24,6 @@ import {
 } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { MessageDisplayState } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
-import { PageContentsCardV1 } from "../../../platform/components";
 import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";

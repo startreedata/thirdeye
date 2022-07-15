@@ -20,9 +20,9 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import { PageContentsCardV1 } from "@startree-ui/platform-ui";
 import React, { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1 } from "../../../platform/components";
 import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { getAlertTemplatesCreatePath } from "../../../utils/routes/routes.util";

@@ -12,8 +12,8 @@
  * the License.
  */
 import { Chip } from "@material-ui/core";
+import { formatLargeNumberV1 } from "@startree-ui/platform-ui";
 import React from "react";
-import { formatLargeNumberV1 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";

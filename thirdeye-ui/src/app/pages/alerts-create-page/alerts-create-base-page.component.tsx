@@ -12,18 +12,6 @@
  * the License.
  */
 import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
-import { AxiosError } from "axios";
-import { isEmpty, isEqual } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import {
-    NavLink,
-    Outlet,
-    useLocation,
-    useNavigate,
-    useSearchParams,
-} from "react-router-dom";
-import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
@@ -36,8 +24,19 @@ import {
     TooltipV1,
     useDialogProviderV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+} from "@startree-ui/platform-ui";
+import { AxiosError } from "axios";
+import { isEmpty, isEqual } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+    NavLink,
+    Outlet,
+    useLocation,
+    useNavigate,
+    useSearchParams,
+} from "react-router-dom";
+import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import { createAlert } from "../../rest/alerts/alerts.rest";
@@ -263,7 +262,6 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             navigate(getAlertsAllPath());
         } else {
             showDialog({
-                type: DialogType.ALERT,
                 headerText: t("message.redirected-to-another-page"),
                 contents: (
                     <>

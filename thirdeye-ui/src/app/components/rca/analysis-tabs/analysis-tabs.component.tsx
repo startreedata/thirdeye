@@ -23,6 +23,12 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import {
+    formatDateAndTimeV1,
+    PageContentsCardV1,
+    SearchInputV1,
+    SkeletonV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,12 +37,6 @@ import {
     BaselineOptionsType,
     BASELINE_OPTIONS,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import {
-    PageContentsCardV1,
-    SearchInputV1,
-    SkeletonV1,
-} from "../../../platform/components";
-import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
     baselineComparisonOffsetToHumanReadable,

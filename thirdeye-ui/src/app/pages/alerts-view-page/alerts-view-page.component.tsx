@@ -12,6 +12,15 @@
  * the License.
  */
 import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import {
+    JSONEditorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    SkeletonV1,
+    useDialogProviderV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { AxiosError } from "axios";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -22,16 +31,6 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
-import {
-    JSONEditorV1,
-    NotificationTypeV1,
-    PageContentsGridV1,
-    PageV1,
-    SkeletonV1,
-    useDialogProviderV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
@@ -231,7 +230,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             return;
         }
         showDialog({
-            type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
                 name: uiAlert.name,
             }),

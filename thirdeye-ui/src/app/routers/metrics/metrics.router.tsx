@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const MetricsAllPage = lazy(() =>

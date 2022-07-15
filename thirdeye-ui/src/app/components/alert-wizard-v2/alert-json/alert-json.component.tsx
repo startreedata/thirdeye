@@ -14,9 +14,9 @@
 import { Box, Divider, Grid, Link, Typography } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import Alert from "@material-ui/lab/Alert";
+import { JSONEditorV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { JSONEditorV1 } from "../../../platform/components";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { THIRDEYE_DOC_LINK } from "../../../utils/constants/constants.util";
 import { getAlertTemplatesAllPath } from "../../../utils/routes/routes.util";

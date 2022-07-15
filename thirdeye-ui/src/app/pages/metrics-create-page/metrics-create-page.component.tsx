@@ -12,18 +12,18 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
-} from "../../platform/components";
+} from "@startree-ui/platform-ui";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { MetricsWizard } from "../../components/metrics-wizard/metrics-wizard.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { LogicalMetric } from "../../rest/dto/metric.interfaces";

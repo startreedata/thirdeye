@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
 import {

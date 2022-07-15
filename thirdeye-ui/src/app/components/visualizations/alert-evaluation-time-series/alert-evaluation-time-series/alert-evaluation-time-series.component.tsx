@@ -12,6 +12,7 @@
  * the License.
  */
 import { Box, useTheme } from "@material-ui/core";
+import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
 import { Orientation } from "@visx/axis";
 import { Brush } from "@visx/brush";
 import BaseBrush, { BaseBrushState } from "@visx/brush/lib/BaseBrush";
@@ -32,7 +33,6 @@ import React, {
     useReducer,
     useRef,
 } from "react";
-import { AppLoadingIndicatorV1 } from "../../../../platform/components";
 import {
     filterAnomaliesByTime,
     getAnomaliesAtTime,

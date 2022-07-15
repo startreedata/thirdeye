@@ -67,6 +67,7 @@
     },
     "dataset": {
       "name": "${dataset}",
+      "rcaExcludedDimensions": "${rcaExcludedDimensions}",
       "completenessDelay": "${completenessDelay}"
     },
     "metric": {
@@ -88,6 +89,7 @@
     "rcaAggregationFunction": "",
     "queryFilters": "",
     "queryLimit": "100000000",
+    "rcaExcludedDimensions": [],
     "seasonalityPeriod": "PT0S"
   }
 }

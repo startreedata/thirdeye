@@ -65,6 +65,7 @@
     },
     "dataset": {
       "name": "${dataset}",
+      "rcaExcludedDimensions": "${rcaExcludedDimensions}",
       "completenessDelay": "${completenessDelay}"
     },
     "metric": {
@@ -84,6 +85,7 @@
     "mergeMaxDuration": "",
     "rcaAggregationFunction": "",
     "queryFilters": "",
+    "rcaExcludedDimensions": [],
     "queryLimit": "100000000"
   }
 }

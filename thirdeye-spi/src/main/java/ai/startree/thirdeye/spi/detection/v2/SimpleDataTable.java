@@ -142,7 +142,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return ImmutableList.of(DetectionResult.from(getDataFrame()));
   }
 
-  public static DataTable fromDataFrame(DataFrame dataFrame) {
+  public static DataTable fromDataFrame(final DataFrame dataFrame) {
     final List<String> columns = new ArrayList<>(dataFrame.getSeriesNames());
     final List<ColumnType> columnTypes = new ArrayList<>();
     for (String key : columns) {

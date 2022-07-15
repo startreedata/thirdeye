@@ -54,7 +54,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
     if (eventType == null) {
       return findEventsBetweenTimeRange(startTime, endTime);
     }
-    Predicate predicate = Predicate
+    final Predicate predicate = Predicate
         .AND(Predicate.EQ("eventType", eventType), Predicate.GT("endTime", startTime),
             Predicate.LT("startTime", endTime));
     return findByPredicate(predicate);
@@ -63,7 +63,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
   @Override
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
       final @Nullable String eventType, final @Nullable Map<String, Set<String>> dimensionFilters) {
-    List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventType);
+    final List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventType);
 
     return applyDimensionFilters(events, dimensionFilters);
   }

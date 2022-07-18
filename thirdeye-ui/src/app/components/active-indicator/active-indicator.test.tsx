@@ -12,7 +12,7 @@
  * the License.
  */
 import { ThemeProvider } from "@material-ui/core";
-import { ColorV1, lightV1 } from "@startree-ui/platform-ui";
+import { lightV1 } from "@startree-ui/platform-ui";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { ActiveIndicator } from "./active-indicator.component";
@@ -49,5 +49,5 @@ const mockActiveIndicatorProps = {
     active: true,
 } as ActiveIndicatorProps;
 
-const expectedActiveColor: string = ColorV1.Green2;
-const expectedInactiveColor: string = ColorV1.Red2;
+const expectedActiveColor: string = lightV1.palette.success.main;
+const expectedInactiveColor: string = lightV1.palette.error.main;

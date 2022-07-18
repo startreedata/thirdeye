@@ -54,6 +54,7 @@
         "@material-ui/icons": "^4.11.2",
         "@material-ui/lab": "4.0.0-alpha.60",
         "@material-ui/pickers": "^3.2.10",
+        "@startree-ui/platform-ui": "^1.27.0",
         "@visx/visx": "^2.9.0",
         "axios": "^0.21.1",
         "binary-search-bounds": "^2.0.5",

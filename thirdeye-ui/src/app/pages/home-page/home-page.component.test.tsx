@@ -18,13 +18,7 @@ import { HomePage } from "./home-page.component";
 
 jest.mock("@startree-ui/platform-ui", () => ({
     PageContentsGridV1: jest.fn().mockImplementation((props) => props.children),
-}));
-
-jest.mock("@startree-ui/platform-ui", () => ({
     PageV1: jest.fn().mockImplementation((props) => props.children),
-}));
-
-jest.mock("@startree-ui/platform-ui", () => ({
     TileButtonIconV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonTextV1: jest.fn().mockImplementation((props) => props.children),
     TileButtonV1: jest.fn().mockImplementation((props) => (

@@ -17,11 +17,14 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -37,9 +40,16 @@ public class AppAnalyticsService {
 
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
-      final AlertTemplateRenderer renderer) {
+      final AlertTemplateRenderer renderer,
+      final MetricRegistry metricRegistry) {
     this.alertManager = alertManager;
     this.renderer = renderer;
+    metricRegistry.register("nMonitoredMetrics", new CachedGauge<Integer>(5, TimeUnit.MINUTES) {
+      @Override
+      protected Integer loadValue() {
+        return uniqueMonitoredMetricsCount();
+      }
+    });
   }
 
   public Integer uniqueMonitoredMetricsCount() {

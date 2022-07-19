@@ -84,6 +84,11 @@ public interface Constants {
   String COL_DIFF_VIOLATION = "diff_violation";
   String COL_IN_WINDOW = "is_in_window";
 
+  // constants for event dataframes
+  String COL_EVENT_NAME = "event_name";
+  String COL_EVENT_START = "event_start";
+  String COL_EVENT_END = "event_end";
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

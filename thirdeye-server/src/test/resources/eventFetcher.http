@@ -1,0 +1,104 @@
+### Fetch events with EventFetcher
+### events are not used by detectors for the moment
+
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "sample-alert",
+    "description": "Sample description payload for testing",
+    "cron": "0 0 0 1/1 * ? *",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "type": "THRESHOLD",
+            "component.timezone": "US/Pacific",
+            "component.monitoringGranularity": "P1D",
+            "component.timestamp": "ts",
+            "component.metric": "met",
+            "component.max": "${max}",
+            "component.min": "${min}",
+            "component.offset": "mo1m",
+            "component.pattern": "down",
+            "anomaly.metric": "${metric}"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "missingDataManager",
+              "sourceProperty": "currentOutput"
+            },
+            {
+              "targetProperty": "events",
+              "sourcePlanNode": "currentEventFetcher",
+              "sourceProperty": "events"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "missingDataManager",
+          "type": "TimeIndexFiller",
+          "params": {
+            "component.timestamp": "ts"
+          },
+          "inputs": [
+            {
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "outputName": "currentOutput"
+            }
+          ]
+        },
+        {
+          "name": "currentEventFetcher",
+          "type": "EventFetcher",
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "events",
+              "outputName": "events"
+            }
+          ]
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "pinot",
+              "outputName": "currentOutput"
+            }
+          ]
+        }
+      ]
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "metric": "sum(views)",
+      "monitoringGranularity": "P1D",
+      "timeColumn": "date",
+      "timeColumnFormat": "yyyyMMdd",
+      "max": "850000",
+      "min": "300000"
+    }
+  },
+  "start": "1613376000000",
+  "end": "1627714800000"
+}
+

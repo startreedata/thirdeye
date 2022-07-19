@@ -17,6 +17,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -37,6 +38,7 @@ public class PlanNodeFactory {
 
   public static final String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
   public static final String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
+  public static final String EVENT_MANAGER_REF_KEY = "$EventManager";
   private static final Logger LOG = LoggerFactory.getLogger(PlanNodeFactory.class);
 
   /* List of plan node classes that are built in with thirdeye */
@@ -47,6 +49,7 @@ public class PlanNodeFactory {
       EchoPlanNode.class,
       EnumeratorPlanNode.class,
       EventTriggerPlanNode.class,
+      EventFetcherPlanNode.class,
       ForkJoinPlanNode.class,
       IndexFillerPlanNode.class,
       SqlExecutionPlanNode.class
@@ -58,13 +61,14 @@ public class PlanNodeFactory {
   private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap;
   private final DataSourceCache dataSourceCache;
   private final DetectionRegistry detectionRegistry;
+  private final EventManager eventDao;
 
   @Inject
-  public PlanNodeFactory(final DataSourceCache dataSourceCache,
-      final DetectionRegistry detectionRegistry) {
+  public PlanNodeFactory(final DataSourceCache dataSourceCache, final DetectionRegistry detectionRegistry, final EventManager eventDao) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
+    this.eventDao = eventDao;
   }
 
   public static PlanNode build(
@@ -99,7 +103,8 @@ public class PlanNodeFactory {
         .setPipelinePlanNodes(pipelinePlanNodes)
         .setProperties(ImmutableMap.of(
             DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
-            DETECTION_REGISTRY_REF_KEY, detectionRegistry
+            DETECTION_REGISTRY_REF_KEY, detectionRegistry,
+            EVENT_MANAGER_REF_KEY, eventDao
         ));
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");

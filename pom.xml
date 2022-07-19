@@ -351,7 +351,7 @@
           <version>4.0</version>
           <executions>
             <execution>
-              <phase>validate</phase>
+              <phase>verify</phase>
               <goals>
                 <goal>check</goal>
               </goals>

@@ -19,11 +19,11 @@ import {
     Select,
 } from "@material-ui/core";
 import {
-    ActionStatus,
     JSONEditorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
+import { ActionStatus } from "@startree-ui/platform-ui/assets/rest/actions.interfaces";
 import { isEmpty, omit } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";

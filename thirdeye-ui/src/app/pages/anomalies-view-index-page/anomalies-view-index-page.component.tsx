@@ -12,11 +12,11 @@
  * the License.
  */
 import {
-    ActionStatus,
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
+import { ActionStatus } from "@startree-ui/platform-ui/assets/rest/actions.interfaces";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";

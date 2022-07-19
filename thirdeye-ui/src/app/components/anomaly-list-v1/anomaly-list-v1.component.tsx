@@ -220,7 +220,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             columns={anomalyListColumns}
             data={props.anomalies as UiAnomaly[]}
             rowKey="id"
-            searchFilterValue={props.searchFilterValue}
+            // searchFilterValue={props.searchFilterValue}
             searchPlaceholder={t("label.search-entity", {
                 entity: t("label.anomalies"),
             })}
@@ -237,7 +237,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                     <AnomalyQuickFilters />
                 </Box>
             }
-            onSearchFilterValueChange={props.onSearchFilterValueChange}
+            // onSearchFilterValueChange={props.onSearchFilterValueChange}
             onSelectionChange={setSelectedAnomaly}
         />
     );

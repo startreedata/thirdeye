@@ -11,12 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    AuthExceptionCodeV1,
-    AuthExceptionCodeV1Label,
-} from "@startree-ui/platform-ui";
+import { AuthExceptionCodeV1 } from "@startree-ui/platform-ui";
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
+import { AuthExceptionCodeV1Label } from "../../utils/auth/auth.utils";
 import { LoginPage } from "./login-page.component";
 
 jest.mock("@startree-ui/platform-ui", () => ({

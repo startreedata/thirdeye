@@ -125,7 +125,6 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
         showDialog({
-            type: DialogType,
             contents: t("message.delete-confirmation", {
                 name: uiAlert.name,
             }),

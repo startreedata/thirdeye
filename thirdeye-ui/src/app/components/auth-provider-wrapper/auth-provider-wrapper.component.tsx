@@ -81,7 +81,7 @@ export const AuthProviderWrapper: FunctionComponent<
         <AuthProviderV1
             appInitFailure={appInitFailure as boolean}
             clientId={clientId as string}
-            disableAuthOverride={isAuthDisabled(fetchedAppConfiguration)}
+            // disableAuthOverride={isAuthDisabled(fetchedAppConfiguration)}
             redirectMethod={AuthRedirectMethodV1.Post}
             redirectPathBlacklist={[AppRoute.LOGIN, AppRoute.LOGOUT]}
         >

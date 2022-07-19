@@ -12,13 +12,13 @@
  * the License.
  */
 import {
-    ActionStatus,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
+import { ActionStatus } from "@startree-ui/platform-ui/assets/rest/actions.interfaces";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo } from "react";

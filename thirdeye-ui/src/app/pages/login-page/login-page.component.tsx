@@ -14,7 +14,6 @@
 import {
     AppLoadingIndicatorV1,
     AuthExceptionCodeV1,
-    AuthExceptionCodeV1Label,
     isBlockingAuthExceptionV1,
     NotificationTypeV1,
     PageHeaderTextV1,
@@ -25,6 +24,7 @@ import {
 } from "@startree-ui/platform-ui";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AuthExceptionCodeV1Label } from "../../utils/auth/auth.utils";
 
 export const LoginPage: FunctionComponent = () => {
     const [exceptionCode, setExceptionCode] = useState("");

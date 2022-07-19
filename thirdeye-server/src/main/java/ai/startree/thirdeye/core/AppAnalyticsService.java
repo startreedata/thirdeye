@@ -15,13 +15,17 @@ package ai.startree.thirdeye.core;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
+import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -37,12 +41,15 @@ public class AppAnalyticsService {
 
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
+  private final MergedAnomalyResultManager anomalyManager;
 
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
+      final MergedAnomalyResultManager anomalyManager,
       final MetricRegistry metricRegistry) {
     this.alertManager = alertManager;
+    this.anomalyManager = anomalyManager;
     this.renderer = renderer;
     metricRegistry.register("nMonitoredMetrics", new CachedGauge<Integer>(5, TimeUnit.MINUTES) {
       @Override
@@ -78,5 +85,32 @@ public class AppAnalyticsService {
         .setMetric(metadata.getMetric().getName())
         .setDataset(metadata.getDataset().getName())
         .setDatasource(metadata.getDatasource().getName());
+  }
+
+  public Double getPrecisionOnAnomalies() {
+    return computeConfusionMatrixForAnomalies().getPrecision();
+  }
+
+  public ConfusionMatrix computeConfusionMatrixForAnomalies() {
+    int truePositive = 0;
+    int falsePositive = 0;
+    List<AnomalyFeedbackType> feedbackTypes = anomalyManager.findAll().stream()
+        .filter(anomaly -> anomaly.getAnomalyFeedbackId() != null)
+        .map(anomaly -> anomalyManager.convertMergedAnomalyBean2DTO(anomaly,  new HashSet<>()).getFeedback().getFeedbackType())
+        .collect(Collectors.toList());
+    for (AnomalyFeedbackType type : feedbackTypes) {
+      switch (type) {
+        case NO_FEEDBACK:
+          break;
+        case NOT_ANOMALY:
+          falsePositive++;
+          break;
+        default:
+          truePositive++;
+      }
+    }
+    return new ConfusionMatrix()
+        .setTruePositive(truePositive)
+        .setFalsePositive(falsePositive);
   }
 }

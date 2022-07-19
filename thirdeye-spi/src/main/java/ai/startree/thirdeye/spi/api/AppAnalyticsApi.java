@@ -21,6 +21,7 @@ public class AppAnalyticsApi implements ThirdEyeApi {
 
   private String version;
   private Integer nMonitoredMetrics;
+  private Double anomalyPrecision;
 
   public String getVersion() {
     return version;
@@ -37,6 +38,15 @@ public class AppAnalyticsApi implements ThirdEyeApi {
 
   public AppAnalyticsApi setnMonitoredMetrics(final Integer nMonitoredMetrics) {
     this.nMonitoredMetrics = nMonitoredMetrics;
+    return this;
+  }
+
+  public Double getAnomalyPrecision() {
+    return anomalyPrecision;
+  }
+
+  public AppAnalyticsApi setAnomalyPrecision(final Double anomalyPrecision) {
+    this.anomalyPrecision = anomalyPrecision;
     return this;
   }
 }

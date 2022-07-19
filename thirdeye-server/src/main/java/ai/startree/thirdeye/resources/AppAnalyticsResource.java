@@ -45,6 +45,7 @@ public class AppAnalyticsResource {
     return Response.ok(new AppAnalyticsApi()
         .setVersion(appVersion())
         .setnMonitoredMetrics(appAnalyticsService.uniqueMonitoredMetricsCount())
+        .setAnomalyPrecision(appAnalyticsService.getPrecisionOnAnomalies())
     ).build();
   }
 

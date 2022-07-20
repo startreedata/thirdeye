@@ -18,6 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
@@ -51,10 +52,23 @@ public class AppAnalyticsService {
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
     this.renderer = renderer;
+
     metricRegistry.register("nMonitoredMetrics", new CachedGauge<Integer>(5, TimeUnit.MINUTES) {
       @Override
       protected Integer loadValue() {
         return uniqueMonitoredMetricsCount();
+      }
+    });
+    metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
+      @Override
+      protected Double loadValue() {
+        return computeConfusionMatrixForAnomalies().getPrecision();
+      }
+    });
+    metricRegistry.register("anomalyResponseRate", new CachedGauge<Double>(1, TimeUnit.HOURS) {
+      @Override
+      protected Double loadValue() {
+        return computeConfusionMatrixForAnomalies().getResponseRate();
       }
     });
   }
@@ -87,20 +101,20 @@ public class AppAnalyticsService {
         .setDatasource(metadata.getDatasource().getName());
   }
 
-  public Double getPrecisionOnAnomalies() {
-    return computeConfusionMatrixForAnomalies().getPrecision();
-  }
-
   public ConfusionMatrix computeConfusionMatrixForAnomalies() {
     int truePositive = 0;
     int falsePositive = 0;
-    List<AnomalyFeedbackType> feedbackTypes = anomalyManager.findAll().stream()
+    int unclassified;
+    List<MergedAnomalyResultDTO> anomalies = anomalyManager.findAll();
+    List<AnomalyFeedbackType> feedbackTypes = anomalies.stream()
         .filter(anomaly -> anomaly.getAnomalyFeedbackId() != null)
         .map(anomaly -> anomalyManager.convertMergedAnomalyBean2DTO(anomaly,  new HashSet<>()).getFeedback().getFeedbackType())
         .collect(Collectors.toList());
+    unclassified = anomalies.size() - feedbackTypes.size();
     for (AnomalyFeedbackType type : feedbackTypes) {
       switch (type) {
         case NO_FEEDBACK:
+          unclassified++;
           break;
         case NOT_ANOMALY:
           falsePositive++;
@@ -111,6 +125,7 @@ public class AppAnalyticsService {
     }
     return new ConfusionMatrix()
         .setTruePositive(truePositive)
-        .setFalsePositive(falsePositive);
+        .setFalsePositive(falsePositive)
+        .setUnclassified(unclassified);
   }
 }

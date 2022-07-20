@@ -224,7 +224,8 @@
         "add-metadata-entry": "Add metadata entry",
         "property-name": "Property name",
         "property-value": "Property value",
-        "example-alert-configurations": "example alert configurations"
+        "example-alert-configurations": "example alert configurations",
+        "support": "Support"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -299,6 +300,7 @@
         "create-custom-event-properties-and-values": "Create custom Event properties and corresponding values",
         "property-value-placeholder": "Type and press enter to add values",
         "select-a-template-to-preview": "Select a template to preview the alert",
-        "complete-missing-information-to-see-preview": "The template is not completed. Please complete the missing information to see the preview."
+        "complete-missing-information-to-see-preview": "The template is not completed. Please complete the missing information to see the preview.",
+        "no-access-to-support-tooltip-msg": "If you dont have access to the support page, reach out to your AE (Account Executive) or join our community: https://dev.startree.ai/docs/community"
     }
 }

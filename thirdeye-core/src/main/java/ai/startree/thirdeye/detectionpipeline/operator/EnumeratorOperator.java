@@ -51,9 +51,9 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
 
   public static class EnumeratorResult implements DetectionPipelineResult {
 
-    private final List<Map<Object, Object>> results;
+    private final List<Map<String, Object>> results;
 
-    public EnumeratorResult(final List<Map<Object, Object>> results) {
+    public EnumeratorResult(final List<Map<String, Object>> results) {
       this.results = results;
     }
 
@@ -62,7 +62,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
       return null;
     }
 
-    public List<Map<Object, Object>> getResults() {
+    public List<Map<String, Object>> getResults() {
       return results;
     }
   }

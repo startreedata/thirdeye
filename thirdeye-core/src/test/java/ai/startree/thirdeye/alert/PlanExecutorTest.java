@@ -16,6 +16,7 @@ package ai.startree.thirdeye.alert;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_COMBINER;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ENUMERATOR;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ROOT;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -40,6 +41,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
@@ -93,7 +95,7 @@ public class PlanExecutorTest {
         .setName("echo")
         .setType(EchoPlanNode.TYPE)
         .setParams(ImmutableMap.of(
-            EchoOperator.DEFAULT_INPUT_KEY, "defaultInput"
+            EchoOperator.DEFAULT_INPUT_KEY, "${key}"
         ));
 
     final PlanNodeBean enumeratorNode = new PlanNodeBean()
@@ -140,5 +142,14 @@ public class PlanExecutorTest {
     final Map<String, DetectionPipelineResult> outputMap = combinerResult.getResults();
 
     assertThat(outputMap).isNotNull();
+
+    assertThat(outputMap.values().size()).isEqualTo(3);
+
+    final Set<String> strings = outputMap.values().stream()
+        .map(r -> (EchoResult) r)
+        .map(EchoResult::text)
+        .collect(toSet());
+
+    assertThat(strings).isEqualTo(Set.of("1", "2", "3"));
   }
 }

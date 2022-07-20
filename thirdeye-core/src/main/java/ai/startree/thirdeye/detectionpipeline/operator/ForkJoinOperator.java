@@ -15,12 +15,17 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
+import ai.startree.thirdeye.mapper.PlanNodeMapper;
+import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
+import ai.startree.thirdeye.util.StringTemplateUtils;
+import com.google.common.collect.ImmutableBiMap;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,18 +65,45 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
+    /* Get all enumerations */
+    final List<Map<String, Object>> enumeratorResults = getEnumeratorResults();
+
+    /* Execute in parallel */
+    final List<Callable<Map<String, DetectionPipelineResult>>> callables =
+        prepareCallables(enumeratorResults);
+    final List<Map<String, DetectionPipelineResult>> allResults = executeAll(callables);
+
+    /* Combine results */
+    final Map<String, DetectionPipelineResult> outputs = combineChildOutputs(allResults);
+    resultMap.putAll(outputs);
+  }
+
+  private List<Map<String, Object>> getEnumeratorResults() throws Exception {
     final Operator op = enumerator.buildOperator();
     op.execute();
     final Map<String, DetectionPipelineResult> outputs = op.getOutputs();
     final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
-    final List<Map<Object, Object>> results = enumeratorResult.getResults();
+    return enumeratorResult.getResults();
+  }
+
+  private Map<String, DetectionPipelineResult> combineChildOutputs(
+      final List<Map<String, DetectionPipelineResult>> allResults) throws Exception {
+    final Operator combinerOp = combiner.buildOperator();
+    combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY, new ForkJoinResult(allResults));
+    combinerOp.execute();
+
+    return combinerOp.getOutputs();
+  }
+
+  private List<Callable<Map<String, DetectionPipelineResult>>> prepareCallables(
+      final List<Map<String, Object>> results) {
     final List<Callable<Map<String, DetectionPipelineResult>>> callables = new ArrayList<>();
 
-    for (final Map<Object, Object> result : results) {
-      /* Clone all nodes for execution */
+    for (final Map<String, Object> result : results) {
+      /* Clone all nodes for execution. Feed enumeration result */
       final Map<String, PlanNode> clonedPipelinePlanNodes = clonePipelinePlanNodes(root
           .getContext()
-          .getPipelinePlanNodes());
+          .getPipelinePlanNodes(), result);
 
       /* Get the new root node in the cloned DAG */
       final PlanNode rootClone = clonedPipelinePlanNodes.get(root.getName());
@@ -83,21 +115,16 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
         return operator.getOutputs();
       }));
     }
-    final List<Map<String, DetectionPipelineResult>> allResults = executeAll(callables);
-
-    final Operator combinerOp = combiner.buildOperator();
-    combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY, new ForkJoinResult(allResults));
-    combinerOp.execute();
-
-    resultMap.putAll(combinerOp.getOutputs());
+    return callables;
   }
 
   private Map<String, PlanNode> clonePipelinePlanNodes(
-      final Map<String, PlanNode> pipelinePlanNodes) {
+      final Map<String, PlanNode> pipelinePlanNodes,
+      final Map<String, Object> templateProperties) {
     final Map<String, PlanNode> clonedPipelinePlanNodes = new HashMap<>();
     for (Map.Entry<String, PlanNode> key : pipelinePlanNodes.entrySet()) {
       final PlanNode planNode = deepCloneWithNewContext(key.getValue(),
-          properties,
+          templateProperties,
           clonedPipelinePlanNodes);
       clonedPipelinePlanNodes.put(key.getKey(), planNode);
     }
@@ -124,11 +151,12 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   }
 
   private PlanNode deepCloneWithNewContext(final PlanNode sourceNode,
-      final Map<String, Object> properties,
+      final Map<String, Object> templateProperties,
       final Map<String, PlanNode> clonedPipelinePlanNodes) {
     try {
       /* Cloned context should contain the new nodes */
-      final PlanNodeContext clonedContext = cloneContext(sourceNode.getContext())
+      final PlanNodeContext context = sourceNode.getContext();
+      final PlanNodeContext clonedContext = cloneContext(context, templateProperties)
           .setPipelinePlanNodes(clonedPipelinePlanNodes);
 
       return PlanNodeFactory.build(sourceNode.getClass(), clonedContext);
@@ -137,12 +165,35 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     }
   }
 
-  private PlanNodeContext cloneContext(final PlanNodeContext context) {
+  private PlanNodeContext cloneContext(final PlanNodeContext context,
+      final Map<String, Object> templateProperties) {
     return new PlanNodeContext()
         .setName(context.getName())
-        .setPlanNodeBean(context.getPlanNodeBean())
+        .setPlanNodeBean(clonePlanNodeBean(templateProperties, context.getPlanNodeBean()))
         .setProperties(context.getProperties())
         .setDetectionInterval(context.getDetectionInterval());
+  }
+
+  private PlanNodeBean clonePlanNodeBean(final Map<String, Object> templateProperties,
+      final PlanNodeBean n) {
+    final Map<String, Object> params = applyTemplatePropertiesOnParams(n.getParams(),
+        templateProperties);
+    return PlanNodeMapper.INSTANCE.clone(n).setParams(params);
+  }
+
+  private Map<String, Object> applyTemplatePropertiesOnParams(
+      final Map<String, Object> params, final Map<String, Object> templateProperties) {
+    if (params == null) {
+      return null;
+    }
+    try {
+      return ImmutableBiMap.copyOf(StringTemplateUtils.applyContext(
+          new HashMap<>(params),
+          templateProperties
+      ));
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

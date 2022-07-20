@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.dataframe.calcite;
+package ai.startree.thirdeye.calcite.dataframe;
 
 import static org.apache.calcite.linq4j.Nullness.castNonNull;
 

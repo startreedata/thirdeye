@@ -27,6 +27,9 @@ import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.List;
+import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
@@ -39,7 +42,8 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
   private Period startTimeLookback;
   private Period endTimeLookback;
   private Period lookaround;
-  // todo cyril implement filters field here
+  private @NonNull List<String> eventTypes;
+  private @Nullable String freeTextSqlFilter;
 
   private EventManager eventDao;
 
@@ -48,7 +52,8 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
     startTimeLookback = isoPeriod(spec.getStartTimeLookback(), DEFAULT_START_TIME_LOOKBACK);
     endTimeLookback = isoPeriod(spec.getEndTimeLookback(), DEFAULT_END_TIME_LOOKBACK);
     lookaround = isoPeriod(spec.getLookaround(), DEFAULT_LOOKAROUND);
-    // todo cyril implement filters init here
+    eventTypes = Objects.requireNonNull(spec.getEventTypes());
+    freeTextSqlFilter = spec.getSqlFilter();
 
     eventDao = spec.getEventManager();
   }
@@ -72,8 +77,8 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
 
     final List<EventDTO> events = eventDao.findEventsBetweenTimeRange(minTime,
         maxTime,
-        // todo cyril implement filters here eventType, dimensionFilters
-        null, null
+        eventTypes,
+        freeTextSqlFilter
     );
 
     final DataFrame eventDf = toDataFrame(events);

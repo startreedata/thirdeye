@@ -38,6 +38,8 @@ import org.apache.calcite.tools.Planner;
 import org.apache.calcite.tools.RelConversionException;
 import org.apache.calcite.tools.RelRunners;
 import org.apache.calcite.tools.ValidationException;
+import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 // generate a query on the _id field and then use it to filter all original objects
@@ -49,7 +51,11 @@ public class SqlFilterRunner<T> {
     this.adapter = adapter;
   }
 
-  public List<T> applyFilter(final List<T> elements, @NotNull final String queryFilter) {
+  public List<T> applyFilter(final List<T> elements, @Nullable final String queryFilter) {
+    if (StringUtils.isBlank(queryFilter)) {
+      return elements;
+    }
+
     for (T e : elements) {
       checkArgument(adapter.idOf(e) != null,
           "An element has a null id. All elements passed to SqlFilterRunner must have a non-null id. Element: %s",

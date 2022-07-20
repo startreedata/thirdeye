@@ -15,6 +15,8 @@ package ai.startree.thirdeye.detectionpipeline.spec;
 
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventFetcherSpec extends AbstractSpec {
 
@@ -40,10 +42,17 @@ public class EventFetcherSpec extends AbstractSpec {
   private String lookaround;
 
   /**
-   * Dimension filters.
-   * TODO cyril implement for eventType and targetDimensionMap
-   * */
-  private Object filters;
+   * Type filters
+   * These filters are applied on an index.
+   * Useful optimization if there is a lot of different type of events.
+   */
+  // todo cyril make this field templatable
+  private List<String> eventTypes = new ArrayList<>();
+
+  /**
+   * Dimension filters. As a sql filter string. If empty or null, no filter is applied.
+   */
+  private String sqlFilter = "";
 
   /**
    * Injected at runtime
@@ -84,6 +93,25 @@ public class EventFetcherSpec extends AbstractSpec {
   public EventFetcherSpec setEventManager(
       final EventManager eventManager) {
     this.eventManager = eventManager;
+    return this;
+  }
+
+  public List<String> getEventTypes() {
+    return eventTypes;
+  }
+
+  public EventFetcherSpec setEventTypes(
+      final List<String> eventTypes) {
+    this.eventTypes = eventTypes;
+    return this;
+  }
+
+  public String getSqlFilter() {
+    return sqlFilter;
+  }
+
+  public EventFetcherSpec setSqlFilter(final String sqlFilter) {
+    this.sqlFilter = sqlFilter;
     return this;
   }
 }

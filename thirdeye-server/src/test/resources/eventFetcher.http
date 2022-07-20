@@ -62,6 +62,9 @@ Content-Type: application/json
         {
           "name": "currentEventFetcher",
           "type": "EventFetcher",
+          "params": {
+            "component.eventTypes": ["HOLIDAY"]
+          },
           "inputs": [],
           "outputs": [
             {
@@ -98,7 +101,7 @@ Content-Type: application/json
       "min": "300000"
     }
   },
-  "start": "1613376000000",
+  "start": "1551172932095",
   "end": "1627714800000"
 }
 

@@ -14,7 +14,9 @@
 import axios from "axios";
 import { Dataset } from "../dto/dataset.interfaces";
 import { Datasource } from "../dto/datasource.interfaces";
+import { GetStatusResponse } from "./datasources.interfaces";
 
+export const OK_STATUS = "OK";
 const BASE_URL_DATASOURCES = "/api/data-sources";
 
 export const getDatasource = async (id: number): Promise<Datasource> => {
@@ -76,6 +78,35 @@ export const onboardAllDatasets = async (
 
 export const deleteDatasource = async (id: number): Promise<Datasource> => {
     const response = await axios.delete(`${BASE_URL_DATASOURCES}/${id}`);
+
+    return response.data;
+};
+
+/**
+ * Requests for the datasource status is expensive and takes a long time. We
+ * want to limit duplicate requests and cache successful requests
+ */
+const PRIVATE_REQUEST_CACHE_MAP = new Map();
+
+export const getStatusForDatasource = async (
+    datasourceName: string,
+    _requestCache = PRIVATE_REQUEST_CACHE_MAP
+): Promise<GetStatusResponse> => {
+    const queryParams = new URLSearchParams([["name", datasourceName]]);
+    const url = `${BASE_URL_DATASOURCES}/status?${queryParams.toString()}`;
+
+    const request = _requestCache.get(url) || axios.get(url);
+    _requestCache.set(url, request);
+
+    let response;
+    try {
+        response = await request;
+    } catch (e) {
+        // If an error occurred, delete entry so it could be retried
+        _requestCache.delete(url);
+
+        throw e;
+    }
 
     return response.data;
 };

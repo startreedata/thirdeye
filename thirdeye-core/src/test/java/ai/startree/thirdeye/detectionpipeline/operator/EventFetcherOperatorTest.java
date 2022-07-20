@@ -31,7 +31,6 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
@@ -95,8 +94,8 @@ public class EventFetcherOperatorTest {
             "P3D",
             "component.eventType",
             "HOLIDAY",
-            "component.dimensionFilters",
-            Map.of("country", Set.of("US"))))
+            "component.sqlFilter",
+            "'US' member of dimensionMap['country']"))
         .setOutputs(List.of(new OutputBean().setOutputKey("events").setOutputName("events")));
 
     final OperatorContext context = new OperatorContext()

@@ -18,6 +18,7 @@ public class ConfusionMatrix {
   private int falsePositive = 0;
   private int trueNegative = 0;
   private int falseNegative = 0;
+  private int unclassified = 0;
 
   public int getTruePositive() {
     return truePositive;
@@ -55,11 +56,28 @@ public class ConfusionMatrix {
     return this;
   }
 
+  public int getUnclassified() {
+    return unclassified;
+  }
+
+  public ConfusionMatrix setUnclassified(final int unclassified) {
+    this.unclassified = unclassified;
+    return this;
+  }
+
   public double getPrecision() {
     if(truePositive == 0) {
       return 0;
     } else {
       return truePositive / (double) (truePositive + falsePositive);
+    }
+  }
+
+  public double getResponseRate() {
+    if(unclassified == 0) {
+      return 1;
+    } else {
+      return 1 - unclassified / (double) (truePositive + falsePositive + trueNegative + falseNegative + unclassified);
     }
   }
 }

@@ -13,22 +13,22 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import ai.startree.thirdeye.datalayer.calcite.filter.SqlFilterRunner;
+import ai.startree.thirdeye.datalayer.calcite.object.adapter.EventToRelationAdapter;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements EventManager {
+
+  private final SqlFilterRunner<EventDTO> sqlFilterRunner = new SqlFilterRunner<>(
+      new EventToRelationAdapter());
 
   @Inject
   public EventManagerImpl(GenericPojoDao genericPojoDao) {
@@ -48,6 +48,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
     return findByPredicate(predicate);
   }
 
+  // fixme cyril allow multiple event types for
   @Override
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime,
       final long endTime, @Nullable final String eventType) {
@@ -62,42 +63,10 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
 
   @Override
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
-      final @Nullable String eventType, final @Nullable Map<String, Set<String>> dimensionFilters) {
+      final @Nullable String eventType, @Nullable final String freeTextSqlFilter) {
     final List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventType);
 
-    return applyDimensionFilters(events, dimensionFilters);
-  }
-
-  @VisibleForTesting
-  protected static List<EventDTO> applyDimensionFilters(@NonNull final List<EventDTO> events,
-      final @Nullable Map<String, Set<String>> dimensionFilters) {
-    if (dimensionFilters == null || dimensionFilters.isEmpty()) {
-      return events;
-    }
-
-    final List<EventDTO> filteredEvents = new ArrayList<>();
-    for (EventDTO e : events) {
-      Map<String, List<String>> eventDimensions = e.getTargetDimensionMap();
-      boolean matchFilter = true;
-      for (String filterKey : dimensionFilters.keySet()) {
-        final Set<String> filterValues = dimensionFilters.get(filterKey);
-        final List<String> eventValues = eventDimensions.get(filterKey);
-        if (eventValues == null) {
-          matchFilter = false;
-        } else {
-          matchFilter = eventValues.stream().anyMatch(filterValues::contains);
-        }
-        if (!matchFilter) {
-          break;
-        }
-      }
-
-      if (matchFilter) {
-        filteredEvents.add(e);
-      }
-    }
-
-    return filteredEvents;
+    return sqlFilterRunner.applyFilter(events, freeTextSqlFilter);
   }
 
   @Override

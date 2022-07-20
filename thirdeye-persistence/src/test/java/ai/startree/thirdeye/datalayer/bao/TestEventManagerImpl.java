@@ -13,14 +13,11 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import org.testng.annotations.Test;
 
+// fixme cyril remove this once events are copied for tests
 public class TestEventManagerImpl {
 
   private static final String COUNTRY_DIMENSION_KEY = "country";
@@ -55,74 +52,4 @@ public class TestEventManagerImpl {
       EASTER_EVENT,
       FR_ONLY_EVENT,
       DEV_ENV_ONLY_EVENT);
-
-  @Test
-  public void testApplyDimensionFiltersWithNullFilters() {
-    final List<EventDTO> output = EventManagerImpl.applyDimensionFilters(EVENT_LIST, null);
-
-    assertThat(output).isEqualTo(EVENT_LIST);
-  }
-
-  @Test
-  public void testApplyDimensionFiltersWithEmptyMap() {
-    final List<EventDTO> output = EventManagerImpl.applyDimensionFilters(EVENT_LIST, Map.of());
-
-    assertThat(output).isEqualTo(EVENT_LIST);
-  }
-
-  @Test
-  public void testApplyDimensionFiltersWithNoAllowedValues() {
-    final Map<String, Set<String>> filters = Map.of(COUNTRY_DIMENSION_KEY, Set.of());
-    final List<EventDTO> output = EventManagerImpl.applyDimensionFilters(EVENT_LIST, filters);
-
-    assertThat(output.isEmpty()).isTrue();
-  }
-
-  @Test
-  public void testApplyDimensionFiltersWithCountryUS() {
-    final Map<String, Set<String>> filters = Map.of(COUNTRY_DIMENSION_KEY,
-        Set.of(US_COUNTRY_VALUE));
-    final List<EventDTO> output = EventManagerImpl.applyDimensionFilters(EVENT_LIST, filters);
-
-    final List<EventDTO> expected = List.of(CHRISTMAS_EVENT, EASTER_EVENT, DEV_ENV_ONLY_EVENT);
-
-    assertThat(output).isEqualTo(expected);
-  }
-
-  @Test
-  public void testApplyDimensionFiltersWithCountryUSorFR() {
-    final Map<String, Set<String>> filters = Map.of(COUNTRY_DIMENSION_KEY,
-        Set.of(US_COUNTRY_VALUE, FR_COUNTRY_VALUE));
-    final List<EventDTO> output = EventManagerImpl.applyDimensionFilters(EVENT_LIST, filters);
-
-    assertThat(output).isEqualTo(EVENT_LIST);
-  }
-
-  @Test
-  public void testApplyDimensionFiltersWithCountryUSandEnvProd() {
-    final Map<String, Set<String>> filters = Map.of(
-        COUNTRY_DIMENSION_KEY,
-        Set.of(US_COUNTRY_VALUE),
-        ENV_DIMENSION_KEY,
-        Set.of(PROD_ENV_VALUE));
-    final List<EventDTO> output = EventManagerImpl.applyDimensionFilters(EVENT_LIST, filters);
-
-    final List<EventDTO> expected = List.of(CHRISTMAS_EVENT, EASTER_EVENT);
-
-    assertThat(output).isEqualTo(expected);
-  }
-
-  @Test
-  public void testApplyDimensionFiltersWithCountryUSorFRandEnvProd() {
-    final Map<String, Set<String>> filters = Map.of(
-        COUNTRY_DIMENSION_KEY,
-        Set.of(US_COUNTRY_VALUE, FR_COUNTRY_VALUE),
-        ENV_DIMENSION_KEY,
-        Set.of(PROD_ENV_VALUE));
-    final List<EventDTO> output = EventManagerImpl.applyDimensionFilters(EVENT_LIST, filters);
-
-    final List<EventDTO> expected = List.of(CHRISTMAS_EVENT, EASTER_EVENT, FR_ONLY_EVENT);
-
-    assertThat(output).isEqualTo(expected);
-  }
 }

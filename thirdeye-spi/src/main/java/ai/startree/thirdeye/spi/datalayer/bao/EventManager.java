@@ -15,8 +15,6 @@ package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EventManager extends AbstractManager<EventDTO> {
@@ -28,7 +26,7 @@ public interface EventManager extends AbstractManager<EventDTO> {
   List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, @Nullable String eventType);
 
   List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
-      @Nullable final String eventType, @Nullable final Map<String, Set<String>> dimensionFilters);
+      @Nullable final String eventType, @Nullable final String freeTextSqlFilter);
 
   List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name, long startTime,
       long endTime);

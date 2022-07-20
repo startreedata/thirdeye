@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.datalayer.calcite.object;
 
-import ai.startree.thirdeye.datalayer.calcite.object.adapter.EventToRelationAdapter;
 import ai.startree.thirdeye.datalayer.calcite.filter.SqlFilterRunner;
+import ai.startree.thirdeye.datalayer.calcite.object.adapter.EventToRelationAdapter;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,6 +23,7 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.tools.RelConversionException;
 import org.apache.calcite.tools.ValidationException;
 
+// todo cyril move this to test
 public class ReflectiveTest {
 
   public static void main(String[] args)

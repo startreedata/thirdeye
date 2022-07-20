@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
@@ -48,24 +49,26 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
     return findByPredicate(predicate);
   }
 
-  // fixme cyril allow multiple event types for
   @Override
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime,
-      final long endTime, @Nullable final String eventType) {
-    if (eventType == null) {
+      final long endTime, @Nullable final List<@NonNull String> eventTypes) {
+    if (eventTypes == null || eventTypes.isEmpty()) {
       return findEventsBetweenTimeRange(startTime, endTime);
     }
     final Predicate predicate = Predicate
-        .AND(Predicate.EQ("eventType", eventType), Predicate.GT("endTime", startTime),
+        .AND(Predicate.IN("eventType", eventTypes.toArray(new String[0])),
+            Predicate.GT("endTime", startTime),
             Predicate.LT("startTime", endTime));
     return findByPredicate(predicate);
   }
 
   @Override
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
-      final @Nullable String eventType, @Nullable final String freeTextSqlFilter) {
-    final List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventType);
-
+      @Nullable final List<@NonNull String> eventTypes, @Nullable final String freeTextSqlFilter) {
+    final List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventTypes);
+    if (freeTextSqlFilter == null) {
+      return events;
+    }
     return sqlFilterRunner.applyFilter(events, freeTextSqlFilter);
   }
 

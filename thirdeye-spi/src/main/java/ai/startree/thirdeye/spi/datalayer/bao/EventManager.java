@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EventManager extends AbstractManager<EventDTO> {
@@ -23,10 +24,15 @@ public interface EventManager extends AbstractManager<EventDTO> {
 
   List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime);
 
-  List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, @Nullable String eventType);
+  default List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, @Nullable String eventType) {
+    List<String> eventTypes = eventType != null ? List.of(eventType) : List.of();
+    return findEventsBetweenTimeRange(startTime, endTime, eventTypes);
+  }
+
+  List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, @Nullable final List<@NonNull String> eventTypes);
 
   List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
-      @Nullable final String eventType, @Nullable final String freeTextSqlFilter);
+      @Nullable final List<@NonNull String> eventTypes, @Nullable final String freeTextSqlFilter);
 
   List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name, long startTime,
       long endTime);

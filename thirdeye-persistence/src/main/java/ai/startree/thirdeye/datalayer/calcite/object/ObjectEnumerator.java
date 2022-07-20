@@ -13,11 +13,10 @@
  */
 package ai.startree.thirdeye.datalayer.calcite.object;
 
-import static org.apache.calcite.linq4j.Nullness.castNonNull;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.calcite.linq4j.Enumerator;
+import org.apache.calcite.linq4j.Nullness;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ObjectEnumerator<T> implements Enumerator<Object[]> {

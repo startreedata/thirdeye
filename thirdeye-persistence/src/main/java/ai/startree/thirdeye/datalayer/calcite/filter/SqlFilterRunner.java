@@ -49,7 +49,7 @@ public class SqlFilterRunner<T> {
     this.adapter = adapter;
   }
 
-  public List<T> applyFilter(final List<T> elements, final String queryFilter) {
+  public List<T> applyFilter(final List<T> elements, @NotNull final String queryFilter) {
     for (T e : elements) {
       checkArgument(adapter.idOf(e) != null,
           "An element has a null id. All elements passed to SqlFilterRunner must have a non-null id. Element: %s",

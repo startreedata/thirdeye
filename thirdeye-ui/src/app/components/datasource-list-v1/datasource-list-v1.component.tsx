@@ -27,6 +27,7 @@ import {
     getDatasourcesViewPath,
 } from "../../utils/routes/routes.util";
 import { DatasourceListV1Props } from "./datasource-list-v1.interfaces";
+import { DatasourceVerification } from "./datasource-verification/datasource-verification.component";
 
 export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
@@ -34,6 +35,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     const { t } = useTranslation();
     const [selectedDatasource, setSelectedDatasource] =
         useState<DataGridSelectionModelV1<UiDatasource>>();
+    const [isCheckingStatus, setIsCheckingStatus] = useState(false);
     const navigate = useNavigate();
 
     const handleDatasourceDelete = (): void => {
@@ -90,6 +92,23 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         );
     };
 
+    const renderStatusCheck = (
+        _: Record<string, unknown>,
+        data: UiDatasource
+    ): ReactElement => {
+        let isSelected = false;
+
+        if (selectedDatasource && selectedDatasource.rowKeyValues) {
+            isSelected = selectedDatasource.rowKeyValues.includes(data.id);
+        }
+
+        if (isSelected) {
+            return <DatasourceVerification datasourceName={data.name} />;
+        }
+
+        return <></>;
+    };
+
     const datasourceColumns = [
         {
             key: "name",
@@ -110,6 +129,18 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         },
     ];
 
+    if (isCheckingStatus) {
+        datasourceColumns.push({
+            key: "status",
+            dataKey: "status",
+            header: t("label.status"),
+            minWidth: 0,
+            flex: 1.5,
+            sortable: false,
+            customCellRenderer: renderStatusCheck,
+        });
+    }
+
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
@@ -124,6 +155,20 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
                     })}
                     toolbarComponent={
                         <Grid container alignItems="center" spacing={2}>
+                            <Grid item>
+                                <Button
+                                    disabled={
+                                        selectedDatasource === undefined ||
+                                        selectedDatasource.rowKeyValues
+                                            .length === 0
+                                    }
+                                    variant="contained"
+                                    onClick={() => setIsCheckingStatus(true)}
+                                >
+                                    {t("label.check-status")}
+                                </Button>
+                            </Grid>
+
                             <Grid item>
                                 <Button
                                     disabled={isActionButtonDisable}

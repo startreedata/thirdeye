@@ -19,9 +19,11 @@ import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
 
 /**
- * Allow SQL on any Object with an ObjectToRelationAdapter.
+ * Allow SQL on any list of Object with an ObjectToRelationAdapter.
  *
  * There is only one table in this schema, it corresponds to the list of objects.
+ *
+ * Could be generalized to multiple tables - see how it's done in DataFrameSchema
  */
 public class ObjectSchema<T> extends AbstractSchema {
 
@@ -35,11 +37,6 @@ public class ObjectSchema<T> extends AbstractSchema {
     super();
     this.elements = elements;
     this.adapter = adapter;
-  }
-
-  // return the original elements
-  public List<T> getElements() {
-    return elements;
   }
 
   public String singleTableName() {

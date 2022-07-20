@@ -25,6 +25,8 @@ public interface ObjectWithIdToRelationAdapter<T> extends ObjectToRelationAdapte
    */
   Long idOf(T element);
 
-  /**Return the name of the column in the relation that contains the id*/
+  /**
+   * Return the name of the column in the relation that contains the id
+   */
   String idColumn();
 }

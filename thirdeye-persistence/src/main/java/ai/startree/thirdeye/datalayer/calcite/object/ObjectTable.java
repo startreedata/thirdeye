@@ -27,7 +27,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Table from a list of objects. The conversion from object to columns follows the
+ * Table from a list of objects. The conversion from object to columns is given by the
  * ObjectToRelationAdapter.
  */
 public class ObjectTable<T> extends AbstractTable implements ScannableTable {
@@ -36,7 +36,7 @@ public class ObjectTable<T> extends AbstractTable implements ScannableTable {
   private final @NonNull ObjectToRelationAdapter<T> adapter;
   private @Nullable RelDataType rowType;
 
-  ObjectTable(final @NonNull List<T> elements, final @NonNull ObjectToRelationAdapter<T> adapter) {
+  public ObjectTable(final @NonNull List<T> elements, final @NonNull ObjectToRelationAdapter<T> adapter) {
     this.elements = elements;
     this.adapter = adapter;
   }

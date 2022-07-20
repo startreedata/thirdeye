@@ -42,7 +42,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
-// generate a query on the _id field and then use it to filter all original objects
+/**
+ * Run sql filter predicates on any list of objects with a given ObjectWithIdToRelationAdapter
+ */
 public class SqlFilterRunner<T> {
 
   private final ObjectWithIdToRelationAdapter<T> adapter;

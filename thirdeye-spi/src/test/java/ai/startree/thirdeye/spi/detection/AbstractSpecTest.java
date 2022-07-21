@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.spec;
+package ai.startree.thirdeye.spi.detection;
 
-import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -39,7 +39,7 @@ public class AbstractSpecTest {
   @Test
   public void testAbstractSpecMappingExtraField() {
     TestSpec spec = AbstractSpec
-        .fromProperties(ImmutableMap.of("a", 321, "className", "org.test.Test"), TestSpec.class);
+        .fromProperties(ImmutableMap.of("a", 321), TestSpec.class);
     Assert.assertEquals(spec.getA(), 321);
     Assert.assertEquals(spec.getB(), 456.7);
     Assert.assertEquals(spec.getC(), "default");
@@ -48,7 +48,7 @@ public class AbstractSpecTest {
   @Test
   public void testAbstractSpecMappingNestedMap() {
     TestSpec spec = AbstractSpec.fromProperties(ImmutableMap
-        .of("a", 321, "className", "org.test.Test", "configuration",
+        .of("a", 321, "configuration",
             ImmutableMap.of("k1", "v1", "k2", "v2")), TestSpec.class);
     Assert.assertEquals(spec.getA(), 321);
     Assert.assertEquals(spec.getB(), 456.7);
@@ -63,6 +63,73 @@ public class AbstractSpecTest {
     Assert.assertEquals(spec.getUpThreshold(), 0.2);
     Assert.assertEquals(spec.getThreshold(), 0.1);
     Assert.assertEquals(spec.getDownThreshold(), 0.3);
+  }
+
+  private static class TestSpec extends AbstractSpec {
+
+    private int a = 123;
+    private double b = 456.7;
+    private String c = "default";
+    private Map<String, String> configuration;
+    private double threshold = 0.1;
+    private double upThreshold;
+    private double downThreshold;
+
+    public Map<String, String> getConfiguration() {
+      return configuration;
+    }
+
+    public void setConfiguration(Map<String, String> configuration) {
+      this.configuration = configuration;
+    }
+
+    public int getA() {
+      return a;
+    }
+
+    public void setA(int a) {
+      this.a = a;
+    }
+
+    public double getB() {
+      return b;
+    }
+
+    public void setB(double b) {
+      this.b = b;
+    }
+
+    public String getC() {
+      return c;
+    }
+
+    public void setC(String c) {
+      this.c = c;
+    }
+
+    public double getThreshold() {
+      return threshold;
+    }
+
+    public void setThreshold(double threshold) {
+      this.threshold = threshold;
+    }
+
+    public double getUpThreshold() {
+      return upThreshold;
+    }
+
+    public void setUpThreshold(double upThreshold) {
+      this.upThreshold = upThreshold;
+    }
+
+    public double getDownThreshold() {
+      return downThreshold;
+    }
+
+    public void setDownThreshold(double downThreshold) {
+      this.downThreshold = downThreshold;
+    }
   }
 }
 

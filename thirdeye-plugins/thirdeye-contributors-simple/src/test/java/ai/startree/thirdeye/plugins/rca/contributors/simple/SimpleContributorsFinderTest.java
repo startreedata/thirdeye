@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_CONTRIBUTION_CHANGE_PERCENTAGE;
+import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_VALUE_CHANGE_PERCENTAGE;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOT_ENOUGH_DATA_FOR_RCA;
@@ -177,4 +179,26 @@ public class SimpleContributorsFinderTest {
         HIERARCHIES))).isInstanceOf(ThirdEyeException.class)
         .hasFieldOrPropertyWithValue("status", ERR_NOT_ENOUGH_DATA_FOR_RCA);
   }
+
+  @Test
+  public void testMergeAndComputeStatsWithDifferentValuesInBreakdown() {
+    final DataFrame baseline = new DataFrame()
+        .addSeries(COL_DIMENSION_NAME, "dim1", "dim1")
+        .addSeries(COL_DIMENSION_VALUE, "val1", "val2")
+        .addSeries(COL_VALUE, 1D, 1D)
+        ;
+    final double baselineTotal = SimpleContributorsFinder.getTotalFromBreakdown(baseline);
+
+    final DataFrame current = new DataFrame()
+        .addSeries(COL_DIMENSION_NAME, "dim1", "dim1")
+        .addSeries(COL_DIMENSION_VALUE, "val1", "val3") // value is different here
+        .addSeries(COL_VALUE, 1D, 1D)
+        ;
+    final double currentTotal = SimpleContributorsFinder.getTotalFromBreakdown(current);
+
+    final DataFrame stats = SimpleContributorsFinder.computeStats(baseline, baselineTotal, current, currentTotal);
+    assertThat(stats.get(COL_VALUE_CHANGE_PERCENTAGE).getDoubles().values()).isEqualTo(new double[]{0D, -100D, 0d/0d});
+    assertThat(stats.get(COL_CONTRIBUTION_CHANGE_PERCENTAGE).getDoubles().values()).isEqualTo(new double[]{0D, -50, 50});
+  }
+
 }

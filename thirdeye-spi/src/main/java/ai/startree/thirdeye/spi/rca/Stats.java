@@ -19,6 +19,7 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 
 public class Stats {
 
+  // fixme cyril rewrite these stats to account for 0 cases - see test of simple to contributors algo - also don't return double.Nan if possible + return positive;INF rather than nan
   public static double computeValueChangePercentage(final double baseline, final double current) {
     if (baseline != 0d) {
       double percentageChange = ((current - baseline) / baseline) * 100d;

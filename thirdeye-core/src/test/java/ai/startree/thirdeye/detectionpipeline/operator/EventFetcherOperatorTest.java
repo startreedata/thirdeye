@@ -92,8 +92,8 @@ public class EventFetcherOperatorTest {
             "P1D",
             "component.lookaround",
             "P3D",
-            "component.eventType",
-            "HOLIDAY",
+            "component.eventTypes",
+            List.of("HOLIDAY"),
             "component.sqlFilter",
             "'US' member of dimensionMap['country']"))
         .setOutputs(List.of(new OutputBean().setOutputKey("events").setOutputName("events")));

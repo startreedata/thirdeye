@@ -33,7 +33,7 @@ public class EventToRelationAdapter implements ObjectWithIdToRelationAdapter<Eve
         .add("dimensionMap",
             typeFactory.createMapType(
                 typeFactory.createSqlType(SqlTypeName.VARCHAR),
-                typeFactory.createMultisetType(typeFactory.createSqlType(SqlTypeName.VARCHAR), 1000)
+                typeFactory.createMultisetType(typeFactory.createSqlType(SqlTypeName.VARCHAR), -1)
             )
         )
         .build();

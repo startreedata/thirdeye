@@ -28,7 +28,6 @@ import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.List;
 import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -42,7 +41,7 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
   private Period startTimeLookback;
   private Period endTimeLookback;
   private Period lookaround;
-  private @NonNull List<String> eventTypes;
+  private List<String> eventTypes;
   private @Nullable String freeTextSqlFilter;
 
   private EventManager eventDao;

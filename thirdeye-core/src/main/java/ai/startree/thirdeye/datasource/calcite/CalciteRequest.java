@@ -46,8 +46,8 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
@@ -255,7 +255,7 @@ public class CalciteRequest {
     return combinePredicates(predicates);
   }
 
-  @NotNull
+  @NonNull
   public static String cleanFreeTextPredicate(final String freeTextPredicate) {
     return freeTextPredicate.replaceFirst("^ *[aA][nN][dD] +", "");
   }

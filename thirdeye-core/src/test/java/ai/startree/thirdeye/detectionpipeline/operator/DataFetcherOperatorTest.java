@@ -76,8 +76,6 @@ public class DataFetcherOperatorTest {
     params.put("component.dataSource", dataSourceName);
     params.put("component.query", "SELECT * FROM myTable");
     params.put("component.tableName", "myTable");
-    params.put("component.className",
-        "ai.startree.thirdeye.detection.v2.components.datafetcher.GenericDataFetcher");
 
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final long startTime = System.currentTimeMillis();

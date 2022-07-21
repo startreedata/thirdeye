@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class RcaInfoFetcherTest {
 

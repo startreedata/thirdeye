@@ -40,6 +40,7 @@ public class Templatable<T> {
   }
 
   public Templatable<T> setTemplatedValue(final @NonNull String templatedValue) {
+    // fixme cyril perform a better check
     checkArgument(templatedValue.length() >= 4,
         "Invalid templated value variable string: %s. Expected format is ${VARIABLE_NAME}",
         templatedValue);

@@ -15,7 +15,9 @@ package ai.startree.thirdeye.plugins.detectors;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.Pattern;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
 
   @Deprecated

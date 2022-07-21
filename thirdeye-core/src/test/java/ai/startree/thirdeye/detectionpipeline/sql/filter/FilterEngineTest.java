@@ -24,7 +24,7 @@ import ai.startree.thirdeye.testutils.SqlUtils;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class FilterEngineTest {
 

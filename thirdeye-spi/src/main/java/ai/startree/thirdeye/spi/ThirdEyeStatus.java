@@ -46,6 +46,7 @@ public enum ThirdEyeStatus {
   ERR_UNKNOWN("%s"),
   ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
   ERR_CALCITE_FILTERING("Failed running Calcite filtering query with filter: %s"),
+  ERR_INVALID_PARAMS_COMPONENTS("Invalid param components: %s for Class %s"),
 
   OK("OK"),
   ;

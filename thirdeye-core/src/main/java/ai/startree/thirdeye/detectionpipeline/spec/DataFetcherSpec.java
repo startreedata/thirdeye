@@ -16,8 +16,10 @@ package ai.startree.thirdeye.detectionpipeline.spec;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DataFetcherSpec extends AbstractSpec {
 
   /**

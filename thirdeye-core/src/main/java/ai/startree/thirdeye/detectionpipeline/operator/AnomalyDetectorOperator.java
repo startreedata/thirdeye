@@ -39,6 +39,7 @@ import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -244,6 +245,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
    * Makes the AnomalyDetectorOperator more aware of what's happening.
    * Temporary solution. Maybe introduce a DetectorSpec extends AbstractSpec in public
    */
+  @JsonIgnoreProperties(ignoreUnknown = true)
   private static class GenericDetectorSpec extends AbstractSpec {
 
     public GenericDetectorSpec() {

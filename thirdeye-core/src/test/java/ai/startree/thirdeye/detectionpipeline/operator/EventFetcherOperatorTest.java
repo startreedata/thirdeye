@@ -82,7 +82,7 @@ public class EventFetcherOperatorTest {
   }
 
   @Test
-  public void testEventFetcherOperatorWithNoFilter() throws Exception {
+  public void testEventFetcherOperator() throws Exception {
     final PlanNodeBean planNodeBean = new PlanNodeBean().setName("root")
         .setType("EventFetcher")
         // check that all parameters are parsed correctly - but don't test behavior, event manager is mocked

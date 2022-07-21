@@ -53,8 +53,8 @@ public class SqlFilterRunner<T> {
     this.adapter = adapter;
   }
 
-  public List<T> applyFilter(final List<T> elements, @Nullable final String queryFilter) {
-    if (StringUtils.isBlank(queryFilter)) {
+  public List<T> applyFilter(@NotNull final List<T> elements, @Nullable final String queryFilter) {
+    if (StringUtils.isBlank(queryFilter) || elements.isEmpty()) {
       return elements;
     }
 

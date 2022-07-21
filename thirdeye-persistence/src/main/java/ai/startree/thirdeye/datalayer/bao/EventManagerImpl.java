@@ -66,9 +66,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
       @Nullable final List<@NonNull String> eventTypes, @Nullable final String freeTextSqlFilter) {
     final List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventTypes);
-    if (freeTextSqlFilter == null) {
-      return events;
-    }
+
     return sqlFilterRunner.applyFilter(events, freeTextSqlFilter);
   }
 

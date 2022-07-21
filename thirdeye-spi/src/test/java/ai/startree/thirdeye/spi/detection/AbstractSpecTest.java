@@ -13,7 +13,11 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -26,6 +30,7 @@ public class AbstractSpecTest {
     Assert.assertEquals(spec.getA(), 123);
     Assert.assertEquals(spec.getB(), 456.7);
     Assert.assertEquals(spec.getC(), "default");
+    Assert.assertEquals(spec.getTemplatableList().value(), List.of());
   }
 
   @Test
@@ -34,6 +39,7 @@ public class AbstractSpecTest {
     Assert.assertEquals(spec.getA(), 321);
     Assert.assertEquals(spec.getB(), 456.7);
     Assert.assertEquals(spec.getC(), "default");
+    Assert.assertEquals(spec.getTemplatableList().value(), List.of());
   }
 
   @Test
@@ -43,6 +49,7 @@ public class AbstractSpecTest {
     Assert.assertEquals(spec.getA(), 321);
     Assert.assertEquals(spec.getB(), 456.7);
     Assert.assertEquals(spec.getC(), "default");
+    Assert.assertEquals(spec.getTemplatableList().value(), List.of());
   }
 
   @Test
@@ -54,6 +61,7 @@ public class AbstractSpecTest {
     Assert.assertEquals(spec.getB(), 456.7);
     Assert.assertEquals(spec.getC(), "default");
     Assert.assertEquals(spec.getConfiguration(), ImmutableMap.of("k1", "v1", "k2", "v2"));
+    Assert.assertEquals(spec.getTemplatableList().value(), List.of());
   }
 
   @Test
@@ -63,6 +71,32 @@ public class AbstractSpecTest {
     Assert.assertEquals(spec.getUpThreshold(), 0.2);
     Assert.assertEquals(spec.getThreshold(), 0.1);
     Assert.assertEquals(spec.getDownThreshold(), 0.3);
+    Assert.assertEquals(spec.getTemplatableList().value(), List.of());
+  }
+
+  @Test
+  public void testAbstractSpecMappingWithTemplatableValue() {
+    final List<String> stringList = List.of("lol");
+    TestSpec spec = AbstractSpec
+        .fromProperties(ImmutableMap.of("templatableList", stringList), TestSpec.class);
+
+    Assert.assertEquals(spec.getTemplatableList().value(), stringList);
+  }
+
+  @Test
+  public void testAbstractSpecMappingWithTemplatableTemplatedValue() {
+    final String variableString = "${var}";
+    TestSpec spec = AbstractSpec
+        .fromProperties(ImmutableMap.of("templatableList", variableString), TestSpec.class);
+
+    Assert.assertEquals(spec.getTemplatableList().templatedValue(), variableString);
+  }
+
+  @Test
+  public void testAbstractSpecMappingWithTemplatableInvalidTemplatedValue() {
+    assertThatThrownBy(() -> AbstractSpec
+        .fromProperties(ImmutableMap.of("templatableList", "invalid"), TestSpec.class)).isInstanceOf(
+        IllegalArgumentException.class);
   }
 
   // does not ignore unknown with @JsonIgnoreProperties(ignoreUnknown = true) - for testing
@@ -75,6 +109,8 @@ public class AbstractSpecTest {
     private double threshold = 0.1;
     private double upThreshold;
     private double downThreshold;
+    private Templatable<List<String>> templatableList = new Templatable<List<String>>().setValue(
+        List.of());
 
     public Map<String, String> getConfiguration() {
       return configuration;
@@ -130,6 +166,16 @@ public class AbstractSpecTest {
 
     public void setDownThreshold(double downThreshold) {
       this.downThreshold = downThreshold;
+    }
+
+    public Templatable<List<String>> getTemplatableList() {
+      return templatableList;
+    }
+
+    public TestSpec setTemplatableList(
+        final Templatable<List<String>> templatableList) {
+      this.templatableList = templatableList;
+      return this;
     }
   }
 }

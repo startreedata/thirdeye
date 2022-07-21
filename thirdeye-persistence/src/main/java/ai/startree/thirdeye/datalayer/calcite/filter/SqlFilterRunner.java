@@ -39,8 +39,8 @@ import org.apache.calcite.tools.RelConversionException;
 import org.apache.calcite.tools.RelRunners;
 import org.apache.calcite.tools.ValidationException;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Run sql filter predicates on any list of objects with a given ObjectWithIdToRelationAdapter
@@ -53,7 +53,7 @@ public class SqlFilterRunner<T> {
     this.adapter = adapter;
   }
 
-  public List<T> applyFilter(@NotNull final List<T> elements, @Nullable final String queryFilter) {
+  public List<T> applyFilter(@NonNull final List<T> elements, @Nullable final String queryFilter) {
     if (StringUtils.isBlank(queryFilter) || elements.isEmpty()) {
       return elements;
     }
@@ -81,7 +81,7 @@ public class SqlFilterRunner<T> {
     }
   }
 
-  @NotNull
+  @NonNull
   private Set<Long> getIdsFrom(final ResultSet resultSet) throws SQLException {
     final Set<Long> matchingIds = new HashSet<>();
     while (resultSet.next()) {
@@ -101,7 +101,7 @@ public class SqlFilterRunner<T> {
     return run.executeQuery();
   }
 
-  @NotNull
+  @NonNull
   private String buildQueryString(final String queryFilter, final String tableName) {
     final String cleanTextPredicate = cleanFreeTextPredicate(
         queryFilter);
@@ -109,7 +109,7 @@ public class SqlFilterRunner<T> {
     return "select " + adapter.idColumn() + " from " + tableName + " WHERE " + cleanTextPredicate;
   }
 
-  @NotNull
+  @NonNull
   private static Planner buildPlanner(final SchemaPlus querySchema) {
     final SqlParser.Config insensitiveParser = SqlParser.config().withCaseSensitive(false);
     final FrameworkConfig config = Frameworks.newConfigBuilder()
@@ -122,7 +122,7 @@ public class SqlFilterRunner<T> {
   }
 
   // fixme cyril - duplicated - move calcite classes to a new module and consolidate
-  @NotNull
+  @NonNull
   public static String cleanFreeTextPredicate(final String freeTextPredicate) {
     return freeTextPredicate.replaceFirst("^ *[aA][nN][dD] +", "");
   }

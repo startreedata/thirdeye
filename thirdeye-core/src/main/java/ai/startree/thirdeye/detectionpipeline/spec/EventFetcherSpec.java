@@ -15,9 +15,11 @@ package ai.startree.thirdeye.detectionpipeline.spec;
 
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventFetcherSpec extends AbstractSpec {
 
   /**

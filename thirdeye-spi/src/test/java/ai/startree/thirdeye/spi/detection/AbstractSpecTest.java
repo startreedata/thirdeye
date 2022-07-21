@@ -65,6 +65,7 @@ public class AbstractSpecTest {
     Assert.assertEquals(spec.getDownThreshold(), 0.3);
   }
 
+  // does not ignore unknown with @JsonIgnoreProperties(ignoreUnknown = true) - for testing
   private static class TestSpec extends AbstractSpec {
 
     private int a = 123;

@@ -14,7 +14,9 @@
 package ai.startree.thirdeye.plugins.detection.components.triggers;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ConsoleOutputTriggerSpec extends AbstractSpec {
   private String format = "Got trigger event = %s";
 

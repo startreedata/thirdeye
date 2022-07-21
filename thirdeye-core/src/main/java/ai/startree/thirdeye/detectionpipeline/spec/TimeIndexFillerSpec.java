@@ -14,9 +14,11 @@
 package ai.startree.thirdeye.detectionpipeline.spec;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashMap;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TimeIndexFillerSpec extends AbstractSpec {
 
   /**

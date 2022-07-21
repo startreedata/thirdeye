@@ -14,7 +14,9 @@
 package ai.startree.thirdeye.plugins.detectors;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AbsoluteChangeRuleDetectorSpec extends AbstractSpec {
 
   private double absoluteChange = Double.NaN;

@@ -45,6 +45,7 @@ public abstract class AbstractSpec implements Serializable {
    * @param <T> Generic Param. Accepts classes which extend this class
    * @return pojo created from properties map
    */
+  // fixme cyril not compatible with Templatable --> does not use the custom serialization module
   public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties,
       Class<T> specClass) {
     // don't reuse model mapper instance. It caches typeMaps and will result in unexpected mappings

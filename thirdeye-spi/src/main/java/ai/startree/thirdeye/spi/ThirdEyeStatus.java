@@ -45,6 +45,7 @@ public enum ThirdEyeStatus {
   ERR_UNEXPECTED_QUERY_PARAM("Unexpected Query Param. Allowed values: %s"),
   ERR_UNKNOWN("%s"),
   ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
+  ERR_CALCITE_FILTERING("Failed running Calcite filtering query with filter: %s"),
 
   OK("OK"),
   ;

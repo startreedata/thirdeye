@@ -61,6 +61,12 @@
       <artifactId>reflections</artifactId>
     </dependency>
 
+    <!--calcite based filtering dependencies -->
+    <dependency>
+      <groupId>org.apache.calcite</groupId>
+      <artifactId>calcite-core</artifactId>
+    </dependency>
+
     <!-- database migration-->
     <dependency>
       <groupId>org.flywaydb</groupId>

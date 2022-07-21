@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator.sql;
 
-import ai.startree.thirdeye.dataframe.calcite.DataFrameSchema;
+import ai.startree.thirdeye.calcite.dataframe.DataFrameSchema;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;

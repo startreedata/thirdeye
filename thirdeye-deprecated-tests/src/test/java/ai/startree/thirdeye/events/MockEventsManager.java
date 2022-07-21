@@ -21,8 +21,6 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -82,7 +80,7 @@ public class MockEventsManager extends AbstractManagerImpl<EventDTO> implements 
   }
 
   @Override
-  public List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, String eventType) {
+  public List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, List<String> eventTypes) {
     throw new AssertionError("not implemented");
   }
 
@@ -93,7 +91,7 @@ public class MockEventsManager extends AbstractManagerImpl<EventDTO> implements 
 
   @Override
   public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
-      final @Nullable String eventType, final @Nullable Map<String, Set<String>> dimensionFilters) {
+      List<String> eventTypes, final @Nullable String freeTextSqlFilter) {
     throw new AssertionError("not implemented");
   }
 

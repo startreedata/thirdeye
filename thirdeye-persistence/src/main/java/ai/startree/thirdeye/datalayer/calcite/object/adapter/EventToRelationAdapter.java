@@ -42,10 +42,10 @@ public class EventToRelationAdapter implements ObjectWithIdToRelationAdapter<Eve
   @Override
   public Object[] getRow(final EventDTO element) {
     // a default map make the sql easier to write for dimension values - because MEMBER OF fails if a collection is null
-    final DefaultedMap<String, List<String>> defaultMap = new DefaultedMap<>(List.of());
-    defaultMap.putAll(element.getTargetDimensionMap());
+    final DefaultedMap<String, List<String>> dimensionDefaultMap = new DefaultedMap<>(List.of());
+    dimensionDefaultMap.putAll(element.getTargetDimensionMap());
 
-    return new Object[]{element.getId(), element.getEventType(), defaultMap};
+    return new Object[]{element.getId(), element.getEventType(), dimensionDefaultMap};
   }
 
   @Override

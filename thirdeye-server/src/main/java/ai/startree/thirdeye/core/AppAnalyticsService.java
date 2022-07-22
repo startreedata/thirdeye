@@ -18,14 +18,12 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -102,30 +100,28 @@ public class AppAnalyticsService {
   }
 
   public ConfusionMatrix computeConfusionMatrixForAnomalies() {
-    int truePositive = 0;
-    int falsePositive = 0;
-    int unclassified;
-    List<MergedAnomalyResultDTO> anomalies = anomalyManager.findAll();
-    List<AnomalyFeedbackType> feedbackTypes = anomalies.stream()
-        .filter(anomaly -> anomaly.getAnomalyFeedbackId() != null)
-        .map(anomaly -> anomalyManager.convertMergedAnomalyBean2DTO(anomaly,  new HashSet<>()).getFeedback().getFeedbackType())
+    final ConfusionMatrix matrix = new ConfusionMatrix();
+    matrix.addUnclassified((int) anomalyManager.countParentAnomaliesWithoutFeedback());
+    final List<AnomalyFeedbackType> feedbackTypes = anomalyManager.findParentAnomaliesWithFeedback().stream()
+        .map(anomaly -> anomaly.getFeedback().getFeedbackType())
         .collect(Collectors.toList());
-    unclassified = anomalies.size() - feedbackTypes.size();
-    for (AnomalyFeedbackType type : feedbackTypes) {
+    for (final AnomalyFeedbackType type : feedbackTypes) {
       switch (type) {
         case NO_FEEDBACK:
-          unclassified++;
+          matrix.incUnclassified();
           break;
         case NOT_ANOMALY:
-          falsePositive++;
+          matrix.incFalsePositive();
+          break;
+        case ANOMALY:
+        case ANOMALY_EXPECTED:
+        case ANOMALY_NEW_TREND:
+          matrix.incTruePositive();
           break;
         default:
-          truePositive++;
+          log.error("Unsupported feedback type: {}", type);
       }
     }
-    return new ConfusionMatrix()
-        .setTruePositive(truePositive)
-        .setFalsePositive(falsePositive)
-        .setUnclassified(unclassified);
+    return matrix;
   }
 }

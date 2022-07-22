@@ -24,8 +24,8 @@ public class ConfusionMatrix {
     return truePositive;
   }
 
-  public ConfusionMatrix setTruePositive(final int truePositive) {
-    this.truePositive = truePositive;
+  public ConfusionMatrix addTruePositive(final int value) {
+    this.truePositive += value;
     return this;
   }
 
@@ -33,8 +33,8 @@ public class ConfusionMatrix {
     return falsePositive;
   }
 
-  public ConfusionMatrix setFalsePositive(final int falsePositive) {
-    this.falsePositive = falsePositive;
+  public ConfusionMatrix addFalsePositive(final int value) {
+    this.falsePositive += value;
     return this;
   }
 
@@ -42,8 +42,8 @@ public class ConfusionMatrix {
     return trueNegative;
   }
 
-  public ConfusionMatrix setTrueNegative(final int trueNegative) {
-    this.trueNegative = trueNegative;
+  public ConfusionMatrix addTrueNegative(final int value) {
+    this.trueNegative += value;
     return this;
   }
 
@@ -51,8 +51,8 @@ public class ConfusionMatrix {
     return falseNegative;
   }
 
-  public ConfusionMatrix setFalseNegative(final int falseNegative) {
-    this.falseNegative = falseNegative;
+  public ConfusionMatrix addFalseNegative(final int value) {
+    this.falseNegative += value;
     return this;
   }
 
@@ -60,9 +60,49 @@ public class ConfusionMatrix {
     return unclassified;
   }
 
-  public ConfusionMatrix setUnclassified(final int unclassified) {
-    this.unclassified = unclassified;
+  public ConfusionMatrix addUnclassified(final int value) {
+    this.unclassified += value;
     return this;
+  }
+
+  public void incTruePositive() {
+    this.truePositive++;
+  }
+
+  public void incTrueNegative() {
+    this.trueNegative++;
+  }
+
+  public void incFalsePositive() {
+    this.falsePositive++;
+  }
+
+  public void incFalseNegative() {
+    this.falseNegative++;
+  }
+
+  public void incUnclassified() {
+    this.unclassified++;
+  }
+
+  public void decTruePositive() {
+    this.truePositive--;
+  }
+
+  public void decTrueNegative() {
+    this.trueNegative--;
+  }
+
+  public void decFalsePositive() {
+    this.falsePositive--;
+  }
+
+  public void decFalseNegative() {
+    this.falseNegative--;
+  }
+
+  public void decUnclassified() {
+    this.unclassified--;
   }
 
   public double getPrecision() {

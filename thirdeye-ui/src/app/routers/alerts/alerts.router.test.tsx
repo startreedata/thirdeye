@@ -67,15 +67,6 @@ jest.mock(
     })
 );
 
-// jest.mock(
-//     "../../pages/alerts-create-page/alerts-create-new-page.component",
-//     () => ({
-//         AlertsCreateNewPage: jest
-//             .fn()
-//             .mockReturnValue("testAlertsCreateNewPage"),
-//     })
-// );
-
 jest.mock(
     "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component",
     () => ({

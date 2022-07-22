@@ -50,9 +50,38 @@ jest.mock("../../pages/alerts-view-page/alerts-view-page.component", () => ({
 }));
 
 jest.mock(
-    "../../pages/alerts-legacy-create-page/alerts-legacy-create-page.component",
+    "../../pages/alerts-create-page/alerts-create-base-page.component",
     () => ({
-        AlertsCreatePage: jest.fn().mockReturnValue("testAlertsCreatePage"),
+        AlertsCreateBasePage: jest
+            .fn()
+            .mockReturnValue("testAlertsCreateBasePage"),
+    })
+);
+
+jest.mock(
+    "../../pages/alerts-create-page/alerts-create-copy-page.component",
+    () => ({
+        AlertsCreateCopyPage: jest
+            .fn()
+            .mockReturnValue("testAlertsCreateCopyPage"),
+    })
+);
+
+// jest.mock(
+//     "../../pages/alerts-create-page/alerts-create-new-page.component",
+//     () => ({
+//         AlertsCreateNewPage: jest
+//             .fn()
+//             .mockReturnValue("testAlertsCreateNewPage"),
+//     })
+// );
+
+jest.mock(
+    "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component",
+    () => ({
+        AlertsCreateNewPage: jest
+            .fn()
+            .mockReturnValue("testAlertsCreateSimplePage"),
     })
 );
 
@@ -192,7 +221,7 @@ describe("Alerts Router", () => {
         );
 
         await expect(
-            screen.findByText("testAlertsCreatePage")
+            screen.findByText("testAlertsCreateBasePage")
         ).resolves.toBeInTheDocument();
     });
 

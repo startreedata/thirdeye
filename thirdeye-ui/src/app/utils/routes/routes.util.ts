@@ -85,8 +85,10 @@ export const AppRoute = {
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
     ALERTS_CREATE_NEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}`,
     ALERTS_CREATE_EXISTING: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}`,
-    ALERTS_CREATE_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
-    ALERTS_CREATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
+    ALERTS_CREATE_NEW_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
+    ALERTS_CREATE_NEW_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
+    ALERTS_CREATE_EXISTING_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
+    ALERTS_CREATE_EXISTING_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
     ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
@@ -164,12 +166,16 @@ export const getAlertsCreatePath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE);
 };
 
-export const getAlertsCreateSimplePath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE_SIMPLE);
+export const getAlertsCreateNewSimplePath = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.ALERTS_CREATE_NEW_SIMPLE
+    );
 };
 
-export const getAlertsCreateAdvancedPath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE_ADVANCED);
+export const getAlertsCreateNewAdvancedPath = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.ALERTS_CREATE_NEW_ADVANCED
+    );
 };
 
 export const getAlertsUpdatePath = (id: number): string => {

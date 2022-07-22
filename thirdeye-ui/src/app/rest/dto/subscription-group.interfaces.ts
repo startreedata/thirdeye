@@ -25,6 +25,37 @@ export interface SubscriptionGroup {
     updated: number;
     owner: User;
     notificationSchemes: NotificationSchemes;
+    specs: (SlackSpec | WebhookSpec | SMTPSpec)[];
+}
+
+export interface SlackSpec {
+    type: "slack";
+    params: {
+        webhookUrl: string;
+    };
+}
+
+export interface WebhookSpec {
+    type: "webhook";
+    params: {
+        url: string;
+    };
+}
+
+export interface SMTPSpec {
+    type: "email-smtp";
+    params: {
+        smtp: {
+            host: string;
+            port: string;
+            user: string;
+            password: string;
+        };
+        emailRecipients: {
+            from: string;
+            to: string[];
+        };
+    };
 }
 
 export interface NotificationSchemes {

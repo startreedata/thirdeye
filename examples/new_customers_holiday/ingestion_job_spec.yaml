@@ -1,0 +1,38 @@
+#
+# Copyright 2022 StarTree Inc
+#
+# Licensed under the StarTree Community License (the "License"); you may not use
+# this file except in compliance with the License. You may obtain a copy of the
+# License at http://www.startree.ai/legal/startree-community-license
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the
+# License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+# either express or implied.
+# See the License for the specific language governing permissions and limitations under
+# the License.
+#
+
+
+executionFrameworkSpec:
+  name: 'standalone'
+  segmentGenerationJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentGenerationJobRunner'
+  segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
+  segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
+jobType: SegmentCreationAndTarPush
+inputDirURI: 'examples/new_customers_holiday/rawdata'
+includeFileNamePattern: 'glob:**/*.csv'
+outputDirURI: 'tmp/data/segments/new_customers_holiday'
+overwriteOutput: true
+pinotFSSpecs:
+  - scheme: file
+    className: org.apache.pinot.spi.filesystem.LocalPinotFS
+recordReaderSpec:
+  dataFormat: 'csv'
+  className: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReader'
+  configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
+tableSpec:
+  tableName: 'new_customers_holiday'
+  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/new_customers_holiday/schema'
+  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/new_customers_holiday'
+pinotClusterSpecs:
+  - controllerURI: 'http://${controllerHost}:${controllerPort}'

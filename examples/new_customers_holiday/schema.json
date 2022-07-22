@@ -1,0 +1,16 @@
+
+{
+  "schemaName": "new_customers_holiday",
+  "metricFieldSpecs": [
+    {
+      "name": "met",
+      "dataType": "INT"
+    }
+  ],
+  "dateTimeFieldSpecs": [{
+    "name": "epochdate",
+    "dataType": "LONG",
+    "format" : "1:MILLISECONDS:EPOCH",
+    "granularity": "1:SECONDS"
+  }]
+}

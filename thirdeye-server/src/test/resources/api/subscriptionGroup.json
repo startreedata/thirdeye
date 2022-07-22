@@ -39,6 +39,24 @@
     ]
   },
   {
+    "name": "email-sendgrid",
+    "cron": "*/1 * * * * ?",
+    "specs": [
+      {
+        "type": "email-sendgrid",
+        "params": {
+          "apiKey": "${SENDGRID_API_KEY}",
+          "emailRecipients": {
+            "from": "thirdeye-alerts@startree.ai",
+            "to": [
+              "suvodeep@startree.ai"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
     "name": "slack-webhook",
     "cron": "*/1 * * * * ?",
     "specs": [

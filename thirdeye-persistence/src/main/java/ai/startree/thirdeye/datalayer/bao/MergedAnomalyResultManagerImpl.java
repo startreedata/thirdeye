@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -440,5 +441,23 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       beanList.add(mergedAnomalyResultDTO);
     }
     return convertMergedAnomalyBean2DTO(beanList);
+  }
+
+  @Override
+  public long countParentAnomaliesWithoutFeedback() {
+    return count(Predicate.AND(
+        Predicate.EQ("anomalyFeedbackId", 0L),
+        Predicate.EQ("child", false)
+    ));
+  }
+
+  @Override
+  public List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback() {
+    return findByPredicate(Predicate.AND(
+        Predicate.NEQ("anomalyFeedbackId", 0),
+        Predicate.EQ("child", false)
+    )).stream()
+        .map(anomaly -> convertMergedAnomalyBean2DTO(anomaly, new HashSet<>()))
+        .collect(Collectors.toList());
   }
 }

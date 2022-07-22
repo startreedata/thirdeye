@@ -1,0 +1,20 @@
+
+{
+  "tableName": "new_customers_holiday",
+  "segmentsConfig" : {
+    "timeColumnName": "epochdate",
+    "timeType": "SECONDS",
+    "replication" : "1",
+    "schemaName" : "new_customers_holiday"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP"
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

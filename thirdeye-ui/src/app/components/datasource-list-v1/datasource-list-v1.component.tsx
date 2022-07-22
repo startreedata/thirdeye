@@ -35,7 +35,6 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     const { t } = useTranslation();
     const [selectedDatasource, setSelectedDatasource] =
         useState<DataGridSelectionModelV1<UiDatasource>>();
-    const [isCheckingStatus, setIsCheckingStatus] = useState(false);
     const navigate = useNavigate();
 
     const handleDatasourceDelete = (): void => {
@@ -96,17 +95,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         _: Record<string, unknown>,
         data: UiDatasource
     ): ReactElement => {
-        let isSelected = false;
-
-        if (selectedDatasource && selectedDatasource.rowKeyValues) {
-            isSelected = selectedDatasource.rowKeyValues.includes(data.id);
-        }
-
-        if (isSelected) {
-            return <DatasourceVerification datasourceName={data.name} />;
-        }
-
-        return <></>;
+        return <DatasourceVerification datasourceName={data.name} />;
     };
 
     const datasourceColumns = [
@@ -127,19 +116,17 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
             minWidth: 0,
             flex: 1,
         },
-    ];
-
-    if (isCheckingStatus) {
-        datasourceColumns.push({
+        {
             key: "status",
             dataKey: "status",
-            header: t("label.status"),
+            header: t("label.health-status"),
             minWidth: 0,
-            flex: 1.5,
+            flex: 1,
             sortable: false,
+            cellTooltip: false,
             customCellRenderer: renderStatusCheck,
-        });
-    }
+        },
+    ];
 
     return (
         <Grid item xs={12}>
@@ -155,20 +142,6 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
                     })}
                     toolbarComponent={
                         <Grid container alignItems="center" spacing={2}>
-                            <Grid item>
-                                <Button
-                                    disabled={
-                                        selectedDatasource === undefined ||
-                                        selectedDatasource.rowKeyValues
-                                            .length === 0
-                                    }
-                                    variant="contained"
-                                    onClick={() => setIsCheckingStatus(true)}
-                                >
-                                    {t("label.check-status")}
-                                </Button>
-                            </Grid>
-
                             <Grid item>
                                 <Button
                                     disabled={isActionButtonDisable}

@@ -199,13 +199,12 @@ describe("Datasources REST", () => {
     });
 
     it("getStatusForDatasource should invoke axios.get with appropriate input and return appropriate status", async () => {
-        const localCache = new Map();
         jest.spyOn(axios, "get").mockResolvedValue({
             data: mockStatusResponse,
         });
 
         await expect(
-            getStatusForDatasource("datasource-name", localCache)
+            getStatusForDatasource("datasource-name")
         ).resolves.toEqual(mockStatusResponse);
 
         expect(axios.get).toHaveBeenCalledWith(
@@ -213,25 +212,12 @@ describe("Datasources REST", () => {
         );
     });
 
-    it("getStatusForDatasource should return a promise with a request inflight if called for same datasource", async () => {
-        const localCache = new Map();
-        jest.spyOn(axios, "get").mockResolvedValue({
-            data: mockStatusResponse,
-        });
-
-        getStatusForDatasource("datasource-name", localCache);
-        getStatusForDatasource("datasource-name", localCache);
-
-        expect(axios.get).toHaveBeenCalledTimes(1);
-    });
-
     it("getStatusForDatasource should throw encountered error", async () => {
-        const localCache = new Map();
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
-        await expect(
-            getStatusForDatasource("datasource-name", localCache)
-        ).rejects.toThrow("testError");
+        await expect(getStatusForDatasource("datasource-name")).rejects.toThrow(
+            "testError"
+        );
     });
 });
 

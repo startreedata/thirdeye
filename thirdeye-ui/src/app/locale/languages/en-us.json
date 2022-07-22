@@ -227,7 +227,7 @@
         "example-alert-configurations": "example alert configurations",
         "support": "Support",
         "check-status": "Check Status",
-        "status": "Status"
+        "health-status": "Health Status"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -304,7 +304,7 @@
         "select-a-template-to-preview": "Select a template to preview the alert",
         "complete-missing-information-to-see-preview": "The template is not completed. Please complete the missing information to see the preview.",
         "no-access-to-support-tooltip-msg": "If you dont have access to the support page, reach out to your AE (Account Executive) or join our community: https://dev.startree.ai/docs/community",
-        "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource. Please try again.",
+        "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource.",
         "datasource-is-healthy": "Datasource is healthy",
         "checking-datasource-health": "Checking datasource health. This will take a few seconds ..."
     }

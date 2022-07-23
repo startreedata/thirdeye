@@ -17,7 +17,31 @@ package ai.startree.thirdeye.spi.detection;
  * Up or down detection pattern
  */
 public enum Pattern {
-  UP,
-  DOWN,
-  UP_OR_DOWN
+  UP {
+    @Override
+    public boolean isAnomaly(final double currentValue, final double lowerBound,
+        final double upperBound) {
+      return currentValue > upperBound;
+    }
+  },
+
+  DOWN {
+    @Override
+    public boolean isAnomaly(final double currentValue, final double lowerBound,
+        final double upperBound) {
+      return currentValue < lowerBound;
+    }
+  },
+
+  UP_OR_DOWN {
+    @Override
+    public boolean isAnomaly(final double currentValue, final double lowerBound,
+        final double upperBound) {
+      return UP.isAnomaly(currentValue, lowerBound, upperBound) ||
+          DOWN.isAnomaly(currentValue, lowerBound, upperBound);
+    }
+  };
+
+  public abstract boolean isAnomaly(final double currentValue, final double lowerBound,
+      final double upperBound);
 }

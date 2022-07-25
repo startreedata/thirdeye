@@ -225,6 +225,11 @@
         "property-name": "Property name",
         "property-value": "Property value",
         "example-alert-configurations": "example alert configurations",
+        "slack": "Slack",
+        "webhook": "Webhook",
+        "groups": "Groups",
+        "optional-overrides": "Optional Overrides",
+        "sendgrid-api-key": "SendGrid API Key",
         "support": "Support",
         "check-status": "Check Status",
         "health-status": "Health Status"
@@ -306,6 +311,8 @@
         "no-access-to-support-tooltip-msg": "If you dont have access to the support page, reach out to your AE (Account Executive) or join our community: https://dev.startree.ai/docs/community",
         "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource.",
         "datasource-is-healthy": "Datasource is healthy",
-        "checking-datasource-health": "Checking datasource health. This will take a few seconds ..."
+        "checking-datasource-health": "Checking datasource health. This will take a few seconds ...",
+        "to-get-started-select-type": "Select a type to get started",
+        "enter-webhook-url": "Enter webhook URL"
     }
 }

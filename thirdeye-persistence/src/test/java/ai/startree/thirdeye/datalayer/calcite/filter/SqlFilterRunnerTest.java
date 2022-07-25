@@ -38,14 +38,12 @@ public class SqlFilterRunnerTest {
   private static final String ENV_DIMENSION_KEY = "environment";
   private static final String PROD_ENV_VALUE = "prod";
   private static final String DEV_ENV_VALUE = "dev";
-  private static final Map<String, List<String>> DIMENSIONS = Map.of(
-      COUNTRY_DIMENSION_KEY,
+  private static final Map<String, List<String>> DIMENSIONS = Map.of(COUNTRY_DIMENSION_KEY,
       List.of(US_COUNTRY_VALUE, FR_COUNTRY_VALUE),
       ENV_DIMENSION_KEY,
       List.of(PROD_ENV_VALUE));
 
-  private static final EventDTO CHRISTMAS_EVENT = (EventDTO) new EventDTO()
-      .setName("CHRISTMAS")
+  private static final EventDTO CHRISTMAS_EVENT = (EventDTO) new EventDTO().setName("CHRISTMAS")
       .setEventType(TYPE_HOLIDAY)
       .setTargetDimensionMap(DIMENSIONS)
       .setId(1L);
@@ -86,11 +84,9 @@ public class SqlFilterRunnerTest {
   @Test
   public void testElementWithNullIdThrows() {
     // second element does not have an id - should fail
-    final List<EventDTO> events = List.of(
-        CHRISTMAS_EVENT,
+    final List<EventDTO> events = List.of(CHRISTMAS_EVENT,
         new EventDTO().setEventType(TYPE_HOLIDAY).setName("malformedElement"),
-        FR_ONLY_EVENT
-    );
+        FR_ONLY_EVENT);
     assertThatThrownBy(() -> FILTER_RUNNER.applyFilter(events, "true")).isInstanceOf(
         IllegalArgumentException.class);
   }
@@ -121,22 +117,29 @@ public class SqlFilterRunnerTest {
   @Test
   public void testApplyFilterWithDimensionFilter() {
     final String sqlFiler = "'US' member of dimensionMap['country']";
-    assertThat(FILTER_RUNNER.applyFilter(EVENT_LIST, sqlFiler)).isEqualTo(List.of(
-        CHRISTMAS_EVENT,
+    assertThat(FILTER_RUNNER.applyFilter(EVENT_LIST, sqlFiler)).isEqualTo(List.of(CHRISTMAS_EVENT,
         EASTER_EVENT,
-        DEV_ENV_ONLY_EVENT
-    ));
+        DEV_ENV_ONLY_EVENT));
+  }
+
+  @Test
+  public void testApplyFilterWithDimensionFilterOnEmptyDimensionMap() {
+    final String sqlFiler = "'US' member of dimensionMap['country']";
+    final EventDTO eventWithoutDimensionMap = (EventDTO) new EventDTO().setName("CHRISTMAS")
+        .setEventType(TYPE_HOLIDAY)
+        .setId(10L);
+
+    assertThat(FILTER_RUNNER.applyFilter(List.of(eventWithoutDimensionMap), sqlFiler)).isEqualTo(
+        List.of());
   }
 
   @Test
   public void testApplyFilterWithComplexDimensionAndTypeFilter() {
     final String sqlFiler = "'US' member of dimensionMap['country'] OR (type = 'CUSTOM' and 'prod' member of dimensionMap['environment'])";
-    assertThat(FILTER_RUNNER.applyFilter(EVENT_LIST, sqlFiler)).isEqualTo(List.of(
-        CHRISTMAS_EVENT,
+    assertThat(FILTER_RUNNER.applyFilter(EVENT_LIST, sqlFiler)).isEqualTo(List.of(CHRISTMAS_EVENT,
         EASTER_EVENT,
         FR_ONLY_EVENT,
-        DEV_ENV_ONLY_EVENT
-    ));
+        DEV_ENV_ONLY_EVENT));
   }
 
   @Test
@@ -155,6 +158,4 @@ public class SqlFilterRunnerTest {
     assertThat(FILTER_RUNNER.applyFilter(EVENT_LIST,
         sqlFiler)).isEqualTo(List.of(DEV_ENV_ONLY_EVENT));
   }
-
-
 }

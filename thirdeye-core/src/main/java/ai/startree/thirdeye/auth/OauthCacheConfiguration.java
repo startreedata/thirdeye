@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.auth;
 
-public class CacheConfig {
+public class OauthCacheConfiguration {
 
   public static final long DEFAULT_SIZE = 64;
   public static final long DEFAULT_TTL = 60000;
@@ -24,7 +24,7 @@ public class CacheConfig {
     return size;
   }
 
-  public CacheConfig setSize(final long size) {
+  public OauthCacheConfiguration setSize(final long size) {
     this.size = size;
     return this;
   }
@@ -33,7 +33,7 @@ public class CacheConfig {
     return ttl;
   }
 
-  public CacheConfig setTtl(final long ttl) {
+  public OauthCacheConfiguration setTtl(final long ttl) {
     this.ttl = ttl;
     return this;
   }

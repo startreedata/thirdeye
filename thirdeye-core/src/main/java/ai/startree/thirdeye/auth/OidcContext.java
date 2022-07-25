@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.auth.CacheConfig.DEFAULT_SIZE;
-import static ai.startree.thirdeye.auth.CacheConfig.DEFAULT_TTL;
+import static ai.startree.thirdeye.auth.OauthCacheConfiguration.DEFAULT_SIZE;
+import static ai.startree.thirdeye.auth.OauthCacheConfiguration.DEFAULT_TTL;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import com.nimbusds.jose.proc.SecurityContext;

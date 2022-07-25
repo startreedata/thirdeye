@@ -116,7 +116,6 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("scheduling/config/server.yaml"),
-        config("configPath", THIRDEYE_CONFIG),
         config("server.connector.port", "0"), // port: 0 implies any port
         config("database.url", db.getDbConfig().getUrl()),
         config("database.user", db.getDbConfig().getUser()),

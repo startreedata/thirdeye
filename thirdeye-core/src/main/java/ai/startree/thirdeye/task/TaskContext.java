@@ -13,19 +13,6 @@
  */
 package ai.startree.thirdeye.task;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-
 public class TaskContext {
 
-  private ThirdEyeServerConfiguration thirdEyeServerConfiguration;
-
-  public ThirdEyeServerConfiguration getThirdEyeWorkerConfiguration() {
-    return thirdEyeServerConfiguration;
-  }
-
-  public TaskContext setThirdEyeWorkerConfiguration(
-      ThirdEyeServerConfiguration thirdEyeServerConfiguration) {
-    this.thirdEyeServerConfiguration = thirdEyeServerConfiguration;
-    return this;
-  }
 }

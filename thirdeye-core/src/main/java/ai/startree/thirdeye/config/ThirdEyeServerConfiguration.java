@@ -67,8 +67,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
   @JsonProperty("time")
   private TimeConfiguration timeConfiguration = new TimeConfiguration();
 
-  private String configPath = "config";
-
   private String phantomJsPath = "";
   private String failureFromAddress;
   private String failureToAddress;
@@ -104,15 +102,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setDatabaseConfiguration(
       final DatabaseConfiguration databaseConfiguration) {
     this.databaseConfiguration = databaseConfiguration;
-    return this;
-  }
-
-  public String getConfigPath() {
-    return configPath;
-  }
-
-  public ThirdEyeServerConfiguration setConfigPath(final String configPath) {
-    this.configPath = configPath;
     return this;
   }
 

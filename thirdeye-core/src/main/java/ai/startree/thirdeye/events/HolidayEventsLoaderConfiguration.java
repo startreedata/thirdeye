@@ -22,7 +22,8 @@ import java.util.List;
 public class HolidayEventsLoaderConfiguration {
 
   private boolean enabled = false;
-  private String googleJsonKey = "holiday-loader-key.json";
+
+  private String googleJsonKeyPath = "config/holiday-loader-key.json";
 
   /**
    * Specify the time range used to calculate the upper bound for an holiday's start time. In
@@ -49,12 +50,12 @@ public class HolidayEventsLoaderConfiguration {
     return this;
   }
 
-  public String getGoogleJsonKey() {
-    return googleJsonKey;
+  public String getGoogleJsonKeyPath() {
+    return googleJsonKeyPath;
   }
 
-  public HolidayEventsLoaderConfiguration setGoogleJsonKey(final String googleJsonKey) {
-    this.googleJsonKey = googleJsonKey;
+  public HolidayEventsLoaderConfiguration setGoogleJsonKeyPath(final String googleJsonKeyPath) {
+    this.googleJsonKeyPath = googleJsonKeyPath;
     return this;
   }
 

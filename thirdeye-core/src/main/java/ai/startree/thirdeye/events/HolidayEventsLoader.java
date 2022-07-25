@@ -15,7 +15,6 @@ package ai.startree.thirdeye.events;
 
 import static java.util.Collections.singleton;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.events.EventType;
@@ -32,7 +31,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.ibm.icu.util.TimeZone;
-import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +70,6 @@ public class HolidayEventsLoader implements Runnable {
     }
   }
 
-  private final ThirdEyeServerConfiguration thirdEyeServerConfiguration;
   private final HolidayEventsLoaderConfiguration config;
   /**
    * Calendar Api private key path
@@ -83,18 +80,12 @@ public class HolidayEventsLoader implements Runnable {
 
   @Inject
   public HolidayEventsLoader(
-      final ThirdEyeServerConfiguration thirdEyeServerConfiguration,
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration config) {
-    this.thirdEyeServerConfiguration = thirdEyeServerConfiguration;
     this.config = config;
-    this.keyPath = getCalendarApiKeyPath(config);
+    this.keyPath = config.getGoogleJsonKeyPath();
     this.eventManager = eventManager;
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-  }
-
-  private String getCalendarApiKeyPath(final HolidayEventsLoaderConfiguration config) {
-    return thirdEyeServerConfiguration.getConfigPath() + File.separator + config.getGoogleJsonKey();
   }
 
   public void start() {

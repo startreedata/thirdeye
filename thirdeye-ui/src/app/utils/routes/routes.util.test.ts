@@ -16,9 +16,9 @@ import {
     createPathWithRecognizedQueryString,
     generateDateRangeMonthsFromNow,
     getAlertsAllPath,
-    getAlertsCreateAdvancedPath,
+    getAlertsCreateNewAdvancedPath,
+    getAlertsCreateNewSimplePath,
     getAlertsCreatePath,
-    getAlertsCreateSimplePath,
     getAlertsPath,
     getAlertsUpdatePath,
     getAlertsViewPath,
@@ -81,14 +81,14 @@ describe("Routes Util", () => {
     });
 
     it("getAlertsCreateSimplePath should return appropriate path with appropriate query string", () => {
-        expect(getAlertsCreateSimplePath()).toEqual(
-            "/alerts/create/simple?testQueryString"
+        expect(getAlertsCreateNewSimplePath()).toEqual(
+            "/alerts/create/new/simple?testQueryString"
         );
     });
 
     it("getAlertsCreateAdvancedPath should return appropriate path with appropriate query string", () => {
-        expect(getAlertsCreateAdvancedPath()).toEqual(
-            "/alerts/create/advanced?testQueryString"
+        expect(getAlertsCreateNewAdvancedPath()).toEqual(
+            "/alerts/create/new/advanced?testQueryString"
         );
     });
 
@@ -235,6 +235,6 @@ describe("Routes Util", () => {
         );
 
         // about 115 days
-        expect(range[1] - range[0]).toEqual(9935999999);
+        expect(range[1] - range[0]).toEqual(9932399999);
     });
 });

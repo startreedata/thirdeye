@@ -33,7 +33,7 @@ describe("AlertDateTimeCronAdvance", () => {
         );
 
         expect(
-            screen.getByText("Unexpected end of expression")
+            screen.getByTestId("error-message-container")
         ).toBeInTheDocument();
 
         expect(screen.getByTestId("cron-input-label")).toHaveClass("Mui-error");
@@ -50,7 +50,7 @@ describe("AlertDateTimeCronAdvance", () => {
 
         // Verify error state
         expect(
-            screen.getByText("Unexpected end of expression")
+            screen.getByTestId("error-message-container")
         ).toBeInTheDocument();
 
         expect(screen.getByTestId("cron-input-label")).toHaveClass("Mui-error");
@@ -97,9 +97,7 @@ describe("AlertDateTimeCronAdvance", () => {
 
         expect(screen.getByTestId("cron-input-label")).toHaveClass("Mui-error");
 
-        expect(
-            screen.getByText("Unexpected end of expression")
-        ).toBeInTheDocument();
+        expect(screen.getByTestId("cron-input-label")).toBeInTheDocument();
         expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 });

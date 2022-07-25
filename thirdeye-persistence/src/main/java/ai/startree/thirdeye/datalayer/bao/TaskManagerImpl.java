@@ -50,10 +50,10 @@ import org.slf4j.LoggerFactory;
 public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements TaskManager {
 
   private static final String FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC =
-      " WHERE status = :status order by startTime asc limit 10";
+      " WHERE status = :status order by startTime asc limit ";
 
   private static final String FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC =
-      " WHERE status = :status order by startTime desc limit 10";
+      " WHERE status = :status order by startTime desc limit ";
 
   private static final String FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC =
       " WHERE name = :name order by createTime asc limit ";
@@ -112,8 +112,9 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       final boolean asc) {
     final Map<String, Object> parameterMap = new HashMap<>();
     parameterMap.put("status", status.toString());
-    final String queryClause =
-        (asc) ? FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC : FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC;
+    final String queryClause = (asc)
+        ? FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC + fetchSize
+        : FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC + fetchSize;
     return genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskDTO.class);
   }
 

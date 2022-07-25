@@ -27,7 +27,7 @@
   <dependencies>
     <dependency>
       <groupId>ai.startree.thirdeye</groupId>
-      <artifactId>thirdeye-core</artifactId>
+      <artifactId>thirdeye-scheduler</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>

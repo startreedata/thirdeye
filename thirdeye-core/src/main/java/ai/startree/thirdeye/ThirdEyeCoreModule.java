@@ -15,7 +15,6 @@ package ai.startree.thirdeye;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.OAuthConfiguration;
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
@@ -40,12 +39,34 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 public class ThirdEyeCoreModule extends AbstractModule {
 
   private final DataSource dataSource;
-  private final ThirdEyeServerConfiguration configuration;
+  private final CacheConfig cacheConfig;
+  private final RcaConfiguration rcaConfiguration;
+  private final ThirdEyeSchedulerConfiguration schedulerConfiguration;
+  private final TaskDriverConfiguration taskDriverConfiguration;
+  private final UiConfiguration uiConfiguration;
+  private final AuthConfiguration authConfiguration;
+  private final NotificationConfiguration notificationConfiguration;
+  private final TimeConfiguration timeConfiguration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
-      final ThirdEyeServerConfiguration configuration) {
+      final CacheConfig cacheConfig,
+      final RcaConfiguration rcaConfiguration,
+      final ThirdEyeSchedulerConfiguration schedulerConfiguration,
+      final TaskDriverConfiguration taskDriverConfiguration,
+      final UiConfiguration uiConfiguration,
+      final AuthConfiguration authConfiguration,
+      final NotificationConfiguration notificationConfiguration,
+      final TimeConfiguration timeConfiguration) {
     this.dataSource = dataSource;
-    this.configuration = configuration;
+
+    this.cacheConfig = cacheConfig;
+    this.rcaConfiguration = rcaConfiguration;
+    this.schedulerConfiguration = schedulerConfiguration;
+    this.taskDriverConfiguration = taskDriverConfiguration;
+    this.uiConfiguration = uiConfiguration;
+    this.authConfiguration = authConfiguration;
+    this.notificationConfiguration = notificationConfiguration;
+    this.timeConfiguration = timeConfiguration;
   }
 
   @Override
@@ -55,37 +76,14 @@ public class ThirdEyeCoreModule extends AbstractModule {
     bind(DataProvider.class).to(DefaultDataProvider.class).in(Scopes.SINGLETON);
     bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
 
-    bind(CacheConfig.class)
-        .toProvider(configuration::getCacheConfig)
-        .in(Scopes.SINGLETON);
-
-    bind(RcaConfiguration.class)
-        .toProvider(configuration::getRcaConfiguration)
-        .in(Scopes.SINGLETON);
-
-    bind(ThirdEyeSchedulerConfiguration.class)
-        .toProvider(configuration::getSchedulerConfiguration)
-        .in(Scopes.SINGLETON);
-
-    bind(TaskDriverConfiguration.class)
-        .toProvider(configuration::getTaskDriverConfiguration)
-        .in(Scopes.SINGLETON);
-
-    bind(UiConfiguration.class)
-        .toProvider(configuration::getUiConfiguration)
-        .in(Scopes.SINGLETON);
-
-    bind(AuthConfiguration.class)
-        .toProvider(configuration::getAuthConfiguration)
-        .in(Scopes.SINGLETON);
-
-    bind(NotificationConfiguration.class)
-        .toProvider(configuration::getNotificationConfiguration)
-        .in(Scopes.SINGLETON);
-
-    bind(TimeConfiguration.class)
-        .toProvider(configuration::getTimeConfiguration)
-        .in(Scopes.SINGLETON);
+    bind(CacheConfig.class).toInstance(cacheConfig);
+    bind(RcaConfiguration.class).toInstance(rcaConfiguration);
+    bind(ThirdEyeSchedulerConfiguration.class).toInstance(schedulerConfiguration);
+    bind(TaskDriverConfiguration.class).toInstance(taskDriverConfiguration);
+    bind(UiConfiguration.class).toInstance(uiConfiguration);
+    bind(AuthConfiguration.class).toInstance(authConfiguration);
+    bind(NotificationConfiguration.class).toInstance(notificationConfiguration);
+    bind(TimeConfiguration.class).toInstance(timeConfiguration);
   }
 
   @Singleton

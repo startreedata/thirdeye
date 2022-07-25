@@ -38,7 +38,15 @@ public class ThirdEyeServerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new ThirdEyeCoreModule(dataSource, configuration));
+    install(new ThirdEyeCoreModule(dataSource,
+        configuration.getCacheConfig(),
+        configuration.getRcaConfiguration(),
+        configuration.getSchedulerConfiguration(),
+        configuration.getTaskDriverConfiguration(),
+        configuration.getUiConfiguration(),
+        configuration.getAuthConfiguration(),
+        configuration.getNotificationConfiguration(),
+        configuration.getTimeConfiguration()));
 
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);

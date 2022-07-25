@@ -476,11 +476,6 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>ai.startree.thirdeye</groupId>
-        <artifactId>thirdeye-dashboard</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
         <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-notification-email</artifactId>
         <version>${project.version}</version>

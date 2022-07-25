@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detection;
 
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.scheduler.ThirdEyeAbstractJob;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
@@ -50,7 +51,10 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
     }
 
     try {
-      final TaskDTO taskDTO = service.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
+      final TaskManager taskManager = getInstance(ctx, TaskManager.class);
+      final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo.getConfigId(),
+          taskInfo,
+          TaskType.DETECTION);
       LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
     } catch (JsonProcessingException e) {
       LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString",

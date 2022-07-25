@@ -17,7 +17,6 @@ import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
-import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -65,19 +64,17 @@ public class DataAvailabilityTaskScheduler implements Runnable {
   // Fallback runs based on the last task run (successful or not).
   private final Map<Long, Long> detectionIdToLastTaskEndTimeMap;
 
-  private final TaskManager taskDAO;
   private final AlertManager alertManager;
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
-  private final JobSchedulerService jobSchedulerService;
+  private final TaskManager taskManager;
 
   @Inject
   public DataAvailabilityTaskScheduler(
       final DataAvailabilitySchedulingConfiguration config,
-      final TaskManager taskDAO,
       final AlertManager alertManager,
       final DatasetConfigManager datasetConfigManager,
-      final JobSchedulerService jobSchedulerService,
+      final TaskManager taskManager,
       final MetricConfigManager metricConfigManager) {
     this.sleepPerRunInSec = config.getSchedulerDelayInSec();
     this.fallBackTimeInSec = config.getTaskTriggerFallBackTimeInSec();
@@ -86,11 +83,10 @@ public class DataAvailabilityTaskScheduler implements Runnable {
 
     this.detectionIdToLastTaskEndTimeMap = new HashMap<>();
     this.executorService = Executors.newSingleThreadScheduledExecutor();
-    this.taskDAO = taskDAO;
     this.alertManager = alertManager;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
-    this.jobSchedulerService = jobSchedulerService;
+    this.taskManager = taskManager;
   }
 
   /**
@@ -116,8 +112,13 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             if (isWithinSchedulingWindow(detection2DatasetMap.get(detectionConfig),
                 datasetConfigMap)) {
               try {
-                TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
-                LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
+                TaskDTO taskDTO = taskManager.createTaskDto(taskInfo.getConfigId(),
+                    taskInfo,
+                    TaskType.DETECTION);
+                LOG.info("Created {} task {} with settings {}",
+                    TaskType.DETECTION,
+                    taskDTO.getId(),
+                    taskDTO);
               } catch (JsonProcessingException e) {
                 LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
               }
@@ -137,8 +138,13 @@ public class DataAvailabilityTaskScheduler implements Runnable {
             LOG.info("Scheduling a task for detection {} due to the fallback mechanism.",
                 detectionConfigId);
             try {
-              TaskDTO taskDTO = jobSchedulerService.createTaskDto(taskInfo.getConfigId(), taskInfo, TaskType.DETECTION);
-              LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
+              TaskDTO taskDTO = taskManager.createTaskDto(taskInfo.getConfigId(),
+                  taskInfo,
+                  TaskType.DETECTION);
+              LOG.info("Created {} task {} with settings {}",
+                  TaskType.DETECTION,
+                  taskDTO.getId(),
+                  taskDTO);
             } catch (JsonProcessingException e) {
               LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
             }
@@ -210,7 +216,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     List<TaskStatus> statusList = new ArrayList<>();
     statusList.add(TaskStatus.WAITING);
     statusList.add(TaskStatus.RUNNING);
-    List<TaskDTO> tasks = taskDAO
+    List<TaskDTO> tasks = taskManager
         .findByStatusesAndTypeWithinDays(statusList, TaskType.DETECTION,
             (int) TimeUnit.MILLISECONDS.toDays(CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
     Map<Long, TaskDTO> res = new HashMap<>(tasks.size());
@@ -222,7 +228,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
 
   private void loadLatestTaskCreateTime(AlertDTO detectionConfig) throws Exception {
     long detectionConfigId = detectionConfig.getId();
-    List<TaskDTO> tasks = taskDAO
+    List<TaskDTO> tasks = taskManager
         .findByNameOrderByCreateTime(TaskType.DETECTION +
             "_" + detectionConfigId, 1, false);
     if (tasks.size() == 0) {

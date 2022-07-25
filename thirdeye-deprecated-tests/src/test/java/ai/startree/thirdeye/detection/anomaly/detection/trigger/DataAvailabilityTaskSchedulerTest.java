@@ -83,10 +83,9 @@ public class DataAvailabilityTaskSchedulerTest {
             .setTaskTriggerFallBackTimeInSec(TimeUnit.DAYS.toSeconds(1))
             .setSchedulingWindowInSec(TimeUnit.MINUTES.toSeconds(30))
             .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)),
-        TestDbEnv.getInstance().getTaskDAO(),
         TestDbEnv.getInstance().getDetectionConfigManager(),
         TestDbEnv.getInstance().getDatasetConfigDAO(),
-        TestDbEnv.getInstance().getJobSchedulerService(),
+        TestDbEnv.getInstance().getTaskDAO(),
         TestDbEnv.getInstance().getMetricConfigDAO()
     );
   }

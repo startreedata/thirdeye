@@ -120,7 +120,7 @@ public class SchedulerService implements Managed {
     // TODO spyne improve scheduler arch and localize
     // TODO spyne explore: consolidate all orphan maintenance tasks in a single pool
     scheduleTaskCleanUp(config.getTaskCleanUpConfiguration());
-    if(taskDriverConfiguration.isRandomWorkerIdEnabled()) {
+    if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
       scheduleOrphanTaskCleanUp(config.getTaskCleanUpConfiguration());
     }
   }

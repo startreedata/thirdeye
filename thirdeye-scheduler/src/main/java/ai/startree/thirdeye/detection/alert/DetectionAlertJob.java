@@ -18,13 +18,13 @@ import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.scheduler.ThirdEyeAbstractJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.task.DetectionAlertTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
   private static final Logger LOG = LoggerFactory.getLogger(DetectionAlertJob.class);
 
   @Override
-  public void execute(JobExecutionContext ctx) throws JobExecutionException {
+  public void execute(final JobExecutionContext ctx) {
     final SubscriptionGroupManager alertConfigDAO = getInstance(ctx,
         SubscriptionGroupManager.class);
 
@@ -50,10 +50,10 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
       LOG.error("Subscription config {} does not exist", detectionAlertConfigId);
     }
 
-    DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(detectionAlertConfigId);
+    final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(detectionAlertConfigId);
 
     // if a task is pending and not time out yet, don't schedule more
-    String jobName = String.format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
+    final String jobName = String.format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
     if (service.taskAlreadyRunning(jobName)) {
       LOG.trace("Skip scheduling subscription task {}. Already queued", jobName);
       return;
@@ -65,9 +65,16 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
     }
 
     try {
-      TaskDTO taskDTO = service.createTaskDto(detectionAlertConfigId, taskInfo, TaskType.NOTIFICATION);
-      LOG.info("Created {} task {} with settings {}", TaskType.NOTIFICATION, taskDTO.getId(), taskDTO);
-    } catch (JsonProcessingException e) {
+      final TaskManager taskManager = getInstance(ctx, TaskManager.class);
+      final TaskDTO taskDTO = taskManager.createTaskDto(detectionAlertConfigId,
+          taskInfo,
+          TaskType.NOTIFICATION);
+
+      LOG.info("Created {} task {} with settings {}",
+          TaskType.NOTIFICATION,
+          taskDTO.getId(),
+          taskDTO);
+    } catch (final JsonProcessingException e) {
       LOG.error("Exception when converting TaskInfo {} to jsonString", taskInfo, e);
     }
   }

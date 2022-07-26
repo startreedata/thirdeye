@@ -122,8 +122,9 @@ module.exports = {
 
     // webpack-dev-server
     devServer: {
-        contentBase: outputPath,
-        compress: true,
+        static: {
+            directory: outputPath,
+        },
         port: 7004,
         // Route all requests to index.html so that app gets to handle all copy pasted deep links
         historyApiFallback: {

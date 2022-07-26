@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye;
 
+import ai.startree.thirdeye.auth.AuthConfiguration;
+import ai.startree.thirdeye.auth.OAuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
@@ -44,12 +46,12 @@ public class ThirdEyeServerModule extends AbstractModule {
         configuration.getCacheConfig(),
         configuration.getRcaConfiguration(),
         configuration.getUiConfiguration(),
-        configuration.getAuthConfiguration(),
         configuration.getNotificationConfiguration(),
         configuration.getTimeConfiguration()));
     install(new ThirdEyeWorkerModule(configuration.getTaskDriverConfiguration()));
     install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
 
+    bind(AuthConfiguration.class).toInstance(configuration.getAuthConfiguration());
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
   }
@@ -58,5 +60,12 @@ public class ThirdEyeServerModule extends AbstractModule {
   @Provides
   public MockEventsConfiguration getMockEventsLoaderConfiguration() {
     return configuration.getMockEventsConfiguration();
+  }
+
+  @Singleton
+  @Provides
+  public OAuthConfiguration getOAuthConfig(
+      AuthConfiguration authConfiguration) {
+    return authConfiguration.getOAuthConfig();
   }
 }

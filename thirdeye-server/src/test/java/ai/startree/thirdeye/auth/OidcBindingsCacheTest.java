@@ -15,9 +15,9 @@ package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.auth.AuthTestUtils.getJWK;
 import static ai.startree.thirdeye.auth.AuthTestUtils.getToken;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.expectThrows;

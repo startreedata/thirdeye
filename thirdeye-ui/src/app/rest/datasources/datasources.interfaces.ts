@@ -11,10 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface UiDataset {
-    id: number;
-    name: string;
-    active?: boolean;
-    datasourceId: number;
-    datasourceName: string;
+import { ActionHook } from "../actions.interfaces";
+
+export interface GetStatusResponse {
+    code?: string;
+    list?: {
+        code: string;
+        msg: string;
+    }[];
+}
+
+export interface GetDatasourceStatus extends ActionHook {
+    healthStatus: GetStatusResponse | null;
+    getDatasourceStatus: (
+        datasourceName: string
+    ) => Promise<GetStatusResponse | undefined>;
 }

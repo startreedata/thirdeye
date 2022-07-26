@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface UiDataset {
-    id: number;
-    name: string;
-    active?: boolean;
-    datasourceId: number;
-    datasourceName: string;
-}
+import { makeStyles } from "@material-ui/core";
+
+export const useDatasourceVerificationStyles = makeStyles((theme) => ({
+    successText: {
+        color: theme.palette.success.main,
+    },
+}));

@@ -11,10 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface UiDataset {
-    id: number;
-    name: string;
-    active?: boolean;
-    datasourceId: number;
+
+export interface DatasourceVerificationProps {
     datasourceName: string;
 }

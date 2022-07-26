@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { createEmptyDataset } from "../../../utils/datasets/datasets.util";
+import { DatasourceVerification } from "../datasource-verification/datasource-verification.component";
 import { DatasetPropertiesFormProps } from "./dataset-properties-form.interfaces";
 
 export const DatasetPropertiesForm: FunctionComponent<
@@ -36,23 +37,26 @@ export const DatasetPropertiesForm: FunctionComponent<
 > = (props: DatasetPropertiesFormProps) => {
     const { t } = useTranslation();
     const defaultValues = props.dataset || createEmptyDataset();
-    const { register, handleSubmit, errors, control } = useForm<Dataset>({
-        defaultValues,
-        resolver: yupResolver(
-            yup.object().shape({
-                name: yup
-                    .string()
-                    .trim()
-                    .required(t("message.dataset-name-required")),
-                dataSource: yup.object().shape({
+    const { register, handleSubmit, errors, control, watch } = useForm<Dataset>(
+        {
+            defaultValues,
+            resolver: yupResolver(
+                yup.object().shape({
                     name: yup
                         .string()
                         .trim()
-                        .required(t("message.dataset-datasource-required")),
-                }),
-            })
-        ),
-    });
+                        .required(t("message.dataset-name-required")),
+                    dataSource: yup.object().shape({
+                        name: yup
+                            .string()
+                            .trim()
+                            .required(t("message.dataset-datasource-required")),
+                    }),
+                })
+            ),
+        }
+    );
+    const dataSourceProperty = watch("dataSource");
 
     const onSubmitDatasetPropertiesForm = (dataset: Dataset): void => {
         props.onSubmit && props.onSubmit(dataset);
@@ -135,6 +139,11 @@ export const DatasetPropertiesForm: FunctionComponent<
                             <FormHelperText error>
                                 {errors.dataSource.name.message}
                             </FormHelperText>
+                        )}
+                        {dataSourceProperty.name && (
+                            <DatasourceVerification
+                                datasourceName={dataSourceProperty.name}
+                            />
                         )}
                     </FormControl>
                 </Grid>

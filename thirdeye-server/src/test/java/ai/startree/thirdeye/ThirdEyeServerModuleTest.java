@@ -37,7 +37,7 @@ public class ThirdEyeServerModuleTest {
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()
         .setAuthConfiguration(new AuthConfiguration())
         .setTaskDriverConfiguration(new TaskDriverConfiguration().setId(0L))
-        .setConfigPath("../config");
+        ;
 
     final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
         configuration,

@@ -13,9 +13,8 @@
  */
 package ai.startree.thirdeye.task.runner;
 
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorJobRunnable;
 import ai.startree.thirdeye.spi.Constants.JobStatus;
+import ai.startree.thirdeye.spi.Constants.MonitorType;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
@@ -49,7 +48,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class MonitorTaskRunner implements TaskRunner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MonitorJobRunnable.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MonitorTaskRunner.class);
   private static final long MAX_TASK_TIME = TimeUnit.HOURS.toMillis(6);
   private static final long MAX_FAILED_DISABLE_DAYS = 30;
 

@@ -166,9 +166,7 @@ describe("Datasources REST", () => {
 
         expect(axios.post).toHaveBeenCalledWith(
             "/api/data-sources/onboard-all",
-            new URLSearchParams({
-                name: mockDatasourceRequest.name,
-            })
+            new URLSearchParams({ name: mockDatasourceRequest.name })
         );
     });
 

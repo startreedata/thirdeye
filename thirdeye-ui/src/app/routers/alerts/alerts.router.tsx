@@ -157,6 +157,9 @@ export const AlertsRouter: FunctionComponent = () => {
                             path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                         />
                     </Route>
+
+                    {/* No match found, render page not found */}
+                    <Route element={<PageNotFoundPage />} path="*" />
                 </Route>
 
                 {/* Alert paths */}

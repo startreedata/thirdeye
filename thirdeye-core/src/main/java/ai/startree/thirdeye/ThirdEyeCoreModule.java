@@ -13,34 +13,75 @@
  */
 package ai.startree.thirdeye;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.config.ThirdEyeServerConfigurationModule;
+import ai.startree.thirdeye.auth.AuthConfiguration;
+import ai.startree.thirdeye.auth.OAuthConfiguration;
+import ai.startree.thirdeye.config.TimeConfiguration;
+import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.detection.DefaultDataProvider;
+import ai.startree.thirdeye.detection.cache.CacheConfig;
+import ai.startree.thirdeye.notification.NotificationConfiguration;
+import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;
+import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.Singleton;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeCoreModule extends AbstractModule {
 
   private final DataSource dataSource;
-  private final ThirdEyeServerConfiguration configuration;
+  private final CacheConfig cacheConfig;
+  private final RcaConfiguration rcaConfiguration;
+  private final TaskDriverConfiguration taskDriverConfiguration;
+  private final UiConfiguration uiConfiguration;
+  private final AuthConfiguration authConfiguration;
+  private final NotificationConfiguration notificationConfiguration;
+  private final TimeConfiguration timeConfiguration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
-      final ThirdEyeServerConfiguration configuration) {
+      final CacheConfig cacheConfig,
+      final RcaConfiguration rcaConfiguration,
+      final TaskDriverConfiguration taskDriverConfiguration,
+      final UiConfiguration uiConfiguration,
+      final AuthConfiguration authConfiguration,
+      final NotificationConfiguration notificationConfiguration,
+      final TimeConfiguration timeConfiguration) {
     this.dataSource = dataSource;
-    this.configuration = configuration;
+
+    this.cacheConfig = cacheConfig;
+    this.rcaConfiguration = rcaConfiguration;
+    this.taskDriverConfiguration = taskDriverConfiguration;
+    this.uiConfiguration = uiConfiguration;
+    this.authConfiguration = authConfiguration;
+    this.notificationConfiguration = notificationConfiguration;
+    this.timeConfiguration = timeConfiguration;
   }
 
   @Override
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
-    install(new ThirdEyeServerConfigurationModule(configuration));
 
     bind(DataProvider.class).to(DefaultDataProvider.class).in(Scopes.SINGLETON);
     bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
+
+    bind(CacheConfig.class).toInstance(cacheConfig);
+    bind(RcaConfiguration.class).toInstance(rcaConfiguration);
+    bind(TaskDriverConfiguration.class).toInstance(taskDriverConfiguration);
+    bind(UiConfiguration.class).toInstance(uiConfiguration);
+    bind(AuthConfiguration.class).toInstance(authConfiguration);
+    bind(NotificationConfiguration.class).toInstance(notificationConfiguration);
+    bind(TimeConfiguration.class).toInstance(timeConfiguration);
+  }
+
+  @Singleton
+  @Provides
+  public OAuthConfiguration getOAuthConfig(
+      AuthConfiguration authConfiguration) {
+    return authConfiguration.getOAuthConfig();
   }
 }

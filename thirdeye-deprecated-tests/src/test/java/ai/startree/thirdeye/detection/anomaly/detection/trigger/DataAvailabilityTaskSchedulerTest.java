@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detection.anomaly.detection.trigger;
 
 import ai.startree.thirdeye.datalayer.bao.TestDbEnv;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
+import ai.startree.thirdeye.scheduler.DataAvailabilityTaskScheduler;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -83,10 +84,9 @@ public class DataAvailabilityTaskSchedulerTest {
             .setTaskTriggerFallBackTimeInSec(TimeUnit.DAYS.toSeconds(1))
             .setSchedulingWindowInSec(TimeUnit.MINUTES.toSeconds(30))
             .setScheduleDelayInSec(TimeUnit.MINUTES.toSeconds(10)),
-        TestDbEnv.getInstance().getTaskDAO(),
         TestDbEnv.getInstance().getDetectionConfigManager(),
         TestDbEnv.getInstance().getDatasetConfigDAO(),
-        TestDbEnv.getInstance().getJobSchedulerService(),
+        TestDbEnv.getInstance().getTaskDAO(),
         TestDbEnv.getInstance().getMetricConfigDAO()
     );
   }

@@ -47,6 +47,7 @@ public enum ThirdEyeStatus {
   ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
   ERR_CALCITE_FILTERING("Failed running Calcite filtering query with filter: %s"),
   ERR_INVALID_PARAMS_COMPONENTS("Invalid param components: %s for Class %s"),
+  ERR_INVALID_DETECTION_REGRESSORS("Invalid regressors configuration. Too few or too many regressors?"),
 
   OK("OK"),
   ;

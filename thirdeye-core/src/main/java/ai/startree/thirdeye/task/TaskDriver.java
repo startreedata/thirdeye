@@ -17,7 +17,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -53,13 +52,13 @@ public class TaskDriver {
   private final MetricRegistry metricRegistry;
 
   @Inject
-  public TaskDriver(final ThirdEyeServerConfiguration thirdEyeServerConfiguration,
-      final TaskManager taskManager,
+  public TaskDriver(final TaskManager taskManager,
       final TaskRunnerFactory taskRunnerFactory,
-      final MetricRegistry metricRegistry) {
+      final MetricRegistry metricRegistry,
+      final TaskDriverConfiguration taskDriverConfiguration) {
     this.taskManager = taskManager;
     this.metricRegistry = metricRegistry;
-    config = thirdEyeServerConfiguration.getTaskDriverConfiguration();
+    config = taskDriverConfiguration;
     workerId = fetchWorkerId(config);
 
     taskExecutorService = Executors.newFixedThreadPool(
@@ -80,7 +79,7 @@ public class TaskDriver {
             .setNameFormat("task-heartbeat-%d")
             .build());
 
-    taskContext = new TaskContext().setThirdEyeWorkerConfiguration(thirdEyeServerConfiguration);
+    taskContext = new TaskContext();
 
     this.taskRunnerFactory = taskRunnerFactory;
   }

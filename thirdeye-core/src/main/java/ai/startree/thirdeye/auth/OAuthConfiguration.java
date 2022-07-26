@@ -24,7 +24,7 @@ public class OAuthConfiguration {
   private String clientId;
   private List<String> required = new ArrayList<>();
   private Map<String, Object> exactMatch = new HashMap<>();
-  private CacheConfig cache;
+  private OauthCacheConfiguration cache;
 
   public String getServerUrl() {
     return serverUrl;
@@ -71,11 +71,11 @@ public class OAuthConfiguration {
     return this;
   }
 
-  public CacheConfig getCache() {
+  public OauthCacheConfiguration getCache() {
     return cache;
   }
 
-  public OAuthConfiguration setCache(final CacheConfig cache) {
+  public OAuthConfiguration setCache(final OauthCacheConfiguration cache) {
     this.cache = cache;
     return this;
   }

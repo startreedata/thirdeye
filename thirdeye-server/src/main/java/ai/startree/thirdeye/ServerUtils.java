@@ -11,18 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.metric;
+package ai.startree.thirdeye;
 
-public class PrometheusConfiguration {
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-  private boolean enabled = false;
+public class ServerUtils {
 
-  public boolean isEnabled() {
-    return enabled;
-  }
+  private static final Logger log = LoggerFactory.getLogger(ServerUtils.class);
 
-  public PrometheusConfiguration setEnabled(final boolean enabled) {
-    this.enabled = enabled;
-    return this;
+  public static void logJvmSettings() {
+    final RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+    log.info(String.format("JVM (%s) arguments: %s",
+        System.getProperty("java.version"),
+        runtimeMxBean.getInputArguments()));
   }
 }

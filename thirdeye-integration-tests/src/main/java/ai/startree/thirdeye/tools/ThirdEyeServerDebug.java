@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.tools;
 
-import static ai.startree.thirdeye.AppUtils.logJvmSettings;
+import static ai.startree.thirdeye.ServerUtils.logJvmSettings;
 
 import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;

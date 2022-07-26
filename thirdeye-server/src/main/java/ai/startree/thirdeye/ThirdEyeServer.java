@@ -82,7 +82,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
    * making it easier to debug.
    */
   public static void main(String[] args) throws Exception {
-    AppUtils.logJvmSettings();
+    ServerUtils.logJvmSettings();
 
     new ThirdEyeServer().run(args);
   }

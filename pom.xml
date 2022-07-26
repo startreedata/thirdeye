@@ -88,7 +88,7 @@
     <parsii.version>1.5</parsii.version>
     <pinot.version>0.10.0</pinot.version>
     <prometheus.version>0.11.0</prometheus.version>
-    <quartz.version>2.2.1</quartz.version>
+    <quartz.version>2.3.2</quartz.version>
     <retrofit2.version>2.9.0</retrofit2.version>
     <sendgrid.version>4.0.1</sendgrid.version>
     <slack.version>1.20.2</slack.version>

@@ -15,9 +15,9 @@ package ai.startree.thirdeye.scheduler.job;
 
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
-import ai.startree.thirdeye.worker.task.DetectionPipelineTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;

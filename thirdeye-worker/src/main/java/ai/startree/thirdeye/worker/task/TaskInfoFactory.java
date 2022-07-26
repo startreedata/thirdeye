@@ -19,6 +19,8 @@ import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 import static ai.startree.thirdeye.spi.task.TaskType.ONBOARDING;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
+import ai.startree.thirdeye.spi.datalayer.dto.OnboardingTaskInfo;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.fasterxml.jackson.core.JsonProcessingException;

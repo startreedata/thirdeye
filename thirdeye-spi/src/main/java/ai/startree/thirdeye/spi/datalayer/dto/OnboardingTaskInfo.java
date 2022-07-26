@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.worker.task;
+package ai.startree.thirdeye.spi.datalayer.dto;
 
 public class OnboardingTaskInfo extends DetectionPipelineTaskInfo {
 

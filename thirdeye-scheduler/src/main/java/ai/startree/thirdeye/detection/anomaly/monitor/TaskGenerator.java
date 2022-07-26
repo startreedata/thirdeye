@@ -11,11 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.task;
+package ai.startree.thirdeye.detection.anomaly.monitor;
 
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorJobContext;
+import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.task.MonitorTaskInfo;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class TaskGenerator {
 
     // Generates the task to updating the status of all jobs and tasks
     MonitorTaskInfo updateTaskInfo = new MonitorTaskInfo();
-    updateTaskInfo.setMonitorType(MonitorType.UPDATE);
+    updateTaskInfo.setMonitorType(Constants.MonitorType.UPDATE);
     updateTaskInfo
         .setCompletedJobRetentionDays(monitorConfiguration.getCompletedJobRetentionDays());
     updateTaskInfo.setDefaultRetentionDays(monitorConfiguration.getDefaultRetentionDays());
@@ -41,7 +40,7 @@ public class TaskGenerator {
 
     // Generates the task to expire (delete) old jobs and tasks in DB
     MonitorTaskInfo expireTaskInfo = new MonitorTaskInfo();
-    expireTaskInfo.setMonitorType(MonitorType.EXPIRE);
+    expireTaskInfo.setMonitorType(Constants.MonitorType.EXPIRE);
     expireTaskInfo
         .setCompletedJobRetentionDays(monitorConfiguration.getCompletedJobRetentionDays());
     expireTaskInfo.setDefaultRetentionDays(monitorConfiguration.getDefaultRetentionDays());

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.task;
 
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConstants.MonitorType;
+import ai.startree.thirdeye.spi.Constants.MonitorType;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import com.google.common.base.MoreObjects;
 import java.util.Objects;

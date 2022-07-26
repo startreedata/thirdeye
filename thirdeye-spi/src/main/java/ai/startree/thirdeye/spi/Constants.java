@@ -106,4 +106,9 @@ public interface Constants {
   enum CompareMode {
     WoW, Wo2W, Wo3W, Wo4W
   }
+
+  enum MonitorType {
+    UPDATE,
+    EXPIRE
+  }
 }

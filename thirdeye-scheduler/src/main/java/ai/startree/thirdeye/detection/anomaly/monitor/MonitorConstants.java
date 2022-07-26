@@ -18,11 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MonitorConstants {
 
-  public enum MonitorType {
-    UPDATE,
-    EXPIRE
-  }
-
   public static int DEFAULT_RETENTION_DAYS = 30;
   public static int DEFAULT_COMPLETED_JOB_RETENTION_DAYS = 14;
   public static int DEFAULT_DETECTION_STATUS_RETENTION_DAYS = 7;

@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.detection.download.ModelDownloaderConfiguration;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
+import ai.startree.thirdeye.scheduler.modeldownload.ModelDownloaderConfiguration;
 import ai.startree.thirdeye.scheduler.monitor.MonitorConfiguration;
 import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;

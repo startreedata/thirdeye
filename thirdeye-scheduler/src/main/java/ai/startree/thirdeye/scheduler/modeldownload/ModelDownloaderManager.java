@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.scheduler.modeldownload;
 
-import ai.startree.thirdeye.detection.download.ModelDownloaderConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;

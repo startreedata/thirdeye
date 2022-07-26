@@ -36,7 +36,7 @@ module.exports = {
     preset: "ts-jest",
 
     // Test Environment
-    testEnvironment: "jest-environment-jsdom-fourteen",
+    testEnvironment: "jest-environment-jsdom",
     setupFilesAfterEnv: ["@testing-library/jest-dom/extend-expect"],
     clearMocks: true,
     moduleNameMapper: {

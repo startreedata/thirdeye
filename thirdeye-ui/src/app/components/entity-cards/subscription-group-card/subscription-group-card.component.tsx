@@ -192,13 +192,15 @@ export const SubscriptionGroupCard: FunctionComponent<
                         </Grid>
 
                         {/* Subscribed emails */}
-                        <Grid item sm={6} xs={12}>
-                            <NameValueDisplayCard<string>
-                                name={t("label.subscribed-emails")}
-                                searchWords={props.searchWords}
-                                values={props.uiSubscriptionGroup.emails}
-                            />
-                        </Grid>
+                        {props.uiSubscriptionGroup.emails.length > 0 && (
+                            <Grid item sm={6} xs={12}>
+                                <NameValueDisplayCard<string>
+                                    name={t("label.subscribed-emails")}
+                                    searchWords={props.searchWords}
+                                    values={props.uiSubscriptionGroup.emails}
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 )}
 

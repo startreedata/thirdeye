@@ -25,6 +25,7 @@ export const availableSpecTypes: SpecUIConfig[] = [
         icon: "carbon:email",
         formComponent: SendgridEmail,
         reviewComponent: SendgridEmailReview,
+        viewComponent: SendgridEmailReview,
     },
     {
         id: SpecType.Slack,
@@ -32,6 +33,7 @@ export const availableSpecTypes: SpecUIConfig[] = [
         icon: "logos:slack-icon",
         formComponent: Slack,
         reviewComponent: (props) => props.configuration.params.webhookUrl,
+        viewComponent: Slack,
     },
     {
         id: SpecType.Webhook,
@@ -39,6 +41,7 @@ export const availableSpecTypes: SpecUIConfig[] = [
         icon: "logos:webhooks",
         formComponent: Webhook,
         reviewComponent: (props) => props.configuration.params.url,
+        viewComponent: Webhook,
     },
 ];
 

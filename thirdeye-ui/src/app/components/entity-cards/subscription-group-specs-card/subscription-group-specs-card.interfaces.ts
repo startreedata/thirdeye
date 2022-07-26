@@ -11,11 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
+import { NotificationSpec } from "../../../rest/dto/subscription-group.interfaces";
 
-export interface SubscriptionGroupEmailsAccordianProps {
-    subscriptionGroup: UiSubscriptionGroup | null;
-    title: string;
-    defaultExpanded?: boolean;
-    onChange?: (emails: string[]) => void;
+export interface SubscriptionGroupSpecsCardProps {
+    specs: NotificationSpec[];
 }

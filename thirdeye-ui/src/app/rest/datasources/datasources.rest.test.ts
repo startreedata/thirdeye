@@ -206,7 +206,7 @@ describe("Datasources REST", () => {
         ).resolves.toEqual(mockStatusResponse);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/data-sources/status?name=datasource-name"
+            "/api/data-sources/validate?name=datasource-name"
         );
     });
 

@@ -125,7 +125,7 @@ data:
       detectionAlert: true
 
       holidayEvents:
-        enabled: {{ not .Values.config.holidayLoaderKey | ternary "false" "true" }}
+        enabled: {{ not .Values.secrets.holidayLoaderKey | ternary "false" "true" }}
         calendars:
         {{- if .Values.config.calendars }}
           {{- toYaml .Values.config.calendars | nindent 10 }}

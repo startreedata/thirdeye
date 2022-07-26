@@ -12,6 +12,7 @@
  * the License.
  */
 import { SpecType } from "../../../rest/dto/subscription-group.interfaces";
+import { SendgridEmailReview } from "../subscription-group-renderer/sendgrid-email-review/sendgrid-email-review.component";
 import { SpecUIConfig } from "./groups-editor.interfaces";
 import { SendgridEmail } from "./sendgrid-email/sendgrid-email.component";
 import { Slack } from "./slack/slack.component";
@@ -23,18 +24,21 @@ export const availableSpecTypes: SpecUIConfig[] = [
         internationalizationString: "label.email",
         icon: "carbon:email",
         formComponent: SendgridEmail,
+        reviewComponent: SendgridEmailReview,
     },
     {
         id: SpecType.Slack,
         internationalizationString: "label.slack",
         icon: "logos:slack-icon",
         formComponent: Slack,
+        reviewComponent: (props) => props.configuration.params.webhookUrl,
     },
     {
         id: SpecType.Webhook,
         internationalizationString: "label.webhook",
         icon: "logos:webhooks",
         formComponent: Webhook,
+        reviewComponent: (props) => props.configuration.params.url,
     },
 ];
 

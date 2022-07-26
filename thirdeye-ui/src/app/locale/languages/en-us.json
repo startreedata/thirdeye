@@ -313,6 +313,7 @@
         "datasource-is-healthy": "Datasource is healthy",
         "checking-datasource-health": "Checking datasource health. This will take a few seconds ...",
         "to-get-started-select-type": "Select a type to get started",
-        "enter-webhook-url": "Enter webhook URL"
+        "enter-webhook-url": "Enter webhook URL",
+        "no-notifications-groups": "No notifications groups have been configured"
     }
 }

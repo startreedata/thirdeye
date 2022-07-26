@@ -23,7 +23,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificati
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
-import ai.startree.thirdeye.task.DetectionPipelineTaskInfo;
+import ai.startree.thirdeye.worker.task.DetectionPipelineTaskInfo;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;

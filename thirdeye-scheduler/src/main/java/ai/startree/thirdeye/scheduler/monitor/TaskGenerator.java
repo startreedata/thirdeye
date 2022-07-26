@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.scheduler.monitor;
 
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.task.MonitorTaskInfo;
+import ai.startree.thirdeye.worker.task.MonitorTaskInfo;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.task.runner.DetectionPipelineTaskRunner;
 import ai.startree.thirdeye.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -49,7 +48,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AlertDetectionIntervalCalculator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AlertDetectionIntervalCalculator.class);
   private static final Interval DUMMY_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private final AlertTemplateRenderer alertTemplateRenderer;
 

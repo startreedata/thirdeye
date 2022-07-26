@@ -22,7 +22,7 @@ import ai.startree.thirdeye.scheduler.modeldownload.ModelDownloaderManager;
 import ai.startree.thirdeye.scheduler.monitor.MonitorJobScheduler;
 import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
-import ai.startree.thirdeye.task.TaskDriverConfiguration;
+import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;

@@ -20,7 +20,7 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.TestDatabase;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.resources.RootResource;
-import ai.startree.thirdeye.task.TaskDriverConfiguration;
+import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;

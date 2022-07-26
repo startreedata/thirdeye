@@ -25,7 +25,6 @@ import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;
-import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -37,7 +36,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
   private final DataSource dataSource;
   private final CacheConfig cacheConfig;
   private final RcaConfiguration rcaConfiguration;
-  private final TaskDriverConfiguration taskDriverConfiguration;
   private final UiConfiguration uiConfiguration;
   private final AuthConfiguration authConfiguration;
   private final NotificationConfiguration notificationConfiguration;
@@ -46,7 +44,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
   public ThirdEyeCoreModule(final DataSource dataSource,
       final CacheConfig cacheConfig,
       final RcaConfiguration rcaConfiguration,
-      final TaskDriverConfiguration taskDriverConfiguration,
       final UiConfiguration uiConfiguration,
       final AuthConfiguration authConfiguration,
       final NotificationConfiguration notificationConfiguration,
@@ -55,7 +52,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
 
     this.cacheConfig = cacheConfig;
     this.rcaConfiguration = rcaConfiguration;
-    this.taskDriverConfiguration = taskDriverConfiguration;
     this.uiConfiguration = uiConfiguration;
     this.authConfiguration = authConfiguration;
     this.notificationConfiguration = notificationConfiguration;
@@ -71,7 +67,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
 
     bind(CacheConfig.class).toInstance(cacheConfig);
     bind(RcaConfiguration.class).toInstance(rcaConfiguration);
-    bind(TaskDriverConfiguration.class).toInstance(taskDriverConfiguration);
     bind(UiConfiguration.class).toInstance(uiConfiguration);
     bind(AuthConfiguration.class).toInstance(authConfiguration);
     bind(NotificationConfiguration.class).toInstance(notificationConfiguration);

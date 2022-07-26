@@ -23,7 +23,7 @@ import ai.startree.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
-import ai.startree.thirdeye.task.TaskDriverConfiguration;
+import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;

@@ -11,12 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.alert;
+package ai.startree.thirdeye.scheduler.job;
 
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
-import ai.startree.thirdeye.scheduler.ThirdEyeAbstractJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;

@@ -11,16 +11,30 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.anomaly.monitor;
+package ai.startree.thirdeye.scheduler.autoonboard;
 
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
-public class MonitorConstants {
+public class AutoOnboardConfiguration {
 
-  public static int DEFAULT_RETENTION_DAYS = 30;
-  public static int DEFAULT_COMPLETED_JOB_RETENTION_DAYS = 14;
-  public static int DEFAULT_DETECTION_STATUS_RETENTION_DAYS = 7;
-  public static int DEFAULT_RAW_ANOMALY_RETENTION_DAYS = 30;
-  public static TimeGranularity DEFAULT_MONITOR_FREQUENCY = new TimeGranularity(1, TimeUnit.DAYS);
+  private boolean enabled = false;
+  private Duration frequency = Duration.ofMinutes(5);
+
+  public Duration getFrequency() {
+    return frequency;
+  }
+
+  public AutoOnboardConfiguration setFrequency(final Duration frequency) {
+    this.frequency = frequency;
+    return this;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public AutoOnboardConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
 }

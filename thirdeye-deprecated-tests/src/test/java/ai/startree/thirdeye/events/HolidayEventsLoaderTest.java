@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.events;
 
+import ai.startree.thirdeye.scheduler.events.HolidayEvent;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.events.EventType;
 import java.util.ArrayList;

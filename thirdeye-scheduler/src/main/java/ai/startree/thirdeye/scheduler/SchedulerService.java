@@ -13,15 +13,14 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.datasource.AutoOnboardConfiguration;
-import ai.startree.thirdeye.datasource.AutoOnboardService;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
-import ai.startree.thirdeye.detection.anomaly.detection.trigger.DataAvailabilityTaskScheduler;
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorJobScheduler;
-import ai.startree.thirdeye.detection.anomaly.monitor.TaskCleanUpConfiguration;
-import ai.startree.thirdeye.detection.download.ModelDownloaderManager;
-import ai.startree.thirdeye.events.HolidayEventsLoader;
-import ai.startree.thirdeye.events.HolidayEventsLoaderConfiguration;
+import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
+import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
+import ai.startree.thirdeye.scheduler.modeldownload.ModelDownloaderManager;
+import ai.startree.thirdeye.scheduler.monitor.MonitorJobScheduler;
+import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.task.TaskDriverConfiguration;
 import com.google.inject.Inject;

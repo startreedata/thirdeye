@@ -16,8 +16,8 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 
-import ai.startree.thirdeye.detection.alert.DetectionAlertJob;
 import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
+import ai.startree.thirdeye.scheduler.job.DetectionAlertJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;

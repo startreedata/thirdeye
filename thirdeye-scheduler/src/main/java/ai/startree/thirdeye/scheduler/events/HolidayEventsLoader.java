@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.events;
+package ai.startree.thirdeye.scheduler.events;
 
 import static java.util.Collections.singleton;
 
@@ -173,7 +173,7 @@ public class HolidayEventsLoader implements Runnable {
     return timeZone;
   }
 
-  Map<String, List<EventDTO>> getHolidayNameToEventDtoMap(
+  public Map<String, List<EventDTO>> getHolidayNameToEventDtoMap(
       Map<HolidayEvent, Set<String>> newHolidayEventToCountryCodes) {
     Map<String, List<EventDTO>> holidayNameToHolidayEvent = new HashMap<>();
 
@@ -201,7 +201,7 @@ public class HolidayEventsLoader implements Runnable {
     return holidayNameToHolidayEvent;
   }
 
-  void mergeWithExistingHolidays(Map<String, List<EventDTO>> holidayNameToHolidayEvent,
+  public void mergeWithExistingHolidays(Map<String, List<EventDTO>> holidayNameToHolidayEvent,
       List<EventDTO> existingEvents) {
     for (EventDTO existingEvent : existingEvents) {
       String holidayName = existingEvent.getName();

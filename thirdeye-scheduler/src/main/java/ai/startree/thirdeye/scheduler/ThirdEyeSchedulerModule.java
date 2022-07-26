@@ -12,12 +12,11 @@
  * the License.
  */
 
-package ai.startree.thirdeye;
+package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.datasource.AutoOnboardConfiguration;
-import ai.startree.thirdeye.detection.anomaly.monitor.MonitorConfiguration;
-import ai.startree.thirdeye.events.HolidayEventsLoaderConfiguration;
-import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
+import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
+import ai.startree.thirdeye.scheduler.monitor.MonitorConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.events;
+package ai.startree.thirdeye.scheduler.events;
 
 import java.util.Objects;
 
@@ -43,7 +43,7 @@ public class HolidayEvent {
    * @param startTime the start time
    * @param endTime the end time
    */
-  HolidayEvent(String name, String eventType, long startTime, long endTime) {
+  public HolidayEvent(String name, String eventType, long startTime, long endTime) {
     this.name = name;
     this.eventType = eventType;
     this.startTime = startTime;

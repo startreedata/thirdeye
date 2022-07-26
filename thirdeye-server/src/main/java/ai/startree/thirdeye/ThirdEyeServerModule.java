@@ -41,12 +41,12 @@ public class ThirdEyeServerModule extends AbstractModule {
     install(new ThirdEyeCoreModule(dataSource,
         configuration.getCacheConfig(),
         configuration.getRcaConfiguration(),
-        configuration.getSchedulerConfiguration(),
         configuration.getTaskDriverConfiguration(),
         configuration.getUiConfiguration(),
         configuration.getAuthConfiguration(),
         configuration.getNotificationConfiguration(),
         configuration.getTimeConfiguration()));
+    install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
 
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);

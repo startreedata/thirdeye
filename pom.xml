@@ -401,8 +401,6 @@
               <exclude>**/node_modules/**</exclude>
               <exclude>**/dist/**</exclude>
               <exclude>**/webpack/**</exclude>
-              <exclude>src/test/resources/**</exclude>
-              <exclude>src/main/resources/**</exclude>
               <exclude>**/build/**</exclude>
               <exclude>**/verify-version-replacement.js</exclude>
 

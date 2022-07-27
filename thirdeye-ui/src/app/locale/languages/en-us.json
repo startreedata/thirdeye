@@ -227,7 +227,14 @@
         "example-alert-configurations": "example alert configurations",
         "support": "Support",
         "check-status": "Check Status",
-        "health-status": "Health Status"
+        "health-status": "Health Status",
+        "seconds": "Seconds",
+        "minute": "Minute",
+        "hour": "Hour",
+        "day": "Day",
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

@@ -15,7 +15,7 @@ import { Box, Grid, Typography } from "@material-ui/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { AlertDateTimeCronAdvance } from "./alert-date-time-cron-advance/alert-date-time-cron-advance.component";
+import { CronEditor } from "../../../cron-editor/cron-editor.componant";
 import { AlertFrequencyProps } from "./alert-frequency.interfaces";
 
 function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
@@ -46,10 +46,7 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
                 </Box>
             </Grid>
 
-            <AlertDateTimeCronAdvance
-                cron={currentCron}
-                onCronChange={handleCronChange}
-            />
+            <CronEditor value={currentCron} onChange={handleCronChange} />
         </>
     );
 }

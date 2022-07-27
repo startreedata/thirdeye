@@ -16,9 +16,9 @@ package ai.startree.thirdeye.util;
 import static ai.startree.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 
-import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.detection.anomaly.views.AnomalyTimelinesView;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -117,11 +117,11 @@ public abstract class ThirdEyeUtils {
         return Double.toString(Double.NEGATIVE_INFINITY);
       }
     }
-    StringBuffer decimalFormatBuffer = new StringBuffer(CoreConstants.TWO_DECIMALS_FORMAT);
+    StringBuffer decimalFormatBuffer = new StringBuffer(Constants.TWO_DECIMALS_FORMAT);
     double compareValue = 0.1;
     while (value > 0 && value < compareValue && !decimalFormatBuffer.toString().equals(
-        CoreConstants.MAX_DECIMALS_FORMAT)) {
-      decimalFormatBuffer.append(CoreConstants.DECIMALS_FORMAT_TOKEN);
+        Constants.MAX_DECIMALS_FORMAT)) {
+      decimalFormatBuffer.append(Constants.DECIMALS_FORMAT_TOKEN);
       compareValue = compareValue * 0.1;
     }
     DecimalFormat decimalFormat = new DecimalFormat(decimalFormatBuffer.toString());
@@ -202,11 +202,11 @@ public abstract class ThirdEyeUtils {
   private static String combineComponents(String component1, String component2) {
     List<String> components = new ArrayList<>();
     components.addAll(Arrays.asList(component1.split(
-        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
+        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
     components.addAll(Arrays.asList(component2.split(
-        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
+        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
     return components.stream().distinct().collect(Collectors.joining(
-        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER));
+        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER));
   }
 
   /**

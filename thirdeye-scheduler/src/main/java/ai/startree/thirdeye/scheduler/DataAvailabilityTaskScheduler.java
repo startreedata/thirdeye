@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -218,7 +218,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
     statusList.add(TaskStatus.RUNNING);
     List<TaskDTO> tasks = taskManager
         .findByStatusesAndTypeWithinDays(statusList, TaskType.DETECTION,
-            (int) TimeUnit.MILLISECONDS.toDays(CoreConstants.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
+            (int) TimeUnit.MILLISECONDS.toDays(Constants.DETECTION_TASK_MAX_LOOKBACK_WINDOW));
     Map<Long, TaskDTO> res = new HashMap<>(tasks.size());
     for (TaskDTO task : tasks) {
       res.put(ThirdEyeUtils.getDetectionIdFromJobName(task.getJobName()), task);

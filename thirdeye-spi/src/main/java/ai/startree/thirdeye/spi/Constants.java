@@ -89,6 +89,13 @@ public interface Constants {
   String COL_EVENT_START = "event_start";
   String COL_EVENT_END = "event_end";
 
+  String TWO_DECIMALS_FORMAT = "#,###.##";
+  String MAX_DECIMALS_FORMAT = "#,###.#####";
+  String DECIMALS_FORMAT_TOKEN = "#";
+  String PROP_DETECTOR_COMPONENT_NAME_DELIMETER = ",";
+  // disable minute level cache warm up
+  long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

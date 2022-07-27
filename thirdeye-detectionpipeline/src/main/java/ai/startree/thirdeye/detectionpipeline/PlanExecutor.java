@@ -16,7 +16,6 @@ package ai.startree.thirdeye.detectionpipeline;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyList;
 
-import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;

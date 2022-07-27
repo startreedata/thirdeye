@@ -11,12 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detectionpipeline.plan;
+package ai.startree.thirdeye.detectionpipeline;
 
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.EventFetcherPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.EventTriggerPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.SqlExecutionPlanNode;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;

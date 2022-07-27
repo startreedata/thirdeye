@@ -15,7 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.EventTriggerOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.detection.v2.Operator;

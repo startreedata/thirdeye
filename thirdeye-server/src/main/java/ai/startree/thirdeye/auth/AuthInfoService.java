@@ -11,19 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.restclient;
+package ai.startree.thirdeye.auth;
 
-public enum Protocol {
-  HTTP("http://"),
-  HTTPS("https://");
+import java.util.Map;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Url;
 
-  private final String val;
-
-  Protocol(String val) {
-    this.val = val;
-  }
-
-  public String val() {
-    return this.val;
-  }
+public interface AuthInfoService {
+  @GET
+  Call<Map<String, Object>> getInfo(@Url String url);
 }

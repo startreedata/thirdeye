@@ -15,7 +15,6 @@ package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.restclient.InfoService;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import com.codahale.metrics.MetricRegistry;
@@ -115,7 +114,7 @@ public class OAuthManager {
         .baseUrl(url)
         .addConverterFactory(JacksonConverterFactory.create())
         .build();
-      final InfoService service = retrofit.create(InfoService.class);
+      final AuthInfoService service = retrofit.create(AuthInfoService.class);
       final Call<Map<String, Object>> call = service.getInfo(String.format("%s%s", url, OIDC_CONFIG_SUFFIX));
       try {
         final Response<Map<String, Object>> response = call.execute();

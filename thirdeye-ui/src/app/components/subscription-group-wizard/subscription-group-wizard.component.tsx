@@ -11,7 +11,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    Grid,
+    Typography,
+} from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,6 +28,7 @@ import { PageContentsCardV1, StepperV1 } from "../../platform/components";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
+    NotificationSpec,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
 import { UiSubscriptionGroupAlert } from "../../rest/dto/ui-subscription-group.interfaces";
@@ -29,9 +39,8 @@ import {
     getUiSubscriptionGroupAlertName,
     getUiSubscriptionGroupAlerts,
 } from "../../utils/subscription-groups/subscription-groups.util";
-import { validateEmail } from "../../utils/validation/validation.util";
-import { EditableList } from "../editable-list/editable-list.component";
 import { TransferList } from "../transfer-list/transfer-list.component";
+import { GroupsEditor } from "./groups-editor/groups-editor.component";
 import { SubscriptionGroupPropertiesForm } from "./subscription-group-properties-form/subscription-group-properties-form.component";
 import { SubscriptionGroupRenderer } from "./subscription-group-renderer/subscription-group-renderer.component";
 import {
@@ -160,6 +169,10 @@ export const SubscriptionGroupWizard: FunctionComponent<
         return t(`label.${kebabCase(SubscriptionGroupWizardStep[+step])}`);
     };
 
+    const handleSpecsChange = (specs: NotificationSpec[]): void => {
+        newSubscriptionGroup.specs = specs;
+    };
+
     return (
         <>
             {/* Stepper */}
@@ -216,11 +229,21 @@ export const SubscriptionGroupWizard: FunctionComponent<
                         </Grid>
 
                         <Grid item xs={12}>
-                            <PageContentsCardV1>
-                                <Typography variant="h5">
-                                    {t("label.subscribe-alerts")}
-                                </Typography>
-                                <Box marginTop={3}>
+                            <Accordion
+                                defaultExpanded={false}
+                                variant="outlined"
+                            >
+                                {/* Header */}
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                >
+                                    <Typography variant="h5">
+                                        {t("label.subscribe-alerts")}
+                                    </Typography>
+                                </AccordionSummary>
+
+                                {/* Subscription group alerts transfer list */}
+                                <AccordionDetails>
                                     <TransferList<UiSubscriptionGroupAlert>
                                         fromLabel={t("label.all-entity", {
                                             entity: t("label.alerts"),
@@ -245,33 +268,20 @@ export const SubscriptionGroupWizard: FunctionComponent<
                                             onUiSubscriptionGroupAlertsChange
                                         }
                                     />
-                                </Box>
-                            </PageContentsCardV1>
+                                </AccordionDetails>
+                            </Accordion>
                         </Grid>
 
                         <Grid item xs={12}>
                             <PageContentsCardV1>
                                 <Typography variant="h5">
-                                    {t("label.subscribe-emails")}
+                                    {t("label.groups")}
                                 </Typography>
                                 <Box marginTop={3}>
-                                    <EditableList
-                                        addButtonLabel={t("label.add")}
-                                        inputLabel={t("label.add-entity", {
-                                            entity: t("label.email"),
-                                        })}
-                                        list={
-                                            (newSubscriptionGroup &&
-                                                newSubscriptionGroup
-                                                    .notificationSchemes
-                                                    .email &&
-                                                newSubscriptionGroup
-                                                    .notificationSchemes.email
-                                                    .to) ||
-                                            []
-                                        }
-                                        validateFn={validateEmail}
-                                        onChange={
+                                    <GroupsEditor
+                                        subscriptionGroup={newSubscriptionGroup}
+                                        onSpecsChange={handleSpecsChange}
+                                        onSubscriptionGroupEmailsChange={
                                             onSubscriptionGroupEmailsChange
                                         }
                                     />

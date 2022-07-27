@@ -52,7 +52,8 @@ public class PlanNodeFactory {
       EventFetcherPlanNode.class,
       ForkJoinPlanNode.class,
       IndexFillerPlanNode.class,
-      SqlExecutionPlanNode.class
+      SqlExecutionPlanNode.class,
+      DelayPlanNode.class
   );
   /**
    * Contains the list of built in as well as node/operators coming from plugins.

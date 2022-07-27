@@ -35,9 +35,7 @@ import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import ai.startree.thirdeye.tracking.RequestStatisticsLogger;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -58,7 +56,6 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.exporter.MetricsServlet;
 import java.util.EnumSet;
-import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -72,7 +69,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeServer.class);
 
   private Injector injector;
-  private RequestStatisticsLogger requestStatisticsLogger = null;
   private TaskDriver taskDriver = null;
   private SchedulerService schedulerService = null;
 
@@ -172,10 +168,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
           schedulerService.start();
         }
 
-        requestStatisticsLogger = new RequestStatisticsLogger(
-            new TimeGranularity(1, TimeUnit.DAYS));
-        requestStatisticsLogger.start();
-
         if (config.getTaskDriverConfiguration().isEnabled()) {
           taskDriver = injector.getInstance(TaskDriver.class);
           taskDriver.start();
@@ -184,9 +176,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
       @Override
       public void stop() throws Exception {
-        if (requestStatisticsLogger != null) {
-          requestStatisticsLogger.shutdown();
-        }
         if (taskDriver != null) {
           taskDriver.shutdown();
         }

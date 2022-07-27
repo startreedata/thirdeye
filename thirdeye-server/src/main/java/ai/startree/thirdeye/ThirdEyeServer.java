@@ -27,18 +27,18 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.detection.cache.CacheConfig;
-import ai.startree.thirdeye.events.MockEventsLoader;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.json.ThirdEyeJsonProcessingExceptionMapper;
 import ai.startree.thirdeye.resources.RootResource;
 import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
+import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import ai.startree.thirdeye.task.TaskDriver;
 import ai.startree.thirdeye.tracking.RequestStatisticsLogger;
+import ai.startree.thirdeye.worker.task.TaskDriver;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
@@ -82,7 +82,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
    * making it easier to debug.
    */
   public static void main(String[] args) throws Exception {
-    AppUtils.logJvmSettings();
+    ServerUtils.logJvmSettings();
 
     new ThirdEyeServer().run(args);
   }

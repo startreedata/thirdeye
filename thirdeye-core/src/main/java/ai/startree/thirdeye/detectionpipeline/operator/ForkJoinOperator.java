@@ -46,7 +46,6 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   public static final String K_COMBINER = "combiner";
   private static final int PARALLELISM = 5;
 
-  private Map<String, Object> properties;
   private PlanNode enumerator;
   private PlanNode root;
   private PlanNode combiner;
@@ -55,7 +54,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    properties = context.getProperties();
+    final Map<String, Object> properties = context.getProperties();
     enumerator = (PlanNode) properties.get("enumerator");
     root = (PlanNode) properties.get("root");
     combiner = (PlanNode) properties.get("combiner");
@@ -122,7 +121,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
       final Map<String, PlanNode> pipelinePlanNodes,
       final Map<String, Object> templateProperties) {
     final Map<String, PlanNode> clonedPipelinePlanNodes = new HashMap<>();
-    for (Map.Entry<String, PlanNode> key : pipelinePlanNodes.entrySet()) {
+    for (final Map.Entry<String, PlanNode> key : pipelinePlanNodes.entrySet()) {
       final PlanNode planNode = deepCloneWithNewContext(key.getValue(),
           templateProperties,
           clonedPipelinePlanNodes);
@@ -160,7 +159,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
           .setPipelinePlanNodes(clonedPipelinePlanNodes);
 
       return PlanNodeFactory.build(sourceNode.getClass(), clonedContext);
-    } catch (ReflectiveOperationException e) {
+    } catch (final ReflectiveOperationException e) {
       throw new RuntimeException("Failed to clone PlanNode: " + sourceNode.getName(), e);
     }
   }
@@ -191,7 +190,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
           new HashMap<>(params),
           templateProperties
       ));
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (final IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }

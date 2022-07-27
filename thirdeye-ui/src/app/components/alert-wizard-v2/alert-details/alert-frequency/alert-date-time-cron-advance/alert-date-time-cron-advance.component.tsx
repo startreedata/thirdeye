@@ -81,7 +81,11 @@ export const AlertDateTimeCronAdvance: FunctionComponent<
 
                 {/* If there are errors, render them */}
                 {!isCronValid && (
-                    <FormHelperText error className={classes.label}>
+                    <FormHelperText
+                        error
+                        className={classes.label}
+                        data-testid="error-message-container"
+                    >
                         {t("message.invalid-cron-input-1")}
                         <Link
                             href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html"

@@ -20,6 +20,7 @@ import {
     deleteDatasource,
     getAllDatasources,
     getDatasource,
+    getStatusForDatasource,
     onboardAllDatasets,
     updateDatasource,
     updateDatasources,
@@ -165,7 +166,7 @@ describe("Datasources REST", () => {
 
         expect(axios.post).toHaveBeenCalledWith(
             "/api/data-sources/onboard-all",
-            mockDatasourceRequest
+            new URLSearchParams({ name: mockDatasourceRequest.name })
         );
     });
 
@@ -194,6 +195,28 @@ describe("Datasources REST", () => {
 
         await expect(deleteDatasource(1)).rejects.toThrow("testError");
     });
+
+    it("getStatusForDatasource should invoke axios.get with appropriate input and return appropriate status", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: mockStatusResponse,
+        });
+
+        await expect(
+            getStatusForDatasource("datasource-name")
+        ).resolves.toEqual(mockStatusResponse);
+
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/data-sources/validate?name=datasource-name"
+        );
+    });
+
+    it("getStatusForDatasource should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(getStatusForDatasource("datasource-name")).rejects.toThrow(
+            "testError"
+        );
+    });
 });
 
 const mockDatasourceRequest = {
@@ -206,6 +229,9 @@ const mockDatasetsResponse = {
 
 const mockDatasourceResponse = {
     name: "testNameDatasourceResponse",
+};
+const mockStatusResponse = {
+    code: "HEALTHY",
 };
 
 const mockError = new Error("testError");

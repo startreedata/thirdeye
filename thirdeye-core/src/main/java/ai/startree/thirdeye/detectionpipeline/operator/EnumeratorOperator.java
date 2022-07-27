@@ -16,8 +16,6 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
-import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -35,13 +33,13 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
     super.init(context);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void execute() throws Exception {
-    setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(Arrays.asList(
-        ImmutableMap.of("key", 1),
-        ImmutableMap.of("key", 2),
-        ImmutableMap.of("key", 3)
-    )));
+    final Map<String, Object> params = getPlanNode().getParams();
+    final List<Map<String, Object>> enumerationList =
+        (List<Map<String, Object>>) params.get("enumerationList");
+    setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(enumerationList));
   }
 
   @Override

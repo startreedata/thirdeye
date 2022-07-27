@@ -102,7 +102,13 @@ public class PlanExecutorTest {
 
     final PlanNodeBean enumeratorNode = new PlanNodeBean()
         .setName("enumerator")
-        .setType(EnumeratorPlanNode.TYPE);
+        .setType(EnumeratorPlanNode.TYPE)
+        .setParams(Map.of("enumerationList", List.of(
+            Map.of("key", 1),
+            Map.of("key", 2),
+            Map.of("key", 3)
+        )))
+        ;
 
     final PlanNodeBean combinerNode = new PlanNodeBean()
         .setName("combiner")

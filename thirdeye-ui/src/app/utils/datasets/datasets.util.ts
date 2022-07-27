@@ -59,6 +59,7 @@ export const getUiDataset = (dataset: Dataset): UiDataset => {
     // Basic properties
     uiDataset.id = dataset.id;
     uiDataset.name = dataset.name || noDataMarker;
+    uiDataset.active = dataset.active;
     // Datasource properties
     if (dataset.dataSource) {
         uiDataset.datasourceId = dataset.dataSource.id;

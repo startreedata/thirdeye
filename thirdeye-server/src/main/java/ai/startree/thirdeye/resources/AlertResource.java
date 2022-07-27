@@ -19,9 +19,9 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.alert.AlertCreater;
-import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
+import ai.startree.thirdeye.core.AlertCreater;
+import ai.startree.thirdeye.core.AlertDeleter;
 import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;

@@ -13,11 +13,14 @@
  */
 package ai.startree.thirdeye;
 
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.config.ThirdEyeServerConfigurationModule;
+import ai.startree.thirdeye.config.TimeConfiguration;
+import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.detection.DefaultDataProvider;
+import ai.startree.thirdeye.detection.cache.CacheConfig;
+import ai.startree.thirdeye.notification.NotificationConfiguration;
+import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;
 import com.google.inject.AbstractModule;
@@ -27,20 +30,38 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 public class ThirdEyeCoreModule extends AbstractModule {
 
   private final DataSource dataSource;
-  private final ThirdEyeServerConfiguration configuration;
+  private final CacheConfig cacheConfig;
+  private final RcaConfiguration rcaConfiguration;
+  private final UiConfiguration uiConfiguration;
+  private final NotificationConfiguration notificationConfiguration;
+  private final TimeConfiguration timeConfiguration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
-      final ThirdEyeServerConfiguration configuration) {
+      final CacheConfig cacheConfig,
+      final RcaConfiguration rcaConfiguration,
+      final UiConfiguration uiConfiguration,
+      final NotificationConfiguration notificationConfiguration,
+      final TimeConfiguration timeConfiguration) {
     this.dataSource = dataSource;
-    this.configuration = configuration;
+
+    this.cacheConfig = cacheConfig;
+    this.rcaConfiguration = rcaConfiguration;
+    this.uiConfiguration = uiConfiguration;
+    this.notificationConfiguration = notificationConfiguration;
+    this.timeConfiguration = timeConfiguration;
   }
 
   @Override
   protected void configure() {
     install(new ThirdEyePersistenceModule(dataSource));
-    install(new ThirdEyeServerConfigurationModule(configuration));
 
     bind(DataProvider.class).to(DefaultDataProvider.class).in(Scopes.SINGLETON);
     bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
+
+    bind(CacheConfig.class).toInstance(cacheConfig);
+    bind(RcaConfiguration.class).toInstance(rcaConfiguration);
+    bind(UiConfiguration.class).toInstance(uiConfiguration);
+    bind(NotificationConfiguration.class).toInstance(notificationConfiguration);
+    bind(TimeConfiguration.class).toInstance(timeConfiguration);
   }
 }

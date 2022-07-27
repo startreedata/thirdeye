@@ -221,7 +221,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = (
 
                                     {/* Next button */}
                                     <Grid item>
-                                        {/* Submit button for dataset properties form in 
+                                        {/* Submit button for dataset properties form in
                                     first step */}
                                         {currentWizardStep ===
                                             DatasetWizardStep.DATASET_PROPERTIES && (

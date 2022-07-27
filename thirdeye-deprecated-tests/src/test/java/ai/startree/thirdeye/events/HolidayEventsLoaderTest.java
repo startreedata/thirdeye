@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.events;
 
-import static org.mockito.Mockito.mock;
-
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
+import ai.startree.thirdeye.scheduler.events.HolidayEvent;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.events.EventType;
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class HolidayEventsLoaderTest {
     anotherEventDTO.setId(1L);
     eventsDAO = new MockEventsManager(new HashSet<>(Arrays.asList(eventDTO, anotherEventDTO)),
         null);
-    holidayEventsLoader = new HolidayEventsLoader(mock(ThirdEyeServerConfiguration.class),
+    holidayEventsLoader = new HolidayEventsLoader(
         eventsDAO,
         holidayEventsLoaderConfiguration);
   }

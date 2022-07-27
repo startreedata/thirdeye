@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datalayer.calcite.object.adapter;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.datalayer.calcite.filter.ObjectWithIdToRelationAdapter;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import java.util.List;
@@ -31,11 +33,8 @@ public class EventToRelationAdapter implements ObjectWithIdToRelationAdapter<Eve
         .add(ID_COLUMN, typeFactory.createSqlType(SqlTypeName.BIGINT))
         .add("type", typeFactory.createSqlType(SqlTypeName.VARCHAR))
         .add("dimensionMap",
-            typeFactory.createMapType(
-                typeFactory.createSqlType(SqlTypeName.VARCHAR),
-                typeFactory.createMultisetType(typeFactory.createSqlType(SqlTypeName.VARCHAR), -1)
-            )
-        )
+            typeFactory.createMapType(typeFactory.createSqlType(SqlTypeName.VARCHAR),
+                typeFactory.createMultisetType(typeFactory.createSqlType(SqlTypeName.VARCHAR), -1)))
         .build();
   }
 
@@ -43,7 +42,7 @@ public class EventToRelationAdapter implements ObjectWithIdToRelationAdapter<Eve
   public Object[] getRow(final EventDTO element) {
     // a default map make the sql easier to write for dimension values - because MEMBER OF fails if a collection is null
     final DefaultedMap<String, List<String>> dimensionDefaultMap = new DefaultedMap<>(List.of());
-    dimensionDefaultMap.putAll(element.getTargetDimensionMap());
+    optional(element.getTargetDimensionMap()).ifPresent(dimensionDefaultMap::putAll);
 
     return new Object[]{element.getId(), element.getEventType(), dimensionDefaultMap};
   }

@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.61.0-SNAPSHOT</version>
+  <version>1.62.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -27,6 +27,8 @@
     <module>thirdeye-spi</module>
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
+    <module>thirdeye-worker</module>
+    <module>thirdeye-scheduler</module>
     <module>thirdeye-server</module>
 
     <!--  Build plugins -->
@@ -86,7 +88,7 @@
     <parsii.version>1.5</parsii.version>
     <pinot.version>0.10.0</pinot.version>
     <prometheus.version>0.11.0</prometheus.version>
-    <quartz.version>2.2.1</quartz.version>
+    <quartz.version>2.3.2</quartz.version>
     <retrofit2.version>2.9.0</retrofit2.version>
     <sendgrid.version>4.0.1</sendgrid.version>
     <slack.version>1.20.2</slack.version>
@@ -399,8 +401,7 @@
               <exclude>**/node_modules/**</exclude>
               <exclude>**/dist/**</exclude>
               <exclude>**/webpack/**</exclude>
-              <exclude>src/test/resources/**</exclude>
-              <exclude>src/main/resources/**</exclude>
+              <exclude>src/main/resources/db/migration/mysql/**</exclude>
               <exclude>**/build/**</exclude>
               <exclude>**/verify-version-replacement.js</exclude>
 
@@ -466,12 +467,17 @@
       </dependency>
       <dependency>
         <groupId>ai.startree.thirdeye</groupId>
-        <artifactId>thirdeye-server</artifactId>
+        <artifactId>thirdeye-worker</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>ai.startree.thirdeye</groupId>
-        <artifactId>thirdeye-dashboard</artifactId>
+        <artifactId>thirdeye-scheduler</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-server</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -699,7 +705,7 @@
       <dependency>
         <groupId>org.yaml</groupId>
         <artifactId>snakeyaml</artifactId>
-        <version>1.17</version>
+        <version>1.26</version>
       </dependency>
 
       <!-- utils -->

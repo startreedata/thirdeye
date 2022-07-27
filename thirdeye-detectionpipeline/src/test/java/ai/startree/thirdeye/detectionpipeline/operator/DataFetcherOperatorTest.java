@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY;
+import static ai.startree.thirdeye.spi.Constants.DATA_SOURCE_CACHE_REF_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

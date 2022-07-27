@@ -16,19 +16,19 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperator;
+import ai.startree.thirdeye.detectionpipeline.operator.EventTriggerOperator;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
-public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
+public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
 
-  public static final String TYPE = "AnomalyDetector";
   private DetectionRegistry detectionRegistry;
 
-  public AnomalyDetectorPlanNode() {
+  public EventTriggerPlanNode() {
     super();
   }
 
@@ -36,13 +36,13 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
     detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
-        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
+        .get(Constants.DETECTION_REGISTRY_REF_KEY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 
   @Override
   public String getType() {
-    return TYPE;
+    return "EventTrigger";
   }
 
   @Override
@@ -52,14 +52,13 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Operator buildOperator() throws Exception {
-    final AnomalyDetectorOperator anomalyDetectorOperator = new AnomalyDetectorOperator();
-    anomalyDetectorOperator.init(new OperatorContext()
-        .setDetectionInterval(this.detectionInterval)
+    final EventTriggerOperator eventTriggerOperator = new EventTriggerOperator();
+    eventTriggerOperator.init(new OperatorContext()
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY,
+        .setProperties(ImmutableMap.of(Constants.DETECTION_REGISTRY_REF_KEY,
             detectionRegistry))
     );
-    return anomalyDetectorOperator;
+    return eventTriggerOperator;
   }
 }

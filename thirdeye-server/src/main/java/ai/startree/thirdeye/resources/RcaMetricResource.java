@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
+import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;

@@ -11,18 +11,22 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.alert;
+package ai.startree.thirdeye.core;
 
-import static ai.startree.thirdeye.alert.ExceptionHandler.handleAlertEvaluationException;
+import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
+import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -59,8 +63,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AlertEvaluator {
-
-  public static final String EVALUATION_FILTERS_KEY = "evaluation.filters";
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluator.class);
   private static final boolean USE_V1_FORMAT = true;
@@ -215,7 +217,7 @@ public class AlertEvaluator {
       if (planNodeBean.getParams() == null) {
         planNodeBean.setParams(new HashMap<>());
       }
-      planNodeBean.getParams().put(EVALUATION_FILTERS_KEY, filters);
+      planNodeBean.getParams().put(Constants.EVALUATION_FILTERS_KEY, filters);
     }
   }
 

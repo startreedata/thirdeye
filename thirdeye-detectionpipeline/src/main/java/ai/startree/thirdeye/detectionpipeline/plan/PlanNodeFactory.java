@@ -17,6 +17,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
@@ -36,9 +37,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class PlanNodeFactory {
 
-  public static final String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
-  public static final String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
-  public static final String EVENT_MANAGER_REF_KEY = "$EventManager";
   private static final Logger LOG = LoggerFactory.getLogger(PlanNodeFactory.class);
 
   /* List of plan node classes that are built in with thirdeye */
@@ -102,9 +100,9 @@ public class PlanNodeFactory {
         .setDetectionInterval(detectionInterval)
         .setPipelinePlanNodes(pipelinePlanNodes)
         .setProperties(ImmutableMap.of(
-            DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
-            DETECTION_REGISTRY_REF_KEY, detectionRegistry,
-            EVENT_MANAGER_REF_KEY, eventDao
+            Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
+            Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry,
+            Constants.EVENT_MANAGER_REF_KEY, eventDao
         ));
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.operator.DataFetcherOperator;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -33,7 +34,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
     this.dataSourceCache = (DataSourceCache) planNodeContext.getProperties()
-        .get(PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY);
+        .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
   }
 
   @Override
@@ -52,7 +53,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
     dataFetcherOperator.init(new OperatorContext()
         .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(PlanNodeFactory.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
+        .setProperties(ImmutableMap.of(Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
     );
     return dataFetcherOperator;
   }

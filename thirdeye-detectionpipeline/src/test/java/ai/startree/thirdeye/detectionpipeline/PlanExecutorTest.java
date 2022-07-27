@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.alert;
+package ai.startree.thirdeye.detectionpipeline;
 
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_COMBINER;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ENUMERATOR;

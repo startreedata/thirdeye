@@ -15,16 +15,14 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.detectionpipeline.operator.sql.DataTableToSqlAdapterFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
-import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
+import ai.startree.thirdeye.util.ThirdEyeUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -129,57 +127,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
   private DataTable runQuery(final String query, final Connection connection) throws SQLException {
     final Statement stmt = connection.createStatement();
     final ResultSet resultSet = stmt.executeQuery(query);
-    return getDataTableFromResultSet(resultSet);
-  }
-
-  public static DataTable getDataTableFromResultSet(final ResultSet resultSet) throws SQLException {
-    final List<String> columns = new ArrayList<>();
-    final List<ColumnType> columnTypes = new ArrayList<>();
-    final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-    final int columnCount = resultSetMetaData.getColumnCount();
-    for (int i = 0; i < columnCount; i++) {
-      columns.add(resultSetMetaData.getColumnLabel(i + 1));
-      columnTypes.add(ColumnType.jdbcTypeToColumnType(resultSetMetaData.getColumnType(i + 1)));
-    }
-    final SimpleDataTableBuilder simpleDataTableBuilder = new SimpleDataTableBuilder(columns,
-        columnTypes);
-    while (resultSet.next()) {
-      final Object[] rowData = simpleDataTableBuilder.newRow();
-      for (int i = 0; i < columnCount; i++) {
-        final ColumnType columnType = columnTypes.get(i);
-        if (columnType.isArray()) {
-          rowData[i] = resultSet.getArray(i + 1);
-          continue;
-        }
-        switch (columnType.getType()) {
-          case INT:
-            rowData[i] = resultSet.getInt(i + 1);
-            continue;
-          case LONG:
-            rowData[i] = resultSet.getLong(i + 1);
-            continue;
-          case DOUBLE:
-            rowData[i] = resultSet.getDouble(i + 1);
-            continue;
-          case STRING:
-            rowData[i] = resultSet.getString(i + 1);
-            continue;
-          case DATE:
-            // todo cyril datetime is parsed as date - precision loss - use timestamp instead?
-            rowData[i] = resultSet.getDate(i + 1);
-            continue;
-          case BOOLEAN:
-            rowData[i] = resultSet.getBoolean(i + 1);
-            continue;
-          case BYTES:
-            rowData[i] = resultSet.getBytes(i + 1);
-            continue;
-          default:
-            throw new RuntimeException("Unrecognized data type - " + columnTypes.get(i + 1));
-        }
-      }
-    }
-    return simpleDataTableBuilder.build();
+    return ThirdEyeUtils.getDataTableFromResultSet(resultSet);
   }
 
   @Override

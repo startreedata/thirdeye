@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory.EVENT_MANAGER_REF_KEY;
+import static ai.startree.thirdeye.spi.Constants.EVENT_MANAGER_REF_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;

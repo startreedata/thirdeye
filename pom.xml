@@ -27,6 +27,7 @@
     <module>thirdeye-spi</module>
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
+    <module>thirdeye-detectionpipeline</module>
     <module>thirdeye-notification</module>
     <module>thirdeye-worker</module>
     <module>thirdeye-scheduler</module>
@@ -464,6 +465,11 @@
       <dependency>
         <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-detectionpipeline</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

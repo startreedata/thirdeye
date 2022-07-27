@@ -11,11 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.alert;
+package ai.startree.thirdeye.core;
 
-import static ai.startree.thirdeye.alert.AlertEvaluator.EVALUATION_FILTERS_KEY;
+import static ai.startree.thirdeye.spi.Constants.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
@@ -25,7 +26,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import java.util.HashMap;
 import java.util.List;

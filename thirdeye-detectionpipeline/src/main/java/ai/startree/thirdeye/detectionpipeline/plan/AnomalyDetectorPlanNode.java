@@ -13,33 +13,37 @@
  */
 package ai.startree.thirdeye.detectionpipeline.plan;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detectionpipeline.operator.EventFetcherOperator;
-import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperator;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
-public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
+public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
 
-  public static final String EVENT_FETCHER_TYPE = "EventFetcher";
-  private EventManager eventManager = null;
+  public static final String TYPE = "AnomalyDetector";
+  private DetectionRegistry detectionRegistry;
+
+  public AnomalyDetectorPlanNode() {
+    super();
+  }
 
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    this.eventManager = (EventManager) planNodeContext.getProperties()
-        .get(PlanNodeFactory.EVENT_MANAGER_REF_KEY);
-    checkArgument(eventManager != null,
-        "Internal issue. No EventManager passed to " + EVENT_FETCHER_TYPE);
+    detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
+        .get(Constants.DETECTION_REGISTRY_REF_KEY);
+    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 
   @Override
   public String getType() {
-    return EVENT_FETCHER_TYPE;
+    return TYPE;
   }
 
   @Override
@@ -49,10 +53,14 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Operator buildOperator() throws Exception {
-    final EventFetcherOperator eventFetcherOperator = new EventFetcherOperator();
-    eventFetcherOperator.init(new OperatorContext().setDetectionInterval(detectionInterval)
+    final AnomalyDetectorOperator anomalyDetectorOperator = new AnomalyDetectorOperator();
+    anomalyDetectorOperator.init(new OperatorContext()
+        .setDetectionInterval(this.detectionInterval)
+        .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(PlanNodeFactory.EVENT_MANAGER_REF_KEY, eventManager)));
-    return eventFetcherOperator;
+        .setProperties(ImmutableMap.of(Constants.DETECTION_REGISTRY_REF_KEY,
+            detectionRegistry))
+    );
+    return anomalyDetectorOperator;
   }
 }

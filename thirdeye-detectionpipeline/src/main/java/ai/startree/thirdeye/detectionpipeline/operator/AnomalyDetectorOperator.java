@@ -22,7 +22,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
-import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
@@ -65,7 +64,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   public void init(final OperatorContext context) {
     super.init(context);
     final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
-        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
+        .get(Constants.DETECTION_REGISTRY_REF_KEY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
     detector = createDetector(planNode.getParams(), detectionRegistry);
   }

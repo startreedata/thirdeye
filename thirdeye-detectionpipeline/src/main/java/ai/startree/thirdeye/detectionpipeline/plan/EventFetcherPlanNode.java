@@ -13,35 +13,34 @@
  */
 package ai.startree.thirdeye.detectionpipeline.plan;
 
-import static java.util.Objects.requireNonNull;
+import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
-import ai.startree.thirdeye.detectionpipeline.operator.EventTriggerOperator;
+import ai.startree.thirdeye.detectionpipeline.operator.EventFetcherOperator;
+import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
-public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
+public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
 
-  private DetectionRegistry detectionRegistry;
-
-  public EventTriggerPlanNode() {
-    super();
-  }
+  public static final String EVENT_FETCHER_TYPE = "EventFetcher";
+  private EventManager eventManager = null;
 
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
-        .get(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY);
-    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
+    this.eventManager = (EventManager) planNodeContext.getProperties()
+        .get(Constants.EVENT_MANAGER_REF_KEY);
+    checkArgument(eventManager != null,
+        "Internal issue. No EventManager passed to " + EVENT_FETCHER_TYPE);
   }
 
   @Override
   public String getType() {
-    return "EventTrigger";
+    return EVENT_FETCHER_TYPE;
   }
 
   @Override
@@ -51,13 +50,10 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Operator buildOperator() throws Exception {
-    final EventTriggerOperator eventTriggerOperator = new EventTriggerOperator();
-    eventTriggerOperator.init(new OperatorContext()
-        .setInputsMap(inputsMap)
+    final EventFetcherOperator eventFetcherOperator = new EventFetcherOperator();
+    eventFetcherOperator.init(new OperatorContext().setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(PlanNodeFactory.DETECTION_REGISTRY_REF_KEY,
-            detectionRegistry))
-    );
-    return eventTriggerOperator;
+        .setProperties(ImmutableMap.of(Constants.EVENT_MANAGER_REF_KEY, eventManager)));
+    return eventFetcherOperator;
   }
 }

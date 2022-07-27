@@ -26,7 +26,7 @@
   <dependencies>
     <dependency>
       <groupId>ai.startree.thirdeye</groupId>
-      <artifactId>thirdeye-detectionpipeline</artifactId>
+      <artifactId>thirdeye-core</artifactId>
     </dependency>
 
     <!-- test dependencies -->

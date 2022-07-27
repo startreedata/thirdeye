@@ -51,7 +51,7 @@ export const Email: FunctionComponent<EmailProps> = ({
                                 primary={lightV1.palette.error}
                             >
                                 <Button color="primary" onClick={onDeleteClick}>
-                                    Delete
+                                    {t("label.delete")}
                                 </Button>
                             </LocalThemeProviderV1>
                         </Box>

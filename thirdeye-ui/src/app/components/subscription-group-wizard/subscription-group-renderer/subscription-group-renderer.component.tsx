@@ -115,7 +115,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<
                             <Divider />
                         </Box>
                         <Typography variant="h5">
-                            {t("label.groups")}
+                            {t("label.channels")}
                         </Typography>
                     </Grid>
                     {props.subscriptionGroup.specs.map((spec) => {

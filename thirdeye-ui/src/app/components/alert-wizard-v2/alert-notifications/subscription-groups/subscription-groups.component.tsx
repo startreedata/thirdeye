@@ -72,6 +72,7 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
                 onSubscriptionGroupsChange([]);
             }
         }
+        console.log(updated);
         setSelectedSubscriptionGroup(updated);
     };
 

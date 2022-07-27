@@ -227,7 +227,7 @@
         "example-alert-configurations": "example alert configurations",
         "slack": "Slack",
         "webhook": "Webhook",
-        "groups": "Groups",
+        "channels": "Channels",
         "optional-overrides": "Optional Overrides",
         "sendgrid-api-key": "SendGrid API Key",
         "support": "Support",
@@ -322,10 +322,12 @@
         "enter-webhook-url": "Enter webhook URL",
         "is-this-an-anomaly": "Is this an anomaly?",
         "click-to-add-comment": "Click to add comment",
-        "no-notifications-groups": "No notifications groups have been configured",
         "reset-alert-information": "Resetting the alert will delete existing anomalies as well as saved investigations and rerun the detection algorithm.",
         "reset-alert-confirmation-prompt": "Are you sure you want to reset the \"{{alertName}}\" alert?",
         "alert-reset-success": "Anomalies deleted and detection algorithm successfully ran for \"{{alertName}}\"",
-        "alert-reset-error": "An issue was experienced while resetting alert. Please try again."
+        "alert-reset-error": "An issue was experienced while resetting alert. Please try again.",
+        "no-notifications-groups": "No notifications groups have been configured",
+        "num-alerts-subscribed": "{{num}} alerts are subscribed to",
+        "no-alerts-subscribed": "No alerts are subscribed to by default"
     }
 }

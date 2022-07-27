@@ -71,6 +71,7 @@ export const Slack: FunctionComponent<SlackProps> = ({
                 </Grid>
             </CardContent>
             <CardContent>
+                <label>{t("message.enter-webhook-url")}</label>
                 <TextField
                     fullWidth
                     data-testid="slack-input-container"

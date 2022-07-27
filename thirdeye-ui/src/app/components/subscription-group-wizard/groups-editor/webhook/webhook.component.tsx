@@ -71,6 +71,7 @@ export const Webhook: FunctionComponent<WebhookProps> = ({
                 </Grid>
             </CardContent>
             <CardContent>
+                <label>{t("message.enter-webhook-url")}</label>
                 <TextField
                     fullWidth
                     data-testid="webhook-input-container"

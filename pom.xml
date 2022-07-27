@@ -401,6 +401,7 @@
               <exclude>**/node_modules/**</exclude>
               <exclude>**/dist/**</exclude>
               <exclude>**/webpack/**</exclude>
+              <exclude>src/main/resources/db/migration/mysql/**</exclude>
               <exclude>**/build/**</exclude>
               <exclude>**/verify-version-replacement.js</exclude>
 

@@ -16,6 +16,7 @@ package ai.startree.thirdeye;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.OAuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
+import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
 import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
@@ -46,8 +47,8 @@ public class ThirdEyeServerModule extends AbstractModule {
         configuration.getCacheConfig(),
         configuration.getRcaConfiguration(),
         configuration.getUiConfiguration(),
-        configuration.getNotificationConfiguration(),
         configuration.getTimeConfiguration()));
+    install(new ThirdEyeNotificationModule(configuration.getNotificationConfiguration()));
     install(new ThirdEyeWorkerModule(configuration.getTaskDriverConfiguration()));
     install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
 

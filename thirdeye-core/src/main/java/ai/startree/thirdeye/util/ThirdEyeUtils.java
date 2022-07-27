@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -31,8 +32,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -42,6 +45,9 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
+  private static final String PROP_METRIC_URNS_KEY = "metricUrn";
+  private static final String PROP_NESTED_METRIC_URNS_KEY = "nestedMetricUrns";
+  private static final String PROP_NESTED_PROPERTIES_KEY = "nested";
 
   /**
    * Returns the time spec of the buckets (data points) in the specified dataset config. For
@@ -275,5 +281,31 @@ public abstract class ThirdEyeUtils {
       }
     }
     return mergedTimeSeriesSnapshot;
+  }
+
+  /**
+   * Extract the list of metric urns in the detection config properties
+   *
+   * @param properties the detection config properties
+   * @return the list of metric urns
+   */
+  public static Set<String> extractMetricUrnsFromProperties(Map<String, Object> properties) {
+    Set<String> metricUrns = new HashSet<>();
+    if (properties == null) {
+      return metricUrns;
+    }
+    if (properties.containsKey(PROP_METRIC_URNS_KEY)) {
+      metricUrns.add((String) properties.get(PROP_METRIC_URNS_KEY));
+    }
+    if (properties.containsKey(PROP_NESTED_METRIC_URNS_KEY)) {
+      metricUrns.addAll(ConfigUtils.getList(properties.get(PROP_NESTED_METRIC_URNS_KEY)));
+    }
+    List<Map<String, Object>> nestedProperties = ConfigUtils
+        .getList(properties.get(PROP_NESTED_PROPERTIES_KEY));
+    // extract the metric urns recursively from the nested properties
+    for (Map<String, Object> nestedProperty : nestedProperties) {
+      metricUrns.addAll(extractMetricUrnsFromProperties(nestedProperty));
+    }
+    return metricUrns;
   }
 }

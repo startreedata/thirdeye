@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.scheduler;
 
 import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -181,7 +180,7 @@ public class DataAvailabilityTaskScheduler implements Runnable {
         .stream().filter(AlertDTO::isDataAvailabilitySchedule)
         .collect(Collectors.toList());
     for (AlertDTO detectionConfig : detectionConfigs) {
-      Set<String> metricUrns = DetectionConfigFormatter
+      Set<String> metricUrns = ThirdEyeUtils
           .extractMetricUrnsFromProperties(detectionConfig.getProperties());
       Set<String> datasets = new HashSet<>();
       for (String urn : metricUrns) {

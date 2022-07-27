@@ -16,6 +16,11 @@ package ai.startree.thirdeye.notification;
 import com.google.common.base.MoreObjects;
 import java.util.Objects;
 
+/**
+ * Notification Spec should be the source of truth and any dependency on this config should be
+ * removed prior to deleting this config class.
+ */
+@Deprecated
 public class SmtpConfiguration {
 
   private String host;

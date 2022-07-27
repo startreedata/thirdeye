@@ -14,18 +14,17 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import java.util.Random;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DelayOperator extends DetectionPipelineOperator{
 
-  private static final Logger LOG = LoggerFactory.getLogger(DelayOperator.class);
-
+  private static final String DELAY_TIME = "delayTime";
+  private static final String RANDOM_OFFSET = "randomOffset";
+  private static final String ID_FIXED_DELAY = "isFixedDelay";
   @Override
   public void execute() throws Exception {
-    long delayTime = Long.parseLong(getPlanNode().getParams().get("delayTime").toString());
-    int randomOffset = Integer.parseInt(getPlanNode().getParams().get("randomOffset").toString());
-    boolean fixedDelay = Boolean.parseBoolean(getPlanNode().getParams().get("isFixedDelay").toString());
+    long delayTime = Long.parseLong(getPlanNode().getParams().get(DELAY_TIME).toString());
+    int randomOffset = Integer.parseInt(getPlanNode().getParams().get(RANDOM_OFFSET).toString());
+    boolean fixedDelay = Boolean.parseBoolean(getPlanNode().getParams().get(ID_FIXED_DELAY).toString());
     long sleepTime = delayTime + (fixedDelay ? 0 : new Random().nextInt(randomOffset));
     Thread.sleep(sleepTime);
     inputMap.forEach(this::setOutput);

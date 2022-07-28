@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.scheduler.monitor;
 
-import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.Executors;
@@ -60,6 +60,6 @@ public class MonitorJobScheduler {
 
   public void shutdown() {
     LOG.info("Stopping monitor service");
-    AnomalyUtils.safelyShutdownExecutionService(scheduledExecutorService, getClass());
+    ThirdEyeUtils.safelyShutdownExecutionService(scheduledExecutorService, getClass());
   }
 }

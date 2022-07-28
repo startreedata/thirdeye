@@ -21,8 +21,8 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
-import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
@@ -95,7 +95,7 @@ public class NotificationReportBuilder {
 
     final PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
         mergedAnomalyResults,
-        new DummyAlertFilter(),
+        new DummyAnomalyFilter(),
         mergedAnomalyResultManager);
 
     final NotificationReportApi report = new NotificationReportApi()

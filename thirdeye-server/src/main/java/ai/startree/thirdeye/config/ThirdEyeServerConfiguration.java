@@ -15,7 +15,6 @@ package ai.startree.thirdeye.config;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
-import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;

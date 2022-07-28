@@ -20,7 +20,7 @@ import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.detection.anomaly.views.AnomalyTimelinesView;
+import ai.startree.thirdeye.notification.AnomalyTimelinesView;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;

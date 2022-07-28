@@ -15,17 +15,16 @@ package ai.startree.thirdeye.worker.task.runner;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.alert.AlertUtils;
-import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
-import ai.startree.thirdeye.detection.alert.NotificationSchemeFactory;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
+import ai.startree.thirdeye.notification.NotificationSchemeFactory;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
+import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
@@ -33,12 +32,21 @@ import ai.startree.thirdeye.worker.task.TaskRunner;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Function;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.annotation.Nullable;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +89,55 @@ public class NotificationTaskRunner implements TaskRunner {
     this.notificationPayloadBuilder = notificationPayloadBuilder;
   }
 
+  private static long getLastTimeStamp(Collection<MergedAnomalyResultDTO> anomalies,
+      long startTime) {
+    long lastTimeStamp = startTime;
+    for (MergedAnomalyResultDTO anomaly : anomalies) {
+      lastTimeStamp = Math.max(anomaly.getCreatedTime(), lastTimeStamp);
+    }
+    return lastTimeStamp;
+  }
+
+  private static Map<Long, Long> makeVectorClock(Collection<MergedAnomalyResultDTO> anomalies) {
+    Multimap<Long, MergedAnomalyResultDTO> grouped = Multimaps
+        .index(anomalies, new Function<>() {
+          @Nullable
+          @Override
+          public Long apply(@Nullable MergedAnomalyResultDTO mergedAnomalyResultDTO) {
+            // Return functionId to support alerting of legacy anomalies
+            if (mergedAnomalyResultDTO.getDetectionConfigId() == null) {
+              return mergedAnomalyResultDTO.getFunctionId();
+            }
+
+            return mergedAnomalyResultDTO.getDetectionConfigId();
+          }
+        });
+    Map<Long, Long> detection2max = new HashMap<>();
+    for (Entry<Long, Collection<MergedAnomalyResultDTO>> entry : grouped.asMap().entrySet()) {
+      detection2max.put(entry.getKey(), getLastTimeStamp(entry.getValue(), -1));
+    }
+    return detection2max;
+  }
+
+  private static Map<Long, Long> mergeVectorClock(Map<Long, Long> a, Map<Long, Long> b) {
+    Set<Long> keySet = new HashSet<>();
+    if (a != null) {
+      keySet.addAll(a.keySet());
+    }
+    if (b != null) {
+      keySet.addAll(b.keySet());
+    }
+
+    Map<Long, Long> result = new HashMap<>();
+    for (Long detectionId : keySet) {
+      long valA = MapUtils.getLongValue(a, detectionId, -1);
+      long valB = MapUtils.getLongValue(b, detectionId, -1);
+      result.put(detectionId, Math.max(valA, valB));
+    }
+
+    return result;
+  }
+
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
     final SubscriptionGroupDTO subscriptionGroupDTO = requireNonNull(
         subscriptionGroupManager.findById(id),
@@ -96,8 +153,8 @@ public class NotificationTaskRunner implements TaskRunner {
       final List<MergedAnomalyResultDTO> allAnomalies) {
     if (!allAnomalies.isEmpty()) {
       subscriptionConfig.setVectorClocks(
-          AlertUtils.mergeVectorClock(subscriptionConfig.getVectorClocks(),
-              AlertUtils.makeVectorClock(allAnomalies)));
+          mergeVectorClock(subscriptionConfig.getVectorClocks(),
+              makeVectorClock(allAnomalies)));
 
       LOG.info("Updating watermarks for subscription config : {}", subscriptionConfig.getId());
       subscriptionGroupManager.save(subscriptionConfig);

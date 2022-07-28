@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.notification;
 
-import ai.startree.thirdeye.detection.detector.email.filter.AlertFilter;
-import ai.startree.thirdeye.detection.detector.email.filter.AlertFilterFactory;
-import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
+import ai.startree.thirdeye.notification.anomalyfilter.AlertFilterFactory;
+import ai.startree.thirdeye.notification.anomalyfilter.AnomalyFilter;
+import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -50,7 +50,7 @@ public class PrecisionRecallEvaluator {
   public static final String USER_REPORT = "userReportAnomaly";
   public static final Double WEIGHT_OF_NULL_LABEL = 0.5;
 
-  protected final AlertFilter alertFilter;
+  protected final AnomalyFilter anomalyFilter;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   protected boolean useAlertFilterOnAnomaly = false;
@@ -71,14 +71,14 @@ public class PrecisionRecallEvaluator {
    * By comparing alert filter's "isQualified" and labels among the list of anomalies, get the
    * performance statistics for this alert filter
    *  @param anomalies the list of anomalies as data for alert filter
-   * @param alertFilter the alert filter to be evaluated
+   * @param anomalyFilter the alert filter to be evaluated
    * @param mergedAnomalyResultManager
    */
   public PrecisionRecallEvaluator(List<MergedAnomalyResultDTO> anomalies,
-      final AlertFilter alertFilter,
+      final AnomalyFilter anomalyFilter,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.alertFilter = alertFilter;
+    this.anomalyFilter = anomalyFilter;
     this.isProjected = true;
     init(anomalies);
   }
@@ -99,9 +99,9 @@ public class PrecisionRecallEvaluator {
    * return user report anomaly as qualified, otherwise return false
    *
    * @param mergedAnomalyResultManager
-   * @param alertFilter alert filter to evaluate system detected anoamlies isQualified
+   * @param anomalyFilter alert filter to evaluate system detected anoamlies isQualified
    */
-  private static Boolean isUserReportAnomalyIsQualified(AlertFilter alertFilter,
+  private static Boolean isUserReportAnomalyIsQualified(AnomalyFilter anomalyFilter,
       MergedAnomalyResultDTO userReportAnomaly,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     List<MergedAnomalyResultDTO> systemAnomalies = mergedAnomalyResultManager
@@ -115,7 +115,7 @@ public class PrecisionRecallEvaluator {
           .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION)
           && anomalyResult.getEndTime() >= startTime && anomalyResult.getStartTime() <= endTime &&
           anomalyResult.getDimensions().equals(userReportAnomaly.getDimensions())) {
-        if (alertFilter.isQualified(anomalyResult)) {
+        if (anomalyFilter.isQualified(anomalyResult)) {
           qualifiedRegion += anomalyResult.getEndTime() - anomalyResult.getStartTime();
         }
       }
@@ -210,13 +210,13 @@ public class PrecisionRecallEvaluator {
     this.userReportTrueAnomalyNewTrend = 0;
 
     for (MergedAnomalyResultDTO anomaly : anomalies) {
-      AlertFilter alertFilterOfAnomaly = this.alertFilter;
+      AnomalyFilter anomalyFilterOfAnomaly = this.anomalyFilter;
       if (useAlertFilterOnAnomaly) {
-        alertFilterOfAnomaly = this.alertFilterFactory
+        anomalyFilterOfAnomaly = this.alertFilterFactory
             .fromSpec(anomaly.getAnomalyFunction().getAlertFilter());
       }
-      if (alertFilterOfAnomaly == null) {
-        alertFilterOfAnomaly = new DummyAlertFilter();
+      if (anomalyFilterOfAnomaly == null) {
+        anomalyFilterOfAnomaly = new DummyAnomalyFilter();
       }
 
       AnomalyFeedback feedback = anomaly.getFeedback();
@@ -241,7 +241,7 @@ public class PrecisionRecallEvaluator {
             userReportTrueAnomalyNewTrend++;
           }
         } else {
-          if (isUserReportAnomalyIsQualified(alertFilterOfAnomaly, anomaly,
+          if (isUserReportAnomalyIsQualified(anomalyFilterOfAnomaly, anomaly,
               mergedAnomalyResultManager)) {
             notifiedTrueAnomaly++;
           } else {
@@ -252,7 +252,7 @@ public class PrecisionRecallEvaluator {
         // if system detected anomaly, if using projected evaluation, skip those true anomalies that are not notified
         // since these anomalies are originally unsent, but reverted the feedback based on user report
         boolean isNotified =
-            isProjected ? alertFilterOfAnomaly.isQualified(anomaly) : anomaly.isNotified();
+            isProjected ? anomalyFilterOfAnomaly.isQualified(anomaly) : anomaly.isNotified();
 
         if (isNotified) {
           if (feedback == null || feedback.getFeedbackType() == null) {

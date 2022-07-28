@@ -33,6 +33,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -219,5 +221,57 @@ public abstract class ThirdEyeUtils {
       }
     }
     return simpleDataTableBuilder.build();
+  }
+
+  /**
+   * Safely and quietly shutdown executor service. This method waits until all threads are complete,
+   * or timeout occurs (5-minutes), or the current thread is interrupted, whichever happens first.
+   *
+   * @param executorService the executor service to be shutdown.
+   * @param ownerClass the class that owns the executor service; it could be null.
+   */
+  public static void safelyShutdownExecutionService(ExecutorService executorService,
+      Class ownerClass) {
+    safelyShutdownExecutionService(executorService, 300, ownerClass);
+  }
+
+  /**
+   * Safely and quietly shutdown executor service. This method waits until all threads are complete,
+   * or number of retries is reached, or the current thread is interrupted, whichever happens first.
+   *
+   * @param executorService the executor service to be shutdown.
+   * @param maxWaitTimeInSeconds max wait time for threads that are still running.
+   * @param ownerClass the class that owns the executor service; it could be null.
+   */
+  public static void safelyShutdownExecutionService(ExecutorService executorService,
+      int maxWaitTimeInSeconds,
+      Class ownerClass) {
+    if (executorService == null) {
+      return;
+    }
+    executorService.shutdown(); // Prevent new tasks from being submitted
+    try {
+      // If not all threads are complete, then a retry loop waits until all threads are complete, or timeout occurs,
+      // or the current thread is interrupted, whichever happens first.
+      for (int retryCount = 0; retryCount < maxWaitTimeInSeconds; ++retryCount) {
+        // Wait a while for existing tasks to terminate
+        if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+          // Force terminate all currently executing tasks if they support such operation
+          executorService.shutdownNow();
+          if (retryCount % 10 == 0) {
+            if (ownerClass != null) {
+              LOG.info("Trying to terminate thread pool for class {}", ownerClass.getSimpleName());
+            } else {
+              LOG.info("Trying to terminate thread pool: {}.", executorService);
+            }
+          }
+        } else {
+          break; // break out retry loop if all threads are complete
+        }
+      }
+    } catch (InterruptedException e) { // If current thread is interrupted
+      executorService.shutdownNow(); // Interrupt all currently executing tasks for the last time
+      Thread.currentThread().interrupt();
+    }
   }
 }

@@ -26,7 +26,6 @@ import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
-import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.json.ThirdEyeJsonProcessingExceptionMapper;
 import ai.startree.thirdeye.resources.RootResource;
@@ -108,9 +107,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         configuration,
         dataSource,
         env.metrics()));
-
-    // TODO remove hack and CacheConfig singleton
-    CacheConfig.setINSTANCE(injector.getInstance(CacheConfig.class));
 
     // Load plugins
     optional(thirdEyePluginDirOverride())

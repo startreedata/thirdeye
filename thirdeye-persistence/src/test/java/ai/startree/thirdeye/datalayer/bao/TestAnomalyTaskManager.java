@@ -35,11 +35,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(singleThreaded = true)
 public class TestAnomalyTaskManager {
 
-  // some tests can be flaky because of the latencies caused by the dockerized MySQL - fixme this may be caused by clock differences between jvm and docker
-  private static final int FLAKY_TEST_SLEEP = 100;
   private static final Set<TaskStatus> allowedOldTaskStatus = new HashSet<>();
 
   static {
@@ -117,7 +114,6 @@ public class TestAnomalyTaskManager {
 
   @Test(dependsOnMethods = {"testUpdateStatusAndTaskEndTime"})
   public void testFindByJobIdStatusNotIn() throws InterruptedException {
-    Thread.sleep(FLAKY_TEST_SLEEP);
     TaskStatus status = TaskStatus.COMPLETED;
     List<TaskDTO> anomalyTaskSpecs = taskDAO.findByJobIdStatusNotIn(anomalyJobId, status);
     Assert.assertEquals(anomalyTaskSpecs.size(), 1);
@@ -133,7 +129,6 @@ public class TestAnomalyTaskManager {
 
   @Test(dependsOnMethods = {"testFindByJobIdStatusNotIn"})
   public void testDeleteRecordOlderThanDaysWithStatus() throws InterruptedException {
-    Thread.sleep(FLAKY_TEST_SLEEP);
     TaskStatus status = TaskStatus.COMPLETED;
     int numRecordsDeleted = taskDAO.deleteRecordsOlderThanDaysWithStatus(0, status);
     Assert.assertEquals(numRecordsDeleted, 1);
@@ -148,7 +143,7 @@ public class TestAnomalyTaskManager {
     anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
     Assert.assertNotNull(anomalyTaskId2);
 
-    Thread.sleep(300 + FLAKY_TEST_SLEEP); // To ensure every task has been created more than 1 ms ago
+    Thread.sleep(300); // To ensure every task has been created more than 1 ms ago
 
     List<TaskDTO> tasksWithZeroDays = taskDAO.findByStatusWithinDays(TaskStatus.WAITING, 0);
     Assert.assertEquals(tasksWithZeroDays.size(), 0);
@@ -164,7 +159,7 @@ public class TestAnomalyTaskManager {
     task1.setStatus(TaskStatus.RUNNING);
     taskDAO.update(task1);
 
-    Thread.sleep(300 + FLAKY_TEST_SLEEP); // To ensure every task has been updated more than 50 ms ago
+    Thread.sleep(300); // To ensure every task has been updated more than 50 ms ago
 
     List<TaskDTO> timeoutTasksWithinOneDays = taskDAO.findTimeoutTasksWithinDays(7, 50);
     Assert.assertTrue(timeoutTasksWithinOneDays.size() > 0);

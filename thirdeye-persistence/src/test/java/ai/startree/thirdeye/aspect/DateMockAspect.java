@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.aspect;
 
-import ai.startree.thirdeye.utils.TimeProvider;
 import java.util.Date;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

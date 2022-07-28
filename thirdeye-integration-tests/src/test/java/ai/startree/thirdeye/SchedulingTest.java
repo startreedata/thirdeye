@@ -21,11 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import ai.startree.thirdeye.utils.TimeProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -33,8 +33,6 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,7 +63,6 @@ import org.testng.annotations.Test;
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  */
 // todo cyril pinot is not necessary - implement and use csv/in-memory datasource instead
-@Test(singleThreaded = true)
 public class SchedulingTest extends PinotBasedIntegrationTest {
 
   private static final Logger log = LoggerFactory.getLogger(SchedulingTest.class);
@@ -107,7 +104,10 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   private long alertId;
 
   @BeforeClass
-  public void beforeClass() throws SQLException {
+  public void beforeClass() {
+    // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
+    assertThat(CLOCK.isTimeMockWorking()).isTrue();
+
     final DatabaseConfiguration dbConfiguration = mysqlTestDatabase.testDatabaseConfiguration();
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
@@ -155,18 +155,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     SUPPORT.after();
   }
 
-  @Test()
-  public void checkTimeIsControlled() {
-    // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
-    CLOCK.useMockTime(0);
-    assertThat(System.currentTimeMillis()).isEqualTo(0);
-    assertThat(new Date().getTime()).isEqualTo(0);
-    CLOCK.tick(20);
-    assertThat(System.currentTimeMillis()).isEqualTo(20);
-    assertThat(new Date().getTime()).isEqualTo(20);
-  }
-
-  @Test(dependsOnMethods = "checkTimeIsControlled")
+  @Test
   public void setUpData() {
     Response response = request("internal/ping").get();
     assertThat(response.getStatus()).isEqualTo(200);

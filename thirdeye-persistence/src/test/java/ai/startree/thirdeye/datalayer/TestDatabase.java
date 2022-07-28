@@ -53,7 +53,7 @@ public class TestDatabase {
           USERNAME,
           PASSWORD);
       connection.createStatement().execute("CREATE DATABASE " + databaseName + ";");
-      connection.createStatement().execute("SET GLOBAL max_connections = 800;");
+      connection.createStatement().execute("SET GLOBAL max_connections = 300;");
       connection.close();
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -78,27 +78,30 @@ public class TestDatabase {
   }
 
   private DataSource buildDataSource(final DatabaseConfiguration dbConfig) {
-    final DataSource ds = new DataSource();
-    ds.setUrl(dbConfig.getUrl());
-    log.debug("Creating db with connection url : " + ds.getUrl());
-    ds.setPassword(dbConfig.getPassword());
-    ds.setUsername(dbConfig.getUser());
-    ds.setDriverClassName(dbConfig.getProperties().get("hibernate.connection.driver_class"));
+    final DataSource dataSource = new DataSource();
+    dataSource.setUrl(dbConfig.getUrl());
+    log.debug("Creating db with connection url : " + dataSource.getUrl());
+    dataSource.setPassword(dbConfig.getPassword());
+    dataSource.setUsername(dbConfig.getUser());
+    dataSource.setDriverClassName(dbConfig.getDriver());
 
     // pool size configurations
-    ds.setMaxActive(200);
-    ds.setMinIdle(10);
-    ds.setInitialSize(10);
+    dataSource.setInitialSize(10);
+    dataSource.setDefaultAutoCommit(false);
+    dataSource.setMaxActive(100);
 
+    dataSource.setValidationQuery("select 1");
+    dataSource.setTestWhileIdle(true);
+    dataSource.setTestOnBorrow(true);
     // when returning connection to pool
-    ds.setTestOnReturn(true);
-    ds.setRollbackOnReturn(true);
+    dataSource.setTestOnReturn(true);
+    dataSource.setRollbackOnReturn(true);
 
     // Timeout before an abandoned(in use) connection can be removed.
-    ds.setRemoveAbandonedTimeout(600_000);
-    ds.setRemoveAbandoned(true);
+    dataSource.setRemoveAbandonedTimeout(600_000);
+    dataSource.setRemoveAbandoned(true);
 
-    return ds;
+    return dataSource;
   }
 
   public Injector createInjector() {

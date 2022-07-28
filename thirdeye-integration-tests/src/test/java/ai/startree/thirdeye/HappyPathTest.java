@@ -66,7 +66,6 @@ import org.testng.annotations.Test;
  * - get a single anomaly
  * - get the anomaly breakdown (heatmap)
  */
-@Test(singleThreaded = true)
 public class HappyPathTest extends PinotBasedIntegrationTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);

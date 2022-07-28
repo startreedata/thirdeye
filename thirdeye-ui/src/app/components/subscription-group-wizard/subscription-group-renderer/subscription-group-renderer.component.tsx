@@ -23,7 +23,7 @@ export const SubscriptionGroupRenderer: FunctionComponent<
     const { t } = useTranslation();
 
     return (
-        <Grid container item justifyContent="flex-end">
+        <Grid container justifyContent="flex-end">
             {/* Name */}
             <Grid item sm={2}>
                 <Typography variant="subtitle1">

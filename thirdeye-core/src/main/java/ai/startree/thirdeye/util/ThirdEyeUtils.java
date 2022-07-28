@@ -16,23 +16,32 @@ package ai.startree.thirdeye.util;
 import static ai.startree.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 
-import ai.startree.thirdeye.CoreConstants;
 import ai.startree.thirdeye.detection.anomaly.views.AnomalyTimelinesView;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
+import ai.startree.thirdeye.spi.detection.v2.ColumnType;
+import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
 import ai.startree.thirdeye.spi.util.SpiUtils;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -42,6 +51,9 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
+  private static final String PROP_METRIC_URNS_KEY = "metricUrn";
+  private static final String PROP_NESTED_METRIC_URNS_KEY = "nestedMetricUrns";
+  private static final String PROP_NESTED_PROPERTIES_KEY = "nested";
 
   /**
    * Returns the time spec of the buckets (data points) in the specified dataset config. For
@@ -117,11 +129,11 @@ public abstract class ThirdEyeUtils {
         return Double.toString(Double.NEGATIVE_INFINITY);
       }
     }
-    StringBuffer decimalFormatBuffer = new StringBuffer(CoreConstants.TWO_DECIMALS_FORMAT);
+    StringBuffer decimalFormatBuffer = new StringBuffer(Constants.TWO_DECIMALS_FORMAT);
     double compareValue = 0.1;
     while (value > 0 && value < compareValue && !decimalFormatBuffer.toString().equals(
-        CoreConstants.MAX_DECIMALS_FORMAT)) {
-      decimalFormatBuffer.append(CoreConstants.DECIMALS_FORMAT_TOKEN);
+        Constants.MAX_DECIMALS_FORMAT)) {
+      decimalFormatBuffer.append(Constants.DECIMALS_FORMAT_TOKEN);
       compareValue = compareValue * 0.1;
     }
     DecimalFormat decimalFormat = new DecimalFormat(decimalFormatBuffer.toString());
@@ -202,11 +214,11 @@ public abstract class ThirdEyeUtils {
   private static String combineComponents(String component1, String component2) {
     List<String> components = new ArrayList<>();
     components.addAll(Arrays.asList(component1.split(
-        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
+        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
     components.addAll(Arrays.asList(component2.split(
-        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
+        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
     return components.stream().distinct().collect(Collectors.joining(
-        CoreConstants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER));
+        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER));
   }
 
   /**
@@ -275,5 +287,81 @@ public abstract class ThirdEyeUtils {
       }
     }
     return mergedTimeSeriesSnapshot;
+  }
+
+  /**
+   * Extract the list of metric urns in the detection config properties
+   *
+   * @param properties the detection config properties
+   * @return the list of metric urns
+   */
+  public static Set<String> extractMetricUrnsFromProperties(Map<String, Object> properties) {
+    Set<String> metricUrns = new HashSet<>();
+    if (properties == null) {
+      return metricUrns;
+    }
+    if (properties.containsKey(PROP_METRIC_URNS_KEY)) {
+      metricUrns.add((String) properties.get(PROP_METRIC_URNS_KEY));
+    }
+    if (properties.containsKey(PROP_NESTED_METRIC_URNS_KEY)) {
+      metricUrns.addAll(ConfigUtils.getList(properties.get(PROP_NESTED_METRIC_URNS_KEY)));
+    }
+    List<Map<String, Object>> nestedProperties = ConfigUtils
+        .getList(properties.get(PROP_NESTED_PROPERTIES_KEY));
+    // extract the metric urns recursively from the nested properties
+    for (Map<String, Object> nestedProperty : nestedProperties) {
+      metricUrns.addAll(extractMetricUrnsFromProperties(nestedProperty));
+    }
+    return metricUrns;
+  }
+
+  public static DataTable getDataTableFromResultSet(final ResultSet resultSet) throws SQLException {
+    final List<String> columns = new ArrayList<>();
+    final List<ColumnType> columnTypes = new ArrayList<>();
+    final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+    final int columnCount = resultSetMetaData.getColumnCount();
+    for (int i = 0; i < columnCount; i++) {
+      columns.add(resultSetMetaData.getColumnLabel(i + 1));
+      columnTypes.add(ColumnType.jdbcTypeToColumnType(resultSetMetaData.getColumnType(i + 1)));
+    }
+    final SimpleDataTableBuilder simpleDataTableBuilder = new SimpleDataTableBuilder(columns,
+        columnTypes);
+    while (resultSet.next()) {
+      final Object[] rowData = simpleDataTableBuilder.newRow();
+      for (int i = 0; i < columnCount; i++) {
+        final ColumnType columnType = columnTypes.get(i);
+        if (columnType.isArray()) {
+          rowData[i] = resultSet.getArray(i + 1);
+          continue;
+        }
+        switch (columnType.getType()) {
+          case INT:
+            rowData[i] = resultSet.getInt(i + 1);
+            continue;
+          case LONG:
+            rowData[i] = resultSet.getLong(i + 1);
+            continue;
+          case DOUBLE:
+            rowData[i] = resultSet.getDouble(i + 1);
+            continue;
+          case STRING:
+            rowData[i] = resultSet.getString(i + 1);
+            continue;
+          case DATE:
+            // todo cyril datetime is parsed as date - precision loss - use timestamp instead?
+            rowData[i] = resultSet.getDate(i + 1);
+            continue;
+          case BOOLEAN:
+            rowData[i] = resultSet.getBoolean(i + 1);
+            continue;
+          case BYTES:
+            rowData[i] = resultSet.getBytes(i + 1);
+            continue;
+          default:
+            throw new RuntimeException("Unrecognized data type - " + columnTypes.get(i + 1));
+        }
+      }
+    }
+    return simpleDataTableBuilder.build();
   }
 }

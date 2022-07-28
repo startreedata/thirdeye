@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.detection.anomaly.detection.trigger.utils;
 
-import ai.startree.thirdeye.notification.DetectionConfigFormatter;
 import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -96,7 +95,7 @@ public class DatasetTriggerInfoRepo {
     List<AlertDTO> detectionConfigs = detectionConfigDAO.findAllActive();
     LOG.info(String.format("Found %d active detection configs", detectionConfigs.size()));
     for (AlertDTO detectionConfig : detectionConfigs) {
-      Set<String> metricUrns = DetectionConfigFormatter
+      Set<String> metricUrns = ThirdEyeUtils
           .extractMetricUrnsFromProperties(detectionConfig.getProperties());
       for (String urn : metricUrns) {
         MetricEntity me = MetricEntity.fromURN(urn);

@@ -15,21 +15,19 @@ package ai.startree.thirdeye.tools;
 
 import static ai.startree.thirdeye.ServerUtils.logJvmSettings;
 
+import ai.startree.thirdeye.PluginLoader;
 import ai.startree.thirdeye.ThirdEyeServer;
-import ai.startree.thirdeye.bootstrap.BootstrapResourcesRegistry;
-import ai.startree.thirdeye.datasource.DataSourcesLoader;
-import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
-import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProviderPlugin;
 import ai.startree.thirdeye.plugins.datasource.DefaultDataSourcesPlugin;
 import ai.startree.thirdeye.plugins.datasource.PinotDataSourcePlugin;
 import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
 import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
-import ai.startree.thirdeye.plugins.notification.email.EmailSendgridNotificationServiceFactory;
-import ai.startree.thirdeye.plugins.notification.email.EmailSmtpNotificationServiceFactory;
+import ai.startree.thirdeye.plugins.notification.email.EmailNotificationPlugin;
 import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
-import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
+import ai.startree.thirdeye.spi.Plugin;
 import com.google.inject.Injector;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,71 +44,30 @@ public class ThirdEyeServerDebug {
 
     final Injector injector = thirdEyeServer.getInjector();
 
-    loadDefaultDataSources(injector.getInstance(DataSourcesLoader.class));
-    loadDetectors(injector.getInstance(DetectionRegistry.class));
-    loadNotificationServiceFactories(injector.getInstance(NotificationServiceRegistry.class));
-    loadContributorsFinderFactories(injector.getInstance(ContributorsFinderRunner.class));
-    loadBootstrapResourcesProviderFactories(injector.getInstance(BootstrapResourcesRegistry.class));
-  }
-
-  private static void loadBootstrapResourcesProviderFactories(
-      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
+    final PluginLoader pluginLoader = injector.getInstance(PluginLoader.class);
     Stream.of(
-            new OpenCoreBoostrapResourcesProviderPlugin()
+            new OpenCoreBoostrapResourcesProviderPlugin(),
+            new SimpleContributorsFinderPlugin(),
+            new DefaultDataSourcesPlugin(),
+            new DetectionComponentsPlugin(),
+            new DetectorsPlugin(),
+            new EmailNotificationPlugin(),
+            new PinotDataSourcePlugin()
         )
-        .forEach(plugin -> plugin.getBootstrapResourcesProviderFactories()
-            .forEach(bootstrapResourcesRegistry::addBootstrapResourcesProviderFactory));
-  }
-
-  private static void loadContributorsFinderFactories(
-      final ContributorsFinderRunner contributorsFinderRunner) {
-    Stream
-        .of(new SimpleContributorsFinderPlugin())
-        .forEach(plugin -> plugin.getContributorsFinderFactories()
-            .forEach(contributorsFinderRunner::addContributorsFinderFactory));
+        .forEach(plugin -> installPlugin(pluginLoader, plugin));
   }
 
   /**
-   * NOTE!
-   * Default Data sources module is packaged as a plugin and therefore not available in the
-   * application. This module has data sources added into it for dev purposes. Any changes WILL
-   * require eventual testing with the final distribution.
+   * invoke private method in PluginLoader.installPlugin(Plugin plugin)
    */
-  static void loadDefaultDataSources(final DataSourcesLoader dataSourcesLoader) {
-    // Load the default data sources.
-    // If there are duplicate additions, this will throw an error.
-    Stream.of(
-            new DefaultDataSourcesPlugin(),
-            new PinotDataSourcePlugin())
-        .forEach(plugin -> plugin
-            .getDataSourceFactories()
-            .forEach(dataSourcesLoader::addThirdEyeDataSourceFactory));
-  }
-
-  static void loadDetectors(final DetectionRegistry detectionRegistry) {
-    // Grab the instance from the coordinator
-
-    // Load the default data sources.
-    // If there are duplicate additions, this will throw an error.
-    final DetectionComponentsPlugin detectionComponentsPlugin = new DetectionComponentsPlugin();
-
-    detectionComponentsPlugin
-        .getAnomalyDetectorFactories()
-        .forEach(detectionRegistry::addAnomalyDetectorFactory);
-
-    detectionComponentsPlugin
-        .getEventTriggerFactories()
-        .forEach(detectionRegistry::addEventTriggerFactory);
-
-    new DetectorsPlugin()
-        .getAnomalyDetectorFactories()
-        .forEach(detectionRegistry::addAnomalyDetectorFactory);
-  }
-
-  static void loadNotificationServiceFactories(final NotificationServiceRegistry instance) {
-    Stream.of(
-        new EmailSmtpNotificationServiceFactory(),
-        new EmailSendgridNotificationServiceFactory()
-    ).forEach(instance::addNotificationServiceFactory);
+  private static void installPlugin(final PluginLoader pluginLoader,
+      final Plugin plugin) {
+    try {
+      final Method method = pluginLoader.getClass().getDeclaredMethod("installPlugin", Plugin.class);
+      method.setAccessible(true);
+      method.invoke(pluginLoader, plugin);
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

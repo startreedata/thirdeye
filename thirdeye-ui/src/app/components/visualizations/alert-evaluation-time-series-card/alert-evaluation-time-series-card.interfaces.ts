@@ -16,15 +16,19 @@ import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface AlertEvaluationTimeSeriesCardProps {
     alertEvaluationTimeSeriesHeight: number;
-    alertEvaluationTimeSeriesMaximizedHeight?: number;
-    title?: string;
-    maximizedTitle?: string;
     alertEvaluation: AlertEvaluation | null;
-    error?: boolean;
-    helperText?: string;
-    showPreviewButton?: boolean;
-    showDatePicker?: boolean;
-    onRefresh?: (start?: number, end?: number) => void;
     onAnomalyBarClick?: (anomaly: Anomaly) => void;
+    onRefresh?: (start?: number, end?: number) => void;
     isLoading?: boolean;
+    header?: React.ReactElement;
+}
+
+export interface ViewAnomalyHeaderProps {
+    anomaly: Anomaly | null;
+    onRefresh?: (start?: number, end?: number) => void;
+}
+
+export interface CreateAlertHeaderProps {
+    onRefresh?: (start?: number, end?: number) => void;
+    title: string;
 }

@@ -62,3 +62,4 @@ taskDriver:
   id: 0 # must be a non-negative integer unique per instance/worker
   noTaskDelay: 1
   randomDelayCap: 1
+  taskFailureDelay: 1

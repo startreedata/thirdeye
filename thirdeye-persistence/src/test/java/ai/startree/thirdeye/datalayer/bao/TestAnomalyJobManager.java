@@ -25,6 +25,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(singleThreaded = true)
 public class TestAnomalyJobManager {
 
   // some tests can be flaky because of the latencies caused by the dockerized MySQL

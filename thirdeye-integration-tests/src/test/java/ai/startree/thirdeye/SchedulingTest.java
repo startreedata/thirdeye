@@ -65,6 +65,7 @@ import org.testng.annotations.Test;
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  */
 // todo cyril pinot is not necessary - implement and use csv/in-memory datasource instead
+@Test(singleThreaded = true)
 public class SchedulingTest extends PinotBasedIntegrationTest {
 
   private static final Logger log = LoggerFactory.getLogger(SchedulingTest.class);

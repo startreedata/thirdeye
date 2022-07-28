@@ -36,9 +36,6 @@
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
 
-    <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
-    <module>thirdeye-deprecated-tests</module>
-
     <!--  Build the distribution -->
     <module>thirdeye-distribution</module>
 

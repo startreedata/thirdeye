@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
@@ -71,7 +70,7 @@ public class TestAnomalyTaskManager {
   void beforeClass() {
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
     CLOCK.useMockTime(JANUARY_1_2022);  // JANUARY 1 2022
-    Injector injector = new MySqlTestDatabase().createInjector();
+    Injector injector = SharedInjector.get();
     jobDAO = injector.getInstance(JobManager.class);
     taskDAO = injector.getInstance(TaskManager.class);
   }
@@ -79,6 +78,8 @@ public class TestAnomalyTaskManager {
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
+    jobDAO.findAll().forEach(jobDAO::delete);
+    taskDAO.findAll().forEach(taskDAO::delete);
   }
 
   @Test

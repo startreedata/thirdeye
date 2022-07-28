@@ -13,13 +13,13 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
 import java.util.ArrayList;
 import java.util.List;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestRootcauseTemplateManager {
@@ -27,9 +27,14 @@ public class TestRootcauseTemplateManager {
   private final static String TEMPLATE_NAME = "test_template_";
   private RootcauseTemplateManager templateDao;
 
-  @BeforeMethod
-  void beforeMethod() {
-    templateDao = new MySqlTestDatabase().createInjector().getInstance(RootcauseTemplateManager.class);
+  @BeforeClass
+  void beforeClass() {
+    templateDao = SharedInjector.get().getInstance(RootcauseTemplateManager.class);
+  }
+
+  @AfterMethod
+  void cleanCreatedEntities() {
+    templateDao.findAll().forEach(templateDao::delete);
   }
 
   @Test

@@ -33,14 +33,15 @@ public class TestDatabase {
 
   public static final String USERNAME = "root";
   public static final String PASSWORD = "test";
+  public static final String JDBC_URL;
   private static final MySQLContainer<?> persistenceDbContainer = new MySQLContainer<>(
       MYSQL_DOCKER_IMAGE).withPassword(PASSWORD);
   private static final String DEFAULT_DATABASE_NAME;
 
   static {
     persistenceDbContainer.start();
-    String jdbUrl = persistenceDbContainer.getJdbcUrl();
-    String[] elements = jdbUrl.split("/");
+    JDBC_URL = persistenceDbContainer.getJdbcUrl();
+    String[] elements = JDBC_URL.split("/");
     DEFAULT_DATABASE_NAME = elements[elements.length - 1];
   }
 
@@ -52,14 +53,14 @@ public class TestDatabase {
           USERNAME,
           PASSWORD);
       connection.createStatement().execute("CREATE DATABASE " + databaseName + ";");
-      connection.createStatement().execute("SET GLOBAL max_connections = 512;");
+      connection.createStatement().execute("SET GLOBAL max_connections = 800;");
       connection.close();
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
 
     return new DatabaseConfiguration()
-        .setUrl(persistenceDbContainer.getJdbcUrl().replace(DEFAULT_DATABASE_NAME, databaseName)
+        .setUrl(JDBC_URL.replace(DEFAULT_DATABASE_NAME, databaseName)
             + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED")
         .setUser(USERNAME)
         .setPassword(PASSWORD)

@@ -82,9 +82,4 @@ public class TimeProvider {
   public synchronized long tick(long tick) {
     return currentTimeMillis.addAndGet(tick);
   }
-
-  public static void main(String[] args) {
-    var CLOCK = new TimeProvider();
-    System.out.println(CLOCK.isTimeMockWorking());
-  }
 }

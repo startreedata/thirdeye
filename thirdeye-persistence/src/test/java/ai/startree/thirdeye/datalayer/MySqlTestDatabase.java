@@ -28,7 +28,7 @@ import org.testcontainers.containers.MySQLContainer;
 public class MySqlTestDatabase {
 
   private static final Logger log = LoggerFactory.getLogger(MySqlTestDatabase.class);
-  private static AtomicInteger counter = new AtomicInteger(0);
+  private static final AtomicInteger counter = new AtomicInteger(0);
   private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
   public static final String USERNAME = "root";

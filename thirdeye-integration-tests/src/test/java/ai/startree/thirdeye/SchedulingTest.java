@@ -210,7 +210,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     List<Map<String, Object>> anomalies = List.of();
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
-      Thread.sleep(8000);
+      Thread.sleep(4000);
       anomalies = getAnomalies();
     }
 
@@ -235,7 +235,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
     // wait for the new anomaly to be created - proxy to know when the detection has run
     while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
-      Thread.sleep(8000);
+      Thread.sleep(4000);
       anomalies = getAnomalies();
     }
 
@@ -259,7 +259,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
     // wait for a new anomaly to be created - proxy to know when the detection has run
     while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
-      Thread.sleep(8000);
+      Thread.sleep(4000);
       anomalies = getAnomalies();
     }
 

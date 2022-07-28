@@ -29,7 +29,7 @@ public class QuartzRandomizedIdleWaitTimeMockAspect {
   public Object aroundRandomizedIdleWaitTime(ProceedingJoinPoint pjp) throws Throwable {
     if (TimeProvider.instance().isTimedMocked()) {
       // time is controlled manually - make quartz idle time small for test speed
-      return 1000;
+      return 500;
     }
     return pjp.proceed();
   }

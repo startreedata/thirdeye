@@ -60,5 +60,5 @@ swagger:
 taskDriver:
   enabled: true
   id: 0 # must be a non-negative integer unique per instance/worker
-  noTaskDelay: 2
-  randomDelayCap: 2
+  noTaskDelay: 1
+  randomDelayCap: 1

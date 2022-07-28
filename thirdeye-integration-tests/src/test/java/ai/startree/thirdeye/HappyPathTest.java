@@ -222,7 +222,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     List<Map<String, Object>> anomalies = List.of();
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
-      Thread.sleep(3000);
+      Thread.sleep(1000);
       Response response = request("api/anomalies").get();
       assertThat(response.getStatus()).isEqualTo(200);
       anomalies = response.readEntity(List.class);

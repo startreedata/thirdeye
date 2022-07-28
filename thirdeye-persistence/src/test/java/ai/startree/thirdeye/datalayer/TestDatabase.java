@@ -85,6 +85,7 @@ public class TestDatabase {
     dataSource.setUsername(dbConfig.getUser());
     dataSource.setDriverClassName(dbConfig.getDriver());
 
+    // todo cyril use the same method for this test configuration and the server configuration
     // pool size configurations
     dataSource.setInitialSize(10);
     dataSource.setDefaultAutoCommit(false);

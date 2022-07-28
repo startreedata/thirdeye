@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  *
  * In command line: ./mvnw -pl 'thirdeye-persistence' -Dtest=TestAnomalyJobManager test
- *
  */
 public class TestAnomalyJobManager {
 
@@ -53,9 +52,8 @@ public class TestAnomalyJobManager {
   @BeforeClass
   void beforeClass() {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
-    // advance time at each step
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
-    CLOCK.useMockTime(JANUARY_1_2022);  // JANUARY 1 2022
+    CLOCK.useMockTime(JANUARY_1_2022);
     jobDAO = new TestDatabase().createInjector().getInstance(JobManager.class);
   }
 

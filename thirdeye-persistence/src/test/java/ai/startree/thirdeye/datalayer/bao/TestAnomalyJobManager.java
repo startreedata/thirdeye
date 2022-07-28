@@ -59,7 +59,7 @@ public class TestAnomalyJobManager {
     jobDAO = new TestDatabase().createInjector().getInstance(JobManager.class);
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
   }

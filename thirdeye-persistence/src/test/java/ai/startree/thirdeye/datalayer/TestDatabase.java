@@ -44,7 +44,8 @@ public class TestDatabase {
     DEFAULT_DATABASE_NAME = elements[elements.length - 1];
   }
 
-  public DatabaseConfiguration testDatabaseConfiguration() {
+
+  public synchronized DatabaseConfiguration testDatabaseConfiguration() {
     final String databaseName = DEFAULT_DATABASE_NAME + counter.getAndIncrement();
     try {
       final Connection connection = DriverManager.getConnection(persistenceDbContainer.getJdbcUrl(),

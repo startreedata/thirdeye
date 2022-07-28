@@ -64,9 +64,9 @@ public class DataSourceBuilder {
 
   private DataSource createDataSource(final DatabaseConfiguration dbConfig) {
     final DataSource dataSource = new DataSource();
-    dataSource.setInitialSize(1);
+    dataSource.setInitialSize(10);
     dataSource.setDefaultAutoCommit(false);
-    dataSource.setMaxActive(1);
+    dataSource.setMaxActive(100);
     dataSource.setUsername(dbConfig.getUser());
     dataSource.setPassword(dbConfig.getPassword());
     dataSource.setUrl(dbConfig.getUrl());

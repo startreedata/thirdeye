@@ -41,7 +41,7 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
-    <!-- todo cyril - remove this-->
+    <!-- todo cyril - remove this dependency - legacy code-->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>

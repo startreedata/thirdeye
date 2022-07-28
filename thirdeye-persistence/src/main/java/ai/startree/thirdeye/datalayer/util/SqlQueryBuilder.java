@@ -88,7 +88,7 @@ public class SqlQueryBuilder {
     names.append(")");
     values.append(")");
 
-    return "INSERT INTO " + tableName + names.toString() + values.toString();
+    return "INSERT INTO " + tableName + names + values;
   }
 
   public PreparedStatement createInsertStatement(final Connection conn, final AbstractEntity entity)
@@ -190,7 +190,7 @@ public class SqlQueryBuilder {
         entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
     final StringBuilder whereClause = new StringBuilder(" WHERE ");
     generateWhereClause(entityNameToDBNameMapping, predicate, parametersList, whereClause);
-    sqlBuilder.append(whereClause.toString());
+    sqlBuilder.append(whereClause);
     int parameterIndex = 1;
     final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
     for (final Pair<String, Object> paramEntry : parametersList) {
@@ -221,7 +221,7 @@ public class SqlQueryBuilder {
       delim = ",";
     }
     whereClause.append(")");
-    sqlBuilder.append(whereClause.toString());
+    sqlBuilder.append(whereClause);
     return connection.prepareStatement(sqlBuilder.toString());
   }
 
@@ -239,7 +239,7 @@ public class SqlQueryBuilder {
       whereClause.append(dbFieldName).append("=").append("?");
       parametersMap.put(dbFieldName, filters.get(columnName));
     }
-    sqlBuilder.append(whereClause.toString());
+    sqlBuilder.append(whereClause);
     final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
     int parameterIndex = 1;
     final LinkedHashMap<String, ColumnInfo> columnInfoMap =
@@ -276,7 +276,7 @@ public class SqlQueryBuilder {
     final StringBuilder whereClause = new StringBuilder(" WHERE ");
     final List<Pair<String, Object>> parametersList = new ArrayList<>();
     generateWhereClause(entityNameToDBNameMapping, predicate, parametersList, whereClause);
-    sqlBuilder.append(whereClause.toString());
+    sqlBuilder.append(whereClause);
     if (limit != null) {
       sqlBuilder.append(" LIMIT ").append(limit);
     }
@@ -422,7 +422,7 @@ public class SqlQueryBuilder {
           if (!rhs.getClass().isArray()) {
             rhs = rhs.toString().split(",");
           }
-          whereClause.append(columnName).append(" ").append(Predicate.OPER.IN.toString())
+          whereClause.append(columnName).append(" ").append(Predicate.OPER.IN)
               .append("(");
           delim = "";
           final int length = Array.getLength(rhs);

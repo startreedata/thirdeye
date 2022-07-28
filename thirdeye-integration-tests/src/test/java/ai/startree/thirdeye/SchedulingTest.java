@@ -110,7 +110,6 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     db = new ThirdEyeH2DatabaseServer("localhost", 7120, "ThirdEyeIntegrationTest");
     db.start();
     db.truncateAllTables();
-    ;
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 

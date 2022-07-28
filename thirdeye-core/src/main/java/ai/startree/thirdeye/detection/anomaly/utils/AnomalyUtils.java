@@ -74,7 +74,7 @@ public class AnomalyUtils {
       }
       LOG.warn("{} merged anomalies overlap with this window {} -- {}. Anomalies: {}",
           overlappedAnomalies.size(),
-          windowStart, windowEnd, sb.toString());
+          windowStart, windowEnd, sb);
     }
   }
 

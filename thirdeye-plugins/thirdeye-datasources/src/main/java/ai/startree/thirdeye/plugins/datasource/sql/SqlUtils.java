@@ -92,7 +92,7 @@ public class SqlUtils {
     }
 
     String sql = String
-        .format("INSERT INTO %s(%s) VALUES(%s)", tableName, columnNames, sb.toString());
+        .format("INSERT INTO %s(%s) VALUES(%s)", tableName, columnNames, sb);
     try (Connection connection = ds.getConnection();
         Statement statement = connection.createStatement()) {
       statement.execute(sql);

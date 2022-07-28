@@ -71,11 +71,7 @@ public abstract class AnomalyTimeBasedSummarizer {
     });
 
     boolean applySequentialGapBasedSplit = false;
-    boolean applyMaxDurationBasedSplit = false;
-
-    if (maxMergedDurationMillis > 0) {
-      applyMaxDurationBasedSplit = true;
-    }
+    boolean applyMaxDurationBasedSplit = maxMergedDurationMillis > 0;
 
     if (sequentialAllowedGap > 0) {
       applySequentialGapBasedSplit = true;

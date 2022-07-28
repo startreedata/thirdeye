@@ -17,7 +17,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
@@ -59,7 +58,7 @@ class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
   @Override
   public Templatable<?> deserialize(final JsonParser jsonParser,
       final DeserializationContext context)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     // case value is a variable in format ${VARIABLE_NAME}
     final String textValue = jsonParser.getText();
     if (textValue.startsWith("${")) {

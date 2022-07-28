@@ -46,7 +46,7 @@ public class MySqlTestDatabase {
   }
 
 
-  public synchronized DatabaseConfiguration testDatabaseConfiguration() {
+  public DatabaseConfiguration testDatabaseConfiguration() {
     final String databaseName = DEFAULT_DATABASE_NAME + counter.getAndIncrement();
     try {
       final Connection connection = DriverManager.getConnection(persistenceDbContainer.getJdbcUrl(),

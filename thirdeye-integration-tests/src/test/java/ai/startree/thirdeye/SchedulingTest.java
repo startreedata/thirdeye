@@ -148,7 +148,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());

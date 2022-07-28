@@ -99,7 +99,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- needs to be exported by modules that use TestDatabase or aspect -->
+    <!-- needs to be exported by modules that use TestDatabase or TimeProvider -->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>

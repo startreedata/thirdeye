@@ -11,11 +11,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.utils;
+package ai.startree.thirdeye.aspect;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+// use this class to controle the value returned by System.currentTimeMillis()
 // thread safety has not been thoroughly tested
 public class TimeProvider {
 
@@ -27,6 +29,26 @@ public class TimeProvider {
 
   private final AtomicLong currentTimeMillis = new AtomicLong();
   private final AtomicBoolean mockTime = new AtomicBoolean(false);
+
+  public boolean isTimeMockWorking() {
+    // setting before the test
+    boolean originalMockTime = mockTime.get();
+    final long originalCurrentTimeMillis = currentTimeMillis.get();
+
+    useMockTime(0);
+    final boolean systemMockWorks = System.currentTimeMillis() == 0;
+    final boolean dateMockWorks = new Date().getTime() == 0;
+    final int tickTestValue = 20;
+    tick(tickTestValue);
+    final boolean systemChangeWorks = System.currentTimeMillis() == tickTestValue;
+    final boolean dateChangeWorks = new Date().getTime() == tickTestValue;
+
+    // set back to the setting before the test
+    mockTime.set(originalMockTime);
+    currentTimeMillis.set(originalCurrentTimeMillis);
+
+    return systemMockWorks && dateMockWorks && systemChangeWorks && dateChangeWorks;
+  }
 
   public boolean isTimedMocked() {
     return mockTime.get();

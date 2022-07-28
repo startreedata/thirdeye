@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import java.util.List;
@@ -27,7 +27,7 @@ public class TestOnlineDetectionDataManager {
 
   @BeforeMethod
   void beforeMethod() {
-    dataDAO = new TestDatabase().createInjector().getInstance(OnlineDetectionDataManager.class);
+    dataDAO = new MySqlTestDatabase().createInjector().getInstance(OnlineDetectionDataManager.class);
   }
 
   @Test

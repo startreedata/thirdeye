@@ -13,8 +13,11 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
@@ -35,9 +38,23 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/**
+ * This class uses weaving to control the java system time.
+ *
+ * Note: if run within IntelliJ, run with the following JVM option:
+ * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.6/aspectjweaver-1.9.6.jar
+ * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
+ *
+ * In command line: ./mvnw -pl 'thirdeye-persistence' -Dtest=TestAnomalyTaskManager test
+ *
+ */
 public class TestAnomalyTaskManager {
 
   private static final Set<TaskStatus> allowedOldTaskStatus = new HashSet<>();
+
+  private static final TimeProvider CLOCK = TimeProvider.instance();
+  // use a time big enough because Timestamp(small int) parses to hours instead of millis
+  public static final long JANUARY_1_2022 = 1640998861000L;
 
   static {
     allowedOldTaskStatus.add(TaskStatus.FAILED);
@@ -52,14 +69,16 @@ public class TestAnomalyTaskManager {
 
   @BeforeClass
   void beforeClass() {
-    Injector injector = new TestDatabase().createInjector();
+    assertThat(CLOCK.isTimeMockWorking()).isTrue();
+    CLOCK.useMockTime(JANUARY_1_2022);  // JANUARY 1 2022
+    Injector injector = new MySqlTestDatabase().createInjector();
     jobDAO = injector.getInstance(JobManager.class);
     taskDAO = injector.getInstance(TaskManager.class);
   }
 
   @AfterClass(alwaysRun = true)
-  void afterClass() {
-
+  public void afterClass() {
+    CLOCK.useSystemTime();
   }
 
   @Test
@@ -73,13 +92,14 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testCreate"})
-  public void testFindAll() throws Exception {
+  public void testFindAll() {
     List<TaskDTO> anomalyTasks = taskDAO.findAll();
     Assert.assertEquals(anomalyTasks.size(), 2);
   }
 
   @Test(dependsOnMethods = {"testFindAll"})
   public void testUpdateStatusAndWorkerId() {
+    CLOCK.tick(1);
     Long workerId = 1L;
     TaskDTO taskDTO = taskDAO.findById(anomalyTaskId1);
     boolean status =
@@ -103,6 +123,7 @@ public class TestAnomalyTaskManager {
   public void testUpdateStatusAndTaskEndTime() {
     TaskStatus oldStatus = TaskStatus.RUNNING;
     TaskStatus newStatus = TaskStatus.COMPLETED;
+    CLOCK.tick(50);
     long taskEndTime = System.currentTimeMillis();
     taskDAO.updateStatusAndTaskEndTime(anomalyTaskId1, oldStatus, newStatus, taskEndTime,
         "testMessage");
@@ -113,7 +134,7 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testUpdateStatusAndTaskEndTime"})
-  public void testFindByJobIdStatusNotIn() {
+  public void testFindByJobIdStatusNotIn() throws InterruptedException {
     TaskStatus status = TaskStatus.COMPLETED;
     List<TaskDTO> anomalyTaskSpecs = taskDAO.findByJobIdStatusNotIn(anomalyJobId, status);
     Assert.assertEquals(anomalyTaskSpecs.size(), 1);
@@ -121,6 +142,7 @@ public class TestAnomalyTaskManager {
 
   @Test(dependsOnMethods = {"testCreate"})
   public void testUpdateTaskStartTime() {
+    CLOCK.tick(50);
     long taskStartTime = System.currentTimeMillis();
     taskDAO.updateTaskStartTime(anomalyTaskId1, taskStartTime);
     TaskDTO anomalyTask = taskDAO.findById(anomalyTaskId1);
@@ -135,7 +157,7 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testDeleteRecordOlderThanDaysWithStatus"})
-  public void testFindByStatusWithinDays() throws JsonProcessingException, InterruptedException {
+  public void testFindByStatusWithinDays() throws JsonProcessingException {
     JobDTO testAnomalyJobSpec = DatalayerTestUtils.getTestJobSpec();
     anomalyJobId = jobDAO.save(testAnomalyJobSpec);
     anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
@@ -143,7 +165,7 @@ public class TestAnomalyTaskManager {
     anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
     Assert.assertNotNull(anomalyTaskId2);
 
-    Thread.sleep(100); // To ensure every task has been created more than 1 ms ago
+    CLOCK.tick(2); // To ensure every task has been created more than 1 ms ago
 
     List<TaskDTO> tasksWithZeroDays = taskDAO.findByStatusWithinDays(TaskStatus.WAITING, 0);
     Assert.assertEquals(tasksWithZeroDays.size(), 0);
@@ -154,15 +176,12 @@ public class TestAnomalyTaskManager {
 
   @Test(dependsOnMethods = {"testDeleteRecordOlderThanDaysWithStatus"})
   public void testFindTimeoutTasksWithinDays()
-      throws JsonProcessingException, InterruptedException {
+  {
     TaskDTO task1 = taskDAO.findById(anomalyTaskId1);
     task1.setStatus(TaskStatus.RUNNING);
     taskDAO.update(task1);
 
-    Thread.sleep(100); // To ensure every task has been updated more than 50 ms ago
-
-    List<TaskDTO> all = taskDAO.findByStatusWithinDays(TaskStatus.RUNNING, 7);
-
+    CLOCK.tick(55); // To ensure every task has been updated more than 50 ms ago
     List<TaskDTO> timeoutTasksWithinOneDays = taskDAO.findTimeoutTasksWithinDays(7, 50);
     Assert.assertTrue(timeoutTasksWithinOneDays.size() > 0);
   }

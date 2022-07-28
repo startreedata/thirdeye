@@ -916,12 +916,6 @@
         <artifactId>hsqldb</artifactId>
         <version>${hsqldb.version}</version>
       </dependency>
-      <!-- Used for demo setup and mock data source-->
-      <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>1.4.200</version>
-      </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>

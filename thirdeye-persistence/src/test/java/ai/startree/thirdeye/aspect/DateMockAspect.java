@@ -13,23 +13,23 @@
  */
 package ai.startree.thirdeye.aspect;
 
-import ai.startree.thirdeye.utils.TimeProvider;
+import java.util.Date;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
 @Aspect
-public class SystemTimeMockAspect {
+public class DateMockAspect {
 
-  @Pointcut("call(public long java.lang.System.currentTimeMillis())")
-  void currentTimeMillis() {
+  @Pointcut("call(java.util.Date.new())")
+  void currentDate() {
   }
 
-  @Around("currentTimeMillis()")
-  public Object aroundSystemcurrentTimeMillis(ProceedingJoinPoint pjp) throws Throwable {
+  @Around("currentDate()")
+  public Object aroundCurrentDate(ProceedingJoinPoint pjp) throws Throwable {
     if (TimeProvider.instance().isTimedMocked()) {
-      return TimeProvider.instance().currentTimeMillis();
+      return new Date(TimeProvider.instance().currentTimeMillis());
     }
     return pjp.proceed();
   }

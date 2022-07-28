@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.inject.Injector;
@@ -40,7 +40,7 @@ public class TestMetricConfigManager {
 
   @BeforeClass
   void beforeClass() {
-    Injector injector = new TestDatabase().createInjector();
+    Injector injector = new MySqlTestDatabase().createInjector();
     metricConfigDAO = injector.getInstance(MetricConfigManager.class);
   }
 

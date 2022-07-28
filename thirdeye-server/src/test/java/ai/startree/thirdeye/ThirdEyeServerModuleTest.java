@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.resources.RootResource;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
@@ -31,7 +31,7 @@ public class ThirdEyeServerModuleTest {
 
   @Test
   public void testRootResourceInjection() throws Exception {
-    final TestDatabase db = new TestDatabase();
+    final MySqlTestDatabase db = new MySqlTestDatabase();
     final DataSource dataSource = db.createDataSource(db.testDatabaseConfiguration());
 
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()

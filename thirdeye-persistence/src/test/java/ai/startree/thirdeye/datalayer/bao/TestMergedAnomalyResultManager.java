@@ -15,7 +15,7 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -44,7 +44,7 @@ public class TestMergedAnomalyResultManager {
 
   @BeforeClass
   void beforeClass() {
-    final Injector injector = new TestDatabase().createInjector();
+    final Injector injector = new MySqlTestDatabase().createInjector();
     detectionConfigDAO = injector.getInstance(AlertManager.class);
     mergedAnomalyResultDAO = injector.getInstance(MergedAnomalyResultManager.class);
   }

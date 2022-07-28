@@ -51,6 +51,7 @@ public class TestDatabase {
           USERNAME,
           PASSWORD);
       connection.createStatement().execute("CREATE DATABASE " + databaseName + ";");
+      connection.createStatement().execute("SET GLOBAL max_connections = 512;");
       connection.close();
     } catch (SQLException e) {
       throw new RuntimeException(e);

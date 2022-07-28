@@ -15,9 +15,8 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.aspect.TimeProvider;
+import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.spi.Constants.JobStatus;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
@@ -54,12 +53,13 @@ public class TestAnomalyJobManager {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
     CLOCK.useMockTime(JANUARY_1_2022);
-    jobDAO = new MySqlTestDatabase().createInjector().getInstance(JobManager.class);
+    jobDAO = SharedInjector.get().getInstance(JobManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
+    jobDAO.findAll().forEach(jobDAO::delete);
   }
 
   @Test

@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import java.util.List;
@@ -38,14 +37,12 @@ public class TestDetectionStatusManager {
 
   @BeforeClass
   void beforeClass() {
-    detectionStatusDAO = new MySqlTestDatabase()
-        .createInjector()
-        .getInstance(DetectionStatusManager.class);
+    detectionStatusDAO = SharedInjector.get().getInstance(DetectionStatusManager.class);
   }
 
   @AfterClass(alwaysRun = true)
-  void afterClass() {
-
+  void clean() {
+    detectionStatusDAO.findAll().forEach(detectionStatusDAO::delete);
   }
 
   @Test

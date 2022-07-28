@@ -14,10 +14,8 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import com.google.inject.Injector;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -40,12 +38,12 @@ public class TestMetricConfigManager {
 
   @BeforeClass
   void beforeClass() {
-    Injector injector = new MySqlTestDatabase().createInjector();
-    metricConfigDAO = injector.getInstance(MetricConfigManager.class);
+    metricConfigDAO = SharedInjector.get().getInstance(MetricConfigManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
+    metricConfigDAO.findAll().forEach(metricConfigDAO::delete);
   }
 
   @Test

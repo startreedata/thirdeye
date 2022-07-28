@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.resources.RootResource;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.codahale.metrics.MetricRegistry;
@@ -43,10 +42,6 @@ public class ThirdEyeServerModuleTest {
         configuration,
         dataSource,
         new MetricRegistry()));
-
-    injector
-        .getInstance(ThirdEyeCacheRegistry.class)
-        .initializeCaches();
 
     assertThat(injector.getInstance(RootResource.class)).isNotNull();
   }

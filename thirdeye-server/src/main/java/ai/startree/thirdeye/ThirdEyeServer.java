@@ -25,7 +25,6 @@ import ai.startree.thirdeye.auth.ThirdEyeAuthenticator;
 import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
-import ai.startree.thirdeye.datasource.ThirdEyeCacheRegistry;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.json.ThirdEyeJsonProcessingExceptionMapper;
 import ai.startree.thirdeye.resources.RootResource;
@@ -115,11 +114,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
             .setPluginsPath(pluginsPath));
 
     injector.getInstance(PluginLoader.class).loadPlugins();
-
-    // Initialize ThirdEyeCacheRegistry
-    injector
-        .getInstance(ThirdEyeCacheRegistry.class)
-        .initializeCaches();
 
     env.jersey().register(injector.getInstance(RootResource.class));
     env.jersey().register(new ThirdEyeJsonProcessingExceptionMapper());

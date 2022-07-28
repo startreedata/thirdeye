@@ -15,7 +15,7 @@ import { Box, Grid, Typography } from "@material-ui/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { CronEditor } from "../../../cron-editor/cron-editor.componant";
+import { CronEditor } from "../../../cron-editor/cron-editor.component";
 import { AlertFrequencyProps } from "./alert-frequency.interfaces";
 
 function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({

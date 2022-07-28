@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
@@ -87,7 +87,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private final TestDatabase mysqlTestDatabase = new TestDatabase();
+  private final MySqlTestDatabase mysqlTestDatabase = new MySqlTestDatabase();
 
   // this attribute is shared between tests
   private long anomalyId;

@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -97,7 +97,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     }
   }
 
-  private final TestDatabase mysqlTestDatabase = new TestDatabase();
+  private final MySqlTestDatabase mysqlTestDatabase = new MySqlTestDatabase();
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 

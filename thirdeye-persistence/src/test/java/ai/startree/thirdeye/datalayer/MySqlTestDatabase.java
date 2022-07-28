@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MySQLContainer;
 
-public class TestDatabase {
+public class MySqlTestDatabase {
 
-  private static final Logger log = LoggerFactory.getLogger(TestDatabase.class);
+  private static final Logger log = LoggerFactory.getLogger(MySqlTestDatabase.class);
   private static AtomicInteger counter = new AtomicInteger(0);
   private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 

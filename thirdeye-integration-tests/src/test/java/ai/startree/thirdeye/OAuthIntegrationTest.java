@@ -21,7 +21,7 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -55,7 +55,7 @@ public class OAuthIntegrationTest {
   private File dir;
   public DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private final TestDatabase mysqlTestDatabase = new TestDatabase();
+  private final MySqlTestDatabase mysqlTestDatabase = new MySqlTestDatabase();
 
   @BeforeClass
   public void beforeClass() throws Exception {

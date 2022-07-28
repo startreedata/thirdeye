@@ -21,7 +21,7 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.database.TestDatabase;
+import ai.startree.thirdeye.datalayer.TestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;

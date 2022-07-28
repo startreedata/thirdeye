@@ -20,6 +20,8 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
+import ai.startree.thirdeye.database.TestDatabase;
+import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
@@ -47,8 +49,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -71,7 +71,6 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
-  private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
   private static final AlertApi ALERT_API;
@@ -88,7 +87,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private JdbcDatabaseContainer<?> persistenceDbContainer;
+  private final TestDatabase mysqlTestDatabase = new TestDatabase();
 
   // this attribute is shared between tests
   private long anomalyId;
@@ -97,8 +96,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    persistenceDbContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE);
-    persistenceDbContainer.start();
+    final DatabaseConfiguration dbConfiguration = mysqlTestDatabase.testDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
@@ -106,10 +104,10 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("happypath/config/server.yaml"),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", persistenceDbContainer.getJdbcUrl() + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED"),
-        config("database.user", persistenceDbContainer.getUsername()),
-        config("database.password", persistenceDbContainer.getPassword()),
-        config("database.driver", persistenceDbContainer.getDriverClassName())
+        config("database.url", dbConfiguration.getUrl()),
+        config("database.user", dbConfiguration.getUser()),
+        config("database.password", dbConfiguration.getPassword()),
+        config("database.driver", dbConfiguration.getDriver())
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
@@ -143,8 +141,6 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   public void afterClass() {
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    log.info("Stopping mysqlDb at port: {}", persistenceDbContainer.getJdbcUrl());
-    persistenceDbContainer.stop();
   }
 
   @Test()

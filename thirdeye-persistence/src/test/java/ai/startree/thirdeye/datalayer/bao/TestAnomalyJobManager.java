@@ -27,6 +27,9 @@ import org.testng.annotations.Test;
 
 public class TestAnomalyJobManager {
 
+  // some tests can be flaky because of the latencies caused by the dockerized MySQL
+  private static final int FLAKY_TEST_SLEEP = 100;
+
   private Long anomalyJobId1;
   private Long anomalyJobId2;
   private Long anomalyJobId3;
@@ -90,7 +93,8 @@ public class TestAnomalyJobManager {
   }
 
   @Test(dependsOnMethods = {"testFindByStatus"})
-  public void testDeleteRecordsOlderThanDaysWithStatus() {
+  public void testDeleteRecordsOlderThanDaysWithStatus() throws InterruptedException {
+    Thread.sleep(FLAKY_TEST_SLEEP);
     JobStatus status = JobStatus.COMPLETED;
     int numRecordsDeleted = jobDAO.deleteRecordsOlderThanDaysWithStatus(0, status);
     Assert.assertEquals(numRecordsDeleted, 2);
@@ -107,7 +111,7 @@ public class TestAnomalyJobManager {
     anomalyJobId3 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId3);
 
-    Thread.sleep(100); // To ensure every job has been created more than 1 ms ago
+    Thread.sleep(300 + FLAKY_TEST_SLEEP); // To ensure every job has been created more than 1 ms ago
 
     List<JobDTO> jobsWithZeroDays = jobDAO.findByStatusWithinDays(JobStatus.SCHEDULED, 0);
     Assert.assertEquals(jobsWithZeroDays.size(), 0);

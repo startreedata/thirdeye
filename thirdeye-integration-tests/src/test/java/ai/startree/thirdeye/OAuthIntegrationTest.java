@@ -21,7 +21,8 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.database.ThirdEyeH2DatabaseServer;
+import ai.startree.thirdeye.database.TestDatabase;
+import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import io.dropwizard.client.JerseyClientBuilder;
@@ -54,23 +55,21 @@ public class OAuthIntegrationTest {
   private File dir;
   public DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private ThirdEyeH2DatabaseServer db;
+  private final TestDatabase mysqlTestDatabase = new TestDatabase();
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7123, "OAuthIntegrationTest");
-    db.start();
-    db.truncateAllTables();
+    final DatabaseConfiguration dbConfiguration = mysqlTestDatabase.testDatabaseConfiguration();
 
     oauthSetup();
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("auth/server.yaml"),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", db.getDbConfig().getUrl()),
-        config("database.user", db.getDbConfig().getUser()),
-        config("database.password", db.getDbConfig().getPassword()),
-        config("database.driver", db.getDbConfig().getDriver()),
+        config("database.url", dbConfiguration.getUrl()),
+        config("database.user", dbConfiguration.getUser()),
+        config("database.password", dbConfiguration.getPassword()),
+        config("database.driver", dbConfiguration.getDriver()),
         config("auth.enabled", "true"),
         config("auth.oauth.keysUrl",
             String.format("file://%s/%s", dir.getAbsolutePath(), KEY_SET_FILENAME))
@@ -102,7 +101,6 @@ public class OAuthIntegrationTest {
   public void afterClass() throws Exception {
     log.info("Thirdeye port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    db.stop();
 
     optional(dir.listFiles())
         .map(Arrays::stream)

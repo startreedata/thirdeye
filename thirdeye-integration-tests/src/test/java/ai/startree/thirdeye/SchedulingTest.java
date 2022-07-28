@@ -20,7 +20,8 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.database.ThirdEyeH2DatabaseServer;
+import ai.startree.thirdeye.database.TestDatabase;
+import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
@@ -88,8 +89,6 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   // = MARCH_26_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
   private static final long MARCH_23_2020_00H00 = 1584921600_000L;
 
-  private ThirdEyeH2DatabaseServer db;
-
   static {
     try {
       String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
@@ -100,6 +99,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     }
   }
 
+  private final TestDatabase mysqlTestDatabase = new TestDatabase();
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -107,19 +107,17 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
   @BeforeClass
   public void beforeClass() throws SQLException {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7120, "ThirdEyeIntegrationTest");
-    db.start();
-    db.truncateAllTables();
+    final DatabaseConfiguration dbConfiguration = mysqlTestDatabase.testDatabaseConfiguration();
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("scheduling/config/server.yaml"),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", db.getDbConfig().getUrl()),
-        config("database.user", db.getDbConfig().getUser()),
-        config("database.password", db.getDbConfig().getPassword()),
-        config("database.driver", db.getDbConfig().getDriver())
+        config("database.url", dbConfiguration.getUrl()),
+        config("database.user", dbConfiguration.getUser()),
+        config("database.password", dbConfiguration.getPassword()),
+        config("database.driver", dbConfiguration.getDriver())
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
@@ -154,8 +152,6 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     CLOCK.useSystemTime();
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    log.info("Stopping H2 Db at port: {}", db.getDbConfig().getUrl());
-    db.stop();
   }
 
   @Test()

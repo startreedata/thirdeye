@@ -11,8 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer;
+package ai.startree.thirdeye;
 
+import ai.startree.thirdeye.datalayer.DatabaseAdministrator;
+import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MySQLContainer;
 
+// fixme cyril duplicated from thirdeye-persistence
 public class TestDatabase {
 
   private static final Logger log = LoggerFactory.getLogger(TestDatabase.class);

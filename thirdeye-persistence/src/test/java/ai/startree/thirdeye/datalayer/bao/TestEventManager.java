@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.events.EventType;
@@ -31,7 +32,7 @@ public class TestEventManager {
 
   @BeforeClass
   void beforeClass() {
-    eventDAO = SharedInjector.get().getInstance(EventManager.class);
+    eventDAO = MySqlTestDatabase.sharedInjector().getInstance(EventManager.class);
   }
 
   @AfterClass

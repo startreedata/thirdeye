@@ -97,7 +97,6 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     }
   }
 
-  private final MySqlTestDatabase mysqlTestDatabase = new MySqlTestDatabase();
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -108,7 +107,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
 
-    final DatabaseConfiguration dbConfiguration = mysqlTestDatabase.testDatabaseConfiguration();
+    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
@@ -153,6 +152,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     CLOCK.useSystemTime();
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
+    MySqlTestDatabase.cleanSharedDatabase();
   }
 
   @Test

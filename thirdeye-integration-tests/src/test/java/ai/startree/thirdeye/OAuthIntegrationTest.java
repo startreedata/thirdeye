@@ -55,11 +55,10 @@ public class OAuthIntegrationTest {
   private File dir;
   public DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private final MySqlTestDatabase mysqlTestDatabase = new MySqlTestDatabase();
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    final DatabaseConfiguration dbConfiguration = mysqlTestDatabase.testDatabaseConfiguration();
+    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     oauthSetup();
 
@@ -97,7 +96,7 @@ public class OAuthIntegrationTest {
     jwkFileWriter.close();
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public void afterClass() throws Exception {
     log.info("Thirdeye port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
@@ -106,6 +105,7 @@ public class OAuthIntegrationTest {
         .map(Arrays::stream)
         .ifPresent(files -> files.forEach(File::delete));
     dir.delete();
+    MySqlTestDatabase.cleanSharedDatabase();
   }
 
 

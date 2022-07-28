@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import java.util.List;
@@ -42,7 +43,7 @@ public class TestEntityToEntityMappingManager {
 
   @BeforeClass
   void beforeClass() {
-    entityToEntityMappingDAO = SharedInjector.get()
+    entityToEntityMappingDAO = MySqlTestDatabase.sharedInjector()
         .getInstance(EntityToEntityMappingManager.class);
   }
 

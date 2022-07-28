@@ -11,11 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.anomaly.detection.trigger;
+package ai.startree.thirdeye.scheduler.dataavailability;
 
-import ai.startree.thirdeye.detection.anomaly.detection.trigger.filter.DataAvailabilityEventFilter;
-import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DatasetTriggerInfoRepo;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;

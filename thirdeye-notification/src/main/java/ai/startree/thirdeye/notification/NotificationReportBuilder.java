@@ -22,7 +22,6 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
-import ai.startree.thirdeye.detection.detector.email.filter.PrecisionRecallEvaluator;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;

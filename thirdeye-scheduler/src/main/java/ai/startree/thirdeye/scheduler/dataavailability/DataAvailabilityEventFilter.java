@@ -11,16 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.anomaly.job;
+package ai.startree.thirdeye.scheduler.dataavailability;
 
-import java.util.List;
+public interface DataAvailabilityEventFilter {
 
-/**
- * An interface for ReplayTaskRunner classes of the executors
- */
-public interface JobRunnable extends Runnable {
-
-  Long createJob();
-
-  List<Long> createTasks();
+  boolean isPassed(DataAvailabilityEvent e);
 }

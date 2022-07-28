@@ -11,8 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.detector.email.filter;
+package ai.startree.thirdeye.notification;
 
+import ai.startree.thirdeye.detection.detector.email.filter.AlertFilter;
+import ai.startree.thirdeye.detection.detector.email.filter.AlertFilterFactory;
+import ai.startree.thirdeye.detection.detector.email.filter.DummyAlertFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -21,6 +24,7 @@ import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +89,38 @@ public class PrecisionRecallEvaluator {
         Arrays.asList(RESPONSE_RATE, PRECISION, WEIGHTED_PRECISION, RECALL, TOTALALERTS,
             TOTALRESPONSES, TRUEANOMALIES,
             FALSEALARM, NEWTREND, USER_REPORT)));
+  }
+
+  /**
+   * Evaluate user report anomaly is qualified given alert filter, user report anomaly, as well as
+   * total anomaly set
+   * Runs through total anomaly set, find out if total qualified region for system anomalies can
+   * reach more than 50% of user report region,
+   * return user report anomaly as qualified, otherwise return false
+   *
+   * @param mergedAnomalyResultManager
+   * @param alertFilter alert filter to evaluate system detected anoamlies isQualified
+   */
+  private static Boolean isUserReportAnomalyIsQualified(AlertFilter alertFilter,
+      MergedAnomalyResultDTO userReportAnomaly,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+    List<MergedAnomalyResultDTO> systemAnomalies = mergedAnomalyResultManager
+        .findByFunctionId(userReportAnomaly.getAnomalyFunction().getId());
+    long startTime = userReportAnomaly.getStartTime();
+    long endTime = userReportAnomaly.getEndTime();
+    long qualifiedRegion = 0;
+    systemAnomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
+    for (MergedAnomalyResultDTO anomalyResult : systemAnomalies) {
+      if (anomalyResult.getAnomalyResultSource()
+          .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION)
+          && anomalyResult.getEndTime() >= startTime && anomalyResult.getStartTime() <= endTime &&
+          anomalyResult.getDimensions().equals(userReportAnomaly.getDimensions())) {
+        if (alertFilter.isQualified(anomalyResult)) {
+          qualifiedRegion += anomalyResult.getEndTime() - anomalyResult.getStartTime();
+        }
+      }
+    }
+    return qualifiedRegion >= (endTime - startTime) * 0.5;
   }
 
   public double getPrecision() {
@@ -205,7 +241,7 @@ public class PrecisionRecallEvaluator {
             userReportTrueAnomalyNewTrend++;
           }
         } else {
-          if (UserReportUtils.isUserReportAnomalyIsQualified(alertFilterOfAnomaly, anomaly,
+          if (isUserReportAnomalyIsQualified(alertFilterOfAnomaly, anomaly,
               mergedAnomalyResultManager)) {
             notifiedTrueAnomaly++;
           } else {

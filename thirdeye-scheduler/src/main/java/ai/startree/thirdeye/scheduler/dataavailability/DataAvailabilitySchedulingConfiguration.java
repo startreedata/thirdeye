@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.anomaly.detection.trigger.utils;
+package ai.startree.thirdeye.scheduler.dataavailability;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

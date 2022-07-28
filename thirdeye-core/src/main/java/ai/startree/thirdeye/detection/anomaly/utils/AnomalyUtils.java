@@ -15,84 +15,19 @@ package ai.startree.thirdeye.detection.anomaly.utils;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AnomalyUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyUtils.class);
-
-  /**
-   * Logs the known anomalies whose window overlaps with the given window, whose range is defined by
-   * windowStart
-   * and windowEnd.
-   *
-   * Reason to log the overlapped anomalies: During anomaly detection, the know anomalies are
-   * supposedly used to remove
-   * abnormal baseline values but not current values. This method provides a check before sending
-   * the known anomalies to
-   * anomaly detection functions.
-   *
-   * @param windowStart the inclusive start time of the window
-   * @param windowEnd the exclusive end time of the window
-   * @param knownAnomalies the known anomalies
-   */
-  public static void logAnomaliesOverlapWithWindow(DateTime windowStart, DateTime windowEnd,
-      List<MergedAnomalyResultDTO> knownAnomalies) {
-    if (CollectionUtils.isEmpty(knownAnomalies) || windowEnd.compareTo(windowStart) <= 0) {
-      return;
-    }
-
-    List<MergedAnomalyResultDTO> overlappedAnomalies = new ArrayList<>();
-    for (MergedAnomalyResultDTO knownAnomaly : knownAnomalies) {
-      if (knownAnomaly.getStartTime() <= windowEnd.getMillis()
-          && knownAnomaly.getEndTime() >= windowStart.getMillis()) {
-        overlappedAnomalies.add(knownAnomaly);
-      }
-    }
-
-    if (overlappedAnomalies.size() > 0) {
-      StringBuffer sb = new StringBuffer();
-      String separator = "";
-      for (MergedAnomalyResultDTO overlappedAnomaly : overlappedAnomalies) {
-        sb.append(separator).append(overlappedAnomaly.getStartTime()).append("--")
-            .append(overlappedAnomaly.getEndTime());
-        separator = ", ";
-      }
-      LOG.warn("{} merged anomalies overlap with this window {} -- {}. Anomalies: {}",
-          overlappedAnomalies.size(),
-          windowStart, windowEnd, sb);
-    }
-  }
-
-  /**
-   * This function checks if the input list of merged anomalies has at least one positive label.
-   * It is a helper for alert filter auto tuning
-   *
-   * @return true if the list of merged anomalies has at least one positive label, false otherwise
-   */
-  public static Boolean checkHasLabels(List<MergedAnomalyResultDTO> mergedAnomalyResultDTOS) {
-    for (MergedAnomalyResultDTO anomaly : mergedAnomalyResultDTOS) {
-      AnomalyFeedback feedback = anomaly.getFeedback();
-      if (feedback != null) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   /**
    * Safely and quietly shutdown executor service. This method waits until all threads are complete,
@@ -143,31 +78,6 @@ public class AnomalyUtils {
     } catch (InterruptedException e) { // If current thread is interrupted
       executorService.shutdownNow(); // Interrupt all currently executing tasks for the last time
       Thread.currentThread().interrupt();
-    }
-  }
-
-  /**
-   * This is a subclass describing anomalies features as training data for alert filter
-   */
-  public static class MetaDataNode {
-
-    public double windowSize;
-    public double severity;
-    public String startTimeISO;
-    public String endTimeISO;
-    public String functionName;
-    public String feedback;
-    public long anomalyId;
-
-    public MetaDataNode(MergedAnomalyResultDTO anomaly) {
-      this.windowSize = 1. * (anomaly.getEndTime() - anomaly.getStartTime()) / 3600000L;
-      this.severity = anomaly.getWeight();
-      this.startTimeISO = new Timestamp(anomaly.getStartTime()).toString();
-      this.endTimeISO = new Timestamp(anomaly.getEndTime()).toString();
-      this.functionName = anomaly.getAnomalyFunction().getFunctionName();
-      this.feedback = (anomaly.getFeedback() == null) ? "null"
-          : String.valueOf(anomaly.getFeedback().getFeedbackType());
-      this.anomalyId = anomaly.getId();
     }
   }
 

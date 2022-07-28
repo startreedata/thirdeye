@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler.monitor;
 
-import ai.startree.thirdeye.detection.anomaly.job.JobContext;
+import ai.startree.thirdeye.scheduler.JobContext;
 
 public class MonitorJobContext extends JobContext {
 

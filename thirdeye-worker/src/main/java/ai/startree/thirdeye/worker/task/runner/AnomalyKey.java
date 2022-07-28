@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detection.algorithm;
+package ai.startree.thirdeye.worker.task.runner;
 
 import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;

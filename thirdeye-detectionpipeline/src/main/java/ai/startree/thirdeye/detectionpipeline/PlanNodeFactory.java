@@ -19,6 +19,7 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.DelayPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EventFetcherPlanNode;

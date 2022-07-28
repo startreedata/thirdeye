@@ -17,7 +17,9 @@ import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -33,21 +35,53 @@ public class MySqlTestDatabase {
 
   public static final String USERNAME = "root";
   public static final String PASSWORD = "test";
-  public static final String JDBC_URL;
-  private static final MySQLContainer<?> persistenceDbContainer = new MySQLContainer<>(
-      MYSQL_DOCKER_IMAGE).withPassword(PASSWORD);
-  private static final String DEFAULT_DATABASE_NAME;
+  public static String jdbcUrl = null;
+  private static String defaultDatabaseName = null;
 
-  static {
-    persistenceDbContainer.start();
-    JDBC_URL = persistenceDbContainer.getJdbcUrl();
-    String[] elements = JDBC_URL.split("/");
-    DEFAULT_DATABASE_NAME = elements[elements.length - 1];
+  private static MySQLContainer<?> persistenceDbContainer = null;
+  private static DatabaseConfiguration sharedConfiguration = null;
+
+  public static DatabaseConfiguration sharedDatabaseConfiguration() {
+    if (sharedConfiguration == null) {
+      sharedConfiguration = newDatabaseConfiguration();
+    }
+    return sharedConfiguration;
   }
 
+  public static void cleanSharedDatabase() {
+    if (sharedConfiguration == null) {
+      return;
+    }
+    try {
+      final Connection connection = DriverManager.getConnection(sharedConfiguration.getUrl(),
+          sharedConfiguration.getUser(),
+          sharedConfiguration.getPassword());
+      final DatabaseMetaData metaData = connection.getMetaData();
+      ResultSet rs = metaData.getTables("test0", null, "%", null);
+      while (rs.next()) {
+        final String tableName = rs.getString(3);
+        if (tableName.equals("flyway_schema_history")) {
+          continue;
+        }
+        connection.createStatement().execute("DELETE FROM " + tableName + ";");
+      }
+      connection.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
 
-  public DatabaseConfiguration testDatabaseConfiguration() {
-    final String databaseName = DEFAULT_DATABASE_NAME + counter.getAndIncrement();
+  public static DatabaseConfiguration newDatabaseConfiguration() {
+    if (persistenceDbContainer == null) {
+      // init docker container
+      persistenceDbContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE).withPassword(PASSWORD);
+      persistenceDbContainer.start();
+      jdbcUrl = persistenceDbContainer.getJdbcUrl();
+      String[] elements = jdbcUrl.split("/");
+      defaultDatabaseName = elements[elements.length - 1];
+    }
+
+    final String databaseName = defaultDatabaseName + counter.getAndIncrement();
     try {
       final Connection connection = DriverManager.getConnection(persistenceDbContainer.getJdbcUrl(),
           USERNAME,
@@ -60,14 +94,14 @@ public class MySqlTestDatabase {
     }
 
     return new DatabaseConfiguration()
-        .setUrl(JDBC_URL.replace(DEFAULT_DATABASE_NAME, databaseName)
+        .setUrl(jdbcUrl.replace(defaultDatabaseName, databaseName)
             + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED")
         .setUser(USERNAME)
         .setPassword(PASSWORD)
         .setDriver(persistenceDbContainer.getDriverClassName());
   }
 
-  public DataSource createDataSource(final DatabaseConfiguration dbConfig) throws Exception {
+  public static DataSource newDataSource(final DatabaseConfiguration dbConfig) throws Exception {
 
     final DataSource ds = buildDataSource(dbConfig);
 
@@ -77,7 +111,7 @@ public class MySqlTestDatabase {
     return ds;
   }
 
-  private DataSource buildDataSource(final DatabaseConfiguration dbConfig) {
+  private static DataSource buildDataSource(final DatabaseConfiguration dbConfig) {
     final DataSource dataSource = new DataSource();
     dataSource.setUrl(dbConfig.getUrl());
     log.debug("Creating db with connection url : " + dataSource.getUrl());
@@ -105,11 +139,19 @@ public class MySqlTestDatabase {
     return dataSource;
   }
 
-  public Injector createInjector() {
-    try {
-      final DatabaseConfiguration configuration = testDatabaseConfiguration();
-      final DataSource dataSource = createDataSource(configuration);
+  public static Injector sharedInjector() {
+    return buildInjector(sharedDatabaseConfiguration());
+  }
 
+  public static Injector newInjector() {
+    final DatabaseConfiguration configuration = newDatabaseConfiguration();
+
+    return buildInjector(configuration);
+  }
+
+  private static Injector buildInjector(final DatabaseConfiguration configuration) {
+    try {
+      final DataSource dataSource = newDataSource(configuration);
       return Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
     } catch (Exception e) {
       throw new RuntimeException(e);

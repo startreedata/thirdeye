@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
@@ -83,7 +84,7 @@ public class TestRcaInvestigationManager {
 
   @BeforeClass
   void beforeClass() {
-    sessionDAO = SharedInjector.get().getInstance(RcaInvestigationManager.class);
+    sessionDAO = MySqlTestDatabase.sharedInjector().getInstance(RcaInvestigationManager.class);
   }
 
   @AfterMethod

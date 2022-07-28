@@ -87,16 +87,14 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private final MySqlTestDatabase mysqlTestDatabase = new MySqlTestDatabase();
 
   // this attribute is shared between tests
   private long anomalyId;
   private long alertId;
 
-
   @BeforeClass
-  public void beforeClass() throws Exception {
-    final DatabaseConfiguration dbConfiguration = mysqlTestDatabase.testDatabaseConfiguration();
+  public void beforeClass() {
+    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
@@ -137,10 +135,11 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public void afterClass() {
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
+    MySqlTestDatabase.cleanSharedDatabase();
   }
 
   @Test()
@@ -223,7 +222,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     List<Map<String, Object>> anomalies = List.of();
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
-      Thread.sleep(8000);
+      Thread.sleep(3000);
       Response response = request("api/anomalies").get();
       assertThat(response.getStatus()).isEqualTo(200);
       anomalies = response.readEntity(List.class);

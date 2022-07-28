@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class TestMetricConfigManager {
 
   @BeforeClass
   void beforeClass() {
-    metricConfigDAO = SharedInjector.get().getInstance(MetricConfigManager.class);
+    metricConfigDAO = MySqlTestDatabase.sharedInjector().getInstance(MetricConfigManager.class);
   }
 
   @AfterClass(alwaysRun = true)

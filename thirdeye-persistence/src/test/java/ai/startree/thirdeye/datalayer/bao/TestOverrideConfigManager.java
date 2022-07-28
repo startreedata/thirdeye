@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer.bao;
 import static ai.startree.thirdeye.spi.Constants.SCALING_FACTOR;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ public class TestOverrideConfigManager {
 
   @BeforeClass
   void beforeClass() {
-    overrideConfigDAO = SharedInjector.get().getInstance(OverrideConfigManager.class);
+    overrideConfigDAO = MySqlTestDatabase.sharedInjector().getInstance(OverrideConfigManager.class);
   }
 
   @AfterClass

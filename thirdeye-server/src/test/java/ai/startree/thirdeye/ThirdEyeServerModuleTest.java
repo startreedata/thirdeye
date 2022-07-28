@@ -18,20 +18,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.resources.RootResource;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.tomcat.jdbc.pool.DataSource;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 public class ThirdEyeServerModuleTest {
 
+  @AfterClass
+  public void clean() {
+    MySqlTestDatabase.cleanSharedDatabase();
+  }
+
   @Test
   public void testRootResourceInjection() throws Exception {
-    final MySqlTestDatabase db = new MySqlTestDatabase();
-    final DataSource dataSource = db.createDataSource(db.testDatabaseConfiguration());
+    final DatabaseConfiguration dbConfig = MySqlTestDatabase.sharedDatabaseConfiguration();
+    final DataSource dataSource = MySqlTestDatabase.newDataSource(dbConfig);
 
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()
         .setAuthConfiguration(new AuthConfiguration())

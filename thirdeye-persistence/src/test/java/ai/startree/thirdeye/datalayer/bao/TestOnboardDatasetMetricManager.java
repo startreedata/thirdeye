@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import java.util.List;
@@ -39,7 +40,7 @@ public class TestOnboardDatasetMetricManager {
 
   @BeforeClass
   void beforeClass() {
-    onboardDatasetMetricDAO = SharedInjector.get()
+    onboardDatasetMetricDAO = MySqlTestDatabase.sharedInjector()
         .getInstance(OnboardDatasetMetricManager.class);
   }
 

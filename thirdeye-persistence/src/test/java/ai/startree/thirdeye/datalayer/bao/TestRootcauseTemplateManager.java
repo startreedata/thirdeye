@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class TestRootcauseTemplateManager {
 
   @BeforeClass
   void beforeClass() {
-    templateDao = SharedInjector.get().getInstance(RootcauseTemplateManager.class);
+    templateDao = MySqlTestDatabase.sharedInjector().getInstance(RootcauseTemplateManager.class);
   }
 
   @AfterMethod

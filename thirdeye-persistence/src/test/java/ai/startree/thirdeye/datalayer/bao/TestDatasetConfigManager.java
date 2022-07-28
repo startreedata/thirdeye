@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
@@ -33,7 +34,7 @@ public class TestDatasetConfigManager {
 
   @BeforeClass
   void beforeClass() {
-    datasetConfigDAO = SharedInjector.get().getInstance(DatasetConfigManager.class);
+    datasetConfigDAO = MySqlTestDatabase.sharedInjector().getInstance(DatasetConfigManager.class);
   }
 
   @AfterClass(alwaysRun = true)

@@ -16,4 +16,4 @@ jobs:
         with:
           java-version: 11
       - name: check
-        run: ./mvnw -B clean license:check
+        run: ./mvnw -T 1C -B clean license:check

@@ -59,16 +59,16 @@ Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql
 ThirdEye is a maven project and uses standard maven commands.   
 ```
 # Build ThirdEye from source
-./mvnw install
+./mvnw -T 1C install
 
 # To skip tests during build
-./mvnw install -DskipTests
+./mvnw -T 1C install -DskipTests
 
 # If you are working on backend, You may skip the ui module
-./mvnw install -pl '!thirdeye-ui'
+./mvnw -T 1C install -pl '!thirdeye-ui'
 
 # To Skip Integration tests
-./mvnw install -pl '!thirdeye-integration-tests'
+./mvnw -T 1C install -pl '!thirdeye-integration-tests'
 ```
 
 ### Running ThirdEye from Distribution
@@ -98,7 +98,7 @@ bin/thirdeye.sh server
 Once a distribution is ready, you can simply package it into a docker container using the command below.
 
 ```SHELL
-./mvnw package -D skipTests && docker build -t thirdeye:latest .
+./mvnw -T 1C package -D skipTests && docker build -t thirdeye:latest .
 ```
 
 #### Start ThirdEye Coordinator

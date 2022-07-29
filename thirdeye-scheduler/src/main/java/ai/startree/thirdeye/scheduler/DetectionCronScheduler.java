@@ -47,8 +47,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class DetectionCronScheduler implements Runnable {
 
-  public static final int DEFAULT_DETECTION_DELAY = 1;
-  public static final TimeUnit DEFAULT_ALERT_DELAY_UNIT = TimeUnit.MINUTES;
+  public static final TimeUnit ALERT_DELAY_UNIT = TimeUnit.SECONDS;
   public static final String QUARTZ_DETECTION_GROUPER = TaskType.DETECTION.toString();
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionCronScheduler.class);
@@ -56,10 +55,12 @@ public class DetectionCronScheduler implements Runnable {
   private final AlertManager alertManager;
   private final Scheduler scheduler;
   private final ScheduledExecutorService executorService;
+  private final int alertDelay;
 
   @Inject
-  public DetectionCronScheduler(final AlertManager alertManager) {
+  public DetectionCronScheduler(ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration, final AlertManager alertManager) {
     this.alertManager = alertManager;
+    this.alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
     executorService = Executors.newSingleThreadScheduledExecutor();
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -79,7 +80,7 @@ public class DetectionCronScheduler implements Runnable {
   public void start() throws SchedulerException {
     scheduler.start();
     executorService
-        .scheduleWithFixedDelay(this, 0, DEFAULT_DETECTION_DELAY, DEFAULT_ALERT_DELAY_UNIT);
+        .scheduleWithFixedDelay(this, 0, alertDelay, ALERT_DELAY_UNIT);
   }
 
   public void run() {

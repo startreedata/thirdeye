@@ -13,11 +13,11 @@
  */
 package ai.startree.thirdeye.worker.task;
 
+import static ai.startree.thirdeye.util.ThirdEyeUtils.safelyShutdownExecutionService;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -148,8 +148,8 @@ public class TaskDriver {
 
   public void shutdown() {
     shutdown.set(true);
-    AnomalyUtils.safelyShutdownExecutionService(taskExecutorService, this.getClass());
-    AnomalyUtils.safelyShutdownExecutionService(taskWatcherExecutorService, this.getClass());
-    AnomalyUtils.safelyShutdownExecutionService(heartbeatExecutorService, this.getClass());
+    safelyShutdownExecutionService(taskExecutorService, this.getClass());
+    safelyShutdownExecutionService(taskWatcherExecutorService, this.getClass());
+    safelyShutdownExecutionService(heartbeatExecutorService, this.getClass());
   }
 }

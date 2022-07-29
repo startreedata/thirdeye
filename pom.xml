@@ -36,9 +36,6 @@
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
 
-    <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
-    <module>thirdeye-deprecated-tests</module>
-
     <!--  Build the distribution -->
     <module>thirdeye-distribution</module>
 
@@ -918,12 +915,6 @@
         <groupId>org.hsqldb</groupId>
         <artifactId>hsqldb</artifactId>
         <version>${hsqldb.version}</version>
-      </dependency>
-      <!-- Used for demo setup and mock data source-->
-      <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>1.4.200</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>

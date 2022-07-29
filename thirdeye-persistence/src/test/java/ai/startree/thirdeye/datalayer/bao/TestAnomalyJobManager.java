@@ -13,8 +13,11 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.Constants.JobStatus;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
@@ -25,7 +28,20 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/**
+ * This class uses weaving to control the java system time.
+ *
+ * Note: if run within IntelliJ, run with the following JVM option:
+ * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.6/aspectjweaver-1.9.6.jar
+ * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
+ *
+ * In command line: ./mvnw -pl 'thirdeye-persistence' -Dtest=TestAnomalyJobManager test
+ */
 public class TestAnomalyJobManager {
+
+  private static final TimeProvider CLOCK = TimeProvider.instance();
+  // use a time big enough because Timestamp(small int) parses to hours instead of millis
+  public static final long JANUARY_1_2022 = 1640998861000L;
 
   private Long anomalyJobId1;
   private Long anomalyJobId2;
@@ -35,16 +51,21 @@ public class TestAnomalyJobManager {
 
   @BeforeClass
   void beforeClass() {
-    jobDAO = new TestDatabase().createInjector().getInstance(JobManager.class);
+    // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
+    assertThat(CLOCK.isTimeMockWorking()).isTrue();
+    CLOCK.useMockTime(JANUARY_1_2022);
+    jobDAO = MySqlTestDatabase.sharedInjector().getInstance(JobManager.class);
   }
 
   @AfterClass(alwaysRun = true)
-  void afterClass() {
-
+  public void afterClass() {
+    CLOCK.useSystemTime();
+    jobDAO.findAll().forEach(jobDAO::delete);
   }
 
   @Test
   public void testCreate() {
+    CLOCK.tick(1);
     anomalyJobId1 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId1);
     anomalyJobId2 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
@@ -62,8 +83,10 @@ public class TestAnomalyJobManager {
 
   @Test(dependsOnMethods = {"testFindAll"})
   public void testUpdateStatusAndJobEndTime() {
+    CLOCK.tick(1);
     JobStatus status = JobStatus.COMPLETED;
     long jobEndTime = System.currentTimeMillis();
+    CLOCK.tick(1);
     List<JobDTO> jobDTOs = jobDAO.findByIds(Arrays.asList(anomalyJobId1, anomalyJobId3));
     jobDAO.updateJobStatusAndEndTime(jobDTOs, status, jobEndTime);
     JobDTO anomalyJob = jobDAO.findById(anomalyJobId1);
@@ -92,6 +115,7 @@ public class TestAnomalyJobManager {
   @Test(dependsOnMethods = {"testFindByStatus"})
   public void testDeleteRecordsOlderThanDaysWithStatus() {
     JobStatus status = JobStatus.COMPLETED;
+    CLOCK.tick(1);
     int numRecordsDeleted = jobDAO.deleteRecordsOlderThanDaysWithStatus(0, status);
     Assert.assertEquals(numRecordsDeleted, 2);
     List<JobDTO> anomalyJobs = jobDAO.findByStatus(status);
@@ -99,7 +123,7 @@ public class TestAnomalyJobManager {
   }
 
   @Test(dependsOnMethods = {"testDeleteRecordsOlderThanDaysWithStatus"})
-  public void testFindByStatusWithinDays() throws InterruptedException {
+  public void testFindByStatusWithinDays() {
     anomalyJobId1 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId1);
     anomalyJobId2 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
@@ -107,8 +131,7 @@ public class TestAnomalyJobManager {
     anomalyJobId3 = jobDAO.save(DatalayerTestUtils.getTestJobSpec());
     Assert.assertNotNull(anomalyJobId3);
 
-    Thread.sleep(100); // To ensure every job has been created more than 1 ms ago
-
+    CLOCK.tick(1);
     List<JobDTO> jobsWithZeroDays = jobDAO.findByStatusWithinDays(JobStatus.SCHEDULED, 0);
     Assert.assertEquals(jobsWithZeroDays.size(), 0);
 

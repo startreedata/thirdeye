@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -161,7 +162,7 @@ public class ThirdEyePinotClient {
       throws IOException {
     Schema schema = null;
     HttpGet schemaReq = new HttpGet(
-        String.format(endpointTemplate, URLEncoder.encode(dataset, UTF_8)));
+        String.format(endpointTemplate, URLEncoder.encode(dataset, StandardCharsets.UTF_8)));
     LOG.info("Retrieving schema: {}", schemaReq);
     CloseableHttpResponse schemaRes = pinotControllerClient.execute(pinotControllerHost, schemaReq);
     try {

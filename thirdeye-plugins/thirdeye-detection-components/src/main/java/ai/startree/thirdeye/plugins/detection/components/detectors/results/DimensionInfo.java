@@ -19,8 +19,8 @@ import java.util.Objects;
 
 public class DimensionInfo {
 
-  private List<String> dimensionColumns;
-  private List<Object> dimensionValues;
+  private final List<String> dimensionColumns;
+  private final List<Object> dimensionValues;
 
   public DimensionInfo(final List<String> dimensionColumns,
       final List<Object> dimensionValues) {

@@ -16,9 +16,7 @@ package ai.startree.thirdeye.notification;
 import static ai.startree.thirdeye.notification.NotificationReportBuilder.ANOMALY_VIEW_PREFIX;
 import static ai.startree.thirdeye.spi.Constants.NOTIFICATIONS_PERCENTAGE_FORMAT;
 
-import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.Constants.CompareMode;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -28,7 +26,6 @@ import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -37,8 +34,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Period;
-import org.joda.time.Weeks;
 
 public class AnomalyReportHelper {
 
@@ -250,45 +245,10 @@ public class AnomalyReportHelper {
   }
 
   /**
-   * Convert comparison mode to Period
-   */
-  public static Period getBaselinePeriod(CompareMode compareMode) {
-    switch (compareMode) {
-      case Wo2W:
-        return Weeks.TWO.toPeriod();
-      case Wo3W:
-        return Weeks.THREE.toPeriod();
-      case Wo4W:
-        return Weeks.weeks(4).toPeriod();
-      case WoW:
-      default:
-        return Weeks.ONE.toPeriod();
-    }
-  }
-
-  /**
    * Get the timezone in String
    */
   public static String getTimezoneString(DateTimeZone dateTimeZone) {
     TimeZone tz = TimeZone.getTimeZone(dateTimeZone.getID());
     return tz.getDisplayName(true, 0);
-  }
-
-  /**
-   * Get the value of matched filter key of given anomaly result
-   *
-   * @param anomaly a MergedAnomalyResultDTO instance
-   * @param matchText a text to be matched in the filter keys
-   * @return a list of filter values
-   */
-  public static List<String> getMatchedFilterValues(MergedAnomalyResultDTO anomaly,
-      String matchText) {
-    Multimap<String, String> filterSet = AnomalyUtils.generateFilterSetForTimeSeriesQuery(anomaly);
-    for (String filterKey : filterSet.keySet()) {
-      if (filterKey.contains(matchText)) {
-        return new ArrayList<>(filterSet.get(filterKey));
-      }
-    }
-    return Collections.emptyList();
   }
 }

@@ -18,9 +18,8 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.alert.DetectionAlertFilterResult;
-import ai.startree.thirdeye.detection.alert.NotificationSchemeFactory;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
+import ai.startree.thirdeye.notification.NotificationSchemeFactory;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -28,6 +27,7 @@ import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
+import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;

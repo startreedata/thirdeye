@@ -13,9 +13,10 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.detection.anomaly.detection.trigger.DataAvailabilityEventListenerDriver;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
+import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilityEventListenerDriver;
+import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilityTaskScheduler;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.modeldownload.ModelDownloaderManager;

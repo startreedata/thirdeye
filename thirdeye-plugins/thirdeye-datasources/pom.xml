@@ -41,9 +41,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
+    <!-- todo cyril - remove this dependency - legacy code-->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
+      <version>1.4.200</version>
     </dependency>
     <dependency>
       <groupId>com.google.auto.service</groupId>

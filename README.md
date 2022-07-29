@@ -1,7 +1,16 @@
 
 # Introduction to ThirdEye
 
-ThirdEye is an integrated tool for realtime monitoring of time series and interactive root-cause analysis. It enables anyone inside an organization to collaborate on effective identification and analysis of deviations in business and system metrics. ThirdEye supports the entire workflow from anomaly detection, over root-cause analysis, to issue resolution and post-mortem reporting.
+ThirdEye is an integrated tool for realtime monitoring of time series and interactive root-cause analysis. 
+It enables anyone inside an organization to collaborate on effective identification and analysis of deviations in 
+business and system metrics. ThirdEye supports the entire workflow from anomaly detection, over root-cause analysis, 
+to issue resolution and post-mortem reporting.
+
+
+**Watch the introduction video**
+[![Watch ThirdEye introduction video](./doc/main_capture.png)](https://www.youtube.com/watch?v=XhaLcpiPUS0 "Watch ThirdEye introduction video")
+
+<details><summary>... or read the summary</summary>
 
 ## What is it for? (key features)
 
@@ -9,20 +18,20 @@ Online monitoring and analysis of business and system metrics from multiple data
 
 **Detection**
 * Detection toolkit based on business rules and exponential smoothing
-* Realtime monitoring of high-dimensional time series
-* Native support for seasonality and permanent change points in time series
-* Email alerts with 1-click feedback for automated tuning of detection algorithms
+  * Realtime monitoring of high-dimensional time series
+  * Native support for seasonality and permanent change points in time series
+  * Email alerts with 1-click feedback for automated tuning of detection algorithms
 
 **Root-Cause Analysis**
 * Collaborative root-cause analysis dashboards
-* Interactive slice-and-dice of data, correlation analysis, and event identification
-* Reporting and archiving tools for anomalies and analyses
-* Knowledge graph construction over time from user feedback
+  * Interactive slice-and-dice of data, correlation analysis, and event identification
+  * Reporting and archiving tools for anomalies and analyses
+  * Knowledge graph construction over time from user feedback
 
 **Integration**
 * Connectors for continuous time series data from Pinot, Presto, MySQL and CSV
-* Connectors for discrete event data sources, such as holidays from Google calendar
-* Plugin support for detection and analysis components
+  * Connectors for discrete event data sources, such as holidays from Google calendar
+  * Plugin support for detection and analysis components
 
 ## What it isn't? (limitations)
 
@@ -31,6 +40,7 @@ ThirdEye maintains a dedicated meta-data store to capture data sources, anomalie
 ThirdEye does not replace your issue tracker - it integrates with it. ThirdEye supports collaboration but focuses on the data-integration aspect of anomaly detection and root-cause analysis. After all, your organization probably already has a well-oiled issue resolution process that we don't want to disrupt.
 
 ThirdEye is not a generic dashboard builder toolkit. ThirdEye attempts to bring overview data from different sources into one single place on-demand. In-depth data about events, such as A/B experiments and deployments, should be kept in their respective systems. ThirdEye can link to these directly.
+</details>
 
 ## Documentation
 

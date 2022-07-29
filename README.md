@@ -50,6 +50,15 @@ Detailed documentation can be found at [ThirdEye documentation](https://dev.star
 - [Data Sources Setup](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/database/)
 - [Alert Setup](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration)
 
+
+## Features
+
+| Alert simulation                                                                                                               | Automatic root cause analysis with top contributors algorithm                                                                    |
+|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| [![Alert evaluation with ThirdEye](./doc/evaluation.png)](https://youtu.be/XhaLcpiPUS0?t=210 "Alert evaluation with ThirdEye") | [![Top contributors in ThirdEye](./doc/top_contributors.png)](https://youtu.be/XhaLcpiPUS0?t=306 "Top contributors in ThirdEye") |
+| Interactive slice-and-dice heatmap                                                                                             | Correlated events analysis                                                                                                       |
+| [![Heatmap in ThirdEye](./doc/heatmap.png)](https://youtu.be/XhaLcpiPUS0?t=328 "Heatmap in Thirdeye")                          | [![Events in Thirdeye](./doc/events.png)](https://youtu.be/XhaLcpiPUS0?t=406 "Events in ThirdEye")                               |
+
 ## Build
 
 ### Requirements

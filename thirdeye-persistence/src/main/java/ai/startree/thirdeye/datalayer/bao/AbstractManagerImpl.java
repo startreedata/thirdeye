@@ -80,7 +80,7 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   }
 
   @Override
-  public int delete(final AbstractDTO entity) {
+  public int delete(final E entity) {
     return genericPojoDao.delete(entity.getId(), dtoClass);
   }
 

@@ -167,10 +167,6 @@ public class SqlUtils {
     return "SELECT MAX(" + timeColumn + ") FROM " + tableName;
   }
 
-  static String getDimensionFiltersSQL(String dimension, String tableName, String sourceName) {
-    return "SELECT DISTINCT(" + dimension + ") FROM " + tableName;
-  }
-
   static String computeSqlTableName(String datasetName) {
     String[] tableComponents = datasetName.split("\\.");
     return datasetName.substring(tableComponents[0].length() + tableComponents[1].length() + 2);

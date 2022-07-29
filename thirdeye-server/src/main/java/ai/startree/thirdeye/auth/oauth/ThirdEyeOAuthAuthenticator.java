@@ -11,11 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
+package ai.startree.thirdeye.auth.oauth;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.auth.oauth.OAuthManager;
 import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
@@ -25,13 +24,13 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThirdEyeAuthenticator implements Authenticator<String, ThirdEyePrincipal> {
+public class ThirdEyeOAuthAuthenticator implements Authenticator<String, ThirdEyePrincipal> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeAuthenticator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeOAuthAuthenticator.class);
   private final LoadingCache<String, ThirdEyePrincipal> bindingsCache;
 
   @Inject
-  public ThirdEyeAuthenticator(final OAuthManager oAuthManager) {
+  public ThirdEyeOAuthAuthenticator(final OAuthManager oAuthManager) {
     this.bindingsCache = oAuthManager.getDefaultCache();
   }
 

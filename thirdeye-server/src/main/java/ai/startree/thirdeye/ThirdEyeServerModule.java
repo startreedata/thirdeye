@@ -14,7 +14,7 @@
 package ai.startree.thirdeye;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
-import ai.startree.thirdeye.auth.OAuthConfiguration;
+import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;

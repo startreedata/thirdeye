@@ -14,6 +14,7 @@
 package ai.startree.thirdeye;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
+import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
@@ -68,5 +69,12 @@ public class ThirdEyeServerModule extends AbstractModule {
   public OAuthConfiguration getOAuthConfig(
       AuthConfiguration authConfiguration) {
     return authConfiguration.getOAuthConfig();
+  }
+
+  @Singleton
+  @Provides
+  public BasicAuthConfiguration getBasicAuthConfig(
+      AuthConfiguration authConfiguration) {
+    return authConfiguration.getBasicAuthConfig();
   }
 }

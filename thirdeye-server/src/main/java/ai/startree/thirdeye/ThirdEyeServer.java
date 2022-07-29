@@ -21,8 +21,8 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
-import ai.startree.thirdeye.auth.ThirdEyeAuthenticator;
 import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
+import ai.startree.thirdeye.auth.oauth.ThirdEyeOAuthAuthenticator;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
@@ -215,7 +215,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
   private AuthFilter buildAuthFilter(final Injector injector) {
     final Authenticator authenticator = injector.getInstance(AuthConfiguration.class).isEnabled()
-        ? injector.getInstance(ThirdEyeAuthenticator.class)
+        ? injector.getInstance(ThirdEyeOAuthAuthenticator.class)
         : injector.getInstance(ThirdEyeAuthenticatorDisabled.class);
     return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
         .setAuthenticator(authenticator)

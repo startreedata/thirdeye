@@ -19,13 +19,14 @@ import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 public class ThirdEyeBasicAuthenticator implements Authenticator<BasicCredentials, ThirdEyePrincipal> {
 
   private final BasicAuthConfiguration configuration;
 
   @Inject
-  public ThirdEyeBasicAuthenticator(final BasicAuthConfiguration configuration) {
+  public ThirdEyeBasicAuthenticator(@Nullable final BasicAuthConfiguration configuration) {
     this.configuration = configuration;
   }
 

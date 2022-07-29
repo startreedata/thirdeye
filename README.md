@@ -1,12 +1,16 @@
 <p align="center">
-  <img height=100 src="./doc/1280x640-startree_thirdeye-logo_storm_wave-white_bkg.png">
+  <img height=100 src="./doc/1280x640-startree_thirdeye-logo_storm_wave-white_bkg.png"><br/>
+  <a href="https://stree.ai/slack"><b>Slack</b></a> —
+  <a href="https://get.startree.ai/startree-community-edition"><b>QuickStart</b></a> —
+  <a href="https://www.startree.ai/blog/introducing-startree-thirdeye-anomaly-detection-and-insights-with-apache-pinot"><b>Blog</b></a> —
+  <a href="https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/"><b>Documentation</b></a>
 </p>
 
 ## What is ThirdEye?
 
-ThirdEye is an integrated tool for realtime monitoring of time series and interactive root-cause analysis. 
-It enables anyone inside an organization to collaborate on effective identification and analysis of deviations in 
-business and system metrics. ThirdEye supports the entire workflow from anomaly detection, over root-cause analysis, 
+ThirdEye is an integrated tool for realtime monitoring of time series and interactive root-cause analysis.
+It enables anyone inside an organization to collaborate on effective identification and analysis of deviations in
+business and system metrics. ThirdEye supports the entire workflow from anomaly detection, over root-cause analysis,
 to issue resolution and post-mortem reporting.
 
 
@@ -47,11 +51,12 @@ ThirdEye is not a generic dashboard builder toolkit. ThirdEye attempts to bring 
 
 ## Documentation
 
-For a complete description of ThirdEye's features, see [**ThirdEye documentation**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/). 
+For a complete description of ThirdEye's features, see [**ThirdEye documentation**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/).
 
 - [**Getting started**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/)
 - [**Data Sources Setup**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/database/)
 - [**Alert Setup**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration)
+- [**Join the Slack Community!**](https://stree.ai/slack)
 
 
 ## Features
@@ -71,14 +76,14 @@ For a complete description of ThirdEye's features, see [**ThirdEye documentation
 - the UI requires internal npm packages. Make sure you can access them. See [thirdeye-ui prerequisites](./thirdeye-ui/README.md#configure-node-package-manager-npm-for-use-with-artifactory)
 
 ### Database setup
-If you have MySQL 8.0 installed, run `scripts/db-setup.sh`. This script uses the `root` user to 
+If you have MySQL 8.0 installed, run `scripts/db-setup.sh`. This script uses the `root` user to
 create the database and tables.
 
 Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql-docker-start.sh`
 
 ### Build with Maven
 
-ThirdEye is a maven project and uses standard maven commands.   
+ThirdEye is a maven project and uses standard maven commands.
 ```
 # Build ThirdEye from source
 ./mvnw -T 1C install
@@ -96,7 +101,7 @@ ThirdEye is a maven project and uses standard maven commands.
 ### Running ThirdEye from Distribution
 
 ThirdEye builds a tarball and creates an installed dir post build.  
-ThirdEye has 3 main components all of which start from a single launcher  
+ThirdEye has 3 main components all of which start from a single launcher
 - **Coordinator**: This is the API server which exposes a swagger endpoint that will be used in this guide
 - **Scheduler**: This is the component that runs the cron jobs and automated pipelines
 - **Worker**: This is the component that does all the hard work: running detection tasks and generating anomalies.

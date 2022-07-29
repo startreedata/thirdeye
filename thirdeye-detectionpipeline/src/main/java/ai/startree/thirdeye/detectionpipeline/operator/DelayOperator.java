@@ -15,8 +15,9 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import java.time.Duration;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DelayOperator extends DetectionPipelineOperator{
 
@@ -24,11 +25,11 @@ public class DelayOperator extends DetectionPipelineOperator{
   private static final String RANDOM_OFFSET = "randomOffset";
   @Override
   public void execute() throws Exception {
-    long delayTime = Long.parseLong(getPlanNode().getParams().get(DELAY_TIME).toString());
-    final AtomicInteger randomOffset = new AtomicInteger();
+    Duration delayTime = Duration.parse(getPlanNode().getParams().get(DELAY_TIME).toString());
+    final AtomicReference<Duration> randomOffset = new AtomicReference<>(Duration.ZERO);
     optional(getPlanNode().getParams().get(RANDOM_OFFSET))
-        .ifPresent(offset -> randomOffset.set(Integer.parseInt(offset.toString())));;
-    long sleepTime = delayTime + (randomOffset.get() == 0 ? 0 : new Random().nextInt(randomOffset.get()));
+        .ifPresent(offset -> randomOffset.set(Duration.parse(offset.toString())));;
+    long sleepTime = delayTime.toMillis() + new Random().nextInt((int) randomOffset.get().toMillis());
     Thread.sleep(sleepTime);
     inputMap.forEach(this::setOutput);
   }

@@ -8,7 +8,7 @@ to issue resolution and post-mortem reporting.
 
 
 **Watch the introduction video**
-[![Watch ThirdEye introduction video](./doc/main_capture.png)](https://www.youtube.com/watch?v=XhaLcpiPUS0 "Watch ThirdEye introduction video")
+[![Watch ThirdEye introduction video](./doc/main_capture.png)](https://www.youtube.com/watch?v=XhaLcpiPUS0 "Watch ThirdEye introduction video"){target="_blank"}
 
 <details><summary>... or read the summary</summary>
 
@@ -44,11 +44,11 @@ ThirdEye is not a generic dashboard builder toolkit. ThirdEye attempts to bring 
 
 ## Documentation
 
-Detailed documentation can be found at [ThirdEye documentation](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/) for a complete description of ThirdEye's features.
+For a complete description of ThirdEye's features, see [**ThirdEye documentation**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/). 
 
-- [Getting started](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/)
-- [Data Sources Setup](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/database/)
-- [Alert Setup](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration)
+- [**Getting started**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/)
+- [**Data Sources Setup**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/database/)
+- [**Alert Setup**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration)
 
 
 ## Features

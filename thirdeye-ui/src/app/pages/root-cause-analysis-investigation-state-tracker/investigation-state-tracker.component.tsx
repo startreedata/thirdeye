@@ -20,11 +20,10 @@ import {
     useTheme,
 } from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { cloneDeep, isEmpty, toNumber } from "lodash";
+import { cloneDeep, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams, useSearchParams } from "react-router-dom";
-import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
     AppLoadingIndicatorV1,
@@ -41,7 +40,6 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { useGetInvestigation } from "../../rest/rca/rca.actions";
-import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     createNewInvestigation,
@@ -248,16 +246,6 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         </PageHeaderTextV1>
                     </div>
 
-                    {anomaly && (
-                        <AnomalyFeedback
-                            anomalyFeedback={
-                                (anomaly && anomaly.feedback) || {
-                                    ...DEFAULT_FEEDBACK,
-                                }
-                            }
-                            anomalyId={toNumber(anomalyId)}
-                        />
-                    )}
                     {investigationId && (
                         <div>
                             <Typography variant="subtitle1">

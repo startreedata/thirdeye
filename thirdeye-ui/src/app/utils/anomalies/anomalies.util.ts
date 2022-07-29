@@ -21,7 +21,10 @@ import {
     formatPercentageV1,
 } from "../../platform/utils";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import {
+    Anomaly,
+    AnomalyFeedbackType,
+} from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
@@ -324,4 +327,22 @@ export const getShortText = (
     }
 
     return textToShow;
+};
+
+export const ANOMALY_OPTIONS_TO_DESCRIPTIONS = {
+    [AnomalyFeedbackType.ANOMALY.valueOf()]: "Yes, this is a valid anomaly",
+    [AnomalyFeedbackType.ANOMALY_EXPECTED.valueOf()]:
+        "Yes, this anomaly is expected",
+    [AnomalyFeedbackType.ANOMALY_NEW_TREND.valueOf()]:
+        "Yes, however, this may be a new trend",
+};
+
+export const ALL_OPTIONS_TO_DESCRIPTIONS = {
+    ...ANOMALY_OPTIONS_TO_DESCRIPTIONS,
+    [AnomalyFeedbackType.NOT_ANOMALY.valueOf()]: "No, this is not an anomaly",
+};
+
+export const ALL_OPTIONS_WITH_NO_FEEDBACK = {
+    ...ALL_OPTIONS_TO_DESCRIPTIONS,
+    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: "Select Feedback",
 };

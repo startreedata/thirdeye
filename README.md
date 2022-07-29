@@ -53,7 +53,7 @@ Detailed documentation can be found at [ThirdEye documentation](https://dev.star
 
 ## Features
 
-| Alert simulation                                                                                                               | Automatic root cause analysis with top contributors algorithm                                                                    |
+| Alert simulation                                                                                                               | Automatic root cause analysis                                                                                                    |
 |--------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
 | [![Alert evaluation with ThirdEye](./doc/evaluation.png)](https://youtu.be/XhaLcpiPUS0?t=210 "Alert evaluation with ThirdEye") | [![Top contributors in ThirdEye](./doc/top_contributors.png)](https://youtu.be/XhaLcpiPUS0?t=306 "Top contributors in ThirdEye") |
 | Interactive slice-and-dice heatmap                                                                                             | Correlated events analysis                                                                                                       |

@@ -1,4 +1,6 @@
-
+<p align="center">
+  <img height=100 src="./doc/1280x640-startree_thirdeye-logo_storm_wave-white_bkg.png">
+</p>
 ## What is ThirdEye?
 
 ThirdEye is an integrated tool for realtime monitoring of time series and interactive root-cause analysis. 

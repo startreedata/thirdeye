@@ -1,5 +1,8 @@
+<p align="center">
+  <img height=100 src="./doc/1280x640-startree_thirdeye-logo_storm_wave-white_bkg.png">
+</p>
 
-# Introduction to ThirdEye
+## What is ThirdEye?
 
 ThirdEye is an integrated tool for realtime monitoring of time series and interactive root-cause analysis. 
 It enables anyone inside an organization to collaborate on effective identification and analysis of deviations in 
@@ -44,11 +47,20 @@ ThirdEye is not a generic dashboard builder toolkit. ThirdEye attempts to bring 
 
 ## Documentation
 
-Detailed documentation can be found at [ThirdEye documentation](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/) for a complete description of ThirdEye's features.
+For a complete description of ThirdEye's features, see [**ThirdEye documentation**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/). 
 
-- [Getting started](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/)
-- [Data Sources Setup](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/database/)
-- [Alert Setup](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration)
+- [**Getting started**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/)
+- [**Data Sources Setup**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/database/)
+- [**Alert Setup**](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration)
+
+
+## Features
+
+| Alert simulation                                                                                                               | Automatic root cause analysis                                                                                                    |
+|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| [![Alert evaluation with ThirdEye](./doc/evaluation.png)](https://youtu.be/XhaLcpiPUS0?t=210 "Alert evaluation with ThirdEye") | [![Top contributors in ThirdEye](./doc/top_contributors.png)](https://youtu.be/XhaLcpiPUS0?t=306 "Top contributors in ThirdEye") |
+| Interactive slice-and-dice heatmap                                                                                             | Correlated events analysis                                                                                                       |
+| [![Heatmap in ThirdEye](./doc/heatmap.png)](https://youtu.be/XhaLcpiPUS0?t=328 "Heatmap in Thirdeye")                          | [![Events in Thirdeye](./doc/events.png)](https://youtu.be/XhaLcpiPUS0?t=406 "Events in ThirdEye")                               |
 
 ## Build
 

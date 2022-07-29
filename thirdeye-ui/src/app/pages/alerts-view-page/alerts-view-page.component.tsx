@@ -297,7 +297,6 @@ export const AlertsViewPage: FunctionComponent = () => {
                                     evaluationRequestStatus ===
                                     ActionStatus.Working
                                 }
-                                title={uiAlert.name}
                                 onAnomalyBarClick={onAnomalyBarClick}
                                 onRefresh={fetchAlertEvaluation}
                             />

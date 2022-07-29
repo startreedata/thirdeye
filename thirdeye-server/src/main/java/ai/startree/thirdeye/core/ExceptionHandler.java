@@ -22,7 +22,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN_RCA_ALGORITHM;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.ResourceUtils.statusApi;
 
-import ai.startree.thirdeye.detection.DataProviderException;
+import ai.startree.thirdeye.DataProviderException;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;

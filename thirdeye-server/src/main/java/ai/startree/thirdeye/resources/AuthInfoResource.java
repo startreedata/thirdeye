@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
-import ai.startree.thirdeye.auth.OAuthManager;
+import ai.startree.thirdeye.auth.oauth.OAuthManager;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import com.codahale.metrics.annotation.Timed;

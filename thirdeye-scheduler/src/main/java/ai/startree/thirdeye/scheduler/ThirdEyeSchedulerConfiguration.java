@@ -29,6 +29,7 @@ public class ThirdEyeSchedulerConfiguration {
   private boolean detectionAlert = false;
   private boolean dataAvailabilityEventListener = false;
   private boolean dataAvailabilityTaskScheduler = false;
+  private int alertUpdateDelay = 60;
 
   @JsonProperty("taskCleanUp")
   private TaskCleanUpConfiguration taskCleanUpConfiguration = new TaskCleanUpConfiguration();
@@ -115,6 +116,15 @@ public class ThirdEyeSchedulerConfiguration {
   public ThirdEyeSchedulerConfiguration setDataAvailabilityTaskScheduler(
       final boolean dataAvailabilityTaskScheduler) {
     this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
+    return this;
+  }
+
+  public int getAlertUpdateDelay() {
+    return alertUpdateDelay;
+  }
+
+  public ThirdEyeSchedulerConfiguration setAlertUpdateDelay(final int alertUpdateDelay) {
+    this.alertUpdateDelay = alertUpdateDelay;
     return this;
   }
 

@@ -21,7 +21,7 @@ import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.detection.annotation.registry.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;

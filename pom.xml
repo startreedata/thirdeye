@@ -36,9 +36,6 @@
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
 
-    <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
-    <module>thirdeye-deprecated-tests</module>
-
     <!--  Build the distribution -->
     <module>thirdeye-distribution</module>
 
@@ -100,6 +97,7 @@
     <testcontainers.version>1.15.3</testcontainers.version>
     <flyway.version>8.5.7</flyway.version>
     <modelmapper.version>3.1.0</modelmapper.version>
+    <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
   </properties>
 
   <licenses>
@@ -171,6 +169,10 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -918,12 +920,6 @@
         <groupId>org.hsqldb</groupId>
         <artifactId>hsqldb</artifactId>
         <version>${hsqldb.version}</version>
-      </dependency>
-      <!-- Used for demo setup and mock data source-->
-      <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>1.4.200</version>
       </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>

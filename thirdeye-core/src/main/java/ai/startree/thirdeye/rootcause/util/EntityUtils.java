@@ -19,9 +19,9 @@ import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.ParsedUrn;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,12 +55,7 @@ public class EntityUtils {
    * @return decoded value
    */
   public static String decodeURNComponent(String value) {
-    try {
-      return URLDecoder.decode(value, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      // must not happen, utf-8 is part of java spec
-      throw new IllegalStateException(e);
-    }
+    return URLDecoder.decode(value, StandardCharsets.UTF_8);
   }
 
   /**
@@ -71,18 +66,13 @@ public class EntityUtils {
    * @return encoded urn fragment
    */
   public static String encodeURNComponent(String value) {
-    try {
-      return URLEncoder.encode(value, "UTF-8")
-          .replace("+", "%20")
-          .replace("%21", "!")
-          .replace("%27", "'")
-          .replace("%28", "(")
-          .replace("%29", ")")
-          .replace("%7E", "~");
-    } catch (UnsupportedEncodingException e) {
-      // must not happen, utf-8 is part of java spec
-      throw new IllegalStateException(e);
-    }
+    return URLEncoder.encode(value, StandardCharsets.UTF_8)
+        .replace("+", "%20")
+        .replace("%21", "!")
+        .replace("%27", "'")
+        .replace("%28", "(")
+        .replace("%29", ")")
+        .replace("%7E", "~");
   }
 
   /**

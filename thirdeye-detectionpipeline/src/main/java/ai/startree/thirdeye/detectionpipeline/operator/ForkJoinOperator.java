@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.detectionpipeline.PlanNodeFactory;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
-import ai.startree.thirdeye.detectionpipeline.plan.PlanNodeFactory;
 import ai.startree.thirdeye.mapper.PlanNodeMapper;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;

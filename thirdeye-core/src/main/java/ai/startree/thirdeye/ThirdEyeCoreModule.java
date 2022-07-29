@@ -13,12 +13,11 @@
  */
 package ai.startree.thirdeye;
 
+import ai.startree.thirdeye.config.CacheConfig;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
-import ai.startree.thirdeye.detection.DefaultDataProvider;
-import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;

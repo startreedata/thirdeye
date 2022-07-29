@@ -232,7 +232,9 @@
         "sendgrid-api-key": "SendGrid API Key",
         "support": "Support",
         "check-status": "Check Status",
-        "health-status": "Health Status"
+        "health-status": "Health Status",
+        "yes": "Yes",
+        "no": "No"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -314,6 +316,8 @@
         "checking-datasource-health": "Checking datasource health. This will take a few seconds ...",
         "to-get-started-select-type": "Select a type to get started",
         "enter-webhook-url": "Enter webhook URL",
+        "is-this-an-anomaly": "Is this an anomaly?",
+        "click-to-add-comment": "Click to add comment",
         "no-notifications-groups": "No notifications groups have been configured"
     }
 }

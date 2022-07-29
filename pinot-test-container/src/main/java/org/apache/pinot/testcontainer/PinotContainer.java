@@ -36,7 +36,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
 
 
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("apachepinot/pinot");
-    private static final String DEFAULT_TAG = "0.7.0-SNAPSHOT-b9b31e5d2-20210413-jdk8";
+    private static final String DEFAULT_TAG = "0.9.3-jdk11";
     private List<AddTable> addTables;
     private List<ImportData> importDataList;
     private Network network;
@@ -51,7 +51,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
 
     public PinotContainer(final DockerImageName dockerImageName) {
         super(dockerImageName);
-        dockerImageName.assertCompatibleWith(DockerImageName.parse("apachepinot/pinot"));
+        dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
         withExposedPorts(DEFAULT_ZOOKEEPER_PORT, DEFAULT_CONTROLLER_HTTP_PORT, DEFAULT_BROKER_HTTP_PORT);
     }
 
@@ -85,7 +85,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
             new WaitAllStrategy()
                 .withStartupTimeout(Duration.ofMinutes(5))
                 .withStrategy(waitStrategy)
-                .withStrategy(Wait.forLogMessage(".*You can always go to http://localhost:9000 to play around in the query console.*", 1))
+                .withStrategy(Wait.forLogMessage(".*Bootstrap baseballStats table.*", 1))
         );
     }
 
@@ -108,7 +108,8 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
                     "/opt/pinot/bin/pinot-admin.sh",
                     "LaunchDataIngestionJob",
                     "-jobSpecFile", "/tmp/" + importData.getBatchJobSpecFile().getName(),
-                    "-values"
+                    "-values", "-controllerHost", "localhost",
+                "-controllerPort", "9000"
             );
             String stdout = launchDataIngestionJobResult.getStdout();
             log.info(stdout);

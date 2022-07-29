@@ -97,6 +97,7 @@
     <testcontainers.version>1.15.3</testcontainers.version>
     <flyway.version>8.5.7</flyway.version>
     <modelmapper.version>3.1.0</modelmapper.version>
+    <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
   </properties>
 
   <licenses>
@@ -168,6 +169,10 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>

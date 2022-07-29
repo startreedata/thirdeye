@@ -1,5 +1,5 @@
 
-# Introduction to ThirdEye
+# What is ThirdEye?
 
 ThirdEye is an integrated tool for realtime monitoring of time series and interactive root-cause analysis. 
 It enables anyone inside an organization to collaborate on effective identification and analysis of deviations in 
@@ -8,7 +8,7 @@ to issue resolution and post-mortem reporting.
 
 
 **Watch the introduction video**
-[![Watch ThirdEye introduction video](./doc/main_capture.png)](https://www.youtube.com/watch?v=XhaLcpiPUS0 "Watch ThirdEye introduction video"){target="_blank"}
+[![Watch ThirdEye introduction video](./doc/main_capture.png)](https://www.youtube.com/watch?v=XhaLcpiPUS0 "Watch ThirdEye introduction video")
 
 <details><summary>... or read the summary</summary>
 

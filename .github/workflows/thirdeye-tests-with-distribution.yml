@@ -28,7 +28,8 @@ jobs:
         server-username: ARTIFACTORY_USERNAME_REF
         server-password: ARTIFACTORY_TOKEN_REF
     - name: Build with Maven
-      run: ./mvnw -T 1C -B clean verify -pl '!thirdeye-ui'
+      # fixme cyril checking cache behaviour
+      run: ls ~/.m2/repository && ./mvnw -T 1C -B clean verify -pl '!thirdeye-ui' && ls ~/.m2/repository
       env:
         ARTIFACTORY_USERNAME_REF: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
         ARTIFACTORY_TOKEN_REF: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}

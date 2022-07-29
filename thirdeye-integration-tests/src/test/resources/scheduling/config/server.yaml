@@ -68,6 +68,7 @@ scheduler:
   # Run the Quartz Scheduler.
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
   enabled: true
+  alertUpdateDelay: 1
 
   detectionPipeline: true
   detectionAlert: true

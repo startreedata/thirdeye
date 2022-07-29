@@ -230,7 +230,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     CLOCK.useMockTime(MARCH_25_2020_05H00);
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
-    // give thread to quartz scheduler - (quartz idle time is weaved to 1000 ms for test speed)
+    // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
     Thread.sleep(1000);
 
     // wait for the new anomaly to be created - proxy to know when the detection has run

@@ -58,7 +58,7 @@ public class DetectionCronScheduler implements Runnable {
   private final int alertDelay;
 
   @Inject
-  public DetectionCronScheduler(ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration, final AlertManager alertManager) {
+  public DetectionCronScheduler(final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration, final AlertManager alertManager) {
     this.alertManager = alertManager;
     this.alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
     executorService = Executors.newSingleThreadScheduledExecutor();

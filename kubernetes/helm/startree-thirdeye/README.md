@@ -195,6 +195,29 @@ SSL/TLS can be configured using
   --set tls.scheduler.enabled=true # for tls on scheduler
 ```
 
+### Basic Authentication Support
+
+Configurations for Basic Authentication
+```yaml
+auth:
+  enabled: true
+  basic:
+    enabled: true
+    users:
+      - username: admin
+      - password: admin
+```
+Details
+
+| Property                 | Description                                        |
+|--------------------------|----------------------------------------------------|
+| `enabled`                | Flag to enable/disable auth                        |
+| `basic.enabled`          | Flag to enable/disable Basic authentication filter |
+| `basic.users[].username` | Username for authentication                        |
+| `basic.users[].password` | Password for authentication                        |
+                                                                                                                |
+
+
 ### OAuth2 Support
 
 Configurations for OAuth2
@@ -202,6 +225,7 @@ Configurations for OAuth2
 auth:
   enabled: true
   oauth:
+    enabled: true
     serverUrl: <auth server url>
     keysUrl: <keys url>
     required:
@@ -218,6 +242,7 @@ Details
 | Property           | Description                                                                                                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
 | `enabled`          | Flag to enable/disable auth                                                                                                                     |
+| `oauth.enabled`    | Flag to enable/disable OAuth authentication filter                                                                                              |
 | `oauth.serverUrl`  | OIDC server url. Usually the oidc server has a standard endpoint to expose its metadata which contains info required for keysUrl and issuer url |
 | `oauth.keysUrl`    | Endpoint where jwk keys are present                                                                                                             |
 | `oauth.required`   | List of claims which are required in the auth token. If any claim from the list is absent, it will considered unauthorised request              |

@@ -11,46 +11,39 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Button,
-    Grid,
-    MenuItem,
-    Popover,
-    TextField,
-} from "@material-ui/core";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
+import { Box, Button, ButtonGroup, TextField } from "@material-ui/core";
+import CommentIcon from "@material-ui/icons/Comment";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+    FunctionComponent,
+    MouseEvent,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
+    DropdownMenuV1,
     NotificationTypeV1,
-    PageContentsCardV1,
+    TooltipV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
+import {
+    ALL_OPTIONS_TO_DESCRIPTIONS,
+    ALL_OPTIONS_WITH_NO_FEEDBACK,
+} from "../../utils/anomalies/anomalies.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { AnomalyFeedbackProps } from "./anomaly-feedback.interfaces";
-
-const OPTION_TO_DESCRIPTIONS = {
-    [AnomalyFeedbackType.ANOMALY.valueOf()]: "Anomaly - unexpected",
-    [AnomalyFeedbackType.ANOMALY_EXPECTED.valueOf()]:
-        "Anomaly - Expected temporary change",
-    [AnomalyFeedbackType.ANOMALY_NEW_TREND.valueOf()]:
-        "Anomaly - Permanent change",
-    [AnomalyFeedbackType.NOT_ANOMALY.valueOf()]: "Not an anomaly",
-    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: "No feedback",
-};
 
 export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     anomalyId,
     anomalyFeedback,
-    className,
 }) => {
     const [currentlySelected, setCurrentlySelected] =
         useState<AnomalyFeedbackType>(anomalyFeedback.type);
@@ -67,27 +60,13 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
      */
     const commentRef = useRef<HTMLInputElement>();
 
-    // Popover
-    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
-        null
-    );
-
-    const handleFeedbackClick = (
-        event: React.MouseEvent<HTMLButtonElement>
-    ): void => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handlePopoverClose = (): void => {
-        setAnchorEl(null);
-    };
+    // Feedback menu
+    const [feedbackMenuAnchorEl, setFeedbackMenuAnchorEl] =
+        React.useState<HTMLElement | null>(null);
 
     const handleLabelChange = (
-        event: React.ChangeEvent<{ value: unknown }>
+        newSelectedFeedbackType: AnomalyFeedbackType
     ): void => {
-        const newSelectedFeedbackType = event.target
-            .value as string as AnomalyFeedbackType;
-
         if (
             newSelectedFeedbackType &&
             newSelectedFeedbackType !== currentlySelected
@@ -95,7 +74,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             showDialog({
                 type: DialogType.ALERT,
                 contents: t("message.change-confirmation-to", {
-                    value: `"${OPTION_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
+                    value: `"${ALL_OPTIONS_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
                 }),
                 okButtonText: t("label.change"),
                 cancelButtonText: t("label.cancel"),
@@ -131,8 +110,8 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         multiline
                         defaultValue={modifiedFeedbackComment}
                         inputRef={commentRef}
+                        minRows={3}
                         name="comment"
-                        rows={3}
                     />
                 </>
             ),
@@ -185,9 +164,6 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     : errMessages.map((err) =>
                           notify(NotificationTypeV1.Error, err)
                       );
-            })
-            .finally(() => {
-                handlePopoverClose();
             });
     };
 
@@ -196,66 +172,75 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         setModifiedFeedbackComment(anomalyFeedback.comment);
     }, [anomalyFeedback]);
 
-    const open = Boolean(anchorEl);
+    const shortcutCreateMenuItems = Object.keys(
+        ALL_OPTIONS_TO_DESCRIPTIONS
+    ).map((optionKey: string) => ({
+        id: optionKey,
+        text: ALL_OPTIONS_TO_DESCRIPTIONS[optionKey],
+    }));
 
     return (
         <>
-            <Box marginTop="10px">
-                <Button
-                    endIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-                    size="small"
-                    variant="text"
-                    onClick={handleFeedbackClick}
-                >
-                    Is this an anomaly?
-                </Button>
+            <Box display="flex">
+                <Box marginRight={1} paddingTop={1}>
+                    <label>{t("message.is-this-an-anomaly")}</label>
+                </Box>
+                <Box>
+                    {/** The single dropdown should trigger the menu open */}
+                    <ButtonGroup
+                        color="primary"
+                        size="small"
+                        variant="outlined"
+                        onClick={(e: MouseEvent<HTMLElement>) =>
+                            setFeedbackMenuAnchorEl(e.currentTarget)
+                        }
+                    >
+                        <Button color="primary" variant="outlined">
+                            {ALL_OPTIONS_WITH_NO_FEEDBACK[currentlySelected]}
+                        </Button>
+                        <Button
+                            color="primary"
+                            variant={
+                                feedbackMenuAnchorEl ? "contained" : "outlined"
+                            }
+                        >
+                            <KeyboardArrowDownIcon />
+                        </Button>
+                    </ButtonGroup>
+                    <DropdownMenuV1
+                        anchorEl={feedbackMenuAnchorEl}
+                        className="dropdown-button-v1-menu"
+                        dropdownMenuItems={shortcutCreateMenuItems}
+                        open={Boolean(feedbackMenuAnchorEl)}
+                        onClick={(menuItemId: number | string): void => {
+                            handleFeedbackChangeOk &&
+                                handleLabelChange(
+                                    menuItemId as unknown as AnomalyFeedbackType
+                                );
+                            setFeedbackMenuAnchorEl(null);
+                        }}
+                        onClose={() => setFeedbackMenuAnchorEl(null)}
+                    />
+                </Box>
+                <Box marginLeft={1}>
+                    <TooltipV1
+                        placement="top"
+                        title={
+                            anomalyFeedback.comment ||
+                            t("message.click-to-add-comment")
+                        }
+                    >
+                        <Button
+                            color="primary"
+                            size="small"
+                            variant="outlined"
+                            onClick={handleCommentUpdateClick}
+                        >
+                            <CommentIcon />
+                        </Button>
+                    </TooltipV1>
+                </Box>
             </Box>
-
-            <Popover
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                }}
-                id="anomaly-feedback"
-                open={open}
-                transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                }}
-                onClose={handlePopoverClose}
-            >
-                <PageContentsCardV1 className={className}>
-                    <Grid container direction="column" spacing={2}>
-                        <Grid item>
-                            <TextField
-                                fullWidth
-                                select
-                                id="anomaly-feedback-select"
-                                value={currentlySelected}
-                                onChange={handleLabelChange}
-                            >
-                                {Object.keys(OPTION_TO_DESCRIPTIONS).map(
-                                    (optionKey: string) => (
-                                        <MenuItem
-                                            key={optionKey}
-                                            value={optionKey}
-                                        >
-                                            {OPTION_TO_DESCRIPTIONS[optionKey]}
-                                        </MenuItem>
-                                    )
-                                )}
-                            </TextField>
-                        </Grid>
-
-                        <Grid item>
-                            <Button onClick={handleCommentUpdateClick}>
-                                View / Edit comment
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </PageContentsCardV1>
-            </Popover>
         </>
     );
 };

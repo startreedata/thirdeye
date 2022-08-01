@@ -19,7 +19,10 @@ import {
     screen,
 } from "@testing-library/react";
 import React from "react";
-import { DataGridColumnV1 } from "../../platform/components/data-grid-v1/data-grid-v1";
+import {
+    DataGridColumnV1,
+    DataGridSortOrderV1,
+} from "../../platform/components/data-grid-v1/data-grid-v1";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { AnomalyListV1 } from "./anomaly-list-v1.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
@@ -97,6 +100,7 @@ jest.mock("../../platform/components/data-grid-v1", () => ({
     DataGridScrollV1: {
         Body: jest.fn().mockImplementation((props) => props.children),
     },
+    DataGridSortOrderV1: DataGridSortOrderV1,
 }));
 
 jest.mock("../../utils/routes/routes.util", () => ({

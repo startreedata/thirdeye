@@ -47,6 +47,7 @@ import { SubscriptionGroupWizard } from "../subscription-group-wizard/subscripti
 import { SubscriptionGroupWizardStep } from "../subscription-group-wizard/subscription-group-wizard.interfaces";
 import { TransferList } from "../transfer-list/transfer-list.component";
 import { AlertEvaluationTimeSeriesCard } from "../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import { CreateAlertHeader } from "../visualizations/alert-evaluation-time-series-card/headers/create-alert-header.component";
 import {
     AlertWizardConfigurationNew,
     DEFAULT_ALERT_TEMPLATE_ID,
@@ -443,13 +444,18 @@ function AlertWizard<NewOrExistingAlert extends EditableAlert | Alert>(
                                     {/* Alert evaluation */}
                                     <Grid item sm={12}>
                                         <AlertEvaluationTimeSeriesCard
-                                            showPreviewButton
                                             alertEvaluation={alertEvaluation}
                                             alertEvaluationTimeSeriesHeight={
                                                 500
                                             }
-                                            title="Preview Alert"
-                                            onRefresh={refreshAlertEvaluation}
+                                            header={
+                                                <CreateAlertHeader
+                                                    title="Preview Alert"
+                                                    onRefresh={
+                                                        refreshAlertEvaluation
+                                                    }
+                                                />
+                                            }
                                         />
                                     </Grid>
                                 </>

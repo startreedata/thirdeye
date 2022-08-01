@@ -22,6 +22,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
+    DataGridSortOrderV1,
     DataGridV1,
 } from "../../platform/components";
 import { linkRendererV1 } from "../../platform/utils";
@@ -219,6 +220,10 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
             hideBorder
             columns={anomalyListColumns}
             data={props.anomalies as UiAnomaly[]}
+            initialSortState={{
+                key: "startTime",
+                order: DataGridSortOrderV1.DESC,
+            }}
             rowKey="id"
             searchFilterValue={props.searchFilterValue}
             searchPlaceholder={t("label.search-entity", {

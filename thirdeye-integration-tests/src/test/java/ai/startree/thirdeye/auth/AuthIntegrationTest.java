@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye;
+package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.utils.AuthTestUtils.getJWKS;
@@ -20,6 +20,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
@@ -31,6 +32,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.HttpHeaders;
@@ -42,16 +44,18 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class OAuthIntegrationTest {
+public class AuthIntegrationTest {
 
-  public static final Logger log = LoggerFactory.getLogger(OAuthIntegrationTest.class);
-  public static final String THIRDEYE_CONFIG = "./src/test/resources/auth";
+  public static final Logger log = LoggerFactory.getLogger(AuthIntegrationTest.class);
 
   private static final String KEY_SET_FILENAME = "keyset.json";
   private static final String ISSUER = "http://identity.example.com";
   private static final String DIR = "authtest";
+  private static final String USERNAME = "user";
+  private static final String PASSWORD = "password";
 
-  private String token;
+  private String oAuthToken;
+  private String basicAuthToken;
   private File dir;
   public DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
@@ -61,6 +65,7 @@ public class OAuthIntegrationTest {
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     oauthSetup();
+    basicAuthSetup();
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("auth/server.yaml"),
@@ -72,7 +77,10 @@ public class OAuthIntegrationTest {
         config("auth.enabled", "true"),
         config("auth.oauth.enabled", "true"),
         config("auth.oauth.keysUrl",
-            String.format("file://%s/%s", dir.getAbsolutePath(), KEY_SET_FILENAME))
+            String.format("file://%s/%s", dir.getAbsolutePath(), KEY_SET_FILENAME)),
+        config("auth.basic.enabled", "true"),
+        config("auth.basic.users[0].username", USERNAME),
+        config("auth.basic.users[0].password", PASSWORD)
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
@@ -82,24 +90,29 @@ public class OAuthIntegrationTest {
         .build("test client");
   }
 
+  private void basicAuthSetup() {
+    final String token = Base64.getEncoder().encodeToString(String.format("%s:%s", USERNAME, PASSWORD).getBytes());
+    basicAuthToken = String.format("Basic %s", token);
+  }
+
   private void oauthSetup() throws Exception {
-    JWKSet jwks = getJWKS(RandomStringUtils.randomAlphanumeric(16));
-    JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("test")
+    final JWKSet jwks = getJWKS(RandomStringUtils.randomAlphanumeric(16));
+    final JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject("test")
         .issuer(ISSUER)
         .expirationTime(new Date(System.currentTimeMillis() + 36000000))
         .build();
-    token = String.format("Bearer %s", getToken(jwks.getKeys().get(0), claimsSet));
+    oAuthToken = String.format("Bearer %s", getToken(jwks.getKeys().get(0), claimsSet));
 
     dir = new File(DIR);
     dir.mkdir();
-    FileWriter jwkFileWriter = new FileWriter(String.format("%s/%s", DIR, KEY_SET_FILENAME));
+    final FileWriter jwkFileWriter = new FileWriter(String.format("%s/%s", DIR, KEY_SET_FILENAME));
     jwkFileWriter.write(jwks.toString());
     jwkFileWriter.close();
   }
 
   @AfterClass(alwaysRun = true)
   public void afterClass() throws Exception {
-    log.info("Thirdeye port: {}", SUPPORT.getLocalPort());
+    log.info("ThirdEye port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
 
     optional(dir.listFiles())
@@ -111,10 +124,20 @@ public class OAuthIntegrationTest {
 
 
   @Test
-  public void testAuthorisedPingRequest() {
-    Response response = client.target(thirdEyeEndPoint("api/auth/login"))
+  public void testOAuthAuthorisedPingRequest() {
+    final Response response = client.target(thirdEyeAuthEndPoint())
         .request()
-        .header(HttpHeaders.AUTHORIZATION, token)
+        .header(HttpHeaders.AUTHORIZATION, oAuthToken)
+        .post(null);
+    assertThat(response.getStatus()).isEqualTo(200);
+
+  }
+
+  @Test
+  public void testBasicAuthorisedPingRequest() {
+    final Response response = client.target(thirdEyeAuthEndPoint())
+        .request()
+        .header(HttpHeaders.AUTHORIZATION, basicAuthToken)
         .post(null);
     assertThat(response.getStatus()).isEqualTo(200);
 
@@ -122,14 +145,14 @@ public class OAuthIntegrationTest {
 
   @Test
   public void testUnauthorisedPingRequest() {
-    Response response = client.target(thirdEyeEndPoint("api/auth/login"))
+    final Response response = client.target(thirdEyeAuthEndPoint())
         .request()
         .post(null);
     assertThat(response.getStatus()).isEqualTo(401);
   }
 
-  private String thirdEyeEndPoint(final String pathFragment) {
-    return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), pathFragment);
+  private String thirdEyeAuthEndPoint() {
+    return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), "api/auth/login");
   }
 }
 

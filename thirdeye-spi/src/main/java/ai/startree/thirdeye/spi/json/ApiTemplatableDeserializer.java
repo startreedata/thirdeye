@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.type.SimpleType;
 import java.io.IOException;
 
 /**
@@ -49,7 +50,13 @@ class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
     checkArgument(property != null,
         "Cannot deserialize Templatable object without its generic type. Attempt to use Templatable as root object?");
     final JavaType wrapperType = property.getType();
-    final JavaType valueType = wrapperType.containedType(0);
+    final int numDistinctType = wrapperType.containedTypeCount();
+    final JavaType valueType;
+    if (numDistinctType == 1) {
+      valueType = wrapperType.containedType(0);
+    } else {
+      valueType = SimpleType.constructUnsafe(Object.class);
+    }
     final ApiTemplatableDeserializer deserializer = new ApiTemplatableDeserializer();
     deserializer.valueType = valueType;
     return deserializer;

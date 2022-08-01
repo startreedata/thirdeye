@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
@@ -26,7 +26,7 @@ public class PlanNodeApiTest {
   @Test
   public void testInputNode() throws IOException {
     URL resource = PlanNodeApiTest.class.getClassLoader().getResource("inputNode.json");
-    final PlanNodeApi inputNode = new ObjectMapper().readValue(
+    final PlanNodeApi inputNode = ThirdEyeSerialization.newObjectMapper().readValue(
         Resources.toString(resource, StandardCharsets.UTF_8),
         PlanNodeApi.class);
     Assert.assertEquals(inputNode.getName(), "baselineDataFetcher");
@@ -40,7 +40,7 @@ public class PlanNodeApiTest {
   @Test
   public void testDetectionNode() throws IOException {
     URL resource = PlanNodeApiTest.class.getClassLoader().getResource("detectionNode.json");
-    final PlanNodeApi inputNode = new ObjectMapper().readValue(Resources.toString(resource,
+    final PlanNodeApi inputNode = ThirdEyeSerialization.newObjectMapper().readValue(Resources.toString(resource,
         StandardCharsets.UTF_8),
         PlanNodeApi.class);
     Assert.assertEquals(inputNode.getName(), "percentageChangeDetector");

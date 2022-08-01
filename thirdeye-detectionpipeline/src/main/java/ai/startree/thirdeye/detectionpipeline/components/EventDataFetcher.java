@@ -51,7 +51,7 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
     startTimeLookback = isoPeriod(spec.getStartTimeLookback(), DEFAULT_START_TIME_LOOKBACK);
     endTimeLookback = isoPeriod(spec.getEndTimeLookback(), DEFAULT_END_TIME_LOOKBACK);
     lookaround = isoPeriod(spec.getLookaround(), DEFAULT_LOOKAROUND);
-    eventTypes = Objects.requireNonNull(spec.getEventTypes().value());
+    eventTypes = Objects.requireNonNull(spec.getEventTypes());
     freeTextSqlFilter = spec.getSqlFilter();
 
     eventDao = spec.getEventManager();

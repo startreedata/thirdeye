@@ -75,7 +75,7 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
   }
 
   private PlanNode getPlanNode(final String key) {
-    final String nodeName = String.valueOf(requireNonNull(getParams().get(key),
+    final String nodeName = String.valueOf(requireNonNull(getParams().get(key).value(),
         "param missing: " + key));
     return requireNonNull(pipelinePlanNodes.get(nodeName), "node not found: " + nodeName);
   }

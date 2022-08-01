@@ -15,6 +15,7 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.spi.Constants.AUTH_BASIC;
 import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
@@ -28,6 +29,8 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
+import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
@@ -37,6 +40,7 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
@@ -95,11 +99,15 @@ public class ThirdEyeServerModule extends AbstractModule {
   @Provides
   public AuthFilter getAuthFilters(final OAuthManager oAuthManager) {
     AuthConfiguration config = configuration.getAuthConfiguration();
-    List<AuthFilter> filters;
+    List<AuthFilter> filters = new ArrayList<>();
     if(config.isEnabled()) {
-       filters = List.of(getBasicAuthFilter(config.getBasicAuthConfig()), getOAuthFilter(oAuthManager));
+      optional(getBasicAuthFilter()).ifPresent(filters::add);
+      optional(getOAuthFilter(oAuthManager)).ifPresent(filters::add);
     } else {
-      filters = List.of(getNoAuthFilter());
+      filters.add(getNoAuthFilter());
+    }
+    if(filters.isEmpty()) {
+      throw new ThirdEyeException(ThirdEyeStatus.ERR_AUTH_FILTERS_DISABLED);
     }
     return new ChainedAuthFilter<>(filters);
   }
@@ -113,19 +121,28 @@ public class ThirdEyeServerModule extends AbstractModule {
   }
 
   private OAuthCredentialAuthFilter<ThirdEyePrincipal> getOAuthFilter(final OAuthManager authManager) {
-    final ThirdEyeOAuthAuthenticator authenticator = new ThirdEyeOAuthAuthenticator(authManager);
-    return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
-        .setAuthenticator(authenticator)
-        .setPrefix(AUTH_BEARER)
-        .buildAuthFilter();
+    OAuthConfiguration config = configuration.getAuthConfiguration().getOAuthConfig();
+    if (config != null && config.isEnabled()) {
+      final ThirdEyeOAuthAuthenticator authenticator = new ThirdEyeOAuthAuthenticator(authManager);
+      return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+          .setAuthenticator(authenticator)
+          .setPrefix(AUTH_BEARER)
+          .buildAuthFilter();
+    } else {
+      return null;
+    }
   }
 
-  private BasicCredentialAuthFilter<ThirdEyePrincipal> getBasicAuthFilter(
-      final BasicAuthConfiguration config) {
-    final ThirdEyeBasicAuthenticator authenticator = new ThirdEyeBasicAuthenticator(config);
-    return new BasicCredentialAuthFilter.Builder<ThirdEyePrincipal>()
-        .setAuthenticator(authenticator)
-        .setPrefix(AUTH_BASIC)
-        .buildAuthFilter();
+  private BasicCredentialAuthFilter<ThirdEyePrincipal> getBasicAuthFilter() {
+    BasicAuthConfiguration config = configuration.getAuthConfiguration().getBasicAuthConfig();
+    if (config != null && config.isEnabled()) {
+      final ThirdEyeBasicAuthenticator authenticator = new ThirdEyeBasicAuthenticator(config);
+      return new BasicCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+          .setAuthenticator(authenticator)
+          .setPrefix(AUTH_BASIC)
+          .buildAuthFilter();
+    } else {
+      return null;
+    }
   }
 }

@@ -18,7 +18,17 @@ import java.util.List;
 
 public class BasicAuthConfiguration {
 
+  private boolean enabled;
   private List<UserCredentialConfiguration> users;
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public BasicAuthConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
 
   public List<UserCredentialConfiguration> getUsers() {
     return users;

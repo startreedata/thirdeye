@@ -70,6 +70,7 @@ public class OAuthIntegrationTest {
         config("database.password", dbConfiguration.getPassword()),
         config("database.driver", dbConfiguration.getDriver()),
         config("auth.enabled", "true"),
+        config("auth.oauth.enabled", "true"),
         config("auth.oauth.keysUrl",
             String.format("file://%s/%s", dir.getAbsolutePath(), KEY_SET_FILENAME))
     );

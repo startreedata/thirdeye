@@ -22,12 +22,7 @@ import {
 } from "@material-ui/core";
 import CronValidator from "cron-expression-validator";
 import cronstrue from "cronstrue";
-import React, {
-    ChangeEvent,
-    FunctionComponent,
-    useEffect,
-    useState,
-} from "react";
+import React, { ChangeEvent, FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QuickScheduleOptions } from "../../utils/cron-expression/cron-expression.util";
 import {
@@ -46,41 +41,25 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     const [cronInternal, setCronInternal] = useState(value ?? "");
     const [quickSchedule, setQuickSchedule] =
         useState<QuickScheduleOptionKeys>();
-    const [seconds, setSeconds] = useState<string>("");
-    const [minute, setMinute] = useState<string>("");
-    const [hour, setHour] = useState<string>("");
-    const [day, setDay] = useState<string>("");
-    const [month, setMonth] = useState<string>("");
-    const [week, setWeek] = useState<string>("");
+
+    const atoms = cronInternal.trim().split(" ");
+    const [_seconds, _minute, _hour, _day, _month, _week, _year] = atoms;
+    const [seconds, setSeconds] = useState<string>(_seconds ?? "");
+    const [minute, setMinute] = useState<string>(_minute ?? "");
+    const [hour, setHour] = useState<string>(_hour ?? "");
+    const [day, setDay] = useState<string>(_day ?? "");
+    const [month, setMonth] = useState<string>(_month ?? "");
+    const [week, setWeek] = useState<string>(_week ?? "");
     // optional
-    const [year, setYear] = useState<string>("");
+    const [year, setYear] = useState<string>(_year ?? "");
 
     // Avoid validation for predefined cron expressions
     const isCronValid =
         Boolean(quickSchedule) ||
         CronValidator.isValidCronExpression(cronInternal.trim());
 
-    useEffect(() => {
-        const atoms = cronInternal.trim().split(" ");
-        let [_seconds, _minute, _hour, _day, _month, _week, _year] = atoms;
-
-        if (atoms.length < 6) {
-            [_minute, _hour, _day, _month, _week] = atoms;
-            _year = "";
-            _seconds = "";
-        }
-
-        // Update fields
-        setSeconds(_seconds);
-        setMinute(_minute);
-        setHour(_hour);
-        setDay(_day);
-        setMonth(_month);
-        setWeek(_week);
-        setYear(_year);
-    }, [cronInternal]);
-
     const handleMinuteUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
+        setMinute(event.target.value);
         setCronInternal(
             `${seconds} ${
                 event.target.value ?? ""
@@ -89,6 +68,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     };
 
     const handleHourUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
+        setHour(event.target.value);
         setCronInternal(
             `${seconds} ${minute} ${
                 event.target.value ?? ""
@@ -97,6 +77,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     };
 
     const handleDayUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
+        setDay(event.target.value);
         setCronInternal(
             `${seconds} ${minute} ${hour} ${
                 event.target.value ?? ""
@@ -105,6 +86,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     };
 
     const handleMonthUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
+        setMonth(event.target.value);
         setCronInternal(
             `${seconds} ${minute} ${hour} ${day} ${
                 event.target.value ?? ""
@@ -113,6 +95,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     };
 
     const handleWeekUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
+        setWeek(event.target.value);
         setCronInternal(
             `${seconds} ${minute} ${hour} ${day} ${month} ${
                 event.target.value ?? ""
@@ -123,6 +106,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     const handleSecondsUpdate = (
         event: ChangeEvent<HTMLInputElement>
     ): void => {
+        setSeconds(event.target.value);
         setCronInternal(
             `${
                 event.target.value ?? ""
@@ -131,6 +115,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     };
 
     const handleYearUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
+        setYear(event.target.value);
         setCronInternal(
             `${seconds} ${minute} ${hour} ${day} ${month} ${week} ${
                 event.target.value ?? ""

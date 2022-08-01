@@ -51,7 +51,7 @@ public class ConfigGenerator {
     Preconditions.checkNotNull(dateTimeFieldSpec);
     DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
     String timeFormatStr = formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
-        .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT.toString(), formatSpec.getSDFPattern())
+        .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT, formatSpec.getSDFPattern())
         : TimeFormat.EPOCH.toString();
     setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec.getName(), timeFormatStr,
         formatSpec.getColumnSize(),

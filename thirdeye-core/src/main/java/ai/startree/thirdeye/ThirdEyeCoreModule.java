@@ -13,13 +13,11 @@
  */
 package ai.startree.thirdeye;
 
+import ai.startree.thirdeye.config.CacheConfig;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
-import ai.startree.thirdeye.detection.DefaultDataProvider;
-import ai.startree.thirdeye.detection.cache.CacheConfig;
-import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.DataProvider;
@@ -33,21 +31,18 @@ public class ThirdEyeCoreModule extends AbstractModule {
   private final CacheConfig cacheConfig;
   private final RcaConfiguration rcaConfiguration;
   private final UiConfiguration uiConfiguration;
-  private final NotificationConfiguration notificationConfiguration;
   private final TimeConfiguration timeConfiguration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
       final CacheConfig cacheConfig,
       final RcaConfiguration rcaConfiguration,
       final UiConfiguration uiConfiguration,
-      final NotificationConfiguration notificationConfiguration,
       final TimeConfiguration timeConfiguration) {
     this.dataSource = dataSource;
 
     this.cacheConfig = cacheConfig;
     this.rcaConfiguration = rcaConfiguration;
     this.uiConfiguration = uiConfiguration;
-    this.notificationConfiguration = notificationConfiguration;
     this.timeConfiguration = timeConfiguration;
   }
 
@@ -61,7 +56,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
     bind(CacheConfig.class).toInstance(cacheConfig);
     bind(RcaConfiguration.class).toInstance(rcaConfiguration);
     bind(UiConfiguration.class).toInstance(uiConfiguration);
-    bind(NotificationConfiguration.class).toInstance(notificationConfiguration);
     bind(TimeConfiguration.class).toInstance(timeConfiguration);
   }
 }

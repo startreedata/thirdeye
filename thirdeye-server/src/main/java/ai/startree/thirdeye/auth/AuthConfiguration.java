@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.auth;
 
+import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AuthConfiguration {

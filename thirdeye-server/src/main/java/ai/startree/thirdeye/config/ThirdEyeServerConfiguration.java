@@ -15,12 +15,10 @@ package ai.startree.thirdeye.config;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
-import ai.startree.thirdeye.detection.anomaly.detection.trigger.utils.DataAvailabilitySchedulingConfiguration;
-import ai.startree.thirdeye.detection.cache.CacheConfig;
 import ai.startree.thirdeye.notification.NotificationConfiguration;
-import ai.startree.thirdeye.restclient.ThirdEyeRestClientConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
+import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -69,7 +67,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
   private String phantomJsPath = "";
   private String failureFromAddress;
   private String failureToAddress;
-  private ThirdEyeRestClientConfiguration teRestConfig = new ThirdEyeRestClientConfiguration();
   private DataAvailabilitySchedulingConfiguration
       dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
   private List<String> holidayCountriesWhitelist;
@@ -158,16 +155,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
 
   public ThirdEyeServerConfiguration setFailureToAddress(final String failureToAddress) {
     this.failureToAddress = failureToAddress;
-    return this;
-  }
-
-  public ThirdEyeRestClientConfiguration getTeRestConfig() {
-    return teRestConfig;
-  }
-
-  public ThirdEyeServerConfiguration setTeRestConfig(
-      final ThirdEyeRestClientConfiguration teRestConfig) {
-    this.teRestConfig = teRestConfig;
     return this;
   }
 

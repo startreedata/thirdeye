@@ -16,12 +16,12 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 
-import ai.startree.thirdeye.detection.anomaly.utils.AnomalyUtils;
 import ai.startree.thirdeye.scheduler.job.DetectionAlertJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -129,7 +129,7 @@ public class SubscriptionCronScheduler implements Runnable {
   }
 
   public void shutdown() throws SchedulerException {
-    AnomalyUtils.safelyShutdownExecutionService(scheduledExecutorService, getClass());
+    ThirdEyeUtils.safelyShutdownExecutionService(scheduledExecutorService, getClass());
     scheduler.shutdown();
   }
 

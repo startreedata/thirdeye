@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.calcite.dataframe;
 
-import static ai.startree.thirdeye.detectionpipeline.operator.SqlExecutionOperator.getDataTableFromResultSet;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -72,7 +72,7 @@ public class DataFrameSchemaTest {
             + "where str_column='PLACED' "
             + "AND long_column=1567631719000 "
             + "AND double_column=1.1 ");
-    final DataTable dataTableFromResultSet = getDataTableFromResultSet(resultSet);
+    final DataTable dataTableFromResultSet = ThirdEyeUtils.getDataTableFromResultSet(resultSet);
     final DataFrame outputDf = dataTableFromResultSet.getDataFrame();
 
     final DataFrame expectedDf = new DataFrame();

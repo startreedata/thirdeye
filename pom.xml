@@ -27,15 +27,14 @@
     <module>thirdeye-spi</module>
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
+    <module>thirdeye-detectionpipeline</module>
+    <module>thirdeye-notification</module>
     <module>thirdeye-worker</module>
     <module>thirdeye-scheduler</module>
     <module>thirdeye-server</module>
 
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
-
-    <!--  Kept for legacy reasons. Still has a bunch of useful tests. -->
-    <module>thirdeye-deprecated-tests</module>
 
     <!--  Build the distribution -->
     <module>thirdeye-distribution</module>
@@ -98,6 +97,7 @@
     <testcontainers.version>1.15.3</testcontainers.version>
     <flyway.version>8.5.7</flyway.version>
     <modelmapper.version>3.1.0</modelmapper.version>
+    <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
   </properties>
 
   <licenses>
@@ -169,6 +169,10 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -463,6 +467,16 @@
       <dependency>
         <groupId>ai.startree.thirdeye</groupId>
         <artifactId>thirdeye-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-detectionpipeline</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye</groupId>
+        <artifactId>thirdeye-notification</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -907,12 +921,6 @@
         <artifactId>hsqldb</artifactId>
         <version>${hsqldb.version}</version>
       </dependency>
-      <!-- Used for demo setup and mock data source-->
-      <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>1.4.200</version>
-      </dependency>
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>
@@ -953,11 +961,6 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-math</artifactId>
         <version>2.1</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>3.2.1</version>
       </dependency>
 
       <!-- Test containers -->

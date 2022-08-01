@@ -89,6 +89,19 @@ public interface Constants {
   String COL_EVENT_START = "event_start";
   String COL_EVENT_END = "event_end";
 
+  String TWO_DECIMALS_FORMAT = "#,###.##";
+  String MAX_DECIMALS_FORMAT = "#,###.#####";
+  String DECIMALS_FORMAT_TOKEN = "#";
+  String PROP_DETECTOR_COMPONENT_NAME_DELIMETER = ",";
+  // disable minute level cache warm up
+  long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
+
+  /* Detection Pipeline Context keys */
+  String EVALUATION_FILTERS_KEY = "evaluation.filters";
+  String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
+  String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
+  String EVENT_MANAGER_REF_KEY = "$EventManager";
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

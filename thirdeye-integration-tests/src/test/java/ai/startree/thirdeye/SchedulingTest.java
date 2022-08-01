@@ -20,11 +20,12 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.database.ThirdEyeH2DatabaseServer;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.aspect.TimeProvider;
+import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import ai.startree.thirdeye.utils.TimeProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -32,8 +33,6 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -88,8 +87,6 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   // = MARCH_26_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
   private static final long MARCH_23_2020_00H00 = 1584921600_000L;
 
-  private ThirdEyeH2DatabaseServer db;
-
   static {
     try {
       String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
@@ -106,21 +103,21 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   private long alertId;
 
   @BeforeClass
-  public void beforeClass() throws SQLException {
-    db = new ThirdEyeH2DatabaseServer("localhost", 7120, "ThirdEyeIntegrationTest");
-    db.start();
-    db.truncateAllTables();
-    ;
+  public void beforeClass() {
+    // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
+    assertThat(CLOCK.isTimeMockWorking()).isTrue();
+
+    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("scheduling/config/server.yaml"),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", db.getDbConfig().getUrl()),
-        config("database.user", db.getDbConfig().getUser()),
-        config("database.password", db.getDbConfig().getPassword()),
-        config("database.driver", db.getDbConfig().getDriver())
+        config("database.url", dbConfiguration.getUrl()),
+        config("database.user", dbConfiguration.getUser()),
+        config("database.password", dbConfiguration.getPassword()),
+        config("database.driver", dbConfiguration.getDriver())
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
@@ -150,27 +147,15 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    log.info("Stopping H2 Db at port: {}", db.getDbConfig().getUrl());
-    db.stop();
+    MySqlTestDatabase.cleanSharedDatabase();
   }
 
-  @Test()
-  public void checkTimeIsControlled() {
-    // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
-    CLOCK.useMockTime(0);
-    assertThat(System.currentTimeMillis()).isEqualTo(0);
-    assertThat(new Date().getTime()).isEqualTo(0);
-    CLOCK.tick(20);
-    assertThat(System.currentTimeMillis()).isEqualTo(20);
-    assertThat(new Date().getTime()).isEqualTo(20);
-  }
-
-  @Test(dependsOnMethods = "checkTimeIsControlled")
+  @Test
   public void setUpData() {
     Response response = request("internal/ping").get();
     assertThat(response.getStatus()).isEqualTo(200);
@@ -225,7 +210,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     List<Map<String, Object>> anomalies = List.of();
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
-      Thread.sleep(8000);
+      Thread.sleep(1000);
       anomalies = getAnomalies();
     }
 
@@ -245,12 +230,12 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
     CLOCK.useMockTime(MARCH_25_2020_05H00);
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
-    // give thread to quartz scheduler - (quartz idle time is weaved to 1000 ms for test speed)
+    // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
     Thread.sleep(1000);
 
     // wait for the new anomaly to be created - proxy to know when the detection has run
     while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
-      Thread.sleep(8000);
+      Thread.sleep(1000);
       anomalies = getAnomalies();
     }
 
@@ -274,7 +259,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
 
     // wait for a new anomaly to be created - proxy to know when the detection has run
     while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
-      Thread.sleep(8000);
+      Thread.sleep(1000);
       anomalies = getAnomalies();
     }
 

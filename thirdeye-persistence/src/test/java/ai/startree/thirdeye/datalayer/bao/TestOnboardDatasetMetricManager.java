@@ -14,11 +14,12 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import java.util.List;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -39,9 +40,13 @@ public class TestOnboardDatasetMetricManager {
 
   @BeforeClass
   void beforeClass() {
-    onboardDatasetMetricDAO = new TestDatabase()
-        .createInjector()
+    onboardDatasetMetricDAO = MySqlTestDatabase.sharedInjector()
         .getInstance(OnboardDatasetMetricManager.class);
+  }
+
+  @AfterClass
+  void clean() {
+    onboardDatasetMetricDAO.findAll().forEach(onboardDatasetMetricDAO::delete);
   }
 
   @Test

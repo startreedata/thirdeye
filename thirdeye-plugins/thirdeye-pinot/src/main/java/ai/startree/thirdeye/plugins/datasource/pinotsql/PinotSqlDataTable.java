@@ -25,7 +25,7 @@ import java.util.List;
 
 public class PinotSqlDataTable extends AbstractDataTableImpl {
 
-  private ResultSet resultset;
+  private final ResultSet resultset;
 
   public PinotSqlDataTable(ResultSet resultSet) {
     this.resultset = resultSet;

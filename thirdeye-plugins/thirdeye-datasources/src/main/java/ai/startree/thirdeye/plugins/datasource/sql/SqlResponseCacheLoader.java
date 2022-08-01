@@ -31,7 +31,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -165,7 +164,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     if (properties.containsKey(BIGQUERY)) {
       List<Map<String, Object>> bigQueryMapList = ConfigUtils.getList(properties.get(BIGQUERY));
       for (Map<String, Object> objMap : bigQueryMapList) {
-        System.out.println(bigQueryMapList.toString());
+        System.out.println(bigQueryMapList);
         Map<String, String> dbNameToURLMap = (Map) objMap.get(DB);
         String bigQueryDriver = (String) objMap.get(DRIVER);
 
@@ -248,62 +247,10 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     }
   }
 
-  /**
-   * Return a DB name to URLs map
-   *
-   * @return a map: key is datasource name and value is a map with key is database name and value is
-   *     the url
-   */
-  public static Map<String, Map<String, String>> getDBNameToURLMap() {
-    Map<String, Map<String, String>> dbNameToURLMap = new LinkedHashMap<>();
-    dbNameToURLMap.put(PRESTO, prestoDBNameToURLMap);
-    dbNameToURLMap.put(MYSQL, mysqlDBNameToURLMap);
-    dbNameToURLMap.put(VERTICA, verticaDBNameToURLMap);
-    dbNameToURLMap.put(BIGQUERY, BigQueryDBNameToURLMap);
-
-    Map<String, String> h2ToURLMap = new HashMap<>();
-    h2ToURLMap.put(H2, h2Url);
-    dbNameToURLMap.put(H2, h2ToURLMap);
-
-    return dbNameToURLMap;
-  }
-
   private String getPassword(Map<String, Object> objMap) {
     String password = (String) objMap.get(PASSWORD);
     password = (password == null) ? "" : password;
     return password;
-  }
-
-  /**
-   * This method gets the dimension filters for the given dataset from the presto data source,
-   * and returns them as map of dimension name to values
-   *
-   * @return dimension filters map
-   */
-  public Map<String, List<String>> getDimensionFilters(final DatasetConfigDTO datasetConfig)
-      throws Exception {
-    String dataset = datasetConfig.getName();
-
-    String sourceName = dataset.split("\\.")[0];
-    String tableName = SqlUtils.computeSqlTableName(dataset);
-    DataSource dataSource = getDataSourceFromDataset(dataset);
-
-    Map<String, List<String>> dimensionFilters = new HashMap<>();
-
-    for (String dimension : datasetConfig.getDimensions()) {
-      dimensionFilters.put(dimension, new ArrayList<>());
-      try (Connection conn = dataSource.getConnection();
-          Statement stmt = conn.createStatement();
-          ResultSet rs = stmt
-              .executeQuery(SqlUtils.getDimensionFiltersSQL(dimension, tableName, sourceName))) {
-        while (rs.next()) {
-          dimensionFilters.get(dimension).add(rs.getString(1));
-        }
-      } catch (Exception e) {
-        throw e;
-      }
-    }
-    return dimensionFilters;
   }
 
   /**

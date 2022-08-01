@@ -40,9 +40,11 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
+import { DEFAULT_FEEDBACK } from "../../../utils/alerts/alerts.util";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
+import { AnomalyFeedback } from "../../anomaly-feedback/anomaly-feedback.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -218,31 +220,56 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     return (
         <Card variant="outlined">
             <CardContent>
-                <Grid container justifyContent="flex-end">
-                    <Grid item>
-                        <TimeRangeButtonWithContext />
+                <Grid container justifyContent="space-between">
+                    <Grid item xs="auto">
+                        {anomaly && (
+                            <AnomalyFeedback
+                                anomalyFeedback={
+                                    anomaly.feedback || {
+                                        ...DEFAULT_FEEDBACK,
+                                    }
+                                }
+                                anomalyId={anomaly.id}
+                            />
+                        )}
                     </Grid>
-                    <Grid item>
-                        <TooltipV1
-                            placement="top"
-                            title={t("message.set-chart-height")}
-                        >
-                            <ButtonGroup color="secondary" variant="outlined">
-                                {CHART_SIZE_OPTIONS.map((sizeOption) => (
-                                    <Button
-                                        disabled={chartHeight === sizeOption[1]}
-                                        key={sizeOption[0]}
-                                        onClick={() =>
-                                            handleChartHeightChange(
-                                                sizeOption[1] as number
-                                            )
-                                        }
+                    <Grid item xs="auto">
+                        {/** Use flex to align the button group */}
+                        <Box display="flex">
+                            <Box>
+                                <TimeRangeButtonWithContext />
+                            </Box>
+                            <Box marginLeft={1}>
+                                <TooltipV1
+                                    placement="top"
+                                    title={t("message.set-chart-height")}
+                                >
+                                    <ButtonGroup
+                                        color="secondary"
+                                        variant="outlined"
                                     >
-                                        {sizeOption[0]}
-                                    </Button>
-                                ))}
-                            </ButtonGroup>
-                        </TooltipV1>
+                                        {CHART_SIZE_OPTIONS.map(
+                                            (sizeOption) => (
+                                                <Button
+                                                    disabled={
+                                                        chartHeight ===
+                                                        sizeOption[1]
+                                                    }
+                                                    key={sizeOption[0]}
+                                                    onClick={() =>
+                                                        handleChartHeightChange(
+                                                            sizeOption[1] as number
+                                                        )
+                                                    }
+                                                >
+                                                    {sizeOption[0]}
+                                                </Button>
+                                            )
+                                        )}
+                                    </ButtonGroup>
+                                </TooltipV1>
+                            </Box>
+                        </Box>
                     </Grid>
                 </Grid>
             </CardContent>

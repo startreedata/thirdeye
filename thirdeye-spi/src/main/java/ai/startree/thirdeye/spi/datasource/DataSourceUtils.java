@@ -118,7 +118,7 @@ public class DataSourceUtils {
     // heap space.
     long maxBucketNumber = getApproximateMaxBucketNumber(
         Constants.DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
-    LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader.toString(),
+    LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader,
         maxBucketNumber);
 
     return CacheBuilder.newBuilder()

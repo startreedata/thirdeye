@@ -19,15 +19,21 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Setup artifactory
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: '11'
         distribution: 'adopt'
         server-id: startree-releases
         server-username: ARTIFACTORY_USERNAME_REF
         server-password: ARTIFACTORY_TOKEN_REF
+      # don't use setup-java cache - hash file pattern has issues
+    - name: Cache local Maven repository
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: tests-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
     - name: Build with Maven
-      run: ./mvnw -B clean verify -pl '!thirdeye-ui'
+      run: ./mvnw -T 1C -B clean verify -pl '!thirdeye-ui'
       env:
         ARTIFACTORY_USERNAME_REF: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
         ARTIFACTORY_TOKEN_REF: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}

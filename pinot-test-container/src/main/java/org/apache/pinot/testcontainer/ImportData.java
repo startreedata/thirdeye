@@ -17,8 +17,8 @@ import java.io.File;
 
 public class ImportData {
 
-    private File batchJobSpecFile;
-    private File dataFile;
+    private final File batchJobSpecFile;
+    private final File dataFile;
 
     public ImportData(File batchJobSpecFile, File dataFile) {
         this.batchJobSpecFile = batchJobSpecFile;

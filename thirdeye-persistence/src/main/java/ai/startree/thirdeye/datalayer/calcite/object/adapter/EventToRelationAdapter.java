@@ -31,6 +31,7 @@ public class EventToRelationAdapter implements ObjectWithIdToRelationAdapter<Eve
   public RelDataType getRowType(final RelDataTypeFactory typeFactory) {
     return typeFactory.builder()
         .add(ID_COLUMN, typeFactory.createSqlType(SqlTypeName.BIGINT))
+        .add("name", typeFactory.createSqlType(SqlTypeName.VARCHAR))
         .add("type", typeFactory.createSqlType(SqlTypeName.VARCHAR))
         .add("dimensionMap",
             typeFactory.createMapType(typeFactory.createSqlType(SqlTypeName.VARCHAR),
@@ -44,7 +45,7 @@ public class EventToRelationAdapter implements ObjectWithIdToRelationAdapter<Eve
     final DefaultedMap<String, List<String>> dimensionDefaultMap = new DefaultedMap<>(List.of());
     optional(element.getTargetDimensionMap()).ifPresent(dimensionDefaultMap::putAll);
 
-    return new Object[]{element.getId(), element.getEventType(), dimensionDefaultMap};
+    return new Object[]{element.getId(), element.getName(), element.getEventType(), dimensionDefaultMap};
   }
 
   @Override

@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye;
 
-import static ai.startree.thirdeye.spi.Constants.AUTH_BASIC;
-import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
 import static ai.startree.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
 import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
@@ -22,10 +20,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
-import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
-import ai.startree.thirdeye.auth.oauth.ThirdEyeOAuthAuthenticator;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
@@ -43,10 +38,7 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
-import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.lifecycle.Managed;
@@ -58,7 +50,6 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.exporter.MetricsServlet;
 import java.util.EnumSet;
-import java.util.List;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -209,43 +200,13 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     try {
       if(!injector.getInstance(AuthConfiguration.class).isEnabled()){
         environment.jersey().register(injector.getInstance(AuthDisabledRequestFilter.class));
-        environment.jersey().register(new AuthDynamicFeature(buildNoAuthFilter()));
-      } else {
-        List<AuthFilter> filters = List.of(buildBasicAuthFilter(injector), buildOAuthFilter(injector));
-        environment.jersey().register(new AuthDynamicFeature(new ChainedAuthFilter(filters)));
       }
-
+      environment.jersey().register(new AuthDynamicFeature(injector.getInstance(AuthFilter.class)));
       environment.jersey().register(RolesAllowedDynamicFeature.class);
       environment.jersey().register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
     } catch (Exception e) {
       throw new IllegalStateException("Failed to configure Authentication filter", e);
     }
-  }
-
-
-  private AuthFilter buildNoAuthFilter() {
-    final Authenticator authenticator = injector.getInstance(ThirdEyeAuthenticatorDisabled.class);
-    return buildOAuthFilter(authenticator);
-  }
-
-  private AuthFilter buildOAuthFilter(final Injector injector) {
-    final Authenticator authenticator = injector.getInstance(ThirdEyeOAuthAuthenticator.class);
-    return buildOAuthFilter(authenticator);
-  }
-
-  private AuthFilter buildOAuthFilter(final Authenticator authenticator) {
-    return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
-        .setAuthenticator(authenticator)
-        .setPrefix(AUTH_BEARER)
-        .buildAuthFilter();
-  }
-
-  private AuthFilter buildBasicAuthFilter(final Injector injector) {
-    final Authenticator authenticator = injector.getInstance(ThirdEyeBasicAuthenticator.class);
-    return new BasicCredentialAuthFilter.Builder<>()
-        .setAuthenticator(authenticator)
-        .setPrefix(AUTH_BASIC)
-        .buildAuthFilter();
   }
 
   /**

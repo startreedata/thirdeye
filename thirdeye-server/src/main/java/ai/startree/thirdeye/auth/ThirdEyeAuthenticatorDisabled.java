@@ -13,9 +13,8 @@
  */
 package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.spi.ThirdEyePrincipal.NAME_CLAIM;
+import static ai.startree.thirdeye.auth.ThirdEyePrincipal.NAME_CLAIM;
 
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import com.nimbusds.jwt.JWTClaimsSet;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;

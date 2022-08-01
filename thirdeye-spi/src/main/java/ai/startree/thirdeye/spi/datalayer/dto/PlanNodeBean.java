@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,7 +39,7 @@ public class PlanNodeBean {
   /**
    * Customized params to init the PlanNode.
    */
-  private Map<String, Object> params;
+  private Map<String, Templatable<Object>> params;
   /**
    * Defines the inputs of this PlanNode are set
    */
@@ -66,11 +67,11 @@ public class PlanNodeBean {
     return this;
   }
 
-  public Map<String, Object> getParams() {
+  public Map<String, Templatable<Object>> getParams() {
     return params;
   }
 
-  public PlanNodeBean setParams(final Map<String, Object> params) {
+  public PlanNodeBean setParams(final Map<String, Templatable<Object>> params) {
     this.params = params;
     return this;
   }

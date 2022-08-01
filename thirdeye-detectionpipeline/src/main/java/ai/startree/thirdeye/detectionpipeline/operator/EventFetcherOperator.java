@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.EventFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
@@ -57,7 +58,7 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
   }
 
   private DataFetcher<EventFetcherSpec> createEventFetcher(
-      final Map<String, Object> params, final EventManager eventDao) {
+      final Map<String, Templatable<Object>> params, final EventManager eventDao) {
     final Map<String, Object> componentSpec = getComponentSpec(params);
     final EventFetcherSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, EventFetcherSpec.class),

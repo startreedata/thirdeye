@@ -33,6 +33,14 @@ public class Templatable<T> {
    */
   public static final String VALUE_FIELD_STRING = "value";
 
+  public static <T> Templatable<T> withValue(final T value) {
+    return new Templatable<T>().setValue(value);
+  }
+
+  public static <T> Templatable<T> withTemplatedValue(final String templatedValue) {
+    return new Templatable<T>().setTemplatedValue(templatedValue);
+  }
+
   @JsonProperty("templatedValue")
   // getter is shortened for ease of use and readability
   public @Nullable String templatedValue() {

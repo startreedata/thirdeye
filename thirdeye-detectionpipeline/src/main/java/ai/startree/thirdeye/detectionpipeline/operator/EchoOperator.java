@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.List;
+import java.util.Objects;
 
 public class EchoOperator extends DetectionPipelineOperator {
 
@@ -34,7 +35,9 @@ public class EchoOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final String echoText = getPlanNode().getParams().get(DEFAULT_INPUT_KEY).toString();
+    final String echoText = Objects.requireNonNull(getPlanNode().getParams()
+        .get(DEFAULT_INPUT_KEY)
+        .value()).toString();
     setOutput(DEFAULT_OUTPUT_KEY, new EchoResult(echoText));
   }
 

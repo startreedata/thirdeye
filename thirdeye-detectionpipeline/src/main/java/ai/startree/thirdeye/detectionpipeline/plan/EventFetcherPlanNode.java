@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.operator.EventFetcherOperator;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -44,7 +45,7 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Map<String, Object> getParams() {
+  public Map<String, Templatable<Object>> getParams() {
     return planNodeBean.getParams();
   }
 

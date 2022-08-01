@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.Constants.EVALUATION_FILTERS_KEY;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -22,6 +23,7 @@ import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
@@ -52,7 +54,8 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
     dataFetcher = createDataFetcher(planNode.getParams(), dataSourceCache);
   }
 
-  protected DataFetcher<DataFetcherSpec> createDataFetcher(final Map<String, Object> params,
+  protected DataFetcher<DataFetcherSpec> createDataFetcher(
+      final Map<String, Templatable<Object>> params,
       final DataSourceCache dataSourceCache) {
     final Map<String, Object> componentSpec = getComponentSpec(params);
     final DataFetcherSpec spec = requireNonNull(
@@ -60,7 +63,8 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
     @SuppressWarnings("unchecked") final List<QueryPredicate> timeseriesFilters =
-        (List<QueryPredicate>) params.getOrDefault(EVALUATION_FILTERS_KEY, List.of());
+        (List<QueryPredicate>) optional(params.get(EVALUATION_FILTERS_KEY)).map(Templatable::value)
+            .orElse(List.of());
     spec.setTimeseriesFilters(timeseriesFilters);
 
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -75,7 +76,10 @@ public class EventFetcherOperatorTest {
   @BeforeMethod
   public void setUp() {
     eventDao = mock(EventManager.class);
-    when(eventDao.findEventsBetweenTimeRange(anyLong(), anyLong(), nullable(List.class), nullable(String.class))).thenReturn(List.of(
+    when(eventDao.findEventsBetweenTimeRange(anyLong(),
+        anyLong(),
+        nullable(List.class),
+        nullable(String.class))).thenReturn(List.of(
         CHRISTMAS_EVENT,
         FR_ONLY_EVENT,
         DEPLOY_EVENT));
@@ -87,15 +91,15 @@ public class EventFetcherOperatorTest {
         .setType("EventFetcher")
         // check that all parameters are parsed correctly - but don't test behavior, event manager is mocked
         .setParams(ImmutableMap.of("component.startTimeLookback",
-            "P2D",
+            Templatable.withValue("P2D"),
             "component.endTimeLookback",
-            "P1D",
+            Templatable.withValue("P1D"),
             "component.lookaround",
-            "P3D",
+            Templatable.withValue("P3D"),
             "component.eventTypes",
-            List.of("HOLIDAY"),
+            Templatable.withValue(List.of("HOLIDAY")),
             "component.sqlFilter",
-            "'US' member of dimensionMap['country']"))
+            Templatable.withValue("'US' member of dimensionMap['country']")))
         .setOutputs(List.of(new OutputBean().setOutputKey("events").setOutputName("events")));
 
     final OperatorContext context = new OperatorContext()

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.plan;
 
 import ai.startree.thirdeye.detectionpipeline.operator.SqlExecutionOperator;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -36,7 +37,7 @@ public class SqlExecutionPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Map<String, Object> getParams() {
+  public Map<String, Templatable<Object>> getParams() {
     return planNodeBean.getParams();
   }
 

@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
@@ -48,10 +49,10 @@ public class TimeIndexFillerOperatorTest {
         .setName("root")
         .setType("TimeIndexFiller")
         .setParams(ImmutableMap.of(
-                "component.monitoringGranularity", "P1D",
-                "component.timestamp", "ts",
-                "component.minTimeInference", "FROM_DATA",
-                "component.maxTimeInference", "FROM_DATA"
+                "component.monitoringGranularity", Templatable.withValue("P1D"),
+                "component.timestamp", Templatable.withValue("ts"),
+                "component.minTimeInference", Templatable.withValue("FROM_DATA"),
+                "component.maxTimeInference", Templatable.withValue("FROM_DATA")
             )
         )
         .setInputs(ImmutableList.of(
@@ -96,12 +97,12 @@ public class TimeIndexFillerOperatorTest {
         .setName("root")
         .setType("TimeIndexFiller")
         .setParams(ImmutableMap.of(
-                "component.monitoringGranularity", "P1D",
-                "component.timestamp", "ts",
+                "component.monitoringGranularity", Templatable.withValue("P1D"),
+                "component.timestamp", Templatable.withValue("ts"),
                 // use detection time to infer bounds
-                "component.minTimeInference", "FROM_DETECTION_TIME_WITH_LOOKBACK",
-                "component.maxTimeInference", "FROM_DETECTION_TIME",
-                "component.lookback", "P1D"
+                "component.minTimeInference", Templatable.withValue("FROM_DETECTION_TIME_WITH_LOOKBACK"),
+                "component.maxTimeInference", Templatable.withValue("FROM_DETECTION_TIME"),
+                "component.lookback", Templatable.withValue("P1D")
             )
         )
         .setInputs(ImmutableList.of(

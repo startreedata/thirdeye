@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
@@ -24,7 +26,6 @@ import ai.startree.thirdeye.spi.detection.EventTriggerFactoryContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
-import org.apache.commons.collections4.MapUtils;
 
 public class EventTriggerOperator extends DetectionPipelineOperator {
 
@@ -64,10 +65,11 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
   }
 
   protected EventTrigger<? extends AbstractSpec> createEventTrigger(
-      final Map<String, Object> params,
+      final Map<String, Templatable<Object>> params,
       final DetectionRegistry detectionRegistry) {
-    final String type = requireNonNull(MapUtils.getString(params, PROP_TYPE),
-        "Must have 'type' in trigger config");
+    final String type = optional(params.get(PROP_TYPE)).map(Templatable::value)
+        .map(Object::toString)
+        .orElseThrow(() -> new NullPointerException("Must have 'type' in trigger config"));
     final Map<String, Object> componentSpec = getComponentSpec(params);
     return detectionRegistry.buildTrigger(type, new EventTriggerFactoryContext()
         .setProperties(componentSpec));

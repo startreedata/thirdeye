@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeFactory;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.mapper.PlanNodeMapper;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -175,13 +176,13 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   private PlanNodeBean clonePlanNodeBean(final Map<String, Object> templateProperties,
       final PlanNodeBean n) {
-    final Map<String, Object> params = applyTemplatePropertiesOnParams(n.getParams(),
+    final Map<String, Templatable<Object>> params = applyTemplatePropertiesOnParams(n.getParams(),
         templateProperties);
     return PlanNodeMapper.INSTANCE.clone(n).setParams(params);
   }
 
-  private Map<String, Object> applyTemplatePropertiesOnParams(
-      final Map<String, Object> params, final Map<String, Object> templateProperties) {
+  private Map<String, Templatable<Object>> applyTemplatePropertiesOnParams(
+      final Map<String, Templatable<Object>> params, final Map<String, Object> templateProperties) {
     if (params == null) {
       return null;
     }

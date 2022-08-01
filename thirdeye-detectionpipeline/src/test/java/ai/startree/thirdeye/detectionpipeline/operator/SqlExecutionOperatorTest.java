@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
@@ -41,24 +42,24 @@ public class SqlExecutionOperatorTest {
   @Test
   public void testSqlExecutionHyperSQLAdapter() throws Exception {
     testSqlExecution(ImmutableMap.of(
-        "sql.engine", "HyperSql"
+        "sql.engine", Templatable.withValue("HyperSql")
     ));
   }
 
   @Test
   public void testSqlExecutionCalciteAdapter() throws Exception {
     testSqlExecution(ImmutableMap.of(
-        "sql.engine", "Calcite"
+        "sql.engine", Templatable.withValue("Calcite")
     ));
   }
 
-  private void testSqlExecution(Map<String, Object> customParams) throws Exception {
-    Map<String, Object> params = new HashMap<>();
-    params.put("sql.queries", ImmutableList.of(
+  private void testSqlExecution(Map<String, Templatable<Object>> customParams) throws Exception {
+    Map<String, Templatable<Object>> params = new HashMap<>();
+    params.put("sql.queries", Templatable.withValue(ImmutableList.of(
         "SELECT ts as timestamp_res, met as value_res FROM baseline_data",
         "SELECT ts as timestamp_res, met as value_res FROM current_data",
         "SELECT ts, met FROM baseline_data UNION ALL SELECT ts, met FROM current_data"
-    ));
+    )));
     // put custom params
     params.putAll(customParams);
 

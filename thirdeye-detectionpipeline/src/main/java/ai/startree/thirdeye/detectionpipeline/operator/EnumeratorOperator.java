@@ -13,11 +13,13 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class EnumeratorOperator extends DetectionPipelineOperator {
 
@@ -36,9 +38,9 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
   @SuppressWarnings("unchecked")
   @Override
   public void execute() throws Exception {
-    final Map<String, Object> params = getPlanNode().getParams();
+    final Map<String, Templatable<Object>> params = getPlanNode().getParams();
     final List<Map<String, Object>> enumerationList =
-        (List<Map<String, Object>>) params.get("enumerationList");
+        (List<Map<String, Object>>) Objects.requireNonNull(params.get("enumerationList")).value();
     setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(enumerationList));
   }
 

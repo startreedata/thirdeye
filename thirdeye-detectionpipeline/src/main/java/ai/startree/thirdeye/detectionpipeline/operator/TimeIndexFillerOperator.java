@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.components.TimeIndexFiller;
 import ai.startree.thirdeye.detectionpipeline.spec.TimeIndexFillerSpec;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.IndexFiller;
@@ -61,7 +62,7 @@ public class TimeIndexFillerOperator extends DetectionPipelineOperator {
   }
 
   private IndexFiller<? extends AbstractSpec> createTimeIndexFiller(
-      final Map<String, Object> params) {
+      final Map<String, Templatable<Object>> params) {
     final Map<String, Object> componentSpec = getComponentSpec(params);
     final TimeIndexFillerSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, TimeIndexFillerSpec.class),

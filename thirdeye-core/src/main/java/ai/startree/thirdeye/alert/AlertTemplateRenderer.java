@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -136,7 +137,7 @@ public class AlertTemplateRenderer {
           // TODO spyne remove magic string. This was done to remove dependency of AnomalyDetector.TYPE on the renderer
           .filter(node -> node.getType().equals("AnomalyDetector"))
           .forEach(node -> node.getParams()
-              .put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
+              .put("anomaly.source", Templatable.withValue(String.format("%s/%s", alertName, node.getName()))));
     }
 
     return StringTemplateUtils.applyContext(template, properties);

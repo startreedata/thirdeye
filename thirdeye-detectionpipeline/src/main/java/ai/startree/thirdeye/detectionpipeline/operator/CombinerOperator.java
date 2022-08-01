@@ -18,6 +18,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.ForkJoinResult;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -29,7 +30,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
 
   public static final String DEFAULT_INPUT_KEY = "input_Combiner";
   public static final String DEFAULT_OUTPUT_KEY = "output_Combiner";
-  private Map<String, Object> params;
+  private Map<String, Templatable<Object>> params;
 
   public CombinerOperator() {
     super();

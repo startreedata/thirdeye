@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyMap;
 
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -25,7 +26,7 @@ import java.util.Map;
 public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
 
   public static final String TYPE = "Enumerator";
-  private Map<String, Object> params;
+  private Map<String, Templatable<Object>> params;
 
   public EnumeratorPlanNode() {
     super();
@@ -43,7 +44,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Map<String, Object> getParams() {
+  public Map<String, Templatable<Object>> getParams() {
     return params;
   }
 

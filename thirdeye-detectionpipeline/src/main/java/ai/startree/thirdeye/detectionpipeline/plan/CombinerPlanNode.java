@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyMap;
 
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -25,7 +26,7 @@ import java.util.Map;
 public class CombinerPlanNode extends DetectionPipelinePlanNode {
 
   public static final String TYPE = "Combiner";
-  private Map<String, Object> params;
+  private Map<String, Templatable<Object>> params;
 
   public CombinerPlanNode() {
     super();
@@ -43,7 +44,7 @@ public class CombinerPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Map<String, Object> getParams() {
+  public Map<String, Templatable<Object>> getParams() {
     return params;
   }
 

@@ -65,12 +65,12 @@ public class AlertEvaluatorTest {
     assertThat(alertTemplateDTO.getNodes().get(2).getParams().get(EVALUATION_FILTERS_KEY)).isNull();
 
     // test that filters are injected in data fetcher nodes
-    assertThat(alertTemplateDTO.getNodes().get(3).getParams().get(EVALUATION_FILTERS_KEY)).isNotNull();
-    assertThat(alertTemplateDTO.getNodes().get(4).getParams().get(EVALUATION_FILTERS_KEY)).isNotNull();
+    assertThat(alertTemplateDTO.getNodes().get(3).getParams().get(EVALUATION_FILTERS_KEY).value()).isNotNull();
+    assertThat(alertTemplateDTO.getNodes().get(4).getParams().get(EVALUATION_FILTERS_KEY).value()).isNotNull();
 
     // check the filter value for one data fetcher
     List<QueryPredicate> injectedFilters = (List<QueryPredicate>) alertTemplateDTO
-        .getNodes().get(3).getParams().get(EVALUATION_FILTERS_KEY);
+        .getNodes().get(3).getParams().get(EVALUATION_FILTERS_KEY).value();
     assertThat(injectedFilters.size()).isEqualTo(1);
     assertThat(injectedFilters.get(0).getDataset()).isEqualTo(DATASET_NAME);
     assertThat(injectedFilters.get(0).getMetricType()).isEqualTo(DimensionType.STRING);

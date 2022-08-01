@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
@@ -54,7 +55,7 @@ public class DataFetcherOperatorTest {
   public void testNewInstance() {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final PlanNodeBean planNodeBean = new PlanNodeBean()
-        .setParams(ImmutableMap.of("component.dataSource", dataSourceName))
+        .setParams(ImmutableMap.of("component.dataSource", Templatable.withValue(dataSourceName)))
         .setOutputs(ImmutableList.of());
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         dataSourceCache);
@@ -71,11 +72,11 @@ public class DataFetcherOperatorTest {
 
   @Test
   public void testInitComponents() {
-    Map<String, Object> params = new HashMap<>();
+    Map<String, Templatable<Object>> params = new HashMap<>();
 
-    params.put("component.dataSource", dataSourceName);
-    params.put("component.query", "SELECT * FROM myTable");
-    params.put("component.tableName", "myTable");
+    params.put("component.dataSource", Templatable.withValue(dataSourceName));
+    params.put("component.query", Templatable.withValue("SELECT * FROM myTable"));
+    params.put("component.tableName", Templatable.withValue("myTable"));
 
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final long startTime = System.currentTimeMillis();

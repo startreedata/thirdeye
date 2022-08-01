@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.plan;
 
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -38,7 +39,7 @@ public class EchoPlanNode extends DetectionPipelinePlanNode {
   }
 
   @Override
-  public Map<String, Object> getParams() {
+  public Map<String, Templatable<Object>> getParams() {
     return planNodeBean.getParams();
   }
 

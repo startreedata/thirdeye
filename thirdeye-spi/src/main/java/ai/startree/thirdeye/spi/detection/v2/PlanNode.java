@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public interface PlanNode {
   /**
    * @return all params
    */
-  Map<String, Object> getParams();
+  Map<String, Templatable<Object>> getParams();
 
   /**
    * Get the execution operator associated with the PlanNode.

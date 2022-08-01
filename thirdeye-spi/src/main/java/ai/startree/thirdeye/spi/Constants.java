@@ -97,6 +97,7 @@ public interface Constants {
   long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
 
   /* Detection Pipeline Context keys */
+  // fixme check here
   String EVALUATION_FILTERS_KEY = "evaluation.filters";
   String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
   String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";

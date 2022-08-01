@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.detectionpipeline.utils.EpochTimeConverter;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.TimeConverter;
@@ -46,7 +47,8 @@ public abstract class DetectionPipelineOperator implements Operator {
   protected DetectionPipelineOperator() {
   }
 
-  protected static Map<String, Object> getComponentSpec(final Map<String, Object> params) {
+  // pre-condition: templatable objects have properties applied
+  protected static Map<String, Object> getComponentSpec(final Map<String, Templatable<Object>> params) {
     final Map<String, Object> componentSpec = new HashMap<>();
     if (params == null || params.isEmpty()) {
       return componentSpec;
@@ -54,7 +56,7 @@ public abstract class DetectionPipelineOperator implements Operator {
     final String prefix = "component.";
     params.forEach((key, value) -> {
       if (key.startsWith(prefix)) {
-        componentSpec.put(key.substring(prefix.length()), value);
+        componentSpec.put(key.substring(prefix.length()), value.value());
       }
     });
     return componentSpec;
@@ -96,11 +98,6 @@ public abstract class DetectionPipelineOperator implements Operator {
       key = outputKeyMap.get(key);
     }
     resultMap.put(key, output);
-  }
-
-  @Override
-  public void setProperty(final String key, final Object value) {
-    planNode.getParams().put(key, value);
   }
 
   @Override

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -71,7 +72,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
   }
 
   @Override
-  public Map<String, Object> getParams() {
+  public Map<String, Templatable<Object>> getParams() {
     return planNodeBean.getParams();
   }
 

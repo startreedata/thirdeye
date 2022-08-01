@@ -25,8 +25,6 @@ public interface Operator {
 
   String getOperatorName();
 
-  void setProperty(String key, Object value);
-
 
   /**
    * Set keyed input

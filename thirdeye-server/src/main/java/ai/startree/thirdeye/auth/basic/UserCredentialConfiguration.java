@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.auth.basic;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
-public class User {
+public class UserCredentialConfiguration {
 
   private String username;
   private String password;
@@ -24,7 +24,7 @@ public class User {
     return username;
   }
 
-  public User setUsername(final String username) {
+  public UserCredentialConfiguration setUsername(final String username) {
     this.username = username;
     return this;
   }
@@ -33,7 +33,7 @@ public class User {
     return password;
   }
 
-  public User setPassword(final String password) {
+  public UserCredentialConfiguration setPassword(final String password) {
     this.password = password;
     return this;
   }
@@ -46,13 +46,12 @@ public class User {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final User user = (User) o;
-    return Objects.equal(getUsername(), user.getUsername())
-        && Objects.equal(getPassword(), user.getPassword());
+    final UserCredentialConfiguration user = (UserCredentialConfiguration) o;
+    return getUsername().equals(user.getUsername()) && getPassword().equals(user.getPassword());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getUsername(), getPassword());
+    return Objects.hash(getUsername(), getPassword());
   }
 }

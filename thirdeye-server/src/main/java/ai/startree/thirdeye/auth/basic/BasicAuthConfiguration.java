@@ -18,13 +18,13 @@ import java.util.List;
 
 public class BasicAuthConfiguration {
 
-  private List<User> users;
+  private List<UserCredentialConfiguration> users;
 
-  public List<User> getUsers() {
+  public List<UserCredentialConfiguration> getUsers() {
     return users;
   }
 
-  public BasicAuthConfiguration setUsers(final List<User> users) {
+  public BasicAuthConfiguration setUsers(final List<UserCredentialConfiguration> users) {
     this.users = users;
     return this;
   }

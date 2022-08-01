@@ -33,7 +33,7 @@ public class ThirdEyeBasicAuthenticator implements Authenticator<BasicCredential
   @Override
   public Optional<ThirdEyePrincipal> authenticate(final BasicCredentials basicCredentials)
       throws AuthenticationException {
-    final User user = new User()
+    final UserCredentialConfiguration user = new UserCredentialConfiguration()
         .setUsername(basicCredentials.getUsername())
         .setPassword(basicCredentials.getPassword());
     if (configuration.getUsers().contains(user)) {

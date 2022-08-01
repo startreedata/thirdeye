@@ -101,9 +101,18 @@ public class AbstractSpecTest {
         ThirdEyeException.class);
   }
 
-  // does not ignore unknown with @JsonIgnoreProperties(ignoreUnknown = true) - for testing
-  private static class TestSpec extends AbstractSpec {
+  // fixme cyril add tests here
+  @Test
+  public void testParseSpec() {
+    var spec = new TestSpec();
+    TestSpec output = AbstractSpec.fromProperties(Map.of("strings", "[\"lol\", \"li\"]"), TestSpec.class);
+    String lol = "new";
+  }
 
+  // does not ignore unknown with @JsonIgnoreProperties(ignoreUnknown = true) - for testing
+  public static class TestSpec extends AbstractSpec {
+
+    private List<String> strings;
     private int a = 123;
     private double b = 456.7;
     private String c = "default";
@@ -177,6 +186,15 @@ public class AbstractSpecTest {
     public TestSpec setTemplatableList(
         final Templatable<List<String>> templatableList) {
       this.templatableList = templatableList;
+      return this;
+    }
+
+    public List<String> getStrings() {
+      return strings;
+    }
+
+    public TestSpec setStrings(final List<String> strings) {
+      this.strings = strings;
       return this;
     }
   }

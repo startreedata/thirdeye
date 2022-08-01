@@ -17,10 +17,12 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_PARAMS_COMPONE
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -31,7 +33,8 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
-  public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  // not using ThirdEye Serialization on purpose
+  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   // avoid using this field - interval.getChronology at runtime should be enough most of the time - not sure if this deserves deprecation yet
   private String timezone = Constants.DEFAULT_TIMEZONE_STRING;
@@ -52,12 +55,29 @@ public abstract class AbstractSpec implements Serializable {
    */
   public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties,
       Class<T> specClass) {
+    // templatable properties are not applied correctly for params - so they are parse manually here
     try {
+      final Field[] fields = specClass.getDeclaredFields();
+      Arrays.stream(fields).forEach(f -> f.setAccessible(true));
+      T spec = specClass.getDeclaredConstructor().newInstance();
+      for (Field field: fields) {
+        final Object propertiesValue = properties.get(field.getName());
+        if (propertiesValue != null) {
+          final String propertiesString = propertiesValue.toString();
+          final Class<?> targetClass = field.getType();
+          final Object objectValue = OBJECT_MAPPER.readValue(propertiesString, targetClass);
+          field.set(spec, objectValue);
+        }
+      }
+      Arrays.stream(fields).forEach(f -> f.setAccessible(false));
+      return spec;
       // transform in string and deserialize to parse Templatable fields correctly
-      final String propertiesString = TE_OBJECT_MAPPER.writeValueAsString(properties);
-      return TE_OBJECT_MAPPER.readValue(propertiesString, specClass);
+      //final String propertiesString = TE_OBJECT_MAPPER.writeValueAsString(properties);
+      //return TE_OBJECT_MAPPER.readValue(propertiesString, specClass);
     } catch (JsonProcessingException e) {
       throw new ThirdEyeException(e, ERR_INVALID_PARAMS_COMPONENTS, properties, specClass);
+    } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+      throw new RuntimeException(String.format("Could not parse properties %s to class %s", properties, specClass), e);
     }
   }
 

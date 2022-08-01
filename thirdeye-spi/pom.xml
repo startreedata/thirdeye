@@ -71,10 +71,6 @@
       <groupId>org.modelmapper</groupId>
       <artifactId>modelmapper</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-auth</artifactId>
-    </dependency>
 
     <!-- test -->
     <dependency>

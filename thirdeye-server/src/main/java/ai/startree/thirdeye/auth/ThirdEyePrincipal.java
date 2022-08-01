@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi;
+package ai.startree.thirdeye.auth;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import io.dropwizard.auth.basic.BasicCredentials;

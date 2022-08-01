@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;

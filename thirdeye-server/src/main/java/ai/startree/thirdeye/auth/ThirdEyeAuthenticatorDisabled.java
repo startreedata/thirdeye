@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.auth;
 
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;

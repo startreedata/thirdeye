@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.auth.basic;
 
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;

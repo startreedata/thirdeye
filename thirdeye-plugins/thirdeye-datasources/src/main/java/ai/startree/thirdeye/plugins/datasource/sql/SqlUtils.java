@@ -92,7 +92,7 @@ public class SqlUtils {
     }
 
     String sql = String
-        .format("INSERT INTO %s(%s) VALUES(%s)", tableName, columnNames, sb.toString());
+        .format("INSERT INTO %s(%s) VALUES(%s)", tableName, columnNames, sb);
     try (Connection connection = ds.getConnection();
         Statement statement = connection.createStatement()) {
       statement.execute(sql);
@@ -165,10 +165,6 @@ public class SqlUtils {
 
   static String getMaxDataTimeSQL(String timeColumn, String tableName, String sourceName) {
     return "SELECT MAX(" + timeColumn + ") FROM " + tableName;
-  }
-
-  static String getDimensionFiltersSQL(String dimension, String tableName, String sourceName) {
-    return "SELECT DISTINCT(" + dimension + ") FROM " + tableName;
   }
 
   static String computeSqlTableName(String datasetName) {

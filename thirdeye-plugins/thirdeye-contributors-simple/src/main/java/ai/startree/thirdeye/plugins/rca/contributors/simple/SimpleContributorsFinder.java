@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.metric.MetricSlice;
 import ai.startree.thirdeye.spi.rca.ContributorsFinder;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,38 +75,24 @@ public class SimpleContributorsFinder implements ContributorsFinder {
 
     final DataFrame baseline = aggregationLoader.loadBreakdown(baselineSlice, LIMIT_DEFAULT);
     if (baseline.size() <= 0) {
-      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA, "No data on baseline timeframe. Cannot compute top contributors.");
+      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA,
+          "No data on baseline timeframe. Cannot compute top contributors.");
     }
     baseline.dropSeries(COL_TIME);
     final double baselineTotal = getTotalFromBreakdown(baseline);
-    final DoubleSeries baselineValues = baseline.getDoubles(COL_VALUE);
 
     final DataFrame current = aggregationLoader.loadBreakdown(currentSlice, LIMIT_DEFAULT);
     if (current.size() <= 0) {
-      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA, "No data on analysis timeframe. Cannot compute top contributors.");
+      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA,
+          "No data on analysis timeframe. Cannot compute top contributors.");
     }
     current.dropSeries(COL_TIME);
     final double currentTotal = getTotalFromBreakdown(current);
-    final DoubleSeries currentValues = current.getDoubles(COL_VALUE);
 
-    baseline.renameSeries(COL_VALUE, COL_BASELINE_VALUE);
-    current.renameSeries(COL_VALUE, COL_CURRENT_VALUE);
-
-    // merge tables and compute stats
-    DataFrame stats = baseline.joinOuter(current, COL_DIMENSION_NAME, COL_DIMENSION_VALUE)
-        .fillNull()
-        .addSeries(COL_VALUE_CHANGE_PERCENTAGE,
-            computeValueChangePercentage(baselineValues, currentValues))
-        .addSeries(COL_CONTRIBUTION_CHANGE_PERCENTAGE,
-            computeContributionChangePercentage(baselineValues,
-                currentValues,
-                baselineTotal,
-                currentTotal))
-        .addSeries(COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE,
-            computeContributionToOverallChangePercentage(baselineValues,
-                currentValues,
-                baselineTotal,
-                currentTotal));
+    DataFrame stats = computeStats(baseline,
+        baselineTotal,
+        current,
+        currentTotal);
 
     if (searchConfiguration.isDoOneSideError()) {
       final ChangeSide changeSide = currentTotal >= baselineTotal ? ChangeSide.UP : ChangeSide.DOWN;
@@ -121,6 +108,39 @@ public class SimpleContributorsFinder implements ContributorsFinder {
     return new SimpleContributorsFinderResult(stats,
         searchConfiguration.getMetricConfigDTO().getName(),
         searchConfiguration.getDatasetConfigDTO().getDataset());
+  }
+
+  /**
+   * @return a df with COL_DIMENSION_NAME, COL_DIMENSION_VALUE, COL_BASELINE_VALUE,
+   *     COL_CURRENT_VALUE, COL_VALUE_CHANGE_PERCENTAGE, COL_CONTRIBUTION_CHANGE_PERCENTAGE,
+   *     COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE
+   **/
+  @VisibleForTesting
+  protected static DataFrame computeStats(final DataFrame baseline,
+      final double baselineTotal, final DataFrame current, final double currentTotal) {
+    // merge breakdowns - some (dimension, value) tuples are not present in both tables - fill those with zeroes
+    baseline.renameSeries(COL_VALUE, COL_BASELINE_VALUE);
+    current.renameSeries(COL_VALUE, COL_CURRENT_VALUE);
+    final DataFrame stats = baseline.joinOuter(current, COL_DIMENSION_NAME, COL_DIMENSION_VALUE)
+        .fillNull(COL_BASELINE_VALUE, COL_CURRENT_VALUE);
+
+    // add stats series
+    final DoubleSeries baselineValues = stats.getDoubles(COL_BASELINE_VALUE);
+    final DoubleSeries currentValues = stats.getDoubles(COL_CURRENT_VALUE);
+    stats
+        .addSeries(COL_VALUE_CHANGE_PERCENTAGE,
+            computeValueChangePercentage(baselineValues, currentValues))
+        .addSeries(COL_CONTRIBUTION_CHANGE_PERCENTAGE,
+            computeContributionChangePercentage(baselineValues,
+                currentValues,
+                baselineTotal,
+                currentTotal))
+        .addSeries(COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE,
+            computeContributionToOverallChangePercentage(baselineValues,
+                currentValues,
+                baselineTotal,
+                currentTotal));
+    return stats;
   }
 
   private DoubleSeries computeCost(final DataFrame stats) {
@@ -140,7 +160,8 @@ public class SimpleContributorsFinder implements ContributorsFinder {
     return builder.build();
   }
 
-  private double getTotalFromBreakdown(final DataFrame breakdownDataframe) {
+  @VisibleForTesting
+  protected static double getTotalFromBreakdown(final DataFrame breakdownDataframe) {
     // aggregate along dimensions and get any value to get the total
     return breakdownDataframe.groupByValue(COL_DIMENSION_NAME)
         .sum(COL_VALUE)

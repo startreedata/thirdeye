@@ -41,6 +41,7 @@ import org.joda.time.PeriodType;
  *
  * @see BaselineAggregateType
  */
+@Deprecated
 public class BaselineAggregate implements Baseline {
 
   private static final String COL_KEY = Grouping.GROUP_KEY;

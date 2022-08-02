@@ -75,20 +75,17 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
         });
     }, [xMax, series]);
 
-    const dataScale = useMemo(
-        () =>
-            scaleLinear<number>({
-                range: [yMax, 0],
-                domain: [
-                    0,
-                    getMinMax(
-                        series.filter((s) => s.enabled),
-                        (d) => d.y
-                    )[1] || 0,
-                ],
-            }),
-        [yMax, series]
-    );
+    const dataScale = useMemo(() => {
+        const minMaxValues = getMinMax(
+            series.filter((s) => s.enabled),
+            (d) => d.y
+        );
+
+        return scaleLinear<number>({
+            range: [yMax, 0],
+            domain: [minMaxValues[0], minMaxValues[1] || 0],
+        });
+    }, [yMax, series]);
 
     if (width < 10) {
         return null;

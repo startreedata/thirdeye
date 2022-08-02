@@ -15,9 +15,11 @@ package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
+import static ai.startree.thirdeye.spi.util.ListUtils.isNullOrEmpty;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.Constants;
@@ -32,6 +34,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import ai.startree.thirdeye.spi.util.ListUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -42,6 +46,7 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// todo cyril move this to core
 @Singleton
 public class RcaInfoFetcher {
 
@@ -128,21 +133,31 @@ public class RcaInfoFetcher {
     return new RootCauseAnalysisInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone);
   }
 
-  private void addCustomFields(final DatasetConfigDTO datasetConfigDTO,
+  @VisibleForTesting
+  protected static void addCustomFields(final DatasetConfigDTO datasetConfigDTO,
       final DatasetConfigDTO metadataDatasetDTO) {
+    boolean includedListIsEmpty = isNullOrEmpty(metadataDatasetDTO.getDimensions());
+    boolean excludedListIsEmpty = optional(metadataDatasetDTO.getRcaExcludedDimensions()).map(t -> t.match(
+        ListUtils::isNullOrEmpty, true)).orElse(true);
+    checkArgument(includedListIsEmpty || excludedListIsEmpty,
+        "Both dimensions and rcaExcludedDimensions are both not empty. Cannot use both list at the same time.");
     // fields that can be configured at the alert level can be added here
+    // todo cyril implement templatable includedDimensions list + refactor to factorize templatable management
     optional(metadataDatasetDTO.getDimensions())
+        .filter(ListUtils::isNotEmpty)
         .ifPresent(datasetConfigDTO::setDimensions);
+
+    // override exclusion list if metadata list is not null or empty
     optional(metadataDatasetDTO.getRcaExcludedDimensions())
+        .filter(t -> t.match(ListUtils::isNotEmpty, false))
         .ifPresent(datasetConfigDTO::setRcaExcludedDimensions);
   }
 
-  private void addCustomFields(final MetricConfigDTO metricConfigDTO,
+  private static void addCustomFields(final MetricConfigDTO metricConfigDTO,
       final MetricConfigDTO metadataMetricDTO) {
     // fields that can be configured at the alert level can be added here
     optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
-    if (StringUtils.isNotBlank(metadataMetricDTO.getDefaultAggFunction())) {
-      metricConfigDTO.setDefaultAggFunction(metadataMetricDTO.getDefaultAggFunction());
-    }
+    optional(metadataMetricDTO.getDefaultAggFunction()).filter(StringUtils::isNotBlank)
+        .ifPresent(metricConfigDTO::setDefaultAggFunction);
   }
 }

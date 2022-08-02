@@ -76,6 +76,12 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
         return count();
       }
     });
+    metricRegistry.register("parentAnomalyCount", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return count(Predicate.EQ("child", false));
+      }
+    });
   }
 
   @Override

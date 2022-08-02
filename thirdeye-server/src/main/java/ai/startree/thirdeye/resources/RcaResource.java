@@ -15,8 +15,9 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.RootCauseEntity;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,6 +30,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
@@ -125,24 +127,40 @@ public class RcaResource {
     throw new UnsupportedOperationException("Deprecated route");
   }
 
+  /**
+   * Apply inclusion and exclusion lists
+   */
   @NonNull
-  protected static List<String> getRcaDimensions(List<String> dimensions,
-      List<String> excludedDimensions,
-      DatasetConfigDTO datasetConfigDTO) {
-    if (dimensions.isEmpty()) {
-      dimensions = optional(datasetConfigDTO.getDimensions()).orElse(List.of());
+  protected static List<String> getRcaDimensions(final @NonNull List<String> includedDimensions,
+      final @NonNull List<String> excludedDimensions,
+      final DatasetConfigDTO datasetConfigDTO) {
+    final boolean oneListIsEmpty = includedDimensions.isEmpty() || excludedDimensions.isEmpty();
+    if (!oneListIsEmpty) {
+      throw new IllegalArgumentException(
+          "includedDimensions and excludedDimensions are both not empty. Cannot use an inclusion list and an exclusion list at the same time");
+    } else if (!includedDimensions.isEmpty()) {
+      // use inclusion list - takes precedence other every other lists
+      return cleanDimensionStrings(includedDimensions);
+    } else if (datasetConfigDTO.getDimensions() == null ) {
+      // no known dimensions - no need to apply exclusion list
+      return List.of();
+    } else {
+      final List<String> excludedDimensionsToUse;
+      if (!excludedDimensions.isEmpty()) {
+        // use argument exclusion list
+        excludedDimensionsToUse = excludedDimensions;
+      } else {
+        // use default exclusion list
+        excludedDimensionsToUse = optional(datasetConfigDTO.getRcaExcludedDimensions()).map(Templatable::value).orElse(List.of());
+      }
+      final List<String> rcaDimensions = new ArrayList<>(datasetConfigDTO.getDimensions());
+      rcaDimensions.removeAll(cleanDimensionStrings(excludedDimensionsToUse));
+      return rcaDimensions;
     }
-    dimensions = cleanDimensionStrings(dimensions);
-    if (excludedDimensions.isEmpty()) {
-      excludedDimensions = optional(datasetConfigDTO.getRcaExcludedDimensions())
-          .orElse(List.of());
-    }
-    excludedDimensions = cleanDimensionStrings(excludedDimensions);
-    dimensions.removeAll(excludedDimensions);
-    return dimensions;
   }
 
-  private static List<String> cleanDimensionStrings(@NonNull final List<String> dimensions) {
+  private static @NonNull List<String> cleanDimensionStrings(
+      @NonNull final List<String> dimensions) {
     return dimensions.stream().map(String::trim).collect(Collectors.toList());
   }
 }

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.util;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;
 
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
@@ -92,6 +93,10 @@ public class ResourceUtils {
     if (!condition) {
       throw badRequest(status, args);
     }
+  }
+
+  public static StatusListApi statusResponse(ThirdEyeException e) {
+    return statusListApi(e.getStatus(), e.getMessage());
   }
 
   public static StatusListApi statusResponse(ThirdEyeStatus status, Object... args) {

@@ -1,2 +1,0 @@
-ALTER TABLE rootcause_template_index ALTER COLUMN owner SET DATA TYPE VARCHAR(256);
-ALTER TABLE rca_investigation_index ALTER COLUMN owner SET DATA TYPE VARCHAR(256);

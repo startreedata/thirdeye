@@ -13,13 +13,13 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.alert.ExceptionHandler.handleRcaAlgorithmException;
+import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
@@ -106,7 +106,7 @@ public class RcaDimensionAnalysisResource {
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) {
     try {
-      RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+      final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
           anomalyId);
       final Interval currentInterval = new Interval(
           rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),

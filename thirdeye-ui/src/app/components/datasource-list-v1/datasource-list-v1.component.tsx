@@ -27,6 +27,7 @@ import {
     getDatasourcesViewPath,
 } from "../../utils/routes/routes.util";
 import { DatasourceListV1Props } from "./datasource-list-v1.interfaces";
+import { DatasourceVerification } from "./datasource-verification/datasource-verification.component";
 
 export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
     props: DatasourceListV1Props
@@ -90,6 +91,13 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
         );
     };
 
+    const renderStatusCheck = (
+        _: Record<string, unknown>,
+        data: UiDatasource
+    ): ReactElement => {
+        return <DatasourceVerification datasourceName={data.name} />;
+    };
+
     const datasourceColumns = [
         {
             key: "name",
@@ -107,6 +115,16 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
             header: t("label.type"),
             minWidth: 0,
             flex: 1,
+        },
+        {
+            key: "status",
+            dataKey: "status",
+            header: t("label.health-status"),
+            minWidth: 0,
+            flex: 1,
+            sortable: false,
+            cellTooltip: false,
+            customCellRenderer: renderStatusCheck,
         },
     ];
 

@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>ai.startree.thirdeye</groupId>
-    <version>1.60.0-SNAPSHOT</version>
+    <version>1.62.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -61,6 +61,12 @@
       <artifactId>reflections</artifactId>
     </dependency>
 
+    <!--calcite based filtering dependencies -->
+    <dependency>
+      <groupId>org.apache.calcite</groupId>
+      <artifactId>calcite-core</artifactId>
+    </dependency>
+
     <!-- database migration-->
     <dependency>
       <groupId>org.flywaydb</groupId>
@@ -69,12 +75,6 @@
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-mysql</artifactId>
-    </dependency>
-
-    <!-- demo dependencies -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
     </dependency>
 
     <!-- test dependencies -->
@@ -96,6 +96,28 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- needs to be exported by modules that use TestDatabase or TimeProvider -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mysql</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
       <scope>test</scope>
     </dependency>
 

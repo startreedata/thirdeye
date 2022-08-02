@@ -14,7 +14,9 @@
 package ai.startree.thirdeye.plugins.detection.components.filters;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DurationAnomalyFilterSpec extends AbstractSpec {
 
   private String minDuration = "PT0S"; // default value 0 seconds

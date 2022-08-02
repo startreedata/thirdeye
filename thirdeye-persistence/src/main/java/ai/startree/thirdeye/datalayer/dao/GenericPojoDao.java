@@ -27,6 +27,7 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
@@ -65,7 +66,7 @@ public class GenericPojoDao {
   private static final int MAX_BATCH_SIZE = 1000;
   private static final ModelMapper MODEL_MAPPER = new ModelMapper();
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
 
   static {
     // add custom mapping from DTO to index

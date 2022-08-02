@@ -17,8 +17,8 @@ import java.io.File;
 
 public class AddTable {
 
-    private File schemaFile;
-    private File tableConfigFile;
+    private final File schemaFile;
+    private final File tableConfigFile;
 
     public AddTable(File schemaFile, File tableConfigFile) {
         this.schemaFile = schemaFile;

@@ -13,12 +13,16 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_PARAMS_COMPONENTS;
+
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serializable;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 
 /**
  * Base class for component specs
@@ -27,6 +31,7 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
+  public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
 
   // avoid using this field - interval.getChronology at runtime should be enough most of the time - not sure if this deserves deprecation yet
   private String timezone = Constants.DEFAULT_TIMEZONE_STRING;
@@ -47,11 +52,13 @@ public abstract class AbstractSpec implements Serializable {
    */
   public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties,
       Class<T> specClass) {
-    // don't reuse model mapper instance. It caches typeMaps and will result in unexpected mappings
-    ModelMapper modelMapper = new ModelMapper();
-    // use strict mapping to ensure no mismatches or ambiguity occurs
-    modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    return modelMapper.map(properties, specClass);
+    try {
+      // transform in string and deserialize to parse Templatable fields correctly
+      final String propertiesString = TE_OBJECT_MAPPER.writeValueAsString(properties);
+      return TE_OBJECT_MAPPER.readValue(propertiesString, specClass);
+    } catch (JsonProcessingException e) {
+      throw new ThirdEyeException(e, ERR_INVALID_PARAMS_COMPONENTS, properties, specClass);
+    }
   }
 
   public String getTimezone() {

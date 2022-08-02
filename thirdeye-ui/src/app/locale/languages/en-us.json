@@ -224,7 +224,17 @@
         "add-metadata-entry": "Add metadata entry",
         "property-name": "Property name",
         "property-value": "Property value",
-        "example-alert-configurations": "example alert configurations"
+        "example-alert-configurations": "example alert configurations",
+        "slack": "Slack",
+        "webhook": "Webhook",
+        "groups": "Groups",
+        "optional-overrides": "Optional Overrides",
+        "sendgrid-api-key": "SendGrid API Key",
+        "support": "Support",
+        "check-status": "Check Status",
+        "health-status": "Health Status",
+        "yes": "Yes",
+        "no": "No"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -299,6 +309,14 @@
         "create-custom-event-properties-and-values": "Create custom Event properties and corresponding values",
         "property-value-placeholder": "Type and press enter to add values",
         "select-a-template-to-preview": "Select a template to preview the alert",
-        "complete-missing-information-to-see-preview": "The template is not completed. Please complete the missing information to see the preview."
+        "complete-missing-information-to-see-preview": "The template is not completed. Please complete the missing information to see the preview.",
+        "no-access-to-support-tooltip-msg": "If you dont have access to the support page, reach out to your AE (Account Executive) or join our community: https://dev.startree.ai/docs/community",
+        "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource.",
+        "datasource-is-healthy": "Datasource is healthy",
+        "checking-datasource-health": "Checking datasource health. This will take a few seconds ...",
+        "to-get-started-select-type": "Select a type to get started",
+        "enter-webhook-url": "Enter webhook URL",
+        "is-this-an-anomaly": "Is this an anomaly?",
+        "click-to-add-comment": "Click to add comment"
     }
 }

@@ -16,6 +16,7 @@ package ai.startree.thirdeye.spi.api;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
 
@@ -30,7 +31,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   @Deprecated // use AlertMetadataApi
   private RcaMetadataApi rca;
   private AlertMetadataApi metadata;
-  private Map<String, Object> defaultProperties;
+  private Map<String, @Nullable Object> defaultProperties;
 
   public Long getId() {
     return id;

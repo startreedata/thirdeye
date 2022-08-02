@@ -13,11 +13,11 @@
  */
 package ai.startree.thirdeye.resources;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
@@ -50,6 +50,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
@@ -105,7 +106,10 @@ public class RcaRelatedResource {
         .getMillis(), anomalyInterval.getEnd().getMillis());
 
     // todo add event filters for rca type and dimension filters could be set at the alert metadata level or at call time?
-    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback, endWithLookahead, type, null);
+    // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
+    final List<@NonNull String> types = type == null ? List.of() : List.of(type);
+    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback, endWithLookahead,
+        types, null);
 
     final Comparator<EventDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,

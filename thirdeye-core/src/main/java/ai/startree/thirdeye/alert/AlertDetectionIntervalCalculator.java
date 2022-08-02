@@ -21,15 +21,14 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.task.runner.DetectionPipelineTaskRunner;
 import ai.startree.thirdeye.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -49,7 +48,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AlertDetectionIntervalCalculator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AlertDetectionIntervalCalculator.class);
   private static final Interval DUMMY_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private final AlertTemplateRenderer alertTemplateRenderer;
 
@@ -91,7 +90,7 @@ public class AlertDetectionIntervalCalculator {
         templateWithProperties);
   }
 
-  @NotNull
+  @NonNull
   @VisibleForTesting
   protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {

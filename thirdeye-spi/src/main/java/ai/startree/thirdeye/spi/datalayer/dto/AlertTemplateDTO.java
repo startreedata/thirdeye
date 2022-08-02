@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class AlertTemplateDTO extends AbstractDTO {
 
@@ -31,7 +32,7 @@ public class AlertTemplateDTO extends AbstractDTO {
   @JsonIgnore
   private RcaMetadataDTO rca;
   private AlertMetadataDTO metadata;
-  private Map<String, Object> defaultProperties;
+  private Map<String, @Nullable Object> defaultProperties;
 
   public String getName() {
     return name;

@@ -14,7 +14,9 @@
 import axios from "axios";
 import { Dataset } from "../dto/dataset.interfaces";
 import { Datasource } from "../dto/datasource.interfaces";
+import { GetStatusResponse } from "./datasources.interfaces";
 
+export const OK_STATUS = "OK";
 const BASE_URL_DATASOURCES = "/api/data-sources";
 
 export const getDatasource = async (id: number): Promise<Datasource> => {
@@ -76,6 +78,17 @@ export const onboardAllDatasets = async (
 
 export const deleteDatasource = async (id: number): Promise<Datasource> => {
     const response = await axios.delete(`${BASE_URL_DATASOURCES}/${id}`);
+
+    return response.data;
+};
+
+export const getStatusForDatasource = async (
+    datasourceName: string
+): Promise<GetStatusResponse> => {
+    const queryParams = new URLSearchParams([["name", datasourceName]]);
+    const url = `${BASE_URL_DATASOURCES}/validate?${queryParams.toString()}`;
+
+    const response = await axios.get(url);
 
     return response.data;
 };

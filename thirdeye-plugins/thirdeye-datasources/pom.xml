@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>ai.startree.thirdeye.plugins</groupId>
-    <version>1.60.0-SNAPSHOT</version>
+    <version>1.62.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -40,10 +40,6 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.auto.service</groupId>
@@ -72,13 +68,12 @@
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-5</version>
         <executions>
           <execution>
             <id>user_distribution</id>
             <phase>package</phase>
             <goals>
-              <goal>attached</goal>
+              <goal>single</goal>
             </goals>
             <configuration>
               <descriptors>

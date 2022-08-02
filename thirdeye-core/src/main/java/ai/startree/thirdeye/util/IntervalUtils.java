@@ -14,13 +14,13 @@
 package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.joda.time.base.AbstractInterval;
 
 public class IntervalUtils {
 
@@ -35,12 +35,7 @@ public class IntervalUtils {
       return intervals;
     }
     // Sort Intervals
-    Collections.sort(intervals, new Comparator<Interval>() {
-      @Override
-      public int compare(Interval o1, Interval o2) {
-        return o1.getStart().compareTo(o2.getStart());
-      }
-    });
+    intervals.sort(Comparator.comparing(AbstractInterval::getStart));
 
     // Merge intervals
     Stack<Interval> intervalStack = new Stack<>();
@@ -52,9 +47,7 @@ public class IntervalUtils {
 
       if (top.overlap(target) == null && (top.getEnd() != target.getStart())) {
         intervalStack.push(target);
-      } else if (top.equals(target)) {
-        continue;
-      } else {
+      } else if (!top.equals(target)) {
         Interval newTop = new Interval(
             Math.min(top.getStart().getMillis(), target.getStart().getMillis()),
             Math.max(top.getEnd().getMillis(), target.getEnd().getMillis()),
@@ -74,41 +67,5 @@ public class IntervalUtils {
     for (DimensionMap dimension : anomalyIntervals.keySet()) {
       anomalyIntervals.put(dimension, mergeIntervals(anomalyIntervals.get(dimension)));
     }
-  }
-
-  /**
-   * turns a list of intervals into a string.
-   * Ex. [1-5, 6-6, 9-15] -> "{1-5, 6, 9-15}"
-   *
-   * @return string form of interval list
-   */
-  public static String getIntervalRangesAsString(List<Interval> intervals) {
-    if (intervals.isEmpty()) {
-      return "";
-    }
-
-    StringBuilder sb = new StringBuilder("{");
-
-    for (Interval interval : intervals) {
-      long start = interval.getStartMillis();
-      long end = interval.getEndMillis();
-
-      // we check using >= because times may not be 100% perfectly aligned due to boundary shifting misalignment.
-      if (start >= end) {
-        sb.append(start);
-      } else {
-        sb.append(start);
-        sb.append("-");
-        sb.append(end);
-      }
-      sb.append(", ");
-    }
-
-    // delete the last "," and " " characters.
-    // StringBuilder start is inclusive, end is exclusive.
-    sb.delete(sb.length() - 2, sb.length());
-    sb.append("}");
-
-    return sb.toString();
   }
 }

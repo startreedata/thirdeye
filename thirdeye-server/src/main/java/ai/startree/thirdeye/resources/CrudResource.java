@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -57,7 +57,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,7 +216,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   /**
    * Child classes should use this method and not reimplement creation logic in other places.
    */
-  @NotNull
+  @NonNull
   final protected List<ApiT> internalCreateMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
@@ -243,7 +243,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   /**
    * Child classes should use this method and not reimplement edit logic in other places.
    */
-  @NotNull
+  @NonNull
   final protected List<ApiT> internalEditMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();

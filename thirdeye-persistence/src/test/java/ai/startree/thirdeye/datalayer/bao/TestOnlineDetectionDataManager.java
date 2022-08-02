@@ -13,21 +13,27 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import java.util.List;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestOnlineDetectionDataManager {
 
   private OnlineDetectionDataManager dataDAO;
 
-  @BeforeMethod
-  void beforeMethod() {
-    dataDAO = new TestDatabase().createInjector().getInstance(OnlineDetectionDataManager.class);
+  @BeforeClass
+  void beforeClass() {
+    dataDAO = MySqlTestDatabase.sharedInjector().getInstance(OnlineDetectionDataManager.class);
+  }
+
+  @AfterMethod
+  void cleanCreatedEntities() {
+    dataDAO.findAll().forEach(dataDAO::delete);
   }
 
   @Test

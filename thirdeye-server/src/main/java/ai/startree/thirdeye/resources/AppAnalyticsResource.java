@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
+import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
 import io.swagger.annotations.Api;
 import javax.inject.Inject;
@@ -28,8 +29,11 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AppAnalyticsResource {
 
+  private final AppAnalyticsService appAnalyticsService;
+
   @Inject
-  public AppAnalyticsResource() {
+  public AppAnalyticsResource(final AppAnalyticsService appAnalyticsService) {
+    this.appAnalyticsService = appAnalyticsService;
   }
 
   public static String appVersion() {
@@ -40,6 +44,7 @@ public class AppAnalyticsResource {
   public Response getAnalyticsPayload() {
     return Response.ok(new AppAnalyticsApi()
         .setVersion(appVersion())
+        .setnMonitoredMetrics(appAnalyticsService.uniqueMonitoredMetricsCount())
     ).build();
   }
 

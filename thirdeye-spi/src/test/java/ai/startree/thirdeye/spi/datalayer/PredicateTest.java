@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import java.util.List;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class PredicateTest {
 

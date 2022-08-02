@@ -16,7 +16,7 @@ package ai.startree.thirdeye.datalayer.bao;
 import static ai.startree.thirdeye.spi.Constants.SCALING_FACTOR;
 
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import java.util.Arrays;
@@ -26,6 +26,7 @@ import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -37,9 +38,12 @@ public class TestOverrideConfigManager {
 
   @BeforeClass
   void beforeClass() {
-    overrideConfigDAO = new TestDatabase()
-        .createInjector()
-        .getInstance(OverrideConfigManager.class);
+    overrideConfigDAO = MySqlTestDatabase.sharedInjector().getInstance(OverrideConfigManager.class);
+  }
+
+  @AfterClass
+  void clean() {
+    overrideConfigDAO.findAll().forEach(overrideConfigDAO::delete);
   }
 
   @Test

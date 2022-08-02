@@ -13,8 +13,13 @@
  */
 package ai.startree.thirdeye;
 
+import ai.startree.thirdeye.auth.AuthConfiguration;
+import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.events.MockEventsConfiguration;
+import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
+import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
+import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
+import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -38,8 +43,16 @@ public class ThirdEyeServerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new ThirdEyeCoreModule(dataSource, configuration));
+    install(new ThirdEyeCoreModule(dataSource,
+        configuration.getCacheConfig(),
+        configuration.getRcaConfiguration(),
+        configuration.getUiConfiguration(),
+        configuration.getTimeConfiguration()));
+    install(new ThirdEyeNotificationModule(configuration.getNotificationConfiguration()));
+    install(new ThirdEyeWorkerModule(configuration.getTaskDriverConfiguration()));
+    install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
 
+    bind(AuthConfiguration.class).toInstance(configuration.getAuthConfiguration());
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
   }
@@ -48,5 +61,12 @@ public class ThirdEyeServerModule extends AbstractModule {
   @Provides
   public MockEventsConfiguration getMockEventsLoaderConfiguration() {
     return configuration.getMockEventsConfiguration();
+  }
+
+  @Singleton
+  @Provides
+  public OAuthConfiguration getOAuthConfig(
+      AuthConfiguration authConfiguration) {
+    return authConfiguration.getOAuthConfig();
   }
 }

@@ -15,37 +15,42 @@ package ai.startree.thirdeye.spi;
 
 public enum ThirdEyeStatus {
 
-  ERR_DATASOURCE_NOT_FOUND("Data Source not found! %s"),
-  ERR_DATASOURCE_UNREACHABLE("Data source validation failed!"),
-  ERR_DATASOURCE_NOT_LOADED("Data source cannot be instantiated! %s"),
-  ERR_DATASET_NOT_FOUND("Dataset not found: %s"),
-  ERR_MULTIPLE_DATASETS_FOUND(
-      "Multiple datasets found based on the dataset's display name %s, candidates: %s"),
-  ERR_DATA_UNAVAILABLE("Data not available! %s"),
-  ERR_CRON_INVALID("Failed to parse cron expression: %s"),
-  ERR_MISSING_CONFIGURATION_FIELD("Missing configuration field in alert: %s"),
-  ERR_TEMPLATE_MISSING_PROPERTY("Failed to apply templateProperties to template. Missing property: %s"),
-  ERR_DETECTION_INTERVAL_COMPUTATION("Failed to compute detection interval. Error caused by : %s"),
   ERR_ALERT_PIPELINE_EXECUTION("Failed to run alert pipeline. Error caused by : %s"),
+  ERR_AUTH_SERVER_NOT_RESPONDING("Auth server is not responding. Auth Server URL : %s"),
+  ERR_CONFIG("Configuration Error! %s"),
+  ERR_CRON_INVALID("Failed to parse cron expression: %s"),
+  ERR_DATASET_NOT_FOUND("Dataset not found: %s"),
+  ERR_DATASOURCE_NOT_FOUND("Data Source not found! %s"),
+  ERR_DATASOURCE_NOT_LOADED("Data source cannot be instantiated! %s"),
+  ERR_DATASOURCE_VALIDATION_FAILED("Data source validation failed! name: %s. %s"),
+  ERR_DATA_UNAVAILABLE("Data not available! %s"),
+  ERR_DETECTION_INTERVAL_COMPUTATION("Failed to compute detection interval. Error caused by : %s"),
   ERR_DUPLICATE_NAME("Name must be unique!"),
-  ERR_MISSING_ID("ID is null!"),
-  ERR_MISSING_NAME("name is null!"),
-  ERR_NOTIFICATION_DISPATCH("%s"),
-  ERR_UNEXPECTED_QUERY_PARAM("Unexpected Query Param. Allowed values: %s"),
   ERR_ID_UNEXPECTED_AT_CREATION("ID should be null at creation time."),
   ERR_INVALID_JSON_FORMAT("Invalid json format"),
   ERR_INVALID_QUERY_PARAM_OPERATOR("Invalid operator for query param. Allowed Values:"),
-  ERR_OBJECT_UNEXPECTED("Object should be null/empty! %s"),
-  ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),
-  ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
-  ERR_CONFIG("Configuration Error! %s"),
-  ERR_TIMEOUT("Operation timed out!"),
-  ERR_UNKNOWN("%s"),
-  HEALTHY("Healthy"),
-  ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
+  ERR_MISSING_CONFIGURATION_FIELD("Missing configuration field in alert: %s"),
+  ERR_MISSING_ID("ID is null!"),
+  ERR_MISSING_NAME("name is null!"),
+  ERR_MULTIPLE_DATASETS_FOUND(
+      "Multiple datasets found based on the dataset's display name %s, candidates: %s"),
+  ERR_NOTIFICATION_DISPATCH("%s"),
   ERR_NOT_ENOUGH_DATA_FOR_RCA("Not enough data for RCA algorithm: %s"),
-  ERR_AUTH_SERVER_NOT_RESPONDING("Auth server is not responding. Auth Server URL : %s"),
-  UNHEALTHY("Unhealthy %s : %s");
+  ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),
+  ERR_OBJECT_UNEXPECTED("Object should be null/empty! %s"),
+  ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
+  ERR_TEMPLATE_MISSING_PROPERTY(
+      "Failed to apply templateProperties to template. Missing property: %s"),
+  ERR_TIMEOUT("Operation timed out!"),
+  ERR_UNEXPECTED_QUERY_PARAM("Unexpected Query Param. Allowed values: %s"),
+  ERR_UNKNOWN("%s"),
+  ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
+  ERR_CALCITE_FILTERING("Failed running Calcite filtering query with filter: %s"),
+  ERR_INVALID_PARAMS_COMPONENTS("Invalid param components: %s for Class %s"),
+  ERR_INVALID_DETECTION_REGRESSORS("Invalid regressors configuration. Too few or too many regressors?"),
+
+  OK("OK"),
+  ;
 
   final String message;
 

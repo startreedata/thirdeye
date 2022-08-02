@@ -46,6 +46,7 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -246,12 +247,17 @@ public class CalciteRequest {
     this.predicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
     for (String freeTextPredicate : freeTextPredicates) {
       // replacement below to make it easy to use the same default templatesProperty for dataFetcher and custom rca where clause
-      String cleanedFreePredicate = freeTextPredicate.replaceFirst("^ *[aA][nN][dD] +", "");
+      String cleanedFreePredicate = cleanFreeTextPredicate(freeTextPredicate);
       predicates.add(expressionToNode(cleanedFreePredicate, sqlParserConfig));
     }
     predicates.addAll(sqlNodePredicates);
 
     return combinePredicates(predicates);
+  }
+
+  @NonNull
+  public static String cleanFreeTextPredicate(final String freeTextPredicate) {
+    return freeTextPredicate.replaceFirst("^ *[aA][nN][dD] +", "");
   }
 
   private SqlNodeList getGroupBy(final SqlParser.Config sqlParserConfig,

@@ -26,6 +26,7 @@ import {
     getDatasetsUpdatePath,
     getDatasetsViewPath,
 } from "../../utils/routes/routes.util";
+import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { DatasetListV1Props } from "./dataset-list-v1.interfaces";
 
 export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
@@ -88,6 +89,16 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
         );
     };
 
+    const renderMetricStatus = (
+        _: Record<string, unknown>,
+        data: UiDataset
+    ): ReactElement => {
+        // Default to true of the active status is missing
+        const active = data.active === undefined ? true : data.active;
+
+        return <ActiveIndicator active={active} />;
+    };
+
     const datasetColumns = [
         {
             key: "name",
@@ -105,6 +116,15 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
             minWidth: 0,
             sortable: true,
             flex: 1,
+        },
+        {
+            key: "active",
+            dataKey: "active",
+            sortable: true,
+            header: t("label.active"),
+            minWidth: 0,
+            flex: 0.5,
+            customCellRenderer: renderMetricStatus,
         },
     ];
 

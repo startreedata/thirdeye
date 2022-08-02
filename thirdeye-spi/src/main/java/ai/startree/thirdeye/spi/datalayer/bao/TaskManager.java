@@ -13,15 +13,20 @@
  */
 package ai.startree.thirdeye.spi.datalayer.bao;
 
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
+
+  TaskDTO createTaskDto(final long alertId, final TaskInfo taskInfo, final TaskType taskType)
+      throws JsonProcessingException;
 
   List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status);
 
@@ -51,6 +56,8 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
 
   void purge(Duration expiryDuration, Integer limitOptional);
+
+  void orphanTaskCleanUp(Timestamp activeThreshold);
 
   long countByStatus(final TaskStatus status);
 }

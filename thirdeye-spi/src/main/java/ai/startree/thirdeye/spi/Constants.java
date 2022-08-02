@@ -21,6 +21,7 @@ import org.joda.time.DateTimeZone;
 public interface Constants {
 
   DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
+  String CRON_TIMEZONE = "UTC";
   String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
   // tz database names that are equivalent to UTC
   List<String> UTC_LIKE_TIMEZONES = List.of("Etc/GMT",
@@ -83,6 +84,24 @@ public interface Constants {
   String COL_DIFF_VIOLATION = "diff_violation";
   String COL_IN_WINDOW = "is_in_window";
 
+  // constants for event dataframes
+  String COL_EVENT_NAME = "event_name";
+  String COL_EVENT_START = "event_start";
+  String COL_EVENT_END = "event_end";
+
+  String TWO_DECIMALS_FORMAT = "#,###.##";
+  String MAX_DECIMALS_FORMAT = "#,###.#####";
+  String DECIMALS_FORMAT_TOKEN = "#";
+  String PROP_DETECTOR_COMPONENT_NAME_DELIMETER = ",";
+  // disable minute level cache warm up
+  long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
+
+  /* Detection Pipeline Context keys */
+  String EVALUATION_FILTERS_KEY = "evaluation.filters";
+  String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
+  String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
+  String EVENT_MANAGER_REF_KEY = "$EventManager";
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,
@@ -99,5 +118,10 @@ public interface Constants {
 
   enum CompareMode {
     WoW, Wo2W, Wo3W, Wo4W
+  }
+
+  enum MonitorType {
+    UPDATE,
+    EXPIRE
   }
 }

@@ -22,6 +22,8 @@ public interface AnomalyDetector<T extends AbstractSpec> extends BaseComponent<T
   // Keys available in Map<String, DataTable> timeSeriesMap
   String KEY_CURRENT = "current";
   String KEY_BASELINE = "baseline";
+  String KEY_CURRENT_EVENTS = "current_events";
+  String KEY_BASELINE_EVENTS = "baseline_events";
 
   /**
    * Run detection for a given interval with provided baseline and current DataTable.

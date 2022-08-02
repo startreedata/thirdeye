@@ -1,0 +1,89 @@
+{{ if .Values.mysql.backup.enabled }}
+#
+# Copyright 2022 StarTree Inc
+#
+# Licensed under the StarTree Community License (the "License"); you may not use
+# this file except in compliance with the License. You may obtain a copy of the
+# License at http://www.startree.ai/legal/startree-community-license
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the
+# License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+# either express or implied.
+# See the License for the specific language governing permissions and limitations under
+# the License.
+#
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-backup
+spec:
+  schedule: {{ .Values.mysql.backup.schedule | quote }}
+  successfulJobsHistoryLimit: 0
+#  ensures the last failed Job and its pod is not cleaned and it is available for debugging
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          initContainers:
+            - name: perform-backup
+              image: mysql:{{ .Values.mysql.imageTag }}
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  mysqldump -P 3306 -h {{ include "thirdeye.mysql.fullname" . }} -u{{ .Values.mysql.mysqlUser }} -p{{ .Values.mysql.mysqlPassword }} thirdeye > /home/dump/backup.sql
+              volumeMounts:
+                - name: dump
+                  mountPath: /home/dump
+            - name: zip-backup
+              image: alpine:3
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  mkdir /home/dump/zip &&
+                  apk --no-cache add zip &&
+                  FNAME=$(date +%F:%H-%M) &&
+                  cd /home/dump &&
+                  mv backup.sql $FNAME.sql &&
+                  zip zip/$FNAME.zip $FNAME.sql
+              volumeMounts:
+                - name: dump
+                  mountPath: /home/dump
+          containers:
+            - name: upload-backup
+              image: amazon/aws-cli:2.0.6
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: thirdeye-secrets
+                      key: mysqlBackupAwsKeyId
+                      optional: false
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: thirdeye-secrets
+                      key: mysqlBackupAwsAccessKey
+                      optional: false
+                - name: AWS_DEFAULT_REGION
+                  value: {{ .Values.mysql.backup.s3.region | quote }}
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  aws s3 mv /home/dump/zip/* s3://{{ .Values.mysql.backup.s3.bucket }}/{{ .Values.mysql.backup.name }}/
+              volumeMounts:
+                - name: dump
+                  mountPath: /home/dump
+          volumes:
+            - name: dump
+              emptyDir: {}
+          restartPolicy: Never
+      backoffLimit: 0
+{{ end }}

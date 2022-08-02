@@ -225,6 +225,44 @@ Details
 | `cache.size`       | Cache size in KBs                                                                                                                               |
 | `cache.ttl`        | Lifetime of the cache in millis                                                                                                                 |
 
+### MySQL backup (S3)
+
+A kubernetes `CronJob` can be enabled for taking regular backups of the MySQL database and store them in an AWS S3 bucket.
+The backup `CronJob` is disabled by default
+
+```yaml
+secrets:
+  ...
+  mysqlBackupAwsKeyId:
+    env: AWS_ACCESS_KEY_ID
+    value: SAMPLEaccessKEYid
+  mysqlBackupAwsAccessKey:
+    env: AWS_SECRET_ACCESS_KEY
+    value: sampleSECRETaccessKEY
+
+mysql:
+  ...
+  backup:
+    enabled: true
+    name: backup-folder-name
+    schedule: "* * 1 * *"
+#    Make sure you uncomment "S3BackUpId" and "S3BackUpKey" in the "secrets" section above when using s3 as backup location
+    s3:
+      bucket: s3-bucket-name
+      region: us-west-2
+```
+
+| Property                                | Description                                   |
+|-----------------------------------------|-----------------------------------------------|
+| `mysql.backup.enabled`                  | Flag to enable/disable backup cron job        |
+| `mysql.backup.name`                     | backup folder name                            |
+| `mysql.backup.schedule`                 | Cron expression for backup frequency          |
+| `mysql.backup.s3.bucket`                | AWS S3 bucket name to store the backup files  |
+| `mysql.backup.s3.region`                | AWS S3 bucket region                          |
+| `secrets.mysqlBackupAwsKeyId.value`     | AWS access key id to access the S3 bucket     |
+| `secrets.mysqlBackupAwsAccessKey.value` | AWS secret access key to access the S3 bucket |
+
+
 ### Other useful configurations
 
 | Property                                           | Description                                                                                                          |

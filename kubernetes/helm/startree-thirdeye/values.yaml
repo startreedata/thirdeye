@@ -185,7 +185,7 @@ mysql:
     enabled: false
     name: backup-folder-name
     schedule: "0 2 * * *"
-#    Make sure you uncomment "S3BackUpId" and "S3BackUpKey" in the "secrets" section above when using s3 as backup location
+#    Make sure you uncomment "mysqlBackupAwsKeyId" and "mysqlBackupAwsAccessKey" in the "secrets" section above when using s3 as backup location
 #    s3:
 #      bucket: thirdeye-backup
 #      region: us-west-2

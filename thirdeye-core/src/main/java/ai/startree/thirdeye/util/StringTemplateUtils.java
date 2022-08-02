@@ -14,6 +14,8 @@
 package ai.startree.thirdeye.util;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.json.TemplatableMapDeserializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -63,7 +65,10 @@ public class StringTemplateUtils {
       final Map<String, Object> valuesMap)
       throws IOException, ClassNotFoundException {
 
-    final Module module = new SimpleModule().addSerializer(Templatable.class, new TemplateEngineTemplatableSerializer(valuesMap));
+    final Module module = new SimpleModule()
+        .addSerializer(Templatable.class, new TemplateEngineTemplatableSerializer(valuesMap))
+        .addSerializer(TemplatableMap.class, new TemplateEngineTemplatableMapSerializer())
+        .addDeserializer(TemplatableMap.class, new TemplatableMapDeserializer());
     final ObjectMapper objectMapper = new ObjectMapper().registerModule(module);
 
     final String jsonString = objectMapper.writeValueAsString(template);

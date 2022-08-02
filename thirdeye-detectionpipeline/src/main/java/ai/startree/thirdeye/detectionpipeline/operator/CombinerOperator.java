@@ -38,7 +38,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    params = optional(getPlanNode().getParams()).orElse(emptyMap());
+    params = optional((Map<String, Object>) getPlanNode().getParams()).orElse(emptyMap());
   }
 
   @Override

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
@@ -66,7 +67,7 @@ public class SqlExecutionOperatorTest {
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
         .setType("SqlExecution")
-        .setParams(params)
+        .setParams(TemplatableMap.copyOf(params))
         .setInputs(ImmutableList.of(
             new InputBean().setTargetProperty("baseline_data")
                 .setSourceProperty("baselineOutput")

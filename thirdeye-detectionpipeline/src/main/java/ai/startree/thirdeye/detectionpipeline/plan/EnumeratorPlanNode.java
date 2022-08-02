@@ -34,7 +34,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    params = optional(planNodeBean.getParams()).orElse(emptyMap());
+    params = optional((Map<String, Object>) planNodeBean.getParams()).orElse(emptyMap());
   }
 
   @Override

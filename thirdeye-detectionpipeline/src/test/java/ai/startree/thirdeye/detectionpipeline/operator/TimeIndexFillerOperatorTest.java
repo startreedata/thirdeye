@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
@@ -47,13 +48,13 @@ public class TimeIndexFillerOperatorTest {
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
         .setType("TimeIndexFiller")
-        .setParams(ImmutableMap.of(
+        .setParams(TemplatableMap.copyOf(ImmutableMap.of(
                 "component.monitoringGranularity", "P1D",
                 "component.timestamp", "ts",
                 "component.minTimeInference", "FROM_DATA",
                 "component.maxTimeInference", "FROM_DATA"
             )
-        )
+        ))
         .setInputs(ImmutableList.of(
             new InputBean().setTargetProperty("baseline")
                 .setSourceProperty("currentDataFetcher")
@@ -95,7 +96,7 @@ public class TimeIndexFillerOperatorTest {
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setName("root")
         .setType("TimeIndexFiller")
-        .setParams(ImmutableMap.of(
+        .setParams(TemplatableMap.copyOf(ImmutableMap.of(
                 "component.monitoringGranularity", "P1D",
                 "component.timestamp", "ts",
                 // use detection time to infer bounds
@@ -103,7 +104,7 @@ public class TimeIndexFillerOperatorTest {
                 "component.maxTimeInference", "FROM_DETECTION_TIME",
                 "component.lookback", "P1D"
             )
-        )
+        ))
         .setInputs(ImmutableList.of(
             new InputBean().setTargetProperty("baseline")
                 .setSourceProperty("currentDataFetcher")

@@ -33,6 +33,27 @@ public class Templatable<T> {
    */
   public static final String VALUE_FIELD_STRING = "value";
 
+  public Templatable() {}
+
+  public Templatable(String s) {
+     initWithString(s);
+  }
+
+  private void initWithString(final String s) {
+    if (s.startsWith("${")) {
+      templatedValue = s;
+    } else
+      value = (T) s;
+  }
+
+  public Templatable(T val) {
+    if (val instanceof String) {
+      initWithString((String) val);
+    } else {
+      value = val;
+    }
+  }
+
   @JsonProperty("templatedValue")
   // getter is shortened for ease of use and readability
   public @Nullable String templatedValue() {

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.json;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -37,7 +38,10 @@ public class ThirdEyeSerialization {
    */
   public static final Module TEMPLATABLE = new SimpleModule()
       .addSerializer(Templatable.class, new ApiTemplatableSerializer())
-      .addDeserializer(Templatable.class, new ApiTemplatableDeserializer());
+      .addDeserializer(Templatable.class, new ApiTemplatableDeserializer())
+      .addSerializer(TemplatableMap.class, new TemplatableMapSerializer())
+      .addDeserializer(TemplatableMap.class, new TemplatableMapDeserializer())
+      ;
 
   /**
    * Returns an objectMapper that implements all Thirdeye specific (de)serialization.

@@ -22,12 +22,12 @@ import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.metric.DimensionType;
-import java.util.HashMap;
 import java.util.List;
 import org.testng.annotations.Test;
 
@@ -49,10 +49,10 @@ public class AlertEvaluatorTest {
             new PlanNodeBean().setName("root").setType(ANOMALY_DETECTOR_TYPE),
             new PlanNodeBean().setName("indexFiller1").setType(INDEX_FILLER_TYPE),
             new PlanNodeBean().setName("indexFiller2").setType(INDEX_FILLER_TYPE)
-            .setParams(new HashMap<>()),
+            .setParams(new TemplatableMap<>()),
             new PlanNodeBean().setName("dataFetcher1").setType(DATA_FETCHER_TYPE),
             new PlanNodeBean().setName("dataFetcher2").setType(DATA_FETCHER_TYPE)
-                .setParams(new HashMap<>())
+                .setParams(new TemplatableMap<>())
         ));
     List<String> filters = List.of("browser=chrome");
 

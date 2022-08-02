@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.auth.oauth;
 
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import com.google.common.cache.CacheLoader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;

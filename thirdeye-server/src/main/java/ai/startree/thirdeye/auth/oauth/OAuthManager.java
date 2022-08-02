@@ -15,7 +15,7 @@ package ai.startree.thirdeye.auth.oauth;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilder;

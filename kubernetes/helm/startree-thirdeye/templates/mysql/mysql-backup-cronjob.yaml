@@ -63,13 +63,13 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       name: thirdeye-secrets
-                      key: S3BackUpId
+                      key: mysqlBackupAwsKeyId
                       optional: false
                 - name: AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
                       name: thirdeye-secrets
-                      key: S3BackUpKey
+                      key: mysqlBackupAwsAccessKey
                       optional: false
                 - name: AWS_DEFAULT_REGION
                   value: {{ .Values.mysql.backup.s3.region | quote }}

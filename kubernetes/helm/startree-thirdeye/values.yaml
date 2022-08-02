@@ -161,10 +161,10 @@ secrets:
   smtpPassword:
     env: SMTP_PASSWORD
     value: tobefedexternally
-#  S3BackUpId:
+#  mysqlBackupAwsKeyId:
 #    env: AWS_ACCESS_KEY_ID
 #    value: <access key id>
-#  S3BackUpKey:
+#  mysqlBackupAwsAccessKey:
 #    env: AWS_SECRET_ACCESS_KEY
 #    value: <access key>
 

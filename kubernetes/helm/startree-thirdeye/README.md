@@ -233,10 +233,10 @@ The backup `CronJob` is disabled by default
 ```yaml
 secrets:
   ...
-  S3BackUpId:
+  mysqlBackupAwsKeyId:
     env: AWS_ACCESS_KEY_ID
     value: SAMPLEaccessKEYid
-  S3BackUpKey:
+  mysqlBackupAwsAccessKey:
     env: AWS_SECRET_ACCESS_KEY
     value: sampleSECRETaccessKEY
 
@@ -252,15 +252,15 @@ mysql:
       region: us-west-2
 ```
 
-| Property                    | Description                                   |
-|-----------------------------|-----------------------------------------------|
-| `mysql.backup.enabled`      | Flag to enable/disable backup cron job        |
-| `mysql.backup.name`         | backup folder name                            |
-| `mysql.backup.schedule`     | Cron expression for backup frequency          |
-| `mysql.backup.s3.bucket`    | AWS S3 bucket name to store the backup files  |
-| `mysql.backup.s3.region`    | AWS S3 bucket region                          |
-| `secrets.S3BackUpId.value`  | AWS access key id to access the S3 bucket     |
-| `secrets.S3BackUpKey.value` | AWS secret access key to access the S3 bucket |
+| Property                                | Description                                   |
+|-----------------------------------------|-----------------------------------------------|
+| `mysql.backup.enabled`                  | Flag to enable/disable backup cron job        |
+| `mysql.backup.name`                     | backup folder name                            |
+| `mysql.backup.schedule`                 | Cron expression for backup frequency          |
+| `mysql.backup.s3.bucket`                | AWS S3 bucket name to store the backup files  |
+| `mysql.backup.s3.region`                | AWS S3 bucket region                          |
+| `secrets.mysqlBackupAwsKeyId.value`     | AWS access key id to access the S3 bucket     |
+| `secrets.mysqlBackupAwsAccessKey.value` | AWS secret access key to access the S3 bucket |
 
 
 ### Other useful configurations

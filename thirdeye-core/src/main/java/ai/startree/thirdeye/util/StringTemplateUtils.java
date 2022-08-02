@@ -37,7 +37,6 @@ public class StringTemplateUtils {
     GROOVY_TEMPLATE_ENGINE.setEscapeBackslash(true);
   }
 
-  // todo cyril make this protected for test only - move alertResourceTest
   public static String renderTemplate(final String template, final Map<String, Object> newContext)
       throws IOException, ClassNotFoundException {
     final Map<String, Object> contextMap = getDefaultContextMap();

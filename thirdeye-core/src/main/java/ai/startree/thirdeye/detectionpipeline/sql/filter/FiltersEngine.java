@@ -46,7 +46,7 @@ import org.apache.calcite.sql.util.SqlShuttle;
 public class FiltersEngine {
 
   private static final List<OPER> SUPPORTED_FILTER_OPERATIONS = List.of(OPER.EQ, OPER.NEQ, OPER.IN);
-  public static final boolean QUOTE_IDENTIFIERS = false;
+  public static final boolean QUOTE_IDENTIFIERS = true;
 
   private final SqlParser.Config sqlParserConfig;
   private final SqlDialect sqlDialect;

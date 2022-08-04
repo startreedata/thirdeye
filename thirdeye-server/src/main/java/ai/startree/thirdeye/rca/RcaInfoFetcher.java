@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -46,7 +47,6 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// todo cyril move this to core
 @Singleton
 public class RcaInfoFetcher {
 
@@ -136,21 +136,24 @@ public class RcaInfoFetcher {
   @VisibleForTesting
   protected static void addCustomFields(final DatasetConfigDTO datasetConfigDTO,
       final DatasetConfigDTO metadataDatasetDTO) {
+    // fields that can be configured at the alert level are parsed in this method
     boolean includedListIsEmpty = isNullOrEmpty(metadataDatasetDTO.getDimensions());
-    boolean excludedListIsEmpty = optional(metadataDatasetDTO.getRcaExcludedDimensions()).map(t -> t.match(
-        ListUtils::isNullOrEmpty, true)).orElse(true);
+    boolean excludedListIsEmpty = optional(metadataDatasetDTO.getRcaExcludedDimensions())
+        .map(Templatable::value)
+        .map(ListUtils::isNullOrEmpty)
+        .orElse(true);
     checkArgument(includedListIsEmpty || excludedListIsEmpty,
         "Both dimensions and rcaExcludedDimensions are both not empty. Cannot use both list at the same time.");
-    // fields that can be configured at the alert level can be added here
-    // todo cyril implement templatable includedDimensions list + refactor to factorize templatable management
+
     optional(metadataDatasetDTO.getDimensions())
         .filter(ListUtils::isNotEmpty)
         .ifPresent(datasetConfigDTO::setDimensions);
 
     // override exclusion list if metadata list is not null or empty
     optional(metadataDatasetDTO.getRcaExcludedDimensions())
-        .filter(t -> t.match(ListUtils::isNotEmpty, false))
-        .ifPresent(datasetConfigDTO::setRcaExcludedDimensions);
+        .map(Templatable::value)
+        .filter(ListUtils::isNotEmpty)
+        .ifPresent(v -> datasetConfigDTO.setRcaExcludedDimensions(Templatable.of(v)));
   }
 
   private static void addCustomFields(final MetricConfigDTO metricConfigDTO,

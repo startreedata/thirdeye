@@ -80,7 +80,7 @@ public class TestTemplatableSerialization {
   public void testTemplatableSerizalizationOfWrappedObject() throws JsonProcessingException {
     final String listElement = "dim1";
     final List<String> value = List.of(listElement);
-    final Templatable<List<String>> templatable = new Templatable<List<String>>().setValue(value);
+    final Templatable<List<String>> templatable = Templatable.of(value);
     final ObjectWithTemplatable obj = new ObjectWithTemplatable().setListOfStrings(templatable);
 
     final String output = OBJECT_MAPPER.writeValueAsString(obj);
@@ -96,7 +96,7 @@ public class TestTemplatableSerialization {
     final ObjectWithTemplatable output = OBJECT_MAPPER.readValue(jsonString,
         ObjectWithTemplatable.class);
 
-    final Templatable<List<String>> templatable = new Templatable<List<String>>().setValue(value);
+    final Templatable<List<String>> templatable = Templatable.of(value);
     final ObjectWithTemplatable expected = new ObjectWithTemplatable().setListOfStrings(templatable);
 
     assertThat(output).isEqualTo(expected);
@@ -106,11 +106,11 @@ public class TestTemplatableSerialization {
   public void testSerializationOfNestedTemplatablesWithValues() throws JsonProcessingException {
     final String listElement = "dim1";
     final List<String> value = List.of(listElement);
-    final Templatable<List<String>> templatable = new Templatable<List<String>>().setValue(value);
+    final Templatable<List<String>> templatable = Templatable.of(value);
     final ObjectWithTemplatable obj = new ObjectWithTemplatable().setListOfStrings(templatable);
     final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
     objectWithNestedTemplatable
-        .setTemplatableNested(new Templatable<ObjectWithTemplatable>().setValue(obj));
+        .setTemplatableNested(Templatable.of(obj));
 
     final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
     assertThat(output).isEqualTo(String.format(
@@ -129,9 +129,8 @@ public class TestTemplatableSerialization {
 
     // build expected object
     final ObjectWithTemplatable objectWithTemplatable = new ObjectWithTemplatable().setListOfStrings(
-        new Templatable<List<String>>().setValue(value));
-    final Templatable<ObjectWithTemplatable> templatableNested = new Templatable<ObjectWithTemplatable>().setValue(
-        objectWithTemplatable);
+        Templatable.of(value));
+    final Templatable<ObjectWithTemplatable> templatableNested = Templatable.of(objectWithTemplatable);
     final ObjectWithNestedTemplatable expected = new ObjectWithNestedTemplatable();
     expected.setTemplatableNested(templatableNested);
 
@@ -174,7 +173,7 @@ public class TestTemplatableSerialization {
     final ObjectWithTemplatable obj = new ObjectWithTemplatable().setListOfStrings(templatable);
     final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
     objectWithNestedTemplatable
-        .setTemplatableNested(new Templatable<ObjectWithTemplatable>().setValue(obj));
+        .setTemplatableNested(Templatable.of(obj));
 
     final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
     assertThat(output).isEqualTo(String.format("{\"templatableNested\":{\"listOfStrings\":\"%s\"}}",
@@ -191,7 +190,7 @@ public class TestTemplatableSerialization {
     // build expected object
     final ObjectWithTemplatable objectWithTemplatable = new ObjectWithTemplatable().setListOfStrings(
         new Templatable<List<String>>().setTemplatedValue(templatedValue));
-    final Templatable<ObjectWithTemplatable> templatableNested = new Templatable<ObjectWithTemplatable>().setValue(
+    final Templatable<ObjectWithTemplatable> templatableNested = Templatable.of(
         objectWithTemplatable);
     final ObjectWithNestedTemplatable expected = new ObjectWithNestedTemplatable();
     expected.setTemplatableNested(templatableNested);

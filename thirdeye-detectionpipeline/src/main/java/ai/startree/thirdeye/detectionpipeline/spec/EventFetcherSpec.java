@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.detectionpipeline.spec;
 
-import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -48,7 +47,7 @@ public class EventFetcherSpec extends AbstractSpec {
    * These filters are applied on an index.
    * Useful optimization if there is a lot of different type of events.
    */
-  private Templatable<List<String>> eventTypes = new Templatable<List<String>>().setValue(List.of());
+  private List<String> eventTypes = List.of();
 
   /**
    * Dimension filters. As a sql filter string. If empty or null, no filter is applied.
@@ -97,12 +96,12 @@ public class EventFetcherSpec extends AbstractSpec {
     return this;
   }
 
-  public Templatable<List<String>> getEventTypes() {
+  public List<String> getEventTypes() {
     return eventTypes;
   }
 
   public EventFetcherSpec setEventTypes(
-      final Templatable<List<String>> eventTypes) {
+      final List<String> eventTypes) {
     this.eventTypes = eventTypes;
     return this;
   }

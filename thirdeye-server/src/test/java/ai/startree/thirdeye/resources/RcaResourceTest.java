@@ -26,9 +26,9 @@ public class RcaResourceTest {
   public static final String DIM_1 = "dim1";
   public static final String DIM_2 = "dim2";
   private static final DatasetConfigDTO DATASET_CONFIG_SIMPLE = new DatasetConfigDTO().setDimensions(
-      List.of(DIM_1, DIM_2));
+      Templatable.of(List.of(DIM_1, DIM_2)));
   private static final DatasetConfigDTO DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS = new DatasetConfigDTO().setDimensions(
-          List.of(DIM_1, DIM_2))
+          Templatable.of(List.of(DIM_1, DIM_2)))
       .setRcaExcludedDimensions(Templatable.of(List.of(DIM_1)));
   private static final DatasetConfigDTO DATASET_CONFIG_WITH_NO_DIMENSION = new DatasetConfigDTO()
       .setRcaExcludedDimensions(Templatable.of(List.of(DIM_1)));

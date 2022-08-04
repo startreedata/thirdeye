@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
@@ -84,7 +85,7 @@ public class ConfigGenerator {
     // Create DatasetConfig
     DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
     datasetConfigDTO.setDataset(dataset);
-    datasetConfigDTO.setDimensions(dimensions);
+    datasetConfigDTO.setDimensions(Templatable.of(dimensions));
     setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec);
     datasetConfigDTO.setDataSource(dataSourceName);
     datasetConfigDTO.setProperties(customConfigs);

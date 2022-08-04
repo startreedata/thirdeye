@@ -141,7 +141,8 @@ public class RcaResource {
     } else if (!includedDimensions.isEmpty()) {
       // use inclusion list - takes precedence other every other lists
       return cleanDimensionStrings(includedDimensions);
-    } else if (datasetConfigDTO.getDimensions() == null ) {
+    } else if (datasetConfigDTO.getDimensions() == null
+        || datasetConfigDTO.getDimensions().value() == null) {
       // no known dimensions - no need to apply exclusion list
       return List.of();
     } else {
@@ -151,9 +152,11 @@ public class RcaResource {
         excludedDimensionsToUse = excludedDimensions;
       } else {
         // use default exclusion list
-        excludedDimensionsToUse = optional(datasetConfigDTO.getRcaExcludedDimensions()).map(Templatable::value).orElse(List.of());
+        excludedDimensionsToUse = optional(datasetConfigDTO.getRcaExcludedDimensions()).map(
+            Templatable::value).orElse(List.of());
       }
-      final List<String> rcaDimensions = new ArrayList<>(datasetConfigDTO.getDimensions());
+      final List<String> rcaDimensions = new ArrayList<>(optional(datasetConfigDTO.getDimensions()).map(
+          Templatable::value).orElse(List.of()));
       rcaDimensions.removeAll(cleanDimensionStrings(excludedDimensionsToUse));
       return rcaDimensions;
     }

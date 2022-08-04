@@ -33,7 +33,7 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   private String dataset;
   private String displayName;
-  private List<String> dimensions;
+  private Templatable<List<String>> dimensions;
   private String timeColumn;
   private TimeUnit timeUnit;
   private Integer timeDuration;
@@ -100,11 +100,11 @@ public class DatasetConfigDTO extends AbstractDTO {
     this.dataset = dataset;
   }
 
-  public List<String> getDimensions() {
+  public Templatable<List<String>> getDimensions() {
     return dimensions;
   }
 
-  public DatasetConfigDTO setDimensions(List<String> dimensions) {
+  public DatasetConfigDTO setDimensions(Templatable<List<String>> dimensions) {
     this.dimensions = dimensions;
     return this;
   }

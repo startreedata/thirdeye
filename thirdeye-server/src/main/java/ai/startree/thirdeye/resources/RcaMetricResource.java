@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -224,7 +225,7 @@ public class RcaMetricResource {
       List<String> rcaDimensions = getRcaDimensions(dimensions,
           excludedDimensions,
           datasetConfigDTO);
-      datasetConfigDTO.setDimensions(rcaDimensions);
+      datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
 
       final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
           rootCauseAnalysisInfo.getMetricConfigDTO(),

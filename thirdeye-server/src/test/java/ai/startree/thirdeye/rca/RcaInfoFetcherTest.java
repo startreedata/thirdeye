@@ -31,7 +31,7 @@ public class RcaInfoFetcherTest {
   @Test
   public void testAddCustomFieldsWithBothIncludedAndExcludedListNotEmpty() {
     final DatasetConfigDTO incorrectMetadataConfig = new DatasetConfigDTO()
-        .setDimensions(List.of(DIM_1))
+        .setDimensions(Templatable.of(List.of(DIM_1)))
         .setRcaExcludedDimensions(Templatable.of(List.of(DIM_2)));
 
     assertThatThrownBy(() -> RcaInfoFetcher.addCustomFields(new DatasetConfigDTO(),incorrectMetadataConfig)).isInstanceOf(IllegalArgumentException.class);
@@ -39,7 +39,7 @@ public class RcaInfoFetcherTest {
 
   @Test
   public void testAddCustomFieldsWithNullDoesNothing() {
-    final List<String> originalDimensions = List.of(DIM_3);
+    final Templatable<List<String>> originalDimensions = Templatable.of(List.of(DIM_3));
     final Templatable<List<String>> originalExcludedDimensions = Templatable.of(List.of(DIM_4));
     final DatasetConfigDTO updatedConfig = new DatasetConfigDTO()
         .setDimensions(originalDimensions)
@@ -56,14 +56,14 @@ public class RcaInfoFetcherTest {
 
   @Test
   public void testAddCustomFieldsWithEmptyDoesNothing() {
-    final List<String> originalDimensions = List.of(DIM_3);
+    final Templatable<List<String>> originalDimensions = Templatable.of(List.of(DIM_3));
     final Templatable<List<String>> originalExcludedDimensions = Templatable.of(List.of(DIM_4));
     final DatasetConfigDTO updatedConfig = new DatasetConfigDTO()
         .setDimensions(originalDimensions)
         .setRcaExcludedDimensions(originalExcludedDimensions);
 
     final DatasetConfigDTO metadataConfig = new DatasetConfigDTO()
-        .setDimensions(List.of())
+        .setDimensions(Templatable.of(List.of()))
         .setRcaExcludedDimensions(Templatable.of(List.of()));
 
     RcaInfoFetcher.addCustomFields(updatedConfig,metadataConfig);
@@ -87,11 +87,11 @@ public class RcaInfoFetcherTest {
 
   @Test
   public void testAddCustomFieldsWithCustomIncludedDimensionsEmptyDoesNothing() {
-    final List<String> originalDimensions = List.of(DIM_3);
+    final Templatable<List<String>> originalDimensions = Templatable.of(List.of(DIM_3));
     final DatasetConfigDTO updatedConfig = new DatasetConfigDTO()
         .setDimensions(originalDimensions);
 
-    final List<String> newDimensions = List.of(DIM_1);
+    final Templatable<List<String>> newDimensions = Templatable.of(List.of(DIM_1));
     final DatasetConfigDTO metadataConfig = new DatasetConfigDTO()
         .setDimensions(newDimensions);
 

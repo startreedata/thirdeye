@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.datasource.mock;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
@@ -75,7 +76,7 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
       DatasetConfigDTO datasetConfig = new DatasetConfigDTO();
       datasetConfig.setDataset(datasetName);
       datasetConfig.setDataSource(this.dataSourceName);
-      datasetConfig.setDimensions(sortedDimensions);
+      datasetConfig.setDimensions(Templatable.of(sortedDimensions));
       datasetConfig.setTimezone(MapUtils.getString(dataset, "timezone", "America/Los_Angeles"));
 
       datasetConfigs.add(datasetConfig);

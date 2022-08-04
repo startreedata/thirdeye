@@ -26,7 +26,7 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
   private String name;
   private Boolean active;
   private Boolean additive;
-  private List<String> dimensions;
+  private Templatable<List<String>> dimensions;
   private TimeColumnApi timeColumn;
   @Deprecated // use completenessDelay
   private Duration expectedDelay;
@@ -76,11 +76,11 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
     return this;
   }
 
-  public List<String> getDimensions() {
+  public Templatable<List<String>> getDimensions() {
     return dimensions;
   }
 
-  public DatasetApi setDimensions(final List<String> dimensions) {
+  public DatasetApi setDimensions(final Templatable<List<String>> dimensions) {
     this.dimensions = dimensions;
     return this;
   }

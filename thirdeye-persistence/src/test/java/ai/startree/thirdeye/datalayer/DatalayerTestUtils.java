@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer;
 import static ai.startree.thirdeye.spi.Constants.SCALING_FACTOR;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
@@ -54,7 +55,7 @@ public class DatalayerTestUtils {
   public static DatasetConfigDTO getTestDatasetConfig(String collection) {
     DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
     datasetConfigDTO.setDataset(collection);
-    datasetConfigDTO.setDimensions(Lists.newArrayList("country", "browser", "environment"));
+    datasetConfigDTO.setDimensions(Templatable.of(Lists.newArrayList("country", "browser", "environment")));
     datasetConfigDTO.setTimeColumn("time");
     datasetConfigDTO.setTimeDuration(1);
     datasetConfigDTO.setTimeUnit(TimeUnit.HOURS);

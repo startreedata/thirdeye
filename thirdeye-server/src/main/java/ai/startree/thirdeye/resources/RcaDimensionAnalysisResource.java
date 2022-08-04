@@ -21,6 +21,7 @@ import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
@@ -124,7 +125,7 @@ public class RcaDimensionAnalysisResource {
       List<String> rcaDimensions = getRcaDimensions(dimensions,
           excludedDimensions,
           datasetConfigDTO);
-      datasetConfigDTO.setDimensions(rcaDimensions);
+      datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
 
       final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 

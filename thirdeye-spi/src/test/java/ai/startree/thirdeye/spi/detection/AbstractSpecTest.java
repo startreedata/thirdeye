@@ -111,8 +111,7 @@ public class AbstractSpecTest {
     private double threshold = 0.1;
     private double upThreshold;
     private double downThreshold;
-    private Templatable<List<String>> templatableList = new Templatable<List<String>>().setValue(
-        List.of());
+    private Templatable<List<String>> templatableList = Templatable.of(List.of());
 
     public Map<String, String> getConfiguration() {
       return configuration;

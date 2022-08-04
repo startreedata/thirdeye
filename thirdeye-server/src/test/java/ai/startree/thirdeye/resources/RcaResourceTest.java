@@ -29,9 +29,9 @@ public class RcaResourceTest {
       List.of(DIM_1, DIM_2));
   private static final DatasetConfigDTO DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS = new DatasetConfigDTO().setDimensions(
           List.of(DIM_1, DIM_2))
-      .setRcaExcludedDimensions(new Templatable<List<String>>().setValue(List.of(DIM_1)));
+      .setRcaExcludedDimensions(Templatable.of(List.of(DIM_1)));
   private static final DatasetConfigDTO DATASET_CONFIG_WITH_NO_DIMENSION = new DatasetConfigDTO()
-      .setRcaExcludedDimensions(new Templatable<List<String>>().setValue(List.of(DIM_1)));
+      .setRcaExcludedDimensions(Templatable.of(List.of(DIM_1)));
 
   @Test
   public void testGetRcaDimensionsWithBothIncludedDimensionsAndExcludedDimensionsNotEmpty() {
@@ -41,23 +41,39 @@ public class RcaResourceTest {
 
   @Test
   public void testGetRcaDimensionsWithEmptyListsChangesNothing() {
-    assertThat(RcaResource.getRcaDimensions(List.of(), List.of(), DATASET_CONFIG_SIMPLE)).isEqualTo(List.of(DIM_1, DIM_2));
-    assertThat(RcaResource.getRcaDimensions(List.of(), List.of(), DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS)).isEqualTo(List.of(DIM_2));
-    assertThat(RcaResource.getRcaDimensions(List.of(), List.of(), DATASET_CONFIG_WITH_NO_DIMENSION)).isEqualTo(List.of());
+    assertThat(RcaResource.getRcaDimensions(List.of(), List.of(), DATASET_CONFIG_SIMPLE)).isEqualTo(
+        List.of(DIM_1, DIM_2));
+    assertThat(RcaResource.getRcaDimensions(List.of(),
+        List.of(),
+        DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS)).isEqualTo(List.of(DIM_2));
+    assertThat(RcaResource.getRcaDimensions(List.of(),
+        List.of(),
+        DATASET_CONFIG_WITH_NO_DIMENSION)).isEqualTo(List.of());
   }
 
   @Test
   public void testGetRcaDimensionsWithIncludedDimensionsTakesPrecedence() {
-    assertThat(RcaResource.getRcaDimensions(List.of(DIM_1), List.of(), DATASET_CONFIG_SIMPLE)).isEqualTo(List.of(DIM_1));
-    assertThat(RcaResource.getRcaDimensions(List.of(DIM_1), List.of(), DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS)).isEqualTo(List.of(DIM_1));
-    assertThat(RcaResource.getRcaDimensions(List.of(DIM_1), List.of(), DATASET_CONFIG_WITH_NO_DIMENSION)).isEqualTo(List.of(DIM_1));
+    assertThat(RcaResource.getRcaDimensions(List.of(DIM_1),
+        List.of(),
+        DATASET_CONFIG_SIMPLE)).isEqualTo(List.of(DIM_1));
+    assertThat(RcaResource.getRcaDimensions(List.of(DIM_1),
+        List.of(),
+        DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS)).isEqualTo(List.of(DIM_1));
+    assertThat(RcaResource.getRcaDimensions(List.of(DIM_1),
+        List.of(),
+        DATASET_CONFIG_WITH_NO_DIMENSION)).isEqualTo(List.of(DIM_1));
   }
 
   @Test
   public void testGetRcaDimensionsWithExcludedDimensions() {
-    assertThat(RcaResource.getRcaDimensions(List.of(), List.of(DIM_2), DATASET_CONFIG_SIMPLE)).isEqualTo(List.of(DIM_1));
-    assertThat(RcaResource.getRcaDimensions(List.of(), List.of(DIM_2), DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS)).isEqualTo(List.of(DIM_1));
-    assertThat(RcaResource.getRcaDimensions(List.of(), List.of(DIM_2), DATASET_CONFIG_WITH_NO_DIMENSION)).isEqualTo(List.of());
+    assertThat(RcaResource.getRcaDimensions(List.of(),
+        List.of(DIM_2),
+        DATASET_CONFIG_SIMPLE)).isEqualTo(List.of(DIM_1));
+    assertThat(RcaResource.getRcaDimensions(List.of(),
+        List.of(DIM_2),
+        DATASET_CONFIG_WITH_EXCLUDED_DIMENSIONS)).isEqualTo(List.of(DIM_1));
+    assertThat(RcaResource.getRcaDimensions(List.of(),
+        List.of(DIM_2),
+        DATASET_CONFIG_WITH_NO_DIMENSION)).isEqualTo(List.of());
   }
-
 }

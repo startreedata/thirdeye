@@ -81,7 +81,7 @@ public class StringTemplateUtilsTest {
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
 
     final ObjectWithTemplatableFields input = new ObjectWithTemplatableFields();
-    input.templatableDto = new Templatable<DatasetConfigDTO>().setValue(datasetConfigDTO);
+    input.templatableDto = Templatable.of(datasetConfigDTO);
 
     final Map<String, Object> properties = Map.of();
     final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(
@@ -114,12 +114,10 @@ public class StringTemplateUtilsTest {
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
 
     final ObjectWithTemplatableFields objectWithTemplatableFields = new ObjectWithTemplatableFields();
-    objectWithTemplatableFields.templatableDto = new Templatable<DatasetConfigDTO>().setValue(
-        datasetConfigDTO);
+    objectWithTemplatableFields.templatableDto = Templatable.of(datasetConfigDTO);
 
     final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
-    objectWithNestedTemplatable.setTemplatableNested(new Templatable<ObjectWithTemplatableFields>().setValue(
-        objectWithTemplatableFields));
+    objectWithNestedTemplatable.setTemplatableNested(Templatable.of(objectWithTemplatableFields));
 
     final Map<String, Object> properties = Map.of();
     final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
@@ -140,15 +138,14 @@ public class StringTemplateUtilsTest {
 
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
     final Map<String, Object> properties = Map.of(templatedValueKey,
-        Map.of("templatableDto", new Templatable<DatasetConfigDTO>().setValue(datasetConfigDTO)));
+        Map.of("templatableDto", Templatable.of(datasetConfigDTO)));
     final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
         objectWithNestedTemplatable,
         properties);
 
     //build expected object
     final ObjectWithTemplatableFields objectWithTemplatableFields = new ObjectWithTemplatableFields();
-    objectWithTemplatableFields.templatableDto = new Templatable<DatasetConfigDTO>().setValue(
-        datasetConfigDTO);
+    objectWithTemplatableFields.templatableDto = Templatable.of(datasetConfigDTO);
 
     assertThat(output.templatableNested.value()).isEqualTo(objectWithTemplatableFields);
     assertThat(output.templatableNested.templatedValue()).isNull();
@@ -162,8 +159,7 @@ public class StringTemplateUtilsTest {
         new Templatable<DatasetConfigDTO>().setTemplatedValue(
             templateVariableOf(templatedValueKey)));
     ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
-    objectWithNestedTemplatable.setTemplatableNested(new Templatable<ObjectWithTemplatableFields>().setValue(
-        objectWithTemplatableFields));
+    objectWithNestedTemplatable.setTemplatableNested(Templatable.of(objectWithTemplatableFields));
 
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
     final Map<String, Object> properties = Map.of(templatedValueKey, datasetConfigDTO);

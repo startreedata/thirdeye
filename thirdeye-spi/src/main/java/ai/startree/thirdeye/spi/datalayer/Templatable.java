@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
-import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -32,6 +31,14 @@ public class Templatable<T> {
    * Name of the field containing the value. Used by TemplateEngineTemplatableSerializer.
    */
   public static final String VALUE_FIELD_STRING = "value";
+
+  public Templatable() {}
+
+  public static <T> Templatable<T> of(final T value) {
+    final Templatable<T> templatable = new Templatable<>();
+    templatable.setValue(value);
+    return templatable;
+  }
 
   @JsonProperty("templatedValue")
   // getter is shortened for ease of use and readability
@@ -76,19 +83,5 @@ public class Templatable<T> {
   @Override
   public int hashCode() {
     return Objects.hash(templatedValue, value);
-  }
-
-  /**
-   * Returns false if the wrapped value is null. Else return the result of the predicate.
-   *
-   * Used in optional/stream filter() to do check on the wrapped value without losing the Templatable wrapping
-   */
-  public boolean match(Predicate<? super T> predicate, final boolean defaultIfNull) {
-    Objects.requireNonNull(predicate);
-    if (value == null) {
-      return defaultIfNull;
-    } else {
-      return predicate.test(value);
-    }
   }
 }

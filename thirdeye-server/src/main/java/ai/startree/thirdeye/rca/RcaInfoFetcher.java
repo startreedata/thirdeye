@@ -34,7 +34,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
-import ai.startree.thirdeye.spi.util.ListUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -155,6 +154,6 @@ public class RcaInfoFetcher {
   private static <E> boolean templatableListIsNotEmpty(
       final Templatable<List<E>> metadataDatasetDTO) {
     return optional(metadataDatasetDTO).map(
-        Templatable::value).map(ListUtils::isNotEmpty).orElse(false);
+        Templatable::value).map( l -> !l.isEmpty()).orElse(false);
   }
 }

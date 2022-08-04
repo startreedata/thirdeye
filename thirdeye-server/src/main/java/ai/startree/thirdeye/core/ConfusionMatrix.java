@@ -85,26 +85,6 @@ public class ConfusionMatrix {
     this.unclassified++;
   }
 
-  public void decTruePositive() {
-    this.truePositive--;
-  }
-
-  public void decTrueNegative() {
-    this.trueNegative--;
-  }
-
-  public void decFalsePositive() {
-    this.falsePositive--;
-  }
-
-  public void decFalseNegative() {
-    this.falseNegative--;
-  }
-
-  public void decUnclassified() {
-    this.unclassified--;
-  }
-
   public double getPrecision() {
     if(truePositive == 0) {
       return 0;

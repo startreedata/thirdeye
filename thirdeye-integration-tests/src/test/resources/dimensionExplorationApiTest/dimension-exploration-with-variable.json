@@ -108,7 +108,8 @@
       "monitoringGranularity": "P1D",
       "timeColumn": "date",
       "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
-      "max": "900000"
+      "max": "900000",
+      "min": "${min}"
     },
     "cron": "0 0 * * * ? *",
     "lastTimestamp": 1659571200000,

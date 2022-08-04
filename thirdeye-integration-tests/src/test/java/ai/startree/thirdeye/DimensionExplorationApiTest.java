@@ -26,7 +26,9 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -102,10 +104,13 @@ public class DimensionExplorationApiTest {
     final AlertEvaluationApi result = response.readEntity(AlertEvaluationApi.class);
 
     final Map<String, DetectionEvaluationApi> detectionEvaluations = result.getDetectionEvaluations();
-    assertThat(detectionEvaluations.size()).isEqualTo(3);
+    assertThat(detectionEvaluations.size()).isEqualTo(2);
 
-    for (DetectionEvaluationApi e : detectionEvaluations.values()) {
-      assertThat(e.getAnomalies().size()).isEqualTo(1);
-    }
+    final Set<Integer> anomalyCounts = detectionEvaluations.values()
+        .stream()
+        .map(e -> e.getAnomalies().size())
+        .collect(Collectors.toSet());
+
+    assertThat(anomalyCounts).isEqualTo(Set.of(0, 1));
   }
 }

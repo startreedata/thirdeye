@@ -53,4 +53,8 @@ public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomal
 
   List<MergedAnomalyResultDTO> convertMergedAnomalyBean2DTO(
       List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList);
+
+  long countParentAnomaliesWithoutFeedback();
+
+  List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback();
 }

@@ -15,13 +15,16 @@ package ai.startree.thirdeye.core;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -37,17 +40,33 @@ public class AppAnalyticsService {
 
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
+  private final MergedAnomalyResultManager anomalyManager;
 
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
+      final MergedAnomalyResultManager anomalyManager,
       final MetricRegistry metricRegistry) {
     this.alertManager = alertManager;
+    this.anomalyManager = anomalyManager;
     this.renderer = renderer;
+
     metricRegistry.register("nMonitoredMetrics", new CachedGauge<Integer>(5, TimeUnit.MINUTES) {
       @Override
       protected Integer loadValue() {
         return uniqueMonitoredMetricsCount();
+      }
+    });
+    metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
+      @Override
+      protected Double loadValue() {
+        return computeConfusionMatrixForAnomalies().getPrecision();
+      }
+    });
+    metricRegistry.register("anomalyResponseRate", new CachedGauge<Double>(1, TimeUnit.HOURS) {
+      @Override
+      protected Double loadValue() {
+        return computeConfusionMatrixForAnomalies().getResponseRate();
       }
     });
   }
@@ -78,5 +97,31 @@ public class AppAnalyticsService {
         .setMetric(metadata.getMetric().getName())
         .setDataset(metadata.getDataset().getName())
         .setDatasource(metadata.getDatasource().getName());
+  }
+
+  public ConfusionMatrix computeConfusionMatrixForAnomalies() {
+    final ConfusionMatrix matrix = new ConfusionMatrix();
+    matrix.addUnclassified((int) anomalyManager.countParentAnomaliesWithoutFeedback());
+    final List<AnomalyFeedbackType> feedbackTypes = anomalyManager.findParentAnomaliesWithFeedback().stream()
+        .map(anomaly -> anomaly.getFeedback().getFeedbackType())
+        .collect(Collectors.toList());
+    for (final AnomalyFeedbackType type : feedbackTypes) {
+      switch (type) {
+        case NO_FEEDBACK:
+          matrix.incUnclassified();
+          break;
+        case NOT_ANOMALY:
+          matrix.incFalsePositive();
+          break;
+        case ANOMALY:
+        case ANOMALY_EXPECTED:
+        case ANOMALY_NEW_TREND:
+          matrix.incTruePositive();
+          break;
+        default:
+          log.error("Unsupported feedback type: {}", type);
+      }
+    }
+    return matrix;
   }
 }

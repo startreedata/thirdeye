@@ -1,0 +1,235 @@
+POST http://localhost:8080/api/alerts/evaluate
+Accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "pageviews-threshold",
+    "description": "Sample description payload for testing",
+    "template": {
+      "nodes": [
+        {
+          "name": "enumerator",
+          "type": "Enumerator",
+          "params": {"enumerationList": [
+            {
+              "key": 1
+            },
+            {
+              "key": 2
+            },
+            {
+              "key": 3
+            }
+          ]}
+        },
+        {
+          "name": "combiner",
+          "type": "Combiner"
+        },
+        {
+          "name": "root",
+          "type": "ForkJoin",
+          "params": {
+            "enumerator": "enumerator",
+            "root": "anomalyDetector",
+            "combiner": "combiner"
+          }
+        },
+        {
+          "name": "anomalyDetector",
+          "type": "AnomalyDetector",
+          "params": {
+            "component.min": "${min}",
+            "component.metric": "met",
+            "component.monitoringGranularity": "${monitoringGranularity}",
+            "component.max": "${max}",
+            "anomaly.dataset": "${dataset}",
+            "component.timestamp": "ts",
+            "anomaly.metric": "${aggregationColumn}",
+            "anomaly.source": "threshold-template/root",
+            "type": "THRESHOLD"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentData"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\") as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "currentData",
+              "outputName": "currentData"
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "datasource": {
+          "name": "${dataSource}"
+        },
+        "dataset": {
+          "name": "${dataset}",
+          "completenessDelay": "${completenessDelay}",
+          "rcaExcludedDimensions": "${rcaExcludedDimensions}"
+        },
+        "metric": {
+          "name": "${aggregationColumn}",
+          "aggregationFunction": "${rcaAggregationFunction}",
+          "where": "${queryFilters}"
+        },
+        "granularity": "${monitoringGranularity}",
+        "timezone": "${timezone}",
+        "mergeMaxGap": "${mergeMaxGap}",
+        "mergeMaxDuration": "${mergeMaxDuration}"
+      },
+      "defaultProperties": {
+        "completenessDelay": "P0D",
+        "timezone": "UTC",
+        "queryFilters": "",
+        "rcaAggregationFunction": "",
+        "queryLimit": "100000000",
+        "mergeMaxDuration": "",
+        "rcaExcludedDimensions": [],
+        "mergeMaxGap": ""
+      }
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "aggregationFunction": "sum",
+      "aggregationColumn": "views",
+      "monitoringGranularity": "P1D",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "max": "900000",
+      "min": "300000"
+    },
+    "cron": "0 0 * * * ? *",
+    "lastTimestamp": 1659571200000,
+    "active": true,
+    "owner": {
+      "principal": "no-auth-user"
+    }
+  },
+  "start": 1609488000000,
+  "end": 1641023999999
+}
+
+###
+
+
+POST http://localhost:7004/api/alerts/evaluate
+Accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "pageviews-threshold",
+    "description": "Sample description payload for testing",
+    "template": {
+      "nodes": [
+        {
+          "name": "root",
+          "type": "AnomalyDetector",
+          "params": {
+            "component.min": "${min}",
+            "component.metric": "met",
+            "component.monitoringGranularity": "${monitoringGranularity}",
+            "component.max": "${max}",
+            "anomaly.dataset": "${dataset}",
+            "component.timestamp": "ts",
+            "anomaly.metric": "${aggregationColumn}",
+            "anomaly.source": "threshold-template/root",
+            "type": "THRESHOLD"
+          },
+          "inputs": [
+            {
+              "targetProperty": "current",
+              "sourcePlanNode": "currentDataFetcher",
+              "sourceProperty": "currentData"
+            }
+          ],
+          "outputs": []
+        },
+        {
+          "name": "currentDataFetcher",
+          "type": "DataFetcher",
+          "params": {
+            "component.dataSource": "${dataSource}",
+            "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\") as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "outputKey": "currentData",
+              "outputName": "currentData"
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "datasource": {
+          "name": "${dataSource}"
+        },
+        "dataset": {
+          "name": "${dataset}",
+          "completenessDelay": "${completenessDelay}",
+          "rcaExcludedDimensions": "${rcaExcludedDimensions}"
+        },
+        "metric": {
+          "name": "${aggregationColumn}",
+          "aggregationFunction": "${rcaAggregationFunction}",
+          "where": "${queryFilters}"
+        },
+        "granularity": "${monitoringGranularity}",
+        "timezone": "${timezone}",
+        "mergeMaxGap": "${mergeMaxGap}",
+        "mergeMaxDuration": "${mergeMaxDuration}"
+      },
+      "defaultProperties": {
+        "completenessDelay": "P0D",
+        "timezone": "UTC",
+        "queryFilters": "",
+        "rcaAggregationFunction": "",
+        "queryLimit": "100000000",
+        "mergeMaxDuration": "",
+        "rcaExcludedDimensions": [],
+        "mergeMaxGap": ""
+      }
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "aggregationFunction": "sum",
+      "aggregationColumn": "views",
+      "monitoringGranularity": "P1D",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "max": "900000",
+      "min": "300000"
+    },
+    "cron": "0 0 * * * ? *",
+    "lastTimestamp": 1659571200000,
+    "active": true,
+    "owner": {
+      "principal": "no-auth-user"
+    }
+  },
+  "start": 1609488000000,
+  "end": 1641023999999
+}
+
+###
+

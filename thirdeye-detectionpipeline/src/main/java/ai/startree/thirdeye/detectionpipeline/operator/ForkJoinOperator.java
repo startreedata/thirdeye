@@ -13,6 +13,10 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.detectionpipeline.PlanExecutor.executePlanNode;
+
+import ai.startree.thirdeye.detectionpipeline.ContextKey;
+import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeFactory;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.mapper.PlanNodeMapper;
@@ -109,9 +113,14 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
       /* Create a callable for parallel execution */
       callables.add((() -> {
-        final Operator operator = rootClone.buildOperator();
-        operator.execute();
-        return operator.getOutputs();
+        /* The context stores all the outputs from all the nodes */
+        final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
+
+        /* Execute the DAG */
+        executePlanNode(clonedPipelinePlanNodes, context, rootClone);
+
+        /* Return the output */
+        return PlanExecutor.getOutput(context, rootClone.getName());
       }));
     }
     return callables;

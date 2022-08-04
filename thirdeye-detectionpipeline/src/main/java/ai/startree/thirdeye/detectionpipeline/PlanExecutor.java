@@ -43,7 +43,7 @@ public class PlanExecutor {
   }
 
   @VisibleForTesting
-  static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
+  public static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
       final Map<ContextKey, DetectionPipelineResult> context,
       final PlanNode node)
       throws Exception {
@@ -71,7 +71,7 @@ public class PlanExecutor {
     return new ContextKey(name, key);
   }
 
-  private static Map<String, DetectionPipelineResult> getOutput(
+  public static Map<String, DetectionPipelineResult> getOutput(
       final Map<ContextKey, DetectionPipelineResult> context, final String nodeName) {
     final Map<String, DetectionPipelineResult> results = new HashMap<>();
     for (final ContextKey contextKey : context.keySet()) {

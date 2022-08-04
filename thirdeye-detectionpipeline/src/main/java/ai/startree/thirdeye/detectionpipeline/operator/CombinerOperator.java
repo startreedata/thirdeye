@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CombinerOperator extends DetectionPipelineOperator {
 
@@ -71,7 +72,10 @@ public class CombinerOperator extends DetectionPipelineOperator {
 
     @Override
     public List<DetectionResult> getDetectionResults() {
-      return null;
+      return results.values().stream()
+          .filter(o -> o instanceof DetectionResult)
+          .map(o -> (DetectionResult) o)
+          .collect(Collectors.toList());
     }
 
     public Map<String, DetectionPipelineResult> getResults() {

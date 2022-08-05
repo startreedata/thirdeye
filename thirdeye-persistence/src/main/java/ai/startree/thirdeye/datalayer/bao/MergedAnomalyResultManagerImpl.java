@@ -80,7 +80,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     metricRegistry.register("parentAnomalyCount", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
-        return count(Predicate.EQ("child", false));
+        return countParentAnomalies();
       }
     });
   }
@@ -447,6 +447,11 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       beanList.add(mergedAnomalyResultDTO);
     }
     return convertMergedAnomalyBean2DTO(beanList);
+  }
+
+  @Override
+  public long countParentAnomalies() {
+    return count(Predicate.EQ("child", false));
   }
 
   @Override

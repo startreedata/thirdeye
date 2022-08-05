@@ -10,6 +10,12 @@ public class AnomalyStatsApi {
   private Long countWithFeedback;
   private Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
 
+  public AnomalyStatsApi() {
+    for(AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
+      feedbackStats.put(type, 0L);
+    }
+  }
+
   public Long getTotalCount() {
     return totalCount;
   }
@@ -39,6 +45,6 @@ public class AnomalyStatsApi {
   }
 
   public void incFeedbackStatCount(AnomalyFeedbackType type) {
-    feedbackStats.put(type, feedbackStats.getOrDefault(type, 0L) + 1L);
+    feedbackStats.put(type, feedbackStats.get(type) + 1L);
   }
 }

@@ -19,6 +19,7 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
+import ai.startree.thirdeye.detectionpipeline.plan.DelayPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EventFetcherPlanNode;
@@ -59,7 +60,8 @@ public class PlanNodeFactory {
       EventFetcherPlanNode.class,
       ForkJoinPlanNode.class,
       IndexFillerPlanNode.class,
-      SqlExecutionPlanNode.class
+      SqlExecutionPlanNode.class,
+      DelayPlanNode.class
   );
   /**
    * Contains the list of built in as well as node/operators coming from plugins.

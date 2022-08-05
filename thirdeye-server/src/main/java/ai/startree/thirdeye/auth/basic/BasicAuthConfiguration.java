@@ -15,10 +15,9 @@ package ai.startree.thirdeye.auth.basic;
 
 import java.util.List;
 
-
 public class BasicAuthConfiguration {
 
-  private boolean enabled;
+  private boolean enabled = false;
   private List<UserCredentialConfiguration> users;
 
   public boolean isEnabled() {

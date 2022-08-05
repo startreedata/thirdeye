@@ -225,7 +225,6 @@ Configurations for OAuth2
 auth:
   enabled: true
   oauth:
-    enabled: true
     serverUrl: <auth server url>
     keysUrl: <keys url>
     required:
@@ -241,8 +240,7 @@ Details
 
 | Property           | Description                                                                                                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`          | Flag to enable/disable auth                                                                                                                     |
-| `oauth.enabled`    | Flag to enable/disable OAuth authentication filter                                                                                              |
+| `enabled`          | Flag to enable/disable auth. OAuth is enabled by default if `auth.enabled` is true                                                              |
 | `oauth.serverUrl`  | OIDC server url. Usually the oidc server has a standard endpoint to expose its metadata which contains info required for keysUrl and issuer url |
 | `oauth.keysUrl`    | Endpoint where jwk keys are present                                                                                                             |
 | `oauth.required`   | List of claims which are required in the auth token. If any claim from the list is absent, it will considered unauthorised request              |

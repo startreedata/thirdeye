@@ -17,7 +17,6 @@ public enum ThirdEyeStatus {
 
   ERR_ALERT_PIPELINE_EXECUTION("Failed to run alert pipeline. Error caused by : %s"),
   ERR_AUTH_SERVER_NOT_RESPONDING("Auth server is not responding. Auth Server URL : %s"),
-  ERR_AUTH_FILTERS_DISABLED("Auth is enabled without enabling any auth filter."),
   ERR_CONFIG("Configuration Error! %s"),
   ERR_CRON_INVALID("Failed to parse cron expression: %s"),
   ERR_DATASET_NOT_FOUND("Dataset not found: %s"),

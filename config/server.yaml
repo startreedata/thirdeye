@@ -56,7 +56,6 @@ auth:
 #      - username: admin
 #        password: admin
 #  oauth:
-#    enabled: false
 #    serverUrl: <dex server url>
 #    required:
 #      - sub

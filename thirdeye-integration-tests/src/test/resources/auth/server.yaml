@@ -47,7 +47,9 @@ auth:
       - username: admin
         password: admin
   oauth:
-    enabled: false
+    cache:
+      size: 64
+      ttl: 60000
 
 database:
   # Assuming a local MySQL server running on the default port 3306

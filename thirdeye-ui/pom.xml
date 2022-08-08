@@ -18,7 +18,7 @@
     <parent>
         <artifactId>thirdeye</artifactId>
         <groupId>ai.startree.thirdeye</groupId>
-        <version>1.63.0-SNAPSHOT</version>
+        <version>1.63.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>thirdeye-ui</artifactId>

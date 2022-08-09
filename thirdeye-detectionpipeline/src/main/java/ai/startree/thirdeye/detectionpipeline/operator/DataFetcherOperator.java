@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.Constants.EVALUATION_FILTERS_KEY;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -22,6 +23,7 @@ import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
@@ -49,7 +51,7 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
     final DataSourceCache dataSourceCache = (DataSourceCache) context.getProperties()
         .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
-    dataFetcher = createDataFetcher(planNode.getParams(), dataSourceCache);
+    dataFetcher = createDataFetcher(optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null), dataSourceCache);
   }
 
   protected DataFetcher<DataFetcherSpec> createDataFetcher(final Map<String, Object> params,

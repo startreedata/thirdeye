@@ -100,7 +100,7 @@ public abstract class DetectionPipelineOperator implements Operator {
 
   @Override
   public void setProperty(final String key, final Object value) {
-    planNode.getParams().put(key, value);
+    planNode.getParams().putValue(key, value);
   }
 
   @Override

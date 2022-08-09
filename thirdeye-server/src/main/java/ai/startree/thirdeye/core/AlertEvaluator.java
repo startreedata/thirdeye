@@ -33,6 +33,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -215,9 +216,9 @@ public class AlertEvaluator {
   private void addFilters(PlanNodeBean planNodeBean, List<QueryPredicate> filters) {
     if (planNodeBean.getType().equals(new DataFetcherPlanNode().getType())) {
       if (planNodeBean.getParams() == null) {
-        planNodeBean.setParams(new HashMap<>());
+        planNodeBean.setParams(new TemplatableMap<>());
       }
-      planNodeBean.getParams().put(Constants.EVALUATION_FILTERS_KEY, filters);
+      planNodeBean.getParams().putValue(Constants.EVALUATION_FILTERS_KEY, filters);
     }
   }
 

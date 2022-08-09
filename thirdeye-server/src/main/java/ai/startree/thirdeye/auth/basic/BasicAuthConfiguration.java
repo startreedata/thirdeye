@@ -11,18 +11,30 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
+package ai.startree.thirdeye.auth.basic;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import java.util.List;
 
-import io.dropwizard.auth.AuthenticationException;
-import io.dropwizard.auth.Authenticator;
-import java.util.Optional;
+public class BasicAuthConfiguration {
 
-public class ThirdEyeAuthenticatorDisabled implements Authenticator<String, ThirdEyePrincipal> {
+  private boolean enabled = false;
+  private List<UserCredentialConfiguration> users;
 
-  @Override
-  public Optional<ThirdEyePrincipal> authenticate(final String s) throws AuthenticationException {
-    return optional(new ThirdEyePrincipal(s));
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public BasicAuthConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
+
+  public List<UserCredentialConfiguration> getUsers() {
+    return users;
+  }
+
+  public BasicAuthConfiguration setUsers(final List<UserCredentialConfiguration> users) {
+    this.users = users;
+    return this;
   }
 }

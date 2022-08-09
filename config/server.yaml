@@ -50,6 +50,11 @@ logging:
 
 auth:
   enabled: false
+#  basic:
+#    enabled: false
+#    users:
+#      - username: admin
+#        password: admin
 #  oauth:
 #    serverUrl: <dex server url>
 #    required:

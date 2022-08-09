@@ -136,6 +136,11 @@ rca:
 
 auth:
   enabled: false
+  basic:
+    enabled: false
+#    users:
+#      - username: admin
+#        password: admin
   oauth:
 #    serverUrl: <dex server url>
 #    keysUrl: <keys url>

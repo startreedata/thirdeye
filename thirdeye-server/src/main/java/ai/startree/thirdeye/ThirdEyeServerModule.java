@@ -13,8 +13,17 @@
  */
 package ai.startree.thirdeye;
 
+import static ai.startree.thirdeye.spi.Constants.AUTH_BASIC;
+import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
+
 import ai.startree.thirdeye.auth.AuthConfiguration;
+import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
+import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
+import ai.startree.thirdeye.auth.oauth.OAuthManager;
+import ai.startree.thirdeye.auth.oauth.ThirdEyeOAuthAuthenticator;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
@@ -22,8 +31,15 @@ import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
 import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import io.dropwizard.auth.AuthFilter;
+import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.auth.chained.ChainedAuthFilter;
+import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeServerModule extends AbstractModule {
@@ -66,7 +82,58 @@ public class ThirdEyeServerModule extends AbstractModule {
   @Singleton
   @Provides
   public OAuthConfiguration getOAuthConfig(
-      AuthConfiguration authConfiguration) {
+      final AuthConfiguration authConfiguration) {
     return authConfiguration.getOAuthConfig();
+  }
+
+  @Singleton
+  @Provides
+  public BasicAuthConfiguration getBasicAuthConfig(
+      final AuthConfiguration authConfiguration) {
+    return authConfiguration.getBasicAuthConfig();
+  }
+
+  @Singleton
+  @Provides
+  public AuthFilter getAuthFilters(
+      final AuthConfiguration config,
+      final Provider<BasicCredentialAuthFilter> basicAuthFilter,
+      final Provider<OAuthCredentialAuthFilter> oAuthFilter) {
+    final List<AuthFilter> filters = new ArrayList<>();
+    if(config.isEnabled()) {
+      filters.add(oAuthFilter.get());
+      if(config.getBasicAuthConfig().isEnabled()) {
+        filters.add(basicAuthFilter.get());
+      }
+    } else {
+      filters.add(getNoAuthFilter());
+    }
+    return new ChainedAuthFilter<>(filters);
+  }
+
+  private OAuthCredentialAuthFilter<ThirdEyePrincipal> getNoAuthFilter() {
+    final ThirdEyeAuthenticatorDisabled authenticator = new ThirdEyeAuthenticatorDisabled();
+    return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+        .setAuthenticator(authenticator)
+        .setPrefix(AUTH_BEARER)
+        .buildAuthFilter();
+  }
+
+  @Singleton
+  @Provides
+  public OAuthCredentialAuthFilter getOAuthFilter(final ThirdEyeOAuthAuthenticator authenticator) {
+    return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+        .setAuthenticator(authenticator)
+        .setPrefix(AUTH_BEARER)
+        .buildAuthFilter();
+  }
+
+  @Singleton
+  @Provides
+  public BasicCredentialAuthFilter getBasicAuthFilter(final ThirdEyeBasicAuthenticator authenticator) {
+    return new BasicCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+        .setAuthenticator(authenticator)
+        .setPrefix(AUTH_BASIC)
+        .buildAuthFilter();
   }
 }

@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye;
 
-import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
 import static ai.startree.thirdeye.spi.Constants.ENV_THIRDEYE_PLUGINS_DIR;
 import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
@@ -21,9 +20,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
-import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.auth.oauth.ThirdEyeOAuthAuthenticator;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
@@ -41,8 +38,7 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
+import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.lifecycle.Managed;
@@ -205,22 +201,12 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       if(!injector.getInstance(AuthConfiguration.class).isEnabled()){
         environment.jersey().register(injector.getInstance(AuthDisabledRequestFilter.class));
       }
-      environment.jersey().register(new AuthDynamicFeature(buildAuthFilter(injector)));
+      environment.jersey().register(new AuthDynamicFeature(injector.getInstance(AuthFilter.class)));
       environment.jersey().register(RolesAllowedDynamicFeature.class);
       environment.jersey().register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
     } catch (Exception e) {
       throw new IllegalStateException("Failed to configure Authentication filter", e);
     }
-  }
-
-  private AuthFilter buildAuthFilter(final Injector injector) {
-    final Authenticator authenticator = injector.getInstance(AuthConfiguration.class).isEnabled()
-        ? injector.getInstance(ThirdEyeOAuthAuthenticator.class)
-        : injector.getInstance(ThirdEyeAuthenticatorDisabled.class);
-    return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
-        .setAuthenticator(authenticator)
-        .setPrefix(AUTH_BEARER)
-        .buildAuthFilter();
   }
 
   /**

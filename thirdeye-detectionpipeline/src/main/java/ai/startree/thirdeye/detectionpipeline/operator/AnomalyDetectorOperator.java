@@ -27,6 +27,8 @@ import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
@@ -66,7 +68,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
         .get(Constants.DETECTION_REGISTRY_REF_KEY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
-    detector = createDetector(planNode.getParams(), detectionRegistry);
+    detector = createDetector(optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null), detectionRegistry);
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
@@ -107,6 +109,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private void addMetadata(DetectionPipelineResult detectionPipelineResult) {
     // Annotate each anomaly with a metric name
     optional(planNode.getParams().get("anomaly.metric"))
+        .map(Templatable::value)
         .map(Object::toString)
         .ifPresent(anomalyMetric -> detectionPipelineResult.getDetectionResults().stream()
             .map(DetectionResult::getAnomalies)
@@ -114,6 +117,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
             .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
 
     optional(planNode.getParams().get("anomaly.dataset"))
+        .map(Templatable::value)
         .map(Object::toString)
         .ifPresent(anomalyDataset -> detectionPipelineResult.getDetectionResults().stream()
             .map(DetectionResult::getAnomalies)
@@ -122,6 +126,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     // Annotate each anomaly with source info
     optional(planNode.getParams().get("anomaly.source"))
+        .map(Templatable::value)
         .map(Object::toString)
         .ifPresent(anomalySource -> detectionPipelineResult.getDetectionResults().stream()
             .map(DetectionResult::getAnomalies)

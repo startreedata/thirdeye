@@ -13,12 +13,14 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.EventFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
@@ -37,7 +39,8 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
     super.init(context);
     final EventManager eventDao = (EventManager) context.getProperties()
         .get(Constants.EVENT_MANAGER_REF_KEY);
-    this.eventFetcher = createEventFetcher(planNode.getParams(), eventDao);
+    this.eventFetcher = createEventFetcher(optional(planNode.getParams()).map(TemplatableMap::valueMap)
+        .orElse(null), eventDao);
 
     checkArgument(inputMap == null || inputMap.size() == 0,
         OPERATOR_NAME + " must have exactly 0 input node.");

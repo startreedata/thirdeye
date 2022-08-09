@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import java.util.Map;
 
 /**
  * PlanNodeApi is self-described detection plan node.
@@ -38,7 +38,7 @@ public class PlanNodeApi {
   /**
    * Customized params to init the PlanNode.
    */
-  private Map<String, Object> params;
+  private TemplatableMap<String, Object> params;
   /**
    * Defines the inputs of this PlanNode are set
    */
@@ -66,11 +66,11 @@ public class PlanNodeApi {
     return this;
   }
 
-  public Map<String, Object> getParams() {
+  public TemplatableMap<String, Object> getParams() {
     return params;
   }
 
-  public PlanNodeApi setParams(final Map<String, Object> params) {
+  public PlanNodeApi setParams(final TemplatableMap<String, Object> params) {
     this.params = params;
     return this;
   }

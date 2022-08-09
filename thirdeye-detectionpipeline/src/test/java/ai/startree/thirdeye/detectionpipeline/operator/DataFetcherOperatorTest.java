@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
@@ -54,7 +55,7 @@ public class DataFetcherOperatorTest {
   public void testNewInstance() {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final PlanNodeBean planNodeBean = new PlanNodeBean()
-        .setParams(ImmutableMap.of("component.dataSource", dataSourceName))
+        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of("component.dataSource", dataSourceName)))
         .setOutputs(ImmutableList.of());
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         dataSourceCache);
@@ -83,7 +84,7 @@ public class DataFetcherOperatorTest {
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setOutputs(ImmutableList.of())
         .setInputs(ImmutableList.of())
-        .setParams(params);
+        .setParams(TemplatableMap.fromValueMap(params));
 
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         dataSourceCache);

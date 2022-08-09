@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import ai.startree.thirdeye.detectionpipeline.operator.sql.DataTableToSqlAdapterFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -54,18 +56,19 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     for (final OutputBean outputBean : context.getPlanNode().getOutputs()) {
       outputKeyMap.put(outputBean.getOutputKey(), outputBean.getOutputName());
     }
+    checkArgument(planNode.getParams() != null);
     if (planNode.getParams().containsKey(SQL_QUERIES)) {
-      queries.addAll((List<String>) planNode.getParams().get(SQL_QUERIES));
+      queries.addAll((List<String>) planNode.getParams().getValue(SQL_QUERIES));
     } else {
       throw new IllegalArgumentException(
           "Missing property '" + SQL_QUERIES + "' in SqlExecutionOperator");
     }
 
-    dataTableToSqlAdapter = DataTableToSqlAdapterFactory.create(planNode.getParams()
+    dataTableToSqlAdapter = DataTableToSqlAdapterFactory.create(planNode.getParams().valueMap()
         .getOrDefault(SQL_ENGINE, DEFAULT_SQL_ENGINE).toString());
     if (planNode.getParams().containsKey(JDBC_CONNECTION_PARAMS)) {
       dataTableToSqlAdapter.jdbcProperties()
-          .putAll((Map<String, String>) planNode.getParams().get(JDBC_CONNECTION_PARAMS));
+          .putAll((Map<String, String>) planNode.getParams().getValue(JDBC_CONNECTION_PARAMS));
     }
   }
 

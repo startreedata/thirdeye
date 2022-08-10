@@ -44,6 +44,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   /**
    * Table to query.
    */
+  private String tableName;
   private ThirdEyeDataSource thirdEyeDataSource;
   private DatasetConfigDTO datasetConfigDTO;
   private List<QueryPredicate> timeseriesFilters;
@@ -59,15 +60,19 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
 
   @VisibleForTesting
   public String getTableName() {
-    return datasetConfigDTO.getDataset();
+    return tableName;
   }
 
   @Override
   public void init(final DataFetcherSpec dataFetcherSpec) {
     this.query = dataFetcherSpec.getQuery();
-    final DatasetConfigManager datasetDao = Objects.requireNonNull(dataFetcherSpec.getDatasetDao());
-    this.datasetConfigDTO = Objects.requireNonNull(datasetDao.findByDataset(dataFetcherSpec.getTableName()),
-        "Could not find dataset " + dataFetcherSpec.getTableName());
+    // table name is optional - it is only necessary for AUTO mode of macros
+    this.tableName = dataFetcherSpec.getTableName();
+    if (tableName != null) {
+      final DatasetConfigManager datasetDao = Objects.requireNonNull(dataFetcherSpec.getDatasetDao());
+      this.datasetConfigDTO = Objects.requireNonNull(datasetDao.findByDataset(dataFetcherSpec.getTableName()),
+          "Could not find dataset " + dataFetcherSpec.getTableName());
+    }
     if (dataFetcherSpec.getDataSourceCache() != null) {
       final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),
           "DataFetcher: data source is not set.");
@@ -112,6 +117,6 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           datasetConfigDTO,
           queryWithFilters).prepareRequest();
     }
-    return new DataSourceRequest(datasetConfigDTO.getDataset(), query, ImmutableMap.of());
+    return new DataSourceRequest(tableName, query, ImmutableMap.of());
   }
 }

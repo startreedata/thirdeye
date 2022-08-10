@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
@@ -39,7 +40,6 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.SqlShuttle;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,10 +63,10 @@ public class MacroEngine {
 
   public MacroEngine(final SqlLanguage sqlLanguage, final SqlExpressionBuilder sqlExpressionBuilder,
       final Interval detectionInterval,
-      @NonNull final DatasetConfigDTO datasetConfigDTO, String query) {
+      @Nullable final DatasetConfigDTO datasetConfigDTO, String query) {
     this.sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
     this.sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
-    this.tableName = datasetConfigDTO.getDataset();
+    this.tableName = optional(datasetConfigDTO).map(DatasetConfigDTO::getDataset).orElse(null);
     this.query = query;
     this.properties = new HashMap<>();
     this.macroFunctionContext = new MacroFunctionContext()

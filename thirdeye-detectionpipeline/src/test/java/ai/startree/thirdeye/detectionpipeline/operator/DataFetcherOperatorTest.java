@@ -65,7 +65,7 @@ public class DataFetcherOperatorTest {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final PlanNodeBean planNodeBean = new PlanNodeBean()
         .setParams(TemplatableMap.fromValueMap(ImmutableMap.of("component.dataSource",
-            dataSourceName, "component.tableName", TABLE_NAME)))
+            dataSourceName)))
         .setOutputs(ImmutableList.of());
     final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
         dataSourceCache, DATASET_DAO_REF_KEY, datasetDao);

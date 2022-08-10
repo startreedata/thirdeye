@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -75,6 +76,7 @@ public class TimeFilterFunction implements MacroFunction {
 
     if (timeColumn.equals(AUTO_TIME_CONFIG)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
+      Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
       return context.getSqlExpressionBuilder()
           .getTimeFilterExpression(datasetConfigDTO.getTimeColumn(),
               filterInterval,

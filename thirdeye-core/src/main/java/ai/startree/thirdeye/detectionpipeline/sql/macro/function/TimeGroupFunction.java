@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
+import java.util.Objects;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 
@@ -46,6 +47,7 @@ public class TimeGroupFunction implements MacroFunction {
 
     if (timeColumn.equals(AUTO_TIME_CONFIG)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
+      Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
       return context.getSqlExpressionBuilder()
           .getTimeGroupExpression(datasetConfigDTO.getTimeColumn(),
               datasetConfigDTO.getTimeFormat(),

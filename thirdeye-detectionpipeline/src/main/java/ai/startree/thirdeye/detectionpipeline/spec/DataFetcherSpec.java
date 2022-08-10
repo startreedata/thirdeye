@@ -32,7 +32,9 @@ public class DataFetcherSpec extends AbstractSpec {
    */
   private String query;
   /**
-   * The table to query
+   * The table to query.
+   *
+   * Optional - only necessary for AUTO mode of macros and better broker choice in pinot client.
    */
   private String tableName;
   /**

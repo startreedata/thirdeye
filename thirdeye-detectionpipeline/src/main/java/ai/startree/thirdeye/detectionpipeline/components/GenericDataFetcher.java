@@ -66,7 +66,6 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   @Override
   public void init(final DataFetcherSpec dataFetcherSpec) {
     this.query = dataFetcherSpec.getQuery();
-    // table name is optional - it is only necessary for AUTO mode of macros
     this.tableName = dataFetcherSpec.getTableName();
     if (tableName != null) {
       final DatasetConfigManager datasetDao = Objects.requireNonNull(dataFetcherSpec.getDatasetDao());

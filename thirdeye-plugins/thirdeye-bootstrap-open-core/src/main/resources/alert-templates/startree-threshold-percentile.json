@@ -48,6 +48,7 @@
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
+        "component.tableName": "${dataset}",
         "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\", ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
@@ -81,6 +82,8 @@
   },
   "defaultProperties": {
     "timezone": "UTC",
+    "timeColumn": "AUTO",
+    "timeColumnFormat": "",
     "completenessDelay": "P0D",
     "mergeMaxGap": "",
     "mergeMaxDuration": "",

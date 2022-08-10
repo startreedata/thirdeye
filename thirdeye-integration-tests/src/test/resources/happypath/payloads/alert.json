@@ -55,6 +55,7 @@
         "type": "DataFetcher",
         "params": {
           "component.dataSource": "${dataSource}",
+          "component.tableName": "${dataset}",
           "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", ${timeColumnFormat}, ${lookback}, ${lookback}) GROUP BY ts ORDER BY ts LIMIT 10000"
         },
         "inputs": [],
@@ -88,6 +89,7 @@
         "type": "DataFetcher",
         "params": {
           "component.dataSource": "${dataSource}",
+          "component.tableName": "${dataset}",
           "component.query": "SELECT __timeGroup(\"${timeColumn}\", ${timeColumnFormat}, ${monitoringGranularity}) as ts, ${metric} as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", ${timeColumnFormat}) GROUP BY ts ORDER BY ts LIMIT 10000"
         },
         "inputs": [],
@@ -116,8 +118,8 @@
     "dataset": "pageviews",
     "metric": "sum(views)",
     "monitoringGranularity": "P1D",
-    "timeColumn": "date",
-    "timeColumnFormat": "yyyyMMdd",
+    "timeColumn": "AUTO",
+    "timeColumnFormat": "",
     "percentageChange": "0.2",
     "offset": "wo1w",
     "lookback": "P7D",

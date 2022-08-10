@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
@@ -32,7 +33,8 @@ public class TimeGroupFunction implements MacroFunction {
   @Override
   public String expandMacro(final List<String> macroParams, final MacroFunctionContext context) {
     //parse params
-    checkArgument(macroParams.size() == 3, "timeGroup macro requires 3 parameters. Eg: __timeGroup(timeColumn, 'timeFormat', 'granularity')");
+    checkArgument(macroParams.size() == 3,
+        "timeGroup macro requires 3 parameters. Eg: __timeGroup(timeColumn, 'timeFormat', 'granularity')");
     final String timeColumn = macroParams.get(0);
     final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
@@ -41,6 +43,16 @@ public class TimeGroupFunction implements MacroFunction {
 
     //write granularity to metadata
     context.getProperties().put(GRANULARITY.toString(), granularityText);
+
+    if (timeColumn.equals(AUTO_TIME_CONFIG)) {
+      final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
+      return context.getSqlExpressionBuilder()
+          .getTimeGroupExpression(datasetConfigDTO.getTimeColumn(),
+              datasetConfigDTO.getTimeFormat(),
+              granularity,
+              datasetConfigDTO.getTimeUnit().toString(),
+              timezone);
+    }
 
     //generate SQL expression
     return context.getSqlExpressionBuilder()

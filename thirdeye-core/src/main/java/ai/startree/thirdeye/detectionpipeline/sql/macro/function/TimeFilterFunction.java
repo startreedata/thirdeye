@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TI
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
@@ -71,6 +72,15 @@ public class TimeFilterFunction implements MacroFunction {
     Map<String, String> properties = context.getProperties();
     properties.put(MIN_TIME_MILLIS.toString(), String.valueOf(filterLowerBound.getMillis()));
     properties.put(MAX_TIME_MILLIS.toString(), String.valueOf(filterUpperBound.getMillis()));
+
+    if (timeColumn.equals(AUTO_TIME_CONFIG)) {
+      final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
+      return context.getSqlExpressionBuilder()
+          .getTimeFilterExpression(datasetConfigDTO.getTimeColumn(),
+              filterInterval,
+              datasetConfigDTO.getTimeFormat(),
+              datasetConfigDTO.getTimeUnit().toString());
+    }
 
     // generate SQL expression
     return context.getSqlExpressionBuilder()

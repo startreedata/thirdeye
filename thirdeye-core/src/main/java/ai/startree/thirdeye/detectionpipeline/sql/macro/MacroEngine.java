@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeFilterFunction;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeGroupFunction;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
@@ -38,6 +39,7 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.SqlShuttle;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,15 +63,16 @@ public class MacroEngine {
 
   public MacroEngine(final SqlLanguage sqlLanguage, final SqlExpressionBuilder sqlExpressionBuilder,
       final Interval detectionInterval,
-      String tableName, String query) {
+      @NonNull final DatasetConfigDTO datasetConfigDTO, String query) {
     this.sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
     this.sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
-    this.tableName = tableName;
+    this.tableName = datasetConfigDTO.getDataset();
     this.query = query;
     this.properties = new HashMap<>();
     this.macroFunctionContext = new MacroFunctionContext()
         .setSqlExpressionBuilder(sqlExpressionBuilder)
         .setDetectionInterval(detectionInterval)
+        .setDatasetConfigDTO(datasetConfigDTO)
         .setLiteralUnquoter(this.sqlDialect::unquoteStringLiteral)
         .setProperties(this.properties);
     // possible to put datasource-specific macros here in the future

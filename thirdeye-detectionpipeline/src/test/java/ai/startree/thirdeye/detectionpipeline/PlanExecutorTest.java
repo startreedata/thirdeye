@@ -30,6 +30,7 @@ import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -56,7 +57,8 @@ public class PlanExecutorTest {
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
         mock(DataSourceCache.class),
         mock(DetectionRegistry.class),
-        mock(EventManager.class));
+        mock(EventManager.class),
+        mock(DatasetConfigManager.class));
     planExecutor = new PlanExecutor(planNodeFactory);
   }
 

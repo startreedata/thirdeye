@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datasource.macro;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.Map;
 import java.util.function.Function;
 import org.joda.time.Interval;
@@ -22,6 +23,10 @@ public class MacroFunctionContext {
   private SqlExpressionBuilder sqlExpressionBuilder;
   private Interval detectionInterval;
   private Map<String, String> properties;
+  /**
+   * Used by macro function to get the default timeUnit and timeColumn.
+   */
+  private DatasetConfigDTO datasetConfigDTO;
   /**
    * Used by macro function to remove quotes from string literal parameters
    * The macro function knows if a parameter is an identifier or a string literal.
@@ -65,6 +70,16 @@ public class MacroFunctionContext {
   public MacroFunctionContext setLiteralUnquoter(
       final Function<String, String> literalUnquoter) {
     this.literalUnquoter = literalUnquoter;
+    return this;
+  }
+
+  public DatasetConfigDTO getDatasetConfigDTO() {
+    return datasetConfigDTO;
+  }
+
+  public MacroFunctionContext setDatasetConfigDTO(
+      final DatasetConfigDTO datasetConfigDTO) {
+    this.datasetConfigDTO = datasetConfigDTO;
     return this;
   }
 }

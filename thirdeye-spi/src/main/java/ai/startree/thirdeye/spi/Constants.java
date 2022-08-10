@@ -102,6 +102,7 @@ public interface Constants {
   String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
   String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
   String EVENT_MANAGER_REF_KEY = "$EventManager";
+  String DATASET_DAO_REF_KEY = "$DatasetDAO";
 
   enum JobStatus {
     SCHEDULED,

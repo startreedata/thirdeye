@@ -24,6 +24,7 @@ import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
@@ -31,6 +32,7 @@ import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class DataFetcherOperator extends DetectionPipelineOperator {
 
@@ -51,16 +53,21 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
     final DataSourceCache dataSourceCache = (DataSourceCache) context.getProperties()
         .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
-    dataFetcher = createDataFetcher(optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null), dataSourceCache);
+    final DatasetConfigManager datasetDao = (DatasetConfigManager) Objects.requireNonNull(context.getProperties()
+        .get(Constants.DATASET_DAO_REF_KEY));
+    final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
+        .orElse(null);
+    dataFetcher = createDataFetcher(params, dataSourceCache, datasetDao);
   }
 
   protected DataFetcher<DataFetcherSpec> createDataFetcher(final Map<String, Object> params,
-      final DataSourceCache dataSourceCache) {
+      final DataSourceCache dataSourceCache, final DatasetConfigManager datasetDao) {
     final Map<String, Object> componentSpec = getComponentSpec(params);
     final DataFetcherSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
     spec.setDataSourceCache(dataSourceCache);
+    spec.setDatasetDao(datasetDao);
     @SuppressWarnings("unchecked") final List<QueryPredicate> timeseriesFilters =
         (List<QueryPredicate>) params.getOrDefault(EVALUATION_FILTERS_KEY, List.of());
     spec.setTimeseriesFilters(timeseriesFilters);

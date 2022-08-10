@@ -13,15 +13,18 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder;
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlLanguage;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
+import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
-import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
-import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import ai.startree.thirdeye.testutils.SqlUtils;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.assertj.core.api.Assertions;
 import org.joda.time.DateTimeZone;
@@ -36,12 +39,14 @@ import org.testng.annotations.Test;
  * Correct SQL is still required for initial AST parsing.
  * Correct SQL is not required in TestMacroManager expression generation methods, as long as the
  * result looks like a function call.
+ *
+ * Tests are performed with Pinot language implementation.
  */
 public class MacroEngineTest {
 
   private static final String TABLE_NAME = "table";
-  private static final SqlLanguage MOCK_SQL_LANGUAGE = new TestSqlLanguage();
-  private static final SqlExpressionBuilder MOCK_SQL_EXPRESSION_BUILDER = new TestSqlExpressionBuilder();
+  private static final SqlLanguage MOCK_SQL_LANGUAGE = new PinotSqlLanguage();
+  private static final SqlExpressionBuilder MOCK_SQL_EXPRESSION_BUILDER = new PinotSqlExpressionBuilder();
   private static final long INPUT_START_TIME = 11111111L;
   private static final long INPUT_END_TIME = 22222222L;
   private static final Interval INPUT_INTERVAL = new Interval(INPUT_START_TIME,
@@ -51,13 +56,23 @@ public class MacroEngineTest {
   private static final String IDENTIFIER_QUOTE_STRING = "\"";
   private static final String LITERAL_QUOTE_STRING = "'";
 
+  private static final TimeUnit DATASET_CONFIG_EPOCH_UNIT = TimeUnit.HOURS;
+
+  private static final DatasetConfigDTO DATASET_CONFIG_DTO = new DatasetConfigDTO().setDataset(
+          TABLE_NAME)
+      .setTimeColumn("defaultCol")
+      .setTimeFormat(INPUT_TIME_COLUMN_FORMAT)
+      .setTimeUnit(DATASET_CONFIG_EPOCH_UNIT);
+  public static final String SIMPLE_TIME_FORMAT = "dd-M-yyyy hh:mm:ss";
+  public static final Period HOUR_PERIOD = Period.hours(1);
+
   private void prepareRequestAndAssert(final String inputQuery, final Interval detectionInterval,
       final String expectedQuery,
       final Map<String, String> expectedProperties) {
-    MacroEngine macroEngine = new MacroEngine(MOCK_SQL_LANGUAGE,
+    final MacroEngine macroEngine = new MacroEngine(MOCK_SQL_LANGUAGE,
         MOCK_SQL_EXPRESSION_BUILDER,
         detectionInterval,
-        TABLE_NAME,
+        DATASET_CONFIG_DTO,
         inputQuery);
     try {
       DataSourceRequest output = macroEngine.prepareRequest();
@@ -82,6 +97,27 @@ public class MacroEngineTest {
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_INTERVAL,
             INPUT_TIME_COLUMN_FORMAT));
+    Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_START_TIME),
+        MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
+        String.valueOf(INPUT_END_TIME));
+
+    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
+  }
+
+  @Test
+  public void testTimeFilterMacroWithAutoTimeConfig() {
+    String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
+        MacroFunction.AUTO_TIME_CONFIG,
+        "NOT_IMPORTANT_SHOULD_NOT_BE_USED");
+
+    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(DATASET_CONFIG_DTO.getTimeColumn(),
+            INPUT_INTERVAL,
+            DATASET_CONFIG_DTO.getTimeFormat(),
+            DATASET_CONFIG_DTO.getTimeUnit().toString()));
+
     Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
         String.valueOf(INPUT_START_TIME),
@@ -118,10 +154,10 @@ public class MacroEngineTest {
     // test if a macro with unquoted arguments work - eg: __timeGroup(timeCol, myTestFormat, P0D)
     // support for unquoted arguments is not mandatory and not documented - drop this test if need be
     String timeColumnMacroArg = "timeCol";
-    String timeColumnFormatMacroArg = "myTestFormat";
-    Period granularityMacroArg = Period.ZERO;
+    String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
+    Period granularityMacroArg = HOUR_PERIOD;
 
-    String inputQuery = String.format("select __timeGroup(%s,%s,%s) from tableName",
+    String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
         timeColumnMacroArg,
         timeColumnFormatMacroArg,
         granularityMacroArg);
@@ -133,7 +169,27 @@ public class MacroEngineTest {
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
-        Period.ZERO.toString());
+        HOUR_PERIOD.toString());
+
+    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
+  }
+
+  @Test
+  public void testTimeGroupMacroWithAutoTimeConfig() {
+    String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
+        MacroFunction.AUTO_TIME_CONFIG,
+        "NOT_IMPORTANT_SHOULD_NOT_BE_USED",
+        HOUR_PERIOD);
+
+    String expectedQuery = String.format("SELECT %s FROM tableName",
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(DATASET_CONFIG_DTO.getTimeColumn(),
+            DATASET_CONFIG_DTO.getTimeFormat(),
+            HOUR_PERIOD,
+            DATASET_CONFIG_DTO.getTimeUnit().toString(),
+            INPUT_INTERVAL.getChronology().getZone().toString()));
+
+    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+        HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
   }
@@ -142,11 +198,11 @@ public class MacroEngineTest {
   public void testTimeGroupMacroWithQuotedLiterals() {
     // test if a macro with string literal params is parsed correctly
     String timeColumnMacroArg = "timeCol";
-    String timeColumnFormatMacroArg = "myTestFormat";
+    String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
     String timeColumnFormatMacroArgQuoted =
         LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
-    Period granularityMacroArg = Period.ZERO;
-    String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
+    Period granularityMacroArg = HOUR_PERIOD;
+    String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + HOUR_PERIOD + LITERAL_QUOTE_STRING;
 
     String inputQuery = String.format("select __timeGroup(%s,%s,%s) FROM tableName",
         timeColumnMacroArg,
@@ -160,7 +216,7 @@ public class MacroEngineTest {
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
     Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
-        Period.ZERO.toString());
+        HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
   }
@@ -169,13 +225,13 @@ public class MacroEngineTest {
   public void testTimeGroupMacroWithCustomTimeZone() {
     // test if a macro with string literal params is parsed correctly
     final String timeColumnMacroArg = "timeCol";
-    final String timeColumnFormatMacroArg = "myTestFormat";
+    final String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
     final String timeZone = "Europe/Amsterdam";
     final String timeColumnFormatMacroArgQuoted =
         LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
-    final Period granularityMacroArg = Period.ZERO;
+    final Period granularityMacroArg = HOUR_PERIOD;
     final String granularityMacroArgQuoted =
-        LITERAL_QUOTE_STRING + Period.ZERO + LITERAL_QUOTE_STRING;
+        LITERAL_QUOTE_STRING + HOUR_PERIOD + LITERAL_QUOTE_STRING;
 
     final String inputQuery = String.format("select __timeGroup(%s,%s,%s) FROM tableName",
         timeColumnMacroArg,
@@ -189,7 +245,7 @@ public class MacroEngineTest {
             timeZone));
 
     final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
-        Period.ZERO.toString());
+        HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery,
         INPUT_INTERVAL.withChronology(INPUT_INTERVAL.getChronology()
@@ -202,11 +258,11 @@ public class MacroEngineTest {
   public void testNestedMacro() {
     // test if nested macros work - eg: __timeFilter(__timeGroup(timeCol, myTestFormat, P0D), 'EPOCH')
     String timeColumnMacroArg = "timeCol";
-    String timeColumnFormatMacroArg = "myTestFormat";
-    Period granularityMacroArg = Period.ZERO;
+    String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
+    Period granularityMacroArg = HOUR_PERIOD;
 
     String inputQuery = String.format(
-        "select * from tableName where __timeFilter(__timeGroup(%s,%s,%s), '%s')",
+        "select * from tableName where __timeFilter(__timeGroup(%s,'%s','%s'), '%s')",
         timeColumnMacroArg,
         timeColumnFormatMacroArg,
         granularityMacroArg,
@@ -226,7 +282,7 @@ public class MacroEngineTest {
         MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
         String.valueOf(INPUT_END_TIME),
         MacroMetadataKeys.GRANULARITY.toString(),
-        Period.ZERO.toString());
+        HOUR_PERIOD.toString());
 
     String expectedQuery = String.format("SELECT * FROM tableName WHERE %s", expectedNestedMacro);
 
@@ -252,59 +308,5 @@ public class MacroEngineTest {
         String.valueOf(INPUT_END_TIME));
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
-  }
-
-  private static class TestSqlLanguage implements SqlLanguage {
-
-    @Override
-    public ThirdEyeSqlParserConfig getSqlParserConfig() {
-      return new ThirdEyeSqlParserConfig.Builder().withLex("MYSQL_ANSI")
-          .withConformance("DEFAULT")
-          .withParserFactory("SqlParserImpl")
-          .build();
-    }
-
-    @Override
-    public ThirdeyeSqlDialect getSqlDialect() {
-      return new ThirdeyeSqlDialect.Builder().withBaseDialect("AnsiSqlDialect")
-          .withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING)
-          .withLiteralQuoteString(LITERAL_QUOTE_STRING)
-          .build();
-    }
-  }
-
-  private static class TestSqlExpressionBuilder implements SqlExpressionBuilder {
-
-    public static final String TIME_GROUP_MOCK = "TIMEGROUP_MACRO_EXPANDED";
-    public static final String TIME_FILTER_MOCK = "TIME_FILTER_MACRO_EXPANDED";
-
-    @Override
-    public String getTimeFilterExpression(final String column, final Interval filterInterval,
-        final String timeColumnFormat) {
-      return String.format("%s(%s, %s, %s, %s)",
-          TIME_FILTER_MOCK,
-          column,
-          timeColumnFormat,
-          filterInterval.getStartMillis(),
-          filterInterval.getEndMillis());
-    }
-
-    @Override
-    public String getTimeGroupExpression(final String timeColumn, final String timeColumnFormat,
-        final Period granularity, final String timezone) {
-      if (timezone == null) {
-        return String.format("%s(%s, '%s', '%s')",
-            TIME_GROUP_MOCK,
-            timeColumn,
-            timeColumnFormat,
-            granularity);
-      }
-      return String.format("%s(%s, '%s', '%s', '%s')",
-          TIME_GROUP_MOCK,
-          timeColumn,
-          timeColumnFormat,
-          granularity,
-          timezone);
-    }
   }
 }

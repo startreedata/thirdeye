@@ -11,15 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datasource.macro;
+package ai.startree.thirdeye.testutils;
 
-import java.util.List;
+public class SqlUtils {
 
-public interface MacroFunction {
-
-  String AUTO_TIME_CONFIG = "AUTO";
-
-  String name();
-
-  String expandMacro(List<String> macroParams, MacroFunctionContext context);
+  public static String cleanSql(String sql) {
+    return sql
+        .trim()
+        .replaceAll("[\\n\\t\\r]+", " ")
+        .replaceAll(" +", " ");
+  }
 }

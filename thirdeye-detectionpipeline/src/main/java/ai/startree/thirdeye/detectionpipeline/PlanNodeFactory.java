@@ -28,6 +28,7 @@ import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.SqlExecutionPlanNode;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
@@ -71,13 +72,16 @@ public class PlanNodeFactory {
   private final DataSourceCache dataSourceCache;
   private final DetectionRegistry detectionRegistry;
   private final EventManager eventDao;
+  private final DatasetConfigManager datasetDao;
 
   @Inject
-  public PlanNodeFactory(final DataSourceCache dataSourceCache, final DetectionRegistry detectionRegistry, final EventManager eventDao) {
+  public PlanNodeFactory(final DataSourceCache dataSourceCache, final DetectionRegistry detectionRegistry, final EventManager eventDao,
+      final DatasetConfigManager datasetDao) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
     this.eventDao = eventDao;
+    this.datasetDao = datasetDao;
   }
 
   public static PlanNode build(
@@ -113,7 +117,8 @@ public class PlanNodeFactory {
         .setProperties(ImmutableMap.of(
             Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
             Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry,
-            Constants.EVENT_MANAGER_REF_KEY, eventDao
+            Constants.EVENT_MANAGER_REF_KEY, eventDao,
+            Constants.DATASET_DAO_REF_KEY, datasetDao
         ));
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");

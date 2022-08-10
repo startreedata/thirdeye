@@ -22,4 +22,8 @@ public interface MacroFunction {
   String name();
 
   String expandMacro(List<String> macroParams, MacroFunctionContext context);
+
+  default boolean isAutoTimeConfiguration(String timeColumn) {
+    return timeColumn.equals(AUTO_TIME_CONFIG) || timeColumn.substring(1, timeColumn.length()-1).equals(AUTO_TIME_CONFIG);
+  }
 }

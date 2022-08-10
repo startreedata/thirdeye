@@ -44,8 +44,7 @@ public class TimeGroupFunction implements MacroFunction {
 
     //write granularity to metadata
     context.getProperties().put(GRANULARITY.toString(), granularityText);
-
-    if (timeColumn.equals(AUTO_TIME_CONFIG)) {
+    if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
       return context.getSqlExpressionBuilder()

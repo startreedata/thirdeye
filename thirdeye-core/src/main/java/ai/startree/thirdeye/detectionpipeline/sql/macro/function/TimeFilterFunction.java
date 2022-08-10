@@ -74,7 +74,7 @@ public class TimeFilterFunction implements MacroFunction {
     properties.put(MIN_TIME_MILLIS.toString(), String.valueOf(filterLowerBound.getMillis()));
     properties.put(MAX_TIME_MILLIS.toString(), String.valueOf(filterUpperBound.getMillis()));
 
-    if (timeColumn.equals(AUTO_TIME_CONFIG)) {
+    if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
       return context.getSqlExpressionBuilder()

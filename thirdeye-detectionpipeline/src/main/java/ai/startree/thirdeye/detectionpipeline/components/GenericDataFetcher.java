@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +58,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     return this;
   }
 
-  // fixme cyril - only here for tests make it protected
+  @VisibleForTesting
   public String getTableName() {
     return datasetConfigDTO.getDataset();
   }

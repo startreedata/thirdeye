@@ -45,7 +45,6 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
    * Table to query.
    */
   private ThirdEyeDataSource thirdEyeDataSource;
-  private DatasetConfigManager datasetDao;
   private DatasetConfigDTO datasetConfigDTO;
   private List<QueryPredicate> timeseriesFilters;
 
@@ -66,7 +65,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   @Override
   public void init(final DataFetcherSpec dataFetcherSpec) {
     this.query = dataFetcherSpec.getQuery();
-    this.datasetDao = Objects.requireNonNull(dataFetcherSpec.getDatasetDao());
+    final DatasetConfigManager datasetDao = Objects.requireNonNull(dataFetcherSpec.getDatasetDao());
     this.datasetConfigDTO = Objects.requireNonNull(datasetDao.findByDataset(dataFetcherSpec.getTableName()),
         "Could not find dataset " + dataFetcherSpec.getTableName());
     if (dataFetcherSpec.getDataSourceCache() != null) {

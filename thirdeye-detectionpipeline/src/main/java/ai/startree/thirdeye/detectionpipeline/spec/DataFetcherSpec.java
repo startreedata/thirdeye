@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.spec;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
@@ -31,13 +32,19 @@ public class DataFetcherSpec extends AbstractSpec {
    */
   private String query;
   /**
-   * The table to query
+   * The table to query.
+   *
+   * Optional - only necessary for AUTO mode of macros and better broker choice in pinot client.
    */
   private String tableName;
   /**
    * Expected to be set during DataFetcherOperator init
    */
   private DataSourceCache dataSourceCache;
+  /**
+   * Expected to be set during DataFetcherOperator init
+   * */
+  private DatasetConfigManager datasetDao;
 
   /**
    * Expected to be set during DataFetcherOperator init.
@@ -75,6 +82,16 @@ public class DataFetcherSpec extends AbstractSpec {
   public DataFetcherSpec setDataSourceCache(
       final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
+    return this;
+  }
+
+  public DatasetConfigManager getDatasetDao() {
+    return datasetDao;
+  }
+
+  public DataFetcherSpec setDatasetDao(
+      final DatasetConfigManager datasetDao) {
+    this.datasetDao = datasetDao;
     return this;
   }
 

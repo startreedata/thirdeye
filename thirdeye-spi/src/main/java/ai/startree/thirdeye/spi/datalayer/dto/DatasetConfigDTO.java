@@ -96,8 +96,9 @@ public class DatasetConfigDTO extends AbstractDTO {
     return dataset;
   }
 
-  public void setDataset(String dataset) {
+  public DatasetConfigDTO setDataset(String dataset) {
     this.dataset = dataset;
+    return this;
   }
 
   public Templatable<List<String>> getDimensions() {
@@ -113,8 +114,9 @@ public class DatasetConfigDTO extends AbstractDTO {
     return timeColumn;
   }
 
-  public void setTimeColumn(String timeColumn) {
+  public DatasetConfigDTO setTimeColumn(String timeColumn) {
     this.timeColumn = timeColumn;
+    return this;
   }
 
   /**
@@ -127,8 +129,9 @@ public class DatasetConfigDTO extends AbstractDTO {
     return timeUnit;
   }
 
-  public void setTimeUnit(TimeUnit timeUnit) {
+  public DatasetConfigDTO setTimeUnit(TimeUnit timeUnit) {
     this.timeUnit = timeUnit;
+    return this;
   }
 
   /**
@@ -153,8 +156,9 @@ public class DatasetConfigDTO extends AbstractDTO {
     return timeFormat;
   }
 
-  public void setTimeFormat(String timeFormat) {
+  public DatasetConfigDTO setTimeFormat(String timeFormat) {
     this.timeFormat = timeFormat;
+    return this;
   }
 
   public String getTimezone() {

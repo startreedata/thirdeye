@@ -14,11 +14,10 @@
 package ai.startree.thirdeye.detectionpipeline.sql.filter;
 
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlLanguage;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
-import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
-import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.testutils.SqlUtils;
 import java.util.List;
@@ -26,9 +25,10 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
+/**
+ * Tests are performed with Pinot language implementation.
+ */
 public class FilterEngineTest {
-
-  private static final String IDENTIFIER_QUOTE_STRING = "\"";
 
   private static final QueryPredicate STRING_FILTER_EQUAL = QueryPredicate.of(
       new Predicate("browser", OPER.EQ, "chrome"),
@@ -44,16 +44,17 @@ public class FilterEngineTest {
 
   private static final QueryPredicate STRING_FILTER_IN = QueryPredicate.of(
       new Predicate("browser", OPER.IN, new String[]{"chrome", "safari"}),
-          DimensionType.STRING,
-          "tableName"
-          );
+      DimensionType.STRING,
+      "tableName"
+  );
   private static final String QUOTED_STRING_FILTER_IN_TO_STRING = " AND (\"tableName\".\"browser\" IN ('chrome', 'safari'))";
+  public static final SqlLanguage TEST_SQL_LANGUAGE = new PinotSqlLanguage();
 
   @Test
   public void testNoFilters() throws SqlParseException {
     final String query = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(), query, List.of());
-    final String output = filtersEngine.prepareQuery();
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE, query, List.of());
+    final String output = filterEngine.prepareQuery();
     final String expected = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
@@ -62,10 +63,10 @@ public class FilterEngineTest {
   @Test
   public void testSingleFilterEqualString() throws SqlParseException {
     final String query = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING;
@@ -76,10 +77,10 @@ public class FilterEngineTest {
   @Test
   public void testSingleFilterNotEqualString() throws SqlParseException {
     final String query = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_NOT_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
@@ -90,10 +91,10 @@ public class FilterEngineTest {
   @Test
   public void testSingleFilterInString() throws SqlParseException {
     final String query = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_IN));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_IN_TO_STRING;
@@ -104,10 +105,10 @@ public class FilterEngineTest {
   @Test
   public void testSingleFilterAndMacros() throws SqlParseException {
     final String query = "SELECT __timeGroup(timeCol, 'yyyyMMdd', 'P5D') AS ts, metric AS met FROM tableName WHERE __timeFilter(ts, 'EPOCH')";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT \"__timeGroup\"(\"timeCol\", 'yyyyMMdd', 'P5D') AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"__timeFilter\"(\"ts\", 'EPOCH')";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING;
@@ -123,10 +124,10 @@ public class FilterEngineTest {
         new Predicate("browser", OPER.EQ, "chrome"),
         DimensionType.STRING,
         "tableName");
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(stringFilter));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT \"__timeGroup\"(\"date\", 'yyyyMMdd', 'P5D') AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"__timeFilter\"(\"ts\", 'EPOCH')";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING;
@@ -137,13 +138,14 @@ public class FilterEngineTest {
   @Test
   public void testMultipleFilters() throws SqlParseException {
     final String query = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
-    final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
+    final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+        + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
@@ -153,14 +155,15 @@ public class FilterEngineTest {
     final String baseQuery = "SELECT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
     final String orderByStatement = " ORDER BY ts";
     final String query = baseQuery + orderByStatement;
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedBaseQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String quotedOrderByStatement = " ORDER BY \"ts\"";
-    final String expected = quotedBaseQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
+    final String expected = quotedBaseQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+        + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
         + quotedOrderByStatement;
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
@@ -171,14 +174,15 @@ public class FilterEngineTest {
     final String baseQuery = "SELECT timeCol AS ts, SUM(metric) AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
     final String groupByStatement = " GROUP BY ts";
     final String query = baseQuery + groupByStatement;
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedBaseQuery = "SELECT \"timeCol\" AS \"ts\", SUM(\"metric\") AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String quotedGroupByStatement = " GROUP BY \"ts\"";
-    final String expected = quotedBaseQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
+    final String expected = quotedBaseQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+        + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
         + quotedGroupByStatement;
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
@@ -189,14 +193,15 @@ public class FilterEngineTest {
     final String baseQuery = "SELECT timeCol AS ts, SUM(metric) AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
     final String groupByHavingStatement = " GROUP BY ts HAVING met > 10";
     final String query = baseQuery + groupByHavingStatement;
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedBaseQuery = "SELECT \"timeCol\" AS \"ts\", SUM(\"metric\") AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String quotedGroupByHavingStatement = " GROUP BY \"ts\" HAVING \"met\" > 10";
-    final String expected = quotedBaseQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
+    final String expected = quotedBaseQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+        + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
         + quotedGroupByHavingStatement;
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
@@ -205,13 +210,14 @@ public class FilterEngineTest {
   @Test
   public void testWithDistinctKeyword() throws SqlParseException {
     final String query = "SELECT DISTINCT timeCol AS ts, metric AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT DISTINCT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
-    final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
+    final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+        + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
@@ -220,13 +226,15 @@ public class FilterEngineTest {
   public void testWithWithKeyword() throws SqlParseException {
     // only filter in main query
     final String query = "WITH t AS (SELECT a FROM tableName) (SELECT timeCol AS ts, t.a AS met FROM tableName WHERE ts >= 1232456765 AND ts < 5432987654)";
-    final FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    final FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    final String output = filtersEngine.prepareQuery();
+    final String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "WITH \"t\" AS (SELECT \"a\" FROM \"tableName\") (SELECT \"timeCol\" AS \"ts\", \"t\".\"a\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654)";
-    final String expected = quotedQuery.substring(0, quotedQuery.length()-1) + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING + ")";
+    final String expected =
+        quotedQuery.substring(0, quotedQuery.length() - 1) + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+            + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING + ")";
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
@@ -234,13 +242,14 @@ public class FilterEngineTest {
   @Test
   public void testWithJoin() throws SqlParseException {
     String query = "SELECT tableName.a, b, c FROM tableName INNER JOIN otherTable ON tableName.a = otherTable.a WHERE ts >= 1232456765 AND ts < 5432987654";
-    FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    String output = filtersEngine.prepareQuery();
+    String output = filterEngine.prepareQuery();
 
     final String quotedQuery = "SELECT \"tableName\".\"a\", \"b\", \"c\" FROM \"tableName\" INNER JOIN \"otherTable\" ON \"tableName\".\"a\" = \"otherTable\".\"a\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
-    final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
+    final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+        + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
   }
@@ -248,34 +257,15 @@ public class FilterEngineTest {
   @Test
   public void testWithSubQuery() throws SqlParseException {
     String query = "SELECT tableName.a, b, c FROM tableName INNER JOIN otherTable ON tableName.a = otherTable.a WHERE ts >= 1232456765 AND ts < 5432987654 AND d = (SELECT COUNT(*) FROM tableName)";
-    FiltersEngine filtersEngine = new FiltersEngine(new TestSqlLanguage(),
+    FilterEngine filterEngine = new FilterEngine(TEST_SQL_LANGUAGE,
         query,
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
-    String output = filtersEngine.prepareQuery();
+    String output = filterEngine.prepareQuery();
 
     String quotedQuery = "SELECT \"tableName\".\"a\", \"b\", \"c\" FROM \"tableName\" INNER JOIN \"otherTable\" ON \"tableName\".\"a\" = \"otherTable\".\"a\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654 AND \"d\" = (SELECT COUNT(*) FROM \"tableName\")";
-    String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
+    String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+        + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
     Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
-  }
-
-  private static class TestSqlLanguage implements SqlLanguage {
-
-    @Override
-    public ThirdEyeSqlParserConfig getSqlParserConfig() {
-      return new ThirdEyeSqlParserConfig.Builder()
-          .withLex("MYSQL_ANSI")
-          .withConformance("DEFAULT")
-          .withParserFactory("SqlBabelParserImpl")
-          .build();
-    }
-
-    @Override
-    public ThirdeyeSqlDialect getSqlDialect() {
-      return new ThirdeyeSqlDialect.Builder()
-          .withBaseDialect("AnsiSqlDialect")
-          .withIdentifierQuoteString(IDENTIFIER_QUOTE_STRING)
-          .build();
-    }
   }
 }

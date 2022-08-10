@@ -34,6 +34,9 @@ public class MacroFunctionContext {
    */
   private Function<String, String> literalUnquoter;
 
+  /**Used by macro function to quote identifiers in AUTO mode.*/
+  private Function<String, String> identifierQuoter;
+
   public SqlExpressionBuilder getSqlExpressionBuilder() {
     return sqlExpressionBuilder;
   }
@@ -80,6 +83,16 @@ public class MacroFunctionContext {
   public MacroFunctionContext setDatasetConfigDTO(
       final DatasetConfigDTO datasetConfigDTO) {
     this.datasetConfigDTO = datasetConfigDTO;
+    return this;
+  }
+
+  public Function<String, String> getIdentifierQuoter() {
+    return identifierQuoter;
+  }
+
+  public MacroFunctionContext setIdentifierQuoter(
+      final Function<String, String> identifierQuoter) {
+    this.identifierQuoter = identifierQuoter;
     return this;
   }
 }

@@ -77,8 +77,9 @@ public class TimeFilterFunction implements MacroFunction {
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      final String datasetTimeColumn = datasetConfigDTO.getTimeColumn();
       return context.getSqlExpressionBuilder()
-          .getTimeFilterExpression(datasetConfigDTO.getTimeColumn(),
+          .getTimeFilterExpression(context.getIdentifierQuoter().apply(datasetTimeColumn),
               filterInterval,
               datasetConfigDTO.getTimeFormat(),
               datasetConfigDTO.getTimeUnit().toString());

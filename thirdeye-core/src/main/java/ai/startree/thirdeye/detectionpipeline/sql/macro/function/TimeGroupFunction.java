@@ -47,8 +47,9 @@ public class TimeGroupFunction implements MacroFunction {
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      final String datasetTimeColumn = datasetConfigDTO.getTimeColumn();
       return context.getSqlExpressionBuilder()
-          .getTimeGroupExpression(datasetConfigDTO.getTimeColumn(),
+          .getTimeGroupExpression(context.getIdentifierQuoter().apply(datasetTimeColumn),
               datasetConfigDTO.getTimeFormat(),
               granularity,
               datasetConfigDTO.getTimeUnit().toString(),

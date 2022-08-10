@@ -24,7 +24,7 @@ public class MacroFunctionContext {
   private Interval detectionInterval;
   private Map<String, String> properties;
   /**
-   * Used by macro function to get the default timeUnit and timeColumn.
+   * Used by macro function to get the default timeColumn, timeUnit, TimeFormat.
    */
   private DatasetConfigDTO datasetConfigDTO;
   /**

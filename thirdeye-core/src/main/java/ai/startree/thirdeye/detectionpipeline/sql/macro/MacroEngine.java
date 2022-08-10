@@ -117,7 +117,7 @@ public class MacroEngine {
         // cannot be a macro function
         return call;
       }
-      MacroFunction macroFunction = availableMacros.get(call.getOperator().getName());
+      final MacroFunction macroFunction = availableMacros.get(call.getOperator().getName());
       if (macroFunction != null) {
         List<String> macroParams = paramsFromCall(call);
         String expandedMacro = macroFunction.expandMacro(macroParams, macroFunctionContext);

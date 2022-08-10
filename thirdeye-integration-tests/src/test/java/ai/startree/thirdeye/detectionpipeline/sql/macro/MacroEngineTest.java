@@ -113,7 +113,8 @@ public class MacroEngineTest {
         "NOT_IMPORTANT_SHOULD_NOT_BE_USED");
 
     String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
-        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(DATASET_CONFIG_DTO.getTimeColumn(),
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
+            "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
             INPUT_INTERVAL,
             DATASET_CONFIG_DTO.getTimeFormat(),
             DATASET_CONFIG_DTO.getTimeUnit().toString()));
@@ -182,7 +183,8 @@ public class MacroEngineTest {
         HOUR_PERIOD);
 
     String expectedQuery = String.format("SELECT %s FROM tableName",
-        MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(DATASET_CONFIG_DTO.getTimeColumn(),
+        MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(
+            "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
             DATASET_CONFIG_DTO.getTimeFormat(),
             HOUR_PERIOD,
             DATASET_CONFIG_DTO.getTimeUnit().toString(),

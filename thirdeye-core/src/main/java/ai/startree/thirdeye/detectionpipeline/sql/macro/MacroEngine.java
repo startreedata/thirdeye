@@ -74,6 +74,7 @@ public class MacroEngine {
         .setDetectionInterval(detectionInterval)
         .setDatasetConfigDTO(datasetConfigDTO)
         .setLiteralUnquoter(this.sqlDialect::unquoteStringLiteral)
+        .setIdentifierQuoter(this.sqlDialect::quoteIdentifier)
         .setProperties(this.properties);
     // possible to put datasource-specific macros here in the future
     for (MacroFunction function : CORE_MACROS) {

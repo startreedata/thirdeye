@@ -236,6 +236,7 @@ function TreemapInternal<Data>({
                                                         ? treemapClasses.clickable
                                                         : undefined
                                                 }
+                                                data-testid={`treemap-group-${node.id}`}
                                                 key={`node-${i}`}
                                                 left={node.x0 + margin.left}
                                                 top={node.y0 + margin.top}

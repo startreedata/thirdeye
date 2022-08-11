@@ -148,8 +148,9 @@ public class DatasetConfigDTO extends AbstractDTO {
     return timeDuration;
   }
 
-  public void setTimeDuration(Integer timeDuration) {
+  public DatasetConfigDTO setTimeDuration(Integer timeDuration) {
     this.timeDuration = timeDuration;
+    return this;
   }
 
   public String getTimeFormat() {
@@ -165,80 +166,90 @@ public class DatasetConfigDTO extends AbstractDTO {
     return timezone;
   }
 
-  public void setTimezone(String timezone) {
+  public DatasetConfigDTO setTimezone(String timezone) {
     this.timezone = timezone;
+    return this;
   }
 
   public String getDataSource() {
     return dataSource;
   }
 
-  public void setDataSource(String dataSource) {
+  public DatasetConfigDTO setDataSource(String dataSource) {
     this.dataSource = dataSource;
+    return this;
   }
 
   public Set<String> getOwners() {
     return owners;
   }
 
-  public void setOwners(Set<String> owners) {
+  public DatasetConfigDTO setOwners(Set<String> owners) {
     this.owners = owners;
+    return this;
   }
 
   public Boolean getActive() {
     return active;
   }
 
-  public void setActive(Boolean active) {
+  public DatasetConfigDTO setActive(Boolean active) {
     this.active = active;
+    return this;
   }
 
   public boolean isAdditive() {
     return additive;
   }
 
-  public void setAdditive(boolean additive) {
+  public DatasetConfigDTO setAdditive(boolean additive) {
     this.additive = additive;
+    return this;
   }
 
   public List<String> getDimensionsHaveNoPreAggregation() {
     return dimensionsHaveNoPreAggregation;
   }
 
-  public void setDimensionsHaveNoPreAggregation(List<String> dimensionsHaveNoPreAggregation) {
+  public DatasetConfigDTO setDimensionsHaveNoPreAggregation(List<String> dimensionsHaveNoPreAggregation) {
     this.dimensionsHaveNoPreAggregation = dimensionsHaveNoPreAggregation;
+    return this;
   }
 
   public String getPreAggregatedKeyword() {
     return preAggregatedKeyword;
   }
 
-  public void setPreAggregatedKeyword(String preAggregatedKeyword) {
+  public DatasetConfigDTO setPreAggregatedKeyword(String preAggregatedKeyword) {
     this.preAggregatedKeyword = preAggregatedKeyword;
+    return this;
   }
 
   public Integer getNonAdditiveBucketSize() {
     return nonAdditiveBucketSize;
   }
 
-  public void setNonAdditiveBucketSize(Integer nonAdditiveBucketSize) {
+  public DatasetConfigDTO setNonAdditiveBucketSize(Integer nonAdditiveBucketSize) {
     this.nonAdditiveBucketSize = nonAdditiveBucketSize;
+    return this;
   }
 
   public TimeUnit getNonAdditiveBucketUnit() {
     return nonAdditiveBucketUnit;
   }
 
-  public void setNonAdditiveBucketUnit(TimeUnit nonAdditiveBucketUnit) {
+  public DatasetConfigDTO setNonAdditiveBucketUnit(TimeUnit nonAdditiveBucketUnit) {
     this.nonAdditiveBucketUnit = nonAdditiveBucketUnit;
+    return this;
   }
 
   public boolean isRealtime() {
     return realtime;
   }
 
-  public void setRealtime(boolean realtime) {
+  public DatasetConfigDTO setRealtime(boolean realtime) {
     this.realtime = realtime;
+    return this;
   }
 
   @Deprecated // use completenessDelay
@@ -247,40 +258,45 @@ public class DatasetConfigDTO extends AbstractDTO {
   }
 
   @Deprecated // use completenessDelay
-  public void setExpectedDelay(TimeGranularity expectedDelay) {
+  public DatasetConfigDTO setExpectedDelay(TimeGranularity expectedDelay) {
     this.expectedDelay = expectedDelay;
+    return this;
   }
 
   public Map<String, String> getProperties() {
     return properties;
   }
 
-  public void setProperties(Map<String, String> properties) {
+  public DatasetConfigDTO setProperties(Map<String, String> properties) {
     this.properties = properties;
+    return this;
   }
 
   public String getDisplayName() {
     return displayName;
   }
 
-  public void setDisplayName(String displayName) {
+  public DatasetConfigDTO setDisplayName(String displayName) {
     this.displayName = displayName;
+    return this;
   }
 
   public long getLastRefreshTime() {
     return lastRefreshTime;
   }
 
-  public void setLastRefreshTime(long lastRefreshTime) {
+  public DatasetConfigDTO setLastRefreshTime(long lastRefreshTime) {
     this.lastRefreshTime = lastRefreshTime;
+    return this;
   }
 
   public long getLastRefreshEventTime() {
     return lastRefreshEventTime;
   }
 
-  public void setLastRefreshEventTime(long lastRefreshEventTime) {
+  public DatasetConfigDTO setLastRefreshEventTime(long lastRefreshEventTime) {
     this.lastRefreshEventTime = lastRefreshEventTime;
+    return this;
   }
 
   public String getCompletenessDelay() {

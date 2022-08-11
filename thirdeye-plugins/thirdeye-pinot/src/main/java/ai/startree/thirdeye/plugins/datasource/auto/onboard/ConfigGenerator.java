@@ -62,11 +62,12 @@ public class ConfigGenerator {
   public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO, String timeColumnName,
       String timeFormatStr,
       int columnSize, TimeUnit columnUnit) {
-    datasetConfigDTO.setTimeColumn(timeColumnName);
-    datasetConfigDTO.setTimeDuration(columnSize);
-    datasetConfigDTO.setTimeUnit(columnUnit);
-    datasetConfigDTO.setTimeFormat(timeFormatStr);
-    datasetConfigDTO.setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
+    datasetConfigDTO
+        .setTimeColumn(timeColumnName)
+        .setTimeDuration(columnSize)
+        .setTimeUnit(columnUnit)
+        .setTimeFormat(timeFormatStr)
+        .setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
     // set the data granularity of epoch timestamp dataset to minute-level
     if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
         .getTimeUnit()

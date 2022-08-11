@@ -23,7 +23,6 @@ import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -155,22 +154,6 @@ public final class MetricSlice {
     return predicates;
   }
 
-  @Deprecated
-  // use predicates
-  public Multimap<String, String> getFilters() {
-    return filters;
-  }
-
-  @Deprecated
-  public @Nullable TimeGranularity getGranularity() {
-    return datasetConfigDTO.bucketTimeGranularity();
-  }
-
-  @Deprecated
-  public @Nullable String getDatasetName() {
-    return datasetConfigDTO.getDataset();
-  }
-
   public MetricSlice withStart(DateTime start) {
     return new MetricSlice(metricConfigDTO,
         interval.withStart(start),
@@ -179,27 +162,9 @@ public final class MetricSlice {
         datasetConfigDTO);
   }
 
-  @Deprecated
-  public MetricSlice withStart(long start) {
-    return new MetricSlice(metricConfigDTO,
-        interval.withStartMillis(start),
-        predicates,
-        filters,
-        datasetConfigDTO);
-  }
-
   public MetricSlice withEnd(DateTime end) {
     return new MetricSlice(metricConfigDTO,
         interval.withEnd(end),
-        predicates,
-        filters,
-        datasetConfigDTO);
-  }
-
-  @Deprecated
-  public MetricSlice withEnd(long end) {
-    return new MetricSlice(metricConfigDTO,
-        interval.withEndMillis(end),
         predicates,
         filters,
         datasetConfigDTO);

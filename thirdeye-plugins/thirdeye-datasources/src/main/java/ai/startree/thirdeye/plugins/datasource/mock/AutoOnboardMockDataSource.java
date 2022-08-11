@@ -73,11 +73,11 @@ public class AutoOnboardMockDataSource extends AutoOnboard {
           (Collection<String>) dataset.get("dimensions"));
       Collections.sort(sortedDimensions);
 
-      DatasetConfigDTO datasetConfig = new DatasetConfigDTO();
-      datasetConfig.setDataset(datasetName);
-      datasetConfig.setDataSource(this.dataSourceName);
-      datasetConfig.setDimensions(Templatable.of(sortedDimensions));
-      datasetConfig.setTimezone(MapUtils.getString(dataset, "timezone", "America/Los_Angeles"));
+      DatasetConfigDTO datasetConfig = new DatasetConfigDTO()
+          .setDataset(datasetName)
+          .setDataSource(this.dataSourceName)
+          .setDimensions(Templatable.of(sortedDimensions))
+          .setTimezone(MapUtils.getString(dataset, "timezone", "America/Los_Angeles"));
 
       datasetConfigs.add(datasetConfig);
 

@@ -41,8 +41,7 @@ public class AlertEvaluatorTest {
   @Test
   public void testInjectFilters() {
     AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null, null);
-    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(DATASET_NAME);
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setDataset(DATASET_NAME);
     AlertTemplateDTO alertTemplateDTO = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO))
         .setNodes(List.of(

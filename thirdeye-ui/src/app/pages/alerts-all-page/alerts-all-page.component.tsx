@@ -170,11 +170,18 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const handleAlertReset = (alert: Alert): void => {
         showDialog({
-            type: DialogType.ALERT,
-            contents: t("message.reset-alert-confirmation-prompt", {
-                alertName: alert.name,
-            }),
-            okButtonText: t("label.reset"),
+            type: DialogType.CUSTOM,
+            contents: (
+                <>
+                    <p>{t("message.reset-alert-information")}</p>
+                    <p>
+                        {t("message.reset-alert-confirmation-prompt", {
+                            alertName: alert.name,
+                        })}
+                    </p>
+                </>
+            ),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => {
                 resetAlert(alert.id);

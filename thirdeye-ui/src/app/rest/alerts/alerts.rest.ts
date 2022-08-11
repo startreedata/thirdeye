@@ -59,6 +59,12 @@ export const deleteAlert = async (id: number): Promise<Alert> => {
     return response.data;
 };
 
+export const resetAlert = async (id: number): Promise<Alert> => {
+    const response = await axios.post(`/api/alerts/${id}/reset`);
+
+    return response.data;
+};
+
 export const getAlertEvaluation = async (
     alertEvaluation: AlertEvaluation,
     filters?: string[] // array of strings in `column=value` format

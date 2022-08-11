@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,8 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useResetAlert } from "../../rest/alerts/alerts.actions";
 import { deleteAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -39,6 +41,36 @@ export const AlertsAllPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const {
+        alert: alertThatWasReset,
+        resetAlert,
+        status,
+        errorMessages,
+    } = useResetAlert();
+
+    // Handle communicating status to the user
+    useEffect(() => {
+        if (status === ActionStatus.Done && alertThatWasReset) {
+            notify(
+                NotificationTypeV1.Success,
+                t("message.alert-reset-success", {
+                    alertName: alertThatWasReset.name,
+                })
+            );
+        }
+        if (status === ActionStatus.Error) {
+            if (!isEmpty(errorMessages)) {
+                errorMessages.forEach((msg) =>
+                    notify(NotificationTypeV1.Error, msg)
+                );
+            } else {
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.alert-reset-error")
+                );
+            }
+        }
+    }, [status]);
 
     useEffect(() => {
         // Time range refreshed, fetch alerts
@@ -145,40 +177,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             okButtonText: t("label.reset"),
             cancelButtonText: t("label.cancel"),
             onOk: () => {
-                axios.post(`/api/alerts/${alert.id}/reset`).then(
-                    () => {
-                        notify(
-                            NotificationTypeV1.Success,
-                            t("message.alert-reset-success", {
-                                alertName: alert.name,
-                            })
-                        );
-                    },
-                    (response) => {
-                        if (
-                            response &&
-                            response.response &&
-                            response.response.data
-                        ) {
-                            if (!isEmpty(response.response.data.list)) {
-                                response.response.data.list.forEach(
-                                    (error: { msg: string }) =>
-                                        notify(
-                                            NotificationTypeV1.Error,
-                                            error.msg
-                                        )
-                                );
-                            }
-                        } else {
-                            notify(
-                                NotificationTypeV1.Error,
-                                t("message.alert-reset-error", {
-                                    alertName: alert.name,
-                                })
-                            );
-                        }
-                    }
-                );
+                resetAlert(alert.id);
             },
         });
     };

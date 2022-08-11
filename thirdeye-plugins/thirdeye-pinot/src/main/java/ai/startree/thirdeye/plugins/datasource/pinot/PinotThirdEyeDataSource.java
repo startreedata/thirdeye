@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.getBetweenClause;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.plugins.datasource.auto.onboard.PinotDatasetOnboarder;
@@ -30,28 +31,37 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
+import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
   public static final String HTTP_SCHEME = "http";
   public static final String HTTPS_SCHEME = "https";
+  private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
+  private static final String TIME_QUERY_TEMPLATE = "SELECT %s(%s) FROM %s WHERE %s";
 
   private final SqlExpressionBuilder sqlExpressionBuilder;
   private final SqlLanguage sqlLanguage;
   private String name;
   private PinotResponseCacheLoader pinotResponseCacheLoader;
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
-  private PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
   private ThirdEyeDataSourceContext context;
 
   public PinotThirdEyeDataSource(
@@ -74,18 +84,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     try {
       pinotResponseCacheLoader = new PinotResponseCacheLoader(buildConfig(properties));
       pinotResponseCacheLoader.initConnections();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
     pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
-
-    // TODO Refactor. remove inverse hierarchical dependency
-    pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
   }
 
   @Override
   public String getName() {
-    return this.name;
+    return name;
   }
 
   /**
@@ -96,14 +103,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup executeSQL(PinotQuery pinotQuery) throws ExecutionException {
+  public ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException {
     Preconditions
-        .checkNotNull(this.pinotResponseCache,
+        .checkNotNull(pinotResponseCache,
             "{} doesn't connect to Pinot or cache is not initialized.", getName());
 
     try {
-      return this.pinotResponseCache.get(pinotQuery);
-    } catch (ExecutionException e) {
+      return pinotResponseCache.get(pinotQuery);
+    } catch (final ExecutionException e) {
       LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
       throw e;
     }
@@ -117,14 +124,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup refreshSQL(PinotQuery pinotQuery) throws ExecutionException {
-    requireNonNull(this.pinotResponseCache,
+  public ThirdEyeResultSetGroup refreshSQL(final PinotQuery pinotQuery) throws ExecutionException {
+    requireNonNull(pinotResponseCache,
         String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
 
     try {
       pinotResponseCache.refresh(pinotQuery);
       return pinotResponseCache.get(pinotQuery);
-    } catch (ExecutionException e) {
+    } catch (final ExecutionException e) {
       LOG.error("Failed to refresh PQL: {}", pinotQuery.getQuery());
       throw e;
     }
@@ -139,36 +146,97 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     try {
       // Use pinot SQL.
-      ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
+      final ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
           request.getQuery(),
           request.getTable(),
           true)).get(0);
       return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
-    } catch (ExecutionException e) {
+    } catch (final ExecutionException e) {
       throw e;
     }
   }
 
   @Override
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotDataSourceTimeQuery.getMaxDateTime(datasetConfig);
+    long maxTime = queryTimeSpecFromPinot("max", datasetConfig);
+    if (maxTime <= 0) {
+      maxTime = System.currentTimeMillis();
+    }
+    return maxTime;
   }
 
+  /**
+   * Returns the earliest time in millis for a dataset in pinot
+   *
+   * @return min (earliest) date time in millis. Returns 0 if dataset is not found
+   */
   @Override
   public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotDataSourceTimeQuery.getMinDateTime(datasetConfig);
+    return queryTimeSpecFromPinot("min", datasetConfig);
+  }
+
+  private long queryTimeSpecFromPinot(final String functionName,
+      final DatasetConfigDTO datasetConfig) {
+    long maxTime = 0;
+    final String dataset = datasetConfig.getName();
+    try {
+      // By default, query only offline, unless dataset has been marked as realtime
+      final TimeSpec timeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
+
+      final long cutoffTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+      final String timeClause = getBetweenClause(new DateTime(0, DateTimeZone.UTC),
+          new DateTime(cutoffTime, DateTimeZone.UTC),
+          timeSpec,
+          datasetConfig);
+
+      final String maxTimePql = String
+          .format(TIME_QUERY_TEMPLATE, functionName, timeSpec.getColumnName(), dataset, timeClause);
+      final PinotQuery maxTimePinotQuery = new PinotQuery(maxTimePql, dataset);
+
+      final ThirdEyeResultSetGroup resultSetGroup;
+      try {
+        refreshSQL(maxTimePinotQuery);
+        resultSetGroup = executeSQL(maxTimePinotQuery);
+      } catch (final ExecutionException e) {
+        throw e;
+      }
+
+      if (resultSetGroup.size() == 0 || resultSetGroup.get(0).getRowCount() == 0) {
+        LOG.error("Failed to get latest max time for dataset {} with SQL: {}", dataset,
+            maxTimePinotQuery.getQuery());
+      } else {
+        final DateTimeZone timeZone = SpiUtils.getDateTimeZone(datasetConfig);
+
+        final long endTime = resultSetGroup.get(0).getDouble(0).longValue();
+        // endTime + 1 to make sure we cover the time range of that time value.
+        final String timeFormat = timeSpec.getFormat();
+        if (StringUtils.isBlank(timeFormat) || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {
+          maxTime = timeSpec.getDataGranularity().toMillis(endTime + 1, timeZone) - 1;
+        } else {
+          final DateTimeFormatter inputDataDateTimeFormatter =
+              DateTimeFormat.forPattern(timeFormat).withZone(timeZone);
+          final DateTime endDateTime = DateTime
+              .parse(String.valueOf(endTime), inputDataDateTimeFormatter);
+          final Period oneBucket = datasetConfig.bucketTimeGranularity().toPeriod();
+          maxTime = endDateTime.plus(oneBucket).getMillis() - 1;
+        }
+      }
+    } catch (final Exception e) {
+      LOG.warn("Exception getting maxTime from collection: {}", dataset, e);
+    }
+    return maxTime;
   }
 
   @Override
   public boolean validate() {
     try {
       // Table name required to execute query against pinot broker.
-      PinotDatasetOnboarder onboard = createPinotDatasetOnboarder();
-      String table = onboard.getAllTables().get(0);
-      String query = String.format("select 1 from %s", table);
-      ThirdEyeResultSetGroup result = executeSQL(new PinotQuery(query, table, true));
+      final PinotDatasetOnboarder onboard = createPinotDatasetOnboarder();
+      final String table = onboard.getAllTables().get(0);
+      final String query = String.format("select 1 from %s", table);
+      final ThirdEyeResultSetGroup result = executeSQL(new PinotQuery(query, table, true));
       return result.get(0).getRowCount() == 1;
-    } catch (ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
+    } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);
     }
     return false;
@@ -180,7 +248,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
     try {
       return pinotDatasetOnboarder.onboardAll(name);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -191,7 +259,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
     try {
       return pinotDatasetOnboarder.onboardTable(datasetName, name);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -199,11 +267,10 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private PinotDatasetOnboarder createPinotDatasetOnboarder() {
     final ThirdEyePinotClient thirdEyePinotClient = new ThirdEyePinotClient(new DataSourceMetaBean()
         .setProperties(context.getDataSourceDTO().getProperties()), "pinot");
-    final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
+    return new PinotDatasetOnboarder(
         thirdEyePinotClient,
         context.getDatasetConfigManager(),
         context.getMetricConfigManager());
-    return pinotDatasetOnboarder;
   }
 
   @Override

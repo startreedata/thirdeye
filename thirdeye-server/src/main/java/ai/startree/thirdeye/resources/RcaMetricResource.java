@@ -249,7 +249,7 @@ public class RcaMetricResource {
 
       final HeatMapResultApi resultApi = new HeatMapResultApi().setMetric(new MetricApi().setName(
                   rootCauseAnalysisInfo.getMetricConfigDTO().getName())
-              .setDataset(new DatasetApi().setName(datasetConfigDTO.getName())))
+              .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset())))
           .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
           .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
 

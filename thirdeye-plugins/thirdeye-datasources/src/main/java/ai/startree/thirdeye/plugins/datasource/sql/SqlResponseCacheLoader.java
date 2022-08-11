@@ -259,7 +259,7 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
    * @return max date time in millis
    */
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    String dataset = datasetConfig.getName();
+    String dataset = datasetConfig.getDataset();
     LOG.info("Getting max data time for " + dataset);
     TimeSpec timeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
     DateTimeZone timeZone = SpiUtils.getDateTimeZone(datasetConfig);

@@ -79,9 +79,6 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   private boolean realtime = false;
 
-  @Deprecated // use completenessDelay
-  @JsonIgnore
-  private TimeGranularity expectedDelay;
   // latest timestamp of the dataset updated by external events
   private long lastRefreshTime;
   // timestamp of receiving the last update event
@@ -250,17 +247,6 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   public DatasetConfigDTO setRealtime(boolean realtime) {
     this.realtime = realtime;
-    return this;
-  }
-
-  @Deprecated // use completenessDelay
-  public TimeGranularity getExpectedDelay() {
-    return expectedDelay;
-  }
-
-  @Deprecated // use completenessDelay
-  public DatasetConfigDTO setExpectedDelay(TimeGranularity expectedDelay) {
-    this.expectedDelay = expectedDelay;
     return this;
   }
 

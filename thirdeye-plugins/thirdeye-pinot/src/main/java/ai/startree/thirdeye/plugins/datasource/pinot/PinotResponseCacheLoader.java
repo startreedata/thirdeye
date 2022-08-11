@@ -13,13 +13,8 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
-import static org.apache.pinot.client.PinotConnectionBuilder.MAX_CONNECTIONS;
-
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import com.google.common.cache.CacheLoader;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.PinotConnectionBuilder;
@@ -35,41 +30,32 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
   private static final String SQL_QUERY_FORMAT = "sql";
   private static final String PQL_QUERY_FORMAT = "pql";
 
-  private final AtomicInteger activeConnections = new AtomicInteger();
   private final PinotThirdEyeDataSourceConfig config;
-  private Connection[] connections;
+  private Connection connection;
 
   public PinotResponseCacheLoader(final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
   }
 
-  public void initConnections() throws Exception {
-    connections = new PinotConnectionBuilder().createConnections(config);
+  public void initConnections() {
+    connection = new PinotConnectionBuilder().createConnection(config);
   }
 
   @Override
   public ThirdEyeResultSetGroup load(final PinotQuery pinotQuery) {
     try {
       final Connection connection = getConnection();
-      try {
-        synchronized (connection) {
-          final int activeConnections = this.activeConnections.incrementAndGet();
-          final long start = System.currentTimeMillis();
-          final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
-          final ResultSetGroup resultSetGroup = connection.execute(
-              pinotQuery.getTableName(),
-              new Request(queryFormat, pinotQuery.getQuery()));
-          final long end = System.currentTimeMillis();
-          LOG.info("Query:{}  took:{} ms  connections:{}",
-              pinotQuery.getQuery().replace('\n', ' '),
-              (end - start),
-              activeConnections);
+      final long start = System.currentTimeMillis();
+      final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
+      final ResultSetGroup resultSetGroup = connection.execute(
+          pinotQuery.getTableName(),
+          new Request(queryFormat, pinotQuery.getQuery())
+      );
+      final long end = System.currentTimeMillis();
+      LOG.info("Query:{}  took:{}ms",
+          pinotQuery.getQuery().replace('\n', ' '), (end - start));
 
-          return PinotThirdEyeDataSourceUtils.toThirdEyeResultSetGroup(resultSetGroup);
-        }
-      } finally {
-        activeConnections.decrementAndGet();
-      }
+      return PinotThirdEyeDataSourceUtils.toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {
       LOG.error("Error when running pql:" + pinotQuery.getQuery(), cause);
       throw new PinotClientException("Error when running pql:" + pinotQuery.getQuery(), cause);
@@ -77,22 +63,12 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
   }
 
   public Connection getConnection() {
-    return connections[(int) (Thread.currentThread().getId() % MAX_CONNECTIONS)];
+    return connection;
   }
 
   public void close() {
-    if (connections != null) {
-      Arrays.stream(connections)
-          .filter(Objects::nonNull)
-          .forEach(this::close);
-    }
-  }
-
-  private void close(final Connection connection) {
-    try {
+    if (connection != null) {
       connection.close();
-    } catch (final PinotClientException e) {
-      // skip
     }
   }
 }

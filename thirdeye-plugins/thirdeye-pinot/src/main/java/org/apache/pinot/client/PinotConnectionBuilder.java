@@ -18,14 +18,6 @@ import static java.util.Collections.singletonList;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,51 +25,24 @@ import org.slf4j.LoggerFactory;
 public class PinotConnectionBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionBuilder.class);
-  private static final long CONNECTION_TIMEOUT = 60000;
-  public static int MAX_CONNECTIONS;
 
-  static {
-    try {
-      MAX_CONNECTIONS = Integer.parseInt(System.getProperty("max_pinot_connections", "2"));
-    } catch (final Exception e) {
-      MAX_CONNECTIONS = 2;
+  public Connection createConnection(final PinotThirdEyeDataSourceConfig config) {
+    final String brokerUrl = config.getBrokerUrl();
+    final PinotClientTransport transport = buildTransport(config);
+
+    final Connection connection;
+    if (brokerUrl != null && brokerUrl.trim().length() > 0) {
+      connection = ConnectionFactory.fromHostList(singletonList(brokerUrl), transport);
+      LOG.info("Created pinot transport with brokers [{}]", brokerUrl);
+    } else {
+      connection = ConnectionFactory.fromZookeeper(String.format("%s/%s",
+          config.getZookeeperUrl(),
+          config.getClusterName()), transport);
+      LOG.info("Created pinot transport with controller {}:{}",
+          config.getControllerHost(),
+          config.getControllerPort());
     }
-  }
-
-  private Connection[] fromHostList(final List<String> thirdeyeBrokers,
-      final PinotClientTransport transport) {
-    final Connection[] connections = new Connection[MAX_CONNECTIONS];
-    for (int i = 0; i < MAX_CONNECTIONS; ++i) {
-      connections[i] = ConnectionFactory.fromHostList(thirdeyeBrokers, transport);
-    }
-    return connections;
-  }
-
-  private Connection[] fromZookeeper(final String zkUrl,
-      final PinotClientTransport transport) throws Exception {
-    final Callable<Connection> callable = () -> ConnectionFactory.fromZookeeper(zkUrl, transport);
-    return fromFutures(executeReplicated(callable, MAX_CONNECTIONS));
-  }
-
-  private <T> Collection<Future<T>> executeReplicated(final Callable<T> callable,
-      final int n) {
-    final ExecutorService executor = Executors.newCachedThreadPool();
-    final Collection<Future<T>> futures = new ArrayList<>();
-    for (int i = 0; i < n; i++) {
-      futures.add(executor.submit(callable));
-    }
-    executor.shutdown();
-    return futures;
-  }
-
-  private Connection[] fromFutures(final Collection<Future<Connection>> futures)
-      throws Exception {
-    final Connection[] connections = new Connection[futures.size()];
-    int i = 0;
-    for (final Future<Connection> f : futures) {
-      connections[i++] = f.get(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-    }
-    return connections;
+    return connection;
   }
 
   private PinotClientTransport buildTransport(
@@ -115,26 +80,5 @@ public class PinotConnectionBuilder {
         .ifPresent(factory::setBrokerResponseTimeoutMs);
 
     return factory.buildTransport();
-  }
-
-  public Connection[] createConnections(final PinotThirdEyeDataSourceConfig config)
-      throws Exception {
-    final String brokerUrl = config.getBrokerUrl();
-    final PinotClientTransport transport = buildTransport(config);
-
-    final Connection[] connections;
-    if (brokerUrl != null && brokerUrl.trim().length() > 0) {
-      connections = fromHostList(singletonList(brokerUrl), transport);
-      LOG.info("Created pinot transport with brokers [{}]", brokerUrl);
-    } else {
-      connections = fromZookeeper(
-          String.format("%s/%s", config.getZookeeperUrl(),
-              config.getClusterName()),
-          transport);
-      LOG.info("Created pinot transport with controller {}:{}",
-          config.getControllerHost(),
-          config.getControllerPort());
-    }
-    return connections;
   }
 }

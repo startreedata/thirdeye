@@ -45,7 +45,6 @@ public class ThirdEyeSerialization {
    * Use this method instead of new ObjectMapper();
    */
   public static ObjectMapper getObjectMapper() {
-    // lazy singleton
     if (objectMapper == null) {
       objectMapper = new ObjectMapper().registerModule(TEMPLATABLE);
     }

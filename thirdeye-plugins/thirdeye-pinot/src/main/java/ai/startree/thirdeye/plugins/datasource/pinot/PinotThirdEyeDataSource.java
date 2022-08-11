@@ -234,7 +234,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       final PinotDatasetOnboarder onboard = createPinotDatasetOnboarder();
       final String table = onboard.getAllTables().get(0);
       final String query = String.format("select 1 from %s", table);
-      final ThirdEyeResultSetGroup result = executeSQL(new PinotQuery(query, table, true));
+
+      final PinotQuery pinotQuery = new PinotQuery(query, table, true);
+
+      /* Disable caching for validate queries */
+      pinotResponseCache.refresh(pinotQuery);
+      final ThirdEyeResultSetGroup result = executeSQL(pinotQuery);
       return result.get(0).getRowCount() == 1;
     } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);

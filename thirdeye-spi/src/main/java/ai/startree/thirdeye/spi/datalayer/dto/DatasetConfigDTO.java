@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.StringUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatasetConfigDTO extends AbstractDTO {
@@ -32,7 +31,6 @@ public class DatasetConfigDTO extends AbstractDTO {
   public static String DEFAULT_PREAGGREGATED_DIMENSION_VALUE = "all";
 
   private String dataset;
-  private String displayName;
   private Templatable<List<String>> dimensions;
   private String timeColumn;
   private TimeUnit timeUnit;
@@ -42,7 +40,9 @@ public class DatasetConfigDTO extends AbstractDTO {
   private String dataSource;
   private Set<String> owners;
   private Boolean active;
-  /** Expected delay for data to be complete. In ISO 8601. Eg P1D*/
+  /**
+   * Expected delay for data to be complete. In ISO 8601. Eg P1D
+   */
   private String completenessDelay;
   /**
    * Dimensions to exclude from RCA algorithm runs.
@@ -211,7 +211,8 @@ public class DatasetConfigDTO extends AbstractDTO {
     return dimensionsHaveNoPreAggregation;
   }
 
-  public DatasetConfigDTO setDimensionsHaveNoPreAggregation(List<String> dimensionsHaveNoPreAggregation) {
+  public DatasetConfigDTO setDimensionsHaveNoPreAggregation(
+      List<String> dimensionsHaveNoPreAggregation) {
     this.dimensionsHaveNoPreAggregation = dimensionsHaveNoPreAggregation;
     return this;
   }
@@ -272,15 +273,6 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  public DatasetConfigDTO setDisplayName(String displayName) {
-    this.displayName = displayName;
-    return this;
-  }
-
   public long getLastRefreshTime() {
     return lastRefreshTime;
   }
@@ -328,7 +320,7 @@ public class DatasetConfigDTO extends AbstractDTO {
     }
     DatasetConfigDTO that = (DatasetConfigDTO) o;
     return active == that.active && additive == that.additive && realtime == that.realtime &&
-        Objects.equals(dataset, that.dataset) && Objects.equals(displayName, that.displayName)
+        Objects.equals(dataset, that.dataset)
         && Objects.equals(dimensions, that.dimensions) && Objects
         .equals(timeColumn, that.timeColumn)
         && timeUnit == that.timeUnit && Objects.equals(timeDuration, that.timeDuration)
@@ -346,7 +338,7 @@ public class DatasetConfigDTO extends AbstractDTO {
   @Override
   public int hashCode() {
     return Objects
-        .hash(dataset, displayName, dimensions, timeColumn, timeUnit, timeDuration, timeFormat,
+        .hash(dataset, dimensions, timeColumn, timeUnit, timeDuration, timeFormat,
             timezone,
             dataSource, owners, active, additive, dimensionsHaveNoPreAggregation,
             preAggregatedKeyword,
@@ -380,14 +372,5 @@ public class DatasetConfigDTO extends AbstractDTO {
           (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit) : null;
     }
     return bucketTimeGranularity;
-  }
-
-  /**
-   * Get the dataset name for display on UI.
-   *
-   * @return the dataset's name. Use display name if it's available, otherwise, use 'dataset' field.
-   */
-  public String getName() {
-    return StringUtils.isNotBlank(getDisplayName()) ? getDisplayName() : getDataset();
   }
 }

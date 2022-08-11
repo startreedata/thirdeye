@@ -40,7 +40,6 @@ public interface DatasetMapper {
         .map(DataSourceApi::getName)
         .ifPresent(dto::setDataSource);
     dto.setDataset(api.getName());
-    dto.setDisplayName(api.getName());
     dto.setActive(api.getActive());
     optional(api.getDimensions()).ifPresent(dto::setDimensions);
     optional(api.getRcaExcludedDimensions()).ifPresent(dto::setRcaExcludedDimensions);

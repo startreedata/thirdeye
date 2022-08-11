@@ -178,7 +178,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private long queryTimeSpecFromPinot(final String functionName,
       final DatasetConfigDTO datasetConfig) {
     long maxTime = 0;
-    final String dataset = datasetConfig.getName();
+    final String dataset = datasetConfig.getDataset();
     try {
       // By default, query only offline, unless dataset has been marked as realtime
       final TimeSpec timeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);

@@ -95,7 +95,7 @@ public class AppAnalyticsService {
   private MonitoredMetricWrapper wrapMonitoredMetric(final AlertMetadataDTO metadata) {
     return new MonitoredMetricWrapper()
         .setMetric(metadata.getMetric().getName())
-        .setDataset(metadata.getDataset().getName())
+        .setDataset(metadata.getDataset().getDataset())
         .setDatasource(metadata.getDatasource().getName());
   }
 

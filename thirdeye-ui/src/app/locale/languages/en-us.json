@@ -250,6 +250,8 @@
         "update-error": "Error updating {{entity}}",
         "delete-confirmation": "Are you sure you want to delete {{name}}?",
         "delete-success": "{{entity}} deleted successfully",
+        "num-delete-success": "{{num}} {{entity}} deleted successfully",
+        "num-delete-error": "{{num}} {{entity}} experienced issues while attempting to delete",
         "delete-error": "Error deleting {{entity}}",
         "onboard-success": "{{entity}} onboarded successfully",
         "onboard-error": "Error onboarding {{entity}}",

@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.util.SpiUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Objects;
@@ -82,5 +83,12 @@ public class PinotThirdEyeDataSourceUtils {
     }
 
     return String.format(" %s >= %s AND %s < %s", timeField, startUnits, timeField, endUnits);
+  }
+
+  public static PinotThirdEyeDataSourceConfig cloneConfig(
+      final PinotThirdEyeDataSourceConfig config) {
+    final Map<String, Object> map = new ObjectMapper()
+        .convertValue(config, new TypeReference<>() {});
+    return buildConfig(map);
   }
 }

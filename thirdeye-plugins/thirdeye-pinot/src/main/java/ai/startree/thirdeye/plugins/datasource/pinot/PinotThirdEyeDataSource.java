@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pinot.client.PinotConnectionBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -81,10 +82,16 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         "Data source property cannot be empty.");
     name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
 
-    final PinotThirdEyeDataSourceConfig config = buildConfig(properties);
-    pinotConnectionManager = new PinotConnectionManager(config);
-    final PinotResponseCacheLoader pinotResponseCacheLoader = new PinotResponseCacheLoader(
-        pinotConnectionManager);
+    /* Create config class */
+    final var config = buildConfig(properties);
+
+    /* Build Connection Manager */
+    pinotConnectionManager = new PinotConnectionManager(new PinotConnectionBuilder(), config);
+
+    /* Cache loader uses the connection to fire queries */
+    final var pinotResponseCacheLoader = new PinotResponseCacheLoader(pinotConnectionManager);
+
+    /* Uses LoadingCache to cache queries */
     pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
   }
 

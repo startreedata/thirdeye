@@ -81,4 +81,5 @@ public class PinotConnectionBuilder {
 
     return factory.buildTransport();
   }
+
 }

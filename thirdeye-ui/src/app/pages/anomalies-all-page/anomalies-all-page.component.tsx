@@ -126,7 +126,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         showDialog({
             type: DialogType.ALERT,
             contents: promptMsg,
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleAnomalyDeleteOk(uiAnomalies),
         });

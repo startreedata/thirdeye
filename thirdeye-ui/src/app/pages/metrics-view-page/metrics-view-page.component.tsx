@@ -82,7 +82,7 @@ export const MetricsViewPage: FunctionComponent = () => {
             contents: t("message.delete-confirmation", {
                 name: uiMetric.name,
             }),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleMetricDeleteOk(uiMetric),
         });

@@ -235,7 +235,8 @@
         "health-status": "Health Status",
         "yes": "Yes",
         "no": "No",
-        "reset": "Reset"
+        "reset": "Reset",
+        "confirm": "Confirm"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

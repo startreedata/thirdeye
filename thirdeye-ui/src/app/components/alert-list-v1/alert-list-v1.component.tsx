@@ -36,9 +36,11 @@ import { ActiveIndicator } from "../active-indicator/active-indicator.component"
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
 import { AlertListV1Props } from "./alert-list-v1.interfaces";
 
-export const AlertListV1: FunctionComponent<AlertListV1Props> = (
-    props: AlertListV1Props
-) => {
+export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
+    alerts,
+    onDelete,
+    onAlertReset,
+}) => {
     const [selectedAlert, setSelectedAlert] =
         useState<DataGridSelectionModelV1<UiAlert>>();
     const [alertsData, setAlertsData] = useState<UiAlert[] | null>(null);
@@ -59,13 +61,13 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
     };
 
     useEffect(() => {
-        if (!props.alerts) {
+        if (!alerts) {
             return;
         }
 
-        const alertsData = generateDataWithChildren(props.alerts);
+        const alertsData = generateDataWithChildren(alerts);
         setAlertsData(alertsData);
-    }, [props.alerts]);
+    }, [alerts]);
 
     const handleAlertViewDetails = (id: number): void => {
         navigate(getAlertsViewPath(id));
@@ -97,13 +99,11 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
 
     const handleAlertDelete = (): void => {
         if (!isActionButtonDisable) {
-            const selectedUiAlert = props.alerts?.find(
+            const selectedUiAlert = alerts?.find(
                 (alert) => alert.id === selectedAlert?.rowKeyValues[0]
             );
 
-            selectedUiAlert &&
-                props.onDelete &&
-                props.onDelete(selectedUiAlert);
+            selectedUiAlert && onDelete && onDelete(selectedUiAlert);
         }
     };
 
@@ -123,6 +123,21 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
         const selectedAlertId = selectedAlert.rowKeyValues[0] as number;
 
         navigate(getAlertsCreateCopyPath(selectedAlertId));
+    };
+
+    const handleAlertReset = (): void => {
+        if (!selectedAlert || !selectedAlert.rowKeyValueMap) {
+            return;
+        }
+        const selectedSingleAlert = selectedAlert.rowKeyValueMap.get(
+            selectedAlert.rowKeyValues[0]
+        );
+
+        if (!selectedSingleAlert || !selectedSingleAlert.alert) {
+            return;
+        }
+
+        onAlertReset && onAlertReset(selectedSingleAlert.alert);
     };
 
     const alertGroupColumns = [
@@ -190,13 +205,24 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = (
                             </Grid>
 
                             {/* Delete */}
-                            <Grid>
+                            <Grid item>
                                 <Button
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleAlertDelete}
                                 >
                                     {t("label.delete")}
+                                </Button>
+                            </Grid>
+
+                            {/* Reset */}
+                            <Grid item>
+                                <Button
+                                    disabled={isActionButtonDisable}
+                                    variant="contained"
+                                    onClick={handleAlertReset}
+                                >
+                                    {t("label.reset")}
                                 </Button>
                             </Grid>
                         </Grid>

@@ -234,7 +234,8 @@
         "check-status": "Check Status",
         "health-status": "Health Status",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "reset": "Reset"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -318,6 +319,9 @@
         "enter-webhook-url": "Enter webhook URL",
         "is-this-an-anomaly": "Is this an anomaly?",
         "click-to-add-comment": "Click to add comment",
-        "no-notifications-groups": "No notifications groups have been configured"
+        "no-notifications-groups": "No notifications groups have been configured",
+        "reset-alert-confirmation-prompt": "Are you sure you want to reset the \"{{alertName}}\" alert? Resetting the alert will delete existing anomalies as well as saved investigations and rerun the detection algorithm.",
+        "alert-reset-success": "Anomalies deleted and detection algorithm successfully ran for \"{{alertName}}\"",
+        "alert-reset-error": "An issue was experienced while resetting \"{{alertName}}\". Please try again."
     }
 }

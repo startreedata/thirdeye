@@ -25,27 +25,52 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import {
-    deleteAlert,
-    getAllAlerts,
-    updateAlert,
-} from "../../rest/alerts/alerts.rest";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useResetAlert } from "../../rest/alerts/alerts.actions";
+import { deleteAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
-import { getUiAlert, getUiAlerts } from "../../utils/alerts/alerts.util";
+import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { PROMISES } from "../../utils/constants/constants.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
-    const [subscriptionGroups, setSubscriptionGroups] = useState<
-        SubscriptionGroup[]
-    >([]);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const {
+        alert: alertThatWasReset,
+        resetAlert,
+        status,
+        errorMessages,
+    } = useResetAlert();
+
+    // Handle communicating status to the user
+    useEffect(() => {
+        if (status === ActionStatus.Done && alertThatWasReset) {
+            notify(
+                NotificationTypeV1.Success,
+                t("message.alert-reset-success", {
+                    alertName: alertThatWasReset.name,
+                })
+            );
+        }
+        if (status === ActionStatus.Error) {
+            if (!isEmpty(errorMessages)) {
+                errorMessages.forEach((msg) =>
+                    notify(NotificationTypeV1.Error, msg)
+                );
+            } else {
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.alert-reset-error")
+                );
+            }
+        }
+    }, [status]);
 
     useEffect(() => {
         // Time range refreshed, fetch alerts
@@ -104,24 +129,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             })
             .finally(() => {
                 setUiAlerts(fetchedUiAlerts);
-                setSubscriptionGroups(fetchedSubscriptionGroups);
             });
-    };
-
-    const handleAlertChange = (uiAlert: UiAlert): void => {
-        if (!uiAlert.alert) {
-            return;
-        }
-
-        updateAlert(uiAlert.alert).then((alert) => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.update-success", { entity: t("label.alert") })
-            );
-
-            // Replace updated alert in fetched alerts
-            replaceUiAlert(alert);
-        });
     };
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
@@ -148,25 +156,6 @@ export const AlertsAllPage: FunctionComponent = () => {
         });
     };
 
-    const replaceUiAlert = (alert: Alert): void => {
-        if (!alert) {
-            return;
-        }
-
-        setUiAlerts(
-            (uiAlerts) =>
-                uiAlerts &&
-                uiAlerts.map((uiAlert) => {
-                    if (uiAlert.id === alert.id) {
-                        // Replace
-                        return getUiAlert(alert, subscriptionGroups);
-                    }
-
-                    return uiAlert;
-                })
-        );
-    };
-
     const removeUiAlert = (alert: Alert): void => {
         if (!alert) {
             return;
@@ -179,6 +168,20 @@ export const AlertsAllPage: FunctionComponent = () => {
         );
     };
 
+    const handleAlertReset = (alert: Alert): void => {
+        showDialog({
+            type: DialogType.ALERT,
+            contents: t("message.reset-alert-confirmation-prompt", {
+                alertName: alert.name,
+            }),
+            okButtonText: t("label.reset"),
+            cancelButtonText: t("label.cancel"),
+            onOk: () => {
+                resetAlert(alert.id);
+            },
+        });
+    };
+
     return (
         <PageV1>
             <PageHeader showCreateButton title={t("label.alerts")} />
@@ -187,7 +190,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                 {/* Alert list */}
                 <AlertListV1
                     alerts={uiAlerts}
-                    onChange={handleAlertChange}
+                    onAlertReset={handleAlertReset}
                     onDelete={handleAlertDelete}
                 />
             </PageContentsGridV1>

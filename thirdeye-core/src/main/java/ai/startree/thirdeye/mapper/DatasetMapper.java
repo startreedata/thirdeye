@@ -35,14 +35,13 @@ public interface DatasetMapper {
       return null;
     }
     final DatasetConfigDTO dto = new DatasetConfigDTO()
-        .setCompletenessDelay(optional(api.getCompletenessDelay()).orElse(null));
-    optional(api.getDataSource())
-        .map(DataSourceApi::getName)
-        .ifPresent(dto::setDataSource);
-    dto.setDataset(api.getName());
-    dto.setActive(api.getActive());
-    optional(api.getDimensions()).ifPresent(dto::setDimensions);
-    optional(api.getRcaExcludedDimensions()).ifPresent(dto::setRcaExcludedDimensions);
+        .setDataset(api.getName())
+        .setActive(api.getActive())
+        .setCompletenessDelay(api.getCompletenessDelay())
+        .setDataSource(optional(api.getDataSource()).map(DataSourceApi::getName).orElse(null))
+        .setDimensions(api.getDimensions())
+        .setRcaExcludedDimensions(api.getRcaExcludedDimensions())
+        ;
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
       updateTimeGranularityOnDataset(dto, timeColumn);
@@ -70,7 +69,8 @@ public interface DatasetMapper {
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
         new TimeColumnApi()
             .setName(timeColumn)
-            .setInterval(optional(dto.bucketTimeGranularity()).map(TimeGranularity::toDuration).orElse(null))
+            .setInterval(optional(dto.bucketTimeGranularity()).map(TimeGranularity::toDuration)
+                .orElse(null))
             .setFormat(dto.getTimeFormat())
             .setTimezone(dto.getTimezone())));
 

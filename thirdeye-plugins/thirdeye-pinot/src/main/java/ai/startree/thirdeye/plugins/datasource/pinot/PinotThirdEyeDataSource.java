@@ -60,9 +60,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private final SqlExpressionBuilder sqlExpressionBuilder;
   private final SqlLanguage sqlLanguage;
   private String name;
-  private PinotResponseCacheLoader pinotResponseCacheLoader;
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
   private ThirdEyeDataSourceContext context;
+  private PinotConnectionManager pinotConnectionManager;
 
   public PinotThirdEyeDataSource(
       final SqlExpressionBuilder sqlExpressionBuilder,
@@ -81,12 +81,10 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         "Data source property cannot be empty.");
     name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
 
-    try {
-      pinotResponseCacheLoader = new PinotResponseCacheLoader(buildConfig(properties));
-      pinotResponseCacheLoader.initConnections();
-    } catch (final Exception e) {
-      throw new RuntimeException(e);
-    }
+    final PinotThirdEyeDataSourceConfig config = buildConfig(properties);
+    pinotConnectionManager = new PinotConnectionManager(config);
+    final PinotResponseCacheLoader pinotResponseCacheLoader = new PinotResponseCacheLoader(
+        pinotConnectionManager);
     pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
   }
 
@@ -280,8 +278,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void close() throws Exception {
-    if (pinotResponseCacheLoader != null) {
-      pinotResponseCacheLoader.close();
+    if (pinotConnectionManager != null) {
+      pinotConnectionManager.close();
     }
   }
 

@@ -105,9 +105,9 @@ public final class MetricSlice {
   @Deprecated
   public static MetricSlice from(final long metricId, long start, long end,
       Multimap<String, String> filters, TimeGranularity granularity) {
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setNonAdditiveBucketSize(granularity.getSize());
-    datasetConfigDTO.setNonAdditiveBucketUnit(granularity.getUnit());
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setNonAdditiveBucketSize(granularity.getSize())
+        .setNonAdditiveBucketUnit(granularity.getUnit());
     return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
         new Interval(start, end, DateTimeZone.UTC),
         List.of(),

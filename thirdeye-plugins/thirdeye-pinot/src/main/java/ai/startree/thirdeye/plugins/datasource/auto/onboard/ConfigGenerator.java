@@ -84,13 +84,13 @@ public class ConfigGenerator {
     List<String> dimensions = schema.getDimensionNames();
     DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
     // Create DatasetConfig
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(dataset);
-    datasetConfigDTO.setDimensions(Templatable.of(dimensions));
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(dataset)
+        .setDimensions(Templatable.of(dimensions))
+        .setDataSource(dataSourceName)
+        .setProperties(customConfigs)
+        .setActive(Boolean.TRUE);
     setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec);
-    datasetConfigDTO.setDataSource(dataSourceName);
-    datasetConfigDTO.setProperties(customConfigs);
-    datasetConfigDTO.setActive(Boolean.TRUE);
     checkNonAdditive(datasetConfigDTO);
     return datasetConfigDTO;
   }

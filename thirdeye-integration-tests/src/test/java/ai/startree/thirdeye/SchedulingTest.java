@@ -69,7 +69,7 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   private static final String RESOURCES_PATH = "/scheduling";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/scheduling/config";
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
   private static final AlertApi ALERT_API;
 
   private static final TimeProvider CLOCK = TimeProvider.instance();

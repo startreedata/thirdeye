@@ -67,7 +67,7 @@ public class GenericPojoDao {
   private static final int MAX_BATCH_SIZE = 1000;
   private static final ModelMapper MODEL_MAPPER = new ModelMapper();
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   static {
     // add custom mapping from DTO to index

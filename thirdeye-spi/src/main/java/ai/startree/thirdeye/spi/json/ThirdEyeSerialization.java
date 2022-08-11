@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  * See {@link ApiTemplatableSerializer} and {@link ApiTemplatableDeserializer}
  *
  * In most context (API level, API json reading/writing, persistence level), you should use  {@link
- * #newObjectMapper newObjectMapper} to get an ObjectMapper.
+ * #getObjectMapper newObjectMapper} to get an ObjectMapper.
  * If you need a jackson.databind.Module with the ThirdEye specific (de)serializations, use {@link
  * #TEMPLATABLE}.
  */
@@ -38,12 +38,17 @@ public class ThirdEyeSerialization {
   public static final Module TEMPLATABLE = new SimpleModule()
       .addSerializer(Templatable.class, new ApiTemplatableSerializer())
       .addDeserializer(Templatable.class, new ApiTemplatableDeserializer());
+  public static ObjectMapper objectMapper;
 
   /**
    * Returns an objectMapper that implements all Thirdeye specific (de)serialization.
    * Use this method instead of new ObjectMapper();
    */
-  public static ObjectMapper newObjectMapper() {
-    return new ObjectMapper().registerModule(TEMPLATABLE);
+  public static ObjectMapper getObjectMapper() {
+    // lazy singleton
+    if (objectMapper == null) {
+      objectMapper = new ObjectMapper().registerModule(TEMPLATABLE);
+    }
+    return objectMapper;
   }
 }

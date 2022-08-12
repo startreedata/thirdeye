@@ -156,6 +156,8 @@ export const AlertEvaluationTimeSeriesPlot: FunctionComponent<
                     }
                 />
             )}
+
+            {props.children}
         </>
     );
 };

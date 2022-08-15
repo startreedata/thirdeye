@@ -15,7 +15,7 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.spi.Constants.AUTH_BASIC;
 import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
@@ -100,17 +100,21 @@ public class ThirdEyeServerModule extends AbstractModule {
   public AuthFilter getAuthFilters(
       final AuthConfiguration authConfig,
       @Nullable final BasicAuthConfiguration basicAuthConfig,
+      @Nullable final OAuthConfiguration oauthConfig,
       final Provider<BasicCredentialAuthFilter<ThirdEyePrincipal>> basicAuthFilter,
       final Provider<OAuthCredentialAuthFilter<ThirdEyePrincipal>> oAuthFilter) {
     final List<AuthFilter> filters = new ArrayList<>();
-    if(authConfig.isEnabled()) {
-      filters.add(oAuthFilter.get());
-      optional(basicAuthConfig)
-          .filter(BasicAuthConfiguration::isEnabled)
-          .ifPresent(config -> filters.add(basicAuthFilter.get()));
+    if (authConfig.isEnabled()) {
+      if (oauthConfig != null && oauthConfig.isEnabled()) {
+        filters.add(oAuthFilter.get());
+      }
+      if (basicAuthConfig != null && basicAuthConfig.isEnabled()) {
+        filters.add(basicAuthFilter.get());
+      }
     } else {
       filters.add(getNoAuthFilter());
     }
+    checkState(!filters.isEmpty(), "If auth is enabled, it must have at least 1 filter enabled.");
     return new ChainedAuthFilter<>(filters);
   }
 
@@ -124,7 +128,8 @@ public class ThirdEyeServerModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public OAuthCredentialAuthFilter<ThirdEyePrincipal> getOAuthFilter(final ThirdEyeOAuthAuthenticator authenticator) {
+  public OAuthCredentialAuthFilter<ThirdEyePrincipal> getOAuthFilter(
+      final ThirdEyeOAuthAuthenticator authenticator) {
     return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BEARER)
@@ -133,7 +138,8 @@ public class ThirdEyeServerModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public BasicCredentialAuthFilter<ThirdEyePrincipal> getBasicAuthFilter(final ThirdEyeBasicAuthenticator authenticator) {
+  public BasicCredentialAuthFilter<ThirdEyePrincipal> getBasicAuthFilter(
+      final ThirdEyeBasicAuthenticator authenticator) {
     return new BasicCredentialAuthFilter.Builder<ThirdEyePrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BASIC)

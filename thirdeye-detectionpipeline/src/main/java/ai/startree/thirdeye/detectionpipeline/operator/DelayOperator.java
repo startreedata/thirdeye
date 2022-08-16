@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import java.time.Duration;
 
 public class DelayOperator extends DetectionPipelineOperator{
@@ -20,7 +23,11 @@ public class DelayOperator extends DetectionPipelineOperator{
   private static final String DELAY_TIME = "delayTime";
   @Override
   public void execute() throws Exception {
-    long sleepTime = Duration.parse(getPlanNode().getParams().get(DELAY_TIME).toString()).toMillis();
+    final long sleepTime = optional(getPlanNode().getParams().get(DELAY_TIME))
+        .map(Templatable::value)
+        .map(Object::toString)
+        .map(text -> Duration.parse(text).toMillis())
+        .orElse(0L);
     Thread.sleep(sleepTime);
     inputMap.forEach(this::setOutput);
   }

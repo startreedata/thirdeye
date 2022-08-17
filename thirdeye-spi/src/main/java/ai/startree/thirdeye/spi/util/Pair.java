@@ -25,7 +25,7 @@ public class Pair<K, V> {
     this.v = v;
   }
 
-  public static <K, V> Pair<K, V> createPair(K k, V v) {
+  public static <K, V> Pair<K, V> pair(K k, V v) {
     return new Pair<K, V>(k, v);
   }
 

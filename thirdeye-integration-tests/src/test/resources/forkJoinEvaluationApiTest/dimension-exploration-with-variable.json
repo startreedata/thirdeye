@@ -8,12 +8,12 @@
           "name": "enumerator",
           "type": "Enumerator",
           "params": {
-            "enumerationList": [
+            "items": [
               {
-                "min": 300000
+                "params": {"min": 300000}
               },
               {
-                "min": 0
+                "params": {"min": 0}
               }
             ]
           }

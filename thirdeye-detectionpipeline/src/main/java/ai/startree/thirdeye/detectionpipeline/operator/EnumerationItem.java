@@ -11,16 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.dto;
+package ai.startree.thirdeye.detectionpipeline.operator;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(Include.NON_NULL)
-public class EnumerationItemDTO extends AbstractDTO {
+public class EnumerationItem {
 
   private String name;
   private String description;
@@ -30,7 +25,7 @@ public class EnumerationItemDTO extends AbstractDTO {
     return name;
   }
 
-  public EnumerationItemDTO setName(final String name) {
+  public EnumerationItem setName(final String name) {
     this.name = name;
     return this;
   }
@@ -39,7 +34,7 @@ public class EnumerationItemDTO extends AbstractDTO {
     return description;
   }
 
-  public EnumerationItemDTO setDescription(final String description) {
+  public EnumerationItem setDescription(final String description) {
     this.description = description;
     return this;
   }
@@ -48,7 +43,7 @@ public class EnumerationItemDTO extends AbstractDTO {
     return params;
   }
 
-  public EnumerationItemDTO setParams(final Map<String, Object> params) {
+  public EnumerationItem setParams(final Map<String, Object> params) {
     this.params = params;
     return this;
   }

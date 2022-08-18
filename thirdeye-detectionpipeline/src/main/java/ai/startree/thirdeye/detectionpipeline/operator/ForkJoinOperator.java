@@ -69,7 +69,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   @Override
   public void execute() throws Exception {
     /* Get all enumerations */
-    final List<Map<String, Object>> enumeratorResults = getEnumeratorResults();
+    final List<EnumerationItem> enumeratorResults = getEnumeratorResults();
 
     /* Execute in parallel */
     final List<Callable<Map<String, DetectionPipelineResult>>> callables =
@@ -81,7 +81,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     resultMap.putAll(outputs);
   }
 
-  private List<Map<String, Object>> getEnumeratorResults() throws Exception {
+  private List<EnumerationItem> getEnumeratorResults() throws Exception {
     final Operator op = enumerator.buildOperator();
     op.execute();
     final Map<String, DetectionPipelineResult> outputs = op.getOutputs();
@@ -99,14 +99,14 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   }
 
   private List<Callable<Map<String, DetectionPipelineResult>>> prepareCallables(
-      final List<Map<String, Object>> results) {
+      final List<EnumerationItem> enumerationItems) {
     final List<Callable<Map<String, DetectionPipelineResult>>> callables = new ArrayList<>();
 
-    for (final Map<String, Object> result : results) {
+    for (final EnumerationItem enumerationItem : enumerationItems) {
       /* Clone all nodes for execution. Feed enumeration result */
       final Map<String, PlanNode> clonedPipelinePlanNodes = clonePipelinePlanNodes(root
           .getContext()
-          .getPipelinePlanNodes(), result);
+          .getPipelinePlanNodes(), enumerationItem);
 
       /* Get the new root node in the cloned DAG */
       final PlanNode rootClone = clonedPipelinePlanNodes.get(root.getName());
@@ -128,11 +128,11 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   private Map<String, PlanNode> clonePipelinePlanNodes(
       final Map<String, PlanNode> pipelinePlanNodes,
-      final Map<String, Object> templateProperties) {
+      final EnumerationItem enumerationItem) {
     final Map<String, PlanNode> clonedPipelinePlanNodes = new HashMap<>();
     for (final Map.Entry<String, PlanNode> key : pipelinePlanNodes.entrySet()) {
       final PlanNode planNode = deepCloneWithNewContext(key.getValue(),
-          templateProperties,
+          enumerationItem.getParams(),
           clonedPipelinePlanNodes);
       clonedPipelinePlanNodes.put(key.getKey(), planNode);
     }

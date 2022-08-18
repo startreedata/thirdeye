@@ -104,12 +104,11 @@ public class PlanExecutorTest {
     final PlanNodeBean enumeratorNode = new PlanNodeBean()
         .setName("enumerator")
         .setType(EnumeratorPlanNode.TYPE)
-        .setParams(TemplatableMap.ofValue("enumerationList", List.of(
-            Map.of("key", 1),
-            Map.of("key", 2),
-            Map.of("key", 3)
-        )))
-        ;
+        .setParams(TemplatableMap.ofValue("items", List.of(
+            Map.of("params", Map.of("key", 1)),
+            Map.of("params", Map.of("key", 2)),
+            Map.of("params", Map.of("key", 3))
+        )));
 
     final PlanNodeBean combinerNode = new PlanNodeBean()
         .setName("combiner")

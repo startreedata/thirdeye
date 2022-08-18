@@ -36,9 +36,9 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class DimensionExplorationApiTest {
+public class ForkJoinEvaluationApiTest {
 
-  private static final String RESOURCES_PATH = "/dimensionExplorationApiTest";
+  private static final String RESOURCES_PATH = "/forkJoinEvaluationApiTest";
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
 
   private static AlertEvaluationApi getAlertEvaluationApi(final String filename) {

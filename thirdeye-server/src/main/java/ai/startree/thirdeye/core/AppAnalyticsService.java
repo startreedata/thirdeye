@@ -27,7 +27,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -136,10 +138,18 @@ public class AppAnalyticsService {
 
   public AnomalyStatsApi computeAnomalyStats() {
     List<AnomalyFeedback> feedbacks = getAnomalyFeedbacks();
-    AnomalyStatsApi stat = new AnomalyStatsApi()
+    Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
+    for(AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
+      feedbackStats.put(type, 0L);
+    }
+    feedbacks.forEach(feedback -> {
+      AnomalyFeedbackType type = feedback.getFeedbackType();
+      long count = feedbackStats.get(type);
+      feedbackStats.put(type, count+1);
+    });
+    return new AnomalyStatsApi()
         .setTotalCount(anomalyManager.countParentAnomalies())
-        .setCountWithFeedback((long) feedbacks.size());
-    feedbacks.forEach(feedback -> stat.incFeedbackStatCount(feedback.getFeedbackType()));
-    return stat;
+        .setCountWithFeedback((long) feedbacks.size())
+        .setFeedbackStats(feedbackStats);
   }
 }

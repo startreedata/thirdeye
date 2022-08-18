@@ -94,7 +94,23 @@ public class CalciteRequestTest {
   }
 
   @Test
-  public void testGeSqlWithSimpleProjectionWithAlias() throws SqlParseException {
+  public void testGetSqlWithFormulaProjection() throws SqlParseException {
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
+        .addSelectProjection(QueryProjection.of("5*col1 -col2"));
+
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    final String expected = String.format("SELECT %s FROM \"%s\".\"%s\"",
+        "5 * \"col1\" - \"col2\"",
+        DATABASE,
+        TABLE);
+
+    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+  }
+
+  @Test
+  public void testGetSqlWithSimpleProjectionWithAlias() throws SqlParseException {
     final String alias = "alias1";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(SIMPLE_PROJECTION.withAlias(alias));
@@ -165,7 +181,8 @@ public class CalciteRequestTest {
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
-    final String expected = String.format("SELECT \"UNKNOWN_MOD\"(\"%s\", \"%s\") FROM \"%s\".\"%s\"",
+    final String expected = String.format(
+        "SELECT \"UNKNOWN_MOD\"(\"%s\", \"%s\") FROM \"%s\".\"%s\"",
         COLUMN_NAME_1,
         COLUMN_NAME_2,
         DATABASE,
@@ -278,7 +295,8 @@ public class CalciteRequestTest {
       final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
       // convert != in other standard format <>
       final String sqlOperator = oper.toString().equals("!=") ? "<>" : oper.toString();
-      final String expected = String.format("SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" %s %s)",
+      final String expected = String.format(
+          "SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" %s %s)",
           COLUMN_NAME_1,
           DATABASE,
           TABLE,
@@ -306,7 +324,8 @@ public class CalciteRequestTest {
       final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
       // convert != in other standard format <>
       final String sqlOperator = oper.toString().equals("!=") ? "<>" : oper.toString();
-      final String expected = String.format("SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" %s %s)",
+      final String expected = String.format(
+          "SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" %s %s)",
           COLUMN_NAME_1,
           DATABASE,
           TABLE,
@@ -334,7 +353,8 @@ public class CalciteRequestTest {
       final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
       // convert != in other standard format <>
       final String sqlOperator = oper.toString().equals("!=") ? "<>" : oper.toString();
-      final String expected = String.format("SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" %s %s)",
+      final String expected = String.format(
+          "SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" %s %s)",
           COLUMN_NAME_1,
           DATABASE,
           TABLE,
@@ -358,7 +378,8 @@ public class CalciteRequestTest {
         ));
     final CalciteRequest request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
-    final String expected = String.format("SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" IN (%s, %s))",
+    final String expected = String.format(
+        "SELECT \"%s\" FROM \"%s\".\"%s\" WHERE (\"%s\".\"%s\" IN (%s, %s))",
         COLUMN_NAME_1,
         DATABASE,
         TABLE,
@@ -679,7 +700,8 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_epoch";
     final String timeColumnFormat = "yyyyMMdd";
     final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ") AS mod1";
-    final String freeTextProjectionQuotedIdentifiers = "MOD(\"" + COLUMN_NAME_1 + "\", \"" + COLUMN_NAME_2 + "\") AS \"mod1\"";
+    final String freeTextProjectionQuotedIdentifiers =
+        "MOD(\"" + COLUMN_NAME_1 + "\", \"" + COLUMN_NAME_2 + "\") AS \"mod1\"";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)
         .addSelectProjection(QueryProjection.of(COLUMN_NAME_2))
@@ -725,7 +747,8 @@ public class CalciteRequestTest {
     final String timeAggregationColumn = "date_epoch";
     final String timeColumnFormat = "yyyyMMdd";
     final String freeTextProjection = "MOD(" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ")";
-    final String freeTextProjectionQuotedIdentifiers = "MOD(\"" + COLUMN_NAME_1 + "\", \"" + COLUMN_NAME_2 + "\")";
+    final String freeTextProjectionQuotedIdentifiers =
+        "MOD(\"" + COLUMN_NAME_1 + "\", \"" + COLUMN_NAME_2 + "\")";
     final String notProjectedColumn = "not_projected_column";
     final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
         .addSelectProjection(STANDARD_AGGREGATION_PROJECTION)

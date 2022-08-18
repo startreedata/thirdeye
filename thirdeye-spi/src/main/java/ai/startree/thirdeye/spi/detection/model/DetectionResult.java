@@ -43,6 +43,14 @@ public class DetectionResult implements DetectionPipelineResult {
   }
 
   /**
+   * TODO spyne refactor. this is just to accomodate the needs of DetectionPipelineResult Interface.
+   * This needs  cleanup.
+   * @param source
+   */
+  protected DetectionResult(final DetectionResult source) {
+    this(source.getAnomalies(), source.getTimeseries(), source.getRawData());
+  }
+  /**
    * Create a empty detection result
    *
    * @return the empty detection result

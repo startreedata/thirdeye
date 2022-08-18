@@ -11,40 +11,29 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import java.util.Map;
 
-public class EnumerationItem {
+public class ForkJoinResultItem {
 
-  private String name;
-  private String description;
-  private Map<String, Object> params;
+  private final EnumerationItemDTO enumerationItem;
+  private final Map<String, DetectionPipelineResult> results;
 
-  public String getName() {
-    return name;
+  public ForkJoinResultItem(final EnumerationItemDTO enumerationItem,
+      final Map<String, DetectionPipelineResult> results) {
+    this.enumerationItem = enumerationItem;
+    this.results = results;
   }
 
-  public EnumerationItem setName(final String name) {
-    this.name = name;
-    return this;
+  public EnumerationItemDTO getEnumerationItem() {
+    return enumerationItem;
   }
 
-  public String getDescription() {
-    return description;
-  }
-
-  public EnumerationItem setDescription(final String description) {
-    this.description = description;
-    return this;
-  }
-
-  public Map<String, Object> getParams() {
-    return params;
-  }
-
-  public EnumerationItem setParams(final Map<String, Object> params) {
-    this.params = params;
-    return this;
+  public Map<String, DetectionPipelineResult> getResults() {
+    return results;
   }
 }

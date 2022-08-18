@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -55,9 +56,9 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
 
   public static class EnumeratorResult implements DetectionPipelineResult {
 
-    private final List<EnumerationItem> results;
+    private final List<EnumerationItemDTO> results;
 
-    public EnumeratorResult(final List<EnumerationItem> results) {
+    public EnumeratorResult(final List<EnumerationItemDTO> results) {
       this.results = results;
     }
 
@@ -66,7 +67,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
       return null;
     }
 
-    public List<EnumerationItem> getResults() {
+    public List<EnumerationItemDTO> getResults() {
       return results;
     }
   }

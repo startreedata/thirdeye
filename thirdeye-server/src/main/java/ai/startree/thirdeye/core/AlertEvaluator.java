@@ -120,6 +120,7 @@ public class AlertEvaluator {
     }
     api.setAnomalies(anomalyApis);
     api.setData(getData(detectionResult));
+    api.setEnumerationItem(ApiBeanMapper.toApi(detectionResult.getEvaluationItem()));
     return api;
   }
 

@@ -15,19 +15,20 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import java.util.List;
+import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 
-public class EnumeratorOperatorParameters {
+public class WrappedDetectionPipelineResult extends DetectionResult {
 
-  private List<EnumerationItemDTO> items;
+  private final EnumerationItemDTO enumerationItem;
 
-  public List<EnumerationItemDTO> getItems() {
-    return items;
+  public WrappedDetectionPipelineResult(final EnumerationItemDTO enumerationItem,
+      final DetectionResult delegate) {
+    super(delegate);
+    this.enumerationItem = enumerationItem;
   }
 
-  public EnumeratorOperatorParameters setItems(
-      final List<EnumerationItemDTO> items) {
-    this.items = items;
-    return this;
+  @Override
+  public EnumerationItemDTO getEvaluationItem() {
+    return enumerationItem;
   }
 }

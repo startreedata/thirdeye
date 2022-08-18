@@ -81,10 +81,16 @@ data:
     taskDriver:
       enabled: {{ not .Values.worker.enabled }}
       # When enabled generates a random id which overrides taskDriver.id (below) to achieve unique worker id in multi worker setup
-      randomWorkerIdEnabled: {{ .Values.worker.randomWorkerIdEnabled }}
-      {{- if not .Values.worker.randomWorkerIdEnabled }}
+      randomWorkerIdEnabled: {{ .Values.worker.config.randomWorkerIdEnabled }}
+      {{- if not .Values.worker.config.randomWorkerIdEnabled }}
       id: 0 # must be a non-negative integer unique per instance/worker
       {{- end }}
+      taskFailureDelay: {{ .Values.worker.config.taskFailureDelay | default 30 }}
+      taskFetchSizeCap: {{ .Values.worker.config.taskFetchSizeCap | default 10 }}
+      maxParallelTasks: {{ .Values.worker.config.maxParallelTasks | default 5 }}
+      noTaskDelay: {{ .Values.worker.config.noTaskDelay | default 15 }}
+      heartbeatInterval: {{ .Values.worker.config.heartbeatInterval | default 30 }}
+      activeThresholdMultiplier: {{ .Values.worker.config.activeThresholdMultiplier | default 30 }}
 
     time:
       timezone: {{ .Values.time.timezone }}

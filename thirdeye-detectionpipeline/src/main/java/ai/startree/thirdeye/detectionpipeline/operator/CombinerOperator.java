@@ -18,6 +18,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.ForkJoinResult;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -39,7 +40,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    params = optional(getPlanNode().getParams()).orElse(emptyMap());
+    params = optional(getPlanNode().getParams()).map(TemplatableMap::valueMap).orElse(emptyMap());
   }
 
   @Override

@@ -16,9 +16,11 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_COMBINER;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ENUMERATOR;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ROOT;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
@@ -50,7 +52,7 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Map<String, Object> getParams() {
-    return planNodeBean.getParams();
+    return optional(planNodeBean.getParams()).map(TemplatableMap::valueMap).orElse(null);
   }
 
   @Override

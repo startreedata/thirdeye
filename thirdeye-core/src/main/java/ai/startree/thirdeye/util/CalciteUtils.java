@@ -133,6 +133,10 @@ public class CalciteUtils {
 
   public static SqlNode expressionToNode(final String sqlExpression,
       final SqlParser.Config sqlParserConfig) throws SqlParseException {
+    // calcite parser cannot recognize * as a valid expression
+    if (sqlExpression.equals("*")) {
+      return identifierOf(sqlExpression);
+    }
     SqlParser sqlParser = SqlParser.create(sqlExpression, sqlParserConfig);
     return sqlParser.parseExpression();
   }

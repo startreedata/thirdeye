@@ -136,7 +136,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                 name: uiSubscriptionGroup.name,
             }),
             cancelButtonText: t("label.cancel"),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
         });
     };

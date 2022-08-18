@@ -11,25 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection;
+package ai.startree.thirdeye.spi.datalayer.bao;
 
-import ai.startree.thirdeye.spi.dataframe.LongSeries;
-import ai.startree.thirdeye.spi.dataframe.Series;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 
-public class NoopTimeConverter implements TimeConverter {
+public interface EnumerationItemManager extends AbstractManager<EnumerationItemDTO> {
 
-  @Override
-  public long convert(final String timeValue) {
-    return Long.parseLong(timeValue);
-  }
-
-  @Override
-  public String convertMillis(final long time) {
-    return String.valueOf(time);
-  }
-
-  @Override
-  public LongSeries convertSeries(final Series series) {
-    return series.getLongs();
-  }
 }

@@ -43,7 +43,7 @@ import org.apache.calcite.sql.util.SqlShuttle;
  * Could be fixed using .withQuoteAllIdentifiers(true)
  * but would require making sure it's consistent with the MacroEngine
  */
-public class FiltersEngine {
+public class FilterEngine {
 
   private static final List<OPER> SUPPORTED_FILTER_OPERATIONS = List.of(OPER.EQ, OPER.NEQ, OPER.IN);
   public static final boolean QUOTE_IDENTIFIERS = true;
@@ -53,7 +53,7 @@ public class FiltersEngine {
   private final String query;
   private final List<QueryPredicate> filters;
 
-  public FiltersEngine(final SqlLanguage sqlLanguage, final String query,
+  public FilterEngine(final SqlLanguage sqlLanguage, final String query,
       List<QueryPredicate> filters) {
     this.sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
     this.sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());

@@ -113,7 +113,9 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
             />
         );
 
-        const chromeTile = await screen.findByText("chrome");
+        const chromeTile = await screen.findByText("chrome: ", {
+            exact: false,
+        });
         fireEvent.click(chromeTile);
 
         const chromePill = await screen.findByText(/browser=chrome/);

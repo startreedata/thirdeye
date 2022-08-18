@@ -20,6 +20,7 @@ import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeFactory;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.mapper.PlanNodeMapper;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -28,7 +29,6 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import ai.startree.thirdeye.util.StringTemplateUtils;
-import com.google.common.collect.ImmutableBiMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -184,21 +184,18 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   private PlanNodeBean clonePlanNodeBean(final Map<String, Object> templateProperties,
       final PlanNodeBean n) {
-    final Map<String, Object> params = applyTemplatePropertiesOnParams(n.getParams(),
+    final TemplatableMap<String, Object> params = applyTemplatePropertiesOnParams(n.getParams(),
         templateProperties);
     return PlanNodeMapper.INSTANCE.clone(n).setParams(params);
   }
 
-  private Map<String, Object> applyTemplatePropertiesOnParams(
-      final Map<String, Object> params, final Map<String, Object> templateProperties) {
+  private TemplatableMap<String, Object> applyTemplatePropertiesOnParams(
+      final TemplatableMap<String, Object> params, final Map<String, Object> templateProperties) {
     if (params == null) {
       return null;
     }
     try {
-      return ImmutableBiMap.copyOf(StringTemplateUtils.applyContext(
-          new HashMap<>(params),
-          templateProperties
-      ));
+      return new TemplatableMap<>(StringTemplateUtils.applyContext(params, templateProperties));
     } catch (final IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }

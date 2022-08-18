@@ -88,7 +88,7 @@ public class QueryProjection {
     return new QueryProjection(this.operator, this.operands, this.quantifier, this.alias, true);
   }
 
-  public SqlNode toSqlNode() {
+  private SqlNode toSqlNode(final Config sqlParserConfig) throws SqlParseException {
     if (operator != null) {
       return applySpecialOperators(new SqlBasicCall(
           new SqlUnresolvedFunction(identifierOf(operator),
@@ -97,16 +97,24 @@ public class QueryProjection {
               null,
               null,
               SqlFunctionCategory.NUMERIC),
-          operands.stream().map(CalciteUtils::identifierOf).toArray(SqlNode[]::new),
+          operandNodes(sqlParserConfig),
           SqlParserPos.ZERO,
           quantifier != null ? symbolLiteralOf(quantifier) : null));
     } else if (operands.size() == 1 && quantifier == null) {
-      return applySpecialOperators(identifierOf(operands.get(0)));
+      return applySpecialOperators(operandNodes(sqlParserConfig)[0]);
     } else {
       throw new UnsupportedOperationException(String.format(
           "Unsupported combination for QueryProjection: %s",
           this));
     }
+  }
+
+  private SqlNode[] operandNodes(final Config sqlParserConfig) throws SqlParseException {
+    final SqlNode[] operandNodes = new SqlNode[this.operands.size()];
+    for (int i = 0; i < operands.size(); i++) {
+      operandNodes[i] = CalciteUtils.expressionToNode(operands.get(i), sqlParserConfig);
+    }
+    return operandNodes;
   }
 
   public SqlNode toDialectSpecificSqlNode(final Config sqlParserConfig,
@@ -131,7 +139,7 @@ public class QueryProjection {
       }
     }
     // 3. default transformation - manages any well-formed projection
-    return toSqlNode();
+    return toSqlNode(sqlParserConfig);
   }
 
   private SqlNode applySpecialOperators(final SqlNode node) {

@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -36,7 +38,8 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
   @SuppressWarnings("unchecked")
   @Override
   public void execute() throws Exception {
-    final Map<String, Object> params = getPlanNode().getParams();
+    checkArgument(getPlanNode().getParams() != null, "Missing configuration parameters in EnumeratorOperator.");
+    final Map<String, Object> params = getPlanNode().getParams().valueMap();
     final List<Map<String, Object>> enumerationList =
         (List<Map<String, Object>>) params.get("enumerationList");
     setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(enumerationList));

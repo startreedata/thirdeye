@@ -97,7 +97,7 @@ export const DatasetsViewPage: FunctionComponent = () => {
             contents: t("message.delete-confirmation", {
                 name: uiDataset.name,
             }),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleDatasetDeleteOk(uiDataset),
         });

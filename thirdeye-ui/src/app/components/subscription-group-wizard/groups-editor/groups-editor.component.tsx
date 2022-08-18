@@ -39,6 +39,9 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
     const [currentSpecs, setCurrentSpecs] = useState<NotificationSpec[]>(
         subscriptionGroup.specs || []
     );
+    const [legacyEmailList, setLegacyEmailList] = useState<string[]>(
+        subscriptionGroup.notificationSchemes.email.to || []
+    );
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -131,6 +134,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
     };
 
     const handleEmailDelete = (): void => {
+        setLegacyEmailList([]);
         onSubscriptionGroupEmailsChange([]);
     };
 
@@ -170,18 +174,17 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                 </Grid>
             )}
             {/** Legacy Email Configuration */}
-            {hasSomeConfig &&
-                subscriptionGroup.notificationSchemes.email.to.length > 0 && (
-                    <Box marginBottom={3}>
-                        <Email
-                            subscriptionGroup={subscriptionGroup}
-                            onDeleteClick={handleEmailDelete}
-                            onSubscriptionGroupEmailsChange={
-                                onSubscriptionGroupEmailsChange
-                            }
-                        />
-                    </Box>
-                )}
+            {hasSomeConfig && legacyEmailList.length > 0 && (
+                <Box marginBottom={3}>
+                    <Email
+                        subscriptionGroup={subscriptionGroup}
+                        onDeleteClick={handleEmailDelete}
+                        onSubscriptionGroupEmailsChange={
+                            onSubscriptionGroupEmailsChange
+                        }
+                    />
+                </Box>
+            )}
 
             {hasSomeConfig &&
                 currentSpecs.map((spec: NotificationSpec, idx: number) => {

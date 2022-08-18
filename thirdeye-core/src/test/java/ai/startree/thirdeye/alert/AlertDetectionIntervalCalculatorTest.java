@@ -53,8 +53,7 @@ public class AlertDetectionIntervalCalculatorTest {
     // test that timeframe is unchanged when there is no completenessDelay nor granularity
     DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(DATASET_NAME);
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setDataset(DATASET_NAME);
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO().setMetadata(new AlertMetadataDTO().setDataset(
         datasetConfigDTO));
     Interval output = getCorrectedInterval(ALERT_ID,
@@ -71,9 +70,9 @@ public class AlertDetectionIntervalCalculatorTest {
     // test that endtime is changed when there is a delay
     DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(DATASET_NAME);
-    datasetConfigDTO.setCompletenessDelay("P1D"); // delay of 1 day
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(DATASET_NAME)
+        .setCompletenessDelay("P1D"); // delay of 1 day
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO));
     Interval output = getCorrectedInterval(ALERT_ID,
@@ -93,8 +92,7 @@ public class AlertDetectionIntervalCalculatorTest {
     // test that timeframe is changed when there is a granularity
     DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(DATASET_NAME);
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setDataset(DATASET_NAME);
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO()
             .setDataset(datasetConfigDTO)
@@ -117,9 +115,9 @@ public class AlertDetectionIntervalCalculatorTest {
     // test that timeframe is changed when there is both delay and granularity
     DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(DATASET_NAME);
-    datasetConfigDTO.setCompletenessDelay("PT2H"); // delay of 2 hours
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(DATASET_NAME)
+        .setCompletenessDelay("PT2H"); // delay of 2 hours
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO()
             .setDataset(datasetConfigDTO)
@@ -143,9 +141,9 @@ public class AlertDetectionIntervalCalculatorTest {
     // this can happen if delay is augmented
     DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(DATASET_NAME);
-    datasetConfigDTO.setCompletenessDelay("P3D");   // delay of 3 day end - delay < start
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(DATASET_NAME)
+        .setCompletenessDelay("P3D");   // delay of 3 day end - delay < start
     AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO));
     Interval output = getCorrectedInterval(ALERT_ID,

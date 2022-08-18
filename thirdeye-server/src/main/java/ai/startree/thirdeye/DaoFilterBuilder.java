@@ -15,6 +15,7 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_QUERY_PARAM_OPERATOR;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNEXPECTED_QUERY_PARAM;
+import static ai.startree.thirdeye.spi.util.Pair.pair;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -62,9 +63,9 @@ public class DaoFilterBuilder {
       if (operator == null) {
         throw new ThirdEyeException(ERR_INVALID_QUERY_PARAM_OPERATOR, OPERATOR_MAP.keySet());
       }
-      return Pair.createPair(operator, m.group(2));
+      return pair(operator, m.group(2));
     }
-    return Pair.createPair(OPER.EQ, s);
+    return pair(OPER.EQ, s);
   }
 
   static Predicate toPredicate(final String columnName, final Object[] objects) {

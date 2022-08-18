@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datasource.macro;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.Map;
 import java.util.function.Function;
 import org.joda.time.Interval;
@@ -23,11 +24,18 @@ public class MacroFunctionContext {
   private Interval detectionInterval;
   private Map<String, String> properties;
   /**
+   * Used by macro function to get the default timeColumn, timeUnit, TimeFormat.
+   */
+  private DatasetConfigDTO datasetConfigDTO;
+  /**
    * Used by macro function to remove quotes from string literal parameters
    * The macro function knows if a parameter is an identifier or a string literal.
    * The sql dialect knows how to remove quote characters from a literal.
    */
   private Function<String, String> literalUnquoter;
+
+  /**Used by macro function to quote identifiers in AUTO mode.*/
+  private Function<String, String> identifierQuoter;
 
   public SqlExpressionBuilder getSqlExpressionBuilder() {
     return sqlExpressionBuilder;
@@ -65,6 +73,26 @@ public class MacroFunctionContext {
   public MacroFunctionContext setLiteralUnquoter(
       final Function<String, String> literalUnquoter) {
     this.literalUnquoter = literalUnquoter;
+    return this;
+  }
+
+  public DatasetConfigDTO getDatasetConfigDTO() {
+    return datasetConfigDTO;
+  }
+
+  public MacroFunctionContext setDatasetConfigDTO(
+      final DatasetConfigDTO datasetConfigDTO) {
+    this.datasetConfigDTO = datasetConfigDTO;
+    return this;
+  }
+
+  public Function<String, String> getIdentifierQuoter() {
+    return identifierQuoter;
+  }
+
+  public MacroFunctionContext setIdentifierQuoter(
+      final Function<String, String> identifierQuoter) {
+    this.identifierQuoter = identifierQuoter;
     return this;
   }
 }

@@ -29,6 +29,8 @@ import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
@@ -55,7 +57,8 @@ public class PlanExecutorTest {
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
         mock(DataSourceCache.class),
         mock(DetectionRegistry.class),
-        mock(EventManager.class));
+        mock(EventManager.class),
+        mock(DatasetConfigManager.class));
     planExecutor = new PlanExecutor(planNodeFactory);
   }
 
@@ -69,7 +72,7 @@ public class PlanExecutorTest {
         .setDetectionInterval(new Interval(0L, 0L, DateTimeZone.UTC))
         .setPlanNodeBean(new PlanNodeBean()
             .setInputs(Collections.emptyList())
-            .setParams(ImmutableMap.of(EchoOperator.DEFAULT_INPUT_KEY, echoInput))
+            .setParams(TemplatableMap.ofValue(EchoOperator.DEFAULT_INPUT_KEY, echoInput))
         )
     );
     final HashMap<ContextKey, DetectionPipelineResult> context = new HashMap<>();
@@ -94,14 +97,14 @@ public class PlanExecutorTest {
     final PlanNodeBean echoNode = new PlanNodeBean()
         .setName("echo")
         .setType(EchoPlanNode.TYPE)
-        .setParams(ImmutableMap.of(
+        .setParams(TemplatableMap.ofValue(
             EchoOperator.DEFAULT_INPUT_KEY, "${key}"
         ));
 
     final PlanNodeBean enumeratorNode = new PlanNodeBean()
         .setName("enumerator")
         .setType(EnumeratorPlanNode.TYPE)
-        .setParams(Map.of("enumerationList", List.of(
+        .setParams(TemplatableMap.ofValue("enumerationList", List.of(
             Map.of("key", 1),
             Map.of("key", 2),
             Map.of("key", 3)
@@ -115,11 +118,11 @@ public class PlanExecutorTest {
     final PlanNodeBean forkJoinNode = new PlanNodeBean()
         .setName("root")
         .setType(ForkJoinPlanNode.TYPE)
-        .setParams(ImmutableMap.of(
+        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of(
             K_ENUMERATOR, enumeratorNode.getName(),
             K_ROOT, echoNode.getName(),
             K_COMBINER, combinerNode.getName()
-        ));
+        )));
 
     final List<PlanNodeBean> planNodeBeans = Arrays.asList(
         echoNode,

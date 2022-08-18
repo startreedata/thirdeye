@@ -111,7 +111,7 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             contents: t("message.delete-confirmation", {
                 name: uiSubscriptionGroup.name,
             }),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
         });

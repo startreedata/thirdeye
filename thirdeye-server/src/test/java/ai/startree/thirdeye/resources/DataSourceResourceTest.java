@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 public class DataSourceResourceTest {
 
   private final String dataSourceName = "test";
-  private final ThirdEyePrincipal principal = new ThirdEyePrincipal();
+  private final ThirdEyePrincipal principal = new ThirdEyePrincipal("test");
   private ThirdEyeDataSource dataSource;
   private DataSourceCache dataSourceCache;
   private DataSourceResource dataSourceResource;

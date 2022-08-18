@@ -79,7 +79,7 @@ export const EventsViewPage: FunctionComponent = () => {
             contents: t("message.delete-confirmation", {
                 name: event.name,
             }),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleEventDeleteOk(event),
         });

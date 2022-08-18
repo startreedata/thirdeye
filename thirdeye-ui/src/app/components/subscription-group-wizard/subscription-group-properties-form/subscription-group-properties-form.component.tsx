@@ -12,7 +12,16 @@
  * the License.
  */
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Grid, TextField, Typography } from "@material-ui/core";
+import {
+    Box,
+    FormHelperText,
+    Grid,
+    Link,
+    TextField,
+    Typography,
+} from "@material-ui/core";
+import CronValidator from "cron-expression-validator";
+import cronstrue from "cronstrue";
 import React, { FunctionComponent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -25,22 +34,27 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<
     SubscriptionGroupPropertiesFormProps
 > = (props: SubscriptionGroupPropertiesFormProps) => {
     const { t } = useTranslation();
-    const { register, handleSubmit, errors } = useForm<SubscriptionGroup>({
-        mode: "onSubmit",
-        reValidateMode: "onSubmit",
-        defaultValues:
-            props.subscriptionGroup || createEmptySubscriptionGroup(),
-        resolver: yupResolver(
-            yup.object().shape({
-                name: yup
-                    .string()
-                    .trim()
-                    .required(t("message.subscription-group-name-required")),
-            })
-        ),
-    });
+    const { register, handleSubmit, errors, watch } =
+        useForm<SubscriptionGroup>({
+            mode: "onSubmit",
+            reValidateMode: "onSubmit",
+            defaultValues:
+                props.subscriptionGroup || createEmptySubscriptionGroup(),
+            resolver: yupResolver(
+                yup.object().shape({
+                    name: yup
+                        .string()
+                        .trim()
+                        .required(
+                            t("message.subscription-group-name-required")
+                        ),
+                })
+            ),
+        });
+    const cron = watch("cron");
+    const isCronValid = CronValidator.isValidCronExpression(cron);
 
-    const onSubmitSusbcriptionGroupPropertiesForm = (
+    const onSubmitSubscriptionGroupPropertiesForm = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
         props.onSubmit && props.onSubmit(subscriptionGroup);
@@ -50,7 +64,7 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<
         <form
             noValidate
             id={props.id}
-            onSubmit={handleSubmit(onSubmitSusbcriptionGroupPropertiesForm)}
+            onSubmit={handleSubmit(onSubmitSubscriptionGroupPropertiesForm)}
         >
             <Grid container alignItems="center">
                 {/* Subscription group name label */}
@@ -89,11 +103,34 @@ export const SubscriptionGroupPropertiesForm: FunctionComponent<
                 <Grid item lg={4} md={5} sm={6} xs={12}>
                     <TextField
                         fullWidth
+                        error={!isCronValid}
                         inputRef={register}
                         name="cron"
                         type="string"
                         variant="outlined"
                     />
+                    {isCronValid && (
+                        <FormHelperText>
+                            {cronstrue.toString(cron, {
+                                verbose: true,
+                            })}
+                        </FormHelperText>
+                    )}
+                    {!isCronValid && (
+                        <FormHelperText
+                            error
+                            data-testid="error-message-container"
+                        >
+                            {t("message.invalid-cron-input-1")}
+                            <Link
+                                href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html"
+                                target="_blank"
+                            >
+                                {t("label.cron-documentation")}
+                            </Link>
+                            {t("message.invalid-cron-input-2")}
+                        </FormHelperText>
+                    )}
                 </Grid>
             </Grid>
         </form>

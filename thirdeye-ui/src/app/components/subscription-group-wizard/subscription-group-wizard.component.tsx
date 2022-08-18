@@ -13,7 +13,6 @@
  */
 import {
     Accordion,
-    AccordionDetails,
     AccordionSummary,
     Box,
     Button,
@@ -24,22 +23,22 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { kebabCase } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1, StepperV1 } from "../../platform/components";
+import {
+    DataGridSelectionModelV1,
+    DataGridV1,
+    PageContentsCardV1,
+    StepperV1,
+} from "../../platform/components";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     EmailScheme,
     NotificationSpec,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
-import { UiSubscriptionGroupAlert } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
     createEmptySubscriptionGroup,
     getUiSubscriptionGroup,
-    getUiSubscriptionGroupAlertId,
-    getUiSubscriptionGroupAlertName,
-    getUiSubscriptionGroupAlerts,
 } from "../../utils/subscription-groups/subscription-groups.util";
-import { TransferList } from "../transfer-list/transfer-list.component";
 import { GroupsEditor } from "./groups-editor/groups-editor.component";
 import { SubscriptionGroupPropertiesForm } from "./subscription-group-properties-form/subscription-group-properties-form.component";
 import { SubscriptionGroupRenderer } from "./subscription-group-renderer/subscription-group-renderer.component";
@@ -51,6 +50,32 @@ import { useSubscriptionGroupWizardStyles } from "./subscription-group-wizard.st
 
 const FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES =
     "FORM_ID_SUBSCRIPTION_GROUP_PROPERTIES";
+
+function generateDefaultSelection(
+    subscriptionGroup: SubscriptionGroup | undefined | null,
+    alerts: Alert[]
+): DataGridSelectionModelV1<Alert> {
+    if (subscriptionGroup && alerts) {
+        const selectedIds = subscriptionGroup.alerts.map(
+            (alert: { id: number }) => alert.id
+        );
+        const selectedAlerts = alerts.filter((alert: Alert) =>
+            selectedIds.includes(alert.id)
+        );
+
+        return {
+            rowKeyValues: selectedIds,
+            rowKeyValueMap: new Map(
+                selectedAlerts.map((alert: Alert) => [alert.id, alert])
+            ),
+        };
+    }
+
+    return {
+        rowKeyValues: [],
+        rowKeyValueMap: new Map(),
+    };
+}
 
 export const SubscriptionGroupWizard: FunctionComponent<
     SubscriptionGroupWizardProps
@@ -64,6 +89,9 @@ export const SubscriptionGroupWizard: FunctionComponent<
         useState<SubscriptionGroupWizardStep>(
             SubscriptionGroupWizardStep.SUBSCRIPTION_GROUP_PROPERTIES
         );
+    const [selectedAlertsGroup, setSelectedAlertsGroup] = useState<
+        DataGridSelectionModelV1<Alert>
+    >(generateDefaultSelection(props.subscriptionGroup, props.alerts));
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -92,17 +120,6 @@ export const SubscriptionGroupWizard: FunctionComponent<
 
         // Next step
         onNext();
-    };
-
-    const onUiSubscriptionGroupAlertsChange = (
-        uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[]
-    ): void => {
-        // Update subscription group with subscribed alerts
-        setNewSubscriptionGroup((newSubscriptionGroup): SubscriptionGroup => {
-            newSubscriptionGroup.alerts = uiSubscriptionGroupAlerts as Alert[];
-
-            return newSubscriptionGroup;
-        });
     };
 
     const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
@@ -173,6 +190,42 @@ export const SubscriptionGroupWizard: FunctionComponent<
         newSubscriptionGroup.specs = specs;
     };
 
+    const alertsColumns = [
+        {
+            key: "name",
+            dataKey: "name",
+            header: t("label.name"),
+            minWidth: 150,
+            flex: 1,
+        },
+    ];
+
+    const handleSelectedAlertsChange = (
+        updated: DataGridSelectionModelV1<Alert>
+    ): void => {
+        if (props.alerts) {
+            let newlySelectedAlertsList: Alert[] = [];
+
+            if (updated && updated.rowKeyValueMap) {
+                const selectedById = updated.rowKeyValueMap;
+
+                newlySelectedAlertsList = props.alerts.filter((group) =>
+                    selectedById.has(group.id)
+                );
+            }
+
+            // Update subscription group with subscribed alerts
+            setNewSubscriptionGroup(
+                (newSubscriptionGroup): SubscriptionGroup => {
+                    newSubscriptionGroup.alerts = newlySelectedAlertsList;
+
+                    return newSubscriptionGroup;
+                }
+            );
+        }
+        setSelectedAlertsGroup(updated);
+    };
+
     return (
         <>
             {/* Stepper */}
@@ -237,45 +290,58 @@ export const SubscriptionGroupWizard: FunctionComponent<
                                 <AccordionSummary
                                     expandIcon={<ExpandMoreIcon />}
                                 >
-                                    <Typography variant="h5">
-                                        {t("label.subscribe-alerts")}
-                                    </Typography>
+                                    <div>
+                                        <div>
+                                            <Typography variant="h5">
+                                                {t("label.subscribe-alerts")}
+                                            </Typography>
+                                        </div>
+                                        <div>
+                                            <Typography variant="caption">
+                                                {newSubscriptionGroup.alerts
+                                                    .length > 0 &&
+                                                    t(
+                                                        "message.num-alerts-subscribed",
+                                                        {
+                                                            num: newSubscriptionGroup
+                                                                .alerts.length,
+                                                        }
+                                                    )}
+                                                {newSubscriptionGroup.alerts
+                                                    .length === 0 &&
+                                                    t(
+                                                        "message.no-alerts-subscribed"
+                                                    )}
+                                            </Typography>
+                                        </div>
+                                    </div>
                                 </AccordionSummary>
-
-                                {/* Subscription group alerts transfer list */}
-                                <AccordionDetails>
-                                    <TransferList<UiSubscriptionGroupAlert>
-                                        fromLabel={t("label.all-entity", {
-                                            entity: t("label.alerts"),
-                                        })}
-                                        fromList={getUiSubscriptionGroupAlerts(
-                                            props.alerts
-                                        )}
-                                        listItemKeyFn={
-                                            getUiSubscriptionGroupAlertId
-                                        }
-                                        listItemTextFn={
-                                            getUiSubscriptionGroupAlertName
-                                        }
-                                        toLabel={t("label.subscribed-alerts")}
-                                        toList={
-                                            getUiSubscriptionGroup(
-                                                newSubscriptionGroup,
-                                                props.alerts
-                                            ).alerts
-                                        }
-                                        onChange={
-                                            onUiSubscriptionGroupAlertsChange
-                                        }
-                                    />
-                                </AccordionDetails>
+                                <Grid container>
+                                    <Grid item lg={6} md={8} sm={12} xs={12}>
+                                        <Box height={500}>
+                                            <DataGridV1<Alert>
+                                                hideBorder
+                                                // hideToolbar
+                                                columns={alertsColumns}
+                                                data={props.alerts}
+                                                rowKey="id"
+                                                selectionModel={
+                                                    selectedAlertsGroup
+                                                }
+                                                onSelectionChange={
+                                                    handleSelectedAlertsChange
+                                                }
+                                            />
+                                        </Box>
+                                    </Grid>
+                                </Grid>
                             </Accordion>
                         </Grid>
 
                         <Grid item xs={12}>
                             <PageContentsCardV1>
                                 <Typography variant="h5">
-                                    {t("label.groups")}
+                                    {t("label.channels")}
                                 </Typography>
                                 <Box marginTop={3}>
                                     <GroupsEditor

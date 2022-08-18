@@ -21,9 +21,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @JsonInclude(Include.NON_NULL)
 public class Templatable<T> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Templatable.class);
 
   private @Nullable String templatedValue;
   private @Nullable T value;
@@ -83,5 +87,14 @@ public class Templatable<T> {
   @Override
   public int hashCode() {
     return Objects.hash(templatedValue, value);
+  }
+
+  @Override
+  public String toString() {
+    LOG.error("Calling toString on a Templatable. Most likely caused by an incorrect implementation targeting the wrapped value or a debug mode.");
+    return "Templatable{" +
+        "templatedValue='" + templatedValue + '\'' +
+        ", value=" + value +
+        '}';
   }
 }

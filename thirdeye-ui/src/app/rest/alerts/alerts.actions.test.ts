@@ -14,7 +14,7 @@
 import { act, renderHook } from "@testing-library/react-hooks";
 import axios from "axios";
 import { ActionStatus } from "../actions.interfaces";
-import { useGetAlert, useGetEvaluation } from "./alerts.actions";
+import { useGetAlert, useGetEvaluation, useResetAlert } from "./alerts.actions";
 
 const mockEvaluation = {
     id: 1,
@@ -105,6 +105,47 @@ describe("Alerts Actions", () => {
                     // When REST call is completed
                     expect(result.current.alert).toEqual({ id: 123 });
                     expect(result.current.getAlert).toBeDefined();
+                    expect(result.current.status).toEqual(ActionStatus.Done);
+                    expect(result.current.errorMessages).toEqual([]);
+                });
+            });
+        });
+    });
+
+    describe("useResetAlert", () => {
+        it("should return initial default values", () => {
+            const { result } = renderHook(() => useResetAlert());
+
+            expect(result.current.alert).toBeNull();
+            expect(result.current.resetAlert).toBeDefined();
+            expect(result.current.status).toEqual(ActionStatus.Initial);
+            expect(result.current.errorMessages).toEqual([]);
+        });
+
+        it("should update data appropriately when making a successful REST call", async () => {
+            mockedAxios.post.mockResolvedValueOnce({
+                data: { id: 123 },
+            });
+            const { result, waitFor } = renderHook(() => useResetAlert());
+
+            await act(async () => {
+                const promise = result.current.resetAlert(123);
+
+                // Wait for state update
+                await waitFor(
+                    () => result.current.status === ActionStatus.Initial
+                );
+
+                // When REST call is in progress
+                expect(result.current.alert).toBeNull();
+                expect(result.current.resetAlert).toBeDefined();
+                expect(result.current.status).toEqual(ActionStatus.Working);
+                expect(result.current.errorMessages).toEqual([]);
+
+                return promise.then(() => {
+                    // When REST call is completed
+                    expect(result.current.alert).toEqual({ id: 123 });
+                    expect(result.current.resetAlert).toBeDefined();
                     expect(result.current.status).toEqual(ActionStatus.Done);
                     expect(result.current.errorMessages).toEqual([]);
                 });

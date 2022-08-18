@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
@@ -41,7 +43,7 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
         .get(Constants.DETECTION_REGISTRY_REF_KEY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
 
-    eventTrigger = createEventTrigger(planNode.getParams(), detectionRegistry);
+    eventTrigger = createEventTrigger(optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null), detectionRegistry);
   }
 
   @Override

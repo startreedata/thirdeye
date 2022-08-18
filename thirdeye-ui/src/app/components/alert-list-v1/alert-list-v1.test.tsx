@@ -52,10 +52,8 @@ jest.mock("../../platform/components", () => ({
                             <span key={alert.id}>
                                 {alert.name}
                                 <p
-                                    onClick={() =>
-                                        mockOnChangeMethod(mockAlert)
-                                    }
-                                >{`Edit${alert.id}`}</p>
+                                    onClick={() => mockOnResetMethod(mockAlert)}
+                                >{`Reset${alert.id}`}</p>
                                 <p
                                     onClick={() =>
                                         mockOnDeleteMethod(mockAlert)
@@ -87,14 +85,6 @@ describe("AlertListV1", () => {
         render(<AlertListV1 {...mockDefaultProps} />);
 
         expect(await screen.findByText("testNameAlert1")).toBeInTheDocument();
-    });
-
-    it("should call onChange when Edit is clicked", async () => {
-        render(<AlertListV1 {...mockDefaultProps} />);
-
-        fireEvent.click(screen.getByText("Edit1"));
-
-        expect(mockOnChangeMethod).toHaveBeenNthCalledWith(1, mockUiAlert);
     });
 
     it("should call onDelete when Delete is clicked", async () => {
@@ -212,10 +202,10 @@ const mockUiAlert = {
 
 const mockOnDeleteMethod = jest.fn();
 
-const mockOnChangeMethod = jest.fn();
+const mockOnResetMethod = jest.fn();
 
 const mockDefaultProps = {
     alerts: [mockUiAlert],
-    onChange: mockOnChangeMethod,
+    onAlertReset: mockOnResetMethod,
     onDelete: mockOnDeleteMethod,
 } as AlertListV1Props;

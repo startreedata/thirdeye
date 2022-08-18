@@ -11,26 +11,30 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detectionpipeline.utils;
+package ai.startree.thirdeye.auth.basic;
 
-import ai.startree.thirdeye.spi.detection.TimeConverter;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
-public class EpochTimeConverter implements TimeConverter {
+public class BasicAuthConfiguration {
 
-  private final TimeUnit timeUnit;
+  private boolean enabled = false;
+  private List<UserCredentialConfiguration> users;
 
-  public EpochTimeConverter(String timeUnit) {
-    this.timeUnit = TimeUnit.valueOf(timeUnit);
+  public boolean isEnabled() {
+    return enabled;
   }
 
-  @Override
-  public long convert(final String timeValue) {
-    return timeUnit.toMillis(Long.parseLong(timeValue));
+  public BasicAuthConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
+    return this;
   }
 
-  @Override
-  public String convertMillis(final long time) {
-    return String.valueOf(timeUnit.convert(time, TimeUnit.MILLISECONDS));
+  public List<UserCredentialConfiguration> getUsers() {
+    return users;
+  }
+
+  public BasicAuthConfiguration setUsers(final List<UserCredentialConfiguration> users) {
+    this.users = users;
+    return this;
   }
 }

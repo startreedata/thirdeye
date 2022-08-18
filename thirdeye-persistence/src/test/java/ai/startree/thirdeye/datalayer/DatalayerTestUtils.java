@@ -53,16 +53,15 @@ public class DatalayerTestUtils {
   }
 
   public static DatasetConfigDTO getTestDatasetConfig(String collection) {
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(collection);
-    datasetConfigDTO.setDimensions(Templatable.of(Lists.newArrayList("country", "browser", "environment")));
-    datasetConfigDTO.setTimeColumn("time");
-    datasetConfigDTO.setTimeDuration(1);
-    datasetConfigDTO.setTimeUnit(TimeUnit.HOURS);
-    datasetConfigDTO.setActive(true);
-    datasetConfigDTO.setDataSource("PinotThirdEyeDataSource");
-    datasetConfigDTO.setLastRefreshTime(System.currentTimeMillis());
-    return datasetConfigDTO;
+    return new DatasetConfigDTO()
+        .setDataset(collection)
+        .setDimensions(Templatable.of(Lists.newArrayList("country", "browser", "environment")))
+        .setTimeColumn("time")
+        .setTimeDuration(1)
+        .setTimeUnit(TimeUnit.HOURS)
+        .setActive(true)
+        .setDataSource("PinotThirdEyeDataSource")
+        .setLastRefreshTime(System.currentTimeMillis());
   }
 
   public static JobDTO getTestJobSpec() {

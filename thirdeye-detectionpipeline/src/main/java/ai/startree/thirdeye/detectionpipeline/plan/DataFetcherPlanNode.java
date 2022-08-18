@@ -13,18 +13,24 @@
  */
 package ai.startree.thirdeye.detectionpipeline.plan;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.operator.DataFetcherOperator;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
 
   private DataSourceCache dataSourceCache = null;
+  private DatasetConfigManager datasetDao = null;
 
   public DataFetcherPlanNode() {
     super();
@@ -35,6 +41,8 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
     super.init(planNodeContext);
     this.dataSourceCache = (DataSourceCache) planNodeContext.getProperties()
         .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
+    this.datasetDao = (DatasetConfigManager) Objects.requireNonNull(planNodeContext.getProperties()
+        .get(Constants.DATASET_DAO_REF_KEY));
   }
 
   @Override
@@ -44,7 +52,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
 
   @Override
   public Map<String, Object> getParams() {
-    return planNodeBean.getParams();
+    return optional(planNodeBean.getParams()).map(TemplatableMap::valueMap).orElse(null);
   }
 
   @Override
@@ -53,7 +61,9 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
     dataFetcherOperator.init(new OperatorContext()
         .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache))
+        .setProperties(ImmutableMap.of(
+            Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
+            Constants.DATASET_DAO_REF_KEY, datasetDao))
     );
     return dataFetcherOperator;
   }

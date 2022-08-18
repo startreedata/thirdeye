@@ -26,6 +26,7 @@ import { PageContentsCardV1 } from "../../../platform/components";
 import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { getAlertTemplatesCreatePath } from "../../../utils/routes/routes.util";
+import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertTemplatePropertiesBuilder } from "./alert-template-properties-builder/alert-template-properties-builder.component";
 import { AlertTemplateProps } from "./alert-template.interfaces";
@@ -168,54 +169,49 @@ function AlertTemplate({
                     </Box>
                 </Grid>
 
-                <Grid item xs={12}>
-                    <Grid container>
-                        <Grid item lg={2} md={4} sm={12} xs={12}>
-                            <InputLabel
-                                shrink
-                                className={classes.label}
-                                data-testid="template-type-input-label"
-                            >
-                                {t("label.template-type")}
-                            </InputLabel>
-                        </Grid>
-                        <Grid item lg={3} md={5} sm={12} xs={12}>
-                            <Autocomplete<AlertTemplateType>
-                                fullWidth
-                                getOptionLabel={(option) =>
-                                    option.name as string
+                <InputSection
+                    inputComponent={
+                        <Autocomplete<AlertTemplateType>
+                            fullWidth
+                            getOptionLabel={(option) => option.name as string}
+                            noOptionsText={t(
+                                "message.no-filter-options-available-entity",
+                                {
+                                    entity: t("label.alert-template"),
                                 }
-                                noOptionsText={t(
-                                    "message.no-filter-options-available-entity",
-                                    {
-                                        entity: t("label.alert-template"),
-                                    }
-                                )}
-                                options={alertTemplateOptions}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={t(
-                                            "message.click-here-to-select-alert-template"
-                                        )}
-                                        variant="outlined"
-                                    />
-                                )}
-                                renderOption={renderAlertTemplateSelectOption}
-                                value={selectedAlertTemplate}
-                                onChange={(_, selectedValue) => {
-                                    handleAlertTemplateChange(selectedValue);
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
-                </Grid>
+                            )}
+                            options={alertTemplateOptions}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        // Override class name so the size of input is smaller
+                                        className: classes.autoCompleteInput,
+                                    }}
+                                    placeholder={t(
+                                        "message.click-here-to-select-alert-template"
+                                    )}
+                                    variant="outlined"
+                                />
+                            )}
+                            renderOption={renderAlertTemplateSelectOption}
+                            value={selectedAlertTemplate}
+                            onChange={(_, selectedValue) => {
+                                handleAlertTemplateChange(selectedValue);
+                            }}
+                        />
+                    }
+                    labelComponent={
+                        <InputLabel
+                            shrink
+                            className={classes.label}
+                            data-testid="template-type-input-label"
+                        >
+                            {t("label.template-type")}
+                        </InputLabel>
+                    }
+                />
 
                 {selectedAlertTemplate && (
                     <AlertTemplatePropertiesBuilder

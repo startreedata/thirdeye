@@ -22,6 +22,7 @@ import {
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
+import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertDetailsProps } from "./alert-details.interfaces";
 import { AlertFrequency } from "./alert-frequency/alert-frequency.component";
@@ -64,8 +65,25 @@ function AlertDetails({
                     </Box>
                 </Grid>
 
-                <Grid container item xs={12}>
-                    <Grid item lg={2} md={4} sm={12} xs={12}>
+                <InputSection
+                    inputComponent={
+                        <>
+                            <TextField
+                                fullWidth
+                                data-testid="name-input-container"
+                                error={nameHasError}
+                                value={name}
+                                variant="outlined"
+                                onChange={handleNameChange}
+                            />
+                            {nameHasError && (
+                                <FormHelperText error>
+                                    {t("message.please-enter-valid-name")}
+                                </FormHelperText>
+                            )}
+                        </>
+                    }
+                    labelComponent={
                         <InputLabel
                             shrink
                             className={classes.label}
@@ -74,39 +92,16 @@ function AlertDetails({
                         >
                             {t("label.name-of-your-alert")}
                         </InputLabel>
-                    </Grid>
-                    <Grid item lg={3} md={5} sm={12} xs={12}>
-                        <TextField
-                            fullWidth
-                            data-testid="name-input-container"
-                            error={nameHasError}
-                            value={name}
-                            variant="outlined"
-                            onChange={handleNameChange}
-                        />
-                        {nameHasError && (
-                            <FormHelperText error>
-                                {t("message.please-enter-valid-name")}
-                            </FormHelperText>
-                        )}
-                    </Grid>
-                </Grid>
+                    }
+                />
 
-                <Grid container item xs={12}>
-                    <Grid item lg={2} md={4} sm={12} xs={12}>
-                        <Typography variant="body2">
-                            {t("label.description")}
-                        </Typography>
-
-                        <Typography variant="caption">
-                            ({t("label.optional")})
-                        </Typography>
-                    </Grid>
-                    <Grid item lg={3} md={5} sm={12} xs={12}>
+                <InputSection
+                    helperLabel={t("label.optional")}
+                    inputComponent={
                         <TextField
                             fullWidth
                             multiline
-                            rows={6}
+                            minRows={6}
                             value={description}
                             variant="outlined"
                             onChange={(
@@ -120,8 +115,9 @@ function AlertDetails({
                                 });
                             }}
                         />
-                    </Grid>
-                </Grid>
+                    }
+                    label={t("label.description")}
+                />
 
                 <AlertFrequency
                     alert={alert}

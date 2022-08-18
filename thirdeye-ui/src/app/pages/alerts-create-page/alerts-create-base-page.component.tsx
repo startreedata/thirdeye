@@ -355,28 +355,29 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                         alertTemplateOptions,
                     ]}
                 />
-                <Box textAlign="right" width="100%">
-                    <PageContentsCardV1>
-                        <Button
-                            className={classes.footerBtn}
-                            color="secondary"
-                            onClick={handlePageExitChecks}
-                        >
-                            {t("label.cancel")}
-                        </Button>
-                        <Button
-                            className={classes.footerBtn}
-                            color="primary"
-                            disabled={!isAlertValid}
-                            onClick={handleCreateAlertClick}
-                        >
-                            {t("label.create-entity", {
-                                entity: t("label.alert"),
-                            })}
-                        </Button>
-                    </PageContentsCardV1>
-                </Box>
             </PageContentsGridV1>
+
+            <Box textAlign="right" width="100%">
+                <PageContentsCardV1>
+                    <Button
+                        className={classes.footerBtn}
+                        color="secondary"
+                        onClick={handlePageExitChecks}
+                    >
+                        {t("label.cancel")}
+                    </Button>
+                    <Button
+                        className={classes.footerBtn}
+                        color="primary"
+                        disabled={!isAlertValid}
+                        onClick={handleCreateAlertClick}
+                    >
+                        {t("label.create-entity", {
+                            entity: t("label.alert"),
+                        })}
+                    </Button>
+                </PageContentsCardV1>
+            </Box>
         </PageV1>
     );
 };

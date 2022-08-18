@@ -14,17 +14,22 @@
 package ai.startree.thirdeye.core;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +79,7 @@ public class AppAnalyticsService {
   public Integer uniqueMonitoredMetricsCount() {
     return getUniqueMonitoredMetrics().size();
   }
+
   private Set<MonitoredMetricWrapper> getUniqueMonitoredMetrics() {
     return alertManager.findAllActive().stream()
         .map(this::getMetadata)
@@ -102,10 +108,9 @@ public class AppAnalyticsService {
   public ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final ConfusionMatrix matrix = new ConfusionMatrix();
     matrix.addUnclassified((int) anomalyManager.countParentAnomaliesWithoutFeedback());
-    final List<AnomalyFeedbackType> feedbackTypes = anomalyManager.findParentAnomaliesWithFeedback().stream()
-        .map(anomaly -> anomaly.getFeedback().getFeedbackType())
-        .collect(Collectors.toList());
-    for (final AnomalyFeedbackType type : feedbackTypes) {
+    final List<AnomalyFeedback> feedbacks = getAnomalyFeedbacks();
+    for (final AnomalyFeedback feedback : feedbacks) {
+      final AnomalyFeedbackType type = feedback.getFeedbackType();
       switch (type) {
         case NO_FEEDBACK:
           matrix.incUnclassified();
@@ -123,5 +128,28 @@ public class AppAnalyticsService {
       }
     }
     return matrix;
+  }
+
+  private List<AnomalyFeedback> getAnomalyFeedbacks() {
+    return anomalyManager.findParentAnomaliesWithFeedback().stream()
+        .map(MergedAnomalyResultDTO::getFeedback)
+        .collect(Collectors.toList());
+  }
+
+  public AnomalyStatsApi computeAnomalyStats() {
+    List<AnomalyFeedback> feedbacks = getAnomalyFeedbacks();
+    Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
+    for(AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
+      feedbackStats.put(type, 0L);
+    }
+    feedbacks.forEach(feedback -> {
+      AnomalyFeedbackType type = feedback.getFeedbackType();
+      long count = feedbackStats.get(type);
+      feedbackStats.put(type, count+1);
+    });
+    return new AnomalyStatsApi()
+        .setTotalCount(anomalyManager.countParentAnomalies())
+        .setCountWithFeedback((long) feedbacks.size())
+        .setFeedbackStats(feedbackStats);
   }
 }

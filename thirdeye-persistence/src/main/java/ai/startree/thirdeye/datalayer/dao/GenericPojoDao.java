@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
+import ai.startree.thirdeye.datalayer.entity.HasJsonVal;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.mapper.RcaInvestigationIndexMapper;
 import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
@@ -166,6 +167,10 @@ public class GenericPojoDao {
               abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
               abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
               abstractIndexEntity.setVersion(1);
+              if (abstractIndexEntity instanceof HasJsonVal) {
+                ((HasJsonVal) abstractIndexEntity).setJsonVal(jsonVal);
+              }
+
               final int numRowsCreated;
               try (final PreparedStatement indexTableInsertStatement = sqlQueryBuilder
                   .createInsertStatement(connection, abstractIndexEntity)) {
@@ -308,6 +313,9 @@ public class GenericPojoDao {
         final AbstractIndexEntity abstractIndexEntity = indexClass.newInstance();
         MODEL_MAPPER.map(pojo, abstractIndexEntity);
         abstractIndexEntity.setBaseId(pojo.getId());
+        if (abstractIndexEntity instanceof HasJsonVal) {
+          ((HasJsonVal) abstractIndexEntity).setJsonVal(jsonVal);
+        }
         abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         //updates all columns in the index table by default
         try (final PreparedStatement indexTableInsertStatement = sqlQueryBuilder

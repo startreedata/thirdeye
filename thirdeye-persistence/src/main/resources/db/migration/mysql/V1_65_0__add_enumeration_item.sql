@@ -11,30 +11,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer.entity;
 
-public enum SubEntityType {
-  ALERT,
-  ALERT_TEMPLATE,
-  ANOMALY_FEEDBACK,
-  ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION,
-  APPLICATION,
-  DATASET,
-  DATA_SOURCE,
-  DETECTION_STATUS,
-  ENTITY_TO_ENTITY_MAPPING,
-  EVALUATION,
-  ENUMERATION_ITEM,
-  EVENT,
-  JOB,
-  ANOMALY,
-  METRIC,
-  ONBOARD_DATASET_METRIC,
-  ONLINE_DETECTION_DATA,
-  OVERRIDE_CONFIG,
-  RCA_INVESTIGATION,
-  ROOT_CAUSE_TEMPLATE,
-  SUBSCRIPTION_GROUP,
-  SESSION,
-  TASK,
-}
+CREATE TABLE IF NOT EXISTS enumeration_item_index
+(
+    name        varchar(200) NOT NULL,
+    base_id     bigint(20)   NOT NULL,
+    create_time timestamp,
+    update_time timestamp DEFAULT CURRENT_TIMESTAMP,
+    version     int(10),
+    json_val    text
+) ENGINE = InnoDB;
+CREATE INDEX enumeration_item_name_idx ON enumeration_item_index (name);
+CREATE INDEX enumeration_item_params_idx ON enumeration_item_index (json_val(500));
+

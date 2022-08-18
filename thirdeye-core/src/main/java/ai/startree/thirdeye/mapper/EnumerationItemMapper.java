@@ -11,30 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer.entity;
+package ai.startree.thirdeye.mapper;
 
-public enum SubEntityType {
-  ALERT,
-  ALERT_TEMPLATE,
-  ANOMALY_FEEDBACK,
-  ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION,
-  APPLICATION,
-  DATASET,
-  DATA_SOURCE,
-  DETECTION_STATUS,
-  ENTITY_TO_ENTITY_MAPPING,
-  EVALUATION,
-  ENUMERATION_ITEM,
-  EVENT,
-  JOB,
-  ANOMALY,
-  METRIC,
-  ONBOARD_DATASET_METRIC,
-  ONLINE_DETECTION_DATA,
-  OVERRIDE_CONFIG,
-  RCA_INVESTIGATION,
-  ROOT_CAUSE_TEMPLATE,
-  SUBSCRIPTION_GROUP,
-  SESSION,
-  TASK,
+import ai.startree.thirdeye.spi.api.EnumerationItemApi;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
+@Mapper
+public interface EnumerationItemMapper {
+
+  EnumerationItemMapper INSTANCE = Mappers.getMapper(EnumerationItemMapper.class);
+
+  EnumerationItemDTO toDto(EnumerationItemApi api);
+
+  EnumerationItemApi toApi(EnumerationItemDTO dto);
 }

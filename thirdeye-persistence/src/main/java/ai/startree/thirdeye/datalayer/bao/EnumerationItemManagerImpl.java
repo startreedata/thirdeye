@@ -11,30 +11,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer.entity;
+package ai.startree.thirdeye.datalayer.bao;
 
-public enum SubEntityType {
-  ALERT,
-  ALERT_TEMPLATE,
-  ANOMALY_FEEDBACK,
-  ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION,
-  APPLICATION,
-  DATASET,
-  DATA_SOURCE,
-  DETECTION_STATUS,
-  ENTITY_TO_ENTITY_MAPPING,
-  EVALUATION,
-  ENUMERATION_ITEM,
-  EVENT,
-  JOB,
-  ANOMALY,
-  METRIC,
-  ONBOARD_DATASET_METRIC,
-  ONLINE_DETECTION_DATA,
-  OVERRIDE_CONFIG,
-  RCA_INVESTIGATION,
-  ROOT_CAUSE_TEMPLATE,
-  SUBSCRIPTION_GROUP,
-  SESSION,
-  TASK,
+import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+@Singleton
+public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationItemDTO>
+    implements EnumerationItemManager {
+
+  @Inject
+  public EnumerationItemManagerImpl(GenericPojoDao genericPojoDao) {
+    super(EnumerationItemDTO.class, genericPojoDao);
+  }
 }

@@ -25,6 +25,7 @@ import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
@@ -167,6 +168,14 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
+  @Test(dependsOnMethods = "testPing")
+  public void testCreateDefaultTemplates() {
+    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    formData.add("updateExisting", "true");
+    Response response = request("/api/alert-templates/load-defaults").post(Entity.form(formData));
+    assertThat(response.getStatus()).isEqualTo(200);
+  }
+
   @Test(dependsOnMethods = "testCreatePinotDataSource")
   public void testCreateDataset() {
     MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
@@ -245,6 +254,14 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     HeatMapResultApi heatmap = response.readEntity(HeatMapResultApi.class);
     assertThat(heatmap.getBaseline().getBreakdown().size()).isGreaterThan(0);
     assertThat(heatmap.getCurrent().getBreakdown().size()).isGreaterThan(0);
+  }
+
+  @Test(dependsOnMethods = "testGetSingleAnomaly")
+  public void testGetTopContributors() {
+    Response response = request("api/rca/dim-analysis?id=" + anomalyId).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(DimensionAnalysisResultApi.class);
+    assertThat(dimensionAnalysisResultApi.getResponseRows().size()).isGreaterThan(0);
   }
 
   private Builder request(final String urlFragment) {

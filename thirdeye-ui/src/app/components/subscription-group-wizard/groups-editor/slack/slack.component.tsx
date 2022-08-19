@@ -11,21 +11,26 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
     Card,
     CardContent,
+    FormHelperText,
     Grid,
     TextField,
     Typography,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../platform/components";
 import { lightV1 } from "../../../../platform/utils";
-import { SlackProps } from "./slack.interfaces";
+import { InputSection } from "../../../form-basics/input-section/input-section.component";
+import { SlackFormEntries, SlackProps } from "./slack.interfaces";
 
 export const Slack: FunctionComponent<SlackProps> = ({
     configuration,
@@ -33,6 +38,19 @@ export const Slack: FunctionComponent<SlackProps> = ({
     onDeleteClick,
 }) => {
     const { t } = useTranslation();
+    const { register, errors } = useForm<SlackFormEntries>({
+        mode: "onChange",
+        reValidateMode: "onChange",
+        defaultValues: configuration.params,
+        resolver: yupResolver(
+            yup.object().shape({
+                webhookUrl: yup
+                    .string()
+                    .trim()
+                    .required(t("message.url-required")),
+            })
+        ),
+    });
 
     const handleWebhookUrlChange = (newValue: string): void => {
         const copied = {
@@ -44,7 +62,7 @@ export const Slack: FunctionComponent<SlackProps> = ({
     };
 
     return (
-        <Card elevation={2}>
+        <Card>
             <CardContent>
                 <Grid container justifyContent="space-between">
                     <Grid item>
@@ -71,17 +89,39 @@ export const Slack: FunctionComponent<SlackProps> = ({
                 </Grid>
             </CardContent>
             <CardContent>
-                <label>{t("message.enter-webhook-url")}</label>
-                <TextField
-                    fullWidth
-                    data-testid="slack-input-container"
-                    placeholder="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
-                    value={configuration.params.webhookUrl}
-                    variant="outlined"
-                    onChange={(e) =>
-                        handleWebhookUrlChange(e.currentTarget.value)
-                    }
-                />
+                <Grid container>
+                    <InputSection
+                        inputComponent={
+                            <>
+                                <TextField
+                                    fullWidth
+                                    data-testid="slack-input-container"
+                                    error={Boolean(errors && errors.webhookUrl)}
+                                    helperText={
+                                        errors &&
+                                        errors.webhookUrl &&
+                                        errors.webhookUrl.message
+                                    }
+                                    inputRef={register}
+                                    name="webhookUrl"
+                                    type="string"
+                                    variant="outlined"
+                                    onChange={(e) =>
+                                        handleWebhookUrlChange(
+                                            e.currentTarget.value
+                                        )
+                                    }
+                                />
+
+                                <FormHelperText>
+                                    e.g.
+                                    https://company.slack.com/archives/XXXXXXXX
+                                </FormHelperText>
+                            </>
+                        }
+                        label={t("label.slack-url")}
+                    />
+                </Grid>
             </CardContent>
         </Card>
     );

@@ -18,3 +18,7 @@ export interface WebhookProps {
     onSpecChange: (updatedSpec: WebhookSpec) => void;
     onDeleteClick: () => void;
 }
+
+export interface WebhookFormEntries {
+    url: string;
+}

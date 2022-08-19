@@ -12,15 +12,7 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
-import {
-    Box,
-    Button,
-    Card,
-    CardActionArea,
-    CardContent,
-    Divider,
-    Grid,
-} from "@material-ui/core";
+import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -140,39 +132,6 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
 
     return (
         <>
-            {!hasSomeConfig && (
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Box textAlign="center">
-                            {t("message.to-get-started-select-type")}
-                        </Box>
-                    </Grid>
-                    {availableSpecTypes.map((item) => (
-                        <Grid item key={item.id} sm={4} xs={12}>
-                            <Card>
-                                <CardActionArea
-                                    onClick={() =>
-                                        handleShortcutCreateOnclick(item.id)
-                                    }
-                                >
-                                    <CardContent>
-                                        <Box color="primary" textAlign="center">
-                                            <Icon
-                                                height={48}
-                                                icon={item.icon}
-                                            />
-                                        </Box>
-
-                                        <Box color="primary" textAlign="center">
-                                            {t(item.internationalizationString)}
-                                        </Box>
-                                    </CardContent>
-                                </CardActionArea>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            )}
             {/** Legacy Email Configuration */}
             {hasSomeConfig && legacyEmailList.length > 0 && (
                 <Box marginBottom={3}>
@@ -190,7 +149,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                 currentSpecs.map((spec: NotificationSpec, idx: number) => {
                     if (specTypeToUIConfig[spec.type]) {
                         return (
-                            <Box marginBottom={3}>
+                            <Box paddingBottom={1} paddingTop={1}>
                                 {React.createElement(
                                     specTypeToUIConfig[spec.type].formComponent,
                                     {
@@ -202,6 +161,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                                         ) => handleSpecChange(updatedSpec, idx),
                                     }
                                 )}
+                                <Divider />
                             </Box>
                         );
                     }
@@ -209,36 +169,39 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                     return null;
                 })}
 
-            {hasSomeConfig && (
-                <>
-                    <Box
-                        marginTop={3}
-                        paddingBottom={3}
-                        paddingTop={3}
-                        textAlign="center"
-                    >
-                        <Divider />
-                    </Box>
-                    <Box textAlign="center">
-                        <span>{t("label.add")}: </span>
-                        {availableSpecTypes.map((item) => (
-                            <Button
-                                color="primary"
-                                key={item.id}
-                                size="small"
-                                startIcon={
-                                    <Icon height={12} icon={item.icon} />
-                                }
-                                onClick={() =>
-                                    handleShortcutCreateOnclick(item.id)
-                                }
-                            >
-                                {t(item.internationalizationString)}
-                            </Button>
-                        ))}
-                    </Box>
-                </>
-            )}
+            <Grid container>
+                {hasSomeConfig && (
+                    <Grid item xs={12}>
+                        <Box paddingBottom={1} paddingTop={1}>
+                            <Typography variant="h5">
+                                {t("label.add-more-channels")}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                )}
+                {availableSpecTypes.map((item) => (
+                    <Grid item key={item.id}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => handleShortcutCreateOnclick(item.id)}
+                        >
+                            <Box display="block" minWidth={100}>
+                                <Box color="primary" textAlign="center">
+                                    <Icon height={48} icon={item.icon} />
+                                </Box>
+
+                                <Box
+                                    color="primary"
+                                    marginTop={2}
+                                    textAlign="center"
+                                >
+                                    {t(item.internationalizationString)}
+                                </Box>
+                            </Box>
+                        </Button>
+                    </Grid>
+                ))}
+            </Grid>
         </>
     );
 };

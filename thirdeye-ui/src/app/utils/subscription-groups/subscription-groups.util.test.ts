@@ -261,7 +261,7 @@ describe("Subscription Groups Util", () => {
 
 const mockEmptySubscriptionGroup = {
     name: "",
-    cron: "",
+    cron: "0 */5 * * * ?",
     alerts: [],
     notificationSchemes: {
         email: {

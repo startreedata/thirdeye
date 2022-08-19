@@ -163,20 +163,25 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     entity: t("label.subscription-group"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {subscriptionGroup && (
-                        <SubscriptionGroupWizard
-                            alerts={alerts}
-                            subscriptionGroup={subscriptionGroup}
-                            onFinish={onSubscriptionGroupWizardFinish}
-                        />
-                    )}
+            {subscriptionGroup && (
+                <SubscriptionGroupWizard
+                    alerts={alerts}
+                    submitBtnLabel={t("label.update-entity", {
+                        entity: t("label.subscription-group"),
+                    })}
+                    subscriptionGroup={subscriptionGroup}
+                    onFinish={onSubscriptionGroupWizardFinish}
+                />
+            )}
 
-                    {/* No data available message */}
-                    {!subscriptionGroup && <NoDataIndicator />}
-                </Grid>
-            </PageContentsGridV1>
+            {/* No data available message */}
+            {!subscriptionGroup && (
+                <PageContentsGridV1>
+                    <Grid item xs={12}>
+                        <NoDataIndicator />
+                    </Grid>
+                </PageContentsGridV1>
+            )}
         </PageV1>
     );
 };

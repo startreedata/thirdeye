@@ -11,7 +11,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { SpecType } from "../../../rest/dto/subscription-group.interfaces";
+import {
+    NotificationSpec,
+    SendgridEmailSpec,
+    SlackSpec,
+    SpecType,
+    WebhookSpec,
+} from "../../../rest/dto/subscription-group.interfaces";
 import { SendgridEmailReview } from "../subscription-group-renderer/sendgrid-email-review/sendgrid-email-review.component";
 import { SpecUIConfig } from "./groups-editor.interfaces";
 import { SendgridEmail } from "./sendgrid-email/sendgrid-email.component";
@@ -22,10 +28,18 @@ export const availableSpecTypes: SpecUIConfig[] = [
     {
         id: SpecType.EmailSendgrid,
         internationalizationString: "label.email",
-        icon: "carbon:email",
+        icon: "ic:twotone-email",
         formComponent: SendgridEmail,
         reviewComponent: SendgridEmailReview,
         viewComponent: SendgridEmailReview,
+        validate: (spec: NotificationSpec): boolean => {
+            const specTyped = spec as SendgridEmailSpec;
+
+            return (
+                specTyped.params.apiKey !== "" &&
+                specTyped.params.emailRecipients.from !== ""
+            );
+        },
     },
     {
         id: SpecType.Slack,
@@ -34,6 +48,11 @@ export const availableSpecTypes: SpecUIConfig[] = [
         formComponent: Slack,
         reviewComponent: (props) => props.configuration.params.webhookUrl,
         viewComponent: Slack,
+        validate: (spec: NotificationSpec): boolean => {
+            const specTyped = spec as SlackSpec;
+
+            return specTyped.params.webhookUrl !== "";
+        },
     },
     {
         id: SpecType.Webhook,
@@ -42,6 +61,11 @@ export const availableSpecTypes: SpecUIConfig[] = [
         formComponent: Webhook,
         reviewComponent: (props) => props.configuration.params.url,
         viewComponent: Webhook,
+        validate: (spec: NotificationSpec): boolean => {
+            const specTyped = spec as WebhookSpec;
+
+            return specTyped.params.url !== "";
+        },
     },
 ];
 

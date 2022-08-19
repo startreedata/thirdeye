@@ -18,3 +18,7 @@ export interface SlackProps {
     onSpecChange: (updatedSpec: SlackSpec) => void;
     onDeleteClick: () => void;
 }
+
+export interface SlackFormEntries {
+    webhookUrl: string;
+}

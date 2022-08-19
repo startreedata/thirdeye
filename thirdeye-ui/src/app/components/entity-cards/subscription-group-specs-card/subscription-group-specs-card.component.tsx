@@ -29,7 +29,7 @@ export const SubscriptionGroupSpecsCard: FunctionComponent<
         <PageContentsCardV1>
             <Grid container>
                 <Grid item xs={12}>
-                    <Typography variant="h6">{t("label.groups")}</Typography>
+                    <Typography variant="h6">{t("label.channels")}</Typography>
                 </Grid>
                 {specs.length > 0 &&
                     specs.map((spec, idx) => {

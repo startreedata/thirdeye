@@ -68,8 +68,14 @@ export function hasRequiredPropertyValuesSet(
     defaultProperties: TemplatePropertiesObject
 ): boolean {
     return requiredFields.every((fieldKey) => {
-        if (alertTemplateProperties[fieldKey]) {
-            return alertTemplateProperties[fieldKey].length > 0;
+        if (alertTemplateProperties[fieldKey] !== undefined) {
+            // See https://cortexdata.atlassian.net/browse/TE-817
+            // Just check is not an empty value (empty array is ok)
+            if (typeof alertTemplateProperties[fieldKey] === "boolean") {
+                return true;
+            } else {
+                return !!alertTemplateProperties[fieldKey];
+            }
         } else if (defaultProperties[fieldKey] !== undefined) {
             // Empty string can be valid for default property
             return true;

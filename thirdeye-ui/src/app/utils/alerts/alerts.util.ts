@@ -312,7 +312,7 @@ const renderMetadataFromAlert = (alert: Alert, uiAlert: UiAlert): void => {
                 if (value) {
                     uiAlert.renderedMetadata.push({
                         key: metadataKey,
-                        value: value,
+                        value: value.toString(),
                     });
                 }
             } else {

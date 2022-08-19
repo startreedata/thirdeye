@@ -195,7 +195,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                                             tabIndex:
                                                 requiredKeys.length + idx + 1,
                                         }}
-                                        placeholder={item.defaultValue}
+                                        placeholder={item.defaultValue.toString()}
                                         onChange={(e) =>
                                             handlePropertyValueChange(
                                                 item.key,

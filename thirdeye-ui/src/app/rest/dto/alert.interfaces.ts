@@ -15,7 +15,7 @@ import { DetectionEvaluation } from "./detection.interfaces";
 import { User } from "./user.interfaces";
 
 export interface TemplatePropertiesObject {
-    [index: string]: string;
+    [index: string]: string | string[] | boolean;
 }
 
 export interface EditableAlert {

@@ -236,7 +236,11 @@
         "yes": "Yes",
         "no": "No",
         "reset": "Reset",
-        "confirm": "Confirm"
+        "confirm": "Confirm",
+        "add-more-channels": "Add More Channels",
+        "webhook-url": "Webhook URL",
+        "slack-url": "Slack URL",
+        "add-email": "Add Email"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -318,8 +322,6 @@
         "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource.",
         "datasource-is-healthy": "Datasource is healthy",
         "checking-datasource-health": "Checking datasource health. This will take a few seconds ...",
-        "to-get-started-select-type": "Select a type to get started",
-        "enter-webhook-url": "Enter webhook URL",
         "is-this-an-anomaly": "Is this an anomaly?",
         "click-to-add-comment": "Click to add comment",
         "reset-alert-information": "Resetting the alert will delete existing anomalies as well as saved investigations and rerun the detection algorithm.",
@@ -327,7 +329,9 @@
         "alert-reset-success": "Anomalies deleted and detection algorithm successfully ran for \"{{alertName}}\"",
         "alert-reset-error": "An issue was experienced while resetting alert. Please try again.",
         "no-notifications-groups": "No notifications groups have been configured",
-        "num-alerts-subscribed": "{{num}} alerts are subscribed to",
-        "no-alerts-subscribed": "No alerts are subscribed to by default"
+        "basic-information-about-group": "Basic information about the group",
+        "channels-subtitle": "Setup the channels and the people you want to receive notifications from this group",
+        "add-emails-example": "Add multiple emails separated by comma. e.g. email1@domain.com, email2@domain.com.",
+        "url-required": "Please enter a URL"
     }
 }

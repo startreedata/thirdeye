@@ -11,14 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Dataset } from "../../../rest/dto/dataset.interfaces";
-import { Datasource } from "../../../rest/dto/datasource.interfaces";
+import { ActionHook } from "../actions.interfaces";
+import { Dataset } from "../dto/dataset.interfaces";
 
-export interface DatasetPropertiesFormProps {
-    id: string;
-    submitBtnLabel: string;
-    dataset: Dataset;
-    datasources: Datasource[];
-    onSubmit?: (dataset: Dataset) => void;
-    onCancel?: () => void;
+export interface GetDataset extends ActionHook {
+    dataset: Dataset | null;
+    getDataset: (id: number) => Promise<Dataset | undefined>;
 }

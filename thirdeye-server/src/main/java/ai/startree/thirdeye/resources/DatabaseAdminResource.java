@@ -15,8 +15,8 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.resultSetToMap;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.DatabaseAdministrator;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;

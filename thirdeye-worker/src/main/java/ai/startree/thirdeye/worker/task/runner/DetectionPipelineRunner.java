@@ -16,7 +16,7 @@ package ai.startree.thirdeye.worker.task.runner;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.alert.PlanExecutor;
+import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;

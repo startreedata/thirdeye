@@ -15,7 +15,7 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.DaoFilterBuilder.toPair;
 import static ai.startree.thirdeye.DaoFilterBuilder.toPredicate;
-import static ai.startree.thirdeye.spi.util.Pair.createPair;
+import static ai.startree.thirdeye.spi.util.Pair.pair;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -26,10 +26,10 @@ public class DaoFilterBuilderTest {
 
   @Test
   public void testToPair() {
-    assertThat(toPair("abcd")).isEqualTo(createPair(OPER.EQ, "abcd"));
-    assertThat(toPair("[gt]1234")).isEqualTo(createPair(OPER.GT, "1234"));
-    assertThat(toPair("[gte]1234")).isEqualTo(createPair(OPER.GE, "1234"));
-    assertThat(toPair("[lte]-1")).isEqualTo(createPair(OPER.LE, "-1"));
+    assertThat(toPair("abcd")).isEqualTo(pair(OPER.EQ, "abcd"));
+    assertThat(toPair("[gt]1234")).isEqualTo(pair(OPER.GT, "1234"));
+    assertThat(toPair("[gte]1234")).isEqualTo(pair(OPER.GE, "1234"));
+    assertThat(toPair("[lte]-1")).isEqualTo(pair(OPER.LE, "-1"));
   }
 
   @Test

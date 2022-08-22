@@ -22,6 +22,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
+    DataGridSortOrderV1,
     DataGridV1,
 } from "../../platform/components";
 import { linkRendererV1 } from "../../platform/utils";
@@ -34,9 +35,12 @@ import {
 import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filters.component";
 import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
 
-export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
-    props: AnomalyListV1Props
-) => {
+export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
+    anomalies,
+    onDelete,
+    searchFilterValue,
+    onSearchFilterValueChange,
+}) => {
     const [selectedAnomaly, setSelectedAnomaly] =
         useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
@@ -112,18 +116,15 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
     );
 
     const isActionButtonDisable = !(
-        selectedAnomaly && selectedAnomaly.rowKeyValues.length === 1
+        selectedAnomaly && selectedAnomaly.rowKeyValues.length > 0
     );
 
     const handleAnomalyDelete = (): void => {
-        if (!selectedAnomaly) {
+        if (!selectedAnomaly || !selectedAnomaly.rowKeyValueMap) {
             return;
         }
-
-        const anomalyId = selectedAnomaly.rowKeyValues[0];
-        const anomaly = selectedAnomaly.rowKeyValueMap?.get(anomalyId);
-
-        props.onDelete && props.onDelete(anomaly as UiAnomaly);
+        onDelete &&
+            onDelete(Array.from(selectedAnomaly.rowKeyValueMap.values()));
     };
 
     const anomalyListColumns = useMemo(
@@ -218,9 +219,13 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
         <DataGridV1<UiAnomaly>
             hideBorder
             columns={anomalyListColumns}
-            data={props.anomalies as UiAnomaly[]}
+            data={anomalies as UiAnomaly[]}
+            initialSortState={{
+                key: "startTime",
+                order: DataGridSortOrderV1.DESC,
+            }}
             rowKey="id"
-            searchFilterValue={props.searchFilterValue}
+            searchFilterValue={searchFilterValue}
             searchPlaceholder={t("label.search-entity", {
                 entity: t("label.anomalies"),
             })}
@@ -237,7 +242,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = (
                     <AnomalyQuickFilters />
                 </Box>
             }
-            onSearchFilterValueChange={props.onSearchFilterValueChange}
+            onSearchFilterValueChange={onSearchFilterValueChange}
             onSelectionChange={setSelectedAnomaly}
         />
     );

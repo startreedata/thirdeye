@@ -225,9 +225,18 @@
         "property-name": "Property name",
         "property-value": "Property value",
         "example-alert-configurations": "example alert configurations",
+        "slack": "Slack",
+        "webhook": "Webhook",
+        "channels": "Channels",
+        "optional-overrides": "Optional Overrides",
+        "sendgrid-api-key": "SendGrid API Key",
         "support": "Support",
         "check-status": "Check Status",
-        "health-status": "Health Status"
+        "health-status": "Health Status",
+        "yes": "Yes",
+        "no": "No",
+        "reset": "Reset",
+        "confirm": "Confirm"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -242,6 +251,8 @@
         "update-error": "Error updating {{entity}}",
         "delete-confirmation": "Are you sure you want to delete {{name}}?",
         "delete-success": "{{entity}} deleted successfully",
+        "num-delete-success": "{{num}} {{entity}} deleted successfully",
+        "num-delete-error": "{{num}} {{entity}} experienced issues while attempting to delete",
         "delete-error": "Error deleting {{entity}}",
         "onboard-success": "{{entity}} onboarded successfully",
         "onboard-error": "Error onboarding {{entity}}",
@@ -306,6 +317,17 @@
         "no-access-to-support-tooltip-msg": "If you dont have access to the support page, reach out to your AE (Account Executive) or join our community: https://dev.startree.ai/docs/community",
         "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource.",
         "datasource-is-healthy": "Datasource is healthy",
-        "checking-datasource-health": "Checking datasource health. This will take a few seconds ..."
+        "checking-datasource-health": "Checking datasource health. This will take a few seconds ...",
+        "to-get-started-select-type": "Select a type to get started",
+        "enter-webhook-url": "Enter webhook URL",
+        "is-this-an-anomaly": "Is this an anomaly?",
+        "click-to-add-comment": "Click to add comment",
+        "reset-alert-information": "Resetting the alert will delete existing anomalies as well as saved investigations and rerun the detection algorithm.",
+        "reset-alert-confirmation-prompt": "Are you sure you want to reset the \"{{alertName}}\" alert?",
+        "alert-reset-success": "Anomalies deleted and detection algorithm successfully ran for \"{{alertName}}\"",
+        "alert-reset-error": "An issue was experienced while resetting alert. Please try again.",
+        "no-notifications-groups": "No notifications groups have been configured",
+        "num-alerts-subscribed": "{{num}} alerts are subscribed to",
+        "no-alerts-subscribed": "No alerts are subscribed to by default"
     }
 }

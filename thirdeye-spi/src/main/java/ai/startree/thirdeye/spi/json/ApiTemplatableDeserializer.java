@@ -16,8 +16,8 @@ package ai.startree.thirdeye.spi.json;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.type.SimpleType;
 import java.io.IOException;
 
 /**
@@ -49,17 +50,21 @@ class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
       throws JsonMappingException {
     checkArgument(property != null,
         "Cannot deserialize Templatable object without its generic type. Attempt to use Templatable as root object?");
-    final JavaType wrapperType = property.getType();
-    final JavaType valueType = wrapperType.containedType(0);
     final ApiTemplatableDeserializer deserializer = new ApiTemplatableDeserializer();
-    deserializer.valueType = valueType;
+    final JavaType wrapperType = property.getType();
+    if (wrapperType.getRawClass() == TemplatableMap.class) {
+      deserializer.valueType = SimpleType.constructUnsafe(Object.class);
+    } else {
+      deserializer.valueType = wrapperType.containedType(0);
+    }
+
     return deserializer;
   }
 
   @Override
   public Templatable<?> deserialize(final JsonParser jsonParser,
       final DeserializationContext context)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     // case value is a variable in format ${VARIABLE_NAME}
     final String textValue = jsonParser.getText();
     if (textValue.startsWith("${")) {

@@ -83,7 +83,7 @@ public class EntityMappingHolder {
       for (Field field : fields) {
         field.setAccessible(true);
         String entityColumn = field.getName();
-        if (dbColumn.toLowerCase().equals(entityColumn.toLowerCase())) {
+        if (dbColumn.equalsIgnoreCase(entityColumn)) {
           success = true;
         }
         String dbColumnNormalized = dbColumn.replaceAll("_", "").toLowerCase();

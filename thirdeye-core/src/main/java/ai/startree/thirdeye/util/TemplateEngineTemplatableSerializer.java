@@ -43,7 +43,7 @@ public class TemplateEngineTemplatableSerializer extends JsonSerializer<Templata
       final String property = templatedValue.substring(2, templatedValue.length() - 1);
       checkArgument(valuesMap.containsKey(property), "Property not provided for templatable value: %s", property);
       final @Nullable Object value = valuesMap.get(property);
-      jsonGenerator.writeObject(new Templatable<>().setValue(value));
+      jsonGenerator.writeObject(Templatable.of(value));
     } else {
       // cannot call writeObject --> this would create an infinite recursive loop
       jsonGenerator.writeStartObject();

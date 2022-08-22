@@ -28,4 +28,10 @@ export interface ChartBrushProps {
     onBrushClick: () => void;
     xAxisOptions?: XAxisOptions;
     initialZoom?: ZoomDomain;
+    margins: {
+        left: number;
+        right: number;
+        bottom: number;
+        top: number;
+    };
 }

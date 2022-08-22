@@ -17,12 +17,12 @@ import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AnomalyFeedback } from "../../components/anomlay-feedback/anomaly-feedback.component";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import { ViewAnomalyHeader } from "../../components/visualizations/alert-evaluation-time-series-card/headers/view-anomaly-header.component";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
@@ -44,7 +44,6 @@ import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
-import { DEFAULT_FEEDBACK } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
@@ -167,7 +166,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             contents: t("message.delete-confirmation", {
                 name: uiAnomaly.name,
             }),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleAnomalyDeleteOk(uiAnomaly),
         });
@@ -241,16 +240,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             </span>
                         </TooltipV1>
                     </PageHeaderTextV1>
-                    <div>
-                        <AnomalyFeedback
-                            anomalyFeedback={
-                                (anomaly && anomaly.feedback) || {
-                                    ...DEFAULT_FEEDBACK,
-                                }
-                            }
-                            anomalyId={Number(anomalyId)}
-                        />
-                    </div>
                 </Box>
                 <PageHeaderActionsV1>
                     <Button
@@ -308,12 +297,16 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         <AlertEvaluationTimeSeriesCard
                             alertEvaluation={alertEvaluation}
                             alertEvaluationTimeSeriesHeight={500}
+                            header={
+                                <ViewAnomalyHeader
+                                    anomaly={anomaly}
+                                    onRefresh={fetchAlertEvaluation}
+                                />
+                            }
                             isLoading={
                                 getEvaluationRequestStatus ===
                                 ActionStatus.Working
                             }
-                            maximizedTitle={uiAnomaly ? uiAnomaly.name : ""}
-                            onRefresh={fetchAlertEvaluation}
                         />
                     )}
                 </Grid>

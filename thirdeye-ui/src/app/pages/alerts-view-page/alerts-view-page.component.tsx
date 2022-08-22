@@ -235,7 +235,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             contents: t("message.delete-confirmation", {
                 name: uiAlert.name,
             }),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleAlertDeleteOk(uiAlert),
         });
@@ -297,7 +297,6 @@ export const AlertsViewPage: FunctionComponent = () => {
                                     evaluationRequestStatus ===
                                     ActionStatus.Working
                                 }
-                                title={uiAlert.name}
                                 onAnomalyBarClick={onAnomalyBarClick}
                                 onRefresh={fetchAlertEvaluation}
                             />

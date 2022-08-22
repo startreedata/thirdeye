@@ -101,7 +101,7 @@ export const DatasourcesViewPage: FunctionComponent = () => {
             contents: t("message.delete-confirmation", {
                 name: uiDatasource.name,
             }),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleDatasourceDeleteOk(uiDatasource),
         });

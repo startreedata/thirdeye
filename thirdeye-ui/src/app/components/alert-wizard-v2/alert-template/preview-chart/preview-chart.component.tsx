@@ -245,7 +245,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         </Grid>
                                         <Box height={300} marginTop={2}>
                                             <AlertEvaluationTimeSeries
-                                                hideBrush
                                                 alertEvaluation={evaluation}
                                             />
                                         </Box>

@@ -39,6 +39,7 @@ public interface Constants {
   String GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME = "detectorComponentName";
   String NO_AUTH_USER = "no-auth-user";
   String AUTH_BEARER = "Bearer";
+  String AUTH_BASIC = "Basic";
 
   // Used in Quartz Scheduler context
   String CTX_INJECTOR = "CTX_INJECTOR";
@@ -88,6 +89,20 @@ public interface Constants {
   String COL_EVENT_NAME = "event_name";
   String COL_EVENT_START = "event_start";
   String COL_EVENT_END = "event_end";
+
+  String TWO_DECIMALS_FORMAT = "#,###.##";
+  String MAX_DECIMALS_FORMAT = "#,###.#####";
+  String DECIMALS_FORMAT_TOKEN = "#";
+  String PROP_DETECTOR_COMPONENT_NAME_DELIMETER = ",";
+  // disable minute level cache warm up
+  long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
+
+  /* Detection Pipeline Context keys */
+  String EVALUATION_FILTERS_KEY = "evaluation.filters";
+  String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
+  String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
+  String EVENT_MANAGER_REF_KEY = "$EventManager";
+  String DATASET_DAO_REF_KEY = "$DatasetDAO";
 
   enum JobStatus {
     SCHEDULED,

@@ -24,7 +24,6 @@ public class DataSourceBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSourceBuilder.class);
   private static final String MYSQL_FLYWAY_PATH = "classpath:db/migration/mysql";
-  private static final String H2_FLYWAY_PATH = "classpath:db/migration/h2";
   private static final String FLYWAY_BASELINE_VERSION = "1.40.0";
 
   public DataSource build(final DatabaseConfiguration dbConfig) {
@@ -57,12 +56,9 @@ public class DataSourceBuilder {
 
   /**
    * Returns the flyway locations with the sql scripts corresponding to the database.
-   * Supports h2 and MySql.
+   * Only supports MySql. h2 has been removed
    */
   private static String getSqlScriptsLocations(final String url) {
-    if (url.startsWith("jdbc:h2")) {
-      return H2_FLYWAY_PATH;
-    }
     return MYSQL_FLYWAY_PATH;
   }
 

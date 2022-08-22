@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>ai.startree.thirdeye</groupId>
-    <version>1.62.0-SNAPSHOT</version>
+    <version>1.66.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -89,6 +89,14 @@
       <artifactId>dropwizard-client</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!--reuse persistence MySQLTestDatabase class - need to import testcontainers and aspect todo cyril make all dependencies packaged together -->
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-persistence</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
@@ -109,6 +117,8 @@
       <artifactId>aspectjweaver</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--end reuse  -->
+
     <!-- https://mvnrepository.com/artifact/io.vertx/vertx-web-client -->
   </dependencies>
 

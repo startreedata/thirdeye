@@ -163,10 +163,10 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    if (!datasets.containsKey(datasetConfig.getName())) {
+    if (!datasets.containsKey(datasetConfig.getDataset())) {
       throw new IllegalArgumentException();
     }
-    return datasets.get(datasetConfig.getName()).getLongs(COL_TIMESTAMP).max().longValue();
+    return datasets.get(datasetConfig.getDataset()).getLongs(COL_TIMESTAMP).max().longValue();
   }
 
   private URL makeUrlFromPath(String input) {

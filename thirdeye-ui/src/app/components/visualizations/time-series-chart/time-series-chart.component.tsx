@@ -327,6 +327,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                         colorScale={colorScale}
                         height={brushChartHeight}
                         initialZoom={currentZoom}
+                        margins={CHART_MARGINS}
                         series={processedBrushChartSeries}
                         top={
                             topChartHeight +

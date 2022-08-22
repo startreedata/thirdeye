@@ -14,6 +14,7 @@
 import { isEmpty, map } from "lodash";
 import { BaselineOffsetUnitsKey } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
+import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
 import {
     DAY_IN_MILLISECONDS,
     MONTH_IN_MILLISECONDS,
@@ -69,9 +70,16 @@ export function formatTreemapData(
     const parentId = `${dimensionData.column}-parent`;
 
     return [
-        { id: parentId, size: 0, parent: null },
+        { id: parentId, size: 0, parent: null, label: parentId },
         ...map(dimensionData.dimensionComparisonData, (comparisonData, k) => {
             const comparisonAndDisplayData = { ...comparisonData, columnName };
+            let metricDiffPercentage = "";
+
+            if (comparisonAndDisplayData.metricValueDiffPercentage !== null) {
+                metricDiffPercentage = Number(
+                    comparisonAndDisplayData.metricValueDiffPercentage
+                ).toFixed(2);
+            }
 
             return {
                 id: k,
@@ -80,6 +88,9 @@ export function formatTreemapData(
                 size: comparisonData.current || 1,
                 parent: parentId,
                 extraData: comparisonAndDisplayData,
+                label: `${k || EMPTY_STRING_DISPLAY}: ${
+                    comparisonAndDisplayData.current
+                } (${metricDiffPercentage}%)`,
             };
         }),
     ];

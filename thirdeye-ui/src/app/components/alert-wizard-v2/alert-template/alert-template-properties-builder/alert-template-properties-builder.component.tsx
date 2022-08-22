@@ -33,6 +33,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { getAlertTemplatesUpdatePath } from "../../../../utils/routes/routes.util";
+import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
 import { setUpFieldInputRenderConfig } from "../alert-template.utils";
 import {
@@ -118,13 +119,8 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
             </Grid>
             {requiredKeys.map((item, idx) => {
                 return (
-                    <Grid container item key={item.key} xs={12}>
-                        <Grid item lg={2} md={4} xs={12}>
-                            <Box paddingBottom={1} paddingTop={1}>
-                                <label>{item.key}</label>
-                            </Box>
-                        </Grid>
-                        <Grid item lg={3} md={5} xs={12}>
+                    <InputSection
+                        inputComponent={
                             <TextField
                                 fullWidth
                                 data-testid={`textfield-${item.key}`}
@@ -140,8 +136,14 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                                     );
                                 }}
                             />
-                        </Grid>
-                    </Grid>
+                        }
+                        key={item.key}
+                        labelComponent={
+                            <Box paddingBottom={1} paddingTop={1}>
+                                <label>{item.key}</label>
+                            </Box>
+                        }
+                    />
                 );
             })}
             {!showMore && optionalKeys.length > 0 && (
@@ -183,13 +185,8 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                     </Grid>
                     {optionalKeys.map((item, idx) => {
                         return (
-                            <Grid container item key={item.key} xs={12}>
-                                <Grid item lg={2} md={4} xs={12}>
-                                    <Box paddingBottom={1} paddingTop={1}>
-                                        <label>{item.key}</label>
-                                    </Box>
-                                </Grid>
-                                <Grid item lg={3} md={5} xs={12}>
+                            <InputSection
+                                inputComponent={
                                     <TextField
                                         fullWidth
                                         data-testid={`textfield-${item.key}`}
@@ -206,8 +203,14 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<
                                             )
                                         }
                                     />
-                                </Grid>
-                            </Grid>
+                                }
+                                key={item.key}
+                                labelComponent={
+                                    <Box paddingBottom={1} paddingTop={1}>
+                                        <label>{item.key}</label>
+                                    </Box>
+                                }
+                            />
                         );
                     })}
                 </>

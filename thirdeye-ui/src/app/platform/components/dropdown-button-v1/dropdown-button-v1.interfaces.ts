@@ -28,4 +28,5 @@ export interface DropdownButtonV1Props {
 export enum DropdownButtonTypeV1 {
     Regular,
     MoreOptions,
+    Custom,
 }

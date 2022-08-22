@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler.monitor;
 
-import ai.startree.thirdeye.detection.anomaly.job.JobRunnable;
+import ai.startree.thirdeye.scheduler.JobRunnable;
 import ai.startree.thirdeye.spi.Constants.JobStatus;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;

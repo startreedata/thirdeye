@@ -33,6 +33,7 @@ public class ApiResource {
   private final EventResource eventResource;
   private final TaskResource taskResource;
   private final UiResource uiResource;
+  private final EnumerationItemResource enumerationItemResource;
 
   @Inject
   public ApiResource(final AppAnalyticsResource appAnalyticsResource,
@@ -49,7 +50,8 @@ public class ApiResource {
       final RcaResource rcaResource,
       final EventResource eventResource,
       final TaskResource taskResource,
-      final UiResource uiResource) {
+      final UiResource uiResource,
+      final EnumerationItemResource enumerationItemResource) {
     this.appAnalyticsResource = appAnalyticsResource;
     this.authResource = authResource;
     this.authInfoResource = authInfoResource;
@@ -65,6 +67,7 @@ public class ApiResource {
     this.eventResource = eventResource;
     this.taskResource = taskResource;
     this.uiResource = uiResource;
+    this.enumerationItemResource = enumerationItemResource;
   }
 
   @Path("app-analytics")
@@ -105,6 +108,11 @@ public class ApiResource {
   @Path("alert-templates")
   public AlertTemplateResource getAlertTemplateResource() {
     return alertTemplateResource;
+  }
+
+  @Path("enumeration-items")
+  public EnumerationItemResource getEnumerationItemResource() {
+    return enumerationItemResource;
   }
 
   @Path("subscription-groups")

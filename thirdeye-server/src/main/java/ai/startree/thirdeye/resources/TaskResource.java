@@ -15,8 +15,8 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;

@@ -53,7 +53,8 @@
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\", ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${baselineOffset}', '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.tableName": "${dataset}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}, ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${baselineOffset}', '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
@@ -86,7 +87,8 @@
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\", ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.tableName": "${dataset}",
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}, ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
@@ -103,6 +105,7 @@
     },
     "dataset": {
       "name": "${dataset}",
+      "dimensions": "${rcaIncludedDimensions}",
       "rcaExcludedDimensions": "${rcaExcludedDimensions}",
       "completenessDelay": "${completenessDelay}"
     },
@@ -118,12 +121,15 @@
   },
   "defaultProperties": {
     "timezone": "UTC",
+    "timeColumn": "AUTO",
+    "timeColumnFormat": "",
     "pattern": "UP_OR_DOWN",
     "completenessDelay": "P0D",
     "mergeMaxGap": "",
     "mergeMaxDuration": "",
     "rcaAggregationFunction": "",
     "queryFilters": "",
+    "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
     "queryLimit": "100000000"
   }

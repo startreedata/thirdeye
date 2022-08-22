@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
@@ -23,7 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestRcaInvestigationManager {
@@ -81,9 +82,14 @@ public class TestRcaInvestigationManager {
     return session;
   }
 
-  @BeforeMethod
-  void beforeMethod() {
-    sessionDAO = new TestDatabase().createInjector().getInstance(RcaInvestigationManager.class);
+  @BeforeClass
+  void beforeClass() {
+    sessionDAO = MySqlTestDatabase.sharedInjector().getInstance(RcaInvestigationManager.class);
+  }
+
+  @AfterMethod
+  void cleanCreatedEntities() {
+    sessionDAO.findAll().forEach(sessionDAO::delete);
   }
 
   @Test
@@ -92,7 +98,7 @@ public class TestRcaInvestigationManager {
   }
 
   @Test
-  public void testUpdateSession() throws Exception {
+  public void testUpdateSession() {
     RcaInvestigationDTO session = makeDefault();
     this.sessionDAO.save(session);
 

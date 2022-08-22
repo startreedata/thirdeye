@@ -13,8 +13,10 @@
  */
 package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -224,7 +226,8 @@ public class PinotDatasetOnboarder {
       Schema schema) {
     LOG.info("Checking for dimensions changes in {}", dataset);
     List<String> schemaDimensions = schema.getDimensionNames();
-    List<String> datasetDimensions = datasetConfig.getDimensions();
+    List<String> datasetDimensions = optional(datasetConfig.getDimensions()).map(Templatable::value)
+        .orElse(new ArrayList<>());
 
     // remove blacklisted dimensions
     Iterator<String> itDimension = schemaDimensions.iterator();
@@ -279,7 +282,7 @@ public class PinotDatasetOnboarder {
         .isNotEmpty(dimensionsToRemove)) {
       datasetDimensions.addAll(dimensionsToAdd);
       datasetDimensions.removeAll(dimensionsToRemove);
-      datasetConfig.setDimensions(datasetDimensions);
+      datasetConfig.setDimensions(Templatable.of(datasetDimensions));
 
       if (!datasetConfig.isAdditive()
           && CollectionUtils.isNotEmpty(datasetConfig.getDimensionsHaveNoPreAggregation())) {
@@ -374,7 +377,7 @@ public class PinotDatasetOnboarder {
     DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
     DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
     String timeFormatStr = formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
-        .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT.toString(), formatSpec.getSDFPattern())
+        .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT, formatSpec.getSDFPattern())
         : TimeFormat.EPOCH.toString();
     if (!datasetConfig.getTimeColumn().equals(timeColumnName)
         || !datasetConfig.getTimeFormat().equals(timeFormatStr)
@@ -396,7 +399,7 @@ public class PinotDatasetOnboarder {
    * @param datasetConfig the current dataset config to be appended with new custom config.
    * @param customConfigs the custom config to be matched with that from dataset config.
    *
-   *     TODO: Remove out-of-date Pinot custom config from dataset config.
+   *         TODO: Remove out-of-date Pinot custom config from dataset config.
    */
   private void appendNewCustomConfigs(DatasetConfigDTO datasetConfig,
       Map<String, String> customConfigs) {

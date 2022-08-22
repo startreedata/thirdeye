@@ -30,9 +30,9 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeResultSetDataTable.class);
 
   private final ThirdEyeResultSet thirdEyeResultSet;
-  private List<String> columns = new ArrayList<>();
-  private List<ColumnType> columnTypes = new ArrayList<>();
-  private int groupKeyLength;
+  private final List<String> columns = new ArrayList<>();
+  private final List<ColumnType> columnTypes = new ArrayList<>();
+  private final int groupKeyLength;
   private DataFrame dataFrame;
 
   public ThirdEyeResultSetDataTable(final ThirdEyeResultSet thirdEyeResultSet) {

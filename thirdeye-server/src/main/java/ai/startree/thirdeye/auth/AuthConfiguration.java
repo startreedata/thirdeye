@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.auth;
 
+import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
+import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AuthConfiguration {
@@ -21,6 +23,9 @@ public class AuthConfiguration {
 
   @JsonProperty("oauth")
   private OAuthConfiguration oAuthConfig;
+
+  @JsonProperty("basic")
+  private BasicAuthConfiguration basicAuthConfig;
 
   public OAuthConfiguration getOAuthConfig() {
     return oAuthConfig;
@@ -37,6 +42,16 @@ public class AuthConfiguration {
 
   public AuthConfiguration setEnabled(final boolean enabled) {
     this.enabled = enabled;
+    return this;
+  }
+
+  public BasicAuthConfiguration getBasicAuthConfig() {
+    return basicAuthConfig;
+  }
+
+  public AuthConfiguration setBasicAuthConfig(
+      final BasicAuthConfiguration basicAuthConfig) {
+    this.basicAuthConfig = basicAuthConfig;
     return this;
   }
 }

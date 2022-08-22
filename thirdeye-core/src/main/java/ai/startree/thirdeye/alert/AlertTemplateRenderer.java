@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
-import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -134,9 +133,10 @@ public class AlertTemplateRenderer {
     // add source metadata to each node
     if (template.getNodes() != null) {
       template.getNodes().stream()
-          .filter(node -> node.getType().equals(AnomalyDetectorPlanNode.TYPE))
+          // TODO spyne remove magic string. This was done to remove dependency of AnomalyDetector.TYPE on the renderer
+          .filter(node -> node.getType().equals("AnomalyDetector"))
           .forEach(node -> node.getParams()
-              .put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
+              .putValue("anomaly.source", String.format("%s/%s", alertName, node.getName())));
     }
 
     return StringTemplateUtils.applyContext(template, properties);

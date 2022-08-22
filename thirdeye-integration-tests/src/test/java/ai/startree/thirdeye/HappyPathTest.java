@@ -20,9 +20,12 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
@@ -47,8 +50,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -71,7 +72,6 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
   private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
-  private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
   private static final AlertApi ALERT_API;
@@ -88,17 +88,14 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private JdbcDatabaseContainer<?> persistenceDbContainer;
 
   // this attribute is shared between tests
   private long anomalyId;
   private long alertId;
 
-
   @BeforeClass
-  public void beforeClass() throws Exception {
-    persistenceDbContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE);
-    persistenceDbContainer.start();
+  public void beforeClass() {
+    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
     setupPluginsDirAbsolutePath();
@@ -106,10 +103,10 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("happypath/config/server.yaml"),
         config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", persistenceDbContainer.getJdbcUrl() + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED"),
-        config("database.user", persistenceDbContainer.getUsername()),
-        config("database.password", persistenceDbContainer.getPassword()),
-        config("database.driver", persistenceDbContainer.getDriverClassName())
+        config("database.url", dbConfiguration.getUrl()),
+        config("database.user", dbConfiguration.getUser()),
+        config("database.password", dbConfiguration.getPassword()),
+        config("database.driver", dbConfiguration.getDriver())
     );
     SUPPORT.before();
     final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
@@ -139,12 +136,11 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
   }
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   public void afterClass() {
     log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
     SUPPORT.after();
-    log.info("Stopping mysqlDb at port: {}", persistenceDbContainer.getJdbcUrl());
-    persistenceDbContainer.stop();
+    MySqlTestDatabase.cleanSharedDatabase();
   }
 
   @Test()
@@ -169,6 +165,14 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
     Response response = request("api/data-sources")
         .post(Entity.json(List.of(dataSourceApi)));
+    assertThat(response.getStatus()).isEqualTo(200);
+  }
+
+  @Test(dependsOnMethods = "testPing")
+  public void testCreateDefaultTemplates() {
+    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    formData.add("updateExisting", "true");
+    Response response = request("/api/alert-templates/load-defaults").post(Entity.form(formData));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
@@ -227,7 +231,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     List<Map<String, Object>> anomalies = List.of();
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
-      Thread.sleep(8000);
+      Thread.sleep(1000);
       Response response = request("api/anomalies").get();
       assertThat(response.getStatus()).isEqualTo(200);
       anomalies = response.readEntity(List.class);
@@ -250,6 +254,14 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     HeatMapResultApi heatmap = response.readEntity(HeatMapResultApi.class);
     assertThat(heatmap.getBaseline().getBreakdown().size()).isGreaterThan(0);
     assertThat(heatmap.getCurrent().getBreakdown().size()).isGreaterThan(0);
+  }
+
+  @Test(dependsOnMethods = "testGetSingleAnomaly")
+  public void testGetTopContributors() {
+    Response response = request("api/rca/dim-analysis?id=" + anomalyId).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(DimensionAnalysisResultApi.class);
+    assertThat(dimensionAnalysisResultApi.getResponseRows().size()).isGreaterThan(0);
   }
 
   private Builder request(final String urlFragment) {

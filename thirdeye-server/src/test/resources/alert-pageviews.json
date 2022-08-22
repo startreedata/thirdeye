@@ -1,0 +1,19 @@
+{
+  "name": "pageviews-threshold",
+  "description": "Sample description payload for testing",
+  "template": {
+    "name": "startree-threshold"
+  },
+  "templateProperties": {
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "aggregationFunction": "sum",
+    "aggregationColumn": "views",
+    "monitoringGranularity": "P1D",
+    "timeColumn": "date",
+    "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+    "max": "900000",
+    "min": "300000"
+  },
+  "cron": "0 0 * * * ? *"
+}

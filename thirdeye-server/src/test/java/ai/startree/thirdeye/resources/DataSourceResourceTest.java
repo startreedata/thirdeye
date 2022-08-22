@@ -17,8 +17,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 public class DataSourceResourceTest {
 
   private final String dataSourceName = "test";
-  private final ThirdEyePrincipal principal = new ThirdEyePrincipal();
+  private final ThirdEyePrincipal principal = new ThirdEyePrincipal("test");
   private ThirdEyeDataSource dataSource;
   private DataSourceCache dataSourceCache;
   private DataSourceResource dataSourceResource;

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import ai.startree.thirdeye.datalayer.TestDatabase;
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.events.EventType;
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -31,7 +32,12 @@ public class TestEventManager {
 
   @BeforeClass
   void beforeClass() {
-    eventDAO = new TestDatabase().createInjector().getInstance(EventManager.class);
+    eventDAO = MySqlTestDatabase.sharedInjector().getInstance(EventManager.class);
+  }
+
+  @AfterClass
+  void clean() {
+    eventDAO.findAll().forEach(eventDAO::delete);
   }
 
   @Test

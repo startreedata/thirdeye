@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
+import java.util.StringJoiner;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -51,5 +52,14 @@ public class EnumerationItemDTO extends AbstractDTO {
   public EnumerationItemDTO setParams(final Map<String, Object> params) {
     this.params = params;
     return this;
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", EnumerationItemDTO.class.getSimpleName() + "[", "]")
+        .add("name='" + name + "'")
+        .add("description='" + description + "'")
+        .add("params=" + params)
+        .toString();
   }
 }

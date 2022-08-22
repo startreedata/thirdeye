@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -23,24 +22,24 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
-    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { getDataset, updateDataset } from "../../rest/datasets/datasets.rest";
-import { getAllDatasources } from "../../rest/datasources/datasources.rest";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetDataset } from "../../rest/datasets/datasets.actions";
+import { updateDataset } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
-import { Datasource } from "../../rest/dto/datasource.interfaces";
-import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getDatasetsViewPath } from "../../utils/routes/routes.util";
+import {
+    getDatasetsAllPath,
+    getDatasetsViewPath,
+} from "../../utils/routes/routes.util";
 import { DatasetsUpdatePageParams } from "./datasets-update-page.interfaces";
 
 export const DatasetsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [dataset, setDataset] = useState<Dataset>();
-    const [datasources, setDatasources] = useState<Datasource[]>([]);
+    const { dataset, getDataset, status, errorMessages } = useGetDataset();
     const params = useParams<DatasetsUpdatePageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -49,6 +48,25 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     useEffect(() => {
         fetchDataset();
     }, []);
+
+    useEffect(() => {
+        if (status !== ActionStatus.Error) {
+            return;
+        }
+
+        isEmpty(errorMessages)
+            ? notify(
+                  NotificationTypeV1.Error,
+                  t("message.error-while-fetching", {
+                      entity: t("label.dataset"),
+                  })
+              )
+            : errorMessages.map((err) => notify(NotificationTypeV1.Error, err));
+    }, [errorMessages]);
+
+    const handleCancelClick = (): void => {
+        navigate(getDatasetsAllPath());
+    };
 
     const onDatasetWizardFinish = (dataset: Dataset): void => {
         if (!dataset) {
@@ -93,56 +111,13 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                     id: params.id,
                 })
             );
-            setLoading(false);
 
             return;
         }
 
-        Promise.allSettled([
-            getDataset(toNumber(params.id)),
-            getAllDatasources(),
-        ])
-            .then(([datasetResponse, datasourcesResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    datasetResponse.status === PROMISES.REJECTED ||
-                    datasourcesResponse.status === PROMISES.REJECTED
-                ) {
-                    const axiosError =
-                        datasourcesResponse.status === PROMISES.REJECTED
-                            ? datasourcesResponse.reason
-                            : datasetResponse.status === PROMISES.REJECTED
-                            ? datasetResponse.reason
-                            : ({} as AxiosError);
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      datasourcesResponse.status ===
-                                          PROMISES.REJECTED
-                                          ? "label.datasources"
-                                          : "label.dataset"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
-                }
-
-                // Attempt to gather data
-                if (datasetResponse.status === PROMISES.FULFILLED) {
-                    setDataset(datasetResponse.value);
-                }
-                if (datasourcesResponse.status === PROMISES.FULFILLED) {
-                    setDatasources(datasourcesResponse.value);
-                }
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
+        getDataset(toNumber(params.id)).finally((): void => {
+            setLoading(false);
+        });
     };
 
     if (loading) {
@@ -156,20 +131,19 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                     entity: t("label.dataset"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {dataset && (
-                        <DatasetWizard
-                            dataset={dataset}
-                            datasources={datasources}
-                            onFinish={onDatasetWizardFinish}
-                        />
-                    )}
+            {dataset && (
+                <DatasetWizard
+                    dataset={dataset}
+                    submitBtnLabel={t("label.update-entity", {
+                        entity: t("label.dataset"),
+                    })}
+                    onCancel={handleCancelClick}
+                    onSubmit={onDatasetWizardFinish}
+                />
+            )}
 
-                    {/* No data available message */}
-                    {!dataset && <NoDataIndicator />}
-                </Grid>
-            </PageContentsGridV1>
+            {/* No data available message */}
+            {!dataset && <NoDataIndicator />}
         </PageV1>
     );
 };

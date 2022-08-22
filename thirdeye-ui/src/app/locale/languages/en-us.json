@@ -32,6 +32,7 @@
         "page-not-found": "Page Not Found",
         "create": "Create",
         "create-entity": "Create {{entity}}",
+        "onboard-entity": "Onboard {{entity}}",
         "add": "Add",
         "add-entity": "Add {{entity}}",
         "update": "Update",

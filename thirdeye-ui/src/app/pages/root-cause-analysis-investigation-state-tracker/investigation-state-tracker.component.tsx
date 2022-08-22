@@ -48,7 +48,6 @@ import {
 } from "../../utils/investigation/investigation.util";
 import {
     getAlertsViewPath,
-    getAnomaliesAllPath,
     getAnomaliesAnomalyViewPath,
 } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
@@ -198,7 +197,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                 <Box display="inline">
                     <Link
                         className={classes.linkButton}
-                        href={getAnomaliesAllPath()}
+                        href={getAnomaliesAnomalyViewPath(Number(anomalyId))}
                     >
                         <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
                         {t("label.back-to-anomalies")}

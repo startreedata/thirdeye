@@ -92,6 +92,19 @@ describe("AlertWizardV2/AlertTemplate Utils", () => {
             )
         ).toEqual(true);
     });
+
+    it("hasRequiredPropertyValuesSet return true if a field is an array or boolean", () => {
+        expect(
+            hasRequiredPropertyValuesSet(
+                ["arrayField", "booleanField"],
+                {
+                    arrayField: [],
+                    booleanField: false,
+                },
+                {}
+            )
+        ).toEqual(true);
+    });
 });
 
 const MOCK_ALERT_TEMPLATE = {

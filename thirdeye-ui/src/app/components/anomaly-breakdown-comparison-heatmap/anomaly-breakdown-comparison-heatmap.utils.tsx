@@ -73,12 +73,19 @@ export function formatTreemapData(
         { id: parentId, size: 0, parent: null, label: parentId },
         ...map(dimensionData.dimensionComparisonData, (comparisonData, k) => {
             const comparisonAndDisplayData = { ...comparisonData, columnName };
-            let metricDiffPercentage = "";
+            let label = `${k || EMPTY_STRING_DISPLAY}: ${
+                comparisonAndDisplayData.current
+            }`;
 
             if (comparisonAndDisplayData.metricValueDiffPercentage !== null) {
-                metricDiffPercentage = Number(
+                const metricDiffPercentage = Number(
                     comparisonAndDisplayData.metricValueDiffPercentage
                 ).toFixed(2);
+                label += ` (${metricDiffPercentage}%)`;
+            } else if (comparisonAndDisplayData.baseline === 0) {
+                if (comparisonAndDisplayData.current > 0) {
+                    label += ` (100.00%)`;
+                }
             }
 
             return {
@@ -88,9 +95,7 @@ export function formatTreemapData(
                 size: comparisonData.current || 1,
                 parent: parentId,
                 extraData: comparisonAndDisplayData,
-                label: `${k || EMPTY_STRING_DISPLAY}: ${
-                    comparisonAndDisplayData.current
-                } (${metricDiffPercentage}%)`,
+                label,
             };
         }),
     ];

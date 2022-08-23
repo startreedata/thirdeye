@@ -18,12 +18,18 @@ import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.HasJsonVal;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import java.sql.Timestamp;
 import org.modelmapper.ModelMapper;
 
 public class DtoIndexMapper {
 
+  /**
+   * ModelMapper is deprecated in favor of MapStruct. All future work should use mapstruct
+   * instead of ModelMapper. This is scheduled for removal.
+   */
+  @Deprecated
   private static final ModelMapper MODEL_MAPPER = new ModelMapper();
 
   static {
@@ -36,14 +42,37 @@ public class DtoIndexMapper {
   public static <E extends AbstractDTO> AbstractIndexEntity toAbstractIndexEntity(final E pojo,
       final Class<? extends AbstractIndexEntity> indexClass, final String jsonVal)
       throws InstantiationException, IllegalAccessException {
-    final AbstractIndexEntity abstractIndexEntity = indexClass.newInstance();
+    final AbstractIndexEntity abstractIndexEntity = buildAbstractIndexEntity(pojo, indexClass);
+
     if (abstractIndexEntity instanceof HasJsonVal) {
       ((HasJsonVal) abstractIndexEntity).setJsonVal(jsonVal);
     }
-    MODEL_MAPPER.map(pojo, abstractIndexEntity);
     abstractIndexEntity.setBaseId(pojo.getId());
     abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 
+    return abstractIndexEntity;
+  }
+
+  private static <E extends AbstractDTO> AbstractIndexEntity buildAbstractIndexEntity(final E pojo,
+      final Class<? extends AbstractIndexEntity> indexClass)
+      throws InstantiationException, IllegalAccessException {
+    if (pojo instanceof MergedAnomalyResultDTO) {
+      return MergedAnomalyIndexMapper.INSTANCE.toMergedAnomalyResultIndex((MergedAnomalyResultDTO) pojo);
+    }
+    return buildWithLegacyModelMapper(
+        pojo,
+        indexClass);
+  }
+
+  /**
+   * TODO spyne remove modelmapper code and dependencies
+   */
+  private static <E extends AbstractDTO> AbstractIndexEntity buildWithLegacyModelMapper(
+      final E pojo,
+      final Class<? extends AbstractIndexEntity> indexClass)
+      throws InstantiationException, IllegalAccessException {
+    final AbstractIndexEntity abstractIndexEntity = indexClass.newInstance();
+    MODEL_MAPPER.map(pojo, abstractIndexEntity);
     return abstractIndexEntity;
   }
 }

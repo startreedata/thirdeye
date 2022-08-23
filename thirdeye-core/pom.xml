@@ -161,10 +161,6 @@
       <artifactId>icu4j</artifactId>
       <version>62.1</version>
     </dependency>
-    <dependency>
-      <groupId>org.mapstruct</groupId>
-      <artifactId>mapstruct</artifactId>
-    </dependency>
 
     <!-- Subscription/Notification dependencies -->
     <!-- https://mvnrepository.com/artifact/com.atlassian.jira/jira-rest-java-client-api -->

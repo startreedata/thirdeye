@@ -28,6 +28,7 @@ public class MergedAnomalyResultIndex extends AbstractIndexEntity {
   DimensionMap dimensions;
   boolean notified;
   boolean child;
+  Long enumerationItemId;
 
   public long getDetectionConfigId() {
     return detectionConfigId;
@@ -115,5 +116,14 @@ public class MergedAnomalyResultIndex extends AbstractIndexEntity {
 
   public void setChild(boolean child) {
     this.child = child;
+  }
+
+  public Long getEnumerationItemId() {
+    return enumerationItemId;
+  }
+
+  public MergedAnomalyResultIndex setEnumerationItemId(final Long enumerationItemId) {
+    this.enumerationItemId = enumerationItemId;
+    return this;
   }
 }

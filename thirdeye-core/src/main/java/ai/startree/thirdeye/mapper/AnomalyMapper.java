@@ -30,7 +30,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses={AnomalyFeedbackMapper.class, MetricMapper.class})
+@Mapper(uses={AnomalyFeedbackMapper.class, MetricMapper.class, EnumerationItemMapper.class})
 public interface AnomalyMapper {
 
   AnomalyMapper INSTANCE = Mappers.getMapper(AnomalyMapper.class);
@@ -73,7 +73,8 @@ public interface AnomalyMapper {
         .setMetadata(new AlertMetadataApi()
             .setMetric(metricApi)
             .setDataset(datasetApi)
-        );
+        )
+        .setEnumerationItem(EnumerationItemMapper.INSTANCE.toApi(dto.getEnumerationItem()));
     if (dto.getMetricUrn() != null) {
       anomalyApi
           .setMetric(toMetricApi(dto.getMetricUrn())

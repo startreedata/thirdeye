@@ -14,9 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.RequestCache.buildCache;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -82,13 +80,12 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   @Override
   protected MergedAnomalyResultDTO createDto(final ThirdEyePrincipal principal,
       final AnomalyApi api) {
-    throw badRequest(ERR_OPERATION_UNSUPPORTED);
+    return toDto(api);
   }
 
   @Override
   protected MergedAnomalyResultDTO toDto(final AnomalyApi api) {
-    // For now, anomalies are to be created/edited by the system.
-    throw badRequest(ERR_OPERATION_UNSUPPORTED);
+    return ApiBeanMapper.toDto(api);
   }
 
   @Override

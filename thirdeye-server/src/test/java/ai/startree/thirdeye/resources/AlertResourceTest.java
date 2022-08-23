@@ -38,10 +38,10 @@ public class AlertResourceTest {
     URL resource = requireNonNull(classLoader.getResource("alertEvaluation.json"));
     final String jsonString = Resources.toString(resource, StandardCharsets.UTF_8);
     resource = classLoader.getResource("alertEvaluation-context.json");
-    final Map<String, Object> alertEvaluationPlanApiContext = ThirdEyeSerialization.newObjectMapper()
+    final Map<String, Object> alertEvaluationPlanApiContext = ThirdEyeSerialization.getObjectMapper()
         .readValue(resource.openStream(), Map.class);
 
-    final AlertEvaluationApi api = ThirdEyeSerialization.newObjectMapper().readValue(StringTemplateUtils.renderTemplate(
+    final AlertEvaluationApi api = ThirdEyeSerialization.getObjectMapper().readValue(StringTemplateUtils.renderTemplate(
         jsonString,
         alertEvaluationPlanApiContext), AlertEvaluationApi.class);
 

@@ -29,7 +29,7 @@ public class PlanNodeApiTest {
   @Test
   public void testInputNode() throws IOException {
     URL resource = PlanNodeApiTest.class.getClassLoader().getResource("inputNode.json");
-    final PlanNodeApi inputNode = ThirdEyeSerialization.newObjectMapper().readValue(
+    final PlanNodeApi inputNode = ThirdEyeSerialization.getObjectMapper().readValue(
         Resources.toString(resource, StandardCharsets.UTF_8),
         PlanNodeApi.class);
     Assert.assertEquals(inputNode.getName(), "baselineDataFetcher");
@@ -43,7 +43,7 @@ public class PlanNodeApiTest {
   @Test
   public void testDetectionNode() throws IOException {
     URL resource = PlanNodeApiTest.class.getClassLoader().getResource("detectionNode.json");
-    final PlanNodeApi inputNode = ThirdEyeSerialization.newObjectMapper().readValue(Resources.toString(resource,
+    final PlanNodeApi inputNode = ThirdEyeSerialization.getObjectMapper().readValue(Resources.toString(resource,
         StandardCharsets.UTF_8),
         PlanNodeApi.class);
     Assert.assertEquals(inputNode.getName(), "percentageChangeDetector");

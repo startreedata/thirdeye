@@ -39,7 +39,7 @@ import org.testng.annotations.Test;
 public class ForkJoinEvaluationApiTest {
 
   private static final String RESOURCES_PATH = "/forkJoinEvaluationApiTest";
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   private static AlertEvaluationApi getAlertEvaluationApi(final String filename) {
     final String path = String.format("%s/%s", RESOURCES_PATH, filename);

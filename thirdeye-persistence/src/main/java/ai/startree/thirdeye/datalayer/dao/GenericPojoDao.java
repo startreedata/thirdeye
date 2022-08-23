@@ -62,7 +62,7 @@ public class GenericPojoDao {
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final int MAX_BATCH_SIZE = 1000;
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   private final Counter dbReadCallCounter;
   private final Counter dbWriteCallCounter;

@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 
 public class TestTemplatableSerialization {
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
   private static final String DOUBLE_QUOTE = "\"";
 
   @Test

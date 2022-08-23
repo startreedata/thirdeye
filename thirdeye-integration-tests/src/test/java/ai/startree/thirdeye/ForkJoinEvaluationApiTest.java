@@ -113,4 +113,28 @@ public class ForkJoinEvaluationApiTest {
 
     assertThat(anomalyCounts).isEqualTo(Set.of(0, 1));
   }
+
+  @Test(enabled = false)
+  public void testDimensionExplorationWithTwoVariables() {
+    final AlertEvaluationApi alertEvaluationApi = getAlertEvaluationApi(
+        "dimension-exploration-with-2variables.json");
+
+    final Response response = client.target("http://localhost:8080/api/alerts/evaluate")
+        .request()
+        .post(Entity.json(alertEvaluationApi));
+
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    final AlertEvaluationApi result = response.readEntity(AlertEvaluationApi.class);
+
+    final Map<String, DetectionEvaluationApi> detectionEvaluations = result.getDetectionEvaluations();
+    assertThat(detectionEvaluations.size()).isEqualTo(3);
+
+    final Set<Integer> anomalyCounts = detectionEvaluations.values()
+        .stream()
+        .map(e -> e.getAnomalies().size())
+        .collect(Collectors.toSet());
+
+    assertThat(anomalyCounts).isEqualTo(Set.of(0, 1, 26));
+  }
 }

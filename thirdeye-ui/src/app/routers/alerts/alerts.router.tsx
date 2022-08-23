@@ -14,6 +14,7 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { AlertsUpdateBasePage } from "../../pages/alerts-update-page/alerts-update-base-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
@@ -59,10 +60,16 @@ const AlertsCreateSimplePage = lazy(() =>
     ).then((module) => ({ default: module.AlertsCreateSimplePage }))
 );
 
-const AlertsUpdatePage = lazy(() =>
+const AlertsUpdateAdvancedPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-update-page" */ "../../pages/alerts-update-page/alerts-update-page.component"
-    ).then((module) => ({ default: module.AlertsUpdatePage }))
+        /* webpackChunkName: "alerts-update-advanced-page" */ "../../pages/alerts-update-page/alerts-update-advanced-page.component"
+    ).then((module) => ({ default: module.AlertsUpdateAdvancedPage }))
+);
+
+const AlertsUpdateSimplePage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-update-simple-page" */ "../../pages/alerts-update-page/alerts-update-simple-page.component"
+    ).then((module) => ({ default: module.AlertsUpdateSimplePage }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -197,10 +204,34 @@ export const AlertsRouter: FunctionComponent = () => {
                         }
                         path={AppRouteRelative.ALERTS_VIEW}
                     />
+
                     <Route
-                        element={<AlertsUpdatePage />}
+                        element={<AlertsUpdateBasePage />}
                         path={AppRouteRelative.ALERTS_UPDATE}
-                    />
+                    >
+                        <Route
+                            index
+                            element={
+                                <RedirectWithDefaultParams
+                                    customDurationGenerator={() => {
+                                        return generateDateRangeMonthsFromNow(
+                                            1
+                                        );
+                                    }}
+                                    to={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
+                                />
+                            }
+                        />
+
+                        <Route
+                            element={<AlertsUpdateSimplePage />}
+                            path={AppRouteRelative.ALERTS_UPDATE_SIMPLE}
+                        />
+                        <Route
+                            element={<AlertsUpdateAdvancedPage />}
+                            path={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
+                        />
+                    </Route>
 
                     {/* No match found, render page not found */}
                     <Route element={<PageNotFoundPage />} path="*" />

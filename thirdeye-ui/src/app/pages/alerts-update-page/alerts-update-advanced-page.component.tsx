@@ -15,27 +15,27 @@ import { Box, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
-import { AlertJson } from "../../../components/alert-wizard-v2/alert-json/alert-json.component";
-import { AlertNotifications } from "../../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
+import { AlertJson } from "../../components/alert-wizard-v2/alert-json/alert-json.component";
+import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import {
     findRequiredFields,
     hasRequiredPropertyValuesSet,
-} from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
-import { PreviewChart } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
-import { MessageDisplayState } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
-import { PageContentsCardV1 } from "../../../platform/components";
-import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
+} from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
+import { MessageDisplayState } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
+import { PageContentsCardV1 } from "../../platform/components";
+import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
+import { EditableAlert } from "../../rest/dto/alert.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
-export const AlertsCreateAdvancePage: FunctionComponent = () => {
+export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
         useState(false);
     const [
         alert,
         onAlertPropertyChange,
-        ,
+        selectedSubscriptionGroups,
         onSubscriptionGroupsChange,
         selectedAlertTemplate,
     ] =
@@ -97,7 +97,9 @@ export const AlertsCreateAdvancePage: FunctionComponent = () => {
             <Grid item xs={12}>
                 <AlertNotifications
                     alert={alert}
-                    initiallySelectedSubscriptionGroups={[]}
+                    initiallySelectedSubscriptionGroups={
+                        selectedSubscriptionGroups
+                    }
                     onSubscriptionGroupsChange={onSubscriptionGroupsChange}
                 />
             </Grid>

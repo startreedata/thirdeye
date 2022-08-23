@@ -21,6 +21,7 @@ import { SubscriptionGroups } from "./subscription-groups/subscription-groups.co
 export const AlertNotifications: FunctionComponent<AlertNotificationsProps> = ({
     alert,
     onSubscriptionGroupsChange,
+    initiallySelectedSubscriptionGroups,
 }) => {
     const { t } = useTranslation();
     const [isNotificationsOn, setIsNotificationsOn] = useState(false);
@@ -56,6 +57,9 @@ export const AlertNotifications: FunctionComponent<AlertNotificationsProps> = ({
                 {isNotificationsOn && (
                     <SubscriptionGroups
                         alert={alert}
+                        initialSubscriptionGroups={
+                            initiallySelectedSubscriptionGroups
+                        }
                         onSubscriptionGroupsChange={onSubscriptionGroupsChange}
                     />
                 )}

@@ -13,21 +13,18 @@
  */
 package ai.startree.thirdeye.datalayer.dao;
 
+import static ai.startree.thirdeye.datalayer.mapper.DtoIndexMapper.toAbstractIndexEntity;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
-import ai.startree.thirdeye.datalayer.entity.HasJsonVal;
-import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
-import ai.startree.thirdeye.datalayer.mapper.RcaInvestigationIndexMapper;
 import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
 import ai.startree.thirdeye.datalayer.util.SqlQueryBuilder;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
@@ -53,7 +50,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
-import org.modelmapper.ModelMapper;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,15 +61,8 @@ public class GenericPojoDao {
 
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final int MAX_BATCH_SIZE = 1000;
-  private static final ModelMapper MODEL_MAPPER = new ModelMapper();
 
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
-
-  static {
-    // add custom mapping from DTO to index
-    MODEL_MAPPER.createTypeMap(RcaInvestigationDTO.class, RcaInvestigationIndex.class)
-        .addMappings(new RcaInvestigationIndexMapper());
-  }
 
   private final Counter dbReadCallCounter;
   private final Counter dbWriteCallCounter;
@@ -116,7 +105,8 @@ public class GenericPojoDao {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   public List<String> getIndexedColumns(final Class beanClass) {
-    final Class<? extends AbstractIndexEntity> indexEntityClass = SubEntities.BEAN_INDEX_MAP.get(beanClass);
+    final Class<? extends AbstractIndexEntity> indexEntityClass = SubEntities.BEAN_INDEX_MAP.get(
+        beanClass);
     final Set<Field> allFields = ReflectionUtils.getAllFields(indexEntityClass);
     final List<String> indexedColumnNames = new ArrayList<>();
     for (final Field field : allFields) {
@@ -161,15 +151,12 @@ public class GenericPojoDao {
               }
             }
             if (indexClass != null) {
-              final AbstractIndexEntity abstractIndexEntity = indexClass.newInstance();
-              MODEL_MAPPER.map(pojo, abstractIndexEntity);
-              abstractIndexEntity.setBaseId(pojo.getId());
-              abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-              abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+              final AbstractIndexEntity abstractIndexEntity = toAbstractIndexEntity(
+                  pojo,
+                  indexClass,
+                  jsonVal);
               abstractIndexEntity.setVersion(1);
-              if (abstractIndexEntity instanceof HasJsonVal) {
-                ((HasJsonVal) abstractIndexEntity).setJsonVal(jsonVal);
-              }
+              abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
               final int numRowsCreated;
               try (final PreparedStatement indexTableInsertStatement = sqlQueryBuilder
@@ -310,13 +297,10 @@ public class GenericPojoDao {
     if (affectedRows == 1) {
       dbWriteByteCounter.inc(jsonVal.length());
       if (indexClass != null) {
-        final AbstractIndexEntity abstractIndexEntity = indexClass.newInstance();
-        MODEL_MAPPER.map(pojo, abstractIndexEntity);
-        abstractIndexEntity.setBaseId(pojo.getId());
-        if (abstractIndexEntity instanceof HasJsonVal) {
-          ((HasJsonVal) abstractIndexEntity).setJsonVal(jsonVal);
-        }
-        abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+        final AbstractIndexEntity abstractIndexEntity = toAbstractIndexEntity(pojo,
+            indexClass,
+            jsonVal);
+
         //updates all columns in the index table by default
         try (final PreparedStatement indexTableInsertStatement = sqlQueryBuilder
             .createUpdateStatementForIndexTable(connection, abstractIndexEntity)) {
@@ -366,7 +350,8 @@ public class GenericPojoDao {
     return OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
   }
 
-  public <E extends AbstractDTO> List<E> list(final Class<E> beanClass, final long limit, final long offset) {
+  public <E extends AbstractDTO> List<E> list(final Class<E> beanClass, final long limit,
+      final long offset) {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -404,7 +389,8 @@ public class GenericPojoDao {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(beanClass);
+        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(
+            beanClass);
         try (final PreparedStatement selectStatement = sqlQueryBuilder
             .createCountStatement(connection, indexClass)) {
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
@@ -426,9 +412,12 @@ public class GenericPojoDao {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(beanClass);
+        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(
+            beanClass);
         try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createCountWhereStatement(connection, new DaoFilter().setPredicate(predicate), indexClass)) {
+            .createCountWhereStatement(connection,
+                new DaoFilter().setPredicate(predicate),
+                indexClass)) {
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
               return resultSet.getInt(1);
@@ -592,7 +581,8 @@ public class GenericPojoDao {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(pojoClass);
+        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(
+            pojoClass);
         final List<? extends AbstractIndexEntity> indexEntities;
         try (final PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
             .createStatementFromSQL(connection,
@@ -696,7 +686,8 @@ public class GenericPojoDao {
     try {
       //apply the predicates and fetch the primary key ids
       return runTask(connection -> {
-        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(daoFilter.getBeanClass());
+        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(
+            daoFilter.getBeanClass());
         //find the matching ids
         final List<? extends AbstractIndexEntity> indexEntities;
         try (final PreparedStatement findByParamsStatement = sqlQueryBuilder
@@ -729,12 +720,14 @@ public class GenericPojoDao {
    * @throws Exception exceptions encountered during row fetches
    */
   @SuppressWarnings("unused")
-  private void dumpTable(final Connection connection, final Class<? extends AbstractEntity> entityClass)
+  private void dumpTable(final Connection connection,
+      final Class<? extends AbstractEntity> entityClass)
       throws Exception {
     final long tStart = System.nanoTime();
     try {
       if (IS_DEBUG) {
-        try (final PreparedStatement findAllStatement = sqlQueryBuilder.createFindAllStatement(connection,
+        try (final PreparedStatement findAllStatement = sqlQueryBuilder.createFindAllStatement(
+            connection,
             entityClass)) {
           try (final ResultSet resultSet = findAllStatement.executeQuery()) {
             final List<? extends AbstractEntity> entities = genericResultSetMapper.mapAll(resultSet,
@@ -755,7 +748,8 @@ public class GenericPojoDao {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(pojoClass);
+        final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(
+            pojoClass);
         final Map<String, Object> filters = new HashMap<>();
         filters.put("id", id);
         try (final PreparedStatement deleteStatement = sqlQueryBuilder
@@ -794,7 +788,8 @@ public class GenericPojoDao {
         int minIdx = 0;
         int maxIdx = MAX_BATCH_SIZE;
         while (minIdx < idsToDelete.size()) {
-          final List<Long> subList = idsToDelete.subList(minIdx, Math.min(maxIdx, idsToDelete.size()));
+          final List<Long> subList = idsToDelete.subList(minIdx,
+              Math.min(maxIdx, idsToDelete.size()));
           try {
             final int updatedBaseRow = addBatchDeletionToConnection(subList,
                 indexEntityClass,

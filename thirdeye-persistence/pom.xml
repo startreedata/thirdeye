@@ -77,6 +77,12 @@
       <artifactId>flyway-mysql</artifactId>
     </dependency>
 
+    <!-- Object mapping utilities -->
+    <dependency>
+      <groupId>org.modelmapper</groupId>
+      <artifactId>modelmapper</artifactId>
+    </dependency>
+
     <!-- test dependencies -->
     <dependency>
       <groupId>org.mockito</groupId>

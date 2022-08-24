@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
@@ -48,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 
 public class AnomalyDetectorOperator extends DetectionPipelineOperator {
@@ -68,7 +66,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
         .get(Constants.DETECTION_REGISTRY_REF_KEY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
-    detector = createDetector(optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null), detectionRegistry);
+    detector = createDetector(optional(planNode.getParams()).map(TemplatableMap::valueMap)
+        .orElse(null), detectionRegistry);
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
@@ -93,17 +92,15 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    for (final Interval interval : getMonitoringWindows()) {
-      final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
-      final AnomalyDetectorResult detectorResult = detector
-          .runDetection(interval, timeSeriesMap);
+    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
+    final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
+        timeSeriesMap);
 
-      DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
+    DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
 
-      addMetadata(detectionResult);
+    addMetadata(detectionResult);
 
-      setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
-    }
+    setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
   }
 
   private void addMetadata(DetectionPipelineResult detectionPipelineResult) {
@@ -132,10 +129,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
             .map(DetectionResult::getAnomalies)
             .flatMap(Collection::stream)
             .forEach(anomaly -> anomaly.setSource(anomalySource)));
-  }
-
-  private List<Interval> getMonitoringWindows() {
-    return singletonList(detectionInterval);
   }
 
   @Override

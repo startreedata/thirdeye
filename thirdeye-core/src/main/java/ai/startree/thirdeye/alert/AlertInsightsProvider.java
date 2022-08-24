@@ -19,7 +19,6 @@ import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.Constants;
@@ -185,10 +184,11 @@ public class AlertInsightsProvider {
         List.of(timeColumnToMillisProjection)).withAlias(MAX_TIME_ALIAS);
     final QueryProjection minTimeProjection = QueryProjection.of(MetricAggFunction.MIN.toString(),
         List.of(timeColumnToMillisProjection)).withAlias(MIN_TIME_ALIAS);
-    final Builder requestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+    final CalciteRequest calciteRequest = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
         .addSelectProjection(maxTimeProjection)
-        .addSelectProjection(minTimeProjection);
+        .addSelectProjection(minTimeProjection)
+        .build();
 
-    return requestBuilder.build().getSql(sqlLanguage, sqlExpressionBuilder);
+    return calciteRequest.getSql(sqlLanguage, sqlExpressionBuilder);
   }
 }

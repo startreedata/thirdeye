@@ -131,11 +131,6 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public long getMinDataTime(final DatasetConfigDTO datasetConfig) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public boolean validate() {
     try {
       String query = "select 1 from x";

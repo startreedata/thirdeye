@@ -170,16 +170,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     return maxTime;
   }
 
-  /**
-   * Returns the earliest time in millis for a dataset in pinot
-   *
-   * @return min (earliest) date time in millis. Returns 0 if dataset is not found
-   */
-  @Override
-  public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return queryTimeSpecFromPinot("min", datasetConfig);
-  }
-
   private long queryTimeSpecFromPinot(final String functionName,
       final DatasetConfigDTO datasetConfig) {
     long maxTime = 0;

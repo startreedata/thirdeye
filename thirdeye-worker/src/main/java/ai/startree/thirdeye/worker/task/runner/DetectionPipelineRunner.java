@@ -13,17 +13,25 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.worker.task.DetectionPipelineResultWrapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +43,27 @@ public class DetectionPipelineRunner {
 
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
+  private final EnumerationItemManager enumerationItemManager;
 
   @Inject
   public DetectionPipelineRunner(
       final PlanExecutor planExecutor,
-      final AlertTemplateRenderer alertTemplateRenderer) {
+      final AlertTemplateRenderer alertTemplateRenderer,
+      final EnumerationItemManager enumerationItemManager) {
     this.planExecutor = planExecutor;
     this.alertTemplateRenderer = alertTemplateRenderer;
+    this.enumerationItemManager = enumerationItemManager;
+  }
+
+  private static EnumerationItemDTO enumerationItemRef(final EnumerationItemDTO evaluationItem) {
+    final EnumerationItemDTO ei = new EnumerationItemDTO();
+    ei.setId(evaluationItem.getId());
+    return ei;
+  }
+
+  private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
+    return Objects.equals(o1.getName(), o2.getName())
+        && Objects.equals(o1.getParams(), o2.getParams());
   }
 
   public DetectionPipelineResult run(final AlertDTO alert,
@@ -49,7 +71,37 @@ public class DetectionPipelineRunner {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
-    return executePlan(alert, detectionInterval);
+    final DetectionPipelineResult result = executePlan(alert, detectionInterval);
+
+    for (DetectionPipelineResult r : result.getDetectionResults()) {
+
+      if (r.getEvaluationItem() != null) {
+        final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(r.getEvaluationItem());
+
+        r.getAnomalies()
+            .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
+      }
+    }
+    return result;
+  }
+
+  private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {
+    requireNonNull(source.getName(), "enumeration item name does not exist!");
+
+    final List<EnumerationItemDTO> byName = enumerationItemManager.findByName(source.getName());
+
+    final Optional<EnumerationItemDTO> filtered = optional(byName).orElse(emptyList()).stream()
+        .filter(e -> matches(source, e))
+        .findFirst();
+
+    if (filtered.isEmpty()) {
+      /* Create new */
+      enumerationItemManager.save(source);
+      requireNonNull(source.getId(), "expecting a generated ID");
+      return source;
+    }
+
+    return filtered.get();
   }
 
   private DetectionPipelineResult executePlan(final AlertDTO alert,

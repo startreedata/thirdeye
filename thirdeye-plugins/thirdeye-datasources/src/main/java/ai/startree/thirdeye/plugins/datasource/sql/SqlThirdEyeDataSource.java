@@ -15,7 +15,6 @@ package ai.startree.thirdeye.plugins.datasource.sql;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.RelationalQuery;
@@ -91,10 +90,5 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public void close() throws Exception {
     // left blank
-  }
-
-  @Override
-  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return sqlResponseCacheLoader.getMaxDataTime(datasetConfig);
   }
 }

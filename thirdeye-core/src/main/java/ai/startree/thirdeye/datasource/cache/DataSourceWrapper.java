@@ -83,16 +83,6 @@ public class DataSourceWrapper implements ThirdEyeDataSource {
   }
 
   @Override
-  public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return delegate.getMinDataTime(datasetConfig);
-  }
-
-  @Override
-  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return delegate.getMaxDataTime(datasetConfig);
-  }
-
-  @Override
   public boolean validate() {
     return delegate.validate();
   }

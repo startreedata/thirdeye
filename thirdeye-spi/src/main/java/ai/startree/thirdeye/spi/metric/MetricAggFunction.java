@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum MetricAggFunction {
-  SUM, AVG, COUNT, COUNT_DISTINCT, MAX, PCT50, PCT90, PCT95, PCT99;
+  SUM, AVG, COUNT, COUNT_DISTINCT, MAX, MIN, PCT50, PCT90, PCT95, PCT99;
 
   public static final String PERCENTILE_PREFIX = "PCT";
 

@@ -92,9 +92,9 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
+    final Map<String, DataTable> dataTableMap = DetectionUtils.getDataTableMap(inputMap);
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
-        timeSeriesMap);
+        dataTableMap);
 
     DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
 

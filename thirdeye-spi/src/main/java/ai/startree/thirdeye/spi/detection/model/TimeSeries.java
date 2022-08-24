@@ -34,20 +34,6 @@ public class TimeSeries {
     this.df = new DataFrame();
   }
 
-  public TimeSeries(LongSeries timestamps, DoubleSeries baselineValues) {
-    this.df = new DataFrame();
-    this.df.addSeries(Constants.COL_TIME, timestamps).setIndex(Constants.COL_TIME);
-    this.df.addSeries(Constants.COL_VALUE, baselineValues);
-  }
-
-  public TimeSeries(LongSeries timestamps, DoubleSeries baselineValues, DoubleSeries currentValues,
-      DoubleSeries upperBoundValues, DoubleSeries lowerBoundValues) {
-    this(timestamps, baselineValues);
-    this.df.addSeries(Constants.COL_CURRENT, currentValues);
-    this.df.addSeries(COL_UPPER_BOUND, upperBoundValues);
-    this.df.addSeries(COL_LOWER_BOUND, lowerBoundValues);
-  }
-
   /**
    * the size of the time series
    *

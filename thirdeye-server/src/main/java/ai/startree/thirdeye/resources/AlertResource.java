@@ -160,7 +160,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
-      // can do better exception handling - see handleAlertEvaluationException
+      // can do better exception handling if necessary - see handleAlertEvaluationException
       throw serverError(ERR_UNKNOWN, e);
     }
   }

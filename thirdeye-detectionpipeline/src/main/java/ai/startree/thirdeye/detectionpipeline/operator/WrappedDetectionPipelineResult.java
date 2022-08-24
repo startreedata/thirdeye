@@ -28,7 +28,7 @@ public class WrappedDetectionPipelineResult extends DetectionResult {
   }
 
   @Override
-  public EnumerationItemDTO getEvaluationItem() {
+  public EnumerationItemDTO getEnumerationItem() {
     return enumerationItem;
   }
 }

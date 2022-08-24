@@ -39,7 +39,7 @@ public interface DetectionPipelineResult {
     throw new UnsupportedOperationException();
   }
 
-  default EnumerationItemDTO getEvaluationItem() {
+  default EnumerationItemDTO getEnumerationItem() {
     return null;
   }
 }

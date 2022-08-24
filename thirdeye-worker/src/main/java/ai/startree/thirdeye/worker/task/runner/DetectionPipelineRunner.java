@@ -75,8 +75,8 @@ public class DetectionPipelineRunner {
 
     for (DetectionPipelineResult r : result.getDetectionResults()) {
 
-      if (r.getEvaluationItem() != null) {
-        final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(r.getEvaluationItem());
+      if (r.getEnumerationItem() != null) {
+        final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(r.getEnumerationItem());
 
         r.getAnomalies()
             .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));

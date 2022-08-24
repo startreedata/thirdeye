@@ -182,9 +182,9 @@ helm install thirdeye . \
 ### SSL/TLS Support
 
 To enable SSL/TLS on ThirdEye components the prerequisite is to have the certificates injected into the namespace as Secret
-- The secrets for server components should have the name as `{component pod name}-internal-tls`
+- The secrets for server components should have the name as `{component deployment name}-internal-tls`
 - Each server component secret must have these data fields: `ca.crt`, `tls.crt`, `tls.key`
-- The secret for UI component should have name as `{UI pod name}-tls`
+- The secret for UI component should have name as `{UI deployment name}-tls`
 - UI secret must have these data fields: `tls.crt`, `tls.key`
 
 SSL/TLS can be configured using

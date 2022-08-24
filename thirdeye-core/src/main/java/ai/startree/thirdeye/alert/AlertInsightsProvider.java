@@ -11,15 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 
-import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
@@ -44,7 +41,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.WebApplicationException;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -76,8 +72,8 @@ public class AlertInsightsProvider {
     this.dataSourceCache = dataSourceCache;
   }
 
-  public AlertInsightsApi getInsights(final AlertDTO alertDTO) {
-    try {
+  public AlertInsightsApi getInsights(final AlertDTO alertDTO)
+      throws Exception {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
           NOT_USED_INTERVAL);
       final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
@@ -87,12 +83,6 @@ public class AlertInsightsProvider {
       addDatasetTimes(insights, metadata);
 
       return insights;
-    } catch (final WebApplicationException e) {
-      throw e;
-    } catch (final Exception e) {
-      // can do better exception handling - see handleAlertEvaluationException
-      throw serverError(ERR_UNKNOWN, e);
-    }
   }
 
   private void addDatasetTimes(@NonNull final AlertInsightsApi insights,
@@ -193,8 +183,7 @@ public class AlertInsightsProvider {
 
     final QueryProjection maxTimeProjection = QueryProjection.of(MetricAggFunction.MAX.toString(),
         List.of(timeColumnToMillisProjection)).withAlias(MAX_TIME_ALIAS);
-    // todo cyril add MIN to metric agg function
-    final QueryProjection minTimeProjection = QueryProjection.of("MIN",
+    final QueryProjection minTimeProjection = QueryProjection.of(MetricAggFunction.MIN.toString(),
         List.of(timeColumnToMillisProjection)).withAlias(MIN_TIME_ALIAS);
     final Builder requestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
         .addSelectProjection(maxTimeProjection)

@@ -57,11 +57,6 @@ public interface ThirdEyeDataSource {
   DataTable fetchDataTable(DataSourceRequest request) throws Exception;
 
   /**
-   * Returns max dateTime in millis for the dataset
-   */
-  long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception;
-
-  /**
    * Returns boolean value to validate the health of data source
    *
    * @return health validation boolean

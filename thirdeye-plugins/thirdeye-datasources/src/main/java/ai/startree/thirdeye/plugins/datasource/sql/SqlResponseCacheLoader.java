@@ -15,14 +15,10 @@ package ai.startree.thirdeye.plugins.datasource.sql;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeDataFrameResultSet;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
-import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheLoader;
 import java.io.File;
@@ -34,11 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -253,51 +247,6 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
     return password;
   }
 
-  /**
-   * Returns the max time in millis for dataset in presto
-   *
-   * @return max date time in millis
-   */
-  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    String dataset = datasetConfig.getDataset();
-    LOG.info("Getting max data time for " + dataset);
-    TimeSpec timeSpec = DataSourceUtils.getTimestampTimeSpecFromDatasetConfig(datasetConfig);
-    DateTimeZone timeZone = SpiUtils.getDateTimeZone(datasetConfig);
-    long maxTime = 0;
-
-    String sourceName = dataset.split("\\.")[0];
-    String tableName = SqlUtils.computeSqlTableName(dataset);
-    DataSource dataSource = getDataSourceFromDataset(dataset);
-
-    try (Connection conn = dataSource.getConnection();
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(
-            SqlUtils.getMaxDataTimeSQL(timeSpec.getColumnName(), tableName, sourceName))) {
-      if (rs.next()) {
-        String maxTimeString = rs.getString(1);
-        if (maxTimeString.indexOf('.') >= 0) {
-          maxTimeString = maxTimeString.substring(0, maxTimeString.indexOf('.'));
-        }
-
-        String timeFormat = timeSpec.getFormat();
-
-        if (StringUtils.isBlank(timeFormat) || TimeSpec.SINCE_EPOCH_FORMAT.equals(timeFormat)) {
-          maxTime = timeSpec.getDataGranularity()
-              .toMillis(Long.valueOf(maxTimeString) - 1, timeZone);
-        } else {
-          DateTimeFormatter inputDataDateTimeFormatter =
-              DateTimeFormat.forPattern(timeFormat).withZone(timeZone);
-          DateTime endDateTime = DateTime.parse(maxTimeString, inputDataDateTimeFormatter);
-          Period oneBucket = datasetConfig.bucketTimeGranularity().toPeriod();
-          maxTime = endDateTime.plus(oneBucket).getMillis() - 1;
-        }
-      }
-    } catch (Exception e) {
-      throw e;
-    }
-    return maxTime;
-  }
-
   @Override
   public ThirdEyeResultSetGroup load(SqlQuery SQLQuery) throws Exception {
     String sourceName = SQLQuery.getSourceName();
@@ -331,30 +280,6 @@ public class SqlResponseCacheLoader extends CacheLoader<SqlQuery, ThirdEyeResult
       return new ThirdEyeResultSetGroup(thirdEyeResultSets);
     } catch (Exception e) {
       throw e;
-    }
-  }
-
-  /**
-   * Helper method that return a DataSource object corresponding to the dataset
-   *
-   * @param dataset name of dataset
-   * @return DataSource object: datasource for the dataset
-   */
-  private DataSource getDataSourceFromDataset(String dataset) {
-    String[] tableComponents = dataset.split("\\.");
-    String sourceName = tableComponents[0];
-    String dbName = tableComponents[1];
-
-    if (sourceName.equals(PRESTO)) {
-      return prestoDBNameToDataSourceMap.get(dbName);
-    } else if (sourceName.equals(MYSQL)) {
-      return mysqlDBNameToDataSourceMap.get(dbName);
-    } else if (sourceName.equals(VERTICA)) {
-      return verticaDBNameToDataSourceMap.get(dbName);
-    } else if (sourceName.equals(BIGQUERY)) {
-      return BigQueryDBNameToDataSourceMap.get(dbName);
-    } else {
-      return h2DataSource;
     }
   }
 }

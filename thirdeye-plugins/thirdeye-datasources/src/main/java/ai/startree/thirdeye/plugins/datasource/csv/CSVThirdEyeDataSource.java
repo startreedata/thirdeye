@@ -16,7 +16,6 @@ package ai.startree.thirdeye.plugins.datasource.csv;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -159,14 +158,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public void close() throws Exception {
 
-  }
-
-  @Override
-  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    if (!datasets.containsKey(datasetConfig.getDataset())) {
-      throw new IllegalArgumentException();
-    }
-    return datasets.get(datasetConfig.getDataset()).getLongs(COL_TIMESTAMP).max().longValue();
   }
 
   private URL makeUrlFromPath(String input) {

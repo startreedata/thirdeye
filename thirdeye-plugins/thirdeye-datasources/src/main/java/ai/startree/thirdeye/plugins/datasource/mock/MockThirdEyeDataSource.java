@@ -453,11 +453,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
     // left blank
   }
 
-  @Override
-  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return this.delegate.getMaxDataTime(datasetConfig);
-  }
-
   /**
    * Container class for datasets and their generator configs
    */

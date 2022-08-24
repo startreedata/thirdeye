@@ -15,11 +15,9 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -153,10 +151,5 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
       dfBuilder.append(row);
     }
     return dfBuilder.build();
-  }
-
-  @Override
-  public List<DetectionResult> getDetectionResults() {
-    return ImmutableList.of(DetectionResult.from(getDataFrame()));
   }
 }

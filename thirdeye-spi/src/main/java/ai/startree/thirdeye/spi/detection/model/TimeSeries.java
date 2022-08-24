@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
@@ -48,18 +49,6 @@ public class TimeSeries {
   }
 
   /**
-   * Add the series into TimeSeries if it exists in the DataFrame.
-   *
-   * @param df The source DataFrame.
-   * @param name The series name.
-   */
-  private void addSeries(DataFrame df, String name) {
-    if (df.contains(name)) {
-      this.df.addSeries(name, df.get(name));
-    }
-  }
-
-  /**
    * return a empty time series
    *
    * @return a empty time series
@@ -69,6 +58,7 @@ public class TimeSeries {
     ts.df.addSeries(Constants.COL_TIME, LongSeries.empty())
         .addSeries(Constants.COL_VALUE, DoubleSeries.empty())
         .addSeries(Constants.COL_CURRENT, DoubleSeries.empty())
+        .addSeries(Constants.COL_ANOMALY, BooleanSeries.empty())
         .addSeries(COL_UPPER_BOUND, DoubleSeries.empty())
         .addSeries(COL_LOWER_BOUND, DoubleSeries.empty())
         .setIndex(Constants.COL_TIME);

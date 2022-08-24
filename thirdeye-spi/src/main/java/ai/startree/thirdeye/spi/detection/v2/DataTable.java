@@ -14,11 +14,17 @@
 package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface DataTable extends DetectionPipelineResult {
+
+  @Override
+  default List<DetectionResult> getDetectionResults() {
+    throw new UnsupportedOperationException("DataTable does not contain detection results.");
+  }
 
   static Object[] getRow(final DataTable dataTable, final int rowIdx) {
     int columnCount = dataTable.getColumnCount();

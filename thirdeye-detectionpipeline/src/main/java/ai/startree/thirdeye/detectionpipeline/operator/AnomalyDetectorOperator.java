@@ -41,10 +41,10 @@ import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -104,31 +104,24 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   }
 
   private void addMetadata(DetectionPipelineResult detectionPipelineResult) {
-    // Annotate each anomaly with a metric name
-    optional(planNode.getParams().get("anomaly.metric"))
+    final Optional<String> anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
         .map(Templatable::value)
-        .map(Object::toString)
-        .ifPresent(anomalyMetric -> detectionPipelineResult.getDetectionResults().stream()
-            .map(DetectionResult::getAnomalies)
-            .flatMap(Collection::stream)
-            .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
+        .map(Object::toString);
+    final Optional<String> anomalyDataset = optional(planNode.getParams().get("anomaly.dataset"))
+        .map(Templatable::value)
+        .map(Object::toString);
+    final Optional<String> anomalySource = optional(planNode.getParams().get("anomaly.source"))
+        .map(Templatable::value)
+        .map(Object::toString);
 
-    optional(planNode.getParams().get("anomaly.dataset"))
-        .map(Templatable::value)
-        .map(Object::toString)
-        .ifPresent(anomalyDataset -> detectionPipelineResult.getDetectionResults().stream()
-            .map(DetectionResult::getAnomalies)
-            .flatMap(Collection::stream)
-            .forEach(anomaly -> anomaly.setCollection(anomalyDataset)));
-
-    // Annotate each anomaly with source info
-    optional(planNode.getParams().get("anomaly.source"))
-        .map(Templatable::value)
-        .map(Object::toString)
-        .ifPresent(anomalySource -> detectionPipelineResult.getDetectionResults().stream()
-            .map(DetectionResult::getAnomalies)
-            .flatMap(Collection::stream)
-            .forEach(anomaly -> anomaly.setSource(anomalySource)));
+    // annotate each anomaly with the available metadata
+    for (DetectionResult result: detectionPipelineResult.getDetectionResults()) {
+      for (MergedAnomalyResultDTO anomaly: result.getAnomalies()) {
+        anomalyMetric.ifPresent(anomaly::setMetric);
+        anomalyDataset.ifPresent(anomaly::setCollection);
+        anomalySource.ifPresent(anomaly::setSource);
+      }
+    }
   }
 
   @Override

@@ -17,10 +17,11 @@ import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface DetectionPipelineResult {
 
-  default List<DetectionResult> getDetectionResults() {
+  default @Nullable List<DetectionResult> getDetectionResults() {
     return null;
   }
 
@@ -36,7 +37,7 @@ public interface DetectionPipelineResult {
     throw new UnsupportedOperationException();
   }
 
-  default EnumerationItemDTO getEnumerationItem() {
+  default @Nullable EnumerationItemDTO getEnumerationItem() {
     return null;
   }
 }

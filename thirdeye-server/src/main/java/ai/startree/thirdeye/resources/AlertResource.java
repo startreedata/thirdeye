@@ -21,11 +21,11 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
-import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AlertCreater;
 import ai.startree.thirdeye.core.AlertDeleter;
 import ai.startree.thirdeye.core.AlertEvaluator;
+import ai.startree.thirdeye.core.AlertInsightsProvider;
 import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;

@@ -14,13 +14,11 @@
 package ai.startree.thirdeye.worker.task;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -77,15 +75,5 @@ public class DetectionPipelineResultWrapper implements DetectionPipelineResult {
         .flatMap(Collection::stream)
         .peek(anomaly -> anomaly.setDetectionConfigId(alert.getId()))
         .collect(Collectors.toList());
-  }
-
-  /**
-   * TODO spyne to be implemented later.
-   *
-   * @return empty list.
-   */
-  @Override
-  public List<EvaluationDTO> getEvaluations() {
-    return Collections.emptyList();
   }
 }

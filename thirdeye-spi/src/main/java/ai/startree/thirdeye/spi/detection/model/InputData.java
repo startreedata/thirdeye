@@ -15,7 +15,6 @@ package ai.startree.thirdeye.spi.detection.model;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -36,7 +35,6 @@ public class InputData {
   final Multimap<EventSlice, EventDTO> events;
   final Map<Long, MetricConfigDTO> metrics;
   final Map<String, DatasetConfigDTO> datasets;
-  final Multimap<EvaluationSlice, EvaluationDTO> evaluations;
 
   /**
    * The data set config dtos for metric ids
@@ -52,7 +50,6 @@ public class InputData {
       final Multimap<EventSlice, EventDTO> events,
       final Map<Long, MetricConfigDTO> metrics,
       final Map<String, DatasetConfigDTO> datasets,
-      final Multimap<EvaluationSlice, EvaluationDTO> evaluations,
       final Map<Long, DatasetConfigDTO> datasetForMetricId) {
     dataSpec = spec;
     this.timeseries = timeseries;
@@ -61,7 +58,6 @@ public class InputData {
     this.events = events;
     this.metrics = metrics;
     this.datasets = datasets;
-    this.evaluations = evaluations;
     this.datasetForMetricId = datasetForMetricId;
   }
 
@@ -87,9 +83,5 @@ public class InputData {
 
   public Map<String, DatasetConfigDTO> getDatasets() {
     return datasets;
-  }
-
-  public Multimap<EvaluationSlice, EvaluationDTO> getEvaluations() {
-    return evaluations;
   }
 }

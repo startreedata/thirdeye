@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import java.util.List;
@@ -32,10 +31,6 @@ public interface DetectionPipelineResult {
   }
 
   default List<MergedAnomalyResultDTO> getAnomalies() {
-    throw new UnsupportedOperationException();
-  }
-
-  default List<EvaluationDTO> getEvaluations() {
     throw new UnsupportedOperationException();
   }
 

@@ -26,7 +26,6 @@ import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DetectionStatusManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EntityToEntityMappingManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.EvaluationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EventManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.GroupedAnomalyResultsManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.JobManagerImpl;
@@ -50,7 +49,6 @@ import ai.startree.thirdeye.datalayer.entity.DetectionConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionStatusIndex;
 import ai.startree.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
-import ai.startree.thirdeye.datalayer.entity.EvaluationIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.JobIndex;
@@ -73,7 +71,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.GroupedAnomalyResultsManager;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
@@ -111,7 +108,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       DetectionConfigIndex.class,
       DetectionStatusIndex.class,
       EntityToEntityMappingIndex.class,
-      EvaluationIndex.class,
       EnumerationItemIndex.class,
       EventIndex.class,
       JobIndex.class,
@@ -166,7 +162,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(AlertTemplateManager.class).to(AlertTemplateManagerImpl.class).in(Scopes.SINGLETON);
     bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(EvaluationManager.class).to(EvaluationManagerImpl.class).in(Scopes.SINGLETON);
     bind(OnlineDetectionDataManager.class).to(OnlineDetectionDataManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(AnomalySubscriptionGroupNotificationManager.class)

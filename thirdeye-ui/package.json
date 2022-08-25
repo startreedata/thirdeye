@@ -64,6 +64,7 @@
         "cronstrue": "^2.9.0",
         "d3-array": "^3.1.4",
         "flat": "^5.0.2",
+        "font-color-contrast": "^11.1.0",
         "i18next": "^19.8.4",
         "i18next-browser-languagedetector": "^6.0.1",
         "immer": "^8.0.1",

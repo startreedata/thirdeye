@@ -22,6 +22,7 @@ import {
     DetectionEvaluation,
 } from "../../rest/dto/detection.interfaces";
 import {
+    checkIfOtherDimension,
     filterAlertEvaluationTimeSeriesPointsByTime,
     formatDateTimeForTimeAxis,
     formatLargeNumberForVisualization,
@@ -609,6 +610,15 @@ describe("Visualization Util", () => {
                 4
             )
         ).toEqual(mockAlertEvaluationTimeSeriesPoint3);
+    });
+
+    it("checkIfOtherDimension should return false if undefined or does not equal other", () => {
+        expect(checkIfOtherDimension(undefined)).toEqual(false);
+        expect(checkIfOtherDimension("not other")).toEqual(false);
+    });
+
+    it("checkIfOtherDimension should return true equal to other", () => {
+        expect(checkIfOtherDimension("other")).toEqual(true);
     });
 });
 

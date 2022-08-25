@@ -66,11 +66,6 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
       this.results = results;
     }
 
-    @Override
-    public List<DetectionResult> getDetectionResults() {
-      return null;
-    }
-
     public List<EnumerationItemDTO> getResults() {
       return results;
     }

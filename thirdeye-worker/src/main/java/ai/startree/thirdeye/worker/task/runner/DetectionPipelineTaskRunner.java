@@ -58,8 +58,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
-      final MetricRegistry metricRegistry,
-      final DetectionPipelineRunner detectionPipelineRunner,
+      final MetricRegistry metricRegistry, final DetectionPipelineRunner detectionPipelineRunner,
       final AnomalyMerger anomalyMerger,
       final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator) {
     this.alertManager = alertManager;
@@ -86,8 +85,9 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
           String.format("Could not resolve config id %d", info.getConfigId()));
 
-      Interval detectionInterval = alertDetectionIntervalCalculator
-          .getCorrectedInterval(alert, info.getStart(), info.getEnd());
+      Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(alert,
+          info.getStart(),
+          info.getEnd());
 
       final DetectionPipelineResult result = detectionPipelineRunner.run(alert, detectionInterval);
 

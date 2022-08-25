@@ -51,11 +51,6 @@ public class EchoOperator extends DetectionPipelineOperator {
       this.text = text;
     }
 
-    @Override
-    public List<DetectionResult> getDetectionResults() {
-      return null;
-    }
-
     public String text() {
       return text;
     }

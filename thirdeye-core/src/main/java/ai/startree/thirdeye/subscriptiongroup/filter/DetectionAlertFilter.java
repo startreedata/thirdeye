@@ -14,17 +14,12 @@
 package ai.startree.thirdeye.subscriptiongroup.filter;
 
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import ai.startree.thirdeye.spi.detection.DataProvider;
 
 /**
  * The Detection alert filter.
  */
 public abstract class DetectionAlertFilter {
 
-  /**
-   * The Provider.
-   */
-  protected final DataProvider provider;
   /**
    * The Config.
    */
@@ -41,8 +36,7 @@ public abstract class DetectionAlertFilter {
    * @param config the config
    * @param endTime the end time
    */
-  public DetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config, long endTime) {
-    this.provider = provider;
+  public DetectionAlertFilter(SubscriptionGroupDTO config, long endTime) {
     this.config = config;
     this.endTime = endTime;
   }

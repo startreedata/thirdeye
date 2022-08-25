@@ -19,7 +19,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilter;
 import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
 import ai.startree.thirdeye.subscriptiongroup.filter.ToAllRecipientsDetectionAlertFilter;
@@ -41,15 +40,12 @@ public class NotificationSchemeFactory {
 
   private static final String PROP_CLASS_NAME = "className";
 
-  private final DataProvider provider;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
 
   @Inject
-  public NotificationSchemeFactory(final DataProvider provider,
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
+  public NotificationSchemeFactory(final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager) {
-    this.provider = provider;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
   }
@@ -85,7 +81,7 @@ public class NotificationSchemeFactory {
       final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
     // Load all the anomalies along with their recipients
     requireNonNull(subscriptionGroupDTO, "subscription Group is null");
-    final DetectionAlertFilter alertFilter = new ToAllRecipientsDetectionAlertFilter(provider,
+    final DetectionAlertFilter alertFilter = new ToAllRecipientsDetectionAlertFilter(
         subscriptionGroupDTO,
         System.currentTimeMillis(),
         mergedAnomalyResultManager,

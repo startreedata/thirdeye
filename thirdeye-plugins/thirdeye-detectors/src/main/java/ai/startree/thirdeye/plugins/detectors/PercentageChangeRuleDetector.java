@@ -70,9 +70,9 @@ public class PercentageChangeRuleDetector implements
 
   @Override
   public AnomalyDetectorResult runDetection(final Interval window,
-      final Map<String, DataTable> timeSeriesMap) throws DetectorException {
-    final DataTable baseline = requireNonNull(timeSeriesMap.get(KEY_BASELINE), "baseline is null");
-    final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
+      final Map<String, DataTable> dataTableMap) throws DetectorException {
+    final DataTable baseline = requireNonNull(dataTableMap.get(KEY_BASELINE), "baseline is null");
+    final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
     final DataFrame baselineDf = baseline.getDataFrame();
     final DataFrame currentDf = current.getDataFrame();
     currentDf

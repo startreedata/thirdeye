@@ -52,9 +52,9 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
 
   @Override
   public AnomalyDetectorResult runDetection(final Interval interval,
-      final Map<String, DataTable> timeSeriesMap
+      final Map<String, DataTable> dataTableMap
   ) throws DetectorException {
-    final DataTable current = requireNonNull(timeSeriesMap.get(KEY_CURRENT), "current is null");
+    final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame();
     currentDf
         .renameSeries(spec.getTimestamp(), COL_TIME)

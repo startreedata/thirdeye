@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
@@ -34,18 +35,8 @@ public class TimeSeries {
     this.df = new DataFrame();
   }
 
-  public TimeSeries(LongSeries timestamps, DoubleSeries baselineValues) {
-    this.df = new DataFrame();
-    this.df.addSeries(Constants.COL_TIME, timestamps).setIndex(Constants.COL_TIME);
-    this.df.addSeries(Constants.COL_VALUE, baselineValues);
-  }
-
-  public TimeSeries(LongSeries timestamps, DoubleSeries baselineValues, DoubleSeries currentValues,
-      DoubleSeries upperBoundValues, DoubleSeries lowerBoundValues) {
-    this(timestamps, baselineValues);
-    this.df.addSeries(Constants.COL_CURRENT, currentValues);
-    this.df.addSeries(COL_UPPER_BOUND, upperBoundValues);
-    this.df.addSeries(COL_LOWER_BOUND, lowerBoundValues);
+  private TimeSeries(final DataFrame df) {
+    this.df = df;
   }
 
   /**
@@ -58,18 +49,6 @@ public class TimeSeries {
   }
 
   /**
-   * Add the series into TimeSeries if it exists in the DataFrame.
-   *
-   * @param df The source DataFrame.
-   * @param name The series name.
-   */
-  private static void addSeries(TimeSeries ts, DataFrame df, String name) {
-    if (df.contains(name)) {
-      ts.df.addSeries(name, df.get(name));
-    }
-  }
-
-  /**
    * return a empty time series
    *
    * @return a empty time series
@@ -79,6 +58,7 @@ public class TimeSeries {
     ts.df.addSeries(Constants.COL_TIME, LongSeries.empty())
         .addSeries(Constants.COL_VALUE, DoubleSeries.empty())
         .addSeries(Constants.COL_CURRENT, DoubleSeries.empty())
+        .addSeries(Constants.COL_ANOMALY, BooleanSeries.empty())
         .addSeries(COL_UPPER_BOUND, DoubleSeries.empty())
         .addSeries(COL_LOWER_BOUND, DoubleSeries.empty())
         .setIndex(Constants.COL_TIME);
@@ -86,26 +66,19 @@ public class TimeSeries {
   }
 
   /**
-   * Add DataFrame into TimeSeries.
+   * Create Timeseries from a DataFrame.
+   * Copies all the columns.
    *
-   * @param df The source DataFrame.
+   * @param detectorResultDf The source DataFrame. {@link ai.startree.thirdeye.spi.detection.AnomalyDetectorResult} dataframe format is expected
    * @return TimeSeries that contains the predicted values.
    */
-  public static TimeSeries fromDataFrame(DataFrame df) {
-    Preconditions.checkArgument(df.contains(Constants.COL_TIME));
-    Preconditions.checkArgument(df.contains(Constants.COL_VALUE));
-    TimeSeries ts = new TimeSeries();
-    // time stamp
-    ts.df.addSeries(Constants.COL_TIME, df.get(Constants.COL_TIME)).setIndex(Constants.COL_TIME);
-    // predicted baseline values
-    addSeries(ts, df, Constants.COL_VALUE);
-    // current values
-    addSeries(ts, df, Constants.COL_CURRENT);
-    // upper bound
-    addSeries(ts, df, COL_UPPER_BOUND);
-    // lower bound
-    addSeries(ts, df, COL_LOWER_BOUND);
-    return ts;
+  public static TimeSeries fromDataFrame(DataFrame detectorResultDf) {
+    Preconditions.checkArgument(detectorResultDf.contains(Constants.COL_TIME));
+    Preconditions.checkArgument(detectorResultDf.contains(Constants.COL_VALUE));
+    // todo cyril see if copy can be avoided
+    final DataFrame tsDf = detectorResultDf.copy().setIndex(Constants.COL_TIME);
+
+    return new TimeSeries(tsDf);
   }
 
   public DoubleSeries getCurrent() {

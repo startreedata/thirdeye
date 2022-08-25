@@ -126,7 +126,7 @@ public class DetectionUtils {
     anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
   }
 
-  public static Map<String, DataTable> getTimeSeriesMap(
+  public static Map<String, DataTable> getDataTableMap(
       final Map<String, DetectionPipelineResult> inputMap) {
     final Map<String, DataTable> timeSeriesMap = new HashMap<>();
     for (final String key : inputMap.keySet()) {

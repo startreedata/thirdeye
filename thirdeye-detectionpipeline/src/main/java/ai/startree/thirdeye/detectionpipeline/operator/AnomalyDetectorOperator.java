@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
@@ -42,13 +41,12 @@ import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 
 public class AnomalyDetectorOperator extends DetectionPipelineOperator {
@@ -68,7 +66,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
         .get(Constants.DETECTION_REGISTRY_REF_KEY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
-    detector = createDetector(optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null), detectionRegistry);
+    detector = createDetector(optional(planNode.getParams()).map(TemplatableMap::valueMap)
+        .orElse(null), detectionRegistry);
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
@@ -93,49 +92,36 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    for (final Interval interval : getMonitoringWindows()) {
-      final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
-      final AnomalyDetectorResult detectorResult = detector
-          .runDetection(interval, timeSeriesMap);
+    final Map<String, DataTable> dataTableMap = DetectionUtils.getDataTableMap(inputMap);
+    final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
+        dataTableMap);
 
-      DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
+    DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
 
-      addMetadata(detectionResult);
+    addMetadata(detectionResult);
 
-      setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
-    }
+    setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
   }
 
   private void addMetadata(DetectionPipelineResult detectionPipelineResult) {
-    // Annotate each anomaly with a metric name
-    optional(planNode.getParams().get("anomaly.metric"))
+    final Optional<String> anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
         .map(Templatable::value)
-        .map(Object::toString)
-        .ifPresent(anomalyMetric -> detectionPipelineResult.getDetectionResults().stream()
-            .map(DetectionResult::getAnomalies)
-            .flatMap(Collection::stream)
-            .forEach(anomaly -> anomaly.setMetric(anomalyMetric)));
-
-    optional(planNode.getParams().get("anomaly.dataset"))
+        .map(Object::toString);
+    final Optional<String> anomalyDataset = optional(planNode.getParams().get("anomaly.dataset"))
         .map(Templatable::value)
-        .map(Object::toString)
-        .ifPresent(anomalyDataset -> detectionPipelineResult.getDetectionResults().stream()
-            .map(DetectionResult::getAnomalies)
-            .flatMap(Collection::stream)
-            .forEach(anomaly -> anomaly.setCollection(anomalyDataset)));
-
-    // Annotate each anomaly with source info
-    optional(planNode.getParams().get("anomaly.source"))
+        .map(Object::toString);
+    final Optional<String> anomalySource = optional(planNode.getParams().get("anomaly.source"))
         .map(Templatable::value)
-        .map(Object::toString)
-        .ifPresent(anomalySource -> detectionPipelineResult.getDetectionResults().stream()
-            .map(DetectionResult::getAnomalies)
-            .flatMap(Collection::stream)
-            .forEach(anomaly -> anomaly.setSource(anomalySource)));
-  }
+        .map(Object::toString);
 
-  private List<Interval> getMonitoringWindows() {
-    return singletonList(detectionInterval);
+    // annotate each anomaly with the available metadata
+    for (DetectionResult result: detectionPipelineResult.getDetectionResults()) {
+      for (MergedAnomalyResultDTO anomaly: result.getAnomalies()) {
+        anomalyMetric.ifPresent(anomaly::setMetric);
+        anomalyDataset.ifPresent(anomaly::setCollection);
+        anomalySource.ifPresent(anomaly::setSource);
+      }
+    }
   }
 
   @Override

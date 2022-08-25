@@ -14,10 +14,8 @@
 package ai.startree.thirdeye.plugins.datasource.pinotsql;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
-import com.google.common.collect.ImmutableList;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -132,10 +130,5 @@ public class PinotSqlDataTable extends AbstractDataTableImpl {
   @Override
   public double getDouble(final int rowIdx, final int colIdx) {
     return Double.parseDouble(getString(rowIdx, colIdx));
-  }
-
-  @Override
-  public List<DetectionResult> getDetectionResults() {
-    return ImmutableList.of(DetectionResult.from(getDataFrame()));
   }
 }

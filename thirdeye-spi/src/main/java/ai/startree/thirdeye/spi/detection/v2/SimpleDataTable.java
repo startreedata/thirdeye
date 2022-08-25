@@ -14,8 +14,6 @@
 package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,11 +133,6 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   @Override
   public double getDouble(final int rowIdx, final int colIdx) {
     return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString());
-  }
-
-  @Override
-  public List<DetectionResult> getDetectionResults() {
-    return ImmutableList.of(DetectionResult.from(getDataFrame()));
   }
 
   public static DataTable fromDataFrame(final DataFrame dataFrame) {

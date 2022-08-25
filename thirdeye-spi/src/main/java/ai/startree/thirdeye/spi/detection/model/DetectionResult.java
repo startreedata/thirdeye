@@ -13,12 +13,10 @@
  */
 package ai.startree.thirdeye.spi.detection.model;
 
-import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,24 +48,6 @@ public class DetectionResult implements DetectionPipelineResult {
   protected DetectionResult(final DetectionResult source) {
     this(source.getAnomalies(), source.getTimeseries(), source.getRawData());
   }
-  /**
-   * Create a empty detection result
-   *
-   * @return the empty detection result
-   */
-  public static DetectionResult empty() {
-    return new DetectionResult(Collections.emptyList(), TimeSeries.empty());
-  }
-
-  /**
-   * Create a detection result from a list of anomalies
-   *
-   * @param anomalies the list of anomalies generated
-   * @return the detection result contains the list of anomalies
-   */
-  public static DetectionResult from(final List<MergedAnomalyResultDTO> anomalies) {
-    return new DetectionResult(anomalies, TimeSeries.empty());
-  }
 
   /**
    * Create a detection result from a list of anomalies and time series
@@ -80,22 +60,6 @@ public class DetectionResult implements DetectionPipelineResult {
   public static DetectionResult from(final List<MergedAnomalyResultDTO> anomalies,
       final TimeSeries timeSeries) {
     return new DetectionResult(anomalies, timeSeries);
-  }
-
-  /**
-   * Create a detection result from the raw data table
-   *
-   * @param rawData the raw data map with column name and the values.
-   * @return the detection result contains the raw data table
-   */
-  public static DetectionResult from(final Map<String, List> rawData) {
-    return new DetectionResult(Collections.emptyList(), TimeSeries.empty(), rawData);
-  }
-
-  public static DetectionResult from(final DataFrame dataFrame) {
-    final Map<String, List> rawData = new HashMap<>();
-    dataFrame.getSeriesNames().forEach(name -> rawData.put(name, dataFrame.getSeries().get(name).getObjects().toListTyped()));
-    return from(rawData);
   }
 
   @Override

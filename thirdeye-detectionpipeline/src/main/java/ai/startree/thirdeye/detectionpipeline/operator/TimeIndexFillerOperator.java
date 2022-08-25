@@ -50,7 +50,7 @@ public class TimeIndexFillerOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
+    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getDataTableMap(inputMap);
     checkArgument(timeSeriesMap.size() == 1,
         OPERATOR_NAME + " must have exactly 1 DataTable in input");
     final DataTable dataTable = timeIndexFiller.fillIndex(detectionInterval,

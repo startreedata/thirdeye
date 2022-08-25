@@ -14,12 +14,10 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AlertCreater;
@@ -55,7 +53,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -153,16 +150,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
+    final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
 
-    try {
-      final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
-      return Response.ok(insights).build();
-    } catch (final WebApplicationException e) {
-      throw e;
-    } catch (final Exception e) {
-      // can do better exception handling if necessary - see handleAlertEvaluationException
-      throw serverError(ERR_UNKNOWN, e);
-    }
+    return Response.ok(insights).build();
   }
 
   @Path("{id}/run")

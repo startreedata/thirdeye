@@ -14,7 +14,9 @@
 package ai.startree.thirdeye.core;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -41,6 +43,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.WebApplicationException;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -72,8 +75,8 @@ public class AlertInsightsProvider {
     this.dataSourceCache = dataSourceCache;
   }
 
-  public AlertInsightsApi getInsights(final AlertDTO alertDTO)
-      throws Exception {
+  public AlertInsightsApi getInsights(final AlertDTO alertDTO) {
+    try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
           NOT_USED_INTERVAL);
       final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
@@ -83,6 +86,12 @@ public class AlertInsightsProvider {
       addDatasetTimes(insights, metadata);
 
       return insights;
+    } catch (final WebApplicationException e) {
+      throw e;
+    } catch (final Exception e) {
+      // can do better exception handling if necessary - see handleAlertEvaluationException
+      throw serverError(ERR_UNKNOWN, e);
+    }
   }
 
   private void addDatasetTimes(@NonNull final AlertInsightsApi insights,

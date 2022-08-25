@@ -241,7 +241,13 @@
         "month": "Month",
         "year": "Year",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "date-type": "Date Type",
+        "day-time": "Day/Time",
+        "repeat-every": "Repeat every",
+        "am": "AM",
+        "pm": "PM",
+        "time": "Time"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -324,6 +330,7 @@
         "to-get-started-select-type": "Select a type to get started",
         "enter-webhook-url": "Enter webhook URL",
         "is-this-an-anomaly": "Is this an anomaly?",
-        "click-to-add-comment": "Click to add comment"
+        "click-to-add-comment": "Click to add comment",
+        "data-type-helper": "Cron expression between Cron & Date/Time is not shared."
     }
 }

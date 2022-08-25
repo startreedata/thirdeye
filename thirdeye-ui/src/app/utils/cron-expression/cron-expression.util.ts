@@ -40,3 +40,19 @@ export const QuickScheduleOptions: Array<QuickScheduleOption> = [
         value: "0 0 * * *",
     },
 ];
+
+export const ClockTimeOptions: Array<string> = ["am", "pm"];
+
+export const CronRepeatOptions: Array<string> = ["day", "month", "year"];
+
+export const convertTime12to24 = (hours: number, modifier: string): number => {
+    if (hours === 12) {
+        hours = 0;
+    }
+
+    if (modifier === "pm") {
+        hours = hours + 12;
+    }
+
+    return hours;
+};

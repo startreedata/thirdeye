@@ -23,10 +23,12 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AlertCreater;
 import ai.startree.thirdeye.core.AlertDeleter;
 import ai.startree.thirdeye.core.AlertEvaluator;
+import ai.startree.thirdeye.core.AlertInsightsProvider;
 import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
+import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -46,6 +48,7 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -72,6 +75,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertDeleter alertDeleter;
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final AlertEvaluator alertEvaluator;
+  private final AlertInsightsProvider alertInsightsProvider;
 
   @Inject
   public AlertResource(
@@ -79,12 +83,14 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertCreater alertCreater,
       final AlertDeleter alertDeleter,
       final AlertApiBeanMapper alertApiBeanMapper,
-      final AlertEvaluator alertEvaluator) {
+      final AlertEvaluator alertEvaluator,
+      final AlertInsightsProvider alertInsightsProvider) {
     super(alertManager, ImmutableMap.of());
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertApiBeanMapper = alertApiBeanMapper;
     this.alertEvaluator = alertEvaluator;
+    this.alertInsightsProvider = alertInsightsProvider;
   }
 
   @Override
@@ -135,6 +141,18 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Override
   protected AlertApi toApi(final AlertDTO dto) {
     return ApiBeanMapper.toApi(dto);
+  }
+
+  @Path("{id}/insights")
+  @GET
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("id") final Long id) {
+    final AlertDTO dto = get(id);
+    final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
+
+    return Response.ok(insights).build();
   }
 
   @Path("{id}/run")

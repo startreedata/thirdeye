@@ -24,6 +24,7 @@ import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
+import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
@@ -71,10 +72,12 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
-  private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
 
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
   private static final AlertApi ALERT_API;
+  private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
+  private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
+  private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
 
   static {
     try {
@@ -191,7 +194,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   public void testEvaluateAlert() {
     AlertEvaluationApi alertEvaluationApi = new AlertEvaluationApi()
         .setAlert(ALERT_API)
-        .setStart(Date.from(Instant.ofEpochMilli(1580601600000L))) //Sunday, 2 February 2020 00:00:00
+        .setStart(Date.from(Instant.ofEpochMilli(PAGEVIEWS_DATASET_START_TIME))) //Sunday, 2 February 2020 00:00:00
         .setEnd(Date.from(Instant.ofEpochMilli(1596326400000L)));  //Sunday, 2 August 2020 00:00:00
 
     Response response = request("api/alerts/evaluate")
@@ -207,6 +210,19 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     assertThat(response.getStatus()).isEqualTo(200);
     List<Map<String, Object>> alerts = response.readEntity(List.class);
     alertId = ((Number) alerts.get(0).get("id")).longValue();
+  }
+
+  @Test(dependsOnMethods = "testCreateAlert")
+  public void testAlertInsights() {
+    final Response response = request("api/alerts/" + alertId + "/insights")
+        .get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
+    assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo("P1D");
+    assertThat(insights.getDefaultStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY);
+    assertThat(insights.getDefaultEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
+    assertThat(insights.getDatasetStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
+    assertThat(insights.getDatasetEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
   }
 
   @Test(dependsOnMethods = "testCreateAlert")
@@ -260,7 +276,8 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   public void testGetTopContributors() {
     Response response = request("api/rca/dim-analysis?id=" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(DimensionAnalysisResultApi.class);
+    DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(
+        DimensionAnalysisResultApi.class);
     assertThat(dimensionAnalysisResultApi.getResponseRows().size()).isGreaterThan(0);
   }
 

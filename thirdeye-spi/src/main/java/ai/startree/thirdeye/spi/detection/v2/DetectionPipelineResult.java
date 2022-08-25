@@ -20,7 +20,9 @@ import java.util.List;
 
 public interface DetectionPipelineResult {
 
-  List<DetectionResult> getDetectionResults();
+  default List<DetectionResult> getDetectionResults() {
+    return null;
+  }
 
   /**
    * If implemented, returns the last timestamp observed in the data. Can be different from the last

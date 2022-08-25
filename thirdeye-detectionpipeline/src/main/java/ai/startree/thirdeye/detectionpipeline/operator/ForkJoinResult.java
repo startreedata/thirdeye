@@ -27,11 +27,6 @@ public class ForkJoinResult implements DetectionPipelineResult {
     this.results = results;
   }
 
-  @Override
-  public List<DetectionResult> getDetectionResults() {
-    return null;
-  }
-
   public List<ForkJoinResultItem> getResults() {
     return results;
   }

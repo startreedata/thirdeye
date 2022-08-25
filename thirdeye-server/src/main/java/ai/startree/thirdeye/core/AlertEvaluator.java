@@ -33,6 +33,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -65,7 +66,6 @@ import org.slf4j.LoggerFactory;
 public class AlertEvaluator {
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluator.class);
-  private static final boolean USE_V1_FORMAT = true;
 
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
@@ -119,6 +119,7 @@ public class AlertEvaluator {
     }
     api.setAnomalies(anomalyApis);
     api.setData(getData(detectionResult));
+    api.setEnumerationItem(ApiBeanMapper.toApi(detectionResult.getEnumerationItem()));
     return api;
   }
 
@@ -215,31 +216,19 @@ public class AlertEvaluator {
   private void addFilters(PlanNodeBean planNodeBean, List<QueryPredicate> filters) {
     if (planNodeBean.getType().equals(new DataFetcherPlanNode().getType())) {
       if (planNodeBean.getParams() == null) {
-        planNodeBean.setParams(new HashMap<>());
+        planNodeBean.setParams(new TemplatableMap<>());
       }
-      planNodeBean.getParams().put(Constants.EVALUATION_FILTERS_KEY, filters);
+      planNodeBean.getParams().putValue(Constants.EVALUATION_FILTERS_KEY, filters);
     }
   }
 
   private AlertEvaluationApi toApi(final Map<String, DetectionPipelineResult> outputMap) {
-    final Map<String, Map<String, DetectionEvaluationApi>> resultMap = new HashMap<>();
+    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     for (final String key : outputMap.keySet()) {
       final DetectionPipelineResult result = outputMap.get(key);
-      resultMap.put(key, detectionPipelineResultToApi(result));
-    }
-    if (USE_V1_FORMAT) {
-      return toV1Format(resultMap);
-    }
-    return new AlertEvaluationApi().setEvaluations(resultMap);
-  }
-
-  private AlertEvaluationApi toV1Format(
-      final Map<String, Map<String, DetectionEvaluationApi>> v2Result) {
-    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    for (final String key : v2Result.keySet()) {
-      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = v2Result.get(key);
-      detectionEvaluationApiMap
-          .keySet()
+      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = detectionPipelineResultToApi(
+          result);
+      detectionEvaluationApiMap.keySet()
           .forEach(apiKey -> map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey)));
     }
     return new AlertEvaluationApi().setDetectionEvaluations(map);

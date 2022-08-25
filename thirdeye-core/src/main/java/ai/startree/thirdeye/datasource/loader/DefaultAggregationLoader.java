@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datasource.loader;
 
 import static ai.startree.thirdeye.datasource.calcite.QueryProjection.getFunctionName;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
@@ -23,6 +24,7 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -67,7 +69,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
   public DataFrame loadBreakdown(final MetricSlice slice, final int limit) throws Exception {
     final DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
 
-    final List<String> dimensions = new ArrayList<>(datasetConfigDTO.getDimensions());
+    final List<String> dimensions = new ArrayList<>(optional(datasetConfigDTO.getDimensions()).map(
+        Templatable::value).orElse(List.of()));
     dimensions.removeAll(slice.getPredicates()
         .stream()
         .map(Predicate::getLhs)

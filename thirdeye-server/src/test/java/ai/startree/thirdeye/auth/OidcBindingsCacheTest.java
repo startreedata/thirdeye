@@ -25,7 +25,6 @@ import static org.testng.Assert.expectThrows;
 import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.auth.oauth.OidcContext;
 import ai.startree.thirdeye.auth.oauth.OidcJWTProcessor;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang3.RandomStringUtils;

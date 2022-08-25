@@ -23,6 +23,6 @@ export interface AlertTemplatePropertiesBuilderProps {
 
 export interface PropertyRenderConfig {
     key: string;
-    value: string;
-    defaultValue: string;
+    value: string | string[] | boolean;
+    defaultValue: string | string[] | boolean;
 }

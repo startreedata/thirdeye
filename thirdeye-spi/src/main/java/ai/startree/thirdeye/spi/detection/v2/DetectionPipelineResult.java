@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
@@ -23,7 +24,8 @@ public interface DetectionPipelineResult {
   List<DetectionResult> getDetectionResults();
 
   /**
-   * If implemented, returns the last timestamp observed in the data. Can be different from the last processed timestamp.
+   * If implemented, returns the last timestamp observed in the data. Can be different from the last
+   * processed timestamp.
    */
   default long getLastTimestamp() {
     return -1;
@@ -35,5 +37,9 @@ public interface DetectionPipelineResult {
 
   default List<EvaluationDTO> getEvaluations() {
     throw new UnsupportedOperationException();
+  }
+
+  default EnumerationItemDTO getEnumerationItem() {
+    return null;
   }
 }

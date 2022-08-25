@@ -599,6 +599,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<
 
                             {/* Brush */}
                             <Brush
+                                useWindowMoveEvents
                                 height={brushYMax}
                                 innerRef={brushRef}
                                 margin={{

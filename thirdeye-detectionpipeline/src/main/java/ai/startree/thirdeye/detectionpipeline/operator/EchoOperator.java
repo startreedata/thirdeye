@@ -34,7 +34,7 @@ public class EchoOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final String echoText = getPlanNode().getParams().get(DEFAULT_INPUT_KEY).toString();
+    final String echoText = getPlanNode().getParams().getValue(DEFAULT_INPUT_KEY).toString();
     setOutput(DEFAULT_OUTPUT_KEY, new EchoResult(echoText));
   }
 

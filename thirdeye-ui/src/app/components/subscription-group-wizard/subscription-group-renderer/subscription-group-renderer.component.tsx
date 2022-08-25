@@ -11,10 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid, Typography } from "@material-ui/core";
+import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { specTypeToUIConfig } from "../groups-editor/groups-editor.utils";
 import { SubscriptionGroupRendererProps } from "./subscription-group-renderer.interfaces";
 
 export const SubscriptionGroupRenderer: FunctionComponent<
@@ -84,41 +85,72 @@ export const SubscriptionGroupRenderer: FunctionComponent<
                 )}
 
             {/* Subscribed emails */}
-            <Grid item sm={2}>
-                <Typography variant="subtitle1">
-                    <strong>{t("label.subscribed-emails")}</strong>
-                </Typography>
-            </Grid>
-
-            {/* No subscribed emails */}
-            {!props.subscriptionGroup ||
-                !props.subscriptionGroup.notificationSchemes.email ||
-                (isEmpty(
-                    props.subscriptionGroup.notificationSchemes.email.to
-                ) && (
-                    <Grid item sm={10}>
-                        <Typography variant="body2">
-                            {t("label.no-data-marker")}
-                        </Typography>
-                    </Grid>
-                ))}
-
-            {/* All subscribed emails */}
             {props.subscriptionGroup &&
                 props.subscriptionGroup.notificationSchemes.email &&
                 !isEmpty(
                     props.subscriptionGroup.notificationSchemes.email.to
                 ) && (
-                    <Grid item sm={10}>
-                        {props.subscriptionGroup.notificationSchemes.email.to.map(
-                            (email, index) => (
-                                <Typography key={index} variant="body2">
-                                    {email}
-                                </Typography>
-                            )
-                        )}
-                    </Grid>
+                    <>
+                        <Grid item sm={2}>
+                            <Typography variant="subtitle1">
+                                <strong>{t("label.subscribed-emails")}</strong>
+                            </Typography>
+                        </Grid>
+                        <Grid item sm={10}>
+                            {props.subscriptionGroup.notificationSchemes.email.to.map(
+                                (email, index) => (
+                                    <Typography key={index} variant="body2">
+                                        {email}
+                                    </Typography>
+                                )
+                            )}
+                        </Grid>
+                    </>
                 )}
+
+            {props.subscriptionGroup && (
+                <>
+                    <Grid item xs={12}>
+                        <Box marginBottom={1}>
+                            <Divider />
+                        </Box>
+                        <Typography variant="h5">
+                            {t("label.channels")}
+                        </Typography>
+                    </Grid>
+                    {props.subscriptionGroup.specs.map((spec) => {
+                        const uiConfig = specTypeToUIConfig[spec.type];
+
+                        return (
+                            <>
+                                <Grid item sm={2}>
+                                    <Typography variant="subtitle1">
+                                        <strong>
+                                            {t(
+                                                uiConfig.internationalizationString
+                                            )}
+                                        </strong>
+                                    </Typography>
+                                </Grid>
+                                <Grid item sm={10}>
+                                    {React.createElement(
+                                        uiConfig.reviewComponent,
+                                        {
+                                            configuration: spec,
+                                        }
+                                    )}
+                                </Grid>
+                            </>
+                        );
+                    })}
+
+                    {props.subscriptionGroup.specs.length === 0 && (
+                        <Grid item xs={12}>
+                            {t("message.no-notifications-groups")}
+                        </Grid>
+                    )}
+                </>
+            )}
         </Grid>
     );
 };

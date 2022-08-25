@@ -112,27 +112,67 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             .finally(() => setUiAnomalies(fetchedUiAnomalies));
     };
 
-    const handleAnomalyDelete = (uiAnomaly: UiAnomaly): void => {
+    const handleAnomalyDelete = (uiAnomalies: UiAnomaly[]): void => {
+        let promptMsg = t("message.delete-confirmation", {
+            name: uiAnomalies[0].name,
+        });
+
+        if (uiAnomalies.length > 1) {
+            promptMsg = t("message.delete-confirmation", {
+                name: `${uiAnomalies.length} ${t("label.anomalies")}`,
+            });
+        }
+
         showDialog({
             type: DialogType.ALERT,
-            contents: t("message.delete-confirmation", {
-                name: uiAnomaly.name,
-            }),
-            okButtonText: t("label.delete"),
+            contents: promptMsg,
+            okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
-            onOk: () => handleAnomalyDeleteOk(uiAnomaly),
+            onOk: () => handleAnomalyDeleteOk(uiAnomalies),
         });
     };
 
-    const handleAnomalyDeleteOk = (uiAnomaly: UiAnomaly): void => {
-        deleteAnomaly(uiAnomaly.id).then((anomaly): void => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.delete-success", { entity: t("label.anomaly") })
-            );
+    const handleAnomalyDeleteOk = (uiAnomalies: UiAnomaly[]): void => {
+        Promise.allSettled(
+            uiAnomalies.map((uiAnomaly) => deleteAnomaly(uiAnomaly.id))
+        ).then((completedRequests) => {
+            let numSuccessful = 0;
+            let errored = 0;
 
-            // Remove deleted anomaly from fetched anomalies
-            removeUiAnomaly(anomaly);
+            completedRequests.forEach((settled) => {
+                if (settled.status === "fulfilled") {
+                    numSuccessful = numSuccessful + 1;
+                    removeUiAnomaly(settled.value);
+                } else {
+                    errored = errored + 1;
+                }
+            });
+
+            if (uiAnomalies.length === 1 && numSuccessful === 1) {
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.delete-success", { entity: t("label.anomaly") })
+                );
+            } else {
+                if (numSuccessful > 0) {
+                    notify(
+                        NotificationTypeV1.Success,
+                        t("message.num-delete-success", {
+                            entity: t("label.anomalies"),
+                            num: numSuccessful,
+                        })
+                    );
+                }
+                if (errored > 0) {
+                    notify(
+                        NotificationTypeV1.Error,
+                        t("message.num-delete-error", {
+                            entity: t("label.anomalies"),
+                            num: errored,
+                        })
+                    );
+                }
+            }
         });
     };
 

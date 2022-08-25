@@ -17,10 +17,12 @@ import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TI
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -71,6 +73,17 @@ public class TimeFilterFunction implements MacroFunction {
     Map<String, String> properties = context.getProperties();
     properties.put(MIN_TIME_MILLIS.toString(), String.valueOf(filterLowerBound.getMillis()));
     properties.put(MAX_TIME_MILLIS.toString(), String.valueOf(filterUpperBound.getMillis()));
+
+    if (isAutoTimeConfiguration(timeColumn)) {
+      final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
+      Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      final String quotedTimeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
+      return context.getSqlExpressionBuilder()
+          .getTimeFilterExpression(quotedTimeColumn,
+              filterInterval,
+              datasetConfigDTO.getTimeFormat(),
+              datasetConfigDTO.getTimeUnit().toString());
+    }
 
     // generate SQL expression
     return context.getSqlExpressionBuilder()

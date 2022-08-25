@@ -61,8 +61,8 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             return;
         }
 
-        updateSubscriptionGroup(subscriptionGroup).then(
-            (subscriptionGroup: SubscriptionGroup): void => {
+        updateSubscriptionGroup(subscriptionGroup)
+            .then((subscriptionGroup: SubscriptionGroup): void => {
                 notify(
                     NotificationTypeV1.Success,
                     t("message.update-success", {
@@ -72,8 +72,21 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
 
                 // Redirect to subscription groups detail path
                 navigate(getSubscriptionGroupsViewPath(subscriptionGroup.id));
-            }
-        );
+            })
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.update-error", {
+                              entity: t("label.subscription-group"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
     };
 
     const fetchSubscriptionGroup = (): void => {
@@ -150,20 +163,25 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     entity: t("label.subscription-group"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {subscriptionGroup && (
-                        <SubscriptionGroupWizard
-                            alerts={alerts}
-                            subscriptionGroup={subscriptionGroup}
-                            onFinish={onSubscriptionGroupWizardFinish}
-                        />
-                    )}
+            {subscriptionGroup && (
+                <SubscriptionGroupWizard
+                    alerts={alerts}
+                    submitBtnLabel={t("label.update-entity", {
+                        entity: t("label.subscription-group"),
+                    })}
+                    subscriptionGroup={subscriptionGroup}
+                    onFinish={onSubscriptionGroupWizardFinish}
+                />
+            )}
 
-                    {/* No data available message */}
-                    {!subscriptionGroup && <NoDataIndicator />}
-                </Grid>
-            </PageContentsGridV1>
+            {/* No data available message */}
+            {!subscriptionGroup && (
+                <PageContentsGridV1>
+                    <Grid item xs={12}>
+                        <NoDataIndicator />
+                    </Grid>
+                </PageContentsGridV1>
+            )}
         </PageV1>
     );
 };

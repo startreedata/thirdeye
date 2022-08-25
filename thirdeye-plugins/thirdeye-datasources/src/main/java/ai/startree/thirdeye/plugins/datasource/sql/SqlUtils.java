@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.datasource.sql;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -123,7 +124,7 @@ public class SqlUtils {
 
     datasetConfig.setDataset(datasetName);
     datasetConfig.setDataSource(SqlThirdEyeDataSource.class.getSimpleName());
-    datasetConfig.setDimensions(sortedDimensions);
+    datasetConfig.setDimensions(Templatable.of(sortedDimensions));
     datasetConfig.setTimezone(dataset.getTimezone());
     datasetConfig.setTimeColumn(dataset.getTimeColumn());
     datasetConfig.setTimeFormat(dataset.getTimeFormat());

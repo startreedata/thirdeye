@@ -19,12 +19,12 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AlertCreater;
 import ai.startree.thirdeye.core.AlertDeleter;
 import ai.startree.thirdeye.core.AlertEvaluator;
 import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -169,13 +168,13 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(list, "Invalid request");
 
     for (AlertApi api : list) {
-      AlertDTO existing = api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
+      AlertDTO existing =
+          api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
       validate(api, existing);
     }
 
     return Response.ok().build();
   }
-
 
   @Path("evaluate")
   @POST
@@ -195,8 +194,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 
-  @ApiOperation(value = "Delete associated Anomalies")
-  @DELETE
+  @ApiOperation(value = "Delete associated anomalies and rerun detection till present")
+  @POST
   @Path("{id}/reset")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
@@ -204,8 +203,16 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
-    alertDeleter.deleteAssociatedAnomalies(dto.getId());
     log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
+
+    alertDeleter.deleteAssociatedAnomalies(dto.getId());
+
+    /* Reset the last timestamp after deleting all anomalies */
+    dto.setLastTimestamp(0);
+    dtoManager.save(dto);
+
+    /* Create a task to rerun all historical anomalies */
+    alertCreater.createOnboardingTask(dto, 0, System.currentTimeMillis());
 
     return respondOk(toApi(dto));
   }

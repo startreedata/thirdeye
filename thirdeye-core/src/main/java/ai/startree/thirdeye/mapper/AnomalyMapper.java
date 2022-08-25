@@ -27,19 +27,21 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Date;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses={AnomalyFeedbackMapper.class, MetricMapper.class, EnumerationItemMapper.class})
 public interface AnomalyMapper {
 
   AnomalyMapper INSTANCE = Mappers.getMapper(AnomalyMapper.class);
 
-  default MergedAnomalyResultDTO toDto(AnomalyApi api) {
-    if (api == null) {
-      return null;
-    }
-    // incomplete because only used by RcaInvestigation for the moment
-    return (MergedAnomalyResultDTO) new MergedAnomalyResultDTO().setId(api.getId());
+  @Mapping(source = "alert.id", target = "detectionConfigId")
+  @Mapping(source = "metadata.metric.name", target = "metric")
+  @Mapping(source = "metadata.dataset.name", target = "collection")
+  MergedAnomalyResultDTO toDto(AnomalyApi api);
+
+  default long map(Date value) {
+    return value.getTime();
   }
 
   default AnomalyApi toApi(MergedAnomalyResultDTO dto) {
@@ -72,7 +74,7 @@ public interface AnomalyMapper {
             .setMetric(metricApi)
             .setDataset(datasetApi)
         )
-        ;
+        .setEnumerationItem(EnumerationItemMapper.INSTANCE.toApi(dto.getEnumerationItem()));
     if (dto.getMetricUrn() != null) {
       anomalyApi
           .setMetric(toMetricApi(dto.getMetricUrn())

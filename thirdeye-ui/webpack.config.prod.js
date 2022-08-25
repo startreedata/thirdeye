@@ -32,7 +32,7 @@ module.exports = {
     output: {
         path: outputPath,
         filename: "thirdeye-ui.js",
-        chunkFilename: "[name].js",
+        chunkFilename: "[name].[contenthash].js",
         publicPath: "/", // Ensures bundle is served from absolute path as opposed to relative
     },
 

@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.62.0-SNAPSHOT</version>
+  <version>1.67.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -82,7 +82,7 @@
     <jodatime.version>2.7</jodatime.version>
     <json-schema-validator.version>2.2.14</json-schema-validator.version>
     <mockito.version>4.3.1</mockito.version>
-    <mysql.connector.version>8.0.27</mysql.connector.version>
+    <mysql.connector.version>8.0.28</mysql.connector.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <parsii.version>1.5</parsii.version>
     <pinot.version>0.10.0</pinot.version>

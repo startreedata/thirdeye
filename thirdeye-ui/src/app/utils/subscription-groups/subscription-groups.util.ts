@@ -28,7 +28,7 @@ import { deepSearchStringProperty } from "../search/search.util";
 export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
     return {
         name: "",
-        cron: "",
+        cron: "0 */5 * * * ?",
         alerts: [] as Alert[],
         notificationSchemes: {
             email: {

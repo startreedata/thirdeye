@@ -25,10 +25,7 @@ import { Text } from "@visx/text";
 import { useTooltip } from "@visx/tooltip";
 import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
 import React, { MouseEvent } from "react";
-import {
-    EMPTY_STRING_DISPLAY,
-    getShortText,
-} from "../../../utils/anomalies/anomalies.util";
+import { getShortText } from "../../../utils/anomalies/anomalies.util";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
 import { GenericTreemapTooltip } from "./generic-treemap-tooltip";
 import {
@@ -91,7 +88,7 @@ function TreemapInternal<Data>({
     const { tooltipTop, tooltipLeft, tooltipData, showTooltip, hideTooltip } =
         useTooltip<TreemapData<Data>>();
 
-    const isOtherDimension = (id: string | undefined): boolean => {
+    const checkIfOtherDimension = (id: string | undefined): boolean => {
         if (!id) {
             return false;
         }
@@ -126,7 +123,7 @@ function TreemapInternal<Data>({
 
     const root = hierarchy(data)
         .sort((a, b) => (b.value || 0) - (a.value || 0))
-        .sort((_a, b) => (isOtherDimension(b.data.id) ? -1 : 1));
+        .sort((_a, b) => (checkIfOtherDimension(b.data.id) ? -1 : 1));
 
     const handleMouseLeave = (): void => {
         hideTooltip();
@@ -164,7 +161,7 @@ function TreemapInternal<Data>({
             | HierarchyRectangularNode<HierarchyNode<TreemapData<Data>>>
             | undefined
     ): void => {
-        if (!node || (node.data.id && isOtherDimension(node?.data?.id))) {
+        if (!node || (node.data.id && checkIfOtherDimension(node?.data?.id))) {
             return;
         }
 
@@ -209,7 +206,10 @@ function TreemapInternal<Data>({
 
                                         let colorValue = -1;
 
-                                        if (!isOtherDimension(node.data.id)) {
+                                        const isOtherDimension =
+                                            checkIfOtherDimension(node.data.id);
+
+                                        if (!isOtherDimension) {
                                             if (node.data.data) {
                                                 colorValue =
                                                     colorChangeValueAccessor(
@@ -236,6 +236,7 @@ function TreemapInternal<Data>({
                                                         ? treemapClasses.clickable
                                                         : undefined
                                                 }
+                                                data-testid={`treemap-group-${node.id}`}
                                                 key={`node-${i}`}
                                                 left={node.x0 + margin.left}
                                                 top={node.y0 + margin.top}
@@ -252,9 +253,7 @@ function TreemapInternal<Data>({
                                                         {rect}
                                                         <Text
                                                             className={
-                                                                isOtherDimension(
-                                                                    node.data.id
-                                                                )
+                                                                isOtherDimension
                                                                     ? treemapClasses.headingOtherDimension
                                                                     : treemapClasses.heading
                                                             }
@@ -266,12 +265,13 @@ function TreemapInternal<Data>({
                                                             {props.shouldTruncateText
                                                                 ? getShortText(
                                                                       node.data
-                                                                          .id ||
-                                                                          EMPTY_STRING_DISPLAY,
+                                                                          .data
+                                                                          .label,
                                                                       nodeWidth,
                                                                       nodeHeight
                                                                   )
-                                                                : node.data.id}
+                                                                : node.data.data
+                                                                      .label}
                                                         </Text>
                                                     </>
                                                 )}

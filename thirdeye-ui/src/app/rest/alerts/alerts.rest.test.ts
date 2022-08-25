@@ -20,6 +20,7 @@ import {
     getAlert,
     getAlertEvaluation,
     getAllAlerts,
+    resetAlert,
     updateAlert,
     updateAlerts,
 } from "./alerts.rest";
@@ -165,6 +166,22 @@ describe("Alerts REST", () => {
         jest.spyOn(axios, "delete").mockRejectedValue(mockError);
 
         await expect(deleteAlert(1)).rejects.toThrow("testError");
+    });
+
+    it("resetAlert should invoke axios.delete with appropriate input and return appropriate alert", async () => {
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: mockAlertResponse,
+        });
+
+        await expect(resetAlert(1)).resolves.toEqual(mockAlertResponse);
+
+        expect(axios.post).toHaveBeenCalledWith("/api/alerts/1/reset");
+    });
+
+    it("resetAlert should throw encountered error", async () => {
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
+
+        await expect(resetAlert(1)).rejects.toThrow("testError");
     });
 
     it("getAlertEvaluation should invoke axios.post with appropriate input and return appropriate alert evaluation", async () => {

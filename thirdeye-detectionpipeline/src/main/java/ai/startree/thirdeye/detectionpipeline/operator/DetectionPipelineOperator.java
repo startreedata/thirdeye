@@ -13,16 +13,13 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import ai.startree.thirdeye.detectionpipeline.utils.EpochTimeConverter;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import ai.startree.thirdeye.spi.detection.TimeConverter;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +32,6 @@ public abstract class DetectionPipelineOperator implements Operator {
 
   protected static final String PROP_TYPE = "type";
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineOperator.class);
-  private static final TimeConverter TIME_CONVERTER = new EpochTimeConverter(TimeUnit.MILLISECONDS.toString());
 
   protected PlanNodeBean planNode;
   protected Interval detectionInterval;
@@ -100,7 +96,7 @@ public abstract class DetectionPipelineOperator implements Operator {
 
   @Override
   public void setProperty(final String key, final Object value) {
-    planNode.getParams().put(key, value);
+    planNode.getParams().putValue(key, value);
   }
 
   @Override

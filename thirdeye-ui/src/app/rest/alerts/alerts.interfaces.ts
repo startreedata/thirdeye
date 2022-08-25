@@ -35,6 +35,11 @@ export interface GetAlert extends ActionHook {
     getAlert: (id: number) => Promise<Alert | undefined>;
 }
 
+export interface ResetAlert extends ActionHook {
+    alert: Alert | null;
+    resetAlert: (id: number) => Promise<Alert | undefined>;
+}
+
 export interface GetEvaluationRequestPayload extends UseGetEvaluationParams {
     evaluationContext?: {
         filters: string[];

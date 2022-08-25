@@ -113,7 +113,7 @@ export const AlertTemplatesViewPage: FunctionComponent = () => {
                 contents: t("message.delete-confirmation", {
                     name: alertTemplate.name,
                 }),
-                okButtonText: t("label.delete"),
+                okButtonText: t("label.confirm"),
                 cancelButtonText: t("label.cancel"),
                 onOk: () => handleAlertTemplateDeleteOk(alertTemplate),
             });

@@ -18,8 +18,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.util.StringTemplateUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
@@ -38,10 +38,10 @@ public class AlertResourceTest {
     URL resource = requireNonNull(classLoader.getResource("alertEvaluation.json"));
     final String jsonString = Resources.toString(resource, StandardCharsets.UTF_8);
     resource = classLoader.getResource("alertEvaluation-context.json");
-    final Map<String, Object> alertEvaluationPlanApiContext = new ObjectMapper()
+    final Map<String, Object> alertEvaluationPlanApiContext = ThirdEyeSerialization.getObjectMapper()
         .readValue(resource.openStream(), Map.class);
 
-    final AlertEvaluationApi api = new ObjectMapper().readValue(StringTemplateUtils.renderTemplate(
+    final AlertEvaluationApi api = ThirdEyeSerialization.getObjectMapper().readValue(StringTemplateUtils.renderTemplate(
         jsonString,
         alertEvaluationPlanApiContext), AlertEvaluationApi.class);
 

@@ -13,15 +13,15 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * An immutable configurations for setting up {@link PinotThirdEyeDataSource}'s connection to Pinot.
  */
 public class PinotThirdEyeDataSourceConfig {
 
+  private PinotOauthConfiguration oauth;
   private String zookeeperUrl;
   private String controllerHost;
   private int controllerPort;
@@ -35,6 +35,16 @@ public class PinotThirdEyeDataSourceConfig {
   private Integer requestTimeoutMs;
   private Integer connectTimeoutMs;
   private Integer brokerResponseTimeoutMs;
+
+  public PinotOauthConfiguration getOauth() {
+    return oauth;
+  }
+
+  public PinotThirdEyeDataSourceConfig setOauth(
+      final PinotOauthConfiguration oauth) {
+    this.oauth = oauth;
+    return this;
+  }
 
   public String getZookeeperUrl() {
     return zookeeperUrl;
@@ -68,7 +78,7 @@ public class PinotThirdEyeDataSourceConfig {
   }
 
   public PinotThirdEyeDataSourceConfig setControllerConnectionScheme(
-    final String controllerConnectionScheme) {
+      final String controllerConnectionScheme) {
     this.controllerConnectionScheme = controllerConnectionScheme;
     return this;
   }
@@ -164,43 +174,37 @@ public class PinotThirdEyeDataSourceConfig {
       return false;
     }
     final PinotThirdEyeDataSourceConfig that = (PinotThirdEyeDataSourceConfig) o;
-    return getControllerPort() == that.getControllerPort() && Objects.equal(
-      getZookeeperUrl(),
-      that.getZookeeperUrl()) && Objects.equal(getControllerHost(),
-      that.getControllerHost())
-      && Objects.equal(getControllerConnectionScheme(),
-      that.getControllerConnectionScheme()) && Objects.equal(getClusterName(),
-      that.getClusterName()) && Objects.equal(getBrokerUrl(),
-      that.getBrokerUrl()) && Objects.equal(getTag(), that.getTag())
-      && Objects.equal(getName(), that.getName())
-      && Objects.equal(getHeaders(), that.getHeaders());
+    return controllerPort == that.controllerPort
+        && Objects.equals(oauth, that.oauth)
+        && Objects.equals(zookeeperUrl, that.zookeeperUrl)
+        && Objects.equals(controllerHost, that.controllerHost)
+        && Objects.equals(controllerConnectionScheme, that.controllerConnectionScheme)
+        && Objects.equals(clusterName, that.clusterName)
+        && Objects.equals(brokerUrl, that.brokerUrl)
+        && Objects.equals(tag, that.tag)
+        && Objects.equals(name, that.name)
+        && Objects.equals(headers, that.headers)
+        && Objects.equals(readTimeoutMs, that.readTimeoutMs)
+        && Objects.equals(requestTimeoutMs, that.requestTimeoutMs)
+        && Objects.equals(connectTimeoutMs, that.connectTimeoutMs)
+        && Objects.equals(brokerResponseTimeoutMs, that.brokerResponseTimeoutMs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getZookeeperUrl(),
-      getControllerHost(),
-      getControllerPort(),
-      getControllerConnectionScheme(),
-      getClusterName(),
-      getBrokerUrl(),
-      getTag(),
-      getName(),
-      getHeaders());
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-      .add("zookeeperUrl", zookeeperUrl)
-      .add("controllerHost", controllerHost)
-      .add("controllerPort", controllerPort)
-      .add("controllerConnectionScheme", controllerConnectionScheme)
-      .add("clusterName", clusterName)
-      .add("brokerUrl", brokerUrl)
-      .add("tag", tag)
-      .add("name", name)
-      .add("headers", headers)
-      .toString();
+    return Objects.hash(oauth,
+        zookeeperUrl,
+        controllerHost,
+        controllerPort,
+        controllerConnectionScheme,
+        clusterName,
+        brokerUrl,
+        tag,
+        name,
+        headers,
+        readTimeoutMs,
+        requestTimeoutMs,
+        connectTimeoutMs,
+        brokerResponseTimeoutMs);
   }
 }

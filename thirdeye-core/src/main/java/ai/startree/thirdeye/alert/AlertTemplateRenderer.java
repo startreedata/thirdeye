@@ -136,7 +136,7 @@ public class AlertTemplateRenderer {
           // TODO spyne remove magic string. This was done to remove dependency of AnomalyDetector.TYPE on the renderer
           .filter(node -> node.getType().equals("AnomalyDetector"))
           .forEach(node -> node.getParams()
-              .put("anomaly.source", String.format("%s/%s", alertName, node.getName())));
+              .putValue("anomaly.source", String.format("%s/%s", alertName, node.getName())));
     }
 
     return StringTemplateUtils.applyContext(template, properties);

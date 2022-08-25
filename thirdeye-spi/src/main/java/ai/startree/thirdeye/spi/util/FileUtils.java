@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FileUtils {
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   @NonNull
   public static <T> T readJsonObject(File file, Class<T> clazz) {

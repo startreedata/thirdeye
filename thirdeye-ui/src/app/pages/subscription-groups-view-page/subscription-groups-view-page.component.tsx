@@ -13,14 +13,13 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { cloneDeep, isEmpty, toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
+import { SubscriptionGroupSpecsCard } from "../../components/entity-cards/subscription-group-specs-card/subscription-group-specs-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
-import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
-import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -31,15 +30,10 @@ import {
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import {
-    EmailScheme,
-    SubscriptionGroup,
-} from "../../rest/dto/subscription-group.interfaces";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
     deleteSubscriptionGroup,
     getSubscriptionGroup,
-    updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -51,7 +45,6 @@ import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-pag
 export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
         useState<UiSubscriptionGroup | null>(null);
-    const [alerts, setAlerts] = useState<Alert[]>([]);
     const { showDialog } = useDialogProviderV1();
     const params = useParams<SubscriptionGroupsViewPageParams>();
     const navigate = useNavigate();
@@ -79,7 +72,6 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
             );
 
             setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
-            setAlerts(fetchedAlerts);
 
             return;
         }
@@ -132,7 +124,6 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
             })
             .finally(() => {
                 setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
-                setAlerts(fetchedAlerts);
             });
     };
 
@@ -145,7 +136,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                 name: uiSubscriptionGroup.name,
             }),
             cancelButtonText: t("label.cancel"),
-            okButtonText: t("label.delete"),
+            okButtonText: t("label.confirm"),
             onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
         });
     };
@@ -166,68 +157,6 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
         });
     };
 
-    const handleSubscriptionGroupAlertsChange = (alerts: Alert[]): void => {
-        if (!uiSubscriptionGroup || !uiSubscriptionGroup.subscriptionGroup) {
-            return;
-        }
-
-        // Create a copy of subscription group and update alerts
-        const subscriptionGroupCopy = cloneDeep(
-            uiSubscriptionGroup.subscriptionGroup
-        );
-        subscriptionGroupCopy.alerts = alerts;
-        saveSubscriptionGroup(subscriptionGroupCopy);
-    };
-
-    const handleSubscriptionGroupEmailsChange = (emails: string[]): void => {
-        if (!uiSubscriptionGroup || !uiSubscriptionGroup.subscriptionGroup) {
-            return;
-        }
-
-        // Create a copy of subscription group and update emails
-        const subscriptionGroupCopy = cloneDeep(
-            uiSubscriptionGroup.subscriptionGroup
-        );
-        if (
-            subscriptionGroupCopy.notificationSchemes &&
-            subscriptionGroupCopy.notificationSchemes.email
-        ) {
-            // Add to existing notification email scheme
-            subscriptionGroupCopy.notificationSchemes.email.to = emails;
-        } else if (subscriptionGroupCopy.notificationSchemes) {
-            // Add to existing notification scheme
-            subscriptionGroupCopy.notificationSchemes.email = {
-                to: emails,
-            } as EmailScheme;
-        } else {
-            // Create and add to notification scheme
-            subscriptionGroupCopy.notificationSchemes = {
-                email: {
-                    to: emails,
-                } as EmailScheme,
-            };
-        }
-        saveSubscriptionGroup(subscriptionGroupCopy);
-    };
-
-    const saveSubscriptionGroup = (
-        subscriptionGroup: SubscriptionGroup
-    ): void => {
-        updateSubscriptionGroup(subscriptionGroup).then((subscriptionGroup) => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.update-success", {
-                    entity: t("label.subscription-group"),
-                })
-            );
-
-            // Replace updated subscription group as fetched subscription group
-            setUiSubscriptionGroup(
-                getUiSubscriptionGroup(subscriptionGroup, alerts)
-            );
-        });
-    };
-
     return (
         <PageV1>
             <PageHeader
@@ -242,23 +171,17 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                     />
                 </Grid>
 
-                {/* Subscribed alerts */}
+                {/* Notifications Groups */}
                 <Grid item xs={12}>
-                    <SubscriptionGroupAlertsAccordian
-                        alerts={alerts}
-                        subscriptionGroup={uiSubscriptionGroup}
-                        title={t("label.subscribe-alerts")}
-                        onChange={handleSubscriptionGroupAlertsChange}
-                    />
-                </Grid>
-
-                {/* Subscribed emails */}
-                <Grid item xs={12}>
-                    <SubscriptionGroupEmailsAccordian
-                        subscriptionGroup={uiSubscriptionGroup}
-                        title={t("label.subscribe-emails")}
-                        onChange={handleSubscriptionGroupEmailsChange}
-                    />
+                    {uiSubscriptionGroup &&
+                        uiSubscriptionGroup.subscriptionGroup && (
+                            <SubscriptionGroupSpecsCard
+                                specs={
+                                    uiSubscriptionGroup.subscriptionGroup
+                                        .specs || []
+                                }
+                            />
+                        )}
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

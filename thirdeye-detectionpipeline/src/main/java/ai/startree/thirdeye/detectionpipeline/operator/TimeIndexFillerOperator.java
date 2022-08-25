@@ -13,11 +13,13 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.components.TimeIndexFiller;
 import ai.startree.thirdeye.detectionpipeline.spec.TimeIndexFillerSpec;
+import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.IndexFiller;
@@ -37,7 +39,8 @@ public class TimeIndexFillerOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    this.timeIndexFiller = createTimeIndexFiller(planNode.getParams());
+    this.timeIndexFiller = createTimeIndexFiller(optional(planNode.getParams()).map(TemplatableMap::valueMap)
+        .orElse(null));
 
     checkArgument(inputMap.size() == 1,
         OPERATOR_NAME + " must have exactly 1 input node.");

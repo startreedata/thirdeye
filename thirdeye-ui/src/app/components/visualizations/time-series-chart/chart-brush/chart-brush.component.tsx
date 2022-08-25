@@ -16,16 +16,17 @@ import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { PartialBrushStartEnd } from "@visx/brush/lib/types";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import React, { FunctionComponent, useMemo, useRef } from "react";
+import { Palette } from "../../../../utils/material-ui/palette.util";
 import { ChartCore } from "../chart-core/chart-core.component";
 import { ChartCoreProps } from "../chart-core/chart-core.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
 import { ChartBrushProps } from "./chart-brush.interfaces";
 
-const BRUSH_MARGIN = { top: 10, bottom: 15, left: 50, right: 20 };
-
 const SELECTED_BRUSH_STYLE = {
-    fill: "rgba(0, 0, 0, 0.25)",
-    stroke: "white",
+    fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+    fillOpacity: 0.4,
+    strokeOpacity: 1,
+    stroke: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
 };
 
 export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
@@ -38,18 +39,13 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     onBrushClick,
     xAxisOptions,
     initialZoom,
+    margins,
 }) => {
     const brushRef = useRef<BaseBrush>(null);
 
     // Bounds
-    const xBrushMax = Math.max(
-        width - BRUSH_MARGIN.left - BRUSH_MARGIN.right,
-        0
-    );
-    const yBrushMax = Math.max(
-        height - BRUSH_MARGIN.top - BRUSH_MARGIN.bottom,
-        0
-    );
+    const xBrushMax = Math.max(width - margins.left - margins.right, 0);
+    const yBrushMax = Math.max(height - margins.top - margins.bottom, 0);
 
     // Scales
     const minMaxTimestamp = getMinMax(
@@ -87,7 +83,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
         showXAxis: true,
         showYAxis: false,
         colorScale,
-        margin: BRUSH_MARGIN,
+        margin: margins,
         top,
         xScale: dateScale,
         yScale: dataScale,
@@ -122,7 +118,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
                             : undefined
                     }
                     innerRef={brushRef}
-                    margin={BRUSH_MARGIN}
+                    margin={{ ...margins }}
                     resizeTriggerAreas={["left", "right"]}
                     selectedBoxStyle={SELECTED_BRUSH_STYLE}
                     width={xBrushMax}

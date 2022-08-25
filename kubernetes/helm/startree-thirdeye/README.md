@@ -182,9 +182,9 @@ helm install thirdeye . \
 ### SSL/TLS Support
 
 To enable SSL/TLS on ThirdEye components the prerequisite is to have the certificates injected into the namespace as Secret
-- The secrets for server components should have the name as `{component pod name}-internal-tls`
+- The secrets for server components should have the name as `{component deployment name}-internal-tls`
 - Each server component secret must have these data fields: `ca.crt`, `tls.crt`, `tls.key`
-- The secret for UI component should have name as `{UI pod name}-tls`
+- The secret for UI component should have name as `{UI deployment name}-tls`
 - UI secret must have these data fields: `tls.crt`, `tls.key`
 
 SSL/TLS can be configured using
@@ -194,6 +194,29 @@ SSL/TLS can be configured using
   --set tls.worker.enabled=true # for tls on worker
   --set tls.scheduler.enabled=true # for tls on scheduler
 ```
+
+### Basic Authentication Support
+
+Configurations for Basic Authentication
+```yaml
+auth:
+  enabled: true
+  basic:
+    enabled: true
+    users:
+      - username: admin
+      - password: admin
+```
+Details
+
+| Property                 | Description                                        |
+|--------------------------|----------------------------------------------------|
+| `enabled`                | Flag to enable/disable auth                        |
+| `basic.enabled`          | Flag to enable/disable Basic authentication filter |
+| `basic.users[].username` | Username for authentication                        |
+| `basic.users[].password` | Password for authentication                        |
+                                                                                                                |
+
 
 ### OAuth2 Support
 
@@ -217,13 +240,51 @@ Details
 
 | Property           | Description                                                                                                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`          | Flag to enable/disable auth                                                                                                                     |
+| `enabled`          | Flag to enable/disable auth. OAuth is enabled by default if `auth.enabled` is true                                                              |
 | `oauth.serverUrl`  | OIDC server url. Usually the oidc server has a standard endpoint to expose its metadata which contains info required for keysUrl and issuer url |
 | `oauth.keysUrl`    | Endpoint where jwk keys are present                                                                                                             |
 | `oauth.required`   | List of claims which are required in the auth token. If any claim from the list is absent, it will considered unauthorised request              |
 | `oauth.exactMatch` | List of claims and their expected value. Any inconsistent claim-value pair will end up being an unauthorized request                            |
 | `cache.size`       | Cache size in KBs                                                                                                                               |
 | `cache.ttl`        | Lifetime of the cache in millis                                                                                                                 |
+
+### MySQL backup (S3)
+
+A kubernetes `CronJob` can be enabled for taking regular backups of the MySQL database and store them in an AWS S3 bucket.
+The backup `CronJob` is disabled by default
+
+```yaml
+secrets:
+  ...
+  mysqlBackupAwsKeyId:
+    env: AWS_ACCESS_KEY_ID
+    value: SAMPLEaccessKEYid
+  mysqlBackupAwsAccessKey:
+    env: AWS_SECRET_ACCESS_KEY
+    value: sampleSECRETaccessKEY
+
+mysql:
+  ...
+  backup:
+    enabled: true
+    name: backup-folder-name
+    schedule: "* * 1 * *"
+#    Make sure you uncomment "S3BackUpId" and "S3BackUpKey" in the "secrets" section above when using s3 as backup location
+    s3:
+      bucket: s3-bucket-name
+      region: us-west-2
+```
+
+| Property                                | Description                                   |
+|-----------------------------------------|-----------------------------------------------|
+| `mysql.backup.enabled`                  | Flag to enable/disable backup cron job        |
+| `mysql.backup.name`                     | backup folder name                            |
+| `mysql.backup.schedule`                 | Cron expression for backup frequency          |
+| `mysql.backup.s3.bucket`                | AWS S3 bucket name to store the backup files  |
+| `mysql.backup.s3.region`                | AWS S3 bucket region                          |
+| `secrets.mysqlBackupAwsKeyId.value`     | AWS access key id to access the S3 bucket     |
+| `secrets.mysqlBackupAwsAccessKey.value` | AWS secret access key to access the S3 bucket |
+
 
 ### Other useful configurations
 

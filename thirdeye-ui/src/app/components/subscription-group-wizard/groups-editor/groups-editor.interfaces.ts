@@ -34,4 +34,9 @@ export interface SpecUIConfig {
      */
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     formComponent: FunctionComponent<any>;
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    reviewComponent: FunctionComponent<any>;
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    viewComponent: FunctionComponent<any>;
+    validate: (spec: NotificationSpec) => boolean;
 }

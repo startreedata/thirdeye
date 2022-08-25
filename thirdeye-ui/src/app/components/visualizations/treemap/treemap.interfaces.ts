@@ -30,6 +30,7 @@ export interface TreemapData<Data> {
     id: string;
     parent: string | null;
     size: number;
+    label: string;
     extraData?: Data;
 }
 

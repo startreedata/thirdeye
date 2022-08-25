@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
@@ -20,6 +21,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeFilterFunction;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeGroupFunction;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
@@ -61,16 +63,18 @@ public class MacroEngine {
 
   public MacroEngine(final SqlLanguage sqlLanguage, final SqlExpressionBuilder sqlExpressionBuilder,
       final Interval detectionInterval,
-      String tableName, String query) {
+      @Nullable final DatasetConfigDTO datasetConfigDTO, String query) {
     this.sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
     this.sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
-    this.tableName = tableName;
+    this.tableName = optional(datasetConfigDTO).map(DatasetConfigDTO::getDataset).orElse(null);
     this.query = query;
     this.properties = new HashMap<>();
     this.macroFunctionContext = new MacroFunctionContext()
         .setSqlExpressionBuilder(sqlExpressionBuilder)
         .setDetectionInterval(detectionInterval)
+        .setDatasetConfigDTO(datasetConfigDTO)
         .setLiteralUnquoter(this.sqlDialect::unquoteStringLiteral)
+        .setIdentifierQuoter(this.sqlDialect::quoteIdentifier)
         .setProperties(this.properties);
     // possible to put datasource-specific macros here in the future
     for (MacroFunction function : CORE_MACROS) {
@@ -114,7 +118,7 @@ public class MacroEngine {
         // cannot be a macro function
         return call;
       }
-      MacroFunction macroFunction = availableMacros.get(call.getOperator().getName());
+      final MacroFunction macroFunction = availableMacros.get(call.getOperator().getName());
       if (macroFunction != null) {
         List<String> macroParams = paramsFromCall(call);
         String expandedMacro = macroFunction.expandMacro(macroParams, macroFunctionContext);

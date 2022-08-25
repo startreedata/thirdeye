@@ -50,6 +50,7 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  javaOpts: -Xmx1G -XX:+UseG1GC
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -66,6 +67,7 @@ scheduler:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  javaOpts: -Xmx1G -XX:+UseG1GC
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
   strategy:
@@ -84,6 +86,7 @@ worker:
   replicas: 1
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  javaOpts: -Xmx1G -XX:+UseG1GC
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -136,6 +139,11 @@ rca:
 
 auth:
   enabled: false
+  basic:
+    enabled: false
+#    users:
+#      - username: admin
+#        password: admin
   oauth:
 #    serverUrl: <dex server url>
 #    keysUrl: <keys url>
@@ -161,6 +169,12 @@ secrets:
   smtpPassword:
     env: SMTP_PASSWORD
     value: tobefedexternally
+#  mysqlBackupAwsKeyId:
+#    env: AWS_ACCESS_KEY_ID
+#    value: <access key id>
+#  mysqlBackupAwsAccessKey:
+#    env: AWS_SECRET_ACCESS_KEY
+#    value: <access key>
 
 # Optional: Enable for ingress
 traefik:
@@ -175,3 +189,11 @@ mysql:
   mysqlUser: uthirdeye
   mysqlPassword: pass
   mysqlDatabase: thirdeye
+  backup:
+    enabled: false
+    name: backup-folder-name
+    schedule: "0 2 * * *"
+#    Make sure you uncomment "mysqlBackupAwsKeyId" and "mysqlBackupAwsAccessKey" in the "secrets" section above when using s3 as backup location
+#    s3:
+#      bucket: thirdeye-backup
+#      region: us-west-2

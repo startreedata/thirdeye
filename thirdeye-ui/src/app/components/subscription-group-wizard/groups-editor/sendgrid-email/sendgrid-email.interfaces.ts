@@ -18,3 +18,8 @@ export interface SendgridEmailProps {
     onSpecChange: (updatedSpec: SendgridEmailSpec) => void;
     onDeleteClick: () => void;
 }
+
+export interface SendgridEmailFormEntries {
+    apiKey: string;
+    from: string;
+}

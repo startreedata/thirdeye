@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
+import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
@@ -36,6 +37,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -255,5 +257,13 @@ public abstract class ApiBeanMapper {
 
   public static RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
     return RcaInvestigationMapper.INSTANCE.toDto(api);
+  }
+
+  public static EnumerationItemDTO toEnumerationItemDTO(final EnumerationItemApi api) {
+    return EnumerationItemMapper.INSTANCE.toDto(api);
+  }
+
+  public static EnumerationItemApi toApi(final EnumerationItemDTO dto) {
+    return EnumerationItemMapper.INSTANCE.toApi(dto);
   }
 }

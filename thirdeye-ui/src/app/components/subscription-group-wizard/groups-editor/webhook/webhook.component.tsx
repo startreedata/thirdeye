@@ -11,21 +11,26 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
     Card,
     CardContent,
+    FormHelperText,
     Grid,
     TextField,
     Typography,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../platform/components";
 import { lightV1 } from "../../../../platform/utils";
-import { WebhookProps } from "./webhook.interfaces";
+import { InputSection } from "../../../form-basics/input-section/input-section.component";
+import { WebhookFormEntries, WebhookProps } from "./webhook.interfaces";
 
 export const Webhook: FunctionComponent<WebhookProps> = ({
     configuration,
@@ -33,6 +38,16 @@ export const Webhook: FunctionComponent<WebhookProps> = ({
     onDeleteClick,
 }) => {
     const { t } = useTranslation();
+    const { register, errors } = useForm<WebhookFormEntries>({
+        mode: "onChange",
+        reValidateMode: "onChange",
+        defaultValues: configuration.params,
+        resolver: yupResolver(
+            yup.object().shape({
+                url: yup.string().trim().required(t("message.url-required")),
+            })
+        ),
+    });
 
     const handleUrlChange = (newValue: string): void => {
         const copied = {
@@ -44,7 +59,7 @@ export const Webhook: FunctionComponent<WebhookProps> = ({
     };
 
     return (
-        <Card elevation={2}>
+        <Card>
             <CardContent>
                 <Grid container justifyContent="space-between">
                     <Grid item>
@@ -71,14 +86,36 @@ export const Webhook: FunctionComponent<WebhookProps> = ({
                 </Grid>
             </CardContent>
             <CardContent>
-                <TextField
-                    fullWidth
-                    data-testid="webhook-input-container"
-                    placeholder={t("message.enter-webhook-url")}
-                    value={configuration.params.url}
-                    variant="outlined"
-                    onChange={(e) => handleUrlChange(e.currentTarget.value)}
-                />
+                <Grid>
+                    <InputSection
+                        inputComponent={
+                            <>
+                                <TextField
+                                    fullWidth
+                                    data-testid="webhook-input-container"
+                                    error={Boolean(errors && errors.url)}
+                                    helperText={
+                                        errors &&
+                                        errors.url &&
+                                        errors.url.message
+                                    }
+                                    inputRef={register}
+                                    name="url"
+                                    type="string"
+                                    variant="outlined"
+                                    onChange={(e) =>
+                                        handleUrlChange(e.currentTarget.value)
+                                    }
+                                />
+                                <FormHelperText>
+                                    e.g.
+                                    https://hooks.com/services/T000000/B000000/XXXXX
+                                </FormHelperText>
+                            </>
+                        }
+                        label={t("label.webhook-url")}
+                    />
+                </Grid>
             </CardContent>
         </Card>
     );

@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>ai.startree.thirdeye</groupId>
-    <version>1.62.0-SNAPSHOT</version>
+    <version>1.67.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -75,6 +75,17 @@
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-mysql</artifactId>
+    </dependency>
+
+    <!-- Object mapping utilities -->
+    <dependency>
+      <groupId>org.modelmapper</groupId>
+      <artifactId>modelmapper</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
     </dependency>
 
     <!-- test dependencies -->

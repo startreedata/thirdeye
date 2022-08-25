@@ -17,4 +17,5 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
 export interface AlertNotificationsProps {
     alert: EditableAlert;
     onSubscriptionGroupsChange: (newGroups: SubscriptionGroup[]) => void;
+    initiallySelectedSubscriptionGroups: SubscriptionGroup[];
 }

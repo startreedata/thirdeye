@@ -11,7 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +21,6 @@ import { SubscriptionGroupWizard } from "../../components/subscription-group-wiz
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
-    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -28,7 +28,9 @@ import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
+import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
@@ -48,8 +50,8 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             return;
         }
 
-        createSubscriptionGroup(subscriptionGroup).then(
-            (subscriptionGroup: SubscriptionGroup): void => {
+        createSubscriptionGroup(subscriptionGroup)
+            .then((subscriptionGroup: SubscriptionGroup): void => {
                 notify(
                     NotificationTypeV1.Success,
                     t("message.create-success", {
@@ -59,8 +61,21 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
 
                 // Redirect to subscription groups detail path
                 navigate(getSubscriptionGroupsViewPath(subscriptionGroup.id));
-            }
-        );
+            })
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.create-error", {
+                              entity: t("label.subscription-group"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
     };
 
     const fetchAllAlerts = (): void => {
@@ -84,14 +99,15 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                     entity: t("label.subscription-group"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <SubscriptionGroupWizard
-                        alerts={alerts}
-                        onFinish={onSubscriptionGroupWizardFinish}
-                    />
-                </Grid>
-            </PageContentsGridV1>
+
+            <SubscriptionGroupWizard
+                alerts={alerts}
+                submitBtnLabel={t("label.create-entity", {
+                    entity: t("label.subscription-group"),
+                })}
+                subscriptionGroup={createEmptySubscriptionGroup()}
+                onFinish={onSubscriptionGroupWizardFinish}
+            />
         </PageV1>
     );
 };

@@ -82,6 +82,8 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   @JsonIgnore
   private boolean renotify = false;
 
+  private EnumerationItemDTO enumerationItem;
+
   public MergedAnomalyResultDTO() {
     setCreatedTime(System.currentTimeMillis());
   }
@@ -409,6 +411,16 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
 
   public MergedAnomalyResultDTO setSource(final String source) {
     this.source = source;
+    return this;
+  }
+
+  public EnumerationItemDTO getEnumerationItem() {
+    return enumerationItem;
+  }
+
+  public MergedAnomalyResultDTO setEnumerationItem(
+      final EnumerationItemDTO enumerationItem) {
+    this.enumerationItem = enumerationItem;
     return this;
   }
 

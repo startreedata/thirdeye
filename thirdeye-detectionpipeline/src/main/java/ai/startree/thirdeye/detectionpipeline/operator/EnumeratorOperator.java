@@ -13,9 +13,13 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 
@@ -36,10 +40,17 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
   @SuppressWarnings("unchecked")
   @Override
   public void execute() throws Exception {
-    final Map<String, Object> params = getPlanNode().getParams();
-    final List<Map<String, Object>> enumerationList =
-        (List<Map<String, Object>>) params.get("enumerationList");
-    setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(enumerationList));
+    checkArgument(getPlanNode().getParams() != null,
+        "Missing configuration parameters in EnumeratorOperator.");
+    final Map<String, Object> paramsMap = getPlanNode().getParams().valueMap();
+
+    final var params = new ObjectMapper().convertValue(paramsMap,
+        EnumeratorOperatorParameters.class);
+
+    final EnumerationItemNameGenerator generator = new EnumerationItemNameGenerator();
+    params.getItems().forEach(ei -> ei.setName(generator.generateName(ei)));
+
+    setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(params.getItems()));
   }
 
   @Override
@@ -49,9 +60,9 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
 
   public static class EnumeratorResult implements DetectionPipelineResult {
 
-    private final List<Map<String, Object>> results;
+    private final List<EnumerationItemDTO> results;
 
-    public EnumeratorResult(final List<Map<String, Object>> results) {
+    public EnumeratorResult(final List<EnumerationItemDTO> results) {
       this.results = results;
     }
 
@@ -60,7 +71,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
       return null;
     }
 
-    public List<Map<String, Object>> getResults() {
+    public List<EnumerationItemDTO> getResults() {
       return results;
     }
   }

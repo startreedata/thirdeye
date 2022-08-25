@@ -37,22 +37,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import org.apache.pinot.client.PinotConnectionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
   public static final String HTTP_SCHEME = "http";
   public static final String HTTPS_SCHEME = "https";
+  private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
 
   private final SqlExpressionBuilder sqlExpressionBuilder;
   private final SqlLanguage sqlLanguage;
   private String name;
-  private PinotResponseCacheLoader pinotResponseCacheLoader;
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
-  private PinotDataSourceTimeQuery pinotDataSourceTimeQuery;
   private ThirdEyeDataSourceContext context;
+  private PinotConnectionManager pinotConnectionManager;
 
   public PinotThirdEyeDataSource(
       final SqlExpressionBuilder sqlExpressionBuilder,
@@ -71,21 +71,22 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         "Data source property cannot be empty.");
     name = requireNonNull(dataSourceDTO.getName(), "name of data source dto is null");
 
-    try {
-      pinotResponseCacheLoader = new PinotResponseCacheLoader(buildConfig(properties));
-      pinotResponseCacheLoader.initConnections();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
+    /* Create config class */
+    final var config = buildConfig(properties);
 
-    // TODO Refactor. remove inverse hierarchical dependency
-    pinotDataSourceTimeQuery = new PinotDataSourceTimeQuery(this);
+    /* Build Connection Manager */
+    pinotConnectionManager = new PinotConnectionManager(new PinotConnectionBuilder(), config);
+
+    /* Cache loader uses the connection to fire queries */
+    final var pinotResponseCacheLoader = new PinotResponseCacheLoader(pinotConnectionManager);
+
+    /* Uses LoadingCache to cache queries */
+    pinotResponseCache = DataSourceUtils.buildResponseCache(pinotResponseCacheLoader);
   }
 
   @Override
   public String getName() {
-    return this.name;
+    return name;
   }
 
   /**
@@ -96,36 +97,15 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup executeSQL(PinotQuery pinotQuery) throws ExecutionException {
+  public ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException {
     Preconditions
-        .checkNotNull(this.pinotResponseCache,
+        .checkNotNull(pinotResponseCache,
             "{} doesn't connect to Pinot or cache is not initialized.", getName());
 
     try {
-      return this.pinotResponseCache.get(pinotQuery);
-    } catch (ExecutionException e) {
-      LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
-      throw e;
-    }
-  }
-
-  /**
-   * Refreshes and returns the cached ResultSetGroup corresponding to the given Pinot query.
-   *
-   * @param pinotQuery the query that is specifically constructed for Pinot.
-   * @return the corresponding ResultSetGroup to the given Pinot query.
-   * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
-   *     Pinot.
-   */
-  public ThirdEyeResultSetGroup refreshSQL(PinotQuery pinotQuery) throws ExecutionException {
-    requireNonNull(this.pinotResponseCache,
-        String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
-
-    try {
-      pinotResponseCache.refresh(pinotQuery);
       return pinotResponseCache.get(pinotQuery);
-    } catch (ExecutionException e) {
-      LOG.error("Failed to refresh PQL: {}", pinotQuery.getQuery());
+    } catch (final ExecutionException e) {
+      LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
       throw e;
     }
   }
@@ -139,36 +119,31 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     try {
       // Use pinot SQL.
-      ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
+      final ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
           request.getQuery(),
           request.getTable(),
           true)).get(0);
       return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
-    } catch (ExecutionException e) {
+    } catch (final ExecutionException e) {
       throw e;
     }
-  }
-
-  @Override
-  public long getMaxDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotDataSourceTimeQuery.getMaxDateTime(datasetConfig);
-  }
-
-  @Override
-  public long getMinDataTime(final DatasetConfigDTO datasetConfig) throws Exception {
-    return pinotDataSourceTimeQuery.getMinDateTime(datasetConfig);
   }
 
   @Override
   public boolean validate() {
     try {
       // Table name required to execute query against pinot broker.
-      PinotDatasetOnboarder onboard = createPinotDatasetOnboarder();
-      String table = onboard.getAllTables().get(0);
-      String query = String.format("select 1 from %s", table);
-      ThirdEyeResultSetGroup result = executeSQL(new PinotQuery(query, table, true));
+      final PinotDatasetOnboarder onboard = createPinotDatasetOnboarder();
+      final String table = onboard.getAllTables().get(0);
+      final String query = String.format("select 1 from %s", table);
+
+      final PinotQuery pinotQuery = new PinotQuery(query, table, true);
+
+      /* Disable caching for validate queries */
+      pinotResponseCache.refresh(pinotQuery);
+      final ThirdEyeResultSetGroup result = executeSQL(pinotQuery);
       return result.get(0).getRowCount() == 1;
-    } catch (ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
+    } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);
     }
     return false;
@@ -180,7 +155,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
     try {
       return pinotDatasetOnboarder.onboardAll(name);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -191,7 +166,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
     try {
       return pinotDatasetOnboarder.onboardTable(datasetName, name);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -199,17 +174,16 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private PinotDatasetOnboarder createPinotDatasetOnboarder() {
     final ThirdEyePinotClient thirdEyePinotClient = new ThirdEyePinotClient(new DataSourceMetaBean()
         .setProperties(context.getDataSourceDTO().getProperties()), "pinot");
-    final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
+    return new PinotDatasetOnboarder(
         thirdEyePinotClient,
         context.getDatasetConfigManager(),
         context.getMetricConfigManager());
-    return pinotDatasetOnboarder;
   }
 
   @Override
   public void close() throws Exception {
-    if (pinotResponseCacheLoader != null) {
-      pinotResponseCacheLoader.close();
+    if (pinotConnectionManager != null) {
+      pinotConnectionManager.close();
     }
   }
 

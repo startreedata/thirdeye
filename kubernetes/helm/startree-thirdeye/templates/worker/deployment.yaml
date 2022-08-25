@@ -106,6 +106,7 @@ spec:
               -Djavax.net.ssl.keyStore=/opt/thirdeye/server/keystore/keystore
               -Djavax.net.ssl.keyStorePassword=changeit
               {{- end }}
+              {{- toYaml .Values.worker.javaOpts | nindent 14 }}
               -Djavax.net.ssl.trustStore=/opt/thirdeye/server/truststore/truststore
               -Djavax.net.ssl.trustStorePassword=changeit
         ports:

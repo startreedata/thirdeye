@@ -18,16 +18,20 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
-import ai.startree.thirdeye.detectionpipeline.sql.filter.FiltersEngine;
+import ai.startree.thirdeye.detectionpipeline.sql.filter.FilterEngine;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.MacroEngine;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
+import java.util.Objects;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.joda.time.Interval;
 
@@ -42,6 +46,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
    */
   private String tableName;
   private ThirdEyeDataSource thirdEyeDataSource;
+  private DatasetConfigDTO datasetConfigDTO;
   private List<QueryPredicate> timeseriesFilters;
 
   public String getQuery() {
@@ -53,19 +58,20 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     return this;
   }
 
+  @VisibleForTesting
   public String getTableName() {
     return tableName;
-  }
-
-  public GenericDataFetcher setTableName(final String tableName) {
-    this.tableName = tableName;
-    return this;
   }
 
   @Override
   public void init(final DataFetcherSpec dataFetcherSpec) {
     this.query = dataFetcherSpec.getQuery();
     this.tableName = dataFetcherSpec.getTableName();
+    if (tableName != null) {
+      final DatasetConfigManager datasetDao = Objects.requireNonNull(dataFetcherSpec.getDatasetDao());
+      this.datasetConfigDTO = Objects.requireNonNull(datasetDao.findByDataset(dataFetcherSpec.getTableName()),
+          "Could not find dataset " + dataFetcherSpec.getTableName());
+    }
     if (dataFetcherSpec.getDataSourceCache() != null) {
       final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),
           "DataFetcher: data source is not set.");
@@ -94,7 +100,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
         String.format(
             "Sql manipulation not supported for datasource %s, but filters list is not empty. Cannot apply filters.",
             thirdEyeDataSource.getName()));
-    return new FiltersEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
+    return new FilterEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
   }
 
   private DataSourceRequest applyMacros(final Interval detectionInterval,
@@ -107,7 +113,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
       return new MacroEngine(sqlLanguage,
           sqlExpressionBuilder,
           detectionInterval,
-          tableName,
+          datasetConfigDTO,
           queryWithFilters).prepareRequest();
     }
     return new DataSourceRequest(tableName, query, ImmutableMap.of());

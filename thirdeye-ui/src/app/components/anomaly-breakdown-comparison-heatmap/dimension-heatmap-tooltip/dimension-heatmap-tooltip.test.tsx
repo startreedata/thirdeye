@@ -18,7 +18,8 @@ import { DimensionHeatmapTooltip } from "./dimension-heatmap-tooltip.component";
 describe("Dimension Heatmap Tooltip", () => {
     it("DimensionHeatmapTooltip renders a span if `extraData` is missing", () => {
         const testProps = {
-            id: "label for data",
+            id: "id for data",
+            label: "label for data",
             parent: null,
             size: 200,
         };
@@ -31,7 +32,8 @@ describe("Dimension Heatmap Tooltip", () => {
 
     it("DimensionHeatmapTooltip renders expected fields for valid `extraData` property", () => {
         const testProps = {
-            id: "label for data",
+            id: "id for data",
+            label: "label for data",
             parent: null,
             size: 200,
             extraData: {

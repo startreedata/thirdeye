@@ -122,7 +122,7 @@ bin/thirdeye.sh server
 
 ### Docker
 
-Once a distribution is ready, you can simply package it into a docker container using the command below.
+Once a distribution is ready, you can package it into a docker container using the command below.
 
 ```SHELL
 ./mvnw -T 1C package -D skipTests && docker build -t thirdeye:latest .

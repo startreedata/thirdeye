@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
@@ -61,11 +62,12 @@ public class ConfigGenerator {
   public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO, String timeColumnName,
       String timeFormatStr,
       int columnSize, TimeUnit columnUnit) {
-    datasetConfigDTO.setTimeColumn(timeColumnName);
-    datasetConfigDTO.setTimeDuration(columnSize);
-    datasetConfigDTO.setTimeUnit(columnUnit);
-    datasetConfigDTO.setTimeFormat(timeFormatStr);
-    datasetConfigDTO.setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
+    datasetConfigDTO
+        .setTimeColumn(timeColumnName)
+        .setTimeDuration(columnSize)
+        .setTimeUnit(columnUnit)
+        .setTimeFormat(timeFormatStr)
+        .setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
     // set the data granularity of epoch timestamp dataset to minute-level
     if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
         .getTimeUnit()
@@ -82,13 +84,13 @@ public class ConfigGenerator {
     List<String> dimensions = schema.getDimensionNames();
     DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
     // Create DatasetConfig
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO();
-    datasetConfigDTO.setDataset(dataset);
-    datasetConfigDTO.setDimensions(dimensions);
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(dataset)
+        .setDimensions(Templatable.of(dimensions))
+        .setDataSource(dataSourceName)
+        .setProperties(customConfigs)
+        .setActive(Boolean.TRUE);
     setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec);
-    datasetConfigDTO.setDataSource(dataSourceName);
-    datasetConfigDTO.setProperties(customConfigs);
-    datasetConfigDTO.setActive(Boolean.TRUE);
     checkNonAdditive(datasetConfigDTO);
     return datasetConfigDTO;
   }

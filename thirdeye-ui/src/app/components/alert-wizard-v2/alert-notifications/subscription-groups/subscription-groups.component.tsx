@@ -28,12 +28,21 @@ import { SubscriptionGroupsProps } from "./subscription-groups.interfaces";
 export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
     alert,
     onSubscriptionGroupsChange,
+    initialSubscriptionGroups,
 }) => {
     const { t } = useTranslation();
     const { subscriptionGroups, getSubscriptionGroups, status } =
         useGetSubscriptionGroups();
-    const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] =
-        useState<DataGridSelectionModelV1<SubscriptionGroup>>();
+    const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] = useState<
+        DataGridSelectionModelV1<SubscriptionGroup>
+    >(() => ({
+        rowKeyValues: initialSubscriptionGroups.map(
+            (s: SubscriptionGroup) => s.id
+        ),
+        rowKeyValueMap: new Map(
+            initialSubscriptionGroups.map((subGroup) => [subGroup.id, subGroup])
+        ),
+    }));
 
     useEffect(() => {
         getSubscriptionGroups().then((fetchedSubscriptionGroups) => {
@@ -151,6 +160,9 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
                                         columns={subscriptionGroupColumns}
                                         data={subscriptionGroups}
                                         rowKey="id"
+                                        selectionModel={
+                                            selectedSubscriptionGroup
+                                        }
                                         onSelectionChange={
                                             handleSelectedSubscriptionGroupChange
                                         }

@@ -97,6 +97,7 @@ export const AlertsCreateAdvancePage: FunctionComponent = () => {
             <Grid item xs={12}>
                 <AlertNotifications
                     alert={alert}
+                    initiallySelectedSubscriptionGroups={[]}
                     onSubscriptionGroupsChange={onSubscriptionGroupsChange}
                 />
             </Grid>

@@ -12,6 +12,7 @@
  * the License.
  */
 import { ScaleLinear, ScaleTime } from "d3-scale";
+import React from "react";
 import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 import { AlertEvaluationTimeSeriesPoint } from "../alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 
@@ -24,4 +25,5 @@ export interface AlertEvaluationTimeSeriesPlotProps {
     alertEvaluationAnomalies?: Anomaly[];
     xScale: ScaleTime<number, number>;
     yScale: ScaleLinear<number, number>;
+    children?: React.ReactElement;
 }

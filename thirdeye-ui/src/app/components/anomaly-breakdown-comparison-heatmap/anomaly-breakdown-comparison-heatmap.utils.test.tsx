@@ -83,6 +83,7 @@ describe("Anomaly Breakdown Comparison Heatmap Utils", () => {
             expect(result).toEqual([
                 {
                     id: "column name-parent",
+                    label: "column name-parent",
                     parent: null,
                     size: 0,
                 },
@@ -90,6 +91,7 @@ describe("Anomaly Breakdown Comparison Heatmap Utils", () => {
                     extraData: {
                         ...mockComparisonData,
                     },
+                    label: "apple: 300000000 (0.28%)",
                     id: "apple",
                     parent: "column name-parent",
                     size: 300000000,
@@ -98,6 +100,7 @@ describe("Anomaly Breakdown Comparison Heatmap Utils", () => {
                     extraData: {
                         ...mockComparisonData,
                     },
+                    label: "coconut: 300000000 (0.28%)",
                     id: "coconut",
                     parent: "column name-parent",
                     size: 300000000,

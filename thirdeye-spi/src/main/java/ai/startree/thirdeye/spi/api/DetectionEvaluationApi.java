@@ -25,6 +25,8 @@ public class DetectionEvaluationApi {
   private DetectionDataApi data;
   private List<AnomalyApi> anomalies = new ArrayList<>();
 
+  private EnumerationItemApi enumerationItem;
+
   public Double getMape() {
     return mape;
   }
@@ -50,6 +52,16 @@ public class DetectionEvaluationApi {
   public DetectionEvaluationApi setAnomalies(
       final List<AnomalyApi> anomalies) {
     this.anomalies = anomalies;
+    return this;
+  }
+
+  public EnumerationItemApi getEnumerationItem() {
+    return enumerationItem;
+  }
+
+  public DetectionEvaluationApi setEnumerationItem(
+      final EnumerationItemApi enumerationItem) {
+    this.enumerationItem = enumerationItem;
     return this;
   }
 }

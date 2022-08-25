@@ -18,10 +18,10 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationSchemeFactory;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;

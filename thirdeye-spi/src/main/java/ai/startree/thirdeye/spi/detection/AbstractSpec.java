@@ -31,7 +31,7 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
-  public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.newObjectMapper();
+  public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   // avoid using this field - interval.getChronology at runtime should be enough most of the time - not sure if this deserves deprecation yet
   private String timezone = Constants.DEFAULT_TIMEZONE_STRING;

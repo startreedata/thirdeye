@@ -1,0 +1,13 @@
+[
+  {
+    "name": "country='US'",
+    "description": "US",
+    "params": {
+      "queryFilter": " AND country='US'"
+    }
+  }
+]
+
+"enumerationItem": {
+  "id": 1234
+}

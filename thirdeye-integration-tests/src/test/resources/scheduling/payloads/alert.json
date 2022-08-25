@@ -29,6 +29,7 @@
         "type": "DataFetcher",
         "params": {
           "component.dataSource": "${dataSource}",
+          "component.tableName": "${dataset}",
           "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregateFunction}(${metric}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
         },
         "outputs": [
@@ -60,8 +61,8 @@
     "metric": "views",
     "monitoringGranularity": "P1D",
     "delay": "P3D",
-    "timeColumn": "date",
-    "timeColumnFormat": "yyyyMMdd",
+    "timeColumn": "AUTO",
+    "timeColumnFormat": "",
     "max": "832000",
     "min": "250000"
   }

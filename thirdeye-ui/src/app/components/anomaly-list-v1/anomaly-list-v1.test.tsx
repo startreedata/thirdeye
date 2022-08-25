@@ -160,7 +160,7 @@ describe("AnomalyListV1", () => {
 
         fireEvent.click(screen.getByTestId("button-delete"));
 
-        expect(mockMethod).toHaveBeenNthCalledWith(1, mockUiAnomaly);
+        expect(mockMethod).toHaveBeenNthCalledWith(1, [mockUiAnomaly]);
     });
 
     it("component should render link with appropriate href", async () => {

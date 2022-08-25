@@ -18,12 +18,12 @@ import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi.HeatMapBreakdownApi;
@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -224,7 +225,7 @@ public class RcaMetricResource {
       List<String> rcaDimensions = getRcaDimensions(dimensions,
           excludedDimensions,
           datasetConfigDTO);
-      datasetConfigDTO.setDimensions(rcaDimensions);
+      datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
 
       final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
           rootCauseAnalysisInfo.getMetricConfigDTO(),
@@ -248,7 +249,7 @@ public class RcaMetricResource {
 
       final HeatMapResultApi resultApi = new HeatMapResultApi().setMetric(new MetricApi().setName(
                   rootCauseAnalysisInfo.getMetricConfigDTO().getName())
-              .setDataset(new DatasetApi().setName(datasetConfigDTO.getName())))
+              .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset())))
           .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
           .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
 

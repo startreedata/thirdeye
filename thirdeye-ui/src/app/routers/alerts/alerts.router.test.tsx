@@ -77,9 +77,11 @@ jest.mock(
 );
 
 jest.mock(
-    "../../pages/alerts-update-page/alerts-update-page.component",
+    "../../pages/alerts-update-page/alerts-update-base-page.component",
     () => ({
-        AlertsUpdatePage: jest.fn().mockReturnValue("testAlertsUpdatePage"),
+        AlertsUpdateBasePage: jest
+            .fn()
+            .mockReturnValue("testAlertsUpdateBasePage"),
     })
 );
 
@@ -248,7 +250,7 @@ describe("Alerts Router", () => {
         );
 
         await expect(
-            screen.findByText("testAlertsUpdatePage")
+            screen.findByText("testAlertsUpdateBasePage")
         ).resolves.toBeInTheDocument();
     });
 

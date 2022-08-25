@@ -36,10 +36,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AlertCreater {
 
-  // default onboarding replay period
-  // not used - with the current implementation alert is replayed from epoch 0
-  // to get this right, this should depend on the granularity
-  private static final long ONBOARDING_REPLAY_LOOKBACK = TimeUnit.DAYS.toMillis(60);
+  private static final long JAN_1_2000_UTC = 946684800000L;
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertCreater.class);
 
@@ -79,8 +76,10 @@ public class AlertCreater {
     long end = System.currentTimeMillis();
     long start = dto.getLastTimestamp();
     // If no value is present, set the default lookback
-    if (start < 0) {
-      start = end - ONBOARDING_REPLAY_LOOKBACK;
+    if (start <= 0) {
+      // replay from JAN 1 2000 quickfix because replaying from 1970 was too slow with small granularity
+      // this default replay period should depend on the granularity
+      start = JAN_1_2000_UTC;
     }
 
     createOnboardingTask(dto, start, end);

@@ -50,6 +50,7 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  javaOpts: -Xmx1G -XX:+UseG1GC
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -66,6 +67,7 @@ scheduler:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  javaOpts: -Xmx1G -XX:+UseG1GC
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
   strategy:
@@ -84,6 +86,7 @@ worker:
   replicas: 1
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  javaOpts: -Xmx1G -XX:+UseG1GC
   strategy:
     type: RollingUpdate
     rollingUpdate:

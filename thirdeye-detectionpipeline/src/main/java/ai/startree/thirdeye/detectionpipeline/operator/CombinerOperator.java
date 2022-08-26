@@ -78,6 +78,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
     return "CombinerOperator";
   }
 
+  // todo cyril suvodeep this class is not really necessary
   public static class CombinerResult implements DetectionPipelineResult {
 
     private final Map<String, DetectionPipelineResult> results;
@@ -89,8 +90,8 @@ public class CombinerOperator extends DetectionPipelineOperator {
     @Override
     public List<DetectionResult> getDetectionResults() {
       return results.values().stream()
-          .filter(o -> o instanceof WrappedAnomalyDetectionResult)
-          .map(o -> (WrappedAnomalyDetectionResult) o)
+          .flatMap(detectionPipelineResult -> detectionPipelineResult.getDetectionResults().stream())
+          .filter(r -> r instanceof WrappedAnomalyDetectionResult)
           .collect(Collectors.toList());
     }
 

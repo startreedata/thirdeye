@@ -91,6 +91,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
     public List<DetectionResult> getDetectionResults() {
       return results.values().stream()
           .flatMap(detectionPipelineResult -> detectionPipelineResult.getDetectionResults().stream())
+          // fixme cyril suvodeep not sure to understand why only WrappedAnomalyDetectionResult are returned
           .filter(r -> r instanceof WrappedAnomalyDetectionResult)
           .collect(Collectors.toList());
     }

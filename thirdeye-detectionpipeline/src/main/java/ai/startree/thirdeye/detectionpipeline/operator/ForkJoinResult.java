@@ -14,10 +14,10 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import java.util.List;
 
-public class ForkJoinResult implements DetectionPipelineResult {
+public class ForkJoinResult implements DetectionResult {
 
   private final List<ForkJoinResultItem> results;
 

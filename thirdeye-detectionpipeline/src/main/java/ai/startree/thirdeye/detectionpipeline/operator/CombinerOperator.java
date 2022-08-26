@@ -48,7 +48,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
   @Override
   public void execute() throws Exception {
     final ForkJoinResult forkJoinResult = (ForkJoinResult) requireNonNull(inputMap.get(
-        DEFAULT_INPUT_KEY), "No input to combiner");
+        DEFAULT_INPUT_KEY), "No input to combiner").getDetectionResults().get(0);
     final var forkJoinResults = forkJoinResult.getResults();
 
     final Map<String, DetectionPipelineResult> results = new HashMap<>();

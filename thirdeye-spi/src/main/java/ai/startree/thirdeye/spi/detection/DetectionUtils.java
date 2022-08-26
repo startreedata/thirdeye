@@ -130,7 +130,7 @@ public class DetectionUtils {
 
   public static Map<String, DataTable> getDataTableMap(
       final Map<String, DetectionPipelineResult> inputMap) {
-    final Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    final Map<String, DataTable> dataTableMap = new HashMap<>();
     for (final String key : inputMap.keySet()) {
       final DetectionPipelineResult input = inputMap.get(key);
       final List<DataTable> dataTables = input.getDetectionResults()
@@ -142,8 +142,8 @@ public class DetectionUtils {
         continue;
       }
       checkArgument(dataTables.size() == 1, "Detection results for key %s has more than 1 DataTable.", key);
-      timeSeriesMap.put(key, dataTables.get(0));
+      dataTableMap.put(key, dataTables.get(0));
     }
-    return timeSeriesMap;
+    return dataTableMap;
   }
 }

@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.worker.task.runner;
 
 import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.lastTimestamp;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.numAnomalies;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
@@ -108,9 +108,7 @@ public class OnboardingTaskRunner implements TaskRunner {
         alert.getId(),
         detectionInterval.getStart(),
         detectionInterval.getEnd(),
-        // fixme cyril helper ?
-        optional(result.getDetectionResults().stream().map(DetectionResult::getAnomalies)
-            .map(List::size).mapToInt(e -> e).sum()).orElse(0));
+        numAnomalies(result));
     return Collections.emptyList();
   }
 }

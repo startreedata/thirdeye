@@ -13,7 +13,8 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.lastTimestamp;
+import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.numAnomalies;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
@@ -91,7 +92,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
       final DetectionPipelineResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
-      if (result.getLastTimestamp() < 0) {
+      if (lastTimestamp(result) < 0) {
         // notice lastTimestamp is not updated
         LOG.info("No data returned for detection run for id {} between {} and {}",
             alert.getId(),
@@ -109,7 +110,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           alert.getId(),
           detectionInterval.getStart(),
           detectionInterval.getEnd(),
-          optional(result.getAnomalies()).map(List::size).orElse(0));
+          numAnomalies(result));
 
       return Collections.emptyList();
     } catch (final Exception e) {
@@ -119,13 +120,17 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final AlertDTO alert, final DetectionPipelineResult result) {
-    anomalyMerger.mergeAndSave(alert, result.getAnomalies());
+    // assumes the anomalies of distinct DetectionResult should not be merged
+    // this behavior was ill-defined before refactoring
+    result.getDetectionResults().forEach(r -> anomalyMerger.mergeAndSave(alert, r.getAnomalies()));
 
     // re-notify the anomalies if any
-    for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
-      // if an anomaly should be re-notified, update the notification lookup table in the database
-      if (anomaly.isRenotify()) {
-        DetectionUtils.renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
+    for (final var r : result.getDetectionResults()) {
+      for (final MergedAnomalyResultDTO anomaly : r.getAnomalies()) {
+        // if an anomaly should be re-notified, update the notification lookup table in the database
+        if (anomaly.isRenotify()) {
+          DetectionUtils.renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
+        }
       }
     }
   }

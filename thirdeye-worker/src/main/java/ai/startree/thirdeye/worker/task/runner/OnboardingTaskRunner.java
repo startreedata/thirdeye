@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
+import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.lastTimestamp;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
@@ -24,6 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardingTaskInfo;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
@@ -80,7 +82,7 @@ public class OnboardingTaskRunner implements TaskRunner {
 
     final DetectionPipelineResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
-    if (result.getLastTimestamp() < 0) {
+    if (lastTimestamp(result) < 0) {
       // notice lastTimestamp is not updated
       LOG.warn("No data returned for detection run for id {} between {} and {}",
           alert.getId(),
@@ -92,11 +94,13 @@ public class OnboardingTaskRunner implements TaskRunner {
     alert.setLastTimestamp(detectionInterval.getEndMillis());
     alertManager.update(alert);
 
-    for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
-      anomaly.setAnomalyResultSource(AnomalyResultSource.ANOMALY_REPLAY);
-      mergedAnomalyResultManager.save(anomaly);
-      if (anomaly.getId() == null) {
-        LOG.warn("Could not store anomaly:\n{}", anomaly);
+    for (final DetectionResult r : result.getDetectionResults()) {
+      for (final MergedAnomalyResultDTO anomaly : r.getAnomalies()) {
+        anomaly.setAnomalyResultSource(AnomalyResultSource.ANOMALY_REPLAY);
+        mergedAnomalyResultManager.save(anomaly);
+        if (anomaly.getId() == null) {
+          LOG.warn("Could not store anomaly:\n{}", anomaly);
+        }
       }
     }
 
@@ -104,7 +108,9 @@ public class OnboardingTaskRunner implements TaskRunner {
         alert.getId(),
         detectionInterval.getStart(),
         detectionInterval.getEnd(),
-        optional(result.getAnomalies()).map(List::size).orElse(0));
+        // fixme cyril helper ?
+        optional(result.getDetectionResults().stream().map(DetectionResult::getAnomalies)
+            .map(List::size).mapToInt(e -> e).sum()).orElse(0));
     return Collections.emptyList();
   }
 }

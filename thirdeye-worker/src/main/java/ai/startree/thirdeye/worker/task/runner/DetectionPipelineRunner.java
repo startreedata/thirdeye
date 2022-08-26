@@ -25,7 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import ai.startree.thirdeye.worker.task.DetectionPipelineResultWrapper;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -72,17 +72,22 @@ public class DetectionPipelineRunner {
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
     final DetectionPipelineResult result = executePlan(alert, detectionInterval);
+    enrichAnomalies(result, alert);
+    return result;
+  }
 
-    for (DetectionPipelineResult r : result.getDetectionResults()) {
+  private void enrichAnomalies(final DetectionPipelineResult result, final AlertDTO alert) {
+    for (DetectionResult r : result.getDetectionResults()) {
+      // generic enrichment
+      r.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
 
+      // dimension exploration enrichment
       if (r.getEnumerationItem() != null) {
         final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(r.getEnumerationItem());
-
         r.getAnomalies()
             .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
       }
     }
-    return result;
   }
 
   private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {
@@ -115,7 +120,6 @@ public class DetectionPipelineRunner {
         detectionInterval);
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
-    final DetectionPipelineResult result = detectionPipelineResultMap.values().iterator().next();
-    return new DetectionPipelineResultWrapper(alert, result);
+    return detectionPipelineResultMap.values().iterator().next();
   }
 }

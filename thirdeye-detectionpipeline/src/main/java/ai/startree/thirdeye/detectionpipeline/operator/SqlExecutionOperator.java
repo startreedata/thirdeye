@@ -17,9 +17,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.operator.sql.DataTableToSqlAdapterFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
+import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import java.sql.Connection;
@@ -101,9 +103,11 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
   private void initTables(final Connection connection) throws SQLException {
     Map<String, DataTable> datatables = new HashMap<>();
     for (String tableName : inputMap.keySet()) {
-      DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
-      if (detectionPipelineResult instanceof DataTable) {
-        datatables.put(tableName, (DataTable) detectionPipelineResult);
+      final DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
+      for (final DetectionResult detectionResult : detectionPipelineResult.getDetectionResults()) {
+        if (detectionResult instanceof DataTable) {
+          datatables.put(tableName, (DataTable) detectionResult);
+        }
       }
     }
     try {
@@ -119,7 +123,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     for (final String query : queries) {
       try {
         DataTable dataTable = runQuery(query, connection);
-        setOutput(Integer.toString(i++), dataTable);
+        setOutput(Integer.toString(i++), DetectionPipelineResultImpl.of(dataTable));
       } catch (final SQLException e) {
         LOG.error("Got exceptions when executing SQL query: {}", query, e);
         throw e;

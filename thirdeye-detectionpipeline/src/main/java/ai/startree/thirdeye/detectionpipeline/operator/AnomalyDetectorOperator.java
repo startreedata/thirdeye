@@ -34,10 +34,12 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
+import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
+import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
@@ -70,8 +72,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         .orElse(null), detectionRegistry);
   }
 
-  private AnomalyDetector<? extends AbstractSpec> createDetector(
-      final Map<String, Object> params,
+  private AnomalyDetector<? extends AbstractSpec> createDetector(final Map<String, Object> params,
       final DetectionRegistry detectionRegistry) {
     final String type = ensureExists(MapUtils.getString(params, PROP_TYPE),
         ERR_MISSING_CONFIGURATION_FIELD,
@@ -86,8 +87,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         "'monitoringGranularity' in detector config");
     monitoringGranularity = isoPeriod(genericDetectorSpec.getMonitoringGranularity());
 
-    return detectionRegistry
-        .buildDetector(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
+    return detectionRegistry.buildDetector(type,
+        new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 
   @Override
@@ -96,7 +97,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
 
-    DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
+    DetectionPipelineResult detectionResult = buildDetectionPipelineResult(detectorResult);
 
     addMetadata(detectionResult);
 
@@ -129,14 +130,14 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     return "AnomalyDetectorOperator";
   }
 
-  private DetectionResult buildDetectionResult(
+  private DetectionPipelineResult buildDetectionPipelineResult(
       final AnomalyDetectorResult detectorV2Result) {
 
-    final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
-        detectorV2Result.getDataFrame());
-
-    return DetectionResult.from(anomalies,
-        TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
+    final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(detectorV2Result.getDataFrame());
+    final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
+        .sortedBy(COL_TIME));
+    final AnomalyDetectionResult detectionResult = AnomalyDetectionResult.from(anomalies, timeSeries);
+    return DetectionPipelineResultImpl.of(detectionResult);
   }
 
   private List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {
@@ -181,8 +182,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
       // last anomaly has not been closed - let's close it - compute end time of anomaly range
       final long lastTimestamp = timeMillisSeries.getLong(timeMillisSeries.size() - 1);
       // exact computation of end of period
-      DateTime endTime = new DateTime(lastTimestamp, detectionInterval.getChronology())
-          .plus(monitoringGranularity);
+      DateTime endTime = new DateTime(lastTimestamp, detectionInterval.getChronology()).plus(
+          monitoringGranularity);
       anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endTime.getMillis()));
     }
 

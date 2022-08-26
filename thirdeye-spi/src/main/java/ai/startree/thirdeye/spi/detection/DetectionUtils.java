@@ -133,6 +133,7 @@ public class DetectionUtils {
       final DetectionPipelineResult input = inputMap.get(key);
       for (final DetectionResult detectionResult : input.getDetectionResults()) {
         if (detectionResult instanceof DataTable) {
+          // assumes only one DataTable per detectionResult because key is the inputMap key
           timeSeriesMap.put(key, (DataTable) detectionResult);
         }
       }

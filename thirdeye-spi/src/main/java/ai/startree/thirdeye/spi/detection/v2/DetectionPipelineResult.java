@@ -13,31 +13,16 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Operator result.
+ * Can contain detection result for multiple timeseries
+ */
 public interface DetectionPipelineResult {
 
-  default @Nullable List<DetectionResult> getDetectionResults() {
-    return null;
-  }
-
-  /**
-   * If implemented, returns the last timestamp observed in the data. Can be different from the last
-   * processed timestamp.
-   */
-  default long getLastTimestamp() {
-    return -1;
-  }
-
-  default List<MergedAnomalyResultDTO> getAnomalies() {
-    throw new UnsupportedOperationException();
-  }
-
-  default @Nullable EnumerationItemDTO getEnumerationItem() {
-    return null;
+  default @NonNull List<DetectionResult> getDetectionResults() {
+    return List.of();
   }
 }

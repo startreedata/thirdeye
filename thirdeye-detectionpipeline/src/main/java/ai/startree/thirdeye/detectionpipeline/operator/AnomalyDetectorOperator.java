@@ -34,10 +34,12 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
+import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
+import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
@@ -96,7 +98,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
 
-    DetectionPipelineResult detectionResult = buildDetectionResult(detectorResult);
+    DetectionPipelineResult detectionResult = buildDetectionPipelineResult(detectorResult);
 
     addMetadata(detectionResult);
 
@@ -129,14 +131,15 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     return "AnomalyDetectorOperator";
   }
 
-  private DetectionResult buildDetectionResult(
+  private DetectionPipelineResult buildDetectionPipelineResult(
       final AnomalyDetectorResult detectorV2Result) {
 
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame());
-
-    return DetectionResult.from(anomalies,
-        TimeSeries.fromDataFrame(detectorV2Result.getDataFrame().sortedBy(COL_TIME)));
+    final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
+        .sortedBy(COL_TIME));
+    final AnomalyDetectionResult detectionResult = AnomalyDetectionResult.from(anomalies, timeSeries);
+    return DetectionPipelineResultImpl.of(detectionResult);
   }
 
   private List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {

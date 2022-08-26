@@ -19,8 +19,10 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
+import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
+import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
   @Override
   public void execute() throws Exception {
     final ForkJoinResult forkJoinResult = (ForkJoinResult) requireNonNull(inputMap.get(
-        DEFAULT_INPUT_KEY), "No input to combiner");
+        DEFAULT_INPUT_KEY), "No input to combiner").getDetectionResults().get(0);
     final var forkJoinResults = forkJoinResult.getResults();
 
     final Map<String, DetectionPipelineResult> results = new HashMap<>();
@@ -62,9 +64,13 @@ public class CombinerOperator extends DetectionPipelineOperator {
 
   private DetectionPipelineResult wrapIfReqd(final EnumerationItemDTO enumerationItem,
       final DetectionPipelineResult v) {
-    return v instanceof DetectionResult
-        ? new WrappedDetectionPipelineResult(enumerationItem, (DetectionResult) v)
-        : v;
+    final List<DetectionResult> detectionResults = v.getDetectionResults()
+        .stream()
+        .map(r -> r instanceof AnomalyDetectionResult ?
+            new WrappedAnomalyDetectionResult(enumerationItem, (AnomalyDetectionResult) r) : r)
+        .collect(Collectors.toList());
+
+    return DetectionPipelineResultImpl.of(detectionResults);
   }
 
   @Override
@@ -72,6 +78,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
     return "CombinerOperator";
   }
 
+  // todo cyril suvodeep this class is not really necessary
   public static class CombinerResult implements DetectionPipelineResult {
 
     private final Map<String, DetectionPipelineResult> results;
@@ -83,8 +90,9 @@ public class CombinerOperator extends DetectionPipelineOperator {
     @Override
     public List<DetectionResult> getDetectionResults() {
       return results.values().stream()
-          .filter(o -> o instanceof WrappedDetectionPipelineResult)
-          .map(o -> (WrappedDetectionPipelineResult) o)
+          .flatMap(detectionPipelineResult -> detectionPipelineResult.getDetectionResults().stream())
+          // fixme cyril suvodeep not sure to understand why only WrappedAnomalyDetectionResult are returned
+          .filter(r -> r instanceof WrappedAnomalyDetectionResult)
           .collect(Collectors.toList());
     }
 

@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
+import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -78,36 +79,38 @@ public class SqlExecutionOperatorTest {
     final OperatorContext context = new OperatorContext().setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
         .setInputsMap(ImmutableMap.of("baseline_data",
+                DetectionPipelineResultImpl.of(
             new SimpleDataTable(ImmutableList.of("ts", "met"),
                 ImmutableList.of(new ColumnType(ColumnDataType.LONG),
                     new ColumnType(ColumnDataType.DOUBLE)),
-                ImmutableList.of(new Object[]{123L, 0.123})),
+                ImmutableList.of(new Object[]{123L, 0.123}))),
             "current_data",
+                DetectionPipelineResultImpl.of(
             new SimpleDataTable(ImmutableList.of("ts", "met"),
                 ImmutableList.of(new ColumnType(ColumnDataType.LONG),
                     new ColumnType(ColumnDataType.DOUBLE)),
-                ImmutableList.of(new Object[]{456L, 0.456}))))
+                ImmutableList.of(new Object[]{456L, 0.456})))))
         .setProperties(properties);
     sqlExecutionOperator.init(context);
     assertThat(sqlExecutionOperator.getDetectionInterval()).isEqualTo(detectionInterval);
     sqlExecutionOperator.execute();
     assertThat(sqlExecutionOperator.getOutputs().size()).isEqualTo(3);
     final DataFrame dataframe0 = ((DataTable) sqlExecutionOperator.getOutputs()
-        .get("sql_0")).getDataFrame();
+        .get("sql_0").getDetectionResults().get(0)).getDataFrame();
     assertThat(dataframe0.getSeriesNames().size()).isEqualTo(2);
     assertThat(dataframe0.size()).isEqualTo(1);
     assertThat(dataframe0.getLong("timestamp_res", 0)).isEqualTo(123L);
     assertThat(dataframe0.getDouble("value_res", 0)).isEqualTo(0.123);
 
     final DataFrame dataFrame1 = ((DataTable) sqlExecutionOperator.getOutputs()
-        .get("sql_1")).getDataFrame();
+        .get("sql_1").getDetectionResults().get(0)).getDataFrame();
     assertThat(dataFrame1.getSeriesNames().size()).isEqualTo(2);
     assertThat(dataFrame1.size()).isEqualTo(1);
     assertThat(dataFrame1.getLong("timestamp_res", 0)).isEqualTo(456L);
     assertThat(dataFrame1.getDouble("value_res", 0)).isEqualTo(0.456);
 
     final DataFrame dataFrame2 = ((DataTable) sqlExecutionOperator.getOutputs()
-        .get("2")).getDataFrame();
+        .get("2").getDetectionResults().get(0)).getDataFrame();
     assertThat(dataFrame2.getSeriesNames().size()).isEqualTo(2);
     assertThat(dataFrame2.size()).isEqualTo(2);
     assertThat(dataFrame2.getLong("ts", 0)).isEqualTo(123L);

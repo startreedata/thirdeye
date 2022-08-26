@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
@@ -26,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DetectionUtils {
 
@@ -38,7 +41,6 @@ public class DetectionUtils {
     throw new IllegalArgumentException(
         "componentKey is invalid; must be of type componentName:type");
   }
-
 
   public static void setEntityChildMapping(final MergedAnomalyResultDTO parent,
       final MergedAnomalyResultDTO child1) {
@@ -128,13 +130,20 @@ public class DetectionUtils {
 
   public static Map<String, DataTable> getDataTableMap(
       final Map<String, DetectionPipelineResult> inputMap) {
-    final Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    final Map<String, DataTable> dataTableMap = new HashMap<>();
     for (final String key : inputMap.keySet()) {
       final DetectionPipelineResult input = inputMap.get(key);
-      if (input instanceof DataTable) {
-        timeSeriesMap.put(key, (DataTable) input);
+      final List<DataTable> dataTables = input.getDetectionResults()
+          .stream()
+          .filter(r -> r instanceof DataTable)
+          .map(r -> (DataTable) r)
+          .collect(Collectors.toList());
+      if (dataTables.isEmpty()) {
+        continue;
       }
+      checkArgument(dataTables.size() == 1, "Detection results for key %s has more than 1 DataTable.", key);
+      dataTableMap.put(key, dataTables.get(0));
     }
-    return timeSeriesMap;
+    return dataTableMap;
   }
 }

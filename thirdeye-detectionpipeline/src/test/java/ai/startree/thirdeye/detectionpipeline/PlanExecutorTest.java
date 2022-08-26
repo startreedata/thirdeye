@@ -34,6 +34,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.common.collect.ImmutableMap;
@@ -85,7 +86,7 @@ public class PlanExecutorTest {
 
     assertThat(context.size()).isEqualTo(1);
     final ContextKey key = PlanExecutor.key(nodeName, EchoOperator.DEFAULT_OUTPUT_KEY);
-    final DetectionPipelineResult result = context.get(key);
+    final DetectionResult result = context.get(key).getDetectionResults().get(0);
     assertThat(result).isNotNull();
 
     final EchoResult echoResult = (EchoResult) result;
@@ -154,7 +155,7 @@ public class PlanExecutorTest {
     assertThat(outputMap.values().size()).isEqualTo(3);
 
     final Set<String> strings = outputMap.values().stream()
-        .map(r -> (EchoResult) r)
+        .map(r -> (EchoResult) r.getDetectionResults().get(0))
         .map(EchoResult::text)
         .collect(toSet());
 

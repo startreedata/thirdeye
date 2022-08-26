@@ -15,14 +15,15 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
+import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
 
-public class WrappedDetectionPipelineResult extends DetectionResult {
+// todo cyril suvodeep - this class does not look necessary AnomalyDetectionResult with enumerationItem setter seems enough and would avoid instanceOf checks
+public class WrappedAnomalyDetectionResult extends AnomalyDetectionResult {
 
   private final EnumerationItemDTO enumerationItem;
 
-  public WrappedDetectionPipelineResult(final EnumerationItemDTO enumerationItem,
-      final DetectionResult delegate) {
+  public WrappedAnomalyDetectionResult(final EnumerationItemDTO enumerationItem,
+      final AnomalyDetectionResult delegate) {
     super(delegate);
     this.enumerationItem = enumerationItem;
   }

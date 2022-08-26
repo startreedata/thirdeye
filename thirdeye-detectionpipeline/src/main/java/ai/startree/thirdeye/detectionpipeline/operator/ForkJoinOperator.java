@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -58,13 +59,14 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final Operator op = enumerator.buildOperator();
     op.execute();
     final Map<String, DetectionPipelineResult> outputs = op.getOutputs();
-    final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
+    final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY).getDetectionResults().get(0);
     return enumeratorResult.getResults();
   }
 
   private Map<String, DetectionPipelineResult> runCombiner(final ForkJoinResult forkJoinResult) throws Exception {
     final Operator combinerOp = combiner.buildOperator();
-    combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY, forkJoinResult);
+    combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY,
+        DetectionPipelineResultImpl.of(forkJoinResult));
     combinerOp.execute();
 
     return combinerOp.getOutputs();

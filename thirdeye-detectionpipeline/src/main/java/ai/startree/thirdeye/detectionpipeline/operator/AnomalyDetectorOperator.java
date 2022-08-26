@@ -72,7 +72,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         .orElse(null), detectionRegistry);
   }
 
-  private AnomalyDetector<? extends AbstractSpec> createDetector(final Map<String, Object> params,
+  private AnomalyDetector<? extends AbstractSpec> createDetector(
+      final Map<String, Object> params,
       final DetectionRegistry detectionRegistry) {
     final String type = ensureExists(MapUtils.getString(params, PROP_TYPE),
         ERR_MISSING_CONFIGURATION_FIELD,
@@ -87,8 +88,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         "'monitoringGranularity' in detector config");
     monitoringGranularity = isoPeriod(genericDetectorSpec.getMonitoringGranularity());
 
-    return detectionRegistry.buildDetector(type,
-        new AnomalyDetectorFactoryContext().setProperties(componentSpec));
+    return detectionRegistry
+        .buildDetector(type, new AnomalyDetectorFactoryContext().setProperties(componentSpec));
   }
 
   @Override
@@ -133,7 +134,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private DetectionPipelineResult buildDetectionPipelineResult(
       final AnomalyDetectorResult detectorV2Result) {
 
-    final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(detectorV2Result.getDataFrame());
+    final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
+        detectorV2Result.getDataFrame());
     final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
         .sortedBy(COL_TIME));
     final AnomalyDetectionResult detectionResult = AnomalyDetectionResult.from(anomalies, timeSeries);
@@ -182,8 +184,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
       // last anomaly has not been closed - let's close it - compute end time of anomaly range
       final long lastTimestamp = timeMillisSeries.getLong(timeMillisSeries.size() - 1);
       // exact computation of end of period
-      DateTime endTime = new DateTime(lastTimestamp, detectionInterval.getChronology()).plus(
-          monitoringGranularity);
+      DateTime endTime = new DateTime(lastTimestamp, detectionInterval.getChronology())
+          .plus(monitoringGranularity);
       anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endTime.getMillis()));
     }
 

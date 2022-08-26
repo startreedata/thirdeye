@@ -13,13 +13,14 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DetectionUtils {
 
@@ -131,12 +133,16 @@ public class DetectionUtils {
     final Map<String, DataTable> timeSeriesMap = new HashMap<>();
     for (final String key : inputMap.keySet()) {
       final DetectionPipelineResult input = inputMap.get(key);
-      for (final DetectionResult detectionResult : input.getDetectionResults()) {
-        if (detectionResult instanceof DataTable) {
-          // assumes only one DataTable per detectionResult because key is the inputMap key
-          timeSeriesMap.put(key, (DataTable) detectionResult);
-        }
+      final List<DataTable> dataTables = input.getDetectionResults()
+          .stream()
+          .filter(r -> r instanceof DataTable)
+          .map(r -> (DataTable) r)
+          .collect(Collectors.toList());
+      if (dataTables.isEmpty()) {
+        continue;
       }
+      checkArgument(dataTables.size() == 1, "Detection results for key %s has more than 1 DataTable.", key);
+      timeSeriesMap.put(key, dataTables.get(0));
     }
     return timeSeriesMap;
   }

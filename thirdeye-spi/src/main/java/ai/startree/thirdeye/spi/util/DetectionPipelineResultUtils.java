@@ -21,7 +21,11 @@ import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-@Deprecated
+/**
+ * Temporary utils - refactoring DetectionPipelineResult.
+ *
+ * todo cyril move back to Runners or delete
+ * */
 public class DetectionPipelineResultUtils {
   /**
    * Finds the max out of all observed timestamps,

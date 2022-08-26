@@ -58,7 +58,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final Operator op = enumerator.buildOperator();
     op.execute();
     final Map<String, DetectionPipelineResult> outputs = op.getOutputs();
-    final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
+    final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY).getDetectionResults().get(0);
     return enumeratorResult.getResults();
   }
 

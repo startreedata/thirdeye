@@ -118,6 +118,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     events,
     LegendComponent = Legend,
 }) => {
+    const [instanceId] = useState(Math.random());
     const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
         initialZoom
     );
@@ -198,6 +199,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
     // If series changed, reset everything
     useEffect(() => {
+        console.log(instanceId, "Series changed");
         setProcessedMainChartSeries(normalizeSeries(series, currentZoom));
         setProcessedBrushChartSeries(normalizeSeries(series));
         setEnabledDisabledSeriesMapping(series.map(syncEnabledDisabled));
@@ -239,6 +241,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     };
 
     const handleBrushChange = (domain: ZoomDomain | null): void => {
+        console.log(instanceId, "handleBrushChange");
         if (!domain) {
             return;
         }
@@ -264,6 +267,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     };
 
     const handleBrushClick = (): void => {
+        console.log(instanceId, "handleBrushClick");
         const seriesDataCopy = series.map((seriesData, idx) => {
             const copied = { ...seriesData };
             copied.enabled = enabledDisabledSeriesMapping[idx];

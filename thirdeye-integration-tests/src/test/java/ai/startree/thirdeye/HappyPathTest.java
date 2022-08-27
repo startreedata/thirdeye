@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye;
 
+import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
+import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
 import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
@@ -49,6 +51,7 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -68,7 +71,7 @@ import org.testng.annotations.Test;
  * - get a single anomaly
  * - get the anomaly breakdown (heatmap)
  */
-public class HappyPathTest extends PinotBasedIntegrationTest {
+public class HappyPathTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
@@ -79,7 +82,10 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
   private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
 
+  private static final PinotContainer pinotContainer;
+
   static {
+    pinotContainer = PinotContainerManager.getInstance().getPinotContainer();
     try {
       String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
       String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);

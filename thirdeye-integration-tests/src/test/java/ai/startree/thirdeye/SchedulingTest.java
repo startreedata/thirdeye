@@ -13,15 +13,17 @@
  */
 package ai.startree.thirdeye;
 
+import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
+import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
 import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
-import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
@@ -42,6 +44,7 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -63,7 +66,7 @@ import org.testng.annotations.Test;
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  */
 // todo cyril pinot is not necessary - implement and use csv/in-memory datasource instead
-public class SchedulingTest extends PinotBasedIntegrationTest {
+public class SchedulingTest {
 
   private static final Logger log = LoggerFactory.getLogger(SchedulingTest.class);
   private static final String RESOURCES_PATH = "/scheduling";
@@ -86,8 +89,10 @@ public class SchedulingTest extends PinotBasedIntegrationTest {
   private static final long MARCH_26_2020_05H00 = 1585198800_000L;
   // = MARCH_26_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
   private static final long MARCH_23_2020_00H00 = 1584921600_000L;
+  private static final PinotContainer pinotContainer;
 
   static {
+    pinotContainer = PinotContainerManager.getInstance().getPinotContainer();
     try {
       String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
       String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);

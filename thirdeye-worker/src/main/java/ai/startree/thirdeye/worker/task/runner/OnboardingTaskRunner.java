@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
-import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.lastTimestamp;
-import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.numAnomalies;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
@@ -24,7 +22,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardingTaskInfo;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
@@ -80,9 +77,9 @@ public class OnboardingTaskRunner implements TaskRunner {
     Interval detectionInterval = alertDetectionIntervalCalculator
         .getCorrectedInterval(alert, info.getStart(), info.getEnd());
 
-    final DetectionPipelineResult result = detectionPipelineRunner.run(alert, detectionInterval);
+    final DetectionResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
-    if (lastTimestamp(result) < 0) {
+    if (result.getLastTimestamp() < 0) {
       // notice lastTimestamp is not updated
       LOG.warn("No data returned for detection run for id {} between {} and {}",
           alert.getId(),
@@ -94,13 +91,12 @@ public class OnboardingTaskRunner implements TaskRunner {
     alert.setLastTimestamp(detectionInterval.getEndMillis());
     alertManager.update(alert);
 
-    for (final DetectionResult r : result.getDetectionResults()) {
-      for (final MergedAnomalyResultDTO anomaly : r.getAnomalies()) {
-        anomaly.setAnomalyResultSource(AnomalyResultSource.ANOMALY_REPLAY);
-        mergedAnomalyResultManager.save(anomaly);
-        if (anomaly.getId() == null) {
-          LOG.warn("Could not store anomaly:\n{}", anomaly);
-        }
+    // fixme manage combiner case
+    for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
+      anomaly.setAnomalyResultSource(AnomalyResultSource.ANOMALY_REPLAY);
+      mergedAnomalyResultManager.save(anomaly);
+      if (anomaly.getId() == null) {
+        LOG.warn("Could not store anomaly:\n{}", anomaly);
       }
     }
 
@@ -108,7 +104,8 @@ public class OnboardingTaskRunner implements TaskRunner {
         alert.getId(),
         detectionInterval.getStart(),
         detectionInterval.getEnd(),
-        numAnomalies(result));
+        // fixme cyril manage combiner case
+        result.getAnomalies().size());
     return Collections.emptyList();
   }
 }

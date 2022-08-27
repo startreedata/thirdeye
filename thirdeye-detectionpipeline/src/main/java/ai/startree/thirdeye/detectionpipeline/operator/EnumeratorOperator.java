@@ -16,7 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
+
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +50,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
     final EnumerationItemNameGenerator generator = new EnumerationItemNameGenerator();
     params.getItems().forEach(ei -> ei.setName(generator.generateName(ei)));
 
-    setOutput(DEFAULT_OUTPUT_KEY, DetectionPipelineResultImpl.of(new EnumeratorResult(params.getItems())));
+    setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(params.getItems()));
   }
 
   @Override

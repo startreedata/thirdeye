@@ -24,7 +24,7 @@ import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
+
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
@@ -53,7 +53,7 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
   public void execute() throws Exception {
     final DataTable dataTable = eventFetcher.getDataTable(detectionInterval);
     resultMap.put(outputKeyMap.values().iterator().next(),
-        DetectionPipelineResultImpl.of(dataTable));
+        dataTable);
   }
 
   @Override

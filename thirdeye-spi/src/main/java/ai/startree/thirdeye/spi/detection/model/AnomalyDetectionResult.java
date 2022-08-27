@@ -40,7 +40,7 @@ public class AnomalyDetectionResult implements DetectionResult {
   }
 
   /**
-   * TODO spyne refactor. this is just to accomodate the needs of DetectionPipelineResult Interface.
+   * TODO spyne refactor. this is just to accomodate the needs of DetectionResult Interface.
    * This needs  cleanup.
    * @param source
    */

@@ -28,7 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
+
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.List;
@@ -83,7 +83,7 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
   public void execute() throws Exception {
     final DataTable dataTable = dataFetcher.getDataTable(detectionInterval);
     resultMap.put(outputKeyMap.values().iterator().next(),
-        DetectionPipelineResultImpl.of(dataTable));
+        dataTable);
   }
 
   @Override

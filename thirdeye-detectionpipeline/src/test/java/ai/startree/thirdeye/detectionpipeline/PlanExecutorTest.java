@@ -33,7 +33,7 @@ import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -76,7 +76,7 @@ public class PlanExecutorTest {
             .setParams(TemplatableMap.ofValue(EchoOperator.DEFAULT_INPUT_KEY, echoInput))
         )
     );
-    final HashMap<ContextKey, DetectionPipelineResult> context = new HashMap<>();
+    final HashMap<ContextKey, DetectionResult> context = new HashMap<>();
     final HashMap<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     PlanExecutor.executePlanNode(
         pipelinePlanNodes,
@@ -86,7 +86,7 @@ public class PlanExecutorTest {
 
     assertThat(context.size()).isEqualTo(1);
     final ContextKey key = PlanExecutor.key(nodeName, EchoOperator.DEFAULT_OUTPUT_KEY);
-    final DetectionResult result = context.get(key).getDetectionResults().get(0);
+    final DetectionResult result = context.get(key);
     assertThat(result).isNotNull();
 
     final EchoResult echoResult = (EchoResult) result;
@@ -131,7 +131,7 @@ public class PlanExecutorTest {
         forkJoinNode
     );
 
-    final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
+    final Map<ContextKey, DetectionResult> context = new HashMap<>();
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,
         new Interval(0L, System.currentTimeMillis(), DateTimeZone.UTC));
     PlanExecutor.executePlanNode(
@@ -142,20 +142,20 @@ public class PlanExecutorTest {
 
     assertThat(context.size()).isEqualTo(1);
 
-    final DetectionPipelineResult detectionPipelineResult = context.get(PlanExecutor.key("root",
+    final DetectionResult detectionPipelineResult = context.get(PlanExecutor.key("root",
         CombinerOperator.DEFAULT_OUTPUT_KEY));
 
     assertThat(detectionPipelineResult).isInstanceOf(CombinerResult.class);
 
     final CombinerResult combinerResult = (CombinerResult) detectionPipelineResult;
-    final Map<String, DetectionPipelineResult> outputMap = combinerResult.getResults();
+    final Map<String, DetectionResult> outputMap = combinerResult.getResults();
 
     assertThat(outputMap).isNotNull();
 
     assertThat(outputMap.values().size()).isEqualTo(3);
 
     final Set<String> strings = outputMap.values().stream()
-        .map(r -> (EchoResult) r.getDetectionResults().get(0))
+        .map(r -> (EchoResult) r)
         .map(EchoResult::text)
         .collect(toSet());
 

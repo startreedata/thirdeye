@@ -90,7 +90,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
       final DetectionResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
-      // fixme cyril manage combiner case
       if (result.getLastTimestamp() < 0) {
         // notice lastTimestamp is not updated
         LOG.info("No data returned for detection run for id {} between {} and {}",
@@ -109,7 +108,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           alert.getId(),
           detectionInterval.getStart(),
           detectionInterval.getEnd(),
-          // fixme cyril manage combiner case
           result.getAnomalies().size());
 
       return Collections.emptyList();
@@ -120,11 +118,9 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final AlertDTO alert, final DetectionResult result) {
-    // fixme cyril manage combiner case
     anomalyMerger.mergeAndSave(alert, result.getAnomalies());
 
     // re-notify the anomalies if any
-    // fixme cyril manage combiner case
     for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {

@@ -19,13 +19,17 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
+import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CombinerOperator extends DetectionPipelineOperator {
 
@@ -79,7 +83,35 @@ public class CombinerOperator extends DetectionPipelineOperator {
       this.results = results;
     }
 
-    // fixme cyril add flatenning classes
+    @Override
+    public long getLastTimestamp() {
+      // returns max of all DetectionResult
+      return results.values()
+          .stream()
+          .filter(Objects::nonNull)
+          .map(DetectionResult::getLastTimestamp)
+          .max(Long::compareTo)
+          .orElse(-1L);
+    }
+
+    @Override
+    public List<MergedAnomalyResultDTO> getAnomalies() {
+      // flatten anomalies of all DetectionResult
+      return results.values()
+          .stream()
+          .flatMap(r -> r.getAnomalies().stream())
+          .collect(Collectors.toList());
+    }
+
+    @Override
+    public @Nullable Map<String, List> getRawData() {
+      throw new UnsupportedOperationException("Flattening not implemented yet. Cast and use CombinerResult getDetectionResults to loop.");
+    }
+
+    @Override
+    public @Nullable TimeSeries getTimeseries() {
+      throw new UnsupportedOperationException("Flattening not implemented yet. Cast and use CombinerResult getDetectionResults to loop.");
+    }
 
     public List<DetectionResult> getDetectionResults() {
       return results.values().stream()

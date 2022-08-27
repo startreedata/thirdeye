@@ -24,6 +24,7 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator.CombinerResult;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
@@ -236,13 +237,16 @@ public class AlertEvaluator {
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(
       final DetectionResult result) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    map.put(String.valueOf(0), toApi(result));
-    // fixme cyril manage combiner case
-//    final List<DetectionResult> detectionResults = result.getDetectionResults();
-//    for (int i = 0; i < detectionResults.size(); i++) {
-//      final DetectionEvaluationApi detectionEvaluationApi = toApi(detectionResults.get(i));
-//      map.put(String.valueOf(i), detectionEvaluationApi);
-//    }
+    if (result instanceof CombinerResult) {
+      final List<DetectionResult> detectionResults = ((CombinerResult) result).getDetectionResults();
+      for (int i = 0; i < detectionResults.size(); i++) {
+        final DetectionEvaluationApi detectionEvaluationApi = toApi(detectionResults.get(i));
+        map.put(String.valueOf(i), detectionEvaluationApi);
+      }
+    } else {
+      map.put(String.valueOf(0), toApi(result));
+    }
+
     return map;
   }
 }

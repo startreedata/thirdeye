@@ -104,7 +104,6 @@ public class OnboardingTaskRunner implements TaskRunner {
         alert.getId(),
         detectionInterval.getStart(),
         detectionInterval.getEnd(),
-        // fixme cyril manage combiner case
         result.getAnomalies().size());
     return Collections.emptyList();
   }

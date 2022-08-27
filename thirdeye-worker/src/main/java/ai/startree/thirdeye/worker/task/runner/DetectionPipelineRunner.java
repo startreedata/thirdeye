@@ -76,7 +76,6 @@ public class DetectionPipelineRunner {
   }
 
   private void enrichAnomalies(final DetectionResult result, final AlertDTO alert) {
-    // fixme cyril manage combiner case
     // generic enrichment
     result.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
 

@@ -18,7 +18,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.operator.sql.DataTableToSqlAdapterFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;

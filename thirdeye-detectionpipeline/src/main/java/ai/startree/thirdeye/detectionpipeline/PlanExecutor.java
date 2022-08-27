@@ -18,7 +18,7 @@ import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import com.google.common.annotations.VisibleForTesting;
@@ -44,7 +44,7 @@ public class PlanExecutor {
 
   @VisibleForTesting
   public static void executePlanNode(final Map<String, PlanNode> pipelinePlanNodes,
-      final Map<ContextKey, DetectionPipelineResult> context,
+      final Map<ContextKey, DetectionResult> context,
       final PlanNode node)
       throws Exception {
     for (final InputBean input : optional(node.getPlanNodeInputs()).orElse(emptyList())) {
@@ -60,8 +60,8 @@ public class PlanExecutor {
     }
     final Operator operator = node.buildOperator();
     operator.execute();
-    final Map<String, DetectionPipelineResult> outputs = operator.getOutputs();
-    for (final Entry<String, DetectionPipelineResult> output : outputs.entrySet()) {
+    final Map<String, DetectionResult> outputs = operator.getOutputs();
+    for (final Entry<String, DetectionResult> output : outputs.entrySet()) {
       context.put(key(node.getName(), output.getKey()), output.getValue());
     }
   }
@@ -71,9 +71,9 @@ public class PlanExecutor {
     return new ContextKey(name, key);
   }
 
-  public static Map<String, DetectionPipelineResult> getOutput(
-      final Map<ContextKey, DetectionPipelineResult> context, final String nodeName) {
-    final Map<String, DetectionPipelineResult> results = new HashMap<>();
+  public static Map<String, DetectionResult> getOutput(
+      final Map<ContextKey, DetectionResult> context, final String nodeName) {
+    final Map<String, DetectionResult> results = new HashMap<>();
     for (final ContextKey contextKey : context.keySet()) {
       if (contextKey.getNodeName().equals(nodeName)) {
         results.put(contextKey.getKey(), context.get(contextKey));
@@ -89,7 +89,7 @@ public class PlanExecutor {
    * @return The result map
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */
-  public Map<String, DetectionPipelineResult> runPipeline(final List<PlanNodeBean> planNodeBeans,
+  public Map<String, DetectionResult> runPipeline(final List<PlanNodeBean> planNodeBeans,
       final Interval detectionInterval)
       throws Exception {
     /* map of all the plan nodes constructed from beans(persisted objects) */
@@ -98,7 +98,7 @@ public class PlanExecutor {
         detectionInterval);
 
     /* The context stores all the outputs from all the nodes */
-    final Map<ContextKey, DetectionPipelineResult> context = new HashMap<>();
+    final Map<ContextKey, DetectionResult> context = new HashMap<>();
 
     /* Execute the DAG */
     final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);

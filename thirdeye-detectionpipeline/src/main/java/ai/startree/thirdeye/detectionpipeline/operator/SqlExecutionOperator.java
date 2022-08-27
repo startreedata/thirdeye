@@ -18,7 +18,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.operator.sql.DataTableToSqlAdapterFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -113,7 +112,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     for (final String query : queries) {
       try {
         DataTable dataTable = runQuery(query, connection);
-        setOutput(Integer.toString(i++), DetectionPipelineResultImpl.of(dataTable));
+        setOutput(Integer.toString(i++), dataTable);
       } catch (final SQLException e) {
         LOG.error("Got exceptions when executing SQL query: {}", query, e);
         throw e;

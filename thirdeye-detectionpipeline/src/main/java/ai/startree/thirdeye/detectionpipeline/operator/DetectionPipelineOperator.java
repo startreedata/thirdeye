@@ -15,7 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
@@ -35,8 +35,8 @@ public abstract class DetectionPipelineOperator implements Operator {
 
   protected PlanNodeBean planNode;
   protected Interval detectionInterval;
-  protected Map<String, DetectionPipelineResult> resultMap = new HashMap<>();
-  protected Map<String, DetectionPipelineResult> inputMap;
+  protected Map<String, DetectionResult> resultMap = new HashMap<>();
+  protected Map<String, DetectionResult> inputMap;
   protected Map<String, String> outputKeyMap = new HashMap<>();
 
   protected DetectionPipelineOperator() {
@@ -87,7 +87,7 @@ public abstract class DetectionPipelineOperator implements Operator {
     return detectionInterval;
   }
 
-  protected void setOutput(String key, final DetectionPipelineResult output) {
+  protected void setOutput(String key, final DetectionResult output) {
     if (outputKeyMap.containsKey(key)) {
       key = outputKeyMap.get(key);
     }
@@ -100,17 +100,17 @@ public abstract class DetectionPipelineOperator implements Operator {
   }
 
   @Override
-  public DetectionPipelineResult getOutput(final String key) {
+  public DetectionResult getOutput(final String key) {
     return resultMap.get(key);
   }
 
   @Override
-  public Map<String, DetectionPipelineResult> getOutputs() {
+  public Map<String, DetectionResult> getOutputs() {
     return resultMap;
   }
 
   @Override
-  public void setInput(final String key, final DetectionPipelineResult input) {
+  public void setInput(final String key, final DetectionResult input) {
     inputMap.put(key, input);
   }
 }

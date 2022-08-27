@@ -20,7 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
+
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
@@ -74,7 +74,7 @@ public class TimeIndexFillerOperatorTest {
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(new Interval(0L, 1L, DateTimeZone.UTC)) // ignored with FROM_DATA
         .setPlanNode(planNodeBean)
-        .setInputsMap(ImmutableMap.of("baseline", DetectionPipelineResultImpl.of(inputDataTable)))
+        .setInputsMap(ImmutableMap.of("baseline", inputDataTable))
         .setProperties(properties);
 
     timeIndexFillerOperator.init(context);
@@ -82,7 +82,7 @@ public class TimeIndexFillerOperatorTest {
     assertThat(timeIndexFillerOperator.getOutputs().size()).isEqualTo(1);
 
     DataTable detectionPipelineResult = (DataTable) timeIndexFillerOperator.getOutputs()
-        .get("currentOutput").getDetectionResults().get(0);
+        .get("currentOutput");
     final DataFrame expectedDataFrame = new DataFrame();
     expectedDataFrame.addSeries("ts", OCTOBER_22_MILLIS, OCTOBER_23_MILLIS, OCTOBER_24_MILLIS);
     expectedDataFrame.addSeries("met", METRIC_VALUE, ZERO_FILLER, METRIC_VALUE);
@@ -126,7 +126,7 @@ public class TimeIndexFillerOperatorTest {
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setInputsMap(ImmutableMap.of("baseline", DetectionPipelineResultImpl.of(inputDataTable)))
+        .setInputsMap(ImmutableMap.of("baseline", inputDataTable))
         .setProperties(properties);
 
     timeIndexFillerOperator.init(context);
@@ -137,7 +137,7 @@ public class TimeIndexFillerOperatorTest {
     assertThat(timeIndexFillerOperator.getOutputs().size()).isEqualTo(1);
 
     DataTable detectionPipelineResult = (DataTable) timeIndexFillerOperator.getOutputs()
-        .get("currentOutput").getDetectionResults().get(0);
+        .get("currentOutput");
     final DataFrame expectedDataFrame = new DataFrame();
     expectedDataFrame.addSeries("ts",
         OCTOBER_22_MILLIS,

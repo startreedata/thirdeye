@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -66,27 +65,25 @@ public class DetectionPipelineRunner {
         && Objects.equals(o1.getParams(), o2.getParams());
   }
 
-  public DetectionPipelineResult run(final AlertDTO alert,
+  public DetectionResult run(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
-    final DetectionPipelineResult result = executePlan(alert, detectionInterval);
+    final DetectionResult result = executePlan(alert, detectionInterval);
     enrichAnomalies(result, alert);
     return result;
   }
 
-  private void enrichAnomalies(final DetectionPipelineResult result, final AlertDTO alert) {
-    for (DetectionResult r : result.getDetectionResults()) {
-      // generic enrichment
-      r.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
+  private void enrichAnomalies(final DetectionResult result, final AlertDTO alert) {
+    // generic enrichment
+    result.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
 
-      // dimension exploration enrichment
-      if (r.getEnumerationItem() != null) {
-        final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(r.getEnumerationItem());
-        r.getAnomalies()
-            .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
-      }
+    // dimension exploration enrichment
+    if (result.getEnumerationItem() != null) {
+      final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(result.getEnumerationItem());
+      result.getAnomalies()
+          .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
     }
   }
 
@@ -109,13 +106,13 @@ public class DetectionPipelineRunner {
     return filtered.get();
   }
 
-  private DetectionPipelineResult executePlan(final AlertDTO alert,
+  private DetectionResult executePlan(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
         detectionInterval);
 
-    final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
+    final Map<String, DetectionResult> detectionPipelineResultMap = planExecutor.runPipeline(
         templateWithProperties.getNodes(),
         detectionInterval);
     checkState(detectionPipelineResultMap.size() == 1,

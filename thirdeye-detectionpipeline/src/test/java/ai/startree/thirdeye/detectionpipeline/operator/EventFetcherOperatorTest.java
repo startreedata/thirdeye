@@ -113,7 +113,7 @@ public class EventFetcherOperatorTest {
 
     assertThat(eventFetcherOperator.getOutputs().size()).isEqualTo(1);
     final DataTable eventDataTable = (DataTable) eventFetcherOperator.getOutputs()
-        .get("events").getDetectionResults().get(0);
+        .get("events");
 
     final DataFrame expectedDataFrame = new DataFrame()
         .addSeries(Constants.COL_EVENT_NAME,

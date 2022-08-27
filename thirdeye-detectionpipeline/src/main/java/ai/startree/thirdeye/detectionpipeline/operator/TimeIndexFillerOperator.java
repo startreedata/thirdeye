@@ -23,7 +23,6 @@ import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.IndexFiller;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
@@ -56,7 +55,7 @@ public class TimeIndexFillerOperator extends DetectionPipelineOperator {
         OPERATOR_NAME + " must have exactly 1 DataTable in input");
     final DataTable dataTable = timeIndexFiller.fillIndex(detectionInterval,
         timeSeriesMap.values().iterator().next());
-    resultMap.put(outputKeyMap.values().iterator().next(), DetectionPipelineResultImpl.of(dataTable));
+    resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
   }
 
   @Override

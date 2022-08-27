@@ -45,7 +45,7 @@ public interface PlanNode {
   /**
    * Set one Input from the other Operator
    */
-  void setInput(String key, DetectionPipelineResult obj);
+  void setInput(String key, DetectionResult obj);
 
   /**
    * @return All Inputs set

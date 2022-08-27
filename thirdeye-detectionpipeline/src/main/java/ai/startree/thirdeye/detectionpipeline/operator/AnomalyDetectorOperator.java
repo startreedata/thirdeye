@@ -35,10 +35,8 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -98,14 +96,14 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
 
-    DetectionPipelineResult detectionResult = buildDetectionPipelineResult(detectorResult);
+    DetectionResult detectionResult = buildDetectionResult(detectorResult);
 
     addMetadata(detectionResult);
 
     setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
   }
 
-  private void addMetadata(DetectionPipelineResult detectionPipelineResult) {
+  private void addMetadata(final DetectionResult detectionResult) {
     final Optional<String> anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
         .map(Templatable::value)
         .map(Object::toString);
@@ -117,12 +115,10 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         .map(Object::toString);
 
     // annotate each anomaly with the available metadata
-    for (DetectionResult result: detectionPipelineResult.getDetectionResults()) {
-      for (MergedAnomalyResultDTO anomaly: result.getAnomalies()) {
-        anomalyMetric.ifPresent(anomaly::setMetric);
-        anomalyDataset.ifPresent(anomaly::setCollection);
-        anomalySource.ifPresent(anomaly::setSource);
-      }
+    for (MergedAnomalyResultDTO anomaly : detectionResult.getAnomalies()) {
+      anomalyMetric.ifPresent(anomaly::setMetric);
+      anomalyDataset.ifPresent(anomaly::setCollection);
+      anomalySource.ifPresent(anomaly::setSource);
     }
   }
 
@@ -131,15 +127,16 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     return "AnomalyDetectorOperator";
   }
 
-  private DetectionPipelineResult buildDetectionPipelineResult(
+  private DetectionResult buildDetectionResult(
       final AnomalyDetectorResult detectorV2Result) {
 
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame());
     final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
         .sortedBy(COL_TIME));
-    final AnomalyDetectionResult detectionResult = AnomalyDetectionResult.from(anomalies, timeSeries);
-    return DetectionPipelineResultImpl.of(detectionResult);
+    final AnomalyDetectionResult detectionResult = AnomalyDetectionResult.from(anomalies,
+        timeSeries);
+    return detectionResult;
   }
 
   private List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {

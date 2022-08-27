@@ -19,15 +19,17 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
-import ai.startree.thirdeye.spi.detection.model.DetectionPipelineResultImpl;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class CombinerOperator extends DetectionPipelineOperator {
 
@@ -48,10 +50,10 @@ public class CombinerOperator extends DetectionPipelineOperator {
   @Override
   public void execute() throws Exception {
     final ForkJoinResult forkJoinResult = (ForkJoinResult) requireNonNull(inputMap.get(
-        DEFAULT_INPUT_KEY), "No input to combiner").getDetectionResults().get(0);
+        DEFAULT_INPUT_KEY), "No input to combiner");
     final var forkJoinResults = forkJoinResult.getResults();
 
-    final Map<String, DetectionPipelineResult> results = new HashMap<>();
+    final Map<String, DetectionResult> results = new HashMap<>();
     for (int i = 0; i < forkJoinResults.size(); i++) {
       final var result = forkJoinResults.get(i);
       final String prefix = i + ".";
@@ -62,15 +64,10 @@ public class CombinerOperator extends DetectionPipelineOperator {
     setOutput(DEFAULT_OUTPUT_KEY, new CombinerResult(results));
   }
 
-  private DetectionPipelineResult wrapIfReqd(final EnumerationItemDTO enumerationItem,
-      final DetectionPipelineResult v) {
-    final List<DetectionResult> detectionResults = v.getDetectionResults()
-        .stream()
-        .map(r -> r instanceof AnomalyDetectionResult ?
-            new WrappedAnomalyDetectionResult(enumerationItem, (AnomalyDetectionResult) r) : r)
-        .collect(Collectors.toList());
-
-    return DetectionPipelineResultImpl.of(detectionResults);
+  private DetectionResult wrapIfReqd(final EnumerationItemDTO enumerationItem,
+      final DetectionResult v) {
+    return v instanceof AnomalyDetectionResult ? new WrappedAnomalyDetectionResult(enumerationItem,
+        (AnomalyDetectionResult) v) : v;
   }
 
   @Override
@@ -78,25 +75,52 @@ public class CombinerOperator extends DetectionPipelineOperator {
     return "CombinerOperator";
   }
 
-  // todo cyril suvodeep this class is not really necessary
-  public static class CombinerResult implements DetectionPipelineResult {
+  public static class CombinerResult implements DetectionResult {
 
-    private final Map<String, DetectionPipelineResult> results;
+    private final Map<String, DetectionResult> results;
 
-    public CombinerResult(final Map<String, DetectionPipelineResult> results) {
+    public CombinerResult(final Map<String, DetectionResult> results) {
       this.results = results;
     }
 
     @Override
+    public long getLastTimestamp() {
+      // returns max of all DetectionResult
+      return results.values()
+          .stream()
+          .filter(Objects::nonNull)
+          .map(DetectionResult::getLastTimestamp)
+          .max(Long::compareTo)
+          .orElse(-1L);
+    }
+
+    @Override
+    public List<MergedAnomalyResultDTO> getAnomalies() {
+      // flatten anomalies of all DetectionResult
+      return results.values()
+          .stream()
+          .flatMap(r -> r.getAnomalies().stream())
+          .collect(Collectors.toList());
+    }
+
+    @Override
+    public @Nullable Map<String, List> getRawData() {
+      throw new UnsupportedOperationException("Flattening not implemented yet. Cast and use CombinerResult getDetectionResults to loop.");
+    }
+
+    @Override
+    public @Nullable TimeSeries getTimeseries() {
+      throw new UnsupportedOperationException("Flattening not implemented yet. Cast and use CombinerResult getDetectionResults to loop.");
+    }
+
     public List<DetectionResult> getDetectionResults() {
       return results.values().stream()
-          .flatMap(detectionPipelineResult -> detectionPipelineResult.getDetectionResults().stream())
           // fixme cyril suvodeep not sure to understand why only WrappedAnomalyDetectionResult are returned
           .filter(r -> r instanceof WrappedAnomalyDetectionResult)
           .collect(Collectors.toList());
     }
 
-    public Map<String, DetectionPipelineResult> getResults() {
+    public Map<String, DetectionResult> getResults() {
       return results;
     }
   }

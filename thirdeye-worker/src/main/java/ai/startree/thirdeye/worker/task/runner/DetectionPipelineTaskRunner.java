@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
-import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.lastTimestamp;
-import static ai.startree.thirdeye.spi.util.DetectionPipelineResultUtils.numAnomalies;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
@@ -24,7 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
@@ -90,9 +88,9 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           info.getStart(),
           info.getEnd());
 
-      final DetectionPipelineResult result = detectionPipelineRunner.run(alert, detectionInterval);
+      final DetectionResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
-      if (lastTimestamp(result) < 0) {
+      if (result.getLastTimestamp() < 0) {
         // notice lastTimestamp is not updated
         LOG.info("No data returned for detection run for id {} between {} and {}",
             alert.getId(),
@@ -110,7 +108,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           alert.getId(),
           detectionInterval.getStart(),
           detectionInterval.getEnd(),
-          numAnomalies(result));
+          result.getAnomalies().size());
 
       return Collections.emptyList();
     } catch (final Exception e) {
@@ -119,18 +117,14 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     }
   }
 
-  private void postExecution(final AlertDTO alert, final DetectionPipelineResult result) {
-    // assumes the anomalies of distinct DetectionResult should not be merged
-    // this behavior was ill-defined before refactoring
-    result.getDetectionResults().forEach(r -> anomalyMerger.mergeAndSave(alert, r.getAnomalies()));
+  private void postExecution(final AlertDTO alert, final DetectionResult result) {
+    anomalyMerger.mergeAndSave(alert, result.getAnomalies());
 
     // re-notify the anomalies if any
-    for (final var r : result.getDetectionResults()) {
-      for (final MergedAnomalyResultDTO anomaly : r.getAnomalies()) {
-        // if an anomaly should be re-notified, update the notification lookup table in the database
-        if (anomaly.isRenotify()) {
-          DetectionUtils.renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
-        }
+    for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
+      // if an anomaly should be re-notified, update the notification lookup table in the database
+      if (anomaly.isRenotify()) {
+        DetectionUtils.renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
       }
     }
   }

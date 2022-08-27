@@ -21,7 +21,7 @@ public class OperatorContext {
   private Interval detectionInterval;
   private PlanNodeBean planNode;
   private Map<String, Object> properties;
-  private Map<String, DetectionPipelineResult> inputsMap;
+  private Map<String, DetectionResult> inputsMap;
 
   public Interval getDetectionInterval() {
     return detectionInterval;
@@ -50,11 +50,11 @@ public class OperatorContext {
     return this;
   }
 
-  public Map<String, DetectionPipelineResult> getInputsMap() {
+  public Map<String, DetectionResult> getInputsMap() {
     return inputsMap;
   }
 
-  public OperatorContext setInputsMap(final Map<String, DetectionPipelineResult> inputsMap) {
+  public OperatorContext setInputsMap(final Map<String, DetectionResult> inputsMap) {
     this.inputsMap = inputsMap;
     return this;
   }

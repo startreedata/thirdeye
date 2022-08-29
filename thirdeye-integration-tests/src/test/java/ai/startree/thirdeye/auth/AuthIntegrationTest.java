@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.IntegrationTestUtils.getJWKS;
+import static ai.startree.thirdeye.IntegrationTestUtils.getToken;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.utils.AuthTestUtils.getJWKS;
-import static ai.startree.thirdeye.utils.AuthTestUtils.getToken;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;

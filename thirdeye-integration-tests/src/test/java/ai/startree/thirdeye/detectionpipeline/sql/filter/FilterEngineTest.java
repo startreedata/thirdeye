@@ -13,13 +13,13 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.filter;
 
+import ai.startree.thirdeye.IntegrationTestUtils;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlLanguage;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.metric.DimensionType;
-import ai.startree.thirdeye.testutils.SqlUtils;
 import java.util.List;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.assertj.core.api.Assertions;
@@ -57,7 +57,7 @@ public class FilterEngineTest {
     final String output = filterEngine.prepareQuery();
     final String expected = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -71,7 +71,7 @@ public class FilterEngineTest {
     final String quotedQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -85,7 +85,7 @@ public class FilterEngineTest {
     final String quotedQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -99,7 +99,7 @@ public class FilterEngineTest {
     final String quotedQuery = "SELECT \"timeCol\" AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_IN_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -113,7 +113,7 @@ public class FilterEngineTest {
     final String quotedQuery = "SELECT \"__timeGroup\"(\"timeCol\", 'yyyyMMdd', 'P5D') AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"__timeFilter\"(\"ts\", 'EPOCH')";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -132,7 +132,7 @@ public class FilterEngineTest {
     final String quotedQuery = "SELECT \"__timeGroup\"(\"date\", 'yyyyMMdd', 'P5D') AS \"ts\", \"metric\" AS \"met\" FROM \"tableName\" WHERE \"__timeFilter\"(\"ts\", 'EPOCH')";
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -147,7 +147,7 @@ public class FilterEngineTest {
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
         + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -166,7 +166,7 @@ public class FilterEngineTest {
         + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
         + quotedOrderByStatement;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -185,7 +185,7 @@ public class FilterEngineTest {
         + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
         + quotedGroupByStatement;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -204,7 +204,7 @@ public class FilterEngineTest {
         + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING
         + quotedGroupByHavingStatement;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -219,7 +219,7 @@ public class FilterEngineTest {
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
         + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -236,7 +236,7 @@ public class FilterEngineTest {
         quotedQuery.substring(0, quotedQuery.length() - 1) + QUOTED_STRING_FILTER_EQUAL_TO_STRING
             + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING + ")";
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -251,7 +251,7 @@ public class FilterEngineTest {
     final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
         + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 
   @Test
@@ -266,6 +266,6 @@ public class FilterEngineTest {
     String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
         + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    Assertions.assertThat(IntegrationTestUtils.cleanSql(output)).isEqualTo(IntegrationTestUtils.cleanSql(expected));
   }
 }

@@ -15,10 +15,8 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
-import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
-import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -38,7 +36,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -107,7 +104,7 @@ public class HappyPathTest {
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
-    setupPluginsDirAbsolutePath();
+    IntegrationTestUtils.setupPluginsDirAbsolutePath();
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("happypath/config/server.yaml"),
@@ -123,26 +120,6 @@ public class HappyPathTest {
     client = new JerseyClientBuilder(SUPPORT.getEnvironment())
         .using(jerseyClientConfiguration)
         .build("test client");
-  }
-
-  private void setupPluginsDirAbsolutePath() {
-    final String projectBuildDirectory = requireNonNull(System.getProperty("projectBuildDirectory"),
-        "project build dir not set");
-    final String projectVersion = requireNonNull(System.getProperty("projectVersion"),
-        "project version not set");
-    final String pluginsPath = new StringBuilder()
-        .append(projectBuildDirectory)
-        .append("/../../thirdeye-distribution/target/thirdeye-distribution-")
-        .append(projectVersion)
-        .append("-dist/thirdeye-distribution-")
-        .append(projectVersion)
-        .append("/plugins")
-        .toString();
-    final File pluginsDir = new File(pluginsPath);
-    assertThat(pluginsDir.exists()).isTrue();
-    assertThat(pluginsDir.isDirectory()).isTrue();
-
-    System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
   }
 
   @AfterClass(alwaysRun = true)

@@ -49,7 +49,10 @@ import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.compo
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
-import { ZoomDomain } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+import {
+    TimeSeriesChartProps,
+    ZoomDomain,
+} from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyTimeSeriesCardProps } from "./anomaly-time-series-card.interfaces";
 import {
     determineInitialZoom,
@@ -79,6 +82,8 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [timeSeriesOptions, setTimeSeriesOptions] =
+        useState<TimeSeriesChartProps>();
 
     const {
         getEvaluation,
@@ -169,6 +174,19 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                   );
         }
     }, [errorMessages, getEvaluationRequestStatus]);
+
+    useEffect(() => {
+        if (alertEvaluation && anomaly) {
+            setTimeSeriesOptions(
+                generateChartOptions(
+                    alertEvaluation,
+                    anomaly,
+                    filteredAlertEvaluation,
+                    t
+                )
+            );
+        }
+    }, [alertEvaluation, anomaly, filteredAlertEvaluation]);
 
     const handleChartHeightChange = (height: number): void => {
         setChartHeight(height);
@@ -287,17 +305,12 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             )}
             {anomaly &&
                 getEvaluationRequestStatus === ActionStatus.Done &&
-                alertEvaluation !== null && (
+                timeSeriesOptions && (
                     <CardContent>
                         <TimeSeriesChart
                             events={events}
                             height={chartHeight}
-                            {...generateChartOptions(
-                                alertEvaluation,
-                                anomaly,
-                                filteredAlertEvaluation,
-                                t
-                            )}
+                            {...timeSeriesOptions}
                             LegendComponent={(props) => (
                                 <RCAChartLegend
                                     {...props}

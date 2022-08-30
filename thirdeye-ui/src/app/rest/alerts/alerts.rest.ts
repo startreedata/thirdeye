@@ -12,13 +12,24 @@
  * the License.
  */
 import axios from "axios";
-import { Alert, AlertEvaluation, EditableAlert } from "../dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    AlertInsight,
+    EditableAlert,
+} from "../dto/alert.interfaces";
 import { GetEvaluationRequestPayload } from "./alerts.interfaces";
 
 const BASE_URL_ALERTS = "/api/alerts";
 
 export const getAlert = async (id: number): Promise<Alert> => {
     const response = await axios.get(`${BASE_URL_ALERTS}/${id}`);
+
+    return response.data;
+};
+
+export const getAlertInsight = async (id: number): Promise<AlertInsight> => {
+    const response = await axios.get(`${BASE_URL_ALERTS}/${id}/insights`);
 
     return response.data;
 };

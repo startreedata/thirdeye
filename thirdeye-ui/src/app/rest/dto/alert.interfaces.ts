@@ -43,6 +43,12 @@ export interface EditableAlert {
 export interface Alert extends EditableAlert {
     id: number;
 }
+export interface AlertInsight {
+    datasetStartTime: number;
+    datasetEndTime: number;
+    defaultStartTime: number;
+    defaultEndTime: number;
+}
 
 export interface AlertDataFetcherNode {
     name: string;

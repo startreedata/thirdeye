@@ -24,7 +24,7 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
-import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator.CombinerResult;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;

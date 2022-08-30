@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator;
-import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator.CombinerResult;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator.EchoResult;
 import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
@@ -33,7 +33,6 @@ import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;

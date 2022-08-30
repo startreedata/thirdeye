@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -80,11 +81,26 @@ public class DetectionPipelineRunner {
     result.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
 
     // dimension exploration enrichment
-    if (result.getEnumerationItem() != null) {
-      final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(result.getEnumerationItem());
-      result.getAnomalies()
-          .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
+    // TODO spyne can this casting thing be eliminated?
+    if (result instanceof CombinerResult) {
+      enrichAnomaliesFromCombinerResult((CombinerResult) result);
     }
+  }
+
+  private void enrichAnomaliesFromCombinerResult(final CombinerResult result) {
+    result
+        .getDetectionResults()
+        .stream()
+        .filter(r -> r.getEnumerationItem() != null)
+        .forEach(this::enrichAnomaliesWithEnumerationItem);
+  }
+
+  private void enrichAnomaliesWithEnumerationItem(final DetectionResult result) {
+    final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(
+        requireNonNull(result.getEnumerationItem(), "enumerationItem is null"));
+    result
+        .getAnomalies()
+        .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
   }
 
   private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {

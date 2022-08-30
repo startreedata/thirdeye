@@ -105,7 +105,7 @@ public class TestMergedAnomalyResultManager {
         .findByStartEndTimeInRangeAndDetectionConfigId(
             new DateTime(2019, 1, 1, 0, 0).getMillis(),
             new DateTime(2019, 1, 3, 0, 0).getMillis(),
-            detectionConfigId);
+            detectionConfigId, null);
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
     for (int i = 0; i < anomalies.size(); i++) {
       MergedAnomalyResultDTO actual = fetchedAnomalies.get(i);
@@ -131,7 +131,7 @@ public class TestMergedAnomalyResultManager {
         .findByStartEndTimeInRangeAndDetectionConfigId(
             new DateTime(2019, 1, 1, 0, 0).getMillis(),
             new DateTime(2019, 1, 3, 0, 0).getMillis(),
-            detectionConfigId);
+            detectionConfigId, null);
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
     for (int i = 0; i < anomalies.size(); i++) {
       MergedAnomalyResultDTO actual = fetchedAnomalies.get(i);

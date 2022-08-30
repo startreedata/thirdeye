@@ -22,11 +22,18 @@ public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomal
 
   List<MergedAnomalyResultDTO> findByFunctionId(Long functionId);
 
+  /**
+   * TODO spyne Refactor. Have a AnomalyFilter object to handle these. Else we'll keep adding params and methods.
+   * @return filtered list of anomalies
+   */
   List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
-      long endTime, long detectionConfigId);
+      long endTime,
+      long alertId,
+      final Long enumerationItemId);
 
   List<MergedAnomalyResultDTO> findByCreatedTimeInRangeAndDetectionConfigId(long startTime,
-      long endTime, long detectionConfigId);
+      long endTime,
+      long alertId);
 
   List<MergedAnomalyResultDTO> findByTime(long startTime, long endTime);
 

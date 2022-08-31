@@ -12,27 +12,18 @@
  * the License.
  */
 import { Bounds } from "@visx/brush/lib/types";
-import {
-    NormalizedSeries,
-    XAxisOptions,
-    ZoomDomain,
-} from "../time-series-chart.interfaces";
+import { NormalizedSeries } from "../time-series-chart.interfaces";
 
-export interface ChartBrushProps {
+export interface ChartZoomProps {
     series: NormalizedSeries[];
     height: number;
     width: number;
-    top: number;
     colorScale: (name: string) => string;
-    onBrushChange: (domain: Bounds | null) => void;
-    onBrushClick: () => void;
-    xAxisOptions?: XAxisOptions;
-    initialZoom?: ZoomDomain;
+    onZoomChange: (domain: Bounds | null) => void;
     margins: {
         left: number;
         right: number;
         bottom: number;
         top: number;
     };
-    onMouseEnter: () => void;
 }

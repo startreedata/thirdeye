@@ -11,29 +11,23 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxisBottom, AxisLeft } from "@visx/axis";
+import { AxisBottom, AxisLeft, AxisRight, Orientation } from "@visx/axis";
+import { LinearGradient } from "@visx/gradient";
 import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
-import { AreaClosed, Bar, LinePath } from "@visx/shape";
-import React, { FunctionComponent, MouseEvent, useMemo } from "react";
+import { AreaClosed, LinePath } from "@visx/shape";
+import React, { FunctionComponent, useMemo } from "react";
 import { formatLargeNumberForVisualization } from "../../../../utils/visualization/visualization.util";
 import { PlotBand } from "../plot-band/plot-band.component";
 import {
     DataPoint,
     NormalizedSeries,
+    SeriesType,
     ThresholdDataPoint,
 } from "../time-series-chart.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
-import { determineXPointForHover } from "../tooltip/tooltip.utils";
 import { ChartCoreProps } from "./chart-core.interfaces";
 
-const axisLeftTickLabelProps = {
-    dx: "-0.25em",
-    dy: "0.25em",
-    fontFamily: "Arial",
-    fontSize: 10,
-    textAnchor: "end" as const,
-};
 const axisBottomTickLabelProps = {
     textAnchor: "middle" as const,
     fontFamily: "Arial",
@@ -55,7 +49,10 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     colorScale,
     children,
     xAxisOptions,
-    tooltipUtils,
+    yAxisOptions,
+    onMouseLeave,
+    onMouseMove,
+    onMouseEnter,
 }) => {
     const marginTop = top || margin.top;
     const marginLeft = left || margin.left;
@@ -78,49 +75,61 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     const dataScale = useMemo(() => {
         const minMaxValues = getMinMax(
             series.filter((s) => s.enabled),
-            (d) => d.y
+            (d, seriesOptions) => {
+                if (seriesOptions.type === SeriesType.AREA_CLOSED) {
+                    const dThreshold = d as ThresholdDataPoint;
+
+                    return [dThreshold.y, dThreshold.y1];
+                } else {
+                    return [d.y];
+                }
+            }
         );
 
         return scaleLinear<number>({
             range: [yMax, 0],
             domain: [minMaxValues[0], minMaxValues[1] || 0],
+            nice: true,
+            clamp: true,
         });
     }, [yMax, series]);
+
+    const xScaleToUse = xScale || dateScale;
+    const yScaleToUse = yScale || dataScale;
+
+    /**
+     *  Determine if it's Right or Left axis. Default it to left oriented axis
+     */
+    const yAxisConfiguration = useMemo(() => {
+        if (yAxisOptions && yAxisOptions.position === Orientation.right) {
+            return {
+                AxisToUse: AxisRight,
+                left: width - marginLeft - margin.right,
+                orientation: Orientation.right,
+            };
+        } else {
+            return {
+                AxisToUse: AxisLeft,
+                left: width - marginLeft - margin.right,
+                orientation: Orientation.left,
+            };
+        }
+    }, [yAxisOptions, width, marginLeft, margin]);
 
     if (width < 10) {
         return null;
     }
 
-    const xScaleToUse = xScale || dateScale;
-    const yScaleToUse = yScale || dataScale;
-
-    // Open the tooltip from the time series parent
-    const handleMouseOver = (event: MouseEvent<SVGRectElement>): void => {
-        const [xValue, coords] = determineXPointForHover(
-            event,
-            series,
-            dateScale,
-            marginLeft
-        );
-
-        if (xValue === null || coords === null) {
-            tooltipUtils && tooltipUtils.hideTooltip();
-
-            return;
-        }
-
-        tooltipUtils &&
-            tooltipUtils.showTooltip({
-                tooltipLeft: dateScale(xValue),
-                tooltipTop: coords.y - marginTop,
-                tooltipData: {
-                    xValue: xValue,
-                },
-            });
-    };
+    let afterChildren: React.ReactElement[] = [];
 
     return (
-        <Group left={marginLeft} top={marginTop}>
+        <Group
+            left={marginLeft}
+            top={marginTop}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onMouseMove={onMouseMove}
+        >
             {xAxisOptions &&
                 xAxisOptions.plotBands &&
                 xAxisOptions.plotBands.map((plotBand, idx) => {
@@ -139,12 +148,16 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                         seriesData.color === undefined
                             ? colorScale(seriesData.name as string)
                             : seriesData.color;
-                    if (seriesData.type === "line") {
+                    if (seriesData.type === SeriesType.LINE) {
                         return (
                             <LinePath<DataPoint>
                                 data={seriesData.data}
+                                defined={(timeSeriesPoint) => {
+                                    return !!Number.isFinite(timeSeriesPoint.y);
+                                }}
                                 key={seriesData.name || `${idx}`}
-                                stroke={color}
+                                stroke={seriesData.stroke || color}
+                                strokeDasharray={seriesData.strokeDasharray}
                                 strokeWidth={seriesData.strokeWidth}
                                 x={(d) =>
                                     xScaleToUse(seriesData.xAccessor(d)) || 0
@@ -154,58 +167,75 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                 }
                             />
                         );
-                    } else if (seriesData.type === "areaclosed") {
-                        return (
-                            <AreaClosed<ThresholdDataPoint>
-                                data={seriesData.data as ThresholdDataPoint[]}
-                                defined={(alertEvaluationTimeSeriesPoint) => {
-                                    if (
-                                        Number.isFinite(
-                                            alertEvaluationTimeSeriesPoint.y
-                                        ) &&
-                                        Number.isFinite(
-                                            alertEvaluationTimeSeriesPoint.y1
-                                        )
-                                    ) {
-                                        // Upper and lower bound both available
-                                        return true;
-                                    }
+                    } else if (seriesData.type === SeriesType.AREA_CLOSED) {
+                        const gradientId = `${seriesData.name}-gradient`;
 
-                                    return false;
-                                }}
-                                fill={color}
-                                fillOpacity={0.6}
-                                key={seriesData.name || `${idx}`}
-                                x={(d: ThresholdDataPoint) =>
-                                    xScaleToUse(seriesData.xAccessor(d)) || 0
-                                }
-                                y0={(d: ThresholdDataPoint) =>
-                                    yScaleToUse(seriesData.yAccessor(d)) || 0
-                                }
-                                y1={(d: ThresholdDataPoint) =>
-                                    yScaleToUse(seriesData.y1Accessor(d)) || 0
-                                }
-                                yScale={yScaleToUse}
-                            />
+                        return (
+                            <>
+                                {seriesData.gradient && (
+                                    <LinearGradient
+                                        {...seriesData.gradient}
+                                        id={gradientId}
+                                    />
+                                )}
+
+                                <AreaClosed<ThresholdDataPoint>
+                                    data={
+                                        seriesData.data as ThresholdDataPoint[]
+                                    }
+                                    defined={(timeSeriesPoint) => {
+                                        return !!(
+                                            Number.isFinite(
+                                                timeSeriesPoint.y
+                                            ) &&
+                                            Number.isFinite(timeSeriesPoint.y1)
+                                        );
+                                    }}
+                                    fill={
+                                        seriesData.gradient
+                                            ? `url(#${gradientId})`
+                                            : color
+                                    }
+                                    fillOpacity={seriesData.fillOpacity}
+                                    key={seriesData.name || `${idx}`}
+                                    stroke={seriesData.stroke}
+                                    strokeOpacity={1}
+                                    strokeWidth={seriesData.strokeWidth}
+                                    x={(d: ThresholdDataPoint) =>
+                                        xScaleToUse(seriesData.xAccessor(d)) ||
+                                        0
+                                    }
+                                    y0={(d: ThresholdDataPoint) =>
+                                        yScaleToUse(seriesData.yAccessor(d)) ||
+                                        0
+                                    }
+                                    y1={(d: ThresholdDataPoint) =>
+                                        yScaleToUse(seriesData.y1Accessor(d)) ||
+                                        0
+                                    }
+                                    yScale={yScaleToUse}
+                                />
+                            </>
                         );
+                    } else if (seriesData.type === SeriesType.CUSTOM) {
+                        // #TODO implement intuitive ordering system
+                        if (seriesData.customRenderer) {
+                            afterChildren = [
+                                ...afterChildren,
+                                ...seriesData.customRenderer(
+                                    xScaleToUse,
+                                    yScaleToUse
+                                ),
+                            ];
+                        }
                     }
                 }
 
                 return;
             })}
-            {tooltipUtils && (
-                /* Mouse hover region for tooltip */
-                <Bar
-                    cursor="default"
-                    height={yScaleToUse.range()[0]}
-                    opacity={0}
-                    width={xScaleToUse.range()[1]}
-                    x={xScaleToUse.range()[0]}
-                    y={yScaleToUse.range()[1]}
-                    onMouseLeave={tooltipUtils.hideTooltip}
-                    onMouseMove={handleMouseOver}
-                />
-            )}
+            {children && children(xScaleToUse, yScaleToUse)}
+            {/* #TODO implement intuitive ordering system */}
+            {afterChildren}
             {showXAxis && (
                 <AxisBottom
                     numTicks={width > 520 ? 10 : 5}
@@ -215,14 +245,13 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                 />
             )}
             {showYAxis && (
-                <AxisLeft
-                    numTicks={5}
+                <yAxisConfiguration.AxisToUse
+                    left={yAxisConfiguration.left}
+                    orientation={yAxisConfiguration.orientation}
                     scale={yScaleToUse}
                     tickFormat={formatLargeNumberForVisualization}
-                    tickLabelProps={() => axisLeftTickLabelProps}
                 />
             )}
-            {children && children(xScaleToUse, yScaleToUse)}
         </Group>
     );
 };

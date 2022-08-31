@@ -41,13 +41,24 @@ export const COLOR_PALETTE = [
  */
 export function getMinMax(
     series: Pick<Series, "data">[],
-    extract = (d: DataPoint | ThresholdDataPoint) => d.x
+    extract = (
+        d: DataPoint | ThresholdDataPoint,
+        seriesOptions: Series
+    ): number[] | number => (seriesOptions ? d.x : d.x)
 ): [number, number] {
     const arrayOfArrayOfValues: number[][] = [];
 
     series.forEach((seriesOptions) => {
         const values: number[] = [];
-        seriesOptions.data.forEach((item) => values.push(extract(item)));
+        seriesOptions.data.forEach((item) => {
+            const extractedValue = extract(item, seriesOptions);
+
+            if (typeof extractedValue === "number") {
+                values.push(extractedValue);
+            } else {
+                extractedValue.forEach((subItem) => values.push(subItem));
+            }
+        });
         arrayOfArrayOfValues.push(values);
     });
 
@@ -97,6 +108,8 @@ export function normalizeSeries(
             enabled: item.enabled === undefined ? true : item.enabled,
             type: item.type === undefined ? DEFAULT_CHART_TYPE : item.type,
             strokeWidth: item.strokeWidth === undefined ? 1 : item.strokeWidth,
+            stroke: item.stroke,
+            fillOpacity: item.fillOpacity ?? 1,
             xAccessor: item.xAccessor ?? defaultXAccessor,
             x1Accessor: item.x1Accessor ?? defaultX1Accessor,
             yAccessor: item.yAccessor ?? defaultYAccessor,

@@ -11,12 +11,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box, Button } from "@material-ui/core";
 import { ParentSize } from "@visx/responsive";
-import { scaleOrdinal } from "@visx/scale";
+import { scaleOrdinal, scaleTime } from "@visx/scale";
 import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+    FunctionComponent,
+    MouseEvent,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { ChartBrush } from "./chart-brush/chart-brush.component";
 import { ChartCore } from "./chart-core/chart-core.component";
+import { ChartZoom } from "./chart-zoom/chart-zoom.component";
 import { EventsChart } from "./events-chart/events-chart.component";
 import { Legend } from "./legend/legend.component";
 import {
@@ -28,11 +36,13 @@ import {
 } from "./time-series-chart.interfaces";
 import {
     COLOR_PALETTE,
+    getMinMax,
     normalizeSeries,
     syncEnabledDisabled,
 } from "./time-series-chart.utils";
 import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
+import { determineXPointForHover } from "./tooltip/tooltip.utils";
 
 const TOP_CHART_HEIGHT_RATIO = 0.85;
 const CHART_SEPARATION = 50;
@@ -40,7 +50,7 @@ const CHART_MARGINS = {
     top: 20,
     left: 50,
     bottom: 20,
-    right: 20,
+    right: 50,
 };
 
 /**
@@ -108,6 +118,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     series,
     legend,
     brush,
+    zoom,
     height,
     width,
     xAxis,
@@ -135,11 +146,13 @@ export const TimeSeriesChartInternal: FunctionComponent<
     >([]);
 
     const tooltipUtils = useTooltip<{ xValue: number }>();
-    const { tooltipData, tooltipLeft, tooltipTop } = tooltipUtils;
+    const { tooltipData, tooltipLeft, tooltipTop, hideTooltip, showTooltip } =
+        tooltipUtils;
 
     // Legend should take on the value of the option if it exists otherwise default to true
     const isLegendEnabled = legend === undefined ? true : legend;
     const isBrushEnabled = brush === undefined ? false : brush;
+    const isZoomEnabled = zoom === undefined ? false : zoom;
     const isTooltipEnabled = tooltip === undefined ? true : tooltip;
     const isXAxisEnabled =
         xAxis === undefined
@@ -147,7 +160,12 @@ export const TimeSeriesChartInternal: FunctionComponent<
             : xAxis.enabled === undefined
             ? true
             : xAxis.enabled;
-    const isYAxisEnabled = yAxis === undefined ? true : yAxis;
+    const isYAxisEnabled =
+        yAxis === undefined
+            ? true
+            : yAxis.enabled === undefined
+            ? true
+            : yAxis.enabled;
     let topChartHeight: number;
     let brushChartHeight;
     let topChartBottomMargin;
@@ -263,7 +281,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
         }
     };
 
-    const handleBrushClick = (): void => {
+    const handleResetZoom = (): void => {
         const seriesDataCopy = series.map((seriesData, idx) => {
             const copied = { ...seriesData };
             copied.enabled = enabledDisabledSeriesMapping[idx];
@@ -277,6 +295,49 @@ export const TimeSeriesChartInternal: FunctionComponent<
         if (chartEvents && chartEvents.onZoomChange) {
             chartEvents.onZoomChange(null);
         }
+    };
+
+    // Open the tooltip
+    const dateScaleForHandleMouseOver = useMemo(() => {
+        const minMaxTimestamp = getMinMax(
+            processedMainChartSeries.filter((s) => s.enabled),
+            (d) => [d.x]
+        );
+
+        return scaleTime<number>({
+            range: [0, xMax],
+            domain: [
+                new Date(minMaxTimestamp[0]),
+                new Date(minMaxTimestamp[1]),
+            ] as [Date, Date],
+        });
+    }, [xMax, processedMainChartSeries]);
+
+    const handleMouseOver = (event: MouseEvent<SVGSVGElement>): void => {
+        if (!isTooltipEnabled) {
+            return;
+        }
+
+        const [xValue, coords] = determineXPointForHover(
+            event,
+            processedMainChartSeries,
+            dateScaleForHandleMouseOver,
+            CHART_MARGINS.left
+        );
+
+        if (xValue === null || coords === null) {
+            hideTooltip();
+
+            return;
+        }
+
+        showTooltip({
+            tooltipLeft: dateScaleForHandleMouseOver(xValue),
+            tooltipTop: coords.y - CHART_MARGINS.top,
+            tooltipData: {
+                xValue: xValue,
+            },
+        });
     };
 
     return (
@@ -299,27 +360,44 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     series={processedMainChartSeries}
                     showXAxis={isXAxisEnabled}
                     showYAxis={isYAxisEnabled}
-                    tooltipUtils={tooltipUtils}
                     width={width}
                     xAxisOptions={xAxis}
                     xMax={xMax}
+                    yAxisOptions={yAxis}
                     yMax={yMax}
+                    // Handles whether to show the tooltip
+                    onMouseLeave={() => {
+                        isTooltipEnabled && hideTooltip();
+                    }}
+                    onMouseMove={(event: MouseEvent<SVGSVGElement>) =>
+                        isTooltipEnabled && handleMouseOver(event)
+                    }
                 >
                     {(xScale, yScale) => {
-                        if (tooltipData) {
-                            return (
-                                <TooltipMarkers
-                                    chartHeight={topChartHeight}
-                                    colorScale={colorScale}
-                                    series={processedMainChartSeries}
-                                    xScale={xScale}
-                                    xValue={tooltipData.xValue}
-                                    yScale={yScale}
-                                />
-                            );
-                        }
-
-                        return undefined;
+                        return (
+                            <>
+                                {isZoomEnabled && (
+                                    <ChartZoom
+                                        colorScale={colorScale}
+                                        height={topChartHeight}
+                                        margins={CHART_MARGINS}
+                                        series={processedMainChartSeries}
+                                        width={width}
+                                        onZoomChange={handleBrushChange}
+                                    />
+                                )}
+                                {tooltipData && (
+                                    <TooltipMarkers
+                                        chartHeight={topChartHeight}
+                                        colorScale={colorScale}
+                                        series={processedMainChartSeries}
+                                        xScale={xScale}
+                                        xValue={tooltipData.xValue}
+                                        yScale={yScale}
+                                    />
+                                )}
+                            </>
+                        );
                     }}
                 </ChartCore>
                 {isBrushEnabled && (
@@ -337,7 +415,8 @@ export const TimeSeriesChartInternal: FunctionComponent<
                         width={width}
                         xAxisOptions={xAxis}
                         onBrushChange={handleBrushChange}
-                        onBrushClick={handleBrushClick}
+                        onBrushClick={handleResetZoom}
+                        onMouseEnter={() => hideTooltip()}
                     />
                 )}
             </svg>
@@ -363,6 +442,16 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     onEventsStateChange={setProcessedEvents}
                     onSeriesClick={handleSeriesClickFromLegend}
                 />
+            )}
+
+            {currentZoom && (
+                <Box
+                    position="absolute"
+                    right={CHART_MARGINS.right + 10}
+                    top={5}
+                >
+                    <Button onClick={handleResetZoom}>Reset Zoom</Button>
+                </Box>
             )}
         </div>
     );

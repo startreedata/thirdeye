@@ -84,6 +84,7 @@ describe("Time Series Chart Utils", () => {
             {
                 data: [],
                 type: SeriesType.AREA_CLOSED,
+                color: "#FFF",
             },
             {
                 data: [],
@@ -103,6 +104,9 @@ describe("Time Series Chart Utils", () => {
             y1Accessor: defaultY1Accessor,
             strokeWidth: 1,
             tooltipValueFormatter: defaultTooltipValueFormatter,
+            fillOpacity: 1,
+            stroke: undefined,
+            color: "#FFF",
         });
         expect(result[1]).toEqual({
             data: [],
@@ -115,6 +119,8 @@ describe("Time Series Chart Utils", () => {
             y1Accessor: defaultY1Accessor,
             strokeWidth: 1,
             tooltipValueFormatter: defaultTooltipValueFormatter,
+            fillOpacity: 1,
+            stroke: undefined,
         });
     });
 });

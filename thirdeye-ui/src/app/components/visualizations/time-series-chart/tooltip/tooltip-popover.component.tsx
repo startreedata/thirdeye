@@ -73,7 +73,12 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
                                 series
                             );
 
-                            if (series.type === SeriesType.AREA_CLOSED) {
+                            if (series.tooltipFormatter) {
+                                displayValue = series.tooltipFormatter(
+                                    dataPoint,
+                                    series
+                                );
+                            } else if (series.type === SeriesType.AREA_CLOSED) {
                                 displayValue = `${series.tooltipValueFormatter(
                                     dataPoint.y,
                                     dataPoint,

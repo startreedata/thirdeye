@@ -30,8 +30,13 @@ export const PlotBand: FunctionComponent<PlotBandProps> = ({
         <Group>
             <Bar
                 fill={plotBand.color || DEFAULT_PLOTBAND_COLOR}
+                fillOpacity={
+                    plotBand.opacity === undefined ? 1 : plotBand.opacity
+                }
                 height={yScale.range()[0]}
-                opacity={plotBand.opacity === undefined ? 1 : plotBand.opacity}
+                stroke={plotBand.color || DEFAULT_PLOTBAND_COLOR}
+                strokeDasharray={4}
+                strokeWidth={2}
                 width={width}
                 x={xScale(plotBand.start)}
                 y={yScale.range()[1]}

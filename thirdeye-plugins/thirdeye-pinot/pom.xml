@@ -28,7 +28,7 @@
   <properties>
     <!--    Should match the helix version here -->
     <!--    https://github.com/apache/incubator-pinot/blob/master/pom.xml#L120 -->
-    <helix.version>0.9.8</helix.version>
+    <helix.version>0.9.10</helix.version>
   </properties>
 
   <dependencies>

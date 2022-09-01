@@ -101,6 +101,7 @@ export const generateSeriesDataForEvaluation = (
                 pointFormatter: (d: DataPoint): string =>
                     formatLargeNumberV1(d.y),
             },
+            legendIndex: 10,
         },
         {
             name: translation("label.activity"),
@@ -127,6 +128,18 @@ export const generateSeriesDataForEvaluation = (
             tooltip: {
                 pointFormatter: (dataPoint): string =>
                     formatLargeNumberV1((dataPoint as ThresholdDataPoint).y1),
+            },
+            customLegendIcon: (svgBound, color) => {
+                return (
+                    <line
+                        stroke={color}
+                        strokeWidth={10}
+                        x1="0"
+                        x2={`${svgBound}`}
+                        y1={`${svgBound / 2}`}
+                        y2={`${svgBound / 2}`}
+                    />
+                );
             },
         },
         {
@@ -242,8 +255,22 @@ export const generateSeriesForAnomalies = (
                 ([, anomalySeriesData]) => anomalySeriesData
             )
         ),
+        strokeDasharray: Dimension.DASHARRAY_VISUALIZATION_ANOMALY,
         type: SeriesType.CUSTOM,
         color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
+        customLegendIcon: (svgBound, color) => {
+            return (
+                <line
+                    stroke={color}
+                    strokeDasharray={Dimension.DASHARRAY_VISUALIZATION_ANOMALY}
+                    strokeWidth={10}
+                    x1={`${svgBound / 2}`}
+                    x2={`${svgBound / 2}`}
+                    y1="0"
+                    y2={`${svgBound}`}
+                />
+            );
+        },
         tooltip: {
             tooltipFormatter: (d: DataPoint, series: NormalizedSeries) => {
                 const dataPoint = d as DataPoint<Anomaly>;

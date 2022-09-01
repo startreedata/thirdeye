@@ -15,13 +15,18 @@ import { Grid } from "@material-ui/core";
 import { LegendItem, LegendLabel, LegendOrdinal } from "@visx/legend";
 import { ScaleOrdinal } from "d3-scale";
 import React, { FunctionComponent } from "react";
-import { LegendProps, Series } from "../time-series-chart.interfaces";
+import {
+    LegendProps,
+    Series,
+    SeriesType,
+} from "../time-series-chart.interfaces";
 import { sortSeries } from "./legend.utils";
 
 const LEGEND_CONTAINER_STYLE = {
     cursor: "pointer",
 };
-const RECT_HEIGHT_WIDTH = 15;
+const RECT_HEIGHT_WIDTH = 20;
+const SVG_ICON_VIRTUAL_BOUND = 50;
 
 export const Legend: FunctionComponent<LegendProps> = ({
     series,
@@ -47,7 +52,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
                          * colorScale cannot be stored in state since its a complicated
                          * object with functions
                          */
-                        if (seriesData && seriesData.color !== undefined) {
+                        if (seriesData.color !== undefined) {
                             color = seriesData.color;
                         }
 
@@ -55,8 +60,37 @@ export const Legend: FunctionComponent<LegendProps> = ({
                          * colorScale is updated before the processed series
                          * in the parent so check for existence of series for index
                          */
-                        if (seriesData && !seriesData.enabled) {
+                        if (!seriesData.enabled) {
                             color = "#EEE";
+                        }
+
+                        let legendIcon = (
+                            <line
+                                stroke={color}
+                                strokeDasharray={seriesData.strokeDasharray}
+                                strokeWidth={10}
+                                x1="0"
+                                x2={`${SVG_ICON_VIRTUAL_BOUND}`}
+                                y1={`${SVG_ICON_VIRTUAL_BOUND / 2}`}
+                                y2={`${SVG_ICON_VIRTUAL_BOUND / 2}`}
+                            />
+                        );
+
+                        if (seriesData.type === SeriesType.AREA_CLOSED) {
+                            legendIcon = (
+                                <rect
+                                    fill={color}
+                                    height={SVG_ICON_VIRTUAL_BOUND}
+                                    width={SVG_ICON_VIRTUAL_BOUND}
+                                />
+                            );
+                        }
+
+                        if (seriesData.legendIcon) {
+                            legendIcon = seriesData.legendIcon(
+                                SVG_ICON_VIRTUAL_BOUND,
+                                color
+                            );
                         }
 
                         return (
@@ -70,13 +104,10 @@ export const Legend: FunctionComponent<LegendProps> = ({
                                 >
                                     <svg
                                         height={RECT_HEIGHT_WIDTH}
+                                        viewBox={`0 0 ${SVG_ICON_VIRTUAL_BOUND} ${SVG_ICON_VIRTUAL_BOUND}`}
                                         width={RECT_HEIGHT_WIDTH}
                                     >
-                                        <rect
-                                            fill={color}
-                                            height={RECT_HEIGHT_WIDTH}
-                                            width={RECT_HEIGHT_WIDTH}
-                                        />
+                                        {legendIcon}
                                     </svg>
                                     <LegendLabel align="left" margin="0 5px">
                                         {seriesData.name}

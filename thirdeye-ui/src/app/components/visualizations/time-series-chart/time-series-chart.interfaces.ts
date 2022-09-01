@@ -46,6 +46,7 @@ export interface Series {
     enabled?: boolean;
     strokeWidth?: number;
     legendIndex?: number;
+    legendIcon?: (svgBound: number, color: string) => React.ReactElement;
     xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
     x1Accessor?: (d: LineDataPoint) => Date;
     yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;
@@ -82,6 +83,7 @@ export interface NormalizedSeries {
     enabled: boolean;
     strokeWidth: number;
     legendIndex?: number;
+    legendIcon?: (svgBound: number, color: string) => React.ReactElement;
     xAccessor: (d: DataPoint | ThresholdDataPoint) => Date;
     x1Accessor: (d: LineDataPoint) => Date;
     yAccessor: (d: DataPoint | ThresholdDataPoint) => number;

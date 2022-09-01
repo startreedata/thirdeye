@@ -12,6 +12,7 @@
  * the License.
  */
 import { ActionHook } from "../actions.interfaces";
+import { Datasource } from "../dto/datasource.interfaces";
 
 export interface GetStatusResponse {
     code?: string;
@@ -26,4 +27,9 @@ export interface GetDatasourceStatus extends ActionHook {
     getDatasourceStatus: (
         datasourceName: string
     ) => Promise<GetStatusResponse | undefined>;
+}
+
+export interface GetDatasources extends ActionHook {
+    datasources: Datasource[] | null;
+    getDatasources: () => Promise<Datasource[] | undefined>;
 }

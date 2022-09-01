@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
 
   protected PlanNodeBean planNodeBean = null;
   protected Interval detectionInterval = null;
-  protected Map<String, DetectionPipelineResult> inputsMap = new HashMap<>();
+  protected Map<String, DetectionResult> inputsMap = new HashMap<>();
 
   private PlanNodeContext context;
 
@@ -68,7 +68,7 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
     return planNodeBean.getInputs();
   }
 
-  public void setInput(String key, DetectionPipelineResult input) {
+  public void setInput(String key, DetectionResult input) {
     this.inputsMap.put(key, input);
   }
 

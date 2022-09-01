@@ -24,6 +24,7 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
@@ -39,9 +40,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -146,7 +146,7 @@ public class AlertEvaluator {
                 .setTemplate(toAlertTemplateApi(templateWithProperties)));
       }
 
-      final Map<String, DetectionPipelineResult> result = executorService
+      final Map<String, DetectionResult> result = executorService
           .submit(() -> planExecutor.runPipeline(templateWithProperties.getNodes(),
               detectionInterval))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
@@ -222,10 +222,10 @@ public class AlertEvaluator {
     }
   }
 
-  private AlertEvaluationApi toApi(final Map<String, DetectionPipelineResult> outputMap) {
+  private AlertEvaluationApi toApi(final Map<String, DetectionResult> outputMap) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     for (final String key : outputMap.keySet()) {
-      final DetectionPipelineResult result = outputMap.get(key);
+      final DetectionResult result = outputMap.get(key);
       final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = detectionPipelineResultToApi(
           result);
       detectionEvaluationApiMap.keySet()
@@ -235,13 +235,18 @@ public class AlertEvaluator {
   }
 
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(
-      final DetectionPipelineResult result) {
+      final DetectionResult result) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    final List<DetectionResult> detectionResults = result.getDetectionResults();
-    for (int i = 0; i < detectionResults.size(); i++) {
-      final DetectionEvaluationApi detectionEvaluationApi = toApi(detectionResults.get(i));
-      map.put(String.valueOf(i), detectionEvaluationApi);
+    if (result instanceof CombinerResult) {
+      final List<DetectionResult> detectionResults = ((CombinerResult) result).getDetectionResults();
+      for (int i = 0; i < detectionResults.size(); i++) {
+        final DetectionEvaluationApi detectionEvaluationApi = toApi(detectionResults.get(i));
+        map.put(String.valueOf(i), detectionEvaluationApi);
+      }
+    } else {
+      map.put(String.valueOf(0), toApi(result));
     }
+
     return map;
   }
 }

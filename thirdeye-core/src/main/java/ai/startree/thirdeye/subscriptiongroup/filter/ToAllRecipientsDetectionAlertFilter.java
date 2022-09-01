@@ -18,7 +18,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.annotation.AlertFilter;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +38,11 @@ public class ToAllRecipientsDetectionAlertFilter extends StatefulDetectionAlertF
   final Map<String, List<String>> recipients;
   final List<Long> alertIds;
 
-  public ToAllRecipientsDetectionAlertFilter(final DataProvider provider,
-      final SubscriptionGroupDTO config,
+  public ToAllRecipientsDetectionAlertFilter(final SubscriptionGroupDTO config,
       final long endTime,
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {
-    super(provider, config, endTime, mergedAnomalyResultManager,
+    super(config, endTime, mergedAnomalyResultManager,
         detectionConfigManager);
 
     final Map<String, Object> properties = this.config.getProperties();

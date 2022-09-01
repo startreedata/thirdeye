@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye;
 
-import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
+import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
+import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
-import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -24,6 +24,7 @@ import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
+import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
@@ -35,7 +36,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -48,6 +48,7 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
@@ -67,16 +68,21 @@ import org.testng.annotations.Test;
  * - get a single anomaly
  * - get the anomaly breakdown (heatmap)
  */
-public class HappyPathTest extends PinotBasedIntegrationTest {
+public class HappyPathTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
   private static final String RESOURCES_PATH = "/happypath";
-  private static final String THIRDEYE_CONFIG = "./src/test/resources/happypath/config";
 
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
   private static final AlertApi ALERT_API;
+  private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
+  private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
+  private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
+
+  private static final PinotContainer pinotContainer;
 
   static {
+    pinotContainer = PinotContainerManager.getInstance().getPinotContainer();
     try {
       String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
       String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);
@@ -98,7 +104,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
-    setupPluginsDirAbsolutePath();
+    IntegrationTestUtils.setupPluginsDirAbsolutePath();
 
     SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
         resourceFilePath("happypath/config/server.yaml"),
@@ -114,26 +120,6 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     client = new JerseyClientBuilder(SUPPORT.getEnvironment())
         .using(jerseyClientConfiguration)
         .build("test client");
-  }
-
-  private void setupPluginsDirAbsolutePath() {
-    final String projectBuildDirectory = requireNonNull(System.getProperty("projectBuildDirectory"),
-        "project build dir not set");
-    final String projectVersion = requireNonNull(System.getProperty("projectVersion"),
-        "project version not set");
-    final String pluginsPath = new StringBuilder()
-        .append(projectBuildDirectory)
-        .append("/../../thirdeye-distribution/target/thirdeye-distribution-")
-        .append(projectVersion)
-        .append("-dist/thirdeye-distribution-")
-        .append(projectVersion)
-        .append("/plugins")
-        .toString();
-    final File pluginsDir = new File(pluginsPath);
-    assertThat(pluginsDir.exists()).isTrue();
-    assertThat(pluginsDir.isDirectory()).isTrue();
-
-    System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
   }
 
   @AfterClass(alwaysRun = true)
@@ -191,7 +177,7 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   public void testEvaluateAlert() {
     AlertEvaluationApi alertEvaluationApi = new AlertEvaluationApi()
         .setAlert(ALERT_API)
-        .setStart(Date.from(Instant.ofEpochMilli(1580601600000L))) //Sunday, 2 February 2020 00:00:00
+        .setStart(Date.from(Instant.ofEpochMilli(PAGEVIEWS_DATASET_START_TIME))) //Sunday, 2 February 2020 00:00:00
         .setEnd(Date.from(Instant.ofEpochMilli(1596326400000L)));  //Sunday, 2 August 2020 00:00:00
 
     Response response = request("api/alerts/evaluate")
@@ -207,6 +193,19 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
     assertThat(response.getStatus()).isEqualTo(200);
     List<Map<String, Object>> alerts = response.readEntity(List.class);
     alertId = ((Number) alerts.get(0).get("id")).longValue();
+  }
+
+  @Test(dependsOnMethods = "testCreateAlert")
+  public void testAlertInsights() {
+    final Response response = request("api/alerts/" + alertId + "/insights")
+        .get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
+    assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo("P1D");
+    assertThat(insights.getDefaultStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY);
+    assertThat(insights.getDefaultEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
+    assertThat(insights.getDatasetStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
+    assertThat(insights.getDatasetEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
   }
 
   @Test(dependsOnMethods = "testCreateAlert")
@@ -260,7 +259,8 @@ public class HappyPathTest extends PinotBasedIntegrationTest {
   public void testGetTopContributors() {
     Response response = request("api/rca/dim-analysis?id=" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(DimensionAnalysisResultApi.class);
+    DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(
+        DimensionAnalysisResultApi.class);
     assertThat(dimensionAnalysisResultApi.getResponseRows().size()).isGreaterThan(0);
   }
 

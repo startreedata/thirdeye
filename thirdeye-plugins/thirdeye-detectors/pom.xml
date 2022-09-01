@@ -19,7 +19,7 @@
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>ai.startree.thirdeye.plugins</groupId>
-    <version>1.67.0-SNAPSHOT</version>
+    <version>1.68.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

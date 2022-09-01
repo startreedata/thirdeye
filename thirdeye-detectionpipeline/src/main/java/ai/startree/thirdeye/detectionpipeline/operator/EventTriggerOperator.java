@@ -48,7 +48,7 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getTimeSeriesMap(inputMap);
+    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getDataTableMap(inputMap);
     for (String inputKey : timeSeriesMap.keySet()) {
       final DataTable dataTable = timeSeriesMap.get(inputKey);
       for (int rowIdx = 0; rowIdx < dataTable.getRowCount(); rowIdx++) {

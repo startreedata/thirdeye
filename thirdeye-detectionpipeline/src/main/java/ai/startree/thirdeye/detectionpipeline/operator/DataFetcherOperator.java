@@ -81,7 +81,8 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
   @Override
   public void execute() throws Exception {
     final DataTable dataTable = dataFetcher.getDataTable(detectionInterval);
-    resultMap.put(outputKeyMap.values().iterator().next(), dataTable);
+    resultMap.put(outputKeyMap.values().iterator().next(),
+        dataTable);
   }
 
   @Override

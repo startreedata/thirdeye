@@ -13,13 +13,13 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.detection.DetectionUtils.getDataTableMap;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.operator.sql.DataTableToSqlAdapterFactory;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import java.sql.Connection;
@@ -28,7 +28,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -99,13 +98,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
   }
 
   private void initTables(final Connection connection) throws SQLException {
-    Map<String, DataTable> datatables = new HashMap<>();
-    for (String tableName : inputMap.keySet()) {
-      DetectionPipelineResult detectionPipelineResult = inputMap.get(tableName);
-      if (detectionPipelineResult instanceof DataTable) {
-        datatables.put(tableName, (DataTable) detectionPipelineResult);
-      }
-    }
+    final Map<String, DataTable> datatables = getDataTableMap(inputMap);
     try {
       dataTableToSqlAdapter.loadTables(connection, datatables);
     } catch (final SQLException e) {

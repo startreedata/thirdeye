@@ -26,7 +26,6 @@ import ai.startree.thirdeye.datalayer.entity.DetectionConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionStatusIndex;
 import ai.startree.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
-import ai.startree.thirdeye.datalayer.entity.EvaluationIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
@@ -48,7 +47,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -86,7 +84,6 @@ public class SubEntities {
         .put(DatasetConfigDTO.class, DatasetConfigIndex.class)
         .put(DetectionStatusDTO.class, DetectionStatusIndex.class)
         .put(EntityToEntityMappingDTO.class, EntityToEntityMappingIndex.class)
-        .put(EvaluationDTO.class, EvaluationIndex.class)
         .put(EnumerationItemDTO.class, EnumerationItemIndex.class)
         .put(EventDTO.class, EventIndex.class)
         .put(JobDTO.class, JobIndex.class)
@@ -113,7 +110,6 @@ public class SubEntities {
         .put(DatasetConfigDTO.class, SubEntityType.DATASET)
         .put(DetectionStatusDTO.class, SubEntityType.DETECTION_STATUS)
         .put(EntityToEntityMappingDTO.class, SubEntityType.ENTITY_TO_ENTITY_MAPPING)
-        .put(EvaluationDTO.class, SubEntityType.EVALUATION)
         .put(EnumerationItemDTO.class, SubEntityType.ENUMERATION_ITEM)
         .put(EventDTO.class, SubEntityType.EVENT)
         .put(JobDTO.class, SubEntityType.JOB)

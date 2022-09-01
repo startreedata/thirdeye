@@ -335,3 +335,13 @@ const alertEvaluationTimeSeriesPointsComparator = (
         alertEvaluationTimeSeriesPoint2.timestamp
     );
 };
+
+const OTHER = "other";
+
+export const checkIfOtherDimension = (id: string | undefined): boolean => {
+    if (!id) {
+        return false;
+    }
+
+    return id.toLowerCase() === OTHER;
+};

@@ -19,13 +19,11 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CombinerOperator extends DetectionPipelineOperator {
 
@@ -49,7 +47,7 @@ public class CombinerOperator extends DetectionPipelineOperator {
         DEFAULT_INPUT_KEY), "No input to combiner");
     final var forkJoinResults = forkJoinResult.getResults();
 
-    final Map<String, DetectionPipelineResult> results = new HashMap<>();
+    final Map<String, DetectionResult> results = new HashMap<>();
     for (int i = 0; i < forkJoinResults.size(); i++) {
       final var result = forkJoinResults.get(i);
       final String prefix = i + ".";
@@ -60,36 +58,14 @@ public class CombinerOperator extends DetectionPipelineOperator {
     setOutput(DEFAULT_OUTPUT_KEY, new CombinerResult(results));
   }
 
-  private DetectionPipelineResult wrapIfReqd(final EnumerationItemDTO enumerationItem,
-      final DetectionPipelineResult v) {
-    return v instanceof DetectionResult
-        ? new WrappedDetectionPipelineResult(enumerationItem, (DetectionResult) v)
-        : v;
+  private DetectionResult wrapIfReqd(final EnumerationItemDTO enumerationItem,
+      final DetectionResult v) {
+    return v instanceof AnomalyDetectionResult ? new WrappedAnomalyDetectionResult(enumerationItem,
+        (AnomalyDetectionResult) v) : v;
   }
 
   @Override
   public String getOperatorName() {
     return "CombinerOperator";
-  }
-
-  public static class CombinerResult implements DetectionPipelineResult {
-
-    private final Map<String, DetectionPipelineResult> results;
-
-    public CombinerResult(final Map<String, DetectionPipelineResult> results) {
-      this.results = results;
-    }
-
-    @Override
-    public List<DetectionResult> getDetectionResults() {
-      return results.values().stream()
-          .filter(o -> o instanceof WrappedDetectionPipelineResult)
-          .map(o -> (WrappedDetectionPipelineResult) o)
-          .collect(Collectors.toList());
-    }
-
-    public Map<String, DetectionPipelineResult> getResults() {
-      return results;
-    }
   }
 }

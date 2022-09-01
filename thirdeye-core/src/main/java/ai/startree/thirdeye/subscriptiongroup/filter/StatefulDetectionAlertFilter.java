@@ -22,7 +22,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
-import ai.startree.thirdeye.spi.detection.DataProvider;
 import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,10 +43,10 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager detectionConfigManager;
 
-  public StatefulDetectionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
+  public StatefulDetectionAlertFilter(SubscriptionGroupDTO config,
       long endTime, final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {
-    super(provider, config, endTime);
+    super(config, endTime);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.detectionConfigManager = detectionConfigManager;
   }

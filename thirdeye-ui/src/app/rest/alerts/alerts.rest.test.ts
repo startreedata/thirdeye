@@ -19,6 +19,7 @@ import {
     deleteAlert,
     getAlert,
     getAlertEvaluation,
+    getAlertInsight,
     getAllAlerts,
     resetAlert,
     updateAlert,
@@ -46,6 +47,22 @@ describe("Alerts REST", () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAlert(1)).rejects.toThrow("testError");
+    });
+
+    it("getAlertInsight should invoke axios.get with appropriate input and return appropriate alert insight", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: mockAlertResponse,
+        });
+
+        await expect(getAlertInsight(1)).resolves.toEqual(mockAlertResponse);
+
+        expect(axios.get).toHaveBeenCalledWith("/api/alerts/1/insights");
+    });
+
+    it("getAlertInsight should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(getAlertInsight(1)).rejects.toThrow("testError");
     });
 
     it("getAllAlerts should invoke axios.get with appropriate input and return appropriate alerts", async () => {

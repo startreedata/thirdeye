@@ -14,10 +14,8 @@
 package ai.startree.thirdeye.spi.detection.health;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -30,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.DateTimeZone;
@@ -59,6 +55,20 @@ public class DetectionHealth {
   @JsonProperty
   private DetectionTaskStatus detectionTaskStatus;
 
+  /**
+   * Create a unknown detection health
+   *
+   * @return the unknown detection health
+   */
+  public static DetectionHealth unknown() {
+    DetectionHealth health = new DetectionHealth();
+    health.anomalyCoverageStatus = AnomalyCoverageStatus.fromCoverageRatio(Double.NaN);
+    health.detectionTaskStatus = DetectionTaskStatus.fromTasks(Collections.emptyList(), -1L);
+    health.regressionStatus = RegressionStatus.fromDetectorMapes(Collections.emptyMap());
+    health.overallHealth = HealthStatus.UNKNOWN;
+    return health;
+  }
+
   public HealthStatus getOverallHealth() {
     return overallHealth;
   }
@@ -80,18 +90,6 @@ public class DetectionHealth {
    */
   public static class Builder {
 
-    private final long startTime;
-    private final long endTime;
-    private final long detectionConfigId;
-    private EvaluationManager evaluationDAO;
-    private MergedAnomalyResultManager anomalyDAO;
-    private TaskManager taskDAO;
-    // the number of task DTO returned in the detectionHealth
-    private long taskLimit;
-    private boolean provideOverallHealth;
-
-    private DetectionHealth lastDetectionHealth;
-
     // database column name constants
     private static final String COL_NAME_START_TIME = "startTime";
     private static final String COL_NAME_END_TIME = "endTime";
@@ -99,6 +97,15 @@ public class DetectionHealth {
     private static final String COL_NAME_TASK_NAME = "name";
     private static final String COL_NAME_TASK_STATUS = "status";
     private static final String COL_NAME_TASK_TYPE = "type";
+    private final long startTime;
+    private final long endTime;
+    private final long detectionConfigId;
+    private MergedAnomalyResultManager anomalyDAO;
+    private TaskManager taskDAO;
+    // the number of task DTO returned in the detectionHealth
+    private long taskLimit;
+    private boolean provideOverallHealth;
+    private DetectionHealth lastDetectionHealth;
 
     public Builder(long detectionConfigId, long startTime, long endTime) {
       Preconditions.checkArgument(endTime >= startTime, "end time must be after start time");
@@ -107,15 +114,27 @@ public class DetectionHealth {
       this.detectionConfigId = detectionConfigId;
     }
 
-    /**
-     * Add the regression health status in the health report built by the builder
-     *
-     * @param evaluationDAO the evaluation dao
-     * @return the builder
-     */
-    public Builder addRegressionStatus(EvaluationManager evaluationDAO) {
-      this.evaluationDAO = evaluationDAO;
-      return this;
+    private static HealthStatus classifyOverallHealth(DetectionHealth health) {
+      HealthStatus taskHealth = health.detectionTaskStatus.getHealthStatus();
+      HealthStatus regressionHealth = health.regressionStatus.getHealthStatus();
+      HealthStatus coverageHealth = health.anomalyCoverageStatus.getHealthStatus();
+
+      Preconditions.checkNotNull(taskHealth);
+      Preconditions.checkNotNull(regressionHealth);
+      Preconditions.checkNotNull(coverageHealth);
+
+      // if task fail ratio is high or both regression and coverage are bad, we say the overall status is bad
+      if (taskHealth.equals(HealthStatus.BAD) || (regressionHealth.equals(HealthStatus.BAD)
+          && coverageHealth.equals(
+          HealthStatus.BAD))) {
+        return HealthStatus.BAD;
+      }
+
+      Set<HealthStatus> statusSet = ImmutableSet.of(taskHealth, regressionHealth, coverageHealth);
+      if (statusSet.contains(HealthStatus.MODERATE) || statusSet.contains(HealthStatus.BAD)) {
+        return HealthStatus.MODERATE;
+      }
+      return HealthStatus.GOOD;
     }
 
     /**
@@ -187,9 +206,6 @@ public class DetectionHealth {
      */
     public DetectionHealth build() {
       DetectionHealth health = new DetectionHealth();
-      if (this.evaluationDAO != null) {
-        health.regressionStatus = buildRegressionStatus();
-      }
       if (this.anomalyDAO != null) {
         health.anomalyCoverageStatus = buildAnomalyCoverageStatus();
       }
@@ -200,23 +216,6 @@ public class DetectionHealth {
         health.overallHealth = classifyOverallHealth(health);
       }
       return health;
-    }
-
-    private RegressionStatus buildRegressionStatus() {
-      // fetch evaluations
-      List<EvaluationDTO> evaluations = this.evaluationDAO.findByPredicate(
-          Predicate.AND(Predicate.LT(COL_NAME_START_TIME, endTime),
-              Predicate.GT(COL_NAME_END_TIME, startTime),
-              Predicate.EQ(COL_NAME_DETECTION_CONFIG_ID, detectionConfigId)));
-
-      // calculate average mapes for each detector
-      Map<String, Double> detectorMapes = evaluations.stream()
-          .filter(eval -> Objects.nonNull(eval.getMape()))
-          .collect(Collectors.groupingBy(EvaluationDTO::getDetectorName,
-              Collectors.averagingDouble(EvaluationDTO::getMape)));
-
-      // construct regression status
-      return RegressionStatus.fromDetectorMapes(detectorMapes);
     }
 
     private AnomalyCoverageStatus buildAnomalyCoverageStatus() {
@@ -273,42 +272,5 @@ public class DetectionHealth {
       }
       return DetectionTaskStatus.fromTasks(tasks, lastTaskExecutionTime, this.taskLimit);
     }
-
-    private static HealthStatus classifyOverallHealth(DetectionHealth health) {
-      HealthStatus taskHealth = health.detectionTaskStatus.getHealthStatus();
-      HealthStatus regressionHealth = health.regressionStatus.getHealthStatus();
-      HealthStatus coverageHealth = health.anomalyCoverageStatus.getHealthStatus();
-
-      Preconditions.checkNotNull(taskHealth);
-      Preconditions.checkNotNull(regressionHealth);
-      Preconditions.checkNotNull(coverageHealth);
-
-      // if task fail ratio is high or both regression and coverage are bad, we say the overall status is bad
-      if (taskHealth.equals(HealthStatus.BAD) || (regressionHealth.equals(HealthStatus.BAD)
-          && coverageHealth.equals(
-          HealthStatus.BAD))) {
-        return HealthStatus.BAD;
-      }
-
-      Set<HealthStatus> statusSet = ImmutableSet.of(taskHealth, regressionHealth, coverageHealth);
-      if (statusSet.contains(HealthStatus.MODERATE) || statusSet.contains(HealthStatus.BAD)) {
-        return HealthStatus.MODERATE;
-      }
-      return HealthStatus.GOOD;
-    }
-  }
-
-  /**
-   * Create a unknown detection health
-   *
-   * @return the unknown detection health
-   */
-  public static DetectionHealth unknown() {
-    DetectionHealth health = new DetectionHealth();
-    health.anomalyCoverageStatus = AnomalyCoverageStatus.fromCoverageRatio(Double.NaN);
-    health.detectionTaskStatus = DetectionTaskStatus.fromTasks(Collections.emptyList(), -1L);
-    health.regressionStatus = RegressionStatus.fromDetectorMapes(Collections.emptyMap());
-    health.overallHealth = HealthStatus.UNKNOWN;
-    return health;
   }
 }

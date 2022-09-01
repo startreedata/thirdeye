@@ -69,8 +69,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         start: number,
         end: number
     ): Promise<void> => {
+        const copiedAlert = { ...alert };
+        delete copiedAlert.id;
         const fetchedAlertEvaluation = await getEvaluation(
-            createAlertEvaluation(alert, start, end)
+            createAlertEvaluation(copiedAlert, start, end)
         );
 
         if (fetchedAlertEvaluation === undefined) {

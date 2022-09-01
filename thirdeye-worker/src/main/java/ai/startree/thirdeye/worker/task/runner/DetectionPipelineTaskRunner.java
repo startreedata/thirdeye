@@ -13,19 +13,16 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
@@ -52,7 +49,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final Counter detectionTaskCounter;
 
   private final AlertManager alertManager;
-  private final EvaluationManager evaluationManager;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
   private final DetectionPipelineRunner detectionPipelineRunner;
   private final AnomalyMerger anomalyMerger;
@@ -60,14 +56,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
-      final EvaluationManager evaluationManager,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
-      final MetricRegistry metricRegistry,
-      final DetectionPipelineRunner detectionPipelineRunner,
+      final MetricRegistry metricRegistry, final DetectionPipelineRunner detectionPipelineRunner,
       final AnomalyMerger anomalyMerger,
       final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator) {
     this.alertManager = alertManager;
-    this.evaluationManager = evaluationManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.detectionPipelineRunner = detectionPipelineRunner;
     this.anomalyMerger = anomalyMerger;
@@ -91,10 +84,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
           String.format("Could not resolve config id %d", info.getConfigId()));
 
-      Interval detectionInterval = alertDetectionIntervalCalculator
-          .getCorrectedInterval(alert, info.getStart(), info.getEnd());
+      Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(alert,
+          info.getStart(),
+          info.getEnd());
 
-      final DetectionPipelineResult result = detectionPipelineRunner.run(alert, detectionInterval);
+      final DetectionResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
       if (result.getLastTimestamp() < 0) {
         // notice lastTimestamp is not updated
@@ -114,7 +108,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           alert.getId(),
           detectionInterval.getStart(),
           detectionInterval.getEnd(),
-          optional(result.getAnomalies()).map(List::size).orElse(0));
+          result.getAnomalies().size());
 
       return Collections.emptyList();
     } catch (final Exception e) {
@@ -123,12 +117,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     }
   }
 
-  private void postExecution(final AlertDTO alert, final DetectionPipelineResult result) {
+  private void postExecution(final AlertDTO alert, final DetectionResult result) {
     anomalyMerger.mergeAndSave(alert, result.getAnomalies());
-
-    for (final EvaluationDTO evaluationDTO : result.getEvaluations()) {
-      evaluationManager.save(evaluationDTO);
-    }
 
     // re-notify the anomalies if any
     for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {

@@ -16,7 +16,9 @@ import { Datasource } from "../../../rest/dto/datasource.interfaces";
 
 export interface DatasetPropertiesFormProps {
     id: string;
-    dataset?: Dataset;
+    submitBtnLabel: string;
+    dataset: Dataset;
     datasources: Datasource[];
     onSubmit?: (dataset: Dataset) => void;
+    onCancel?: () => void;
 }

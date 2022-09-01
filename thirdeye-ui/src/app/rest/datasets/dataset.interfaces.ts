@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -11,14 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.testutils;
+import { ActionHook } from "../actions.interfaces";
+import { Dataset } from "../dto/dataset.interfaces";
 
-public class SqlUtils {
-
-  public static String cleanSql(String sql) {
-    return sql
-        .trim()
-        .replaceAll("[\\n\\t\\r]+", " ")
-        .replaceAll(" +", " ");
-  }
+export interface GetDataset extends ActionHook {
+    dataset: Dataset | null;
+    getDataset: (id: number) => Promise<Dataset | undefined>;
 }

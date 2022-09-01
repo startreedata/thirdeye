@@ -13,33 +13,51 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
+import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import java.util.List;
+import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface DetectionPipelineResult {
-
-  List<DetectionResult> getDetectionResults();
+/**
+ * Single timeseries detection result.
+ *
+ * Note:
+ * Can be output by any operator, so it does not necessarily return detection results.
+ * Eg {@link ai.startree.thirdeye.spi.detection.v2.DataTable} implements this interface but does not return
+ *
+ * todo cyril rename this as smthing like OperatorResult
+ * */
+public interface DetectionResult {
 
   /**
    * If implemented, returns the last timestamp observed in the data. Can be different from the last
    * processed timestamp.
    */
   default long getLastTimestamp() {
-    return -1;
+    return optional(getTimeseries())
+        .map(TimeSeries::getTime)
+        .filter(longSeries -> longSeries.size() > 0)
+        .map(longSeries -> longSeries.get(longSeries.size() - 1))
+        .orElse(-1L);
   }
 
   default List<MergedAnomalyResultDTO> getAnomalies() {
     throw new UnsupportedOperationException();
   }
 
-  default List<EvaluationDTO> getEvaluations() {
-    throw new UnsupportedOperationException();
+  default @Nullable EnumerationItemDTO getEnumerationItem() {
+    return null;
   }
 
-  default EnumerationItemDTO getEnumerationItem() {
+  default @Nullable Map<String, List> getRawData() {
+    return null;
+  }
+
+  default @Nullable TimeSeries getTimeseries() {
     return null;
   }
 }

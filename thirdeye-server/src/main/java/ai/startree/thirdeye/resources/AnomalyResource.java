@@ -58,6 +58,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       .put("isChild", "child")
       .put("metadata.metric.name", "metric")
       .put("metadata.dataset.name", "collection")
+      .put("enumerationItem.id", "enumerationItemId")
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;

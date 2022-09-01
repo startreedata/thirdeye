@@ -20,12 +20,12 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
-import ai.startree.thirdeye.worker.task.DetectionPipelineResultWrapper;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -66,23 +66,41 @@ public class DetectionPipelineRunner {
         && Objects.equals(o1.getParams(), o2.getParams());
   }
 
-  public DetectionPipelineResult run(final AlertDTO alert,
+  public DetectionResult run(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
-    final DetectionPipelineResult result = executePlan(alert, detectionInterval);
-
-    for (DetectionPipelineResult r : result.getDetectionResults()) {
-
-      if (r.getEnumerationItem() != null) {
-        final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(r.getEnumerationItem());
-
-        r.getAnomalies()
-            .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
-      }
-    }
+    final DetectionResult result = executePlan(alert, detectionInterval);
+    enrichAnomalies(result, alert);
     return result;
+  }
+
+  private void enrichAnomalies(final DetectionResult result, final AlertDTO alert) {
+    // generic enrichment
+    result.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
+
+    // dimension exploration enrichment
+    // TODO spyne can this casting thing be eliminated?
+    if (result instanceof CombinerResult) {
+      enrichAnomaliesFromCombinerResult((CombinerResult) result);
+    }
+  }
+
+  private void enrichAnomaliesFromCombinerResult(final CombinerResult result) {
+    result
+        .getDetectionResults()
+        .stream()
+        .filter(r -> r.getEnumerationItem() != null)
+        .forEach(this::enrichAnomaliesWithEnumerationItem);
+  }
+
+  private void enrichAnomaliesWithEnumerationItem(final DetectionResult result) {
+    final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(
+        requireNonNull(result.getEnumerationItem(), "enumerationItem is null"));
+    result
+        .getAnomalies()
+        .forEach(anomaly -> anomaly.setEnumerationItem(enumerationItemRef(enumerationItemDTO)));
   }
 
   private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {
@@ -104,18 +122,17 @@ public class DetectionPipelineRunner {
     return filtered.get();
   }
 
-  private DetectionPipelineResult executePlan(final AlertDTO alert,
+  private DetectionResult executePlan(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
         detectionInterval);
 
-    final Map<String, DetectionPipelineResult> detectionPipelineResultMap = planExecutor.runPipeline(
+    final Map<String, DetectionResult> detectionPipelineResultMap = planExecutor.runPipeline(
         templateWithProperties.getNodes(),
         detectionInterval);
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
-    final DetectionPipelineResult result = detectionPipelineResultMap.values().iterator().next();
-    return new DetectionPipelineResultWrapper(alert, result);
+    return detectionPipelineResultMap.values().iterator().next();
   }
 }

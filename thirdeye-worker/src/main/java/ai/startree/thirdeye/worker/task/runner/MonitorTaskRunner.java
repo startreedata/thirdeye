@@ -18,7 +18,6 @@ import ai.startree.thirdeye.spi.Constants.MonitorType;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -56,7 +55,6 @@ public class MonitorTaskRunner implements TaskRunner {
   private final JobManager jobManager;
   private final AlertManager alertManager;
   private final DetectionStatusManager detectionStatusManager;
-  private final EvaluationManager evaluationManager;
   private final OnlineDetectionDataManager onlineDetectionDataManager;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
 
@@ -65,14 +63,12 @@ public class MonitorTaskRunner implements TaskRunner {
       final JobManager jobManager,
       final AlertManager alertManager,
       final DetectionStatusManager detectionStatusManager,
-      final EvaluationManager evaluationManager,
       final OnlineDetectionDataManager onlineDetectionDataManager,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
     this.taskManager = taskManager;
     this.jobManager = jobManager;
     this.alertManager = alertManager;
     this.detectionStatusManager = detectionStatusManager;
-    this.evaluationManager = evaluationManager;
     this.onlineDetectionDataManager = onlineDetectionDataManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
   }
@@ -230,16 +226,6 @@ public class MonitorTaskRunner implements TaskRunner {
           monitorTaskInfo.getDetectionStatusRetentionDays());
     } catch (Exception e) {
       LOG.error("Exception when expiring detection status.", e);
-    }
-
-    // Delete old evaluations.
-    try {
-      int deletedEvaluations = evaluationManager
-          .deleteRecordsOlderThanDays(monitorTaskInfo.getDefaultRetentionDays());
-      LOG.info("Deleted {} evaluations that are older than {} days.", deletedEvaluations,
-          monitorTaskInfo.getDefaultRetentionDays());
-    } catch (Exception e) {
-      LOG.error("Exception when deleting old evaluations.", e);
     }
 
     // Delete expired online detection data

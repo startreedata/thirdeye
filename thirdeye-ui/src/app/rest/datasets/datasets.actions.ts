@@ -11,10 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { useHTTPAction } from "../create-rest-action";
+import { Dataset } from "../dto/dataset.interfaces";
+import { GetDataset } from "./dataset.interfaces";
+import { getDataset as getDatasetREST } from "./datasets.rest";
 
-export const useDatasetWizardStyles = makeStyles({
-    controlsContainer: {
-        flexGrow: 1,
-    },
-});
+export const useGetDataset = (): GetDataset => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<Dataset>(getDatasetREST);
+
+    const getDataset = (id: number): Promise<Dataset | undefined> => {
+        return makeRequest(id);
+    };
+
+    return { dataset: data, getDataset, status, errorMessages };
+};

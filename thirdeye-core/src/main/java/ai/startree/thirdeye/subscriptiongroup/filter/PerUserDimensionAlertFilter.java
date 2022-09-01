@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.spi.detection.DataProvider;
 import ai.startree.thirdeye.spi.detection.annotation.AlertFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -57,10 +56,10 @@ public class PerUserDimensionAlertFilter extends StatefulDetectionAlertFilter {
   final SetMultimap<String, String> dimensionRecipients;
   final List<Long> detectionConfigIds;
 
-  public PerUserDimensionAlertFilter(DataProvider provider, SubscriptionGroupDTO config,
+  public PerUserDimensionAlertFilter(SubscriptionGroupDTO config,
       long endTime, final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager detectionConfigManager) {
-    super(provider, config, endTime, mergedAnomalyResultManager,
+    super(config, endTime, mergedAnomalyResultManager,
         detectionConfigManager);
     Preconditions
         .checkNotNull(config.getProperties().get(PROP_DIMENSION), "Dimension name not specified");

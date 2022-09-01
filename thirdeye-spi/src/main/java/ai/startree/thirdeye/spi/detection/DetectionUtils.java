@@ -18,7 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificati
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class DetectionUtils {
 
@@ -38,7 +39,6 @@ public class DetectionUtils {
     throw new IllegalArgumentException(
         "componentKey is invalid; must be of type componentName:type");
   }
-
 
   public static void setEntityChildMapping(final MergedAnomalyResultDTO parent,
       final MergedAnomalyResultDTO child1) {
@@ -126,15 +126,14 @@ public class DetectionUtils {
     anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
   }
 
-  public static Map<String, DataTable> getTimeSeriesMap(
-      final Map<String, DetectionPipelineResult> inputMap) {
-    final Map<String, DataTable> timeSeriesMap = new HashMap<>();
-    for (final String key : inputMap.keySet()) {
-      final DetectionPipelineResult input = inputMap.get(key);
-      if (input instanceof DataTable) {
-        timeSeriesMap.put(key, (DataTable) input);
+  public static Map<String, DataTable> getDataTableMap(
+      final Map<String, DetectionResult> inputMap) {
+    final Map<String, DataTable> dataTableMap = new HashMap<>();
+    for (final Entry<String, DetectionResult> entry : inputMap.entrySet()) {
+      if (entry.getValue() instanceof DataTable) {
+        dataTableMap.put(entry.getKey(), (DataTable) entry.getValue());
       }
     }
-    return timeSeriesMap;
+    return dataTableMap;
   }
 }

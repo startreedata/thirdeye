@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import ai.startree.thirdeye.IntegrationTestUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlLanguage;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -21,7 +22,6 @@ import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
-import ai.startree.thirdeye.testutils.SqlUtils;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -77,7 +77,8 @@ public class MacroEngineTest {
     try {
       DataSourceRequest output = macroEngine.prepareRequest();
       Assert.assertEquals(TABLE_NAME, output.getTable());
-      Assertions.assertThat(SqlUtils.cleanSql(output.getQuery())).isEqualTo(SqlUtils.cleanSql(
+      Assertions.assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
+          IntegrationTestUtils.cleanSql(
           expectedQuery));
       Assert.assertEquals(expectedProperties, output.getProperties());
     } catch (SqlParseException e) {

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -11,20 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer.bao;
-
-import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
-import ai.startree.thirdeye.spi.datalayer.bao.EvaluationManager;
-import ai.startree.thirdeye.spi.datalayer.dto.EvaluationDTO;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-@Singleton
-public class EvaluationManagerImpl extends AbstractManagerImpl<EvaluationDTO> implements
-    EvaluationManager {
-
-  @Inject
-  public EvaluationManagerImpl(GenericPojoDao genericPojoDao) {
-    super(EvaluationDTO.class, genericPojoDao);
-  }
+export interface AlertFetchRedirectParamsProps {
+    to: string;
+    replace?: boolean;
+    fallbackDurationGenerator: () => [number, number];
 }

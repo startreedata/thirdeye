@@ -182,28 +182,40 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     }
   }
 
+  /**
+   * TODO spyne Refactor. Have a AnomalyFilter object to handle these. Else we'll keep adding params and methods.
+   *
+   * @return filtered list of anomalies
+   */
   @Override
   public List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(
       final long startTime,
       final long endTime,
-      final long detectionConfigId) {
-    final Predicate predicate =
-        Predicate.AND(Predicate.LT("startTime", endTime), Predicate.GT("endTime", startTime),
-            Predicate.EQ("detectionConfigId", detectionConfigId));
+      final long alertId,
+      final Long enumerationItemId) {
+    final List<Predicate> predicates = new ArrayList<>(List.of(
+        Predicate.LT("startTime", endTime),
+        Predicate.GT("endTime", startTime),
+        Predicate.EQ("detectionConfigId", alertId)
+    ));
+    if (enumerationItemId != null) {
+      predicates.add(Predicate.EQ("enumerationItemId", enumerationItemId));
+    }
+
     final List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
+        .get(Predicate.AND(predicates.toArray(new Predicate[0])), MergedAnomalyResultDTO.class);
     return convertMergedAnomalyBean2DTO(list);
   }
 
   @Override
   public List<MergedAnomalyResultDTO> findByCreatedTimeInRangeAndDetectionConfigId(
       final long startTime,
-      final long endTime, final long detectionConfigId) {
+      final long endTime, final long alertId) {
     final Predicate predicate =
         Predicate.AND(
             Predicate.GE("createTime", new Timestamp(startTime)),
             Predicate.LT("createTime", new Timestamp(endTime)),
-            Predicate.EQ("detectionConfigId", detectionConfigId));
+            Predicate.EQ("detectionConfigId", alertId));
     final List<MergedAnomalyResultDTO> list = genericPojoDao
         .get(predicate, MergedAnomalyResultDTO.class);
     return convertMergedAnomalyBean2DTO(list);

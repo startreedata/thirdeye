@@ -13,10 +13,9 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import ai.startree.thirdeye.spi.detection.model.DetectionResult;
-import ai.startree.thirdeye.spi.detection.v2.DetectionPipelineResult;
+
+import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
-import java.util.List;
 
 public class EchoOperator extends DetectionPipelineOperator {
 
@@ -43,17 +42,12 @@ public class EchoOperator extends DetectionPipelineOperator {
     return "EchoOperator";
   }
 
-  public static class EchoResult implements DetectionPipelineResult {
+  public static class EchoResult implements DetectionResult {
 
     private final String text;
 
     public EchoResult(final String text) {
       this.text = text;
-    }
-
-    @Override
-    public List<DetectionResult> getDetectionResults() {
-      return null;
     }
 
     public String text() {

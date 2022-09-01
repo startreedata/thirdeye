@@ -69,7 +69,7 @@
     <commons-math3.version>3.2</commons-math3.version>
     <commons.email.version>1.5</commons.email.version>
     <dropwizard.redirect.bundle.version>1.3.5</dropwizard.redirect.bundle.version>
-    <dropwizard.version>1.3.21</dropwizard.version>
+    <dropwizard.version>1.3.29</dropwizard.version>
     <evalex.version>1.0</evalex.version>
     <freemarker.version>2.3.28</freemarker.version>
     <guava.version>20.0</guava.version>
@@ -1031,7 +1031,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check />
+          <check/>
         </configuration>
       </plugin>
       <plugin>

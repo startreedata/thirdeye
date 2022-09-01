@@ -13,18 +13,11 @@
  */
 import {
     Box,
-    FormControl,
-    FormControlLabel,
     FormHelperText,
     Grid,
     MenuItem,
-    Radio,
-    RadioGroup,
     TextField,
-    Typography,
 } from "@material-ui/core";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import CronValidator from "cron-expression-validator";
 import React, {
     ChangeEvent,
     FunctionComponent,
@@ -32,13 +25,15 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { TooltipV1 } from "../../platform/components";
 import {
     ClockTimeOptions,
     convertTime12to24,
     CronRepeatOptions,
+    getCronHour,
+    getCronValue,
+    getHourFormat,
 } from "../../utils/cron-expression/cron-expression.util";
-import CronHelper from "../cron-helper/cron-helper.component";
+import { InputSection } from "../form-basics/input-section/input-section.component";
 import { CronEditorProps } from "./cron-editor.interfaces";
 import { useCronEditorStyle } from "./cron-editor.style";
 
@@ -47,34 +42,24 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     onChange,
 }: CronEditorProps) => {
     const { t } = useTranslation();
-    const [cronInternal, setCronInternal] = useState(value ?? "");
 
-    const [cronConfigTab, setCronConfigTab] = useState<string>(
-        t("label.day-time")
+    const [minute, setMinute] = useState<number>(() =>
+        getCronValue(value, "minute")
     );
+    const [hour, setHour] = useState<number>(() => getCronHour(value));
+    const [day, setDay] = useState<number>(() => getCronValue(value, "day"));
+    const [month, setMonth] = useState<number>(() =>
+        getCronValue(value, "month")
+    );
+    const [year, setYear] = useState<number>(() => getCronValue(value, "year"));
 
-    const [dayTimeCron, setDayTimeCron] = useState<string>("");
-
-    const [minute, setMinute] = useState<number>(0);
-    const [hour, setHour] = useState<number>(0);
-    const [day, setDay] = useState<string>("1");
-    const [month, setMonth] = useState<string>("1");
-    const [year, setYear] = useState<string>("");
-
-    const [intervalValue, setIntervalValue] = useState<string>("");
+    const [intervalValue, setIntervalValue] = useState<number>(0);
     const [intervalType, setIntervalType] = useState<string>("day");
-    const [clockValue, setClockValue] = useState<string>("am");
+    const [clockValue, setClockValue] = useState<string>(() =>
+        getHourFormat(value)
+    );
 
     const cronEditorStyle = useCronEditorStyle();
-
-    // Avoid validation for predefined cron expressions
-    const isCronValid = CronValidator.isValidCronExpression(
-        cronInternal.trim()
-    );
-
-    const isDayTimeCronValid = CronValidator.isValidCronExpression(
-        dayTimeCron.trim()
-    );
 
     useEffect(() => {
         setValues(intervalValue);
@@ -86,28 +71,18 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
 
     useEffect(() => {
         const hour24Format = convertTime12to24(hour, clockValue);
-        setDayTimeCron(
-            `0 ${minute || 0} ${hour24Format || 0} ${
-                day ? `1/${day}` : "1/1"
-            } ${month ? `1/${month}` : "*"} ? ${
-                year ? `${new Date().getFullYear()}/${year}` : "*"
-            }`
-        );
+        onChange &&
+            onChange(
+                `0 ${minute || 0} ${hour24Format || 0} ${
+                    day ? `1/${day}` : "1/1"
+                } ${month ? `1/${month}` : "*"} ? ${
+                    year ? `${new Date().getFullYear()}/${year}` : "*"
+                }`
+            );
     }, [minute, hour, day, month, year, clockValue]);
-
-    useEffect(() => {
-        if (cronConfigTab === t("label.day-time")) {
-            onChange && onChange(dayTimeCron);
-        } else {
-            onChange && onChange(cronInternal);
-        }
-    }, [cronConfigTab, cronInternal, dayTimeCron]);
 
     const handleMinuteUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
         let inputMinute = +event.target.value;
-        if (isNaN(inputMinute)) {
-            return;
-        }
         if (inputMinute >= 59) {
             inputMinute = 59;
         }
@@ -116,9 +91,6 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
 
     const handleHourUpdate = (event: ChangeEvent<HTMLInputElement>): void => {
         let inputHours = +event.target.value;
-        if (isNaN(inputHours)) {
-            return;
-        }
 
         if (inputHours >= 11 && clockValue === "am") {
             inputHours = 11;
@@ -133,9 +105,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     const handleIntervalChange = (
         event: ChangeEvent<HTMLInputElement>
     ): void => {
-        if (!isNaN(+event.target.value)) {
-            setIntervalValue(event.target.value);
-        }
+        setIntervalValue(+event.target.value);
     };
 
     const handleIntervalTypeChange = (
@@ -156,31 +126,19 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
         }
     };
 
-    const handleCronInputChange = (
-        event: ChangeEvent<HTMLInputElement>
-    ): void => {
-        setCronInternal(event.target.value);
-    };
-
-    const handleDateTypeChange = (
-        event: ChangeEvent<HTMLInputElement>
-    ): void => {
-        setCronConfigTab(event.target.value);
-    };
-
-    const handleDayUpdate = (value: string): void => {
+    const handleDayUpdate = (value: number): void => {
         setDay(value);
     };
 
-    const handleMonthUpdate = (value: string): void => {
+    const handleMonthUpdate = (value: number): void => {
         setMonth(value);
     };
 
-    const handleYearUpdate = (value: string): void => {
+    const handleYearUpdate = (value: number): void => {
         setYear(value);
     };
 
-    const getIntervalValue = (): string => {
+    const getIntervalValue = (): number => {
         switch (intervalType) {
             case "day":
                 return day;
@@ -190,11 +148,11 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
                 return year;
 
             default:
-                return "";
+                return 0;
         }
     };
 
-    const setValues = (value: string): void => {
+    const setValues = (value: number): void => {
         switch (intervalType) {
             case "day":
                 handleDayUpdate(value);
@@ -211,165 +169,138 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
         }
     };
 
-    return (
-        <Grid container item alignItems="center" spacing={2}>
-            <Grid item lg={2} md={4} sm={12} xs={12}>
-                <Box alignItems="center" display="flex">
-                    <Typography variant="body2">
-                        {t("label.date-type")}&nbsp;
-                    </Typography>
-                    <TooltipV1 title={t("message.data-type-helper") as string}>
-                        <HelpOutlineIcon color="secondary" fontSize="small" />
-                    </TooltipV1>
-                </Box>
-            </Grid>
-            <Grid item lg={10} md={8} sm={12} xs={12}>
-                <FormControl component="fieldset">
-                    <RadioGroup
-                        row
-                        aria-label="cron-radio-buttons"
-                        name="cron-radio-buttons"
-                        value={cronConfigTab}
-                        onChange={handleDateTypeChange}
-                    >
-                        <FormControlLabel
-                            control={<Radio />}
-                            label={t("label.day-time")}
-                            value={t("label.day-time")}
-                        />
-                        <FormControlLabel
-                            control={<Radio />}
-                            label={t("label.cron")}
-                            value={t("label.cron")}
-                        />
-                    </RadioGroup>
-                </FormControl>
-            </Grid>
+    const generateSelectOptions = (min: number, max: number): JSX.Element[] => {
+        const options: JSX.Element[] = [];
+        for (let i = min; i <= max; i++) {
+            options.push(
+                <MenuItem key={i} value={i}>
+                    {i}
+                </MenuItem>
+            );
+        }
 
-            {cronConfigTab === t("label.day-time") ? (
-                <>
-                    <Grid item lg={2} md={4} sm={12} xs={12}>
-                        <Typography variant="body2">
-                            {t("label.repeat-every")}
-                        </Typography>
-                    </Grid>
-                    <Grid item lg={10} md={8} sm={12} xs={12}>
-                        <Grid container>
-                            <Grid item>
-                                <TextField
-                                    InputProps={{
-                                        className:
-                                            cronEditorStyle.cronInputField,
-                                    }}
-                                    type="text"
-                                    value={intervalValue}
-                                    variant="outlined"
-                                    onChange={handleIntervalChange}
-                                />
-                            </Grid>
-                            <Grid item>
-                                <TextField
-                                    select
-                                    InputProps={{
-                                        className:
-                                            cronEditorStyle.repeatTypeField,
-                                    }}
-                                    id="interval-select"
-                                    value={intervalType}
-                                    variant="outlined"
-                                    onChange={handleIntervalTypeChange}
-                                >
-                                    {CronRepeatOptions.map((option) => (
-                                        <MenuItem key={option} value={option}>
-                                            {t(`label.${option}`)}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item lg={2} md={4} sm={12} xs={12}>
-                        <Typography variant="body2">
-                            {t("label.time")}
-                        </Typography>
-                    </Grid>
-                    <Grid item lg={10} md={8} sm={12} xs={12}>
-                        <Grid container>
-                            <Grid item>
-                                <TextField
-                                    InputProps={{
-                                        className:
-                                            cronEditorStyle.cronInputField,
-                                    }}
-                                    type="text"
-                                    value={hour}
-                                    variant="outlined"
-                                    onChange={handleHourUpdate}
-                                />
-                                <FormHelperText>
-                                    {t("label.hour")}:
-                                    {clockValue === "pm" ? " 1" : " 0"} -
-                                    {clockValue === "am" ? " 11" : " 12"}
-                                </FormHelperText>
-                            </Grid>
-                            <Grid item>
-                                <TextField
-                                    InputProps={{
-                                        className:
-                                            cronEditorStyle.cronInputField,
-                                    }}
-                                    type="text"
-                                    value={minute}
-                                    variant="outlined"
-                                    onChange={handleMinuteUpdate}
-                                />
-                                <FormHelperText>
-                                    {t("label.minute")}: 0 - 59
-                                </FormHelperText>
-                            </Grid>
-                            <Grid item>
-                                <TextField
-                                    select
-                                    InputProps={{
-                                        className:
-                                            cronEditorStyle.cronInputField,
-                                    }}
-                                    id="interval-select"
-                                    value={clockValue}
-                                    variant="outlined"
-                                    onChange={handleClockTypeChange}
-                                >
-                                    {ClockTimeOptions.map((option) => (
-                                        <MenuItem key={option} value={option}>
-                                            {t(`label.${option}`)}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <CronHelper
-                        cron={dayTimeCron}
-                        isCronValid={isDayTimeCronValid}
-                    />
-                </>
-            ) : (
-                <>
+        return options;
+    };
+
+    const generateRepeatOption = (
+        type: string
+    ): JSX.Element[] | JSX.Element => {
+        switch (type) {
+            case "day":
+                return generateSelectOptions(1, 31);
+            case "month":
+                return generateSelectOptions(1, 12);
+            case "year":
+                return generateSelectOptions(1, 129);
+            default:
+                return <></>;
+        }
+    };
+
+    return (
+        <>
+            <InputSection
+                inputComponent={
                     <Grid container>
-                        <Grid item lg={2} md={4} sm={12} xs={12} />
-                        <Grid item lg={3} md={8} sm={12} xs={12}>
+                        <Grid item>
                             <TextField
-                                fullWidth
-                                error={!isCronValid}
-                                value={cronInternal}
+                                select
+                                InputProps={{
+                                    className: cronEditorStyle.cronInputField,
+                                }}
+                                value={intervalValue}
                                 variant="outlined"
-                                onChange={handleCronInputChange}
-                            />
+                                onChange={handleIntervalChange}
+                            >
+                                {generateRepeatOption(intervalType)}
+                            </TextField>
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                select
+                                InputProps={{
+                                    className: cronEditorStyle.repeatTypeField,
+                                }}
+                                id="interval-select"
+                                value={intervalType}
+                                variant="outlined"
+                                onChange={handleIntervalTypeChange}
+                            >
+                                {CronRepeatOptions.map((option) => (
+                                    <MenuItem key={option} value={option}>
+                                        {t(`label.${option}`)}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
                         </Grid>
                     </Grid>
-                    <CronHelper cron={cronInternal} isCronValid={isCronValid} />
-                </>
-            )}
-        </Grid>
+                }
+                labelComponent={
+                    <Box paddingY={1}>
+                        <label>{t("label.repeat-every")}</label>
+                    </Box>
+                }
+            />
+            <InputSection
+                inputComponent={
+                    <Grid container>
+                        <Grid item>
+                            <TextField
+                                select
+                                InputProps={{
+                                    className: cronEditorStyle.cronInputField,
+                                }}
+                                value={hour}
+                                variant="outlined"
+                                onChange={handleHourUpdate}
+                            >
+                                {generateSelectOptions(
+                                    clockValue === "am" ? 0 : 1,
+                                    clockValue === "am" ? 11 : 12
+                                )}
+                            </TextField>
+                            <FormHelperText>{t("label.hour")}</FormHelperText>
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                select
+                                InputProps={{
+                                    className: cronEditorStyle.cronInputField,
+                                }}
+                                value={minute}
+                                variant="outlined"
+                                onChange={handleMinuteUpdate}
+                            >
+                                {generateSelectOptions(0, 59)}
+                            </TextField>
+                            <FormHelperText>{t("label.minute")}</FormHelperText>
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                select
+                                InputProps={{
+                                    className: cronEditorStyle.cronInputField,
+                                }}
+                                id="interval-select"
+                                value={clockValue}
+                                variant="outlined"
+                                onChange={handleClockTypeChange}
+                            >
+                                {ClockTimeOptions.map((option) => (
+                                    <MenuItem key={option} value={option}>
+                                        {t(`label.${option}`)}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                    </Grid>
+                }
+                labelComponent={
+                    <Box paddingY={1}>
+                        <label>{t("label.time")}</label>
+                    </Box>
+                }
+            />
+        </>
     );
 };

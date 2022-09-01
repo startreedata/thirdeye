@@ -11,11 +11,23 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Typography } from "@material-ui/core";
-import React, { useState } from "react";
+import {
+    Box,
+    FormControl,
+    FormControlLabel,
+    Grid,
+    Radio,
+    RadioGroup,
+    Typography,
+} from "@material-ui/core";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { TooltipV1 } from "../../../../platform/components";
 import { Alert, EditableAlert } from "../../../../rest/dto/alert.interfaces";
 import { CronEditor } from "../../../cron-editor/cron-editor.component";
+import { InputSection } from "../../../form-basics/input-section/input-section.component";
+import { AlertDateTimeCronAdvance } from "./alert-date-time-cron-advance/alert-date-time-cron-advance.component";
 import { AlertFrequencyProps } from "./alert-frequency.interfaces";
 
 function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
@@ -23,15 +35,21 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
     onAlertPropertyChange,
 }: AlertFrequencyProps<NewOrExistingAlert>): JSX.Element {
     const [currentCron, setCurrentCron] = useState<string>(alert.cron);
+    const [dayTimeCron, setDayTimeCron] = useState<string>(alert.cron);
 
     const { t } = useTranslation();
 
-    const handleCronChange = (cron: string): void => {
-        setCurrentCron(cron);
-        onAlertPropertyChange({
-            cron,
-        });
-    };
+    const [cronConfigTab, setCronConfigTab] = useState<string>(
+        t("label.day-time")
+    );
+
+    useEffect(() => {
+        if (cronConfigTab === t("label.day-time")) {
+            onAlertPropertyChange({ cron: dayTimeCron });
+        } else {
+            onAlertPropertyChange({ cron: currentCron });
+        }
+    }, [cronConfigTab, currentCron, dayTimeCron]);
 
     return (
         <>
@@ -46,7 +64,54 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
                 </Box>
             </Grid>
 
-            <CronEditor value={currentCron} onChange={handleCronChange} />
+            <InputSection
+                inputComponent={
+                    <FormControl component="fieldset">
+                        <RadioGroup
+                            row
+                            aria-label="cron-radio-buttons"
+                            name="cron-radio-buttons"
+                            value={cronConfigTab}
+                            onChange={(e) => setCronConfigTab(e.target.value)}
+                        >
+                            <FormControlLabel
+                                control={<Radio />}
+                                label={t("label.day-time")}
+                                value={t("label.day-time")}
+                            />
+                            <FormControlLabel
+                                control={<Radio />}
+                                label={t("label.cron")}
+                                value={t("label.cron")}
+                            />
+                        </RadioGroup>
+                    </FormControl>
+                }
+                labelComponent={
+                    <Box alignItems="center" display="flex" paddingTop={1}>
+                        <Typography variant="body2">
+                            {t("label.date-type")}&nbsp;
+                        </Typography>
+                        <TooltipV1
+                            title={t("message.data-type-helper") as string}
+                        >
+                            <HelpOutlineIcon
+                                color="secondary"
+                                fontSize="small"
+                            />
+                        </TooltipV1>
+                    </Box>
+                }
+            />
+
+            {cronConfigTab === t("label.day-time") ? (
+                <CronEditor value={dayTimeCron} onChange={setDayTimeCron} />
+            ) : (
+                <AlertDateTimeCronAdvance
+                    cron={currentCron}
+                    onCronChange={setCurrentCron}
+                />
+            )}
         </>
     );
 }

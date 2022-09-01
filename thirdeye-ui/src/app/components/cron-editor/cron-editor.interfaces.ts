@@ -30,3 +30,11 @@ export type QuickScheduleOption = {
     value: string;
     label: string;
 };
+
+export type CronIndex = {
+    minute: number;
+    hour: number;
+    day: number;
+    month: number;
+    year: number;
+};

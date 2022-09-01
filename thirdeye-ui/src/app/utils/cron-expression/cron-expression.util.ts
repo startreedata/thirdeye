@@ -11,7 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { QuickScheduleOption } from "../../components/cron-editor/cron-editor.interfaces";
+import CronValidator from "cron-expression-validator";
+import { last } from "lodash";
+import {
+    CronIndex,
+    QuickScheduleOption,
+} from "../../components/cron-editor/cron-editor.interfaces";
 
 export const QuickScheduleOptions: Array<QuickScheduleOption> = [
     {
@@ -55,4 +60,42 @@ export const convertTime12to24 = (hours: number, modifier: string): number => {
     }
 
     return hours;
+};
+
+const cronIndex: CronIndex = {
+    minute: 1,
+    hour: 2,
+    day: 3,
+    month: 4,
+    year: 6,
+};
+
+export const getCronValue = (cron: string, type: keyof CronIndex): number => {
+    const index = cronIndex[type];
+
+    const defaultValue = type === "month" ? 1 : 0;
+
+    if (CronValidator.isValidCronExpression(cron)) {
+        const cronArray = cron.split(" ")[index];
+        if (!isNaN(+cronArray)) {
+            return +cronArray;
+        }
+        if (cronArray.includes("*") && cronArray.length === 1) {
+            return defaultValue;
+        }
+
+        return +(last(cronArray.split("/")) || defaultValue);
+    }
+
+    return defaultValue;
+};
+
+export const getCronHour = (cron: string): number => {
+    const hour = getCronValue(cron, "hour");
+
+    return hour % 12;
+};
+
+export const getHourFormat = (cron: string): string => {
+    return getCronValue(cron, "hour") <= 11 ? "am" : "pm";
 };

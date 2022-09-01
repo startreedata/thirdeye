@@ -21,16 +21,19 @@ export enum SeriesType {
     AREA_CLOSED = "areaclosed",
     CUSTOM = "custom",
 }
-export interface DataPoint {
+export interface DataPoint<ExtraData = unknown> {
     x: number;
     y: number;
+    extraData?: ExtraData;
 }
 
-export interface ThresholdDataPoint extends DataPoint {
+export interface ThresholdDataPoint<ExtraData = unknown>
+    extends DataPoint<ExtraData> {
     y1: number; // y1 is used in Threshold shapes
 }
 
-export interface LineDataPoint extends ThresholdDataPoint {
+export interface LineDataPoint<ExtraData = unknown>
+    extends ThresholdDataPoint<ExtraData> {
     x1: number; // x1 is used in Line only shapes
 }
 
@@ -45,15 +48,17 @@ export interface Series {
     xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
     x1Accessor?: (d: LineDataPoint) => Date;
     yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;
-    tooltipValueFormatter?: (
-        value: number,
-        d: DataPoint | ThresholdDataPoint | LineDataPoint,
-        series: NormalizedSeries
-    ) => string;
-    tooltipFormatter?: (
-        d: DataPoint | ThresholdDataPoint | LineDataPoint,
-        series: NormalizedSeries
-    ) => string;
+    tooltip?: {
+        valueFormatter?: (value: number) => string;
+        pointFormatter?: (
+            d: DataPoint | ThresholdDataPoint | LineDataPoint,
+            series: NormalizedSeries
+        ) => React.ReactElement | string;
+        tooltipFormatter?: (
+            d: DataPoint | ThresholdDataPoint | LineDataPoint,
+            series: NormalizedSeries
+        ) => React.ReactElement | string;
+    };
     strokeDasharray?: string;
     /** Fields specific to areaclosed */
     // See https://airbnb.io/visx/docs/gradient#LinearGradient
@@ -78,15 +83,17 @@ export interface NormalizedSeries {
     xAccessor: (d: DataPoint | ThresholdDataPoint) => Date;
     x1Accessor: (d: LineDataPoint) => Date;
     yAccessor: (d: DataPoint | ThresholdDataPoint) => number;
-    tooltipValueFormatter: (
-        value: number,
-        d: DataPoint | ThresholdDataPoint | LineDataPoint,
-        series: NormalizedSeries
-    ) => string;
-    tooltipFormatter?: (
-        d: DataPoint | ThresholdDataPoint | LineDataPoint,
-        series: NormalizedSeries
-    ) => string;
+    tooltip: {
+        valueFormatter: (value: number) => string;
+        pointFormatter: (
+            d: DataPoint | ThresholdDataPoint | LineDataPoint,
+            series: NormalizedSeries
+        ) => React.ReactElement | string;
+        tooltipFormatter?: (
+            d: DataPoint | ThresholdDataPoint | LineDataPoint,
+            series: NormalizedSeries
+        ) => React.ReactElement | string;
+    };
     strokeDasharray?: string;
     /** Fields specific to areaclosed */
     // See https://airbnb.io/visx/docs/gradient#LinearGradient

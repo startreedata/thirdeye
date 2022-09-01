@@ -444,7 +444,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 />
             )}
 
-            {currentZoom && (
+            {isZoomEnabled && currentZoom && (
                 <Box
                     position="absolute"
                     right={CHART_MARGINS.right + 10}

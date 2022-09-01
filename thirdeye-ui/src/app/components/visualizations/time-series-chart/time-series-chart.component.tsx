@@ -189,10 +189,12 @@ export const TimeSeriesChartInternal: FunctionComponent<
     const xMax = Math.max(width - CHART_MARGINS.left - CHART_MARGINS.right, 0);
     const yMax = Math.max(topChartHeight, 0);
 
-    const colorScale = scaleOrdinal({
-        domain: series.map((x) => x.name) as string[],
-        range: COLOR_PALETTE,
-    });
+    const colorScale = useMemo(() => {
+        return scaleOrdinal({
+            domain: series.map((x) => x.name) as string[],
+            range: COLOR_PALETTE,
+        });
+    }, [series]);
 
     // If enabledDisabledMapping changes, sync it with the stored series
     useEffect(() => {

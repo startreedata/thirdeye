@@ -15,7 +15,8 @@ import { Grid } from "@material-ui/core";
 import { LegendItem, LegendLabel, LegendOrdinal } from "@visx/legend";
 import { ScaleOrdinal } from "d3-scale";
 import React, { FunctionComponent } from "react";
-import { LegendProps } from "../time-series-chart.interfaces";
+import { LegendProps, Series } from "../time-series-chart.interfaces";
+import { sortSeries } from "./legend.utils";
 
 const LEGEND_CONTAINER_STYLE = {
     cursor: "pointer",
@@ -27,16 +28,17 @@ export const Legend: FunctionComponent<LegendProps> = ({
     onSeriesClick,
     colorScale,
 }) => {
-    const handleOnClick = (idx: number): void => {
+    const handleOnClick = (seriesData: Series): void => {
+        const idx = series.findIndex((s) => s == seriesData);
         onSeriesClick && onSeriesClick(idx);
     };
 
     return (
         <LegendOrdinal<ScaleOrdinal<string, string, never>> scale={colorScale}>
-            {(labels) => (
+            {() => (
                 <Grid container justifyContent="center">
-                    {labels.map((label, idx) => {
-                        let color = label.value;
+                    {sortSeries(series).map((seriesData) => {
+                        let color = colorScale(seriesData.name as string);
 
                         /**
                          * colorScale is updated before the processed series
@@ -45,25 +47,27 @@ export const Legend: FunctionComponent<LegendProps> = ({
                          * colorScale cannot be stored in state since its a complicated
                          * object with functions
                          */
-                        if (series[idx] && series[idx].color !== undefined) {
-                            color = series[idx].color;
+                        if (seriesData && seriesData.color !== undefined) {
+                            color = seriesData.color;
                         }
 
                         /**
                          * colorScale is updated before the processed series
                          * in the parent so check for existence of series for index
                          */
-                        if (series[idx] && !series[idx].enabled) {
+                        if (seriesData && !seriesData.enabled) {
                             color = "#EEE";
                         }
 
                         return (
                             <Grid
                                 item
-                                key={`legend-item-${idx}`}
+                                key={`legend-item-${seriesData.name}`}
                                 style={LEGEND_CONTAINER_STYLE}
                             >
-                                <LegendItem onClick={() => handleOnClick(idx)}>
+                                <LegendItem
+                                    onClick={() => handleOnClick(seriesData)}
+                                >
                                     <svg
                                         height={RECT_HEIGHT_WIDTH}
                                         width={RECT_HEIGHT_WIDTH}
@@ -75,7 +79,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
                                         />
                                     </svg>
                                     <LegendLabel align="left" margin="0 5px">
-                                        {label.text}
+                                        {seriesData.name}
                                     </LegendLabel>
                                 </LegendItem>
                             </Grid>

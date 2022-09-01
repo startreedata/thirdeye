@@ -45,6 +45,7 @@ export interface Series {
     stroke?: string;
     enabled?: boolean;
     strokeWidth?: number;
+    legendIndex?: number;
     xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
     x1Accessor?: (d: LineDataPoint) => Date;
     yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;
@@ -80,6 +81,7 @@ export interface NormalizedSeries {
     stroke?: string;
     enabled: boolean;
     strokeWidth: number;
+    legendIndex?: number;
     xAccessor: (d: DataPoint | ThresholdDataPoint) => Date;
     x1Accessor: (d: LineDataPoint) => Date;
     yAccessor: (d: DataPoint | ThresholdDataPoint) => number;

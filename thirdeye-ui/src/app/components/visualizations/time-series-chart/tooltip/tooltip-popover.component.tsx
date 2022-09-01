@@ -14,7 +14,6 @@
 import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { formatDateAndTimeV1 } from "../../../../platform/utils";
-import { useAlertEvaluationTimeSeriesTooltipStyles } from "../../alert-evaluation-time-series/alert-evaluation-time-series-tooltip/alert-evaluation-time-series-tooltip.styles";
 import { DataPoint, NormalizedSeries } from "../time-series-chart.interfaces";
 import { TooltipPopoverProps } from "./tooltip.interfaces";
 import { useTooltipStyles } from "./tooltip.styles";
@@ -25,8 +24,6 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
     xValue,
     colorScale,
 }) => {
-    const alertEvaluationTimeSeriesTooltipClasses =
-        useAlertEvaluationTimeSeriesTooltipStyles();
     const timeSeriesChartTooltipClasses = useTooltipStyles();
     const dataPointForXValue: [DataPoint, NormalizedSeries][] =
         getDataPointsInSeriesForXValue(series, xValue);
@@ -34,11 +31,7 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
     return (
         <Grid container>
             {/* Time */}
-            <Grid
-                item
-                className={alertEvaluationTimeSeriesTooltipClasses.time}
-                xs={12}
-            >
+            <Grid item className={timeSeriesChartTooltipClasses.time} xs={12}>
                 <Grid
                     container
                     alignItems="center"

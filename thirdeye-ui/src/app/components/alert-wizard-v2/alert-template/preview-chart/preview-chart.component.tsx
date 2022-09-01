@@ -28,9 +28,11 @@ import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { AlertEvaluation } from "../../../../rest/dto/alert.interfaces";
 import { createAlertEvaluation } from "../../../../utils/alerts/alerts.util";
+import { generateChartOptionsForAlert } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
-import { AlertEvaluationTimeSeries } from "../../../visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.component";
+import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
+import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
 import {
     MessageDisplayState,
@@ -57,9 +59,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     const { notify } = useNotificationProviderV1();
     const [currentAlertEvaluation, setCurrentAlertEvaluation] =
         useState<AlertEvaluation>();
+    const [timeSeriesOptions, setTimeSeriesOptions] =
+        useState<TimeSeriesChartProps>();
 
     const {
-        evaluation,
         getEvaluation,
         errorMessages: getEvaluationRequestErrors,
         status: getEvaluationStatus,
@@ -81,6 +84,22 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
         setCurrentAlertEvaluation(fetchedAlertEvaluation);
     };
+
+    useEffect(() => {
+        if (currentAlertEvaluation) {
+            const timeseriesConfiguration = generateChartOptionsForAlert(
+                currentAlertEvaluation,
+                currentAlertEvaluation.detectionEvaluations
+                    .output_AnomalyDetectorResult_0.anomalies,
+                t
+            );
+
+            timeseriesConfiguration.brush = false;
+            timeseriesConfiguration.zoom = true;
+
+            setTimeSeriesOptions(timeseriesConfiguration);
+        }
+    }, [currentAlertEvaluation]);
 
     useEffect(() => {
         if (getEvaluationStatus === ActionStatus.Error) {
@@ -209,7 +228,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                     </Box>
                                 )}
 
-                                {currentAlertEvaluation && (
+                                {currentAlertEvaluation && timeSeriesOptions && (
                                     <Box>
                                         <Grid container>
                                             <Grid item sm={8} xs={12}>
@@ -245,9 +264,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                                 </Box>
                                             </Grid>
                                         </Grid>
-                                        <Box height={300} marginTop={2}>
-                                            <AlertEvaluationTimeSeries
-                                                alertEvaluation={evaluation}
+                                        <Box marginTop={2}>
+                                            <TimeSeriesChart
+                                                height={300}
+                                                {...timeSeriesOptions}
                                             />
                                         </Box>
                                     </Box>

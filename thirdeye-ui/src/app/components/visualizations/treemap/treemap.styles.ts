@@ -13,7 +13,7 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const useTreemapStyles = makeStyles(() => ({
+export const useTreemapStyles = makeStyles((theme) => ({
     heading: {
         fontSize: "13px",
         fontWeight: "bold",
@@ -24,5 +24,15 @@ export const useTreemapStyles = makeStyles(() => ({
     headingOtherDimension: {
         fontSize: "13px",
         fontWeight: "bold",
+    },
+    time: {
+        marginBottom: theme.spacing(1),
+    },
+    alertEvaluationTimeSeriesTooltip: {
+        minWidth: 140,
+    },
+    nameValueContents: {
+        width: "100%",
+        display: "table",
     },
 }));

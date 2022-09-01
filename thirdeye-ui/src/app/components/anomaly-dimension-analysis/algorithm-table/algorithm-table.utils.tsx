@@ -22,6 +22,7 @@ import {
     baselineOffsetToMilliseconds,
     parseBaselineComparisonOffset,
 } from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
+import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import {
@@ -88,6 +89,24 @@ export const generateComparisonChartOptions = (
         filtered.detectionEvaluations.output_AnomalyDetectorResult_0.data;
     const series = [
         {
+            enabled: false,
+            name: translation("label.upper-and-lower-bound"),
+            type: SeriesType.AREA_CLOSED,
+            fillOpacity: 0.1,
+            color: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+            stroke: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+            strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
+            data: filteredTimeSeriesData.lowerBound.map((value, idx) => {
+                return {
+                    y: value,
+                    y1: filteredTimeSeriesData.upperBound[idx],
+                    x: filteredTimeSeriesData.timestamp[idx],
+                };
+            }),
+            tooltipValueFormatter: (value: number): string =>
+                formatLargeNumberV1(value),
+        },
+        {
             name: translation("label.non-filtered"),
             data: nonFiltered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
                 (value, idx) => {
@@ -111,7 +130,7 @@ export const generateComparisonChartOptions = (
             }),
         },
         {
-            name: translation("label.baseline"),
+            name: translation("label.predicted"),
             data: filteredTimeSeriesData.expected.map((value, idx) => {
                 return {
                     y: value,
@@ -119,21 +138,6 @@ export const generateComparisonChartOptions = (
                         .output_AnomalyDetectorResult_0.data.timestamp[idx],
                 };
             }),
-        },
-        {
-            enabled: false,
-            name: translation("label.upper-and-lower-bound"),
-            type: SeriesType.AREA_CLOSED,
-            color: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
-            data: filteredTimeSeriesData.lowerBound.map((value, idx) => {
-                return {
-                    y: value,
-                    y1: filteredTimeSeriesData.upperBound[idx],
-                    x: filteredTimeSeriesData.timestamp[idx],
-                };
-            }),
-            tooltipValueFormatter: (value: number): string =>
-                formatLargeNumberV1(value),
         },
     ];
 

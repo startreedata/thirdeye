@@ -11,11 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import bounds from "binary-search-bounds";
 import { ScaleTime } from "d3-scale";
 import { isEmpty, isNil } from "lodash";
 import { Interval } from "luxon";
-import { AlertEvaluationTimeSeriesPoint } from "../../components/visualizations/alert-evaluation-time-series/alert-evaluation-time-series/alert-evaluation-time-series.interfaces";
 import {
     formatDateV1,
     formatLargeNumberV1,
@@ -23,8 +21,7 @@ import {
     formatTimeV1,
     formatYearV1,
 } from "../../platform/utils";
-import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { DAY_IN_MILLISECONDS } from "../time/time.util";
 
 export const SEPARATOR_DATE_TIME = "@";
 export const NUM_TICKS = 8;
@@ -148,192 +145,28 @@ export const getTickValuesForTimeAxis = (
     ];
 };
 
-export const getAlertEvaluationTimeSeriesPoints = (
-    alertEvaluation: AlertEvaluation
-): AlertEvaluationTimeSeriesPoint[] => {
-    if (!alertEvaluation || isEmpty(alertEvaluation.detectionEvaluations)) {
-        return [];
-    }
+export const determineGranularity = (timestamps: number[]): number => {
+    const timestampArrayLength = timestamps.length;
+    let granularityBestGuess = DAY_IN_MILLISECONDS;
+    let idx = 1;
+    let timesSame = 0;
 
-    // Gather only the first detection evaluation
-    const detectionEvaluation = Object.values(
-        alertEvaluation.detectionEvaluations
-    )[0];
-    if (
-        isEmpty(detectionEvaluation.data) ||
-        isEmpty(detectionEvaluation.data.timestamp)
-    ) {
-        return [];
-    }
+    /**
+     * If the difference between timestamps is the same at least 3 times,
+     * assume that is the granularity
+     */
+    while (idx < timestampArrayLength && timesSame < 3) {
+        const diff = timestamps[idx] - timestamps[idx - 1];
 
-    const alertEvaluationTimeSeriesPoints = [];
-    for (
-        let index = 0;
-        index < detectionEvaluation.data.timestamp.length;
-        index++
-    ) {
-        alertEvaluationTimeSeriesPoints.push({
-            timestamp: detectionEvaluation.data.timestamp[index],
-            current: detectionEvaluation.data.current[index],
-            expected: detectionEvaluation.data.expected[index],
-            upperBound: detectionEvaluation.data.upperBound[index],
-            lowerBound: detectionEvaluation.data.lowerBound[index],
-        });
-    }
-
-    return alertEvaluationTimeSeriesPoints;
-};
-
-export const getAlertEvaluationAnomalies = (
-    alertEvaluation: AlertEvaluation
-): Anomaly[] => {
-    if (!alertEvaluation || isEmpty(alertEvaluation.detectionEvaluations)) {
-        return [];
-    }
-
-    // Gather only the first detection evaluation
-    const detectionEvaluation = Object.values(
-        alertEvaluation.detectionEvaluations
-    )[0];
-
-    return detectionEvaluation.anomalies || [];
-};
-
-export const getAlertEvaluationTimeSeriesPointsMinTimestamp = (
-    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
-): number => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
-        return 0;
-    }
-
-    // Alert evaluation time series points assumed to be sorted by timestamp
-    return alertEvaluationTimeSeriesPoints[0].timestamp;
-};
-
-export const getAlertEvaluationTimeSeriesPointsMaxTimestamp = (
-    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
-): number => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
-        return 0;
-    }
-
-    // Alert evaluation time series points assumed to be sorted by timestamp
-    return alertEvaluationTimeSeriesPoints[
-        alertEvaluationTimeSeriesPoints.length - 1
-    ].timestamp;
-};
-
-export const getAlertEvaluationTimeSeriesPointsMaxValue = (
-    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[]
-): number => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
-        return 0;
-    }
-
-    let maxValue = Number.MIN_VALUE;
-    for (const alertEvaluationTimeSeriesPoint of alertEvaluationTimeSeriesPoints) {
-        // Current
-        if (
-            Number.isFinite(alertEvaluationTimeSeriesPoint.current) &&
-            maxValue < alertEvaluationTimeSeriesPoint.current
-        ) {
-            maxValue = alertEvaluationTimeSeriesPoint.current;
+        if (granularityBestGuess === diff) {
+            timesSame++;
         }
 
-        // Baseline
-        if (
-            Number.isFinite(alertEvaluationTimeSeriesPoint.expected) &&
-            maxValue < alertEvaluationTimeSeriesPoint.expected
-        ) {
-            maxValue = alertEvaluationTimeSeriesPoint.expected;
-        }
-
-        // Upper bound
-        if (
-            Number.isFinite(alertEvaluationTimeSeriesPoint.upperBound) &&
-            maxValue < alertEvaluationTimeSeriesPoint.upperBound
-        ) {
-            maxValue = alertEvaluationTimeSeriesPoint.upperBound;
-        }
-
-        // Lower bound
-        if (
-            Number.isFinite(alertEvaluationTimeSeriesPoint.lowerBound) &&
-            maxValue < alertEvaluationTimeSeriesPoint.lowerBound
-        ) {
-            maxValue = alertEvaluationTimeSeriesPoint.lowerBound;
-        }
+        granularityBestGuess = diff;
+        idx++;
     }
 
-    return maxValue;
-};
-
-export const filterAlertEvaluationTimeSeriesPointsByTime = (
-    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[],
-    startTime: number,
-    endTime: number
-): AlertEvaluationTimeSeriesPoint[] => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints)) {
-        return [];
-    }
-
-    if (isNil(startTime) || isNil(endTime)) {
-        return alertEvaluationTimeSeriesPoints;
-    }
-
-    // Alert evaluation time series points assumed to be sorted by timestamp
-    // Search first alert evaluation time series point with timestamp greater than or equal to start
-    // time
-    const startIndex = bounds.ge(
-        alertEvaluationTimeSeriesPoints,
-        { timestamp: startTime } as AlertEvaluationTimeSeriesPoint,
-        alertEvaluationTimeSeriesPointsComparator
-    );
-    if (startIndex === alertEvaluationTimeSeriesPoints.length) {
-        // Not found
-        return [];
-    }
-
-    // Search first alert evaluation time series point with timestamp less than or equal to end time
-    const endIndex = bounds.le(
-        alertEvaluationTimeSeriesPoints,
-        { timestamp: endTime } as AlertEvaluationTimeSeriesPoint,
-        alertEvaluationTimeSeriesPointsComparator
-    );
-
-    return alertEvaluationTimeSeriesPoints.slice(startIndex, endIndex + 1);
-};
-
-export const getAlertEvaluationTimeSeriesPointAtTime = (
-    alertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[],
-    time: number
-): AlertEvaluationTimeSeriesPoint | null => {
-    if (isEmpty(alertEvaluationTimeSeriesPoints) || isNil(time)) {
-        return null;
-    }
-
-    // Search first alert evaluation time series point with timestamp closest or equal to time
-    const index = bounds.le(
-        alertEvaluationTimeSeriesPoints,
-        { timestamp: time } as AlertEvaluationTimeSeriesPoint,
-        alertEvaluationTimeSeriesPointsComparator
-    );
-    if (index === -1) {
-        // Not found
-        return null;
-    }
-
-    return alertEvaluationTimeSeriesPoints[index];
-};
-
-const alertEvaluationTimeSeriesPointsComparator = (
-    alertEvaluationTimeSeriesPoint1: AlertEvaluationTimeSeriesPoint,
-    alertEvaluationTimeSeriesPoint2: AlertEvaluationTimeSeriesPoint
-): number => {
-    return (
-        alertEvaluationTimeSeriesPoint1.timestamp -
-        alertEvaluationTimeSeriesPoint2.timestamp
-    );
+    return granularityBestGuess;
 };
 
 const OTHER = "other";

@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.spi.detection.model;
 
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.Map;
  * Anomaly detection result. Contains a list of anomalies detected and the associated timeseries
  * which includes timestamps, predicted baseline, current value, upper/lower bounds.
  */
-public class AnomalyDetectionResult implements DetectionResult {
+public class AnomalyDetectionResult implements OperatorResult {
 
   private final List<MergedAnomalyResultDTO> anomalies;
   private final TimeSeries timeseries;
@@ -40,11 +40,11 @@ public class AnomalyDetectionResult implements DetectionResult {
   }
 
   /**
-   * TODO spyne refactor. this is just to accomodate the needs of DetectionResult Interface.
+   * TODO spyne refactor. this is just to accomodate the needs of OperatorResult Interface.
    * This needs  cleanup.
    * @param source
    */
-  protected AnomalyDetectionResult(final DetectionResult source) {
+  protected AnomalyDetectionResult(final OperatorResult source) {
     this(source.getAnomalies(), source.getTimeseries(), source.getRawData());
   }
 
@@ -72,7 +72,7 @@ public class AnomalyDetectionResult implements DetectionResult {
 
   @Override
   public String toString() {
-    return "DetectionResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries + ", rawdata=" + rawData + '}';
+    return "OperatorResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries + ", rawdata=" + rawData + '}';
   }
 
   public Map<String, List> getRawData() {

@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 
 public class EchoOperator extends DetectionPipelineOperator {
 
@@ -42,7 +42,7 @@ public class EchoOperator extends DetectionPipelineOperator {
     return "EchoOperator";
   }
 
-  public static class EchoResult implements DetectionResult {
+  public static class EchoResult implements OperatorResult {
 
     private final String text;
 

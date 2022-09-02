@@ -16,35 +16,35 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class CombinerResult implements DetectionResult {
+public class CombinerResult implements OperatorResult {
 
-  private final Map<String, DetectionResult> results;
+  private final Map<String, OperatorResult> results;
 
-  public CombinerResult(final Map<String, DetectionResult> results) {
+  public CombinerResult(final Map<String, OperatorResult> results) {
     this.results = results;
   }
 
   @Override
   public long getLastTimestamp() {
-    // returns max of all DetectionResult
+    // returns max of all OperatorResult
     return results.values()
         .stream()
         .filter(Objects::nonNull)
-        .map(DetectionResult::getLastTimestamp)
+        .map(OperatorResult::getLastTimestamp)
         .max(Long::compareTo)
         .orElse(-1L);
   }
 
   @Override
   public List<MergedAnomalyResultDTO> getAnomalies() {
-    // flatten anomalies of all DetectionResult
+    // flatten anomalies of all OperatorResult
     return results.values()
         .stream()
         .flatMap(r -> r.getAnomalies().stream())
@@ -63,14 +63,14 @@ public class CombinerResult implements DetectionResult {
         "Flattening not implemented yet. Cast and use CombinerResult getDetectionResults to loop.");
   }
 
-  public List<DetectionResult> getDetectionResults() {
+  public List<OperatorResult> getDetectionResults() {
     return results.values().stream()
         // fixme cyril suvodeep not sure to understand why only WrappedAnomalyDetectionResult are returned
         .filter(r -> r instanceof WrappedAnomalyDetectionResult)
         .collect(Collectors.toList());
   }
 
-  public Map<String, DetectionResult> getResults() {
+  public Map<String, OperatorResult> getResults() {
     return results;
   }
 }

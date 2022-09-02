@@ -15,16 +15,16 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Map;
 
 public class ForkJoinResultItem {
 
   private final EnumerationItemDTO enumerationItem;
-  private final Map<String, DetectionResult> results;
+  private final Map<String, OperatorResult> results;
 
   public ForkJoinResultItem(final EnumerationItemDTO enumerationItem,
-      final Map<String, DetectionResult> results) {
+      final Map<String, OperatorResult> results) {
     this.enumerationItem = enumerationItem;
     this.results = results;
   }
@@ -33,7 +33,7 @@ public class ForkJoinResultItem {
     return enumerationItem;
   }
 
-  public Map<String, DetectionResult> getResults() {
+  public Map<String, OperatorResult> getResults() {
     return results;
   }
 }

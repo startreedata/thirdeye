@@ -41,7 +41,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -90,12 +90,12 @@ public class AlertEvaluator {
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
-  public static DetectionDataApi getData(final DetectionResult detectionResult) {
-    final Map<String, List> rawData = detectionResult.getRawData();
+  public static DetectionDataApi getData(final OperatorResult operatorResult) {
+    final Map<String, List> rawData = operatorResult.getRawData();
     if (!rawData.isEmpty()) {
       return new DetectionDataApi().setRawData(rawData);
     }
-    final TimeSeries timeSeries = detectionResult.getTimeseries();
+    final TimeSeries timeSeries = operatorResult.getTimeseries();
     final DetectionDataApi api = new DetectionDataApi()
         .setCurrent(timeSeries.getCurrent().toList())
         .setExpected(timeSeries.getPredictedBaseline().toList())
@@ -111,15 +111,15 @@ public class AlertEvaluator {
     return api;
   }
 
-  public static DetectionEvaluationApi toApi(final DetectionResult detectionResult) {
+  public static DetectionEvaluationApi toApi(final OperatorResult operatorResult) {
     final DetectionEvaluationApi api = new DetectionEvaluationApi();
     final List<AnomalyApi> anomalyApis = new ArrayList<>();
-    for (final MergedAnomalyResultDTO anomalyDto : detectionResult.getAnomalies()) {
+    for (final MergedAnomalyResultDTO anomalyDto : operatorResult.getAnomalies()) {
       anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
     }
     api.setAnomalies(anomalyApis);
-    api.setData(getData(detectionResult));
-    api.setEnumerationItem(ApiBeanMapper.toApi(detectionResult.getEnumerationItem()));
+    api.setData(getData(operatorResult));
+    api.setEnumerationItem(ApiBeanMapper.toApi(operatorResult.getEnumerationItem()));
     return api;
   }
 
@@ -146,7 +146,7 @@ public class AlertEvaluator {
                 .setTemplate(toAlertTemplateApi(templateWithProperties)));
       }
 
-      final Map<String, DetectionResult> result = executorService
+      final Map<String, OperatorResult> result = executorService
           .submit(() -> planExecutor.runPipeline(templateWithProperties.getNodes(),
               detectionInterval))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
@@ -222,10 +222,10 @@ public class AlertEvaluator {
     }
   }
 
-  private AlertEvaluationApi toApi(final Map<String, DetectionResult> outputMap) {
+  private AlertEvaluationApi toApi(final Map<String, OperatorResult> outputMap) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     for (final String key : outputMap.keySet()) {
-      final DetectionResult result = outputMap.get(key);
+      final OperatorResult result = outputMap.get(key);
       final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = detectionPipelineResultToApi(
           result);
       detectionEvaluationApiMap.keySet()
@@ -235,12 +235,12 @@ public class AlertEvaluator {
   }
 
   private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(
-      final DetectionResult result) {
+      final OperatorResult result) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
     if (result instanceof CombinerResult) {
-      final List<DetectionResult> detectionResults = ((CombinerResult) result).getDetectionResults();
-      for (int i = 0; i < detectionResults.size(); i++) {
-        final DetectionEvaluationApi detectionEvaluationApi = toApi(detectionResults.get(i));
+      final List<OperatorResult> operatorResults = ((CombinerResult) result).getDetectionResults();
+      for (int i = 0; i < operatorResults.size(); i++) {
+        final DetectionEvaluationApi detectionEvaluationApi = toApi(operatorResults.get(i));
         map.put(String.valueOf(i), detectionEvaluationApi);
       }
     } else {

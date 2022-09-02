@@ -22,7 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardingTaskInfo;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
@@ -77,7 +77,7 @@ public class OnboardingTaskRunner implements TaskRunner {
     Interval detectionInterval = alertDetectionIntervalCalculator
         .getCorrectedInterval(alert, info.getStart(), info.getEnd());
 
-    final DetectionResult result = detectionPipelineRunner.run(alert, detectionInterval);
+    final OperatorResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
     if (result.getLastTimestamp() < 0) {
       // notice lastTimestamp is not updated

@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 
-import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 
 public class EchoOperator extends DetectionPipelineOperator {
 

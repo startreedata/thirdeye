@@ -20,8 +20,8 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
-import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
 import java.util.Map;
 

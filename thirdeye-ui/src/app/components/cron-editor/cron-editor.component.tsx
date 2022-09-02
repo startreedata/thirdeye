@@ -35,7 +35,6 @@ import {
 } from "../../utils/cron-expression/cron-expression.util";
 import { InputSection } from "../form-basics/input-section/input-section.component";
 import { CronEditorProps } from "./cron-editor.interfaces";
-import { useCronEditorStyle } from "./cron-editor.style";
 
 export const CronEditor: FunctionComponent<CronEditorProps> = ({
     value,
@@ -58,8 +57,6 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     const [clockValue, setClockValue] = useState<string>(() =>
         getHourFormat(value)
     );
-
-    const cronEditorStyle = useCronEditorStyle();
 
     useEffect(() => {
         setValues(intervalValue);
@@ -202,12 +199,10 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
             <InputSection
                 inputComponent={
                     <Grid container>
-                        <Grid item>
+                        <Grid item xs={6}>
                             <TextField
+                                fullWidth
                                 select
-                                InputProps={{
-                                    className: cronEditorStyle.cronInputField,
-                                }}
                                 value={intervalValue}
                                 variant="outlined"
                                 onChange={handleIntervalChange}
@@ -215,12 +210,10 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
                                 {generateRepeatOption(intervalType)}
                             </TextField>
                         </Grid>
-                        <Grid item>
+                        <Grid item xs={6}>
                             <TextField
+                                fullWidth
                                 select
-                                InputProps={{
-                                    className: cronEditorStyle.repeatTypeField,
-                                }}
                                 id="interval-select"
                                 value={intervalType}
                                 variant="outlined"
@@ -244,12 +237,10 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
             <InputSection
                 inputComponent={
                     <Grid container>
-                        <Grid item>
+                        <Grid item xs={4}>
                             <TextField
+                                fullWidth
                                 select
-                                InputProps={{
-                                    className: cronEditorStyle.cronInputField,
-                                }}
                                 value={hour}
                                 variant="outlined"
                                 onChange={handleHourUpdate}
@@ -261,12 +252,10 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
                             </TextField>
                             <FormHelperText>{t("label.hour")}</FormHelperText>
                         </Grid>
-                        <Grid item>
+                        <Grid item xs={4}>
                             <TextField
+                                fullWidth
                                 select
-                                InputProps={{
-                                    className: cronEditorStyle.cronInputField,
-                                }}
                                 value={minute}
                                 variant="outlined"
                                 onChange={handleMinuteUpdate}
@@ -275,12 +264,10 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
                             </TextField>
                             <FormHelperText>{t("label.minute")}</FormHelperText>
                         </Grid>
-                        <Grid item>
+                        <Grid item xs={4}>
                             <TextField
+                                fullWidth
                                 select
-                                InputProps={{
-                                    className: cronEditorStyle.cronInputField,
-                                }}
                                 id="interval-select"
                                 value={clockValue}
                                 variant="outlined"

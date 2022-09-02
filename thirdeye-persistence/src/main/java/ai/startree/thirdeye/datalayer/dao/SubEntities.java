@@ -27,6 +27,7 @@ import ai.startree.thirdeye.datalayer.entity.DetectionStatusIndex;
 import ai.startree.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
+import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
@@ -36,6 +37,7 @@ import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
+import ai.startree.thirdeye.datalayer.entity.TaskBaseEntity;
 import ai.startree.thirdeye.datalayer.entity.TaskIndex;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -71,6 +73,16 @@ public class SubEntities {
 
   static final ImmutableMap<Class<? extends AbstractDTO>, SubEntityType>
       BEAN_TYPE_MAP = buildTypeBeanBimap();
+
+  static final ImmutableMap<Class<? extends AbstractDTO>, Class<? extends GenericJsonEntity>>
+      BEAN_BASE_MAP = buildBeanBaseBimap();
+
+  private static ImmutableMap<Class<? extends AbstractDTO>, Class<? extends GenericJsonEntity>>
+  buildBeanBaseBimap() {
+    return ImmutableMap.<Class<? extends AbstractDTO>, Class<? extends GenericJsonEntity>>builder()
+        .put(TaskDTO.class, TaskBaseEntity.class)
+        .build();
+  }
 
   private static ImmutableMap<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>
   buildBeanIndexMap() {

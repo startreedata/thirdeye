@@ -59,6 +59,7 @@ import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
+import ai.startree.thirdeye.datalayer.entity.TaskBaseEntity;
 import ai.startree.thirdeye.datalayer.entity.TaskIndex;
 import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -97,6 +98,8 @@ public class ThirdEyePersistenceModule extends AbstractModule {
   private static final List<Class<? extends AbstractEntity>> ENTITY_CLASSES = Arrays.asList(
       // Main data table
       GenericJsonEntity.class,
+      // Task data table
+      TaskBaseEntity.class,
 
       // All index tables
       AlertTemplateIndex.class,

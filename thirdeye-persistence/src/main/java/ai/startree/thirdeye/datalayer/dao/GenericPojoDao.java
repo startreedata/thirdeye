@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -132,7 +133,7 @@ public class GenericPojoDao {
       //update indexes
       return runTask(connection -> {
         final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(pojo.getClass());
-        final GenericJsonEntity genericJsonEntity = new GenericJsonEntity();
+        final GenericJsonEntity genericJsonEntity = getBaseEntity(pojo);
         genericJsonEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         genericJsonEntity.setVersion(1);
@@ -280,7 +281,7 @@ public class GenericPojoDao {
     //update base table
     final String jsonVal = toJsonString(pojo);
 
-    final GenericJsonEntity genericJsonEntity = new GenericJsonEntity();
+    final GenericJsonEntity genericJsonEntity = getBaseEntity(pojo);
     genericJsonEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
     genericJsonEntity.setJsonVal(jsonVal);
     genericJsonEntity.setId(pojo.getId());
@@ -319,9 +320,10 @@ public class GenericPojoDao {
     try {
       return runTask(connection -> {
         final Predicate predicate = Predicate.EQ("type", SubEntities.getType(beanClass));
+        final Class<? extends GenericJsonEntity> entityClass = getEntityClass(beanClass);
         final List<GenericJsonEntity> entities;
         try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createFindByParamsStatement(connection, GenericJsonEntity.class, predicate)) {
+            .createFindByParamsStatement(connection, entityClass, predicate)) {
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
             entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
           }
@@ -359,7 +361,7 @@ public class GenericPojoDao {
         final Predicate predicate = Predicate.EQ("type", SubEntities.getType(beanClass));
         try (final PreparedStatement selectStatement = sqlQueryBuilder
             .createfindByParamsStatementWithLimit(connection,
-                GenericJsonEntity.class,
+                getEntityClass(beanClass),
                 predicate,
                 limit,
                 offset)) {
@@ -440,7 +442,7 @@ public class GenericPojoDao {
         final GenericJsonEntity genericJsonEntity;
         try (final PreparedStatement selectStatement = sqlQueryBuilder.createFindByParamsStatement(
             connection,
-            GenericJsonEntity.class,
+            getEntityClass(pojoClass),
             Predicate.AND(
                 Predicate.EQ("id", id),
                 Predicate.EQ("type", SubEntities.getType(pojoClass)))
@@ -501,7 +503,7 @@ public class GenericPojoDao {
       return runTask(connection -> {
         final List<GenericJsonEntity> genericJsonEntities;
         try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createFindByIdStatement(connection, GenericJsonEntity.class, idList)) {
+            .createFindByIdStatement(connection, getEntityClass(pojoClass), idList)) {
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
             genericJsonEntities = genericResultSetMapper.mapAll(resultSet,
                 GenericJsonEntity.class);
@@ -547,7 +549,7 @@ public class GenericPojoDao {
         //fetch the entities
         final List<E> results = new ArrayList<>();
         try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createFindByIdStatement(connection, GenericJsonEntity.class, ids)) {
+            .createFindByIdStatement(connection, getEntityClass(beanClass), ids)) {
           final List<GenericJsonEntity> entities;
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
             entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
@@ -604,7 +606,7 @@ public class GenericPojoDao {
         if (!idsToFind.isEmpty()) {
           final List<GenericJsonEntity> entities;
           try (final PreparedStatement selectStatement = sqlQueryBuilder
-              .createFindByIdStatement(connection, GenericJsonEntity.class, idsToFind)) {
+              .createFindByIdStatement(connection, getEntityClass(pojoClass), idsToFind)) {
             try (final ResultSet resultSet = selectStatement.executeQuery()) {
               entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
             }
@@ -651,7 +653,7 @@ public class GenericPojoDao {
         if (!idsToFind.isEmpty()) {
           final List<GenericJsonEntity> entities;
           try (final PreparedStatement selectStatement = sqlQueryBuilder
-              .createFindByIdStatement(connection, GenericJsonEntity.class, idsToFind)) {
+              .createFindByIdStatement(connection, getEntityClass(pojoClass), idsToFind)) {
             try (final ResultSet resultSet = selectStatement.executeQuery()) {
               entities = genericResultSetMapper.mapAll(resultSet, GenericJsonEntity.class);
             }
@@ -753,7 +755,7 @@ public class GenericPojoDao {
         final Map<String, Object> filters = new HashMap<>();
         filters.put("id", id);
         try (final PreparedStatement deleteStatement = sqlQueryBuilder
-            .createDeleteByIdStatement(connection, GenericJsonEntity.class, filters)) {
+            .createDeleteByIdStatement(connection, getEntityClass(pojoClass), filters)) {
           deleteStatement.executeUpdate();
         }
         filters.clear();
@@ -849,7 +851,7 @@ public class GenericPojoDao {
       statement.executeUpdate();
     }
     try (final PreparedStatement baseTableDeleteStatement = sqlQueryBuilder
-        .createDeleteStatement(connection, GenericJsonEntity.class, idsToDelete, false)) {
+        .createDeleteStatement(connection, getEntityClass(indexEntityClass), idsToDelete, false)) {
       return baseTableDeleteStatement.executeUpdate();
     }
   }
@@ -901,4 +903,14 @@ public class GenericPojoDao {
 
     T handle(Connection connection) throws Exception;
   }
+
+  private GenericJsonEntity getBaseEntity(final AbstractDTO pojo)
+      throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+      return getEntityClass(pojo.getClass()).getDeclaredConstructor().newInstance();
+  }
+
+  private Class<? extends GenericJsonEntity> getEntityClass(Class<?> clazz) {
+    return SubEntities.BEAN_BASE_MAP.getOrDefault(clazz, GenericJsonEntity.class);
+  }
+
 }

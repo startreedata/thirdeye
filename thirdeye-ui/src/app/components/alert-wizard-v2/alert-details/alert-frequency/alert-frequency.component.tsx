@@ -20,36 +20,57 @@ import {
     RadioGroup,
     Typography,
 } from "@material-ui/core";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { TooltipV1 } from "../../../../platform/components";
+import { useDialogProviderV1 } from "../../../../platform/components";
+import { DialogType } from "../../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { Alert, EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { CronEditor } from "../../../cron-editor/cron-editor.component";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { AlertDateTimeCronAdvance } from "./alert-date-time-cron-advance/alert-date-time-cron-advance.component";
+import { AlertDateTimeCronSimple } from "./alert-date-time-cron-simple/alert-date-time-cron-simple.component";
+import { isSimpleConvertible } from "./alert-date-time-cron-simple/alert-date-time-cron-simple.utils";
 import { AlertFrequencyProps } from "./alert-frequency.interfaces";
+
+enum CronMode {
+    SIMPLE,
+    ADVANCED,
+}
 
 function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
     alert,
     onAlertPropertyChange,
 }: AlertFrequencyProps<NewOrExistingAlert>): JSX.Element {
+    const { showDialog } = useDialogProviderV1();
     const [currentCron, setCurrentCron] = useState<string>(alert.cron);
-    const [dayTimeCron, setDayTimeCron] = useState<string>(alert.cron);
 
     const { t } = useTranslation();
 
-    const [cronConfigTab, setCronConfigTab] = useState<string>(
-        t("label.day-time")
+    const [cronConfigTab, setCronConfigTab] = useState<CronMode>(
+        CronMode.SIMPLE
     );
 
-    useEffect(() => {
-        if (cronConfigTab === t("label.day-time")) {
-            onAlertPropertyChange({ cron: dayTimeCron });
+    const handleCronChange = (cron: string): void => {
+        setCurrentCron(cron);
+        onAlertPropertyChange({
+            cron,
+        });
+    };
+
+    const handleCronModeChange = (mode: CronMode): void => {
+        // If switching to simple mode, check if the cron is transferable
+        if (mode === CronMode.SIMPLE && !isSimpleConvertible(currentCron)) {
+            console.log("show dialog");
+            showDialog({
+                type: DialogType.ALERT,
+                contents: t("message.change-cron-warning"),
+                okButtonText: t("label.ok"),
+                cancelButtonText: t("label.cancel"),
+                onOk: () => setCronConfigTab(mode),
+            });
         } else {
-            onAlertPropertyChange({ cron: currentCron });
+            setCronConfigTab(mode);
         }
-    }, [cronConfigTab, currentCron, dayTimeCron]);
+    };
 
     return (
         <>
@@ -72,17 +93,23 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
                             aria-label="cron-radio-buttons"
                             name="cron-radio-buttons"
                             value={cronConfigTab}
-                            onChange={(e) => setCronConfigTab(e.target.value)}
+                            onChange={(e) =>
+                                handleCronModeChange(
+                                    Number(
+                                        e.target.value
+                                    ) as unknown as CronMode
+                                )
+                            }
                         >
                             <FormControlLabel
                                 control={<Radio />}
                                 label={t("label.day-time")}
-                                value={t("label.day-time")}
+                                value={CronMode.SIMPLE}
                             />
                             <FormControlLabel
                                 control={<Radio />}
                                 label={t("label.cron")}
-                                value={t("label.cron")}
+                                value={CronMode.ADVANCED}
                             />
                         </RadioGroup>
                     </FormControl>
@@ -90,26 +117,21 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
                 labelComponent={
                     <Box alignItems="center" display="flex" paddingTop={1}>
                         <Typography variant="body2">
-                            {t("label.date-type")}&nbsp;
+                            {t("label.date-type")}
                         </Typography>
-                        <TooltipV1
-                            title={t("message.data-type-helper") as string}
-                        >
-                            <HelpOutlineIcon
-                                color="secondary"
-                                fontSize="small"
-                            />
-                        </TooltipV1>
                     </Box>
                 }
             />
 
-            {cronConfigTab === t("label.day-time") ? (
-                <CronEditor value={dayTimeCron} onChange={setDayTimeCron} />
+            {cronConfigTab === CronMode.SIMPLE ? (
+                <AlertDateTimeCronSimple
+                    value={currentCron}
+                    onChange={handleCronChange}
+                />
             ) : (
                 <AlertDateTimeCronAdvance
                     cron={currentCron}
-                    onCronChange={setCurrentCron}
+                    onCronChange={handleCronChange}
                 />
             )}
         </>

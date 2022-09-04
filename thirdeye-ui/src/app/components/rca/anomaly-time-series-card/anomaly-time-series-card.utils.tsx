@@ -129,7 +129,7 @@ export const generateSeriesDataForEvaluation = (
                 pointFormatter: (dataPoint): string =>
                     formatLargeNumberV1((dataPoint as ThresholdDataPoint).y1),
             },
-            customLegendIcon: (svgBound, color) => {
+            legendIcon: (svgBound, color) => {
                 return (
                     <line
                         stroke={color}
@@ -258,7 +258,7 @@ export const generateSeriesForAnomalies = (
         strokeDasharray: Dimension.DASHARRAY_VISUALIZATION_ANOMALY,
         type: SeriesType.CUSTOM,
         color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
-        customLegendIcon: (svgBound, color) => {
+        legendIcon: (svgBound, color) => {
             return (
                 <line
                     stroke={color}

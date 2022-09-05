@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import React from "react";
 import {
     DataPoint,
     LineDataPoint,
@@ -41,13 +42,24 @@ export const COLOR_PALETTE = [
  */
 export function getMinMax(
     series: Pick<Series, "data">[],
-    extract = (d: DataPoint | ThresholdDataPoint) => d.x
+    extract = (
+        d: DataPoint | ThresholdDataPoint,
+        seriesOptions: Series
+    ): number[] | number => (seriesOptions ? d.x : d.x)
 ): [number, number] {
     const arrayOfArrayOfValues: number[][] = [];
 
     series.forEach((seriesOptions) => {
         const values: number[] = [];
-        seriesOptions.data.forEach((item) => values.push(extract(item)));
+        seriesOptions.data.forEach((item) => {
+            const extractedValue = extract(item, seriesOptions);
+
+            if (typeof extractedValue === "number") {
+                values.push(extractedValue);
+            } else {
+                extractedValue.forEach((subItem) => values.push(subItem));
+            }
+        });
         arrayOfArrayOfValues.push(values);
     });
 
@@ -97,14 +109,54 @@ export function normalizeSeries(
             enabled: item.enabled === undefined ? true : item.enabled,
             type: item.type === undefined ? DEFAULT_CHART_TYPE : item.type,
             strokeWidth: item.strokeWidth === undefined ? 1 : item.strokeWidth,
+            stroke: item.stroke,
+            fillOpacity: item.fillOpacity ?? 1,
             xAccessor: item.xAccessor ?? defaultXAccessor,
             x1Accessor: item.x1Accessor ?? defaultX1Accessor,
             yAccessor: item.yAccessor ?? defaultYAccessor,
             y1Accessor: item.y1Accessor ?? defaultY1Accessor,
-            tooltipValueFormatter:
-                item.tooltipValueFormatter ?? defaultTooltipValueFormatter,
+            ...generateDefaultSeriesTooltipConfiguration(item.tooltip, item),
         };
     });
+}
+
+function generateDefaultSeriesTooltipConfiguration(
+    tooltipConfiguration:
+        | {
+              valueFormatter?: (value: number) => string;
+              pointFormatter?: (
+                  d: DataPoint | ThresholdDataPoint | LineDataPoint,
+                  series: NormalizedSeries
+              ) => React.ReactElement | string;
+              tooltipFormatter?: (
+                  d: DataPoint | ThresholdDataPoint | LineDataPoint,
+                  series: NormalizedSeries
+              ) => React.ReactElement | string;
+          }
+        | undefined,
+    series: Series
+): Pick<NormalizedSeries, "tooltip"> {
+    if (tooltipConfiguration === undefined) {
+        return {
+            tooltip: {
+                valueFormatter: defaultValueFormatter,
+                pointFormatter:
+                    series.type === SeriesType.AREA_CLOSED
+                        ? defaultAreaSeriesPointFormatter
+                        : defaultPointFormatter,
+            },
+        };
+    }
+
+    return {
+        tooltip: {
+            ...tooltipConfiguration,
+            valueFormatter:
+                tooltipConfiguration.valueFormatter ?? defaultValueFormatter,
+            pointFormatter:
+                tooltipConfiguration.pointFormatter ?? defaultPointFormatter,
+        },
+    };
 }
 
 export const syncEnabledDisabled = (seriesData: Series): boolean => {
@@ -127,6 +179,24 @@ export const defaultY1Accessor = (d: ThresholdDataPoint): number => {
     return d.y1;
 };
 
-export const defaultTooltipValueFormatter = (value: number): string => {
+export const defaultValueFormatter = (value: number): string => {
     return value.toString();
+};
+
+export const defaultPointFormatter = (
+    dataPoint: DataPoint,
+    series: NormalizedSeries
+): string => {
+    return series.tooltip.valueFormatter(dataPoint.y);
+};
+
+export const defaultAreaSeriesPointFormatter = (
+    dataPoint: DataPoint,
+    series: NormalizedSeries
+): string => {
+    const d = dataPoint as ThresholdDataPoint;
+
+    return `${series.tooltip.valueFormatter(
+        d.y
+    )} - ${series.tooltip.valueFormatter(d.y1)}`;
 };

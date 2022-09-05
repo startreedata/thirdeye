@@ -34,4 +34,5 @@ export interface ChartBrushProps {
         bottom: number;
         top: number;
     };
+    onMouseEnter: () => void;
 }

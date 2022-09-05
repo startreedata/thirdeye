@@ -17,10 +17,11 @@ import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 export interface AlertEvaluationTimeSeriesCardProps {
     alertEvaluationTimeSeriesHeight: number;
     alertEvaluation: AlertEvaluation | null;
-    onAnomalyBarClick?: (anomaly: Anomaly) => void;
     onRefresh?: (start?: number, end?: number) => void;
     isLoading?: boolean;
     header?: React.ReactElement;
+    anomalies: Anomaly[];
+    disableNavigation?: boolean;
 }
 
 export interface ViewAnomalyHeaderProps {

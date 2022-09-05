@@ -42,6 +42,7 @@ import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import {
@@ -295,8 +296,10 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     )}
                     {getEvaluationRequestStatus !== ActionStatus.Error && (
                         <AlertEvaluationTimeSeriesCard
+                            disableNavigation
                             alertEvaluation={alertEvaluation}
                             alertEvaluationTimeSeriesHeight={500}
+                            anomalies={[anomaly as Anomaly]}
                             header={
                                 <ViewAnomalyHeader
                                     anomaly={anomaly}

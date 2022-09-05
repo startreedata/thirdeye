@@ -11,21 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { Bounds } from "@visx/brush/lib/types";
+import { NormalizedSeries } from "../time-series-chart.interfaces";
 
-export const useAlertEvaluationTimeSeriesLegendStyles = makeStyles((theme) => ({
-    legendItem: {
-        cursor: "pointer",
-        paddingLeft: theme.spacing(1),
-        paddingRight: theme.spacing(1),
-    },
-    legendItemWrapped: {
-        marginRight: `${theme.spacing(18)}px !important`,
-    },
-    legendLabel: {
-        paddingLeft: theme.spacing(1),
-    },
-    legendLabelDisabled: {
-        color: theme.palette.text.disabled,
-    },
-}));
+export interface ChartZoomProps {
+    series: NormalizedSeries[];
+    height: number;
+    width: number;
+    colorScale: (name: string) => string;
+    onZoomChange: (domain: Bounds | null) => void;
+    margins: {
+        left: number;
+        right: number;
+        bottom: number;
+        top: number;
+    };
+}

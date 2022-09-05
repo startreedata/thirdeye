@@ -42,5 +42,6 @@ module.exports = {
     moduleNameMapper: {
         "\\.(svg|ttf)": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock SVG imports
         "\\.(css|scss)$": "identity-obj-proxy", // Mock style imports
+        "^d3-(.*)$": `d3-$1/dist/d3-$1`, // bisect function has been having issues
     },
 };

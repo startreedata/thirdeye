@@ -23,15 +23,12 @@ import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Single timeseries detection result.
+ * Operator result.
  *
  * Note:
- * Can be output by any operator, so it does not necessarily return detection results.
- * Eg {@link ai.startree.thirdeye.spi.detection.v2.DataTable} implements this interface but does not return
- *
- * todo cyril rename this as smthing like OperatorResult
+ * Can be output by any operator, so it does not necessarily contain detection results.
  * */
-public interface DetectionResult {
+public interface OperatorResult {
 
   /**
    * If implemented, returns the last timestamp observed in the data. Can be different from the last

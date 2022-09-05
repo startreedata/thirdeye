@@ -33,16 +33,16 @@ public interface Operator {
    * @param key
    * @param input
    */
-  void setInput(String key, DetectionResult input);
+  void setInput(String key, OperatorResult input);
 
   /**
    * Get keyed output
    * @param key
    */
-  DetectionResult getOutput(String key);
+  OperatorResult getOutput(String key);
 
   /**
    * Get all keyed outputs
    */
-  Map<String, DetectionResult> getOutputs();
+  Map<String, OperatorResult> getOutputs();
 }

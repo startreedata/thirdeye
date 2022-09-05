@@ -29,7 +29,11 @@ export const Color = {
     GREEN_4: "#81c784",
     GREEN_5: "#4caf50",
     GREEN_6: "#388e3c",
+    GREEN_7: "#20A927",
     RED_1: "#E57373",
     RED_2: "#F44336",
     RED_3: "#D32f2f",
+    YELLOW_1: "#FFA726",
+    BLUE_1: "#166DFF",
+    BLUE_2: "#0D47A1",
 } as const;

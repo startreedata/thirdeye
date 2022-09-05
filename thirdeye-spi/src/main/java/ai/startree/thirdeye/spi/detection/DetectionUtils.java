@@ -18,7 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificati
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -127,9 +127,9 @@ public class DetectionUtils {
   }
 
   public static Map<String, DataTable> getDataTableMap(
-      final Map<String, DetectionResult> inputMap) {
+      final Map<String, OperatorResult> inputMap) {
     final Map<String, DataTable> dataTableMap = new HashMap<>();
-    for (final Entry<String, DetectionResult> entry : inputMap.entrySet()) {
+    for (final Entry<String, OperatorResult> entry : inputMap.entrySet()) {
       if (entry.getValue() instanceof DataTable) {
         dataTableMap.put(entry.getKey(), (DataTable) entry.getValue());
       }

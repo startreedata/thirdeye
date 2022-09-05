@@ -16,8 +16,8 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
     return "EnumeratorOperator";
   }
 
-  public static class EnumeratorResult implements DetectionResult {
+  public static class EnumeratorResult implements OperatorResult {
 
     private final List<EnumerationItemDTO> results;
 

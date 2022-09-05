@@ -253,7 +253,8 @@
         "repeat-every": "Repeat every",
         "am": "AM",
         "pm": "PM",
-        "time": "Time"
+        "time": "Time",
+        "activity": "Activity"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -347,6 +348,7 @@
         "add-emails-example": "Add multiple emails separated by comma. e.g. email1@domain.com, email2@domain.com.",
         "url-required": "Please enter a URL",
         "select-days-of-week": "Select day(s) of week",
-        "change-cron-warning": "Using simple mode will cause the current cron string to change since it is more advanced"
+        "change-cron-warning": "Using simple mode will cause the current cron string to change since it is more advanced",
+        "click-to-view-anomaly": "Click to view anomaly"
     }
 }

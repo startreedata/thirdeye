@@ -11,17 +11,22 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
+import { sortBy } from "lodash";
+import { Series } from "../time-series-chart.interfaces";
 
-export interface AlertEvaluationTimeSeriesTooltipProps {
-    alertEvaluationTimeSeriesTooltipPoint?: AlertEvaluationTimeSeriesTooltipPoint;
-}
+export const sortSeries = (series: Series[]): Series[] => {
+    const noIndices: Series[] = [];
+    let withIndices: Series[] = [];
 
-export interface AlertEvaluationTimeSeriesTooltipPoint {
-    timestamp: number;
-    current: number;
-    expected: number;
-    upperBound: number;
-    lowerBound: number;
-    anomalies: Anomaly[];
-}
+    series.forEach((seriesData: Series) => {
+        if (seriesData.legendIndex === undefined) {
+            noIndices.push(seriesData);
+        } else {
+            withIndices.push(seriesData);
+        }
+    });
+
+    withIndices = sortBy(withIndices, (item) => item.legendIndex);
+
+    return [...noIndices, ...withIndices];
+};

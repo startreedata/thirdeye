@@ -13,7 +13,9 @@
  */
 import { SeriesType } from "./time-series-chart.interfaces";
 import {
-    defaultTooltipValueFormatter,
+    defaultAreaSeriesPointFormatter,
+    defaultPointFormatter,
+    defaultValueFormatter,
     defaultX1Accessor,
     defaultXAccessor,
     defaultY1Accessor,
@@ -84,6 +86,7 @@ describe("Time Series Chart Utils", () => {
             {
                 data: [],
                 type: SeriesType.AREA_CLOSED,
+                color: "#FFF",
             },
             {
                 data: [],
@@ -102,7 +105,13 @@ describe("Time Series Chart Utils", () => {
             yAccessor: defaultYAccessor,
             y1Accessor: defaultY1Accessor,
             strokeWidth: 1,
-            tooltipValueFormatter: defaultTooltipValueFormatter,
+            tooltip: {
+                pointFormatter: defaultAreaSeriesPointFormatter,
+                valueFormatter: defaultValueFormatter,
+            },
+            fillOpacity: 1,
+            stroke: undefined,
+            color: "#FFF",
         });
         expect(result[1]).toEqual({
             data: [],
@@ -114,7 +123,12 @@ describe("Time Series Chart Utils", () => {
             yAccessor: defaultYAccessor,
             y1Accessor: defaultY1Accessor,
             strokeWidth: 1,
-            tooltipValueFormatter: defaultTooltipValueFormatter,
+            tooltip: {
+                pointFormatter: defaultPointFormatter,
+                valueFormatter: defaultValueFormatter,
+            },
+            fillOpacity: 1,
+            stroke: undefined,
         });
     });
 });

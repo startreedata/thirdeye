@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface DataTable extends DetectionResult {
+public interface DataTable extends OperatorResult {
 
   static Object[] getRow(final DataTable dataTable, final int rowIdx) {
     int columnCount = dataTable.getColumnCount();

@@ -37,7 +37,7 @@ import { SubscriptionGroupWizardProps } from "./subscription-group-wizard.interf
 
 export const SubscriptionGroupWizard: FunctionComponent<
     SubscriptionGroupWizardProps
-> = ({ subscriptionGroup, alerts, onCancel, submitBtnLabel }) => {
+> = ({ subscriptionGroup, alerts, onCancel, submitBtnLabel, onFinish }) => {
     const [editedSubscriptionGroup, setEditedSubscriptionGroup] =
         useState<SubscriptionGroup>(subscriptionGroup);
     const [selectedAlertsGroup, setSelectedAlertsGroup] = useState<
@@ -66,10 +66,7 @@ export const SubscriptionGroupWizard: FunctionComponent<
     }, [editedSubscriptionGroup]);
 
     const handleSubmitClick = (): void => {
-        // Update subscription group with form inputs
-        setEditedSubscriptionGroup((newSubscriptionGroup) =>
-            Object.assign(newSubscriptionGroup, subscriptionGroup)
-        );
+        onFinish && onFinish(editedSubscriptionGroup);
     };
 
     const handleSubscriptionChange = (

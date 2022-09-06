@@ -11,33 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-//  import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../../rest/dto/ui-anomaly.interfaces";
 
 export interface MetricsReportEvaluationTimeSeriesProps {
     data: UiAnomaly;
     searchParams?: URLSearchParams | null;
-}
-
-export enum MetricReportEvaluationTimeSeriesStateAction {
-    UPDATE,
-}
-
-export interface MetricsReportEvaluationTimeSeriesState {
-    loading: boolean;
-    noData: boolean;
-    filteredAlertEvaluationTimeSeriesPoints: AlertEvaluationTimeSeriesPoint[];
-    filteredAlertEvaluationAnomalies: Anomaly[];
-    currentPlotVisible: boolean;
-    anomaliesPlotVisible: boolean;
-}
-
-export interface AlertEvaluationTimeSeriesPoint {
-    timestamp: number;
-    current: number;
-    expected: number;
-    upperBound: number;
-    lowerBound: number;
 }

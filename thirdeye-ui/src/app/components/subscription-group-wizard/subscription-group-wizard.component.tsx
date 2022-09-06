@@ -76,9 +76,9 @@ export const SubscriptionGroupWizard: FunctionComponent<
         modifiedSubscriptionGroup: Partial<SubscriptionGroup>
     ): void => {
         // Update subscription group with form inputs
-        setEditedSubscriptionGroup((newSubscriptionGroup) =>
-            Object.assign(newSubscriptionGroup, modifiedSubscriptionGroup)
-        );
+        setEditedSubscriptionGroup((currentlyEdited) => {
+            return { ...currentlyEdited, ...modifiedSubscriptionGroup };
+        });
     };
 
     const onSubscriptionGroupEmailsChange = (emails: string[]): void => {

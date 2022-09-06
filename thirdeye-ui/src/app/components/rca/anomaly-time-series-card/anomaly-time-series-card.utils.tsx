@@ -110,29 +110,21 @@ export const generateSeriesDataForEvaluation = (
         },
         {
             name: translation("label.activity"),
-            type: SeriesType.AREA_CLOSED,
-            gradient: {
-                from: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
-                to: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
-                fromOpacity: 0.1,
-                toOffset: 25,
-                toOpacity: 0,
-            },
+            type: SeriesType.LINE,
             color: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
             stroke: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
             strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_CURRENT,
             data: timeSeriesData.current
                 .map((value, idx) => {
                     return {
-                        y: 0,
-                        y1: value,
+                        y: value,
                         x: timeSeriesData.timestamp[idx],
                     };
                 })
                 .filter((d) => Number.isFinite(d.y)),
             tooltip: {
-                pointFormatter: (dataPoint): string =>
-                    formatLargeNumberV1((dataPoint as ThresholdDataPoint).y1),
+                pointFormatter: (d: DataPoint): string =>
+                    formatLargeNumberV1(d.y),
             },
             legendIcon: (svgBound, color) => {
                 return (

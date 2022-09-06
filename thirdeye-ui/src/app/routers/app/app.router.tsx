@@ -27,7 +27,7 @@ const AlertsRouter = lazy(() =>
 
 const AnomaliesRouter = lazy(() =>
     import(
-        /* webpackChunkName: "anomalies-router" */ "../anomalies/anomalies.router"
+        /* webpackChunkName: "anomalies-router" */ "../anomalies/anomalies-view.router"
     ).then((module) => ({ default: module.AnomaliesRouter }))
 );
 

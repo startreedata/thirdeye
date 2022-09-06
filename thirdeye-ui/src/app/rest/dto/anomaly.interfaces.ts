@@ -34,6 +34,7 @@ export interface Anomaly {
     severity: AnomalySeverity;
     child: boolean;
     feedback?: AnomalyFeedback;
+    metadata: AnomalyMetaData;
 }
 
 export interface AnomalyFeedback {
@@ -67,4 +68,9 @@ export enum AnomalyFeedbackType {
     NOT_ANOMALY = "NOT_ANOMALY",
     ANOMALY_NEW_TREND = "ANOMALY_NEW_TREND",
     NO_FEEDBACK = "NO_FEEDBACK",
+}
+
+export interface AnomalyMetaData {
+    dataset?: { name: string };
+    metric?: { name: string };
 }

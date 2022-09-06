@@ -63,6 +63,7 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         endTime: noDataMarker,
         endTimeVal: -1,
         startTimeVal: -1,
+        datasetName: noDataMarker,
     };
 };
 
@@ -144,6 +145,13 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     if (anomaly.metric) {
         uiAnomaly.metricId = anomaly.metric.id;
         uiAnomaly.metricName = anomaly.metric.name;
+    }
+
+    // metadata
+    if (anomaly.metadata) {
+        if (anomaly.metadata?.dataset) {
+            uiAnomaly.datasetName = anomaly.metadata.dataset?.name;
+        }
     }
 
     return uiAnomaly;

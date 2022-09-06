@@ -254,7 +254,11 @@
         "am": "AM",
         "pm": "PM",
         "time": "Time",
-        "activity": "Activity"
+        "activity": "Activity",
+        "anomalies-list": "ANOMALIES LIST",
+        "metrics-report": "METRICS REPORT",
+        "chart": "Chart",
+        "id": "ID"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

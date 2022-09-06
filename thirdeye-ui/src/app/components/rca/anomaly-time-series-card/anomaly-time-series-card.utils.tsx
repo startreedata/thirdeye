@@ -47,7 +47,10 @@ const CURSOR_POINTER_STYLE = { cursor: "pointer" };
 export const generateSeriesDataForEvaluation = (
     alertEvaluation: AlertEvaluation,
     filteredAlertEvaluations: [AlertEvaluation, AnomalyFilterOption[]][],
-    translation: (id: string) => string
+    translation: (id: string) => string,
+    hideUpperLowerBound?: boolean,
+    hideActivity?: boolean,
+    hidePredicted?: boolean
 ): Series[] => {
     const filteredTimeSeriesData: Series[] = filteredAlertEvaluations.map(
         (alertEvalAndFilters) => {
@@ -82,85 +85,100 @@ export const generateSeriesDataForEvaluation = (
             .data;
 
     return [
-        {
-            enabled: false,
-            name: translation("label.upper-and-lower-bound"),
-            type: SeriesType.AREA_CLOSED,
-            fillOpacity: 0.1,
-            color: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
-            data: timeSeriesData.lowerBound.map((value, idx) => {
-                return {
-                    y: value,
-                    y1: timeSeriesData.upperBound[idx],
-                    x: timeSeriesData.timestamp[idx],
-                };
-            }),
-            stroke: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
-            strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
-            tooltip: {
-                pointFormatter: (d: DataPoint): string =>
-                    formatLargeNumberV1(d.y),
-            },
-            legendIndex: 10,
-        },
-        {
-            name: translation("label.activity"),
-            type: SeriesType.AREA_CLOSED,
-            gradient: {
-                from: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
-                to: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
-                fromOpacity: 0.1,
-                toOffset: 25,
-                toOpacity: 0,
-            },
-            color: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
-            stroke: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
-            strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_CURRENT,
-            data: timeSeriesData.current
-                .map((value, idx) => {
-                    return {
-                        y: 0,
-                        y1: value,
-                        x: timeSeriesData.timestamp[idx],
-                    };
-                })
-                .filter((d) => Number.isFinite(d.y)),
-            tooltip: {
-                pointFormatter: (dataPoint): string =>
-                    formatLargeNumberV1((dataPoint as ThresholdDataPoint).y1),
-            },
-            legendIcon: (svgBound, color) => {
-                return (
-                    <line
-                        stroke={color}
-                        strokeWidth={10}
-                        x1="0"
-                        x2={`${svgBound}`}
-                        y1={`${svgBound / 2}`}
-                        y2={`${svgBound / 2}`}
-                    />
-                );
-            },
-        },
-        {
-            name: translation("label.predicted"),
-            type: SeriesType.LINE,
-            color: Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
-            strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
-            data: timeSeriesData.expected
-                .map((value, idx) => {
-                    return {
-                        y: value,
-                        x: timeSeriesData.timestamp[idx],
-                    };
-                })
-                .filter((d) => Number.isFinite(d.y)),
-            tooltip: {
-                pointFormatter: (d: DataPoint): string =>
-                    formatLargeNumberV1(d.y),
-            },
-            strokeDasharray: `${Dimension.DASHARRAY_VISUALIZATION_BASELINE}`,
-        },
+        ...(!hideUpperLowerBound
+            ? [
+                  {
+                      enabled: false,
+                      name: translation("label.upper-and-lower-bound"),
+                      type: SeriesType.AREA_CLOSED,
+                      fillOpacity: 0.1,
+                      color: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+                      data: timeSeriesData.lowerBound.map((value, idx) => {
+                          return {
+                              y: value,
+                              y1: timeSeriesData.upperBound[idx],
+                              x: timeSeriesData.timestamp[idx],
+                          };
+                      }),
+                      stroke: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+                      strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
+                      tooltip: {
+                          pointFormatter: (d: DataPoint): string =>
+                              formatLargeNumberV1(d.y),
+                      },
+                      legendIndex: 10,
+                  },
+              ]
+            : []),
+        ...(!hideActivity
+            ? [
+                  {
+                      name: translation("label.activity"),
+                      type: SeriesType.AREA_CLOSED,
+                      gradient: {
+                          from: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
+                          to: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
+                          fromOpacity: 0.1,
+                          toOffset: 25,
+                          toOpacity: 0,
+                      },
+                      color: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
+                      stroke: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
+                      strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_CURRENT,
+                      data: timeSeriesData.current
+                          .map((value, idx) => {
+                              return {
+                                  y: 0,
+                                  y1: value,
+                                  x: timeSeriesData.timestamp[idx],
+                              };
+                          })
+                          .filter((d) => Number.isFinite(d.y)),
+                      tooltip: {
+                          pointFormatter: (dataPoint: DataPoint): string =>
+                              formatLargeNumberV1(
+                                  (dataPoint as ThresholdDataPoint).y1
+                              ),
+                      },
+                      legendIcon: (svgBound: number, color: string) => {
+                          return (
+                              <line
+                                  stroke={color}
+                                  strokeWidth={10}
+                                  x1="0"
+                                  x2={`${svgBound}`}
+                                  y1={`${svgBound / 2}`}
+                                  y2={`${svgBound / 2}`}
+                              />
+                          );
+                      },
+                  },
+              ]
+            : []),
+        ...(!hidePredicted
+            ? [
+                  {
+                      name: translation("label.predicted"),
+                      type: SeriesType.LINE,
+                      color: Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
+                      strokeWidth:
+                          Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
+                      data: timeSeriesData.expected
+                          .map((value, idx) => {
+                              return {
+                                  y: value,
+                                  x: timeSeriesData.timestamp[idx],
+                              };
+                          })
+                          .filter((d) => Number.isFinite(d.y)),
+                      tooltip: {
+                          pointFormatter: (d: DataPoint): string =>
+                              formatLargeNumberV1(d.y),
+                      },
+                      strokeDasharray: `${Dimension.DASHARRAY_VISUALIZATION_BASELINE}`,
+                  },
+              ]
+            : []),
         ...filteredTimeSeriesData,
     ];
 };
@@ -455,6 +473,47 @@ export const generateChartOptionsForAlert = (
         yAxis: {
             position: Orientation.right,
         },
+    };
+};
+
+export const generateChartOptionsForMetricsReport = (
+    alertEvaluation: AlertEvaluation,
+    anomalies: Anomaly[],
+    translation: (id: string) => string
+): TimeSeriesChartProps => {
+    const data =
+        alertEvaluation.detectionEvaluations.output_AnomalyDetectorResult_0
+            .data;
+    let series: Series[] = [];
+
+    if (alertEvaluation !== null) {
+        series = generateSeriesDataForEvaluation(
+            alertEvaluation,
+            [],
+            translation,
+            true,
+            false,
+            true
+        );
+    }
+
+    if (anomalies) {
+        series.push(
+            generateSeriesForAnomalies(
+                anomalies,
+                translation,
+                data.timestamp,
+                data.current
+            )
+        );
+    }
+
+    return {
+        series,
+        legend: false,
+        brush: false,
+        tooltip: false,
+        yAxis: { enabled: false },
     };
 };
 

@@ -36,8 +36,11 @@ export const AppRouteRelative = {
     ALERTS_UPDATE_SIMPLE: "simple",
     ALERTS_UPDATE_ADVANCED: "advanced",
     ANOMALIES: "anomalies",
+    ANOMALIES_LIST: "anomalies-list",
     ANOMALIES_ALL: "all",
+    METRICS_REPORT_ALL: "all",
     ANOMALIES_ALL_RANGE: "range",
+    METRICS_REPORT_ALL_RANGE: "range",
     ANOMALIES_ANOMALY: `${PLACEHOLDER_ROUTE_ID}`,
     ANOMALIES_ANOMALY_VIEW: `view`,
     CONFIGURATION: "configuration",
@@ -64,6 +67,7 @@ export const AppRouteRelative = {
     ALERT_TEMPLATES_ALERT_TEMPLATE_UPDATE: "update",
     METRICS: "metrics",
     METRICS_ALL: "all",
+    METRICS_REPORT: "metrics-report",
     METRICS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS_CREATE: `create`,
     METRICS_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
@@ -96,10 +100,10 @@ export const AppRoute = {
     ALERTS_UPDATE_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
     ALERTS_UPDATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
-    ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
-    ANOMALIES_ALL_RANGE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}`,
-    ANOMALIES_ANOMALY: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}`,
-    ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}`,
+    ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_LIST}`,
+    ANOMALIES_ALL_RANGE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_LIST}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}`,
+    ANOMALIES_ANOMALY: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_LIST}/${AppRouteRelative.ANOMALIES_ANOMALY}`,
+    ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_LIST}/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}`,
     CONFIGURATION: `/${AppRouteRelative.CONFIGURATION}`,
     SUBSCRIPTION_GROUPS: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}`,
     SUBSCRIPTION_GROUPS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}`,
@@ -141,6 +145,8 @@ export const AppRoute = {
     EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
     EVENTS_ALL_RANGE: `/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}/${AppRouteRelative.EVENTS_ALL_RANGE}`,
     EVENTS: `/${AppRouteRelative.EVENTS}`,
+    ANOMALIES_LIST_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_LIST}`,
+    METRICS_REPORT_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.METRICS_REPORT}`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -263,6 +269,14 @@ export const getDatasetsPath = (): string => {
 
 export const getDatasetsAllPath = (): string => {
     return AppRoute.DATASETS_ALL;
+};
+
+export const getAnomaliesListPath = (): string => {
+    return AppRoute.ANOMALIES_LIST_ALL;
+};
+
+export const getMetricsReportPath = (): string => {
+    return AppRoute.METRICS_REPORT_ALL;
 };
 
 export const getDatasetsViewPath = (id: number): string => {

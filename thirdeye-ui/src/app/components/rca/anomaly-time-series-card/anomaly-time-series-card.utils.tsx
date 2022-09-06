@@ -98,8 +98,13 @@ export const generateSeriesDataForEvaluation = (
             stroke: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
             strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
             tooltip: {
-                pointFormatter: (d: DataPoint): string =>
-                    formatLargeNumberV1(d.y),
+                pointFormatter: (d: DataPoint): string => {
+                    const dThreshold = d as ThresholdDataPoint;
+
+                    return `${formatLargeNumberV1(
+                        dThreshold.y
+                    )} - ${formatLargeNumberV1(dThreshold.y1)}`;
+                },
             },
             legendIndex: 10,
         },

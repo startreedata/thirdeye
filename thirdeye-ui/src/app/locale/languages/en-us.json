@@ -32,7 +32,6 @@
         "page-not-found": "Page Not Found",
         "create": "Create",
         "create-entity": "Create {{entity}}",
-        "onboard-entity": "Onboard {{entity}}",
         "add": "Add",
         "add-entity": "Add {{entity}}",
         "update": "Update",
@@ -234,6 +233,13 @@
         "support": "Support",
         "check-status": "Check Status",
         "health-status": "Health Status",
+        "seconds": "Seconds",
+        "minute": "Minute",
+        "hour": "Hour",
+        "day": "Day",
+        "week": "Week",
+        "month": "Month",
+        "year": "Year",
         "yes": "Yes",
         "no": "No",
         "reset": "Reset",
@@ -242,6 +248,12 @@
         "webhook-url": "Webhook URL",
         "slack-url": "Slack URL",
         "add-email": "Add Email",
+        "date-type": "Date Type",
+        "day-time": "Day/Time",
+        "repeat-every": "Repeat every",
+        "am": "AM",
+        "pm": "PM",
+        "time": "Time",
         "activity": "Activity"
     },
     "message": {
@@ -335,6 +347,8 @@
         "channels-subtitle": "Setup the channels and the people you want to receive notifications from this group",
         "add-emails-example": "Add multiple emails separated by comma. e.g. email1@domain.com, email2@domain.com.",
         "url-required": "Please enter a URL",
+        "select-days-of-week": "Select day(s) of week",
+        "change-cron-warning": "Using simple mode will cause the current cron string to change since it is more advanced",
         "click-to-view-anomaly": "Click to view anomaly"
     }
 }

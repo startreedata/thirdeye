@@ -21,6 +21,7 @@ import {
     EditableAlert,
 } from "../../rest/dto/alert.interfaces";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
+import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import {
     UiAlert,
@@ -28,6 +29,11 @@ import {
     UiAlertSubscriptionGroup,
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
+
+export const DEFAULT_FEEDBACK = {
+    type: AnomalyFeedbackType.NO_FEEDBACK,
+    comment: "",
+};
 
 // fixme cyril update this template
 export const createDefaultAlert = (): EditableAlert => {
@@ -367,7 +373,10 @@ const mapSubscriptionGroupsToAlertIds = (
     return subscriptionGroupsToAlertIdsMap;
 };
 
-export const DEFAULT_FEEDBACK = {
-    type: AnomalyFeedbackType.NO_FEEDBACK,
-    comment: "",
+export const extractDetectionEvaluation = (
+    evaluationDataPayload: AlertEvaluation
+): DetectionEvaluation[] => {
+    return Object.keys(evaluationDataPayload.detectionEvaluations).map(
+        (k) => evaluationDataPayload.detectionEvaluations[k]
+    );
 };

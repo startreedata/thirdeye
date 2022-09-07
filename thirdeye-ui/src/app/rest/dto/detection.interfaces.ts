@@ -14,9 +14,9 @@
 import { Anomaly } from "./anomaly.interfaces";
 
 export interface DetectionEvaluation {
-    mape: number;
     data: DetectionData;
     anomalies: Anomaly[];
+    enumerationItem?: EnumerationItem;
 }
 
 export interface DetectionData {
@@ -25,4 +25,11 @@ export interface DetectionData {
     expected: number[];
     upperBound: number[];
     lowerBound: number[];
+}
+
+export interface EnumerationItem {
+    name: string;
+    params: {
+        [key: string]: number | string;
+    };
 }

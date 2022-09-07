@@ -46,6 +46,7 @@ import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     createAlertEvaluation,
+    extractDetectionEvaluation,
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { PROMISES } from "../../utils/constants/constants.util";
@@ -87,8 +88,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     useEffect(() => {
         if (evaluation) {
             if (anomalies) {
-                evaluation.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies =
-                    anomalies;
+                extractDetectionEvaluation(evaluation)[0].anomalies = anomalies;
             }
             setAlertEvaluation(evaluation);
         }

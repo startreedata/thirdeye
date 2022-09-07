@@ -46,7 +46,7 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
     const { t } = useTranslation();
 
     const [cronConfigTab, setCronConfigTab] = useState<CronMode>(
-        CronMode.SIMPLE
+        isSimpleConvertible(currentCron) ? CronMode.SIMPLE : CronMode.ADVANCED
     );
 
     const handleCronChange = (cron: string): void => {
@@ -59,7 +59,6 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
     const handleCronModeChange = (mode: CronMode): void => {
         // If switching to simple mode, check if the cron is transferable
         if (mode === CronMode.SIMPLE && !isSimpleConvertible(currentCron)) {
-            console.log("show dialog");
             showDialog({
                 type: DialogType.ALERT,
                 contents: t("message.change-cron-warning"),

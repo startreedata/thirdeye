@@ -45,6 +45,7 @@ import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
+import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
@@ -106,7 +107,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         }
         // Only filter for the current anomaly
         const anomalyDetectionResults =
-            evaluation.detectionEvaluations.output_AnomalyDetectorResult_0;
+            extractDetectionEvaluation(evaluation)[0];
         anomalyDetectionResults.anomalies = [anomaly];
         setAlertEvaluation(evaluation);
     }, [evaluation, anomaly]);

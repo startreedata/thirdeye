@@ -27,7 +27,10 @@ import {
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { AlertEvaluation } from "../../../../rest/dto/alert.interfaces";
-import { createAlertEvaluation } from "../../../../utils/alerts/alerts.util";
+import {
+    createAlertEvaluation,
+    extractDetectionEvaluation,
+} from "../../../../utils/alerts/alerts.util";
 import { generateChartOptionsForAlert } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -89,8 +92,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         if (currentAlertEvaluation) {
             const timeseriesConfiguration = generateChartOptionsForAlert(
                 currentAlertEvaluation,
-                currentAlertEvaluation.detectionEvaluations
-                    .output_AnomalyDetectorResult_0.anomalies,
+                extractDetectionEvaluation(currentAlertEvaluation)[0].anomalies,
                 t
             );
 

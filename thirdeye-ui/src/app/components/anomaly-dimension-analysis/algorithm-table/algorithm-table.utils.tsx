@@ -16,6 +16,7 @@ import React from "react";
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
+import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import {
     baselineComparisonOffsetToHumanReadable,
@@ -85,8 +86,10 @@ export const generateComparisonChartOptions = (
     comparisonOffset: string,
     translation: (labelName: string) => string = (s) => s
 ): TimeSeriesChartProps => {
-    const filteredTimeSeriesData =
-        filtered.detectionEvaluations.output_AnomalyDetectorResult_0.data;
+    const filteredTimeSeriesData = extractDetectionEvaluation(filtered)[0].data;
+    const nonFilteredTimeSeriesData =
+        extractDetectionEvaluation(nonFiltered)[0].data;
+
     const series = [
         {
             enabled: false,
@@ -108,15 +111,12 @@ export const generateComparisonChartOptions = (
         },
         {
             name: translation("label.non-filtered"),
-            data: nonFiltered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
-                (value, idx) => {
-                    return {
-                        y: value,
-                        x: nonFiltered.detectionEvaluations
-                            .output_AnomalyDetectorResult_0.data.timestamp[idx],
-                    };
-                }
-            ),
+            data: nonFilteredTimeSeriesData.current.map((value, idx) => {
+                return {
+                    y: value,
+                    x: nonFilteredTimeSeriesData.timestamp[idx],
+                };
+            }),
             enabled: false,
         },
         {
@@ -124,8 +124,7 @@ export const generateComparisonChartOptions = (
             data: filteredTimeSeriesData.current.map((value, idx) => {
                 return {
                     y: value,
-                    x: filtered.detectionEvaluations
-                        .output_AnomalyDetectorResult_0.data.timestamp[idx],
+                    x: filteredTimeSeriesData.timestamp[idx],
                 };
             }),
         },
@@ -134,8 +133,7 @@ export const generateComparisonChartOptions = (
             data: filteredTimeSeriesData.expected.map((value, idx) => {
                 return {
                     y: value,
-                    x: filtered.detectionEvaluations
-                        .output_AnomalyDetectorResult_0.data.timestamp[idx],
+                    x: filteredTimeSeriesData.timestamp[idx],
                 };
             }),
         },

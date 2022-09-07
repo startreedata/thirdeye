@@ -12,7 +12,12 @@
  * the License.
  */
 import { cloneDeep } from "lodash";
-import { Alert, AlertNodeType } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    AlertNodeType,
+} from "../../rest/dto/alert.interfaces";
+import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
@@ -21,6 +26,7 @@ import {
     createEmptyUiAlert,
     createEmptyUiAlertDatasetAndMetric,
     createEmptyUiAlertSubscriptionGroup,
+    extractDetectionEvaluation,
     filterAlerts,
     getUiAlert,
     getUiAlerts,
@@ -187,6 +193,12 @@ describe("Alerts Util", () => {
 
     it("omitNonUpdatableData should return appropriate alert for update alert", () => {
         expect(omitNonUpdatableData(mockAlert3)).toEqual({});
+    });
+
+    it("extractEvaluationData should return array of detection results", () => {
+        expect(extractDetectionEvaluation(mockAlertEvaluation)).toEqual(
+            mockDetectionEvaluations
+        );
     });
 });
 
@@ -411,3 +423,65 @@ const mockUiAlert3 = {
 const mockUiAlerts = [mockUiAlert1, mockUiAlert2, mockUiAlert3];
 
 const mockSearchWords = ["testNameMetric3", "testNameSubscriptionGroup11"];
+
+const mockDetectionEvaluations = [
+    {
+        data: {
+            timestamp: [1, 2, 3],
+            upperBound: [4, 5, 6],
+            lowerBound: [7, 8, 9],
+            current: [10, 11, 12],
+            expected: [13, 14, 15],
+        },
+        anomalies: [
+            {
+                startTime: 16,
+                endTime: 17,
+                avgCurrentVal: 18,
+                avgBaselineVal: 19,
+            },
+            {
+                startTime: 20,
+                endTime: 21,
+                avgCurrentVal: 22,
+                avgBaselineVal: 23,
+            },
+        ],
+    },
+    {
+        data: {
+            timestamp: [24],
+            upperBound: [25],
+            lowerBound: [26],
+            current: [27],
+            expected: [28],
+        },
+        anomalies: [
+            {
+                startTime: 29,
+                endTime: 30,
+                avgCurrentVal: 31,
+                avgBaselineVal: 32,
+            },
+            {
+                startTime: 33,
+                endTime: 34,
+                avgCurrentVal: 35,
+                avgBaselineVal: 36,
+            },
+        ],
+    },
+];
+
+const mockAlertEvaluation = {
+    alert: {} as Alert,
+    detectionEvaluations: {
+        detectionEvaluation1:
+            mockDetectionEvaluations[0] as DetectionEvaluation,
+        detectionEvaluation2:
+            mockDetectionEvaluations[1] as DetectionEvaluation,
+    },
+    start: 37,
+    end: 38,
+    lastTimestamp: 39,
+} as AlertEvaluation;

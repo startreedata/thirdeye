@@ -24,6 +24,7 @@ import {
 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
@@ -54,8 +55,7 @@ export const generateSeriesDataForEvaluation = (
             const [filteredAlertEvaluation, filterOptions] =
                 alertEvalAndFilters;
             const filteredAlertEvaluationTimeSeriesData =
-                filteredAlertEvaluation.detectionEvaluations
-                    .output_AnomalyDetectorResult_0.data;
+                extractDetectionEvaluation(filteredAlertEvaluation)[0].data;
 
             return {
                 name: filterOptions.map(concatKeyValueWithEqual).join(" & "),
@@ -77,9 +77,7 @@ export const generateSeriesDataForEvaluation = (
         }
     );
 
-    const timeSeriesData =
-        alertEvaluation.detectionEvaluations.output_AnomalyDetectorResult_0
-            .data;
+    const timeSeriesData = extractDetectionEvaluation(alertEvaluation)[0].data;
 
     return [
         {
@@ -171,6 +169,9 @@ export const generateChartOptions = (
     let series: Series[] = [];
 
     if (alertEvaluation) {
+        const timeseriesData =
+            extractDetectionEvaluation(alertEvaluation)[0].data;
+
         series = generateSeriesDataForEvaluation(
             alertEvaluation,
             filteredAlertEvaluation,
@@ -180,10 +181,8 @@ export const generateChartOptions = (
             generateSeriesForAnomalies(
                 [anomaly],
                 translation,
-                alertEvaluation.detectionEvaluations
-                    .output_AnomalyDetectorResult_0.data.timestamp,
-                alertEvaluation.detectionEvaluations
-                    .output_AnomalyDetectorResult_0.data.current
+                timeseriesData.timestamp,
+                timeseriesData.current
             )
         );
     }
@@ -419,9 +418,7 @@ export const generateChartOptionsForAlert = (
     translation: (id: string) => string,
     navigate?: NavigateFunction
 ): TimeSeriesChartProps => {
-    const data =
-        alertEvaluation.detectionEvaluations.output_AnomalyDetectorResult_0
-            .data;
+    const data = extractDetectionEvaluation(alertEvaluation)[0].data;
     let series: Series[] = [];
 
     if (alertEvaluation !== null) {

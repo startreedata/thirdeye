@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Date;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -40,7 +41,10 @@ public interface AnomalyMapper {
   @Mapping(source = "metadata.dataset.name", target = "collection")
   MergedAnomalyResultDTO toDto(AnomalyApi api);
 
-  default long map(Date value) {
+  default long map(@Nullable final Date value) {
+    if (value == null) {
+      return 0L;
+    }
     return value.getTime();
   }
 

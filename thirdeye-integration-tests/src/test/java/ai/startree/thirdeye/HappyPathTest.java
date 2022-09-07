@@ -25,11 +25,13 @@ import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
 import ai.startree.thirdeye.spi.api.HeatMapResultApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
+import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -262,6 +264,19 @@ public class HappyPathTest {
     DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(
         DimensionAnalysisResultApi.class);
     assertThat(dimensionAnalysisResultApi.getResponseRows().size()).isGreaterThan(0);
+  }
+
+  @Test(dependsOnMethods = "testGetSingleAnomaly")
+  public void testSaveInvestigation() {
+    final RcaInvestigationApi rcaInvestigationApi = new RcaInvestigationApi()
+        .setName("investigationName")
+        .setText("textDescription")
+        .setAnomaly(new AnomalyApi().setId(anomalyId))
+        .setUiMetadata(Map.of("uiKey1", List.of(1,2), "uiKey2", "foo"));
+
+    final Response response = request("api/rca/investigations")
+        .post(Entity.json(List.of(rcaInvestigationApi)));
+    assertThat(response.getStatus()).isEqualTo(200);
   }
 
   private Builder request(final String urlFragment) {

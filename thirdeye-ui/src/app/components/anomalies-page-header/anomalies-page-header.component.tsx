@@ -11,8 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box, Breadcrumbs, Typography } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import {
     PageHeaderActionsV1,
     PageHeaderTabsV1,
@@ -34,12 +37,32 @@ export const AnomaliesPageHeader: FunctionComponent<
 
     return (
         <PageHeaderV1>
-            <PageHeaderTextV1>{t("label.anomalies")}</PageHeaderTextV1>
+            <Box paddingBottom={2}>
+                <Breadcrumbs aria-label="breadcrumb">
+                    <Link
+                        color="inherit"
+                        style={{ textDecoration: "none" }}
+                        to="/"
+                    >
+                        <Typography color="textPrimary" variant="subtitle2">
+                            Home
+                        </Typography>
+                    </Link>
+                    <Typography variant="subtitle2">
+                        {capitalize(
+                            props.selectedIndex === 0
+                                ? t("label.anomalies-list")
+                                : t("label.metrics-report")
+                        )}
+                    </Typography>
+                </Breadcrumbs>
+                <PageHeaderTextV1>{t("label.anomalies")}</PageHeaderTextV1>
+            </Box>
+
             <PageHeaderActionsV1>
                 {/* Create options button */}
                 <CreateMenuButton />
             </PageHeaderActionsV1>
-
             <PageHeaderTabsV1 selectedIndex={props.selectedIndex}>
                 <PageHeaderTabV1 href={getAnomaliesListPath()}>
                     {t("label.anomalies-list")}

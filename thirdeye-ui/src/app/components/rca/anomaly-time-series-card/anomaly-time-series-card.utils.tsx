@@ -84,8 +84,10 @@ export const generateSeriesDataForEvaluation = (
         alertEvaluation.detectionEvaluations.output_AnomalyDetectorResult_0
             .data;
 
-    return [
-        {
+    const chartSeries: Series[] = [];
+
+    if (!hideUpperLowerBound) {
+        chartSeries.push({
             enabled: false,
             name: translation("label.upper-and-lower-bound"),
             type: SeriesType.AREA_CLOSED,
@@ -110,8 +112,11 @@ export const generateSeriesDataForEvaluation = (
                 },
             },
             legendIndex: 10,
-        },
-        {
+        });
+    }
+
+    if (!hideActivity) {
+        chartSeries.push({
             name: translation("label.activity"),
             type: SeriesType.LINE,
             color: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
@@ -141,8 +146,11 @@ export const generateSeriesDataForEvaluation = (
                     />
                 );
             },
-        },
-        {
+        });
+    }
+
+    if (!hidePredicted) {
+        chartSeries.push({
             name: translation("label.predicted"),
             type: SeriesType.LINE,
             color: Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
@@ -160,9 +168,10 @@ export const generateSeriesDataForEvaluation = (
                     formatLargeNumberV1(d.y),
             },
             strokeDasharray: `${Dimension.DASHARRAY_VISUALIZATION_BASELINE}`,
-        },
-        ...filteredTimeSeriesData,
-    ];
+        });
+    }
+
+    return [...chartSeries, ...filteredTimeSeriesData];
 };
 
 export const generateChartOptions = (

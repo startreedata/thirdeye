@@ -43,7 +43,7 @@ export const MetricsReportList: FunctionComponent<MetricsReportListProps> = ({
     const { t } = useTranslation();
 
     const generateDataWithChildren = (data: UiAnomaly[]): UiAnomaly[] => {
-        return data?.map((metric, index: number) => ({
+        return data.map((metric, index: number) => ({
             ...metric,
             children: [
                 {

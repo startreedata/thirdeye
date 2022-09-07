@@ -13,9 +13,15 @@
  */
 
 import { Box } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLoadingIndicatorV1 } from "../../../platform/components";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
@@ -31,12 +37,22 @@ const MetricsReportEvaluationTimeSeries: FunctionComponent<
 > = ({ data, searchParams }) => {
     const [alertEvaluation, setAlertEvaluation] =
         useState<AlertEvaluation | null>(null);
-    const [loading, setLoading] = useState(true);
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
-    const { evaluation, getEvaluation } = useGetEvaluation();
+    const {
+        evaluation,
+        getEvaluation,
+        errorMessages,
+        status: evaluationRequestStatus,
+    } = useGetEvaluation();
 
-    const { anomalies, getAnomalies } = useGetAnomalies();
+    const {
+        anomalies,
+        getAnomalies,
+        status: anomaliesRequestStatus,
+        errorMessages: anomaliesRequestErrors,
+    } = useGetAnomalies();
 
     useEffect(() => {
         fetchAlertEvaluation();
@@ -48,13 +64,41 @@ const MetricsReportEvaluationTimeSeries: FunctionComponent<
                 evaluation.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies =
                     anomalies;
             }
-            setLoading(false);
             setAlertEvaluation(evaluation);
         }
     }, [evaluation]);
 
+    useEffect(() => {
+        if (evaluationRequestStatus === ActionStatus.Error) {
+            !isEmpty(errorMessages)
+                ? errorMessages.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.chart-data"),
+                      })
+                  );
+        }
+    }, [errorMessages, evaluationRequestStatus]);
+
+    useEffect(() => {
+        if (anomaliesRequestStatus === ActionStatus.Error) {
+            !isEmpty(anomaliesRequestErrors)
+                ? anomaliesRequestErrors.map((msg) =>
+                      notify(NotificationTypeV1.Error, msg)
+                  )
+                : notify(
+                      NotificationTypeV1.Error,
+                      t("message.error-while-fetching", {
+                          entity: t("label.anomalies"),
+                      })
+                  );
+        }
+    }, [anomaliesRequestStatus, anomaliesRequestErrors]);
+
     const fetchAlertEvaluation = (): void => {
-        setLoading(true);
         const start = searchParams?.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams?.get(TimeRangeQueryStringKey.END_TIME);
         getAnomalies({
@@ -69,9 +113,10 @@ const MetricsReportEvaluationTimeSeries: FunctionComponent<
 
     return (
         <Box height={120} width={500}>
-            {loading ? (
+            {evaluationRequestStatus === ActionStatus.Working ? (
                 <AppLoadingIndicatorV1 />
-            ) : !alertEvaluation ? (
+            ) : evaluationRequestStatus === ActionStatus.Error ||
+              !alertEvaluation ? (
                 <NoDataIndicator />
             ) : (
                 <TimeSeriesChart

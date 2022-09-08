@@ -125,7 +125,7 @@ export interface XAxisOptions {
     hideTime?: boolean;
     enabled?: boolean;
     plotBands?: PlotBand[];
-    tickFormatter: (date: string) => string;
+    tickFormatter?: (date: string) => string;
 }
 
 export interface YAxisOptions {

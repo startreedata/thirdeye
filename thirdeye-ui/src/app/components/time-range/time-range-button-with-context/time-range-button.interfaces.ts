@@ -17,8 +17,12 @@ export interface TimeRangeButtonProps {
     timeRangeDuration: TimeRangeDuration;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     onChange?: (timeRangeDuration: TimeRangeDuration) => void;
+    maxDate?: number;
+    minDate?: number;
 }
 
 export interface TimeRangeButtonWithContextProps {
     onTimeRangeChange?: (start: number, end: number) => void;
+    maxDate?: number;
+    minDate?: number;
 }

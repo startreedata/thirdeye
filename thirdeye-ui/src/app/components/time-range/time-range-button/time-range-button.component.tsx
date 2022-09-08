@@ -23,10 +23,17 @@ import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { TimeRangeSelectorPopoverContent } from "../time-range-selector-popover-content/time-range-selector-popover-content.component";
 import { TimeRangeButtonProps } from "./time-range-button.interfaces";
 
+enum Direction {
+    BACK,
+    FORWARD,
+}
+
 export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
     timeRangeDuration,
     recentCustomTimeRangeDurations,
     onChange,
+    maxDate,
+    minDate,
 }: TimeRangeButtonProps) => {
     const { t } = useTranslation();
     const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
@@ -42,25 +49,35 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
         setTimeRangeSelectorAnchorElement(null);
     };
 
-    const handleWeekExtensionClick = (direction: number): void => {
+    const handleWeekExtensionClick = (direction: Direction): void => {
         const copiedTimeRange = { ...timeRangeDuration };
-        if (direction > 0) {
-            copiedTimeRange.endTime =
-                copiedTimeRange.endTime + WEEK_IN_MILLISECONDS;
-        } else {
+        if (direction === Direction.BACK) {
             copiedTimeRange.startTime =
                 copiedTimeRange.startTime - WEEK_IN_MILLISECONDS;
+        } else {
+            copiedTimeRange.endTime = Math.min(
+                copiedTimeRange.endTime + WEEK_IN_MILLISECONDS,
+                Date.now()
+            );
         }
         onChange && onChange(copiedTimeRange);
     };
+
+    const isDateEndExtendable = maxDate
+        ? timeRangeDuration.endTime + WEEK_IN_MILLISECONDS <= maxDate
+        : timeRangeDuration.endTime + WEEK_IN_MILLISECONDS < Date.now();
+    const isDateStartExtendable = minDate
+        ? timeRangeDuration.startTime - WEEK_IN_MILLISECONDS >= minDate
+        : true;
 
     return (
         <>
             <ButtonGroup color="secondary" variant="outlined">
                 <Button
                     color="secondary"
+                    disabled={!isDateStartExtendable}
                     variant="outlined"
-                    onClick={() => handleWeekExtensionClick(-1)}
+                    onClick={() => handleWeekExtensionClick(Direction.BACK)}
                 >
                     <TooltipV1
                         placement="top"
@@ -83,8 +100,9 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
                 </Button>
                 <Button
                     color="secondary"
+                    disabled={!isDateEndExtendable}
                     variant="outlined"
-                    onClick={() => handleWeekExtensionClick(1)}
+                    onClick={() => handleWeekExtensionClick(Direction.FORWARD)}
                 >
                     <TooltipV1
                         placement="top"
@@ -105,6 +123,8 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
                 onClose={handleTimeRangeSelectorClose}
             >
                 <TimeRangeSelectorPopoverContent
+                    maxDate={maxDate}
+                    minDate={minDate}
                     recentCustomTimeRangeDurations={
                         recentCustomTimeRangeDurations
                     }

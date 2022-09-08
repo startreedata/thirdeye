@@ -162,14 +162,14 @@ public class AlertInsightsProvider {
   }
 
   private static long safeEndTime(final long datasetEndTime) {
-    // if there is bad data in the dataset, datasetEndTime can have a big, incorrect value - see TE-860
-    final long hostCurrentEndTime = System.currentTimeMillis();
-    if (datasetEndTime > hostCurrentEndTime + COMPUTER_CLOCK_MARGIN_MILLIS) {
+    // if there is bad data in the dataset, datasetEndTime can have an incorrect value, bigger than the current time - see TE-860
+    final long hostCurrenTime = System.currentTimeMillis();
+    if (datasetEndTime > hostCurrenTime + COMPUTER_CLOCK_MARGIN_MILLIS) {
       LOG.warn(
-          "Dataset maxTime is too big: {}. Most likely a data issue in the dataset. Correcting to the current time of ThirdEye system: {}",
+          "Dataset maxTime is too big: {}. Most likely a data issue in the dataset. Replacing by the current time of ThirdEye system: {}",
           datasetEndTime,
-          hostCurrentEndTime);
-      return hostCurrentEndTime;
+          hostCurrenTime);
+      return hostCurrenTime;
     }
 
     return datasetEndTime;

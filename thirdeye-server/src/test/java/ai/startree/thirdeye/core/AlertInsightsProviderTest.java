@@ -54,7 +54,7 @@ public class AlertInsightsProviderTest {
 
   @Test
   public void testDefaultIntervalWithDailyGranularityWithEndTimeBiggerThanCurrentTime() {
-    // see te-860
+    // check case in which datasetEndTime has an incorrect value, bigger than the current time - can happen with bad data quality in the dataset
     final AlertMetadataDTO alertMetadataDTO = new AlertMetadataDTO().setGranularity(
         DAILY_GRANULARITY);
     final Interval res = AlertInsightsProvider.getDefaultInterval(JANUARY_1_2019_OAM,

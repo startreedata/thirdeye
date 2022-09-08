@@ -125,6 +125,7 @@ export interface XAxisOptions {
     hideTime?: boolean;
     enabled?: boolean;
     plotBands?: PlotBand[];
+    tickFormatter: (date: string) => string;
 }
 
 export interface YAxisOptions {
@@ -147,6 +148,12 @@ export interface TimeSeriesChartProps {
     };
     initialZoom?: ZoomDomain;
     events?: Event[];
+    margins?: {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+    };
 }
 
 export interface ZoomDomain {

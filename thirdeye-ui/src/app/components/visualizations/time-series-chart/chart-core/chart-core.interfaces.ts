@@ -24,6 +24,7 @@ export interface ChartCoreProps {
     xScale?: AxisScale<number>;
     yScale?: AxisScale<number>;
     width: number;
+    height: number;
     yMax: number;
     xMax: number;
     margin: { top: number; right: number; bottom: number; left: number };

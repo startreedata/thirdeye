@@ -62,6 +62,8 @@ public class AlertInsightsProvider {
   private static final Interval NOT_USED_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final String MAX_TIME_ALIAS = "maxTime";
   private static final String MIN_TIME_ALIAS = "minTime";
+  // computer clock difference is usually order of seconds - but here taking 1 day is safe and does not impact the logic
+  private static final long COMPUTER_CLOCK_MARGIN_MILLIS = 86_400_000;
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final DatasetConfigManager datasetConfigManager;
@@ -144,9 +146,10 @@ public class AlertInsightsProvider {
     final Period granularity = isoPeriod(metadata.getGranularity());
     final DateTimeZone timeZone = optional(metadata.getTimezone()).map(DateTimeZone::forID)
         .orElse(Constants.DEFAULT_TIMEZONE);
-    DateTime defaultEndDateTime = new DateTime(datasetEndTime, timeZone);
-    defaultEndDateTime = TimeUtils.floorByPeriod(defaultEndDateTime, granularity);
+    final long safeEndTime = safeEndTime(datasetEndTime);
 
+    DateTime defaultEndDateTime = new DateTime(safeEndTime, timeZone);
+    defaultEndDateTime = TimeUtils.floorByPeriod(defaultEndDateTime, granularity);
     DateTime defaultStartTime = defaultEndDateTime.minus(defaultChartTimeframe(granularity));
     if (defaultStartTime.getMillis() < datasetStartTime) {
       defaultStartTime = new DateTime(datasetStartTime, timeZone);
@@ -156,6 +159,20 @@ public class AlertInsightsProvider {
     }
 
     return new Interval(defaultStartTime, defaultEndDateTime);
+  }
+
+  private static long safeEndTime(final long datasetEndTime) {
+    // if there is bad data in the dataset, datasetEndTime can have a big, incorrect value - see TE-860
+    final long hostCurrentEndTime = System.currentTimeMillis();
+    if (datasetEndTime > hostCurrentEndTime + COMPUTER_CLOCK_MARGIN_MILLIS) {
+      LOG.warn(
+          "Dataset maxTime is too big: {}. Most likely a data issue in the dataset. Correcting to the current time of ThirdEye system: {}",
+          datasetEndTime,
+          hostCurrentEndTime);
+      return hostCurrentEndTime;
+    }
+
+    return datasetEndTime;
   }
 
   /**

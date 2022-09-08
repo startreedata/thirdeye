@@ -15,7 +15,10 @@ package ai.startree.thirdeye.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import ai.startree.thirdeye.util.TimeUtils;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -31,6 +34,7 @@ public class AlertInsightsProviderTest {
   private final static long JANUARY_1_2021_0AM = 1609459200000L;
   private final static long DECEMBER_31_2020_11PM = 1609455600000L;
   private final static long JANUARY_1_2019_OAM = 1546300800000L;
+  private final static long JULY_4_2038_2AM = 2161822950829L;
   private final static String DAILY_GRANULARITY = Period.days(1).toString();
   public static final String PARIS_TIMEZONE = "Europe/Paris";
 
@@ -46,6 +50,22 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_0AM,
         DateTimeZone.UTC);
     assertThat(res).isEqualTo(expected);
+  }
+
+  @Test
+  public void testDefaultIntervalWithDailyGranularityWithEndTimeBiggerThanCurrentTime() {
+    // see te-860
+    final AlertMetadataDTO alertMetadataDTO = new AlertMetadataDTO().setGranularity(
+        DAILY_GRANULARITY);
+    final Interval res = AlertInsightsProvider.getDefaultInterval(JANUARY_1_2019_OAM,
+        JULY_4_2038_2AM,
+        alertMetadataDTO);
+
+    final DateTime correctedEndDateTime = TimeUtils.floorByPeriod(new DateTime(System.currentTimeMillis(),
+        Constants.DEFAULT_TIMEZONE), Period.days(1));
+    final Interval expected = new Interval(correctedEndDateTime.minus(Period.years(1)), correctedEndDateTime);
+    assertThat(res).isEqualTo(expected);
+
   }
 
   @Test

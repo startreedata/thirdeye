@@ -48,6 +48,8 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<
 > = ({
     timeRangeDuration,
     onClose,
+    minDate,
+    maxDate,
     ...props
 }: TimeRangeSelectorPopoverProps) => {
     const timeRangeSelectorPopoverClasses = useTimeRangeSelectorPopoverStyles();
@@ -188,6 +190,8 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<
                                 }
                             >
                                 <TimeRangeList
+                                    maxDate={maxDate}
+                                    minDate={minDate}
                                     recentCustomTimeRangeDurations={
                                         props.recentCustomTimeRangeDurations
                                     }
@@ -251,6 +255,16 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<
                                             ToolbarComponent={
                                                 DateTimePickerToolbar
                                             }
+                                            maxDate={
+                                                maxDate
+                                                    ? new Date(maxDate)
+                                                    : undefined
+                                            }
+                                            minDate={
+                                                minDate
+                                                    ? new Date(minDate)
+                                                    : undefined
+                                            }
                                             value={
                                                 new Date(
                                                     componentTimeRangeDuration.startTime
@@ -294,6 +308,11 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<
                                             hideTabs
                                             ToolbarComponent={
                                                 DateTimePickerToolbar
+                                            }
+                                            maxDate={
+                                                maxDate
+                                                    ? new Date(maxDate)
+                                                    : undefined
                                             }
                                             minDate={
                                                 new Date(

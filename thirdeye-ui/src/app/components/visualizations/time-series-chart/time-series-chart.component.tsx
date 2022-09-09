@@ -104,6 +104,7 @@ export const TimeSeriesChart: FunctionComponent<TimeSeriesChartProps> = (
             {({ width, height }) => (
                 <TimeSeriesChartInternal
                     height={props.height || height}
+                    margins={CHART_MARGINS}
                     width={width}
                     {...props}
                 />
@@ -128,6 +129,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     chartEvents,
     events,
     LegendComponent = Legend,
+    margins = CHART_MARGINS,
 }) => {
     const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
         initialZoom
@@ -170,7 +172,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
     let brushChartHeight;
     let topChartBottomMargin;
 
-    const innerHeight = height - CHART_MARGINS.top - CHART_MARGINS.bottom;
+    const innerHeight = height - margins.top - margins.bottom;
 
     if (brush) {
         topChartBottomMargin = isXAxisEnabled
@@ -180,13 +182,13 @@ export const TimeSeriesChartInternal: FunctionComponent<
             TOP_CHART_HEIGHT_RATIO * innerHeight - topChartBottomMargin;
         brushChartHeight = innerHeight - topChartHeight - CHART_SEPARATION;
     } else {
-        topChartBottomMargin = CHART_MARGINS.top;
+        topChartBottomMargin = margins.top;
         topChartHeight = innerHeight - topChartBottomMargin;
         brushChartHeight = 0;
     }
 
     // Bounds
-    const xMax = Math.max(width - CHART_MARGINS.left - CHART_MARGINS.right, 0);
+    const xMax = Math.max(width - margins.left - margins.right, 0);
     const yMax = Math.max(topChartHeight, 0);
 
     const colorScale = useMemo(() => {
@@ -358,6 +360,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
             <svg height={height} width={width}>
                 <ChartCore
                     colorScale={colorScale}
+                    height={height}
                     margin={{ ...CHART_MARGINS, bottom: topChartBottomMargin }}
                     series={processedMainChartSeries}
                     showXAxis={isXAxisEnabled}
@@ -407,12 +410,10 @@ export const TimeSeriesChartInternal: FunctionComponent<
                         colorScale={colorScale}
                         height={brushChartHeight}
                         initialZoom={currentZoom}
-                        margins={CHART_MARGINS}
+                        margins={margins}
                         series={processedBrushChartSeries}
                         top={
-                            topChartHeight +
-                            topChartBottomMargin +
-                            CHART_MARGINS.top
+                            topChartHeight + topChartBottomMargin + margins.top
                         }
                         width={width}
                         xAxisOptions={xAxis}
@@ -426,7 +427,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 <TooltipWithBounds
                     // set this to random so it correctly updates with parent bounds
                     key={Math.random()}
-                    left={tooltipLeft + CHART_MARGINS.left}
+                    left={tooltipLeft + margins.left}
                     top={tooltipTop}
                 >
                     <TooltipPopover
@@ -447,11 +448,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
             )}
 
             {isZoomEnabled && currentZoom && (
-                <Box
-                    position="absolute"
-                    right={CHART_MARGINS.right + 10}
-                    top={5}
-                >
+                <Box position="absolute" right={margins.right + 10} top={5}>
                     <Button onClick={handleResetZoom}>Reset Zoom</Button>
                 </Box>
             )}

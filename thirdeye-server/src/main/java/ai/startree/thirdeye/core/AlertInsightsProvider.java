@@ -47,6 +47,7 @@ import javax.ws.rs.WebApplicationException;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -105,74 +106,107 @@ public class AlertInsightsProvider {
     }
     final DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
     if (datasetConfigDTO == null) {
-      LOG.warn("Dataset not found: {}. Cannot fetch start and end time.", datasetName);
-      return;
-    }
-    final String dataSource = datasetConfigDTO.getDataSource();
-    if (dataSource == null) {
-      LOG.warn("Datasource is null in dataset configuration: {}. Cannot fetch start and end time.",
-          datasetName);
-      return;
-    }
-
-    final @NonNull ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
-    final SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
-    final SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
-
-    final String sqlQuery = minMaxTimesSqlQuery(datasetConfigDTO,
-        sqlExpressionBuilder,
-        sqlLanguage);
-    final DataSourceRequest request = new DataSourceRequest(null, sqlQuery, Map.of());
-    final DataFrame df = thirdEyeDataSource.fetchDataTable(request).getDataFrame();
-    if (df.size() == 0) {
       LOG.warn(
-          "Empty dataframe for max/min time query on dataset {}. Dataset is empty or unknown SQL error. Could not fetch start and end time.",
+          "Dataset configuration not found: {}. Dataset not onboarded? Cannot fetch start and end time.",
           datasetName);
       return;
     }
-    final long datasetStartTime = df.getLong(MIN_TIME_ALIAS, 0);
-    final long datasetEndTime = df.getLong(MAX_TIME_ALIAS, 0);
-    final Interval defaultInterval = getDefaultInterval(datasetStartTime, datasetEndTime, metadata);
 
-    insights.setDatasetEndTime(datasetEndTime);
-    insights.setDatasetStartTime(datasetStartTime);
+    // fetch dataset interval
+    final DateTimeZone timeZone = optional(metadata.getTimezone()).map(DateTimeZone::forID)
+        .orElse(Constants.DEFAULT_TIMEZONE);
+    final Interval datasetInterval = getDatasetInterval(insights, datasetConfigDTO, timeZone);
+    if (datasetInterval == null) {
+      return;
+    }
+
+    // compute default chart interval
+    final Period granularity = isoPeriod(metadata.getGranularity());
+    final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity);
+
+    insights.setDatasetStartTime(datasetInterval.getStartMillis());
+    insights.setDatasetEndTime(datasetInterval.getEndMillis());
     insights.setDefaultStartTime(defaultInterval.getStartMillis());
     insights.setDefaultEndTime(defaultInterval.getEndMillis());
   }
 
-  @VisibleForTesting
-  protected static Interval getDefaultInterval(final long datasetStartTime,
-      final long datasetEndTime, @NonNull final AlertMetadataDTO metadata) {
-    final Period granularity = isoPeriod(metadata.getGranularity());
-    final DateTimeZone timeZone = optional(metadata.getTimezone()).map(DateTimeZone::forID)
-        .orElse(Constants.DEFAULT_TIMEZONE);
-    final long safeEndTime = safeEndTime(datasetEndTime);
+  private @Nullable Interval getDatasetInterval(final AlertInsightsApi insights,
+      final DatasetConfigDTO datasetConfigDTO, final DateTimeZone timeZone) throws Exception {
+    final DataFrame timesDf = fetchMinMaxTimes(datasetConfigDTO, null);
+    if (timesDf == null || timesDf.size() == 0) {
+      return null;
+    }
+    final long datasetStartTime = timesDf.getLong(MIN_TIME_ALIAS, 0);
+    long datasetEndTime = timesDf.getLong(MAX_TIME_ALIAS, 0);
 
-    DateTime defaultEndDateTime = new DateTime(safeEndTime, timeZone);
-    defaultEndDateTime = TimeUtils.floorByPeriod(defaultEndDateTime, granularity);
+    // if there is bad data in the dataset, datasetEndTime can have an incorrect value, bigger than the current time - see TE-860
+    // if it's the case - fetch a safe datasetEndTime value
+    final long hostCurrenTime = System.currentTimeMillis();
+    final boolean endTimeIsInTheFuture =
+        datasetEndTime > hostCurrenTime + COMPUTER_CLOCK_MARGIN_MILLIS;
+    if (endTimeIsInTheFuture) {
+      LOG.warn(
+          "Dataset maxTime is too big: {}. Current system time: {}.Most likely a data issue in the dataset. Rerunning query with a filter < currentTime to get a safe maxTime.",
+          datasetEndTime,
+          hostCurrenTime);
+      insights.setSuspiciousDatasetEndTime(datasetEndTime);
+      final Interval safeTimeInterval = new Interval(0L,
+          hostCurrenTime + COMPUTER_CLOCK_MARGIN_MILLIS);
+      final DataFrame safeTimesDf = fetchMinMaxTimes(datasetConfigDTO, safeTimeInterval);
+      if (safeTimesDf == null || safeTimesDf.size() == 0) {
+        LOG.warn("Could not fetch the maxTime on a safe time interval for dataset {}.",
+            datasetConfigDTO.getDataset());
+        return null;
+      } else {
+        datasetEndTime = safeTimesDf.getLong(MAX_TIME_ALIAS, 0);
+      }
+    }
+    return new Interval(datasetStartTime, datasetEndTime, timeZone);
+  }
+
+  private @Nullable DataFrame fetchMinMaxTimes(final @NonNull DatasetConfigDTO datasetConfigDTO,
+      final @Nullable Interval timeFilterInterval) throws Exception {
+    final String dataSource = datasetConfigDTO.getDataSource();
+    if (dataSource == null) {
+      LOG.warn(
+          "Datasource is null in dataset configuration: {}. Could not fetch start and end time.",
+          datasetConfigDTO.getDataset());
+      return null;
+    }
+
+    final @NonNull ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
+
+    final String sqlQuery = minMaxTimesSqlQuery(datasetConfigDTO,
+        thirdEyeDataSource,
+        timeFilterInterval);
+    final DataSourceRequest request = new DataSourceRequest(null, sqlQuery, Map.of());
+
+    final DataFrame df = thirdEyeDataSource.fetchDataTable(request).getDataFrame();
+
+    if (df.size() == 0) {
+      LOG.warn(
+          "Empty dataframe for max/min time query on dataset {} on interval: {}. Dataset is empty or unknown SQL error. Could not fetch start and end time.",
+          datasetConfigDTO.getDataset(),
+          timeFilterInterval == null ? "full dataset" : timeFilterInterval.toString());
+    }
+
+    return df;
+  }
+
+  @VisibleForTesting
+  protected static Interval getDefaultChartInterval(final @NonNull Interval datasetInterval,
+      @NonNull final Period granularity) {
+    final DateTime defaultEndDateTime = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
+        granularity);
+
     DateTime defaultStartTime = defaultEndDateTime.minus(defaultChartTimeframe(granularity));
-    if (defaultStartTime.getMillis() < datasetStartTime) {
-      defaultStartTime = new DateTime(datasetStartTime, timeZone);
-      defaultStartTime = TimeUtils.floorByPeriod(defaultStartTime, granularity);
+    if (defaultStartTime.getMillis() < datasetInterval.getStartMillis()) {
+      defaultStartTime = TimeUtils.floorByPeriod(datasetInterval.getStart(), granularity);
       // first bucket may be incomplete - start from second one
       defaultStartTime = defaultStartTime.plus(granularity);
     }
 
     return new Interval(defaultStartTime, defaultEndDateTime);
-  }
-
-  private static long safeEndTime(final long datasetEndTime) {
-    // if there is bad data in the dataset, datasetEndTime can have an incorrect value, bigger than the current time - see TE-860
-    final long hostCurrenTime = System.currentTimeMillis();
-    if (datasetEndTime > hostCurrenTime + COMPUTER_CLOCK_MARGIN_MILLIS) {
-      LOG.warn(
-          "Dataset maxTime is too big: {}. Most likely a data issue in the dataset. Replacing by the current time of ThirdEye system: {}",
-          datasetEndTime,
-          hostCurrenTime);
-      return hostCurrenTime;
-    }
-
-    return datasetEndTime;
   }
 
   /**
@@ -194,8 +228,11 @@ public class AlertInsightsProvider {
   }
 
   private String minMaxTimesSqlQuery(final DatasetConfigDTO datasetConfigDTO,
-      final SqlExpressionBuilder sqlExpressionBuilder, final SqlLanguage sqlLanguage)
-      throws SqlParseException {
+      final @NonNull ThirdEyeDataSource thirdEyeDataSource,
+      final @Nullable Interval timeFilterInterval) throws SqlParseException {
+    final SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
+    final SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
+
     final SqlDialect dialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
     // build sql string that transform time column in milliseconds
     // time conversion happens before the MAX operation - the datasource is responsible for optimizing this
@@ -211,11 +248,17 @@ public class AlertInsightsProvider {
         List.of(timeColumnToMillisProjection)).withAlias(MAX_TIME_ALIAS);
     final QueryProjection minTimeProjection = QueryProjection.of(MetricAggFunction.MIN.toString(),
         List.of(timeColumnToMillisProjection)).withAlias(MIN_TIME_ALIAS);
-    final CalciteRequest calciteRequest = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+    final CalciteRequest.Builder calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
         .addSelectProjection(maxTimeProjection)
-        .addSelectProjection(minTimeProjection)
-        .build();
+        .addSelectProjection(minTimeProjection);
 
-    return calciteRequest.getSql(sqlLanguage, sqlExpressionBuilder);
+    if (timeFilterInterval != null) {
+      calciteRequestBuilder.withTimeFilter(timeFilterInterval,
+          datasetConfigDTO.getTimeColumn(),
+          datasetConfigDTO.getTimeFormat(),
+          datasetConfigDTO.getTimeUnit().name());
+    }
+
+    return calciteRequestBuilder.build().getSql(sqlLanguage, sqlExpressionBuilder);
   }
 }

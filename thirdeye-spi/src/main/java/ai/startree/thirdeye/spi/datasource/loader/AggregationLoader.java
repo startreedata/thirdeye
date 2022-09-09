@@ -51,7 +51,5 @@ public interface AggregationLoader {
    * @param limit top k element limit ({@code -1} for default)
    * @return aggregates data frame
    */
-  DataFrame loadAggregate(MetricSlice slice, List<String> dimensions, int limit) throws Exception;
-
   Future<DataFrame> loadAggregateAsync(MetricSlice slice, List<String> dimensions, int limit) throws Exception;
 }

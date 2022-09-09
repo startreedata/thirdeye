@@ -80,6 +80,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     const chartOptions: ChartCoreProps = {
         series,
         width,
+        height,
         yMax: yBrushMax,
         xMax: xBrushMax,
         showXAxis: true,

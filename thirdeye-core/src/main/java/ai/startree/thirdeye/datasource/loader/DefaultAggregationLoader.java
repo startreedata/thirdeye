@@ -37,12 +37,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -63,6 +61,51 @@ public class DefaultAggregationLoader implements AggregationLoader {
   public DefaultAggregationLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
     executorService = Executors.newCachedThreadPool();
+  }
+
+  /**
+   * Returns a map of maps (keyed by dimension name, keyed by dimension value) derived from the
+   * breakdown results dataframe.
+   *
+   * @param dataBreakdown (transformed) breakdown query results
+   * @param dataAggregate (transformed) aggregate query results
+   * @return map of maps of value (keyed by dimension name, keyed by dimension value)
+   */
+  public static Map<String, Map<String, Double>> makeBreakdownMap(DataFrame dataBreakdown,
+      DataFrame dataAggregate) {
+    final Map<String, Map<String, Double>> output = new TreeMap<>();
+
+    dataBreakdown = dataBreakdown.dropNull();
+    dataAggregate = dataAggregate.dropNull();
+
+    final Map<String, Double> dimensionTotals = new HashMap<>();
+
+    for (int i = 0; i < dataBreakdown.size(); i++) {
+      final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
+      final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
+      final double value = dataBreakdown.getDouble(Constants.COL_VALUE, i);
+
+      // cell
+      if (!output.containsKey(dimName)) {
+        output.put(dimName, new HashMap<>());
+      }
+      output.get(dimName).put(dimValue, value);
+
+      // total
+      dimensionTotals.put(dimName, MapUtils.getDoubleValue(dimensionTotals, dimName, 0) + value);
+    }
+
+    // add rollup column
+    if (!dataAggregate.isEmpty()) {
+      final double total = dataAggregate.getDouble(Constants.COL_VALUE, 0);
+      for (final Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
+        if (entry.getValue() < total) {
+          output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
+        }
+      }
+    }
+
+    return output;
   }
 
   @Override
@@ -124,14 +167,6 @@ public class DefaultAggregationLoader implements AggregationLoader {
   }
 
   @Override
-  public DataFrame loadAggregate(final MetricSlice slice, final List<String> dimensions, final int limit)
-      throws ExecutionException, InterruptedException, TimeoutException {
-    final Future<DataFrame> future = loadAggregateAsync(slice, dimensions, limit);
-
-    return future.get(TIMEOUT, TimeUnit.MILLISECONDS);
-  }
-
-  @Override
   public Future<DataFrame> loadAggregateAsync(final MetricSlice slice,
       final List<String> dimensions, final int limit) {
     LOG.info("Aggregating '{}'", slice);
@@ -139,9 +174,12 @@ public class DefaultAggregationLoader implements AggregationLoader {
         .newBuilderFrom(slice)
         .withLimit(limit);
     if (dimensions.isEmpty()) {
-      // add this count to help check if there is data in aggregate only queries - some aggregations can return a value even if there is no data see https://docs.pinot.apache.org/users/user-guide-query/supported-aggregations
+      // add this count to help check if there is data in aggregate only queries - some aggregations
+      // can return a value even if there is no data see
+      // https://docs.pinot.apache.org/users/user-guide-query/supported-aggregations
       // count rows non null
-      requestBuilder.addSelectProjection(QueryProjection.of("COUNT", List.of(getFunctionName(slice.getMetricConfigDTO()))).withAlias(
+      requestBuilder.addSelectProjection(QueryProjection.of("COUNT",
+          List.of(getFunctionName(slice.getMetricConfigDTO()))).withAlias(
           COL_AGGREGATION_ONLY_NON_NULL_ROWS_COUNT));
       // count all rows
       requestBuilder.addSelectProjection(QueryProjection.of("COUNT", List.of("*")).withAlias(
@@ -170,51 +208,5 @@ public class DefaultAggregationLoader implements AggregationLoader {
     // table info is only used with legacy Pinot client - should be removed
     final DataSourceRequest requestV2 = new DataSourceRequest(null, query, Map.of());
     return thirdEyeDataSource.fetchDataTable(requestV2).getDataFrame();
-  }
-
-
-  /**
-   * Returns a map of maps (keyed by dimension name, keyed by dimension value) derived from the
-   * breakdown results dataframe.
-   *
-   * @param dataBreakdown (transformed) breakdown query results
-   * @param dataAggregate (transformed) aggregate query results
-   * @return map of maps of value (keyed by dimension name, keyed by dimension value)
-   */
-  public static Map<String, Map<String, Double>> makeBreakdownMap(DataFrame dataBreakdown,
-      DataFrame dataAggregate) {
-    final Map<String, Map<String, Double>> output = new TreeMap<>();
-
-    dataBreakdown = dataBreakdown.dropNull();
-    dataAggregate = dataAggregate.dropNull();
-
-    final Map<String, Double> dimensionTotals = new HashMap<>();
-
-    for (int i = 0; i < dataBreakdown.size(); i++) {
-      final String dimName = dataBreakdown.getString(COL_DIMENSION_NAME, i);
-      final String dimValue = dataBreakdown.getString(COL_DIMENSION_VALUE, i);
-      final double value = dataBreakdown.getDouble(Constants.COL_VALUE, i);
-
-      // cell
-      if (!output.containsKey(dimName)) {
-        output.put(dimName, new HashMap<>());
-      }
-      output.get(dimName).put(dimValue, value);
-
-      // total
-      dimensionTotals.put(dimName, MapUtils.getDoubleValue(dimensionTotals, dimName, 0) + value);
-    }
-
-    // add rollup column
-    if (!dataAggregate.isEmpty()) {
-      final double total = dataAggregate.getDouble(Constants.COL_VALUE, 0);
-      for (final Map.Entry<String, Double> entry : dimensionTotals.entrySet()) {
-        if (entry.getValue() < total) {
-          output.get(entry.getKey()).put(ROLLUP_NAME, total - entry.getValue());
-        }
-      }
-    }
-
-    return output;
   }
 }

@@ -133,9 +133,40 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     <Typography variant="body2">{subtitle}</Typography>
                 </Box>
             </Grid>
+
+            <Grid container item xs={12}>
+                <Grid item sm={8} xs={12}>
+                    <TimeRangeButtonWithContext
+                        onTimeRangeChange={(start, end) =>
+                            displayState ===
+                                MessageDisplayState.GOOD_TO_PREVIEW &&
+                            fetchAlertEvaluation(start, end)
+                        }
+                    />
+                </Grid>
+                <Grid item sm={4} xs={12}>
+                    <Box textAlign="right">
+                        <Button
+                            color="primary"
+                            disabled={
+                                displayState !==
+                                MessageDisplayState.GOOD_TO_PREVIEW
+                            }
+                            variant="outlined"
+                            onClick={() => {
+                                fetchAlertEvaluation(startTime, endTime);
+                            }}
+                        >
+                            <RefreshIcon fontSize="small" />
+                            {t("label.reload-preview")}
+                        </Button>
+                    </Box>
+                </Grid>
+            </Grid>
+
             <Grid item xs={12}>
                 {displayState === MessageDisplayState.SELECT_TEMPLATE && (
-                    <Box position="relative">
+                    <Box marginTop={2} position="relative">
                         <Box className={previewChartClasses.alertContainer}>
                             <Grid container justifyContent="space-around">
                                 <Grid item>
@@ -159,7 +190,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 )}
                 {displayState ===
                     MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES && (
-                    <Box position="relative">
+                    <Box marginTop={2} position="relative">
                         <Box className={previewChartClasses.alertContainer}>
                             <Grid container justifyContent="space-around">
                                 <Grid item>
@@ -194,7 +225,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                         {getEvaluationStatus !== ActionStatus.Working && (
                             <>
                                 {!currentAlertEvaluation && (
-                                    <Box position="relative">
+                                    <Box marginTop={2} position="relative">
                                         <Box
                                             className={
                                                 previewChartClasses.alertContainer
@@ -232,40 +263,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
                                 {currentAlertEvaluation && timeSeriesOptions && (
                                     <Box>
-                                        <Grid container>
-                                            <Grid item sm={8} xs={12}>
-                                                <TimeRangeButtonWithContext
-                                                    onTimeRangeChange={(
-                                                        start,
-                                                        end
-                                                    ) =>
-                                                        fetchAlertEvaluation(
-                                                            start,
-                                                            end
-                                                        )
-                                                    }
-                                                />
-                                            </Grid>
-                                            <Grid item sm={4} xs={12}>
-                                                <Box textAlign="right">
-                                                    <Button
-                                                        color="primary"
-                                                        variant="outlined"
-                                                        onClick={() => {
-                                                            fetchAlertEvaluation(
-                                                                startTime,
-                                                                endTime
-                                                            );
-                                                        }}
-                                                    >
-                                                        <RefreshIcon fontSize="small" />
-                                                        {t(
-                                                            "label.reload-preview"
-                                                        )}
-                                                    </Button>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
                                         <Box marginTop={2}>
                                             <TimeSeriesChart
                                                 height={300}

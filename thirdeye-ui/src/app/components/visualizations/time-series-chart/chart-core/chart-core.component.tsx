@@ -37,6 +37,7 @@ const axisBottomTickLabelProps = {
 export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     series,
     width,
+    height,
     yMax,
     xMax,
     margin,
@@ -240,6 +241,9 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                 <AxisBottom
                     numTicks={width > 520 ? 10 : 5}
                     scale={xScaleToUse}
+                    tickFormat={
+                        xAxisOptions ? xAxisOptions.tickFormatter : undefined
+                    }
                     tickLabelProps={() => axisBottomTickLabelProps}
                     top={yMax}
                 />
@@ -247,6 +251,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
             {showYAxis && (
                 <yAxisConfiguration.AxisToUse
                     left={yAxisConfiguration.left}
+                    numTicks={height > 520 ? undefined : 5}
                     orientation={yAxisConfiguration.orientation}
                     scale={yScaleToUse}
                     tickFormat={formatLargeNumberForVisualization}

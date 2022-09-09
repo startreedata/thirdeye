@@ -24,35 +24,44 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DatabaseService {
 
+  private static final Logger LOG = LoggerFactory.getLogger(DatabaseService.class);
+
   private final SqlQueryBuilder sqlQueryBuilder;
-  private final DatabaseTaskService taskService;
+  private final DataSource dataSource;
   private final GenericResultSetMapper genericResultSetMapper;
-
-
   private final Counter dbReadCallCounter;
   private final Counter dbWriteCallCounter;
   private final Histogram dbReadDuration;
   private final Histogram dbWriteDuration;
+  private final Counter dbExceptionCounter;
+  private final Counter dbCallCounter;
 
   @Inject
   public DatabaseService(final SqlQueryBuilder sqlQueryBuilder,
-      final DatabaseTaskService taskService,
+      final DataSource dataSource,
       final GenericResultSetMapper genericResultSetMapper,
       final MetricRegistry metricRegistry) {
     this.sqlQueryBuilder = sqlQueryBuilder;
-    this.taskService = taskService;
+    this.dataSource = dataSource;
     this.genericResultSetMapper = genericResultSetMapper;
 
+    dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
+    dbCallCounter = metricRegistry.counter("dbCallCounter");
     dbReadCallCounter = metricRegistry.counter("dbReadCallCounter");
     dbWriteDuration = metricRegistry.histogram("dbWriteDuration");
     dbWriteCallCounter = metricRegistry.counter("dbWriteCallCounter");
@@ -67,7 +76,7 @@ public class DatabaseService {
   public <E extends AbstractEntity> List<E> findAll(final Class<E> clazz) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         try (final PreparedStatement selectStatement = sqlQueryBuilder
             .createFindAllStatement(connection, clazz)) {
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
@@ -88,7 +97,7 @@ public class DatabaseService {
   public <E extends AbstractEntity> List<E> findAll(final Predicate predicate, final Long limit, final Long offset, final Class<E> clazz) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         try (final PreparedStatement selectStatement = sqlQueryBuilder
             .createfindByParamsStatementWithLimit(connection,
                 clazz,
@@ -109,7 +118,7 @@ public class DatabaseService {
   public <E extends AbstractEntity> Long save(final E entity) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         try (final PreparedStatement baseTableInsertStmt = sqlQueryBuilder
             .createInsertStatement(connection, entity)) {
           final int affectedRows = baseTableInsertStmt.executeUpdate();
@@ -148,7 +157,7 @@ public class DatabaseService {
       final long tStart = System.nanoTime();
       entity.setCreateTime(dbEntity.getCreateTime());
       try {
-        return taskService.runTask(connection -> {
+        return runTask(connection -> {
           try (final PreparedStatement baseTableInsertStmt = sqlQueryBuilder
               .createUpdateStatement(connection, entity, null, finalPredicate)) {
             return baseTableInsertStmt.executeUpdate();
@@ -172,7 +181,7 @@ public class DatabaseService {
   public Integer deleteByBaseId(final List<Long> idsToDelete, final Class<? extends AbstractIndexEntity> entityClass) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         if (CollectionUtils.isEmpty(idsToDelete)) {
           return 0;
         }
@@ -190,7 +199,7 @@ public class DatabaseService {
   public Integer delete(final List<Long> idsToDelete, final Class<? extends AbstractEntity> entityClass) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         if (CollectionUtils.isEmpty(idsToDelete)) {
           return 0;
         }
@@ -208,7 +217,7 @@ public class DatabaseService {
   public <E extends AbstractIndexEntity> Long count(Class<E> clazz) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         try (final PreparedStatement selectStatement = sqlQueryBuilder
             .createCountStatement(connection, clazz)) {
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
@@ -228,7 +237,7 @@ public class DatabaseService {
   public <E extends AbstractIndexEntity> Long count(Predicate predicate, Class<E> clazz) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         try (final PreparedStatement selectStatement = sqlQueryBuilder
             .createCountWhereStatement(connection,
                 new DaoFilter().setPredicate(predicate),
@@ -253,7 +262,7 @@ public class DatabaseService {
       final Class<E> indexClass) {
     final long tStart = System.nanoTime();
     try {
-      return taskService.runTask(connection -> {
+      return runTask(connection -> {
         try (final PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
             .createStatementFromSQL(connection,
                 parameterizedSQL,
@@ -270,4 +279,54 @@ public class DatabaseService {
     }
   }
 
+  /**
+   * Use at your own risk!!! Ensure to close the connection after using it or it can cause a leak.
+   */
+  public Connection getConnection()
+      throws SQLException {
+    // ensure to close the connection
+    return dataSource.getConnection();
+  }
+
+  <T> T runTask(final QueryTask<T> task, final T defaultReturnValue) {
+    dbCallCounter.inc();
+
+    Connection connection = null;
+    try {
+      connection = getConnection();
+      // Enable transaction
+      connection.setAutoCommit(false);
+      final T t = task.handle(connection);
+      // Commit this transaction
+      connection.commit();
+      return t;
+    } catch (final Exception e) {
+      LOG.error("Exception while executing query task", e);
+      dbExceptionCounter.inc();
+
+      // Rollback transaction in case json table is updated but index table isn't due to any errors (duplicate key, etc.)
+      if (connection != null) {
+        try {
+          connection.rollback();
+        } catch (final SQLException e1) {
+          LOG.error("Failed to rollback SQL execution", e);
+        }
+      }
+      return defaultReturnValue;
+    } finally {
+      // Always close connection before leaving
+      if (connection != null) {
+        try {
+          connection.close();
+        } catch (final SQLException e) {
+          LOG.error("Failed to close connection", e);
+        }
+      }
+    }
+  }
+
+  protected interface QueryTask<T> {
+
+    T handle(Connection connection) throws Exception;
+  }
 }

@@ -49,7 +49,7 @@ public class DatabaseService {
 
 
   public <E extends AbstractEntity> E find(final Long id, final Class<E> clazz) {
-    return findAll(Predicate.EQ("id", id), clazz).stream().findFirst().orElse(null);
+    return findAll(Predicate.EQ(getIdColumnName(clazz), id), clazz).stream().findFirst().orElse(null);
   }
 
   public <E extends AbstractEntity> List<E> findAll(final Class<E> clazz) {
@@ -126,10 +126,11 @@ public class DatabaseService {
   public <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate) {
     final E dbEntity = (E) find(entity.getId(), entity.getClass());
     final Predicate finalPredicate;
+    final String idCol = getIdColumnName(entity.getClass());
     if(predicate == null) {
-      finalPredicate = Predicate.EQ("id", entity.getId());
+      finalPredicate = Predicate.EQ(idCol, entity.getId());
     } else {
-      finalPredicate = Predicate.AND(predicate, Predicate.EQ("id", entity.getId()));
+      finalPredicate = Predicate.AND(predicate, Predicate.EQ(idCol, entity.getId()));
     }
     if(dbEntity != null) {
       final long tStart = System.nanoTime();
@@ -147,6 +148,10 @@ public class DatabaseService {
       }
     }
     return 0;
+  }
+
+  private <E extends AbstractEntity> String getIdColumnName(final Class<E> clazz) {
+    return AbstractIndexEntity.class.isAssignableFrom(clazz) ? "baseId" : "id";
   }
 
   // TODO shounak

@@ -108,9 +108,11 @@ public class GenericPojoDao {
   private <E extends AbstractDTO> GenericJsonEntity toGenericJsonEntity(final E pojo)
       throws JsonProcessingException {
     GenericJsonEntity ret = new GenericJsonEntity();
+    int version = pojo.getVersion() == 0 ? 1 : pojo.getVersion();
+    ret.setId(pojo.getId());
     ret.setCreateTime(new Timestamp(System.currentTimeMillis()));
     ret.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-    ret.setVersion(1);
+    ret.setVersion(version);
     ret.setType(SubEntities.getType(pojo.getClass()));
     final String jsonVal = toJsonString(pojo);
     ret.setJsonVal(jsonVal);
@@ -154,7 +156,7 @@ public class GenericPojoDao {
       throw new IllegalArgumentException(String.format("Need an ID to update the DB entity: %s",
           pojo));
     }
-    return update(pojo, Predicate.EQ("id", pojo.getId()));
+    return update(pojo, null);
   }
 
   public <E extends AbstractDTO> int update(final E pojo, final Predicate predicate) {
@@ -182,7 +184,7 @@ public class GenericPojoDao {
             genericJsonEntity.getJsonVal());
 
         //updates all columns in the index table by default
-        return databaseService.update(abstractIndexEntity, predicate);
+        return databaseService.update(abstractIndexEntity);
       }
     }
     return affectedRows;

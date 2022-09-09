@@ -13,19 +13,19 @@
 # the License.
 #
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TE_REPO="${SCRIPT_DIR}/.."
 if [ -z "${PINOT_VERSION}" ]; then
-    PINOT_VERSION=0.9.3
+  PINOT_VERSION=0.9.3
 fi
 if [ -z "${CONTROLLER_HOST}" ]; then
-    CONTROLLER_HOST=localhost
+  CONTROLLER_HOST=localhost
 fi
 if [ -z "${CONTROLLER_PORT}" ]; then
-    CONTROLLER_PORT=9000
+  CONTROLLER_PORT=9000
 fi
 if [ -z "${PINOT_DIST_ROOT}" ]; then
-    PINOT_DIST_ROOT="${TE_REPO}/tmp/pinot-bin/apache-pinot-${PINOT_VERSION}-bin"
+  PINOT_DIST_ROOT="${TE_REPO}/tmp/pinot-bin/apache-pinot-${PINOT_VERSION}-bin"
 fi
 cd "${TE_REPO}" || (echo "failed to load" && exit 1)
 
@@ -35,7 +35,7 @@ PINOT_ADMIN_SH="${PINOT_DIST_ROOT}/bin/pinot-admin.sh"
 function create_table() {
   tableConfigFile=$1
   schemaFile=$2
-  "${PINOT_ADMIN_SH}" AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile"  -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} -exec
+  "${PINOT_ADMIN_SH}" AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile" -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} -exec
 }
 
 # #unused. Please do not remove.
@@ -56,7 +56,6 @@ function add_dataset() {
   "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" -values controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}"
 }
 
-
 # Add datasets
 add_dataset "examples/pageviews"
 add_dataset "examples/us_monthly_air_passengers_simplified"
@@ -64,3 +63,25 @@ add_dataset "examples/pageviews_with_missing_data"
 add_dataset "examples/pageviews_with_nulls"
 add_dataset "examples/order_events"
 add_dataset "examples/new_customers_holiday"
+
+#
+# Add a dataset in pinot using REST APIs
+# Beta: Use at your own risk!
+#
+# Creates a dataset in pinot:
+# - Step 1: Add schema
+# - Step 2: Add table
+# - Step 3: Ingest Data
+#
+function add_table_beta() {
+  CONTROLLER_URI="http://localhost:9000"
+  TABLE_NAME_WITH_TYPE="pageviews_OFFLINE"
+
+  curl -F schemaName=@schema.json "${CONTROLLER_URI}/schemas"
+  curl -i -X POST -H 'Content-Type: application/json' -d @table_config.json "${CONTROLLER_URI}/tables"
+  curl -X POST -F file=@rawdata/data.csv \
+    -H "Content-Type: multipart/form-data" \
+    --data-urlencode "tableNameWithType=${TABLE_NAME_WITH_TYPE}" \
+    --data-urlencode "batchConfigMapStr={\"inputFormat\":\"csv\"}" \
+    "${CONTROLLER_URI}/ingestFromFile"
+}

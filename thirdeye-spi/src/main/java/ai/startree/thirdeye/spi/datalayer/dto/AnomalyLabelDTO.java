@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AnomalyLabelDTO {
-  /**Name of the anomaly - displayed in UI.*/
+  /**Name of the label - displayed in UI.*/
   private String name;
   /**Name of the postProcessor that generated this label.*/
   private String sourcePostProcessor;

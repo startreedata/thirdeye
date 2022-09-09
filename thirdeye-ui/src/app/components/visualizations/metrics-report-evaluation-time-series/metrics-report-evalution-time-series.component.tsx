@@ -112,7 +112,7 @@ const MetricsReportEvaluationTimeSeries: FunctionComponent<
     };
 
     return (
-        <Box height={120} width={500}>
+        <Box height={120}>
             {evaluationRequestStatus === ActionStatus.Working ? (
                 <AppLoadingIndicatorV1 />
             ) : evaluationRequestStatus === ActionStatus.Error ||

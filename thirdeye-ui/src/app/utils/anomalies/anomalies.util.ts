@@ -149,7 +149,7 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
 
     // metadata
     if (anomaly.metadata) {
-        if (anomaly.metadata?.dataset) {
+        if (anomaly.metadata.dataset) {
             uiAnomaly.datasetName = anomaly.metadata.dataset.name;
         }
     }

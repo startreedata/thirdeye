@@ -611,7 +611,8 @@ export function DataGridV1<T>({
                     <div
                         className={classNames(
                             dataGridV1Classes.dataGridCell,
-                            "data-grid-v1-cell"
+                            "data-grid-v1-cell",
+                            column.cellClasses
                         )}
                     >
                         {cellContents}
@@ -625,7 +626,8 @@ export function DataGridV1<T>({
             <div
                 className={classNames(
                     dataGridV1Classes.dataGridCell,
-                    "data-grid-v1-cell"
+                    "data-grid-v1-cell",
+                    column.cellClasses
                 )}
             >
                 {cellContents}
@@ -1014,6 +1016,7 @@ export function DataGridV1<T>({
                                         eachColumn.align ||
                                         DataGridAlignmentV1.Left
                                     }
+                                    cellClasses={eachColumn.cellClasses}
                                     cellRenderer={cellRendererDefault}
                                     cellTooltip={eachColumn.cellTooltip}
                                     className="data-grid-v1-column"

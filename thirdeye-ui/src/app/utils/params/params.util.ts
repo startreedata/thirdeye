@@ -238,7 +238,7 @@ export const deserializeKeyValuePair = (
 };
 
 // List of app query string keys that are allowed to be carried forward when navigating
-const allowedAppQueryStringKeys = [
+export const allowedAppQueryStringKeys = [
     TimeRangeQueryStringKey.TIME_RANGE,
     TimeRangeQueryStringKey.START_TIME,
     TimeRangeQueryStringKey.END_TIME,

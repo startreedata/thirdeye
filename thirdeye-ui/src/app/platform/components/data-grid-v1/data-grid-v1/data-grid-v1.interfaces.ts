@@ -75,6 +75,7 @@ export interface DataGridColumnV1<T> {
         data: T,
         column: DataGridColumnV1<T>
     ) => ReactNode;
+    cellClasses?: string;
 }
 
 // Expand panel should also carry a unique identifier with same property name as the rest of the

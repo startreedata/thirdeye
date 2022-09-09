@@ -12,6 +12,7 @@
  * the License.
  */
 import { AlertProps } from "@material-ui/lab";
+import { allowedAppQueryStringKeys } from "../../../utils/params/params.util";
 import { DimensionV1 } from "./dimension.util";
 
 // Material UI theme style overrides for Alert
@@ -36,4 +37,18 @@ export const alertClassesV1 = {
 export const alertPropsV1: Partial<AlertProps> = {
     icon: false,
     variant: "filled",
+};
+export const getIsValidTimeRange = (searchParams: URLSearchParams): boolean => {
+    let queryPresent = false;
+    for (const allowedAppQueryStringKey of allowedAppQueryStringKeys) {
+        if (searchParams.has(allowedAppQueryStringKey)) {
+            queryPresent = Boolean(searchParams.get(allowedAppQueryStringKey));
+        } else {
+            queryPresent = false;
+
+            break;
+        }
+    }
+
+    return queryPresent;
 };

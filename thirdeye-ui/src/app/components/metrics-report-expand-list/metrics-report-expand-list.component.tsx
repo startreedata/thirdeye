@@ -22,10 +22,12 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { DataGridScrollV1, DataGridV1 } from "../../platform/components";
+import { linkRendererV1 } from "../../platform/utils";
 import { getAnomalies } from "../../rest/anomalies/anomalies.rest";
 import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
+import { getAnomaliesAnomalyPath } from "../../utils/routes/routes.util";
 import { TimeRangeQueryStringKey } from "../time-range/time-range-provider/time-range-provider.interfaces";
 import { MetricReportExpandListProps } from "./metrics-report-expand-list.interface";
 
@@ -106,14 +108,22 @@ export const MetricReportExpandList: FunctionComponent<
         []
     );
 
+    const anomalyIdRenderer = useCallback(
+        (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
+        },
+        []
+    );
+
     const metricsReportExpandColumns = useMemo(
         () => [
             {
-                key: "id",
-                dataKey: "id",
-                header: t("label.id"),
+                key: "name",
+                dataKey: "name",
+                header: t("label.name"),
                 sortable: true,
                 minWidth: 200,
+                customCellRenderer: anomalyIdRenderer,
             },
             {
                 key: "startTime",

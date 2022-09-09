@@ -32,6 +32,7 @@ import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filt
 import { MetricReportExpandList } from "../metrics-report-expand-list/metrics-report-expand-list.component";
 import MetricsReportEvaluationTimeSeries from "../visualizations/metrics-report-evaluation-time-series/metrics-report-evalution-time-series.component";
 import { MetricsReportListProps } from "./metrics-report-list.interfaces";
+import { useMetricsReportListStyles } from "./metrics-report-list.styles";
 
 export const MetricsReportList: FunctionComponent<MetricsReportListProps> = ({
     metricsReport,
@@ -41,6 +42,8 @@ export const MetricsReportList: FunctionComponent<MetricsReportListProps> = ({
         UiAnomaly[] | null
     >(null);
     const { t } = useTranslation();
+
+    const classes = useMetricsReportListStyles();
 
     const generateDataWithChildren = (data: UiAnomaly[]): UiAnomaly[] => {
         return data.map((metric, index: number) => ({
@@ -127,7 +130,9 @@ export const MetricsReportList: FunctionComponent<MetricsReportListProps> = ({
                 key: "chart",
                 dataKey: "chart",
                 header: t("label.chart"),
-                minWidth: 500,
+                flex: 1,
+                minWidth: 0,
+                cellClasses: classes.fullWidthCell,
                 cellTooltip: false,
                 customCellRenderer: chartRenderer,
             },

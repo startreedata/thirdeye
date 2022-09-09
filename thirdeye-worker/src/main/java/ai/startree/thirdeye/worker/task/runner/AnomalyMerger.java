@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -393,16 +392,17 @@ public class AnomalyMerger {
     }
   }
 
-  private @NonNull List<AnomalyLabelDTO> mergeAnomalyLabels(final @Nullable List<AnomalyLabelDTO> parentLabels,
+  private @Nullable List<AnomalyLabelDTO> mergeAnomalyLabels(final @Nullable List<AnomalyLabelDTO> parentLabels,
       @Nullable final List<AnomalyLabelDTO> childLabels) {
     if (parentLabels == null && childLabels == null) {
-      return List.of();
+      return null;
     } else if (parentLabels == null) {
       return childLabels;
     } else if (childLabels == null) {
       return parentLabels;
     }
 
+    // simple merging logic based on hash - can be enhanced later
     final Set<AnomalyLabelDTO> labels = new HashSet<>(childLabels);
     labels.addAll(parentLabels);
 

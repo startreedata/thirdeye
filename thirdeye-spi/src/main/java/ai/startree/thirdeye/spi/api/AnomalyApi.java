@@ -55,6 +55,7 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
   private AnomalyFeedbackApi feedback;
 
   private EnumerationItemApi enumerationItem;
+  private List<AnomalyLabelApi> anomalyLabels;
 
   public Long getId() {
     return id;
@@ -255,6 +256,16 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
   public AnomalyApi setEnumerationItem(
       final EnumerationItemApi enumerationItem) {
     this.enumerationItem = enumerationItem;
+    return this;
+  }
+
+  public List<AnomalyLabelApi> getAnomalyLabels() {
+    return anomalyLabels;
+  }
+
+  public AnomalyApi setAnomalyLabels(
+      final List<AnomalyLabelApi> anomalyLabels) {
+    this.anomalyLabels = anomalyLabels;
     return this;
   }
 }

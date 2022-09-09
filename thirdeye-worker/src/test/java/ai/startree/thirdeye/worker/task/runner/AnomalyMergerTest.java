@@ -30,6 +30,7 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.io.IOException;
@@ -274,8 +275,6 @@ public class AnomalyMergerTest {
     final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
 
-    final long expectedId = existing1.getId();
-
     final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
         .getMillis();
     final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime);
@@ -289,6 +288,92 @@ public class AnomalyMergerTest {
         Period.ZERO, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(2);
+  }
+
+  @Test
+  public void testMergeNoMergeWithLabelsWithIgnoreDefaultDifferent() {
+    // never merge anomalies with different ignore default
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime)
+        .setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(false)));
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
+        List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(2);
+  }
+
+  @Test
+  public void testMergeDoMergeWithLabelsWithIgnoreDefaultSameFalse() {
+    // merge anomalies with ignore default both false
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H)
+        // ignore=false if there is no label
+        .setAnomalyLabels(List.of());
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime)
+        .setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(false)));
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
+        List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testMergeDoMergeWithLabelsWithIgnoreDefaultSameTrue() {
+    // merge anomalies with ignore default both true
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime)
+        .setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
+        List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testMergeDoMergeWithLabelsWithExistingIgnoreDefaultSameTrue() {
+    // never merge anomalies with different ignore default
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime)
+        .setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
+        List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(1);
   }
 
   @Test

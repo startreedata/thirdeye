@@ -427,7 +427,7 @@ public class AnomalyMerger {
     requireNonNull(parent);
 
     final boolean parentDefaultIgnore = getDefaultIgnore(parent);
-    final boolean childDefaultIgnore = getDefaultIgnore(parent);
+    final boolean childDefaultIgnore = getDefaultIgnore(child);
     if (parentDefaultIgnore != childDefaultIgnore) {
       // never merge anomalies with different ignore value
       return false;

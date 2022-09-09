@@ -130,8 +130,7 @@ public class AlertInsightsProvider {
     insights.setDefaultEndTime(defaultInterval.getEndMillis());
   }
 
-  @VisibleForTesting
-  protected @Nullable Interval getDatasetInterval(final AlertInsightsApi insights,
+  private @Nullable Interval getDatasetInterval(final AlertInsightsApi insights,
       final DatasetConfigDTO datasetConfigDTO, final DateTimeZone timeZone) throws Exception {
     final DataFrame timesDf = fetchMinMaxTimes(datasetConfigDTO, null);
     if (timesDf == null || timesDf.size() == 0) {

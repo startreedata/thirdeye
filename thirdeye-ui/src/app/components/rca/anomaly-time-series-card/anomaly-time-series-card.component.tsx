@@ -40,7 +40,10 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
-import { DEFAULT_FEEDBACK } from "../../../utils/alerts/alerts.util";
+import {
+    DEFAULT_FEEDBACK,
+    extractDetectionEvaluation,
+} from "../../../utils/alerts/alerts.util";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
@@ -179,7 +182,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
         if (alertEvaluation && anomaly) {
             setTimeSeriesOptions(
                 generateChartOptions(
-                    alertEvaluation,
+                    extractDetectionEvaluation(alertEvaluation)[0],
                     anomaly,
                     filteredAlertEvaluation,
                     t

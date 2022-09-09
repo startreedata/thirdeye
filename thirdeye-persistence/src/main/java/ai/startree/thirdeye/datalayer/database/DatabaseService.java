@@ -15,7 +15,6 @@ package ai.startree.thirdeye.datalayer.database;
 
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
-import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
 import ai.startree.thirdeye.datalayer.util.SqlQueryBuilder;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;

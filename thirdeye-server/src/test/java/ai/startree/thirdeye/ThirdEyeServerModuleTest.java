@@ -14,36 +14,62 @@
 package ai.startree.thirdeye;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
-import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.resources.RootResource;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.apache.tomcat.jdbc.pool.DataSource;
-import org.testng.annotations.AfterClass;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.Test;
 
 public class ThirdEyeServerModuleTest {
 
-  @AfterClass
-  public void clean() {
-    MySqlTestDatabase.cleanSharedDatabase();
+  private static DataSource mockDataSource() throws SQLException {
+    final ResultSet resultSet = mock(ResultSet.class);
+    when(resultSet.next()).thenAnswer(new Answer<Boolean>() {
+      private boolean value = false;
+
+      @Override
+      public Boolean answer(final InvocationOnMock invocationOnMock) {
+        /* Alternate between true and false */
+        value = !value;
+        return value;
+      }
+    });
+    when(resultSet.getString(anyInt())).thenReturn("string");
+
+    final DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+    when(databaseMetaData.getColumns(any(), any(), any(), any()))
+        .thenReturn(resultSet);
+
+    final Connection connection = mock(Connection.class);
+    when(connection.getMetaData()).thenReturn(databaseMetaData);
+
+    final DataSource dataSource = mock(DataSource.class);
+    when(dataSource.getConnection()).thenReturn(connection);
+    return dataSource;
   }
 
   @Test
   public void testRootResourceInjection() throws Exception {
-    final DatabaseConfiguration dbConfig = MySqlTestDatabase.sharedDatabaseConfiguration();
-    final DataSource dataSource = MySqlTestDatabase.newDataSource(dbConfig);
+    final DataSource dataSource = mockDataSource();
 
     final ThirdEyeServerConfiguration configuration = new ThirdEyeServerConfiguration()
         .setAuthConfiguration(new AuthConfiguration())
-        .setTaskDriverConfiguration(new TaskDriverConfiguration().setId(0L))
-        ;
+        .setTaskDriverConfiguration(new TaskDriverConfiguration().setId(0L));
 
     final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
         configuration,

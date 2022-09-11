@@ -89,9 +89,9 @@ public class GenericResultSetMapper {
       for (int i = 1; i <= numColumns; i++) {
         String dbColumnName = resultSetMetaData.getColumnLabel(i).toLowerCase();
         ColumnInfo columnInfo = columnInfoMap.get(dbColumnName);
-        Field field = columnInfo.field;
+        Field field = columnInfo.getField();
         Object val;
-        if (columnInfo.sqlType == Types.CLOB) {
+        if (columnInfo.getSqlType() == Types.CLOB) {
           Clob clob = rs.getClob(i);
           val = clob.getSubString(1, (int) clob.length());
         } else {

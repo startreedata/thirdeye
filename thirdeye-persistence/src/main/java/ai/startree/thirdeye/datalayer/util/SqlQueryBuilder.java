@@ -76,8 +76,8 @@ public class SqlQueryBuilder {
     values.append("(");
     String delim = "";
     for (final ColumnInfo columnInfo : columnInfoMap.values()) {
-      final String columnName = columnInfo.columnNameInDB;
-      if (columnInfo.field != null && !AUTO_UPDATE_COLUMN_SET.contains(columnName.toLowerCase())) {
+      final String columnName = columnInfo.getColumnNameInDB();
+      if (columnInfo.getField() != null && !AUTO_UPDATE_COLUMN_SET.contains(columnName.toLowerCase())) {
         names.append(delim);
         names.append(columnName);
         values.append(delim);
@@ -113,21 +113,21 @@ public class SqlQueryBuilder {
         entityMappingHolder.columnInfoPerTable.get(tableName);
     int parameterIndex = 1;
     for (final ColumnInfo columnInfo : columnInfoMap.values()) {
-      if (columnInfo.field != null
-          && !AUTO_UPDATE_COLUMN_SET.contains(columnInfo.columnNameInDB.toLowerCase())) {
-        final Object val = columnInfo.field.get(entity);
+      if (columnInfo.getField() != null
+          && !AUTO_UPDATE_COLUMN_SET.contains(columnInfo.getColumnNameInDB().toLowerCase())) {
+        final Object val = columnInfo.getField().get(entity);
         if (val != null) {
-          if (columnInfo.sqlType == Types.CLOB) {
+          if (columnInfo.getSqlType() == Types.CLOB) {
             final Clob clob = conn.createClob();
             clob.setString(1, val.toString());
             preparedStatement.setClob(parameterIndex++, clob);
-          } else if (columnInfo.sqlType == Types.TIMESTAMP) {
-            preparedStatement.setObject(parameterIndex++, val, columnInfo.sqlType);
+          } else if (columnInfo.getSqlType() == Types.TIMESTAMP) {
+            preparedStatement.setObject(parameterIndex++, val, columnInfo.getSqlType());
           } else {
-            preparedStatement.setObject(parameterIndex++, val.toString(), columnInfo.sqlType);
+            preparedStatement.setObject(parameterIndex++, val.toString(), columnInfo.getSqlType());
           }
         } else {
-          preparedStatement.setNull(parameterIndex++, columnInfo.sqlType);
+          preparedStatement.setNull(parameterIndex++, columnInfo.getSqlType());
         }
       }
     }
@@ -169,10 +169,10 @@ public class SqlQueryBuilder {
     String delim = "";
     final List<Pair<String, Object>> parametersList = new ArrayList<>();
     for (final ColumnInfo columnInfo : columnInfoMap.values()) {
-      final String columnNameInDB = columnInfo.columnNameInDB;
+      final String columnNameInDB = columnInfo.getColumnNameInDB();
       if (!AUTO_UPDATE_COLUMN_SET.contains(columnNameInDB)
-          && (fieldsToUpdate == null || fieldsToUpdate.contains(columnInfo.columnNameInEntity))) {
-        Object val = columnInfo.field.get(entity);
+          && (fieldsToUpdate == null || fieldsToUpdate.contains(columnInfo.getColumnNameInEntity()))) {
+        Object val = columnInfo.getField().get(entity);
         if (val != null) {
           if (Enum.class.isAssignableFrom(val.getClass())) {
             val = val.toString();
@@ -196,7 +196,7 @@ public class SqlQueryBuilder {
     for (final Pair<String, Object> paramEntry : parametersList) {
       final String dbFieldName = paramEntry.getKey();
       final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.sqlType);
+      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.getSqlType());
     }
     return prepareStatement;
   }
@@ -247,7 +247,7 @@ public class SqlQueryBuilder {
     for (final Entry<String, Object> paramEntry : parametersMap.entrySet()) {
       final String dbFieldName = paramEntry.getKey();
       final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.sqlType);
+      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.getSqlType());
     }
     return prepareStatement;
   }
@@ -292,7 +292,7 @@ public class SqlQueryBuilder {
       final ColumnInfo info = columnInfoMap.get(dbFieldName);
       checkNotNull(info,
           String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
-      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.sqlType);
+      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
     }
     return prepareStatement;
   }
@@ -337,7 +337,7 @@ public class SqlQueryBuilder {
       final ColumnInfo info = columnInfoMap.get(dbFieldName);
       checkNotNull(info,
           String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
-      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.sqlType);
+      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
     }
     return prepareStatement;
   }
@@ -376,7 +376,7 @@ public class SqlQueryBuilder {
       final ColumnInfo info = columnInfoMap.get(dbFieldName);
       checkNotNull(info,
           String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
-      preparedStatement.setObject(parameterIndex++, pair.getValue(), info.sqlType);
+      preparedStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
     }
     return preparedStatement;
   }
@@ -496,7 +496,7 @@ public class SqlQueryBuilder {
       if (Enum.class.isAssignableFrom(val.getClass())) {
         val = val.toString();
       }
-      ps.setObject(parameterIndex++, val, columnInfo.get(dbFieldName).sqlType);
+      ps.setObject(parameterIndex++, val, columnInfo.get(dbFieldName).getSqlType());
     }
 
     return ps;
@@ -513,10 +513,10 @@ public class SqlQueryBuilder {
     String delim = "";
     final LinkedHashMap<String, Object> parameterMap = new LinkedHashMap<>();
     for (final ColumnInfo columnInfo : columnInfoMap.values()) {
-      final String columnNameInDB = columnInfo.columnNameInDB;
+      final String columnNameInDB = columnInfo.getColumnNameInDB();
       if (!columnNameInDB.equalsIgnoreCase(BASE_ID) && !AUTO_UPDATE_COLUMN_SET.contains(
           columnNameInDB)) {
-        final Field field = columnInfo.field;
+        final Field field = columnInfo.getField();
         if (field == null) {
           LOG.error(String.format("DB schema update required. field %s is no longer in table: %s",
               columnNameInDB, tableName));
@@ -544,7 +544,7 @@ public class SqlQueryBuilder {
     for (final Entry<String, Object> paramEntry : parameterMap.entrySet()) {
       final String dbFieldName = paramEntry.getKey();
       final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.sqlType);
+      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.getSqlType());
     }
     return prepareStatement;
   }

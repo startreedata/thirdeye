@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
-import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
+import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
 import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;

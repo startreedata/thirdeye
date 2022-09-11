@@ -12,4 +12,5 @@
 # See the License for the specific language governing permissions and limitations under
 # the License.
 #
+
 jps | grep "Quickstart" | awk '{print $1}' | xargs -n 1 kill

@@ -35,13 +35,13 @@ import org.slf4j.LoggerFactory;
 public class EntityMappingHolder {
 
   private static final Logger LOG = LoggerFactory.getLogger(EntityMappingHolder.class);
-  public static final int COLUMN_NAME_INDEX = 4;
+  private static final int COLUMN_NAME_INDEX = 4;
 
   //Map<TableName,EntityName>
-  BiMap<String, String> tableToEntityNameMap = HashBiMap.create();
-  Map<String, LinkedHashMap<String, ColumnInfo>> columnInfoPerTable = new HashMap<>();
+  final BiMap<String, String> tableToEntityNameMap = HashBiMap.create();
+  final Map<String, LinkedHashMap<String, ColumnInfo>> columnInfoPerTable = new HashMap<>();
   //DB NAME to ENTITY NAME mapping
-  Map<String, BiMap<String, String>> columnMappingPerTable = new HashMap<>();
+  final Map<String, BiMap<String, String>> columnMappingPerTable = new HashMap<>();
 
   private static List<Field> getAllFields(List<Field> fields, final Class<?> type) {
     fields.addAll(Arrays.asList(type.getDeclaredFields()));
@@ -57,15 +57,14 @@ public class EntityMappingHolder {
     return databaseMetaData.getColumns(null, null, tableNamePattern, null);
   }
 
-  private static boolean buildColumnInfoMap(final String tableName,
-      final DatabaseMetaData databaseMetaData,
-      final LinkedHashMap<String, ColumnInfo> columnInfoMap) throws SQLException {
-    boolean foundTable = false;
-    for (final String tableNamePattern : new String[]{tableName.toLowerCase(),
-        tableName.toUpperCase()}) {
+  private static LinkedHashMap<String, ColumnInfo> buildColumnInfoMap(final String tableName,
+      final DatabaseMetaData databaseMetaData) throws SQLException {
+    final LinkedHashMap<String, ColumnInfo> columnInfoMap = new LinkedHashMap<>();
+    final var tableNamePatterns = List.of(tableName.toLowerCase(), tableName.toUpperCase());
+
+    for (final String tableNamePattern : tableNamePatterns) {
       try (final ResultSet rs = getColumns(databaseMetaData, tableNamePattern)) {
         while (rs.next()) {
-          foundTable = true;
           final String columnName = rs.getString(COLUMN_NAME_INDEX).toLowerCase();
           final ColumnInfo columnInfo = new ColumnInfo()
               .setColumnNameInDB(columnName)
@@ -75,7 +74,13 @@ public class EntityMappingHolder {
         }
       }
     }
-    return foundTable;
+    return columnInfoMap;
+  }
+
+  private static List<Field> getFields(final Class<? extends AbstractEntity> entityClass) {
+    final List<Field> fields = new ArrayList<>();
+    getAllFields(fields, entityClass);
+    return fields;
   }
 
   public void register(final Connection connection,
@@ -86,26 +91,18 @@ public class EntityMappingHolder {
     tableToEntityNameMap.put(tableName, entityClass.getSimpleName());
     columnMappingPerTable.put(tableName, HashBiMap.create());
 
-    final LinkedHashMap<String, ColumnInfo> columnInfoMap = new LinkedHashMap<>();
-    final boolean foundTable = buildColumnInfoMap(tableName, databaseMetaData, columnInfoMap);
-    checkState(foundTable, "Unable to find table: " + tableName);
+    final var columnInfoMap = buildColumnInfoMap(tableName, databaseMetaData);
+    checkState(!columnInfoMap.isEmpty(), "Unable to find table: " + tableName);
 
-    registerTable(entityClass, tableName, columnInfoMap);
-  }
-
-  private void registerTable(final Class<? extends AbstractEntity> entityClass,
-      final String tableName,
-      final LinkedHashMap<String, ColumnInfo> columnInfoMap) {
-    final List<Field> fields = new ArrayList<>();
-    getAllFields(fields, entityClass);
-    populateColumnInfoMap(entityClass, tableName, columnInfoMap, fields);
+    populateColumnInfoMap(entityClass, tableName, columnInfoMap);
     columnInfoPerTable.put(tableName, columnInfoMap);
   }
 
   private void populateColumnInfoMap(final Class<? extends AbstractEntity> entityClass,
       final String tableName,
-      final LinkedHashMap<String, ColumnInfo> columnInfoMap,
-      final List<Field> fields) {
+      final LinkedHashMap<String, ColumnInfo> columnInfoMap) {
+    final List<Field> fields = getFields(entityClass);
+
     for (final String dbColumn : columnInfoMap.keySet()) {
       boolean success = false;
       for (final Field field : fields) {
@@ -127,8 +124,9 @@ public class EntityMappingHolder {
         }
       }
       if (!success) {
-        LOG.error("Unable to map [" + dbColumn + "] to any field in table [" + entityClass
-            .getSimpleName() + "] !!!");
+        LOG.error(String.format("Unable to map [%s] to any field in table [%s] !!!",
+            dbColumn,
+            entityClass.getSimpleName()));
       }
     }
   }

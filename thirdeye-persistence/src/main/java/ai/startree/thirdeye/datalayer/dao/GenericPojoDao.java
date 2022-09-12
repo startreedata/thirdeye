@@ -174,7 +174,7 @@ public class GenericPojoDao {
 
     final GenericJsonEntity genericJsonEntity = toGenericJsonEntity(pojo);
     final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(pojo.getClass());
-    final int affectedRows = databaseService.update(genericJsonEntity);
+    final int affectedRows = databaseService.update(genericJsonEntity, predicate);
 
     //update indexes
     if (affectedRows == 1) {

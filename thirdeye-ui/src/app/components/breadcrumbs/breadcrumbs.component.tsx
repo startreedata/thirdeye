@@ -39,7 +39,7 @@ export const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = ({
                 }
 
                 return (
-                    <Typography color="textPrimary" key={idx}>
+                    <Typography color="textSecondary" key={idx}>
                         {crumb.label}
                     </Typography>
                 );

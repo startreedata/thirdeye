@@ -148,9 +148,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       task.setStartTime(System.currentTimeMillis());
       //increment the version
       task.setVersion(expectedVersion + 1);
-      final Predicate predicate = Predicate.AND(
-          Predicate.EQ("id", id),
-          Predicate.EQ("version", expectedVersion));
+      final Predicate predicate = Predicate.EQ("version", expectedVersion);
       final int update = update(task, predicate);
       return update == 1;
     } else {

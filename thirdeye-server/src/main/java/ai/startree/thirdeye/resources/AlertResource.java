@@ -207,7 +207,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
-    long safeEndTime = getSafeEndTime(request.getEnd().getTime());
+    final long safeEndTime = getSafeEndTime(request.getEnd().getTime());
     request.setEnd(new Date(safeEndTime));
 
     final AlertApi alert = request.getAlert();

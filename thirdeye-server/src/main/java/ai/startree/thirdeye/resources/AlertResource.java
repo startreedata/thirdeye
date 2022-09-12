@@ -222,17 +222,16 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     if (endTime == null) {
       return System.currentTimeMillis();
     }
-    long safeEndTime = endTime;
     final long currentMaximumPossibleEndTime = currentMaximumPossibleEndTime();
-    if (safeEndTime > currentMaximumPossibleEndTime) {
+    if (endTime > currentMaximumPossibleEndTime) {
       LOG.warn(
           "Evaluate endTime is too big: {}. Current system time: {}. Replacing with a smaller safe endTime: {}.",
-          safeEndTime,
+          endTime,
           System.currentTimeMillis(),
           currentMaximumPossibleEndTime);
-      safeEndTime = currentMaximumPossibleEndTime;
+      return currentMaximumPossibleEndTime;
     }
-    return safeEndTime;
+    return endTime;
   }
 
   @ApiOperation(value = "Delete associated anomalies and rerun detection till present")

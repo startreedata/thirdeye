@@ -168,12 +168,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("end") final Long endTime
   ) {
     ensureExists(startTime, "start");
-    final long safeEndTime = safeEndTime(endTime);
 
     final AlertDTO dto = get(id);
     alertCreater.createOnboardingTask(dto,
         startTime,
-        safeEndTime
+        safeEndTime(endTime)
     );
 
     return Response.ok().build();

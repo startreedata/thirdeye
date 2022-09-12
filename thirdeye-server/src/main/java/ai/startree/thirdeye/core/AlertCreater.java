@@ -78,21 +78,25 @@ public class AlertCreater {
     long start = dto.getLastTimestamp();
     // If no value is present, set the default lookback
     if (start <= 0) {
-      try {
-        final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
-        start = insights.getDatasetStartTime();
-      } catch (final WebApplicationException e) {
-        throw e;
-      } catch (Exception e) {
-        // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
-        start = JAN_1_2000_UTC;
-        LOG.error("Could not fetch insights for alert {}. Defaulting start of onboarding task to {}",
-            dto,
-            start);
-      }
+      start = getDefaultStart(dto);
     }
 
     createOnboardingTask(dto, start, end);
+  }
+
+  private long getDefaultStart(final AlertDTO dto) {
+    try {
+      final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
+      return insights.getDatasetStartTime();
+    } catch (final WebApplicationException e) {
+      throw e;
+    } catch (Exception e) {
+      // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
+      LOG.error("Could not fetch insights for alert {}. Defaulting onboarding task startTime to {}",
+          dto,
+          JAN_1_2000_UTC);
+      return JAN_1_2000_UTC;
+    }
   }
 
   public void createOnboardingTask(final AlertDTO dto, final long start, final long end) {

@@ -12,9 +12,11 @@
  * the License.
  */
 
-import { UiAnomaly } from "../../../rest/dto/ui-anomaly.interfaces";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 
 export interface MetricsReportEvaluationTimeSeriesProps {
-    data: UiAnomaly;
-    searchParams?: URLSearchParams | null;
+    alertEvaluation?: AlertEvaluation;
+    fetchAlertEvaluation: () => void;
+    evaluationRequestStatus: ActionStatus;
 }

@@ -168,7 +168,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("end") final Long endTime
   ) {
     ensureExists(startTime, "start");
-    final long safeEndTime = getSafeEndTime(endTime);
+    final long safeEndTime = safeEndTime(endTime);
 
     final AlertDTO dto = get(id);
     alertCreater.createOnboardingTask(dto,
@@ -207,7 +207,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
-    final long safeEndTime = getSafeEndTime(request.getEnd().getTime());
+    final long safeEndTime = safeEndTime(request.getEnd().getTime());
     request.setEnd(new Date(safeEndTime));
 
     final AlertApi alert = request.getAlert();
@@ -218,7 +218,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 
-  private long getSafeEndTime(final @Nullable Long endTime) {
+  private long safeEndTime(final @Nullable Long endTime) {
     if (endTime == null) {
       return System.currentTimeMillis();
     }

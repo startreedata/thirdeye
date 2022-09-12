@@ -92,7 +92,7 @@ public class RcaMetricResource {
 
       @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
       @QueryParam("limit") Integer limit
-      ) {
+  ) {
     try {
       if (limit == null) {
         limit = LIMIT_DEFAULT;

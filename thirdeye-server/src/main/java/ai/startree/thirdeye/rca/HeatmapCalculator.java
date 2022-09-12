@@ -89,26 +89,26 @@ public class HeatmapCalculator {
       final Integer limit,
       final List<String> dimensions,
       final List<String> excludedDimensions) throws Exception {
-    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
         anomalyId);
-    final Interval currentInterval = new Interval(rootCauseAnalysisInfo.getMergedAnomalyResultDTO()
+    final Interval currentInterval = new Interval(rcaInfo.getAnomaly()
         .getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        rootCauseAnalysisInfo.getTimezone());
+        rcaInfo.getAnomaly().getEndTime(),
+        rcaInfo.getTimezone());
 
     Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
     final Interval baselineInterval = new Interval(currentInterval.getStart()
         .minus(baselineOffsetPeriod), currentInterval.getEnd().minus(baselineOffsetPeriod));
 
     // override dimensions
-    final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+    final DatasetConfigDTO datasetConfigDTO = rcaInfo.getDataset();
     List<String> rcaDimensions = getRcaDimensions(dimensions,
         excludedDimensions,
         datasetConfigDTO);
     datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
 
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO(),
+        rcaInfo.getMetric(),
         parseAndCombinePredicates(filters),
         currentInterval,
         getSimpleRange(),
@@ -116,7 +116,7 @@ public class HeatmapCalculator {
         datasetConfigDTO);
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
-        rootCauseAnalysisInfo.getMetricConfigDTO(),
+        rcaInfo.getMetric(),
         parseAndCombinePredicates(filters),
         baselineInterval,
         getSimpleRange(),
@@ -129,7 +129,7 @@ public class HeatmapCalculator {
 
     return new HeatMapResponseApi()
         .setMetric(new MetricApi()
-            .setName(rootCauseAnalysisInfo.getMetricConfigDTO().getName())
+            .setName(rcaInfo.getMetric().getName())
             .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset())))
         .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
         .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
@@ -169,8 +169,11 @@ public class HeatmapCalculator {
   }
 
   private Map<String, Map<String, Double>> computeBreakdown(final MetricConfigDTO metricConfigDTO,
-      final List<Predicate> predicates, final Interval interval, final Baseline range,
-      final int limit, final DatasetConfigDTO datasetConfigDTO) throws Exception {
+      final List<Predicate> predicates,
+      final Interval interval,
+      final Baseline range,
+      final int limit,
+      final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
     MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,

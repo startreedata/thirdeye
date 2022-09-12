@@ -132,8 +132,8 @@ public class DatabaseService {
             }
           }
         }
-        return 0L;
-      }, 0L);
+        return null;
+      }, null);
     } finally {
       dbWriteCallCounter.inc();
       dbWriteDuration.update(System.nanoTime() - tStart);

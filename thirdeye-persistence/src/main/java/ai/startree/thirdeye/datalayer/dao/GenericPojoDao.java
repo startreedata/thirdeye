@@ -78,7 +78,7 @@ public class GenericPojoDao {
 
   public <E extends AbstractDTO> Long put(final E pojo) {
     if(pojo.getId() != null) {
-      return 0L;
+      return null;
     }
     //insert into its base table
     //get the generated id

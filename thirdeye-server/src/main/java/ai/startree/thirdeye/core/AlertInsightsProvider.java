@@ -141,17 +141,16 @@ public class AlertInsightsProvider {
 
     // if there is bad data in the dataset, datasetEndTime can have an incorrect value, bigger than the current time - see TE-860
     // if it's the case - fetch a safe datasetEndTime value
-    final long hostCurrenTime = System.currentTimeMillis();
-    final boolean endTimeIsInTheFuture =
-        datasetEndTime > hostCurrenTime + COMPUTER_CLOCK_MARGIN_MILLIS;
+    final long maximumPossibleEndTime = currentMaximumPossibleEndTime();
+    final boolean endTimeIsInTheFuture = datasetEndTime > maximumPossibleEndTime;
     if (endTimeIsInTheFuture) {
       LOG.warn(
-          "Dataset maxTime is too big: {}. Current system time: {}.Most likely a data issue in the dataset. Rerunning query with a filter < currentTime to get a safe maxTime.",
+          "Dataset maxTime is too big: {}. Current system time: {}.Most likely a data issue in the dataset. Rerunning query with a filter < safeEndTime={} to get a safe maxTime.",
           datasetEndTime,
-          hostCurrenTime);
+          System.currentTimeMillis(),
+          maximumPossibleEndTime);
       insights.setSuspiciousDatasetEndTime(datasetEndTime);
-      final Interval safeTimeInterval = new Interval(0L,
-          hostCurrenTime + COMPUTER_CLOCK_MARGIN_MILLIS);
+      final Interval safeTimeInterval = new Interval(0L, maximumPossibleEndTime);
       final DataFrame safeTimesDf = fetchMinMaxTimes(datasetConfigDTO, safeTimeInterval);
       if (safeTimesDf == null || safeTimesDf.size() == 0) {
         LOG.warn("Could not fetch the maxTime on a safe time interval for dataset {}.",
@@ -162,6 +161,10 @@ public class AlertInsightsProvider {
       }
     }
     return new Interval(datasetStartTime, datasetEndTime, timeZone);
+  }
+
+  public static long currentMaximumPossibleEndTime() {
+    return System.currentTimeMillis() + COMPUTER_CLOCK_MARGIN_MILLIS;
   }
 
   private @Nullable DataFrame fetchMinMaxTimes(final @NonNull DatasetConfigDTO datasetConfigDTO,

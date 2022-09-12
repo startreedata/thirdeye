@@ -76,7 +76,7 @@ public class RcaInfoFetcher {
    * This method gets the metric and dataset info from the alert template.
    * It could be more intelligent: metric and dataset could be inferred from the query.
    */
-  public RcaInfo getRootCauseAnalysisInfo(long anomalyId)
+  public RcaInfo getRcaInfo(long anomalyId)
       throws IOException, ClassNotFoundException {
     final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
         String.format("Anomaly ID: %d", anomalyId));

@@ -91,7 +91,7 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(
         rcaInfo.getAnomaly().getStartTime(),
@@ -135,7 +135,7 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(
         rcaInfo.getAnomaly().getStartTime(),

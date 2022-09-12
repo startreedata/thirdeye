@@ -89,7 +89,7 @@ public class HeatmapCalculator {
       final Integer limit,
       final List<String> dimensions,
       final List<String> excludedDimensions) throws Exception {
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
         anomalyId);
     final Interval currentInterval = new Interval(rcaInfo.getAnomaly()
         .getStartTime(),

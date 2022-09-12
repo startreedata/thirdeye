@@ -107,7 +107,7 @@ public class RcaDimensionAnalysisResource {
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) {
     try {
-      final RcaInfo rcaInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+      final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
           anomalyId);
       final Interval currentInterval = new Interval(
           rcaInfo.getAnomaly().getStartTime(),

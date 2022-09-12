@@ -361,7 +361,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 <ChartCore
                     colorScale={colorScale}
                     height={height}
-                    margin={{ ...CHART_MARGINS, bottom: topChartBottomMargin }}
+                    margin={{ ...margins, bottom: topChartBottomMargin }}
                     series={processedMainChartSeries}
                     showXAxis={isXAxisEnabled}
                     showYAxis={isYAxisEnabled}
@@ -385,7 +385,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                                     <ChartZoom
                                         colorScale={colorScale}
                                         height={topChartHeight}
-                                        margins={CHART_MARGINS}
+                                        margins={margins}
                                         series={processedMainChartSeries}
                                         width={width}
                                         onZoomChange={handleBrushChange}

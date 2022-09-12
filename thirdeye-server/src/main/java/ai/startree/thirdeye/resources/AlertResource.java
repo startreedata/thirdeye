@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.core.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
@@ -43,6 +44,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
@@ -57,6 +59,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +70,7 @@ import org.slf4j.LoggerFactory;
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
-  private static final Logger log = LoggerFactory.getLogger(AlertResource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AlertResource.class);
 
   private static final String CRON_EVERY_HOUR = "0 0 * * * ? *";
 
@@ -165,11 +168,12 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("end") final Long endTime
   ) {
     ensureExists(startTime, "start");
+    final long safeEndTime = getSafeEndTime(endTime);
 
     final AlertDTO dto = get(id);
     alertCreater.createOnboardingTask(dto,
         startTime,
-        optional(endTime).orElse(System.currentTimeMillis())
+        safeEndTime
     );
 
     return Response.ok().build();
@@ -203,6 +207,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
+    long safeEndTime = getSafeEndTime(request.getEnd().getTime());
+    request.setEnd(new Date(safeEndTime));
 
     final AlertApi alert = request.getAlert();
     ensureExists(alert)
@@ -210,6 +216,23 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
             .setPrincipal(principal.getName()));
 
     return Response.ok(alertEvaluator.evaluate(request)).build();
+  }
+
+  private long getSafeEndTime(final @Nullable Long endTime) {
+    if (endTime == null) {
+      return System.currentTimeMillis();
+    }
+    long safeEndTime = endTime;
+    final long currentMaximumPossibleEndTime = currentMaximumPossibleEndTime();
+    if (safeEndTime > currentMaximumPossibleEndTime) {
+      LOG.warn(
+          "Evaluate endTime is too big: {}. Current system time: {}. Replacing with a smaller safe endTime: {}.",
+          safeEndTime,
+          System.currentTimeMillis(),
+          currentMaximumPossibleEndTime);
+      safeEndTime = currentMaximumPossibleEndTime;
+    }
+    return safeEndTime;
   }
 
   @ApiOperation(value = "Delete associated anomalies and rerun detection till present")
@@ -221,7 +244,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
-    log.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
+    LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     alertDeleter.deleteAssociatedAnomalies(dto.getId());
 

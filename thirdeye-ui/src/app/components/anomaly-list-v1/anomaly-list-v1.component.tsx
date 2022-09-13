@@ -28,7 +28,7 @@ import {
 import { linkRendererV1 } from "../../platform/utils";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
-    getAlertsViewPath,
+    getAlertsAlertPath,
     getAnomaliesAnomalyPath,
     getMetricsViewPath,
 } from "../../utils/routes/routes.util";
@@ -54,7 +54,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const alertNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
+            return linkRendererV1(cellValue, getAlertsAlertPath(data.alertId));
         },
         []
     );

@@ -105,7 +105,7 @@ jest.mock("../../platform/components/data-grid-v1", () => ({
 
 jest.mock("../../utils/routes/routes.util", () => ({
     getAnomaliesAnomalyPath: jest.fn().mockImplementation((value) => value),
-    getAlertsViewPath: jest.fn().mockImplementation((value) => value),
+    getAlertsAlertPath: jest.fn().mockImplementation((value) => value),
 }));
 
 describe("AnomalyListV1", () => {

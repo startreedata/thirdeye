@@ -14,8 +14,11 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static java.util.Objects.requireNonNull;
+
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.google.common.base.Joiner;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +27,8 @@ public class EnumerationItemNameGenerator {
   private static final Logger log = LoggerFactory.getLogger(EnumerationItemNameGenerator.class);
 
   public String generateName(EnumerationItemDTO enumerationItem) {
-    return Joiner.on(",").withKeyValueSeparator("=").join(enumerationItem.getParams());
+    final Map<String, Object> params = requireNonNull(enumerationItem.getParams(),
+        "params null in enumeration items");
+    return Joiner.on(",").withKeyValueSeparator("=").join(params);
   }
 }

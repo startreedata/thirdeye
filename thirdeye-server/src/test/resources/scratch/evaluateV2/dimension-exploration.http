@@ -13,12 +13,24 @@ Content-Type: application/json
           "name": "enumerator",
           "type": "Enumerator",
           "params": {
-            "enumerationList": [
+            "items": [
               {
-                "min": "300000"
+                "params": {
+                  "max": 800000,
+                  "min": 300000
+                }
               },
               {
-                "min": "0"
+                "params": {
+                  "max": 900000,
+                  "min": 300000
+                }
+              },
+              {
+                "params": {
+                  "max": 900000,
+                  "min": 0
+                }
               }
             ]
           }
@@ -31,6 +43,7 @@ Content-Type: application/json
           "name": "root",
           "type": "ForkJoin",
           "params": {
+            "dryRun": true,
             "enumerator": "enumerator",
             "root": "anomalyDetector",
             "combiner": "combiner"

@@ -12,21 +12,27 @@
  * the License.
  */
 import { makeStyles } from "@material-ui/core";
+import { PaletteV1 } from "../../platform/utils";
 
-export const useAnomalyQuickFilterStyles = makeStyles((theme) => ({
-    root: {
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
+export const useMetricsReportListStyles = makeStyles((theme) => ({
+    fullWidthCell: {
         width: "100%",
-        justifyContent: "space-between",
     },
-    dataGridToolbarSearch: {
-        width: 170,
-        marginLeft: theme.spacing(1),
+    tableHeader: {
+        backgroundColor: PaletteV1.DataGridHeaderBackgroundColor,
+        "&> th": {
+            ...theme.typography.subtitle2,
+            height: "39px",
+            paddingBottom: 0,
+            paddingTop: 0,
+        },
     },
-    filterGroup: {
-        display: "flex",
-        flexWrap: "wrap",
+    expanded: {
+        "&> th": {
+            borderBottom: "none",
+        },
+        "&> td": {
+            borderBottom: "none",
+        },
     },
 }));

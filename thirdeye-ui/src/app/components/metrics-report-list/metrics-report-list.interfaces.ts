@@ -11,22 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 
-export const useAnomalyQuickFilterStyles = makeStyles((theme) => ({
-    root: {
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        width: "100%",
-        justifyContent: "space-between",
-    },
-    dataGridToolbarSearch: {
-        width: 170,
-        marginLeft: theme.spacing(1),
-    },
-    filterGroup: {
-        display: "flex",
-        flexWrap: "wrap",
-    },
-}));
+export interface MetricsReportListProps {
+    anomalies: Anomaly[] | null;
+    chartStart: number;
+    chartEnd: number;
+}
+
+export interface AnomaliesByAlert {
+    alert: Alert;
+    anomalies: Anomaly[];
+    metric: string;
+    dataset: string;
+}

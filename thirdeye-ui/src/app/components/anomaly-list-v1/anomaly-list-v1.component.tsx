@@ -28,7 +28,7 @@ import {
 import { linkRendererV1 } from "../../platform/utils";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
-    getAlertsViewPath,
+    getAlertsAlertPath,
     getAnomaliesAnomalyPath,
     getMetricsViewPath,
 } from "../../utils/routes/routes.util";
@@ -54,7 +54,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const alertNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            return linkRendererV1(cellValue, getAlertsViewPath(data.alertId));
+            return linkRendererV1(cellValue, getAlertsAlertPath(data.alertId));
         },
         []
     );
@@ -154,6 +154,13 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                 customCellRenderer: metricNameRenderer,
             },
             {
+                key: "datasetName",
+                dataKey: "datasetName",
+                header: t("label.dataset"),
+                sortable: true,
+                minWidth: 180,
+            },
+            {
                 key: "duration",
                 dataKey: "durationVal",
                 header: t("label.duration"),
@@ -217,6 +224,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     return (
         <DataGridV1<UiAnomaly>
+            disableSearch
             hideBorder
             columns={anomalyListColumns}
             data={anomalies as UiAnomaly[]}
@@ -226,11 +234,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             }}
             rowKey="id"
             searchFilterValue={searchFilterValue}
-            searchPlaceholder={t("label.search-entity", {
-                entity: t("label.anomalies"),
-            })}
             toolbarComponent={
-                <Box display="flex" justifyContent="space-between">
+                <Box display="flex">
                     <Button
                         data-testid="button-delete"
                         disabled={isActionButtonDisable}

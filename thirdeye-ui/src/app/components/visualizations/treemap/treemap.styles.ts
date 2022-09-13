@@ -35,4 +35,9 @@ export const useTreemapStyles = makeStyles((theme) => ({
         width: "100%",
         display: "table",
     },
+    textOverflowEllipses: {
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    },
 }));

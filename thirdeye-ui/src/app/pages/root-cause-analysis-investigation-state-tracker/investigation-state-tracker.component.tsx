@@ -47,7 +47,7 @@ import {
     INVESTIGATION_ID_QUERY_PARAM,
 } from "../../utils/investigation/investigation.util";
 import {
-    getAlertsViewPath,
+    getAlertsAlertPath,
     getAnomaliesAnomalyViewPath,
 } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
@@ -208,7 +208,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                 <>
                                     {t("label.investigate")}:{" "}
                                     <Link
-                                        href={getAlertsViewPath(
+                                        href={getAlertsAlertPath(
                                             anomaly.alert.id
                                         )}
                                     >

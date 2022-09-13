@@ -25,7 +25,7 @@ import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getAlertsViewPath } from "../../utils/routes/routes.util";
+import { getAlertsAlertPath } from "../../utils/routes/routes.util";
 import { AlertsEditBasePage } from "../alerts-update-page/alerts-edit-base-page.component";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
 
@@ -44,7 +44,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             .then((alert) => {
                 if (isEmpty(subscriptionGroups)) {
                     // Redirect to alerts detail path
-                    navigate(getAlertsViewPath(alert.id));
+                    navigate(getAlertsAlertPath(alert.id));
 
                     return;
                 }
@@ -71,7 +71,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                     })
                     .finally((): void => {
                         // Redirect to alerts detail path
-                        navigate(getAlertsViewPath(alert.id));
+                        navigate(getAlertsAlertPath(alert.id));
                     });
             })
             .catch((error: AxiosError) => {

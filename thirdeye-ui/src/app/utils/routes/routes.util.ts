@@ -36,7 +36,9 @@ export const AppRouteRelative = {
     ALERTS_UPDATE_SIMPLE: "simple",
     ALERTS_UPDATE_ADVANCED: "advanced",
     ANOMALIES: "anomalies",
+    ANOMALIES_LIST: "anomalies-list",
     ANOMALIES_ALL: "all",
+    ANOMALIES_METRICS_REPORT: "metrics-report",
     ANOMALIES_ALL_RANGE: "range",
     ANOMALIES_ANOMALY: `${PLACEHOLDER_ROUTE_ID}`,
     ANOMALIES_ANOMALY_VIEW: `view`,
@@ -64,6 +66,7 @@ export const AppRouteRelative = {
     ALERT_TEMPLATES_ALERT_TEMPLATE_UPDATE: "update",
     METRICS: "metrics",
     METRICS_ALL: "all",
+    METRICS_REPORT: "metrics-report",
     METRICS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS_CREATE: `create`,
     METRICS_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
@@ -92,12 +95,15 @@ export const AppRoute = {
     ALERTS_CREATE_EXISTING_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
     ALERTS_CREATE_EXISTING_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
+    ALERTS_ALERT_VIEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_VIEW}`,
     ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ALERTS_UPDATE_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
     ALERTS_UPDATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
     ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
     ANOMALIES_ALL_RANGE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}`,
+    ANOMALIES_LIST_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}/${AppRouteRelative.ANOMALIES_LIST}`,
+    METRICS_REPORT_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}/${AppRouteRelative.METRICS_REPORT}`,
     ANOMALIES_ANOMALY: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}`,
     ANOMALIES_VIEW: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}`,
     CONFIGURATION: `/${AppRouteRelative.CONFIGURATION}`,
@@ -159,8 +165,15 @@ export const getAlertsAllPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS_ALL);
 };
 
-export const getAlertsViewPath = (id: number): string => {
+export const getAlertsAlertPath = (id: number): string => {
     let path: string = AppRoute.ALERTS_ALERT;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getAlertsAlertViewPath = (id: number): string => {
+    let path: string = AppRoute.ALERTS_ALERT_VIEW;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);
@@ -263,6 +276,14 @@ export const getDatasetsPath = (): string => {
 
 export const getDatasetsAllPath = (): string => {
     return AppRoute.DATASETS_ALL;
+};
+
+export const getAnomaliesListPath = (): string => {
+    return AppRoute.ANOMALIES_LIST_ALL;
+};
+
+export const getMetricsReportPath = (): string => {
+    return AppRoute.METRICS_REPORT_ALL;
 };
 
 export const getDatasetsViewPath = (id: number): string => {

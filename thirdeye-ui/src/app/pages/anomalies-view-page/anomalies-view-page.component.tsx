@@ -53,7 +53,7 @@ import {
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import {
-    getAlertsViewPath,
+    getAlertsAlertPath,
     getAnomaliesAllPath,
     getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../utils/routes/routes.util";
@@ -217,7 +217,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         {anomaly && uiAnomaly && (
                             <>
                                 <Link
-                                    href={getAlertsViewPath(anomaly.alert.id)}
+                                    href={getAlertsAlertPath(anomaly.alert.id)}
                                 >
                                     {anomaly.alert.name}
                                 </Link>

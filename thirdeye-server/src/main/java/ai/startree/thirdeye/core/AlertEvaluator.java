@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.core;
 
+import static ai.startree.thirdeye.core.AlertEvaluatorResponseMapper.toAlertEvaluationApi;
 import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
@@ -24,31 +25,22 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
-import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
-import ai.startree.thirdeye.spi.api.AnomalyApi;
-import ai.startree.thirdeye.spi.api.DetectionDataApi;
-import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -90,39 +82,6 @@ public class AlertEvaluator {
     executorService = Executors.newFixedThreadPool(PARALLELISM);
   }
 
-  public static DetectionDataApi getData(final OperatorResult operatorResult) {
-    final Map<String, List> rawData = operatorResult.getRawData();
-    if (!rawData.isEmpty()) {
-      return new DetectionDataApi().setRawData(rawData);
-    }
-    final TimeSeries timeSeries = operatorResult.getTimeseries();
-    final DetectionDataApi api = new DetectionDataApi()
-        .setCurrent(timeSeries.getCurrent().toList())
-        .setExpected(timeSeries.getPredictedBaseline().toList())
-        .setTimestamp(timeSeries.getTime().toList());
-
-    if (timeSeries.hasLowerBound()) {
-      api.setLowerBound(timeSeries.getPredictedLowerBound().toList());
-    }
-
-    if (timeSeries.hasUpperBound()) {
-      api.setUpperBound(timeSeries.getPredictedUpperBound().toList());
-    }
-    return api;
-  }
-
-  public static DetectionEvaluationApi toApi(final OperatorResult operatorResult) {
-    final DetectionEvaluationApi api = new DetectionEvaluationApi();
-    final List<AnomalyApi> anomalyApis = new ArrayList<>();
-    for (final MergedAnomalyResultDTO anomalyDto : operatorResult.getAnomalies()) {
-      anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
-    }
-    api.setAnomalies(anomalyApis);
-    api.setData(getData(operatorResult));
-    api.setEnumerationItem(ApiBeanMapper.toApi(operatorResult.getEnumerationItem()));
-    return api;
-  }
-
   private void stop() {
     executorService.shutdownNow();
   }
@@ -151,8 +110,9 @@ public class AlertEvaluator {
               detectionInterval))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-      return toApi(result)
-          .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
+      return toAlertEvaluationApi(result)
+          .setAlert(new AlertApi()
+              .setTemplate(toAlertTemplateApi(templateWithProperties)));
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
@@ -220,33 +180,5 @@ public class AlertEvaluator {
       }
       planNodeBean.getParams().putValue(Constants.EVALUATION_FILTERS_KEY, filters);
     }
-  }
-
-  private AlertEvaluationApi toApi(final Map<String, OperatorResult> outputMap) {
-    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    for (final String key : outputMap.keySet()) {
-      final OperatorResult result = outputMap.get(key);
-      final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = detectionPipelineResultToApi(
-          result);
-      detectionEvaluationApiMap.keySet()
-          .forEach(apiKey -> map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey)));
-    }
-    return new AlertEvaluationApi().setDetectionEvaluations(map);
-  }
-
-  private Map<String, DetectionEvaluationApi> detectionPipelineResultToApi(
-      final OperatorResult result) {
-    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    if (result instanceof CombinerResult) {
-      final List<OperatorResult> operatorResults = ((CombinerResult) result).getDetectionResults();
-      for (int i = 0; i < operatorResults.size(); i++) {
-        final DetectionEvaluationApi detectionEvaluationApi = toApi(operatorResults.get(i));
-        map.put(String.valueOf(i), detectionEvaluationApi);
-      }
-    } else {
-      map.put(String.valueOf(0), toApi(result));
-    }
-
-    return map;
   }
 }

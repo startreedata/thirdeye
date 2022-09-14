@@ -202,6 +202,40 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     return respondOk(results.stream().map(dto -> toApi(dto, cache)));
   }
 
+  @GET
+  @Path("{id}")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("id") Long id) {
+    final RequestCache cache = createRequestCache();
+    return respondOk(toApi(get(id), cache));
+  }
+
+  @GET
+  @Path("name/{name}")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("name") String name) {
+    final RequestCache cache = createRequestCache();
+    ensureExists(name, ERR_MISSING_NAME);
+
+    /* If name column is mapped, use the mapping, else use 'name' */
+    final String nameColumn = optional(apiToIndexMap.get("name")).orElse("name");
+    final List<DtoT> byName = dtoManager.filter(new DaoFilter()
+        .setPredicate(Predicate.EQ(nameColumn, name)));
+
+    ensure(byName.size() > 0, ERR_OBJECT_DOES_NOT_EXIST, name);
+    if (byName.size() > 1) {
+      throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
+    }
+    DtoT dtoT = byName.iterator().next();
+    return respondOk(toApi(dtoT, cache));
+  }
+
   @POST
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
@@ -252,40 +286,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
         .peek(dtoManager::update)
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
-  }
-
-  @GET
-  @Path("{id}")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response get(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id) {
-    final RequestCache cache = createRequestCache();
-    return respondOk(toApi(get(id), cache));
-  }
-
-  @GET
-  @Path("name/{name}")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response get(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("name") String name) {
-    final RequestCache cache = createRequestCache();
-    ensureExists(name, ERR_MISSING_NAME);
-
-    /* If name column is mapped, use the mapping, else use 'name' */
-    final String nameColumn = optional(apiToIndexMap.get("name")).orElse("name");
-    final List<DtoT> byName = dtoManager.filter(new DaoFilter()
-        .setPredicate(Predicate.EQ(nameColumn, name)));
-
-    ensure(byName.size() > 0, ERR_OBJECT_DOES_NOT_EXIST, name);
-    if (byName.size() > 1) {
-      throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
-    }
-    DtoT dtoT = byName.iterator().next();
-    return respondOk(toApi(dtoT, cache));
   }
 
   @DELETE

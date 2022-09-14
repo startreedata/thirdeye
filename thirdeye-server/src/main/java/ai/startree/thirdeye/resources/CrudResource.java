@@ -73,7 +73,10 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       final AbstractManager<DtoT> dtoManager,
       final ImmutableMap<String, String> apiToIndexMap) {
     this.dtoManager = dtoManager;
-    this.apiToIndexMap = apiToIndexMap;
+    this.apiToIndexMap = ImmutableMap.<String, String>builder()
+        .put("id", "baseId")
+        .putAll(apiToIndexMap)
+        .build();
   }
 
   /**

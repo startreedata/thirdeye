@@ -21,6 +21,8 @@ import ai.startree.thirdeye.datalayer.database.DatabaseService;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
+import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -205,7 +207,6 @@ public class GenericPojoDao {
       // Enable transaction
       connection.setAutoCommit(false);
       //update base table
-
       final GenericJsonEntity genericJsonEntity = toGenericJsonEntity(pojo);
       final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(pojo.getClass());
       ret = databaseService.update(genericJsonEntity, predicate, connection);
@@ -220,6 +221,9 @@ public class GenericPojoDao {
           //updates all columns in the index table by default
           ret = databaseService.update(abstractIndexEntity, null, connection);
         }
+      }
+      if(ret > 1) {
+        throw new ThirdEyeException(ThirdEyeStatus.ERR_UNKNOWN, "Too many rows updated");
       }
       // Commit this transaction
       connection.commit();

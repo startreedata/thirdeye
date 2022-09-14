@@ -25,10 +25,10 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDataset } from "../../rest/datasets/datasets.actions";
 import { updateDataset } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -50,19 +50,15 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        if (status !== ActionStatus.Error) {
-            return;
-        }
-
-        isEmpty(errorMessages)
-            ? notify(
-                  NotificationTypeV1.Error,
-                  t("message.error-while-fetching", {
-                      entity: t("label.dataset"),
-                  })
-              )
-            : errorMessages.map((err) => notify(NotificationTypeV1.Error, err));
-    }, [errorMessages]);
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.dataset"),
+            })
+        );
+    }, [status]);
 
     const handleCancelClick = (): void => {
         navigate(getDatasetsAllPath());

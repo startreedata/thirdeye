@@ -11,17 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     AppLoadingIndicatorV1,
-    NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDatasources } from "../../rest/datasources/datasources.actions";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { DatasetPropertiesForm } from "./dataset-properties-form/dataset-properties-form.component";
 import { DatasetWizardProps } from "./dataset-wizard.interfaces";
 
@@ -47,18 +45,14 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     }, []);
 
     useEffect(() => {
-        if (status !== ActionStatus.Error) {
-            return;
-        }
-
-        isEmpty(errorMessages)
-            ? notify(
-                  NotificationTypeV1.Error,
-                  t("message.error-while-fetching", {
-                      entity: t("label.datasources"),
-                  })
-              )
-            : errorMessages.map((err) => notify(NotificationTypeV1.Error, err));
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.datasources"),
+            })
+        );
     }, [status]);
 
     if (loading) {

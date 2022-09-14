@@ -51,6 +51,7 @@ import {
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import {
     getAlertsAlertPath,
@@ -118,18 +119,14 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     }, [anomaly, searchParams]);
 
     useEffect(() => {
-        if (getEvaluationRequestStatus === ActionStatus.Error) {
-            !isEmpty(errorMessages)
-                ? errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.chart-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            getEvaluationRequestStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.chart-data"),
+            })
+        );
     }, [errorMessages, getEvaluationRequestStatus]);
 
     if (anomalyId && !isValidNumberId(anomalyId)) {

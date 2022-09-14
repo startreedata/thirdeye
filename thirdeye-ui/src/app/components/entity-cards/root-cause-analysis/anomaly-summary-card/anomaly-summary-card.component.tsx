@@ -14,11 +14,9 @@
 import { Grid, Typography } from "@material-ui/core";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     SkeletonV1,
     useNotificationProviderV1,
@@ -26,6 +24,7 @@ import {
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../../rest/alerts/alerts.actions";
 import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
+import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardDetail } from "./anomaly-summary-card-deatil.component";
 import { AnomalySummaryCardProps } from "./anomaly-summary-card.interfaces";
@@ -48,18 +47,14 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     }, [uiAnomaly]);
 
     useEffect(() => {
-        if (status === ActionStatus.Error) {
-            isEmpty(errorMessages)
-                ? notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.alert"),
-                      })
-                  )
-                : errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  );
-        }
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.alert"),
+            })
+        );
     }, [status, errorMessages]);
 
     if (alert && alert.templateProperties) {

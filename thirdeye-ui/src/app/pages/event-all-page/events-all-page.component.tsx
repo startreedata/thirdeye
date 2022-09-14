@@ -31,6 +31,7 @@ import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { useGetEvents } from "../../rest/event/event.actions";
 import { deleteEvent } from "../../rest/event/events.rest";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const EventsAllPage: FunctionComponent = () => {
@@ -54,18 +55,14 @@ export const EventsAllPage: FunctionComponent = () => {
     }, [startTime, endTime]);
 
     useEffect(() => {
-        if (status === ActionStatus.Error) {
-            !isEmpty(errorMessages)
-                ? errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.events"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.events"),
+            })
+        );
     }, [status]);
 
     useEffect(() => {

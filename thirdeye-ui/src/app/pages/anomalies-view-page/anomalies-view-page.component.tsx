@@ -268,22 +268,14 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
             <PageContentsGridV1>
                 {/* Anomaly */}
-                <Grid
-                    container
-                    item
-                    alignItems="stretch"
-                    justifyContent="space-between"
-                    xs={12}
-                >
-                    <Grid item xs={12}>
-                        <AnomalyCard
-                            className={style.fullHeight}
-                            isLoading={
-                                anomalyRequestStatus === ActionStatus.Working
-                            }
-                            uiAnomaly={uiAnomaly}
-                        />
-                    </Grid>
+                <Grid item xs={12}>
+                    <AnomalyCard
+                        className={style.fullHeight}
+                        isLoading={
+                            anomalyRequestStatus === ActionStatus.Working
+                        }
+                        uiAnomaly={uiAnomaly}
+                    />
                 </Grid>
 
                 {/* Alert evaluation time series */}

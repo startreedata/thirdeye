@@ -57,6 +57,7 @@ public class PlanExecutorTest {
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
         mock(DataSourceCache.class),
         mock(DetectionRegistry.class),
+        mock(PostProcessorRegistry.class),
         mock(EventManager.class),
         mock(DatasetConfigManager.class));
     planExecutor = new PlanExecutor(planNodeFactory);

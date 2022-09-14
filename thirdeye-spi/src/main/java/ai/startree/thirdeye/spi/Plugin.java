@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
+import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import java.util.Collections;
@@ -44,6 +45,10 @@ public interface Plugin {
   }
 
   default Iterable<BootstrapResourcesProviderFactory> getBootstrapResourcesProviderFactories() {
+    return Collections.emptyList();
+  }
+
+  default Iterable<AnomalyPostProcessorFactory> getAnomalyPostProcessorFactories() {
     return Collections.emptyList();
   }
 }

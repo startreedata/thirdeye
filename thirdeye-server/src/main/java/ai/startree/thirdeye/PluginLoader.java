@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
@@ -27,6 +28,7 @@ import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
+import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import com.google.inject.Inject;
@@ -61,6 +63,7 @@ public class PluginLoader {
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
+  private final PostProcessorRegistry postProcessorRegistry;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -72,12 +75,14 @@ public class PluginLoader {
       final NotificationServiceRegistry notificationServiceRegistry,
       final ContributorsFinderRunner contributorsFinderRunner,
       final BootstrapResourcesRegistry bootstrapResourcesRegistry,
+      final PostProcessorRegistry postProcessorRegistry,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.contributorsFinderRunner = contributorsFinderRunner;
     this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
+    this.postProcessorRegistry = postProcessorRegistry;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -130,6 +135,9 @@ public class PluginLoader {
     }
     for (BootstrapResourcesProviderFactory f: plugin.getBootstrapResourcesProviderFactories()) {
       bootstrapResourcesRegistry.addBootstrapResourcesProviderFactory(f);
+    }
+    for (AnomalyPostProcessorFactory f: plugin.getAnomalyPostProcessorFactories()) {
+      postProcessorRegistry.addAnomalyPostProcessorFactory(f);
     }
     log.info("Installed plugin: " + plugin.getClass().getName());
   }

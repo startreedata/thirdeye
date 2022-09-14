@@ -101,6 +101,7 @@ public interface Constants {
   String EVALUATION_FILTERS_KEY = "evaluation.filters";
   String DATA_SOURCE_CACHE_REF_KEY = "$DataSourceCache";
   String DETECTION_REGISTRY_REF_KEY = "$DetectionRegistry";
+  String POST_PROCESSOR_REGISTRY_REF_KEY = "$PostProcessorRegistry";
   String EVENT_MANAGER_REF_KEY = "$EventManager";
   String DATASET_DAO_REF_KEY = "$DatasetDAO";
 

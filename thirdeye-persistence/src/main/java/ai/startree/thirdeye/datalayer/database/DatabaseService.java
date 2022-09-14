@@ -116,6 +116,14 @@ public class DatabaseService {
   }
 
   public <E extends AbstractEntity> Long save(final E entity) {
+    try {
+      return save(entity, null);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+  public <E extends AbstractEntity> Long save(final E entity, final Connection managedConnection)
+      throws Exception {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -133,7 +141,7 @@ public class DatabaseService {
           }
         }
         return null;
-      }, null);
+      }, null, managedConnection);
     } finally {
       dbWriteCallCounter.inc();
       dbWriteDuration.update(System.nanoTime() - tStart);
@@ -145,6 +153,15 @@ public class DatabaseService {
   }
 
   public <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate) {
+    try {
+      return update(entity, predicate, null);
+    } catch (Exception e) {
+      return 0;
+    }
+  }
+
+  public <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate, final Connection managedConnection)
+      throws Exception {
     final E dbEntity = (E) find(entity.getId(), entity.getClass());
     final Predicate finalPredicate;
     final String idCol = getIdColumnName(entity.getClass());
@@ -162,7 +179,7 @@ public class DatabaseService {
               .createUpdateStatement(connection, entity, null, finalPredicate)) {
             return baseTableInsertStmt.executeUpdate();
           }
-        }, 0);
+        }, 0, managedConnection);
       } finally {
         dbWriteCallCounter.inc();
         dbWriteDuration.update(System.nanoTime() - tStart);
@@ -179,6 +196,18 @@ public class DatabaseService {
   // replace the below method by delete(Predicate predicate, ...)
   // after supporting a delete by predicate SqlQueryBuilder method
   public Integer deleteByBaseId(final List<Long> idsToDelete, final Class<? extends AbstractIndexEntity> entityClass) {
+    try {
+      return deleteByBaseId(idsToDelete, entityClass, null);
+    } catch (Exception e) {
+      return 0;
+    }
+  }
+
+  // TODO shounak
+  // replace the below method by delete(Predicate predicate, ...)
+  // after supporting a delete by predicate SqlQueryBuilder method
+  public Integer deleteByBaseId(final List<Long> idsToDelete, final Class<? extends AbstractIndexEntity> entityClass, final Connection managedConnection)
+      throws Exception {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -189,7 +218,7 @@ public class DatabaseService {
             .createDeleteStatement(connection, entityClass, idsToDelete, true)) {
           return baseTableDeleteStatement.executeUpdate();
         }
-      }, 0);
+      }, 0, managedConnection);
     } finally {
       dbWriteCallCounter.inc();
       dbWriteDuration.update(System.nanoTime() - tStart);
@@ -197,6 +226,15 @@ public class DatabaseService {
   }
 
   public Integer delete(final List<Long> idsToDelete, final Class<? extends AbstractEntity> entityClass) {
+    try {
+      return delete(idsToDelete, entityClass, null);
+    } catch (Exception e) {
+      return 0;
+    }
+  }
+
+  public Integer delete(final List<Long> idsToDelete, final Class<? extends AbstractEntity> entityClass, final Connection managedConnection)
+      throws Exception {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -207,7 +245,7 @@ public class DatabaseService {
             .createDeleteStatement(connection, entityClass, idsToDelete, false)) {
           return baseTableDeleteStatement.executeUpdate();
         }
-      }, 0);
+      }, 0, managedConnection);
     } finally {
       dbWriteCallCounter.inc();
       dbWriteDuration.update(System.nanoTime() - tStart);
@@ -286,6 +324,17 @@ public class DatabaseService {
       throws SQLException {
     // ensure to close the connection
     return dataSource.getConnection();
+  }
+
+
+  <T> T runTask(final QueryTask<T> task, final T defaultReturnValue, final Connection connection)
+      throws Exception {
+    if(connection != null) {
+      dbCallCounter.inc();
+      return task.handle(connection);
+    } else {
+      return runTask(task, defaultReturnValue);
+    }
   }
 
   <T> T runTask(final QueryTask<T> task, final T defaultReturnValue) {

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.Constants.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;

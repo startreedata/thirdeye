@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
@@ -19,7 +19,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 
-import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;

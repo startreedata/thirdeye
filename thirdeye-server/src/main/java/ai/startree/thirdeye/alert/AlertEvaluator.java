@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.alert;
 
-import static ai.startree.thirdeye.core.AlertEvaluatorResponseMapper.toAlertEvaluationApi;
+import static ai.startree.thirdeye.alert.AlertEvaluatorResponseMapper.toAlertEvaluationApi;
 import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
@@ -21,8 +21,6 @@ import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredic
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
-import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
-import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
@@ -89,7 +87,7 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      Interval detectionInterval = computeDetectionInterval(request);
+      final Interval detectionInterval = computeDetectionInterval(request);
 
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
@@ -124,7 +122,7 @@ public class AlertEvaluator {
   private Interval computeDetectionInterval(final AlertEvaluationApi request)
       throws IOException, ClassNotFoundException {
     // this method only exists to catch exception and translate into a TE exception
-    Interval detectionInterval;
+    final Interval detectionInterval;
     detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
         request.getStart().getTime(),
         request.getEnd().getTime());
@@ -137,7 +135,7 @@ public class AlertEvaluator {
       return;
     }
 
-    List<String> filters = evaluationContext.getFilters();
+    final List<String> filters = evaluationContext.getFilters();
     if (filters != null) {
       injectFilters(templateWithProperties, filters);
     }
@@ -145,7 +143,7 @@ public class AlertEvaluator {
 
   @VisibleForTesting
   protected void injectFilters(final AlertTemplateDTO templateWithProperties,
-      List<String> filters) {
+      final List<String> filters) {
     if (filters.isEmpty()) {
       return;
     }
@@ -173,7 +171,7 @@ public class AlertEvaluator {
     return DimensionType.STRING;
   }
 
-  private void addFilters(PlanNodeBean planNodeBean, List<QueryPredicate> filters) {
+  private void addFilters(final PlanNodeBean planNodeBean, final List<QueryPredicate> filters) {
     if (planNodeBean.getType().equals(new DataFetcherPlanNode().getType())) {
       if (planNodeBean.getParams() == null) {
         planNodeBean.setParams(new TemplatableMap<>());

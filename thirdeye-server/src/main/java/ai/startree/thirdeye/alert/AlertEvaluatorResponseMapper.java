@@ -12,7 +12,7 @@
  * the License.
  */
 
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.alert;
 
 import static java.util.Objects.requireNonNull;
 

@@ -13,12 +13,18 @@
  */
 package ai.startree.thirdeye.datalayer.database;
 
+import static ai.startree.thirdeye.datalayer.mapper.DtoIndexMapper.toAbstractIndexEntity;
+
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
+import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
 import ai.startree.thirdeye.datalayer.util.SqlQueryBuilder;
+import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
@@ -28,6 +34,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -195,17 +202,6 @@ public class DatabaseService {
   // TODO shounak
   // replace the below method by delete(Predicate predicate, ...)
   // after supporting a delete by predicate SqlQueryBuilder method
-  public Integer deleteByBaseId(final List<Long> idsToDelete, final Class<? extends AbstractIndexEntity> entityClass) {
-    try {
-      return deleteByBaseId(idsToDelete, entityClass, null);
-    } catch (Exception e) {
-      return 0;
-    }
-  }
-
-  // TODO shounak
-  // replace the below method by delete(Predicate predicate, ...)
-  // after supporting a delete by predicate SqlQueryBuilder method
   public Integer deleteByBaseId(final List<Long> idsToDelete, final Class<? extends AbstractIndexEntity> entityClass, final Connection managedConnection)
       throws Exception {
     final long tStart = System.nanoTime();
@@ -320,7 +316,7 @@ public class DatabaseService {
   /**
    * Use at your own risk!!! Ensure to close the connection after using it or it can cause a leak.
    */
-  public Connection getConnection()
+  private Connection getConnection()
       throws SQLException {
     // ensure to close the connection
     return dataSource.getConnection();
@@ -378,4 +374,58 @@ public class DatabaseService {
 
     T handle(Connection connection) throws Exception;
   }
+
+  /**
+   * TODO shounak
+   * The below section is very specific to GenericPojoDao.
+   * Should be eventually removed
+   */
+
+  public <E extends AbstractDTO> Long save(final E entity, GenericJsonEntity genericJsonEntity, Class<? extends AbstractIndexEntity> indexClass) {
+    return runTask(connection -> {
+      final Long generatedKey = save(genericJsonEntity, connection);
+      entity.setId(generatedKey);
+      if (indexClass != null) {
+        final AbstractIndexEntity abstractIndexEntity = toAbstractIndexEntity(
+            entity,
+            indexClass,
+            genericJsonEntity.getJsonVal());
+        abstractIndexEntity.setVersion(1);
+        abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        return save(abstractIndexEntity, connection);
+      } else {
+        return entity.getId();
+      }
+    }, null);
+  }
+
+  public <E extends AbstractDTO> Integer update(final E entity, GenericJsonEntity genericJsonEntity, Class<? extends AbstractIndexEntity> indexClass, Predicate predicate) {
+    return runTask(connection -> {
+      Integer ret = update(genericJsonEntity, predicate, connection);
+      //update indexes
+      if (ret == 1) {
+        if (indexClass != null) {
+          final AbstractIndexEntity abstractIndexEntity = toAbstractIndexEntity(entity,
+              indexClass,
+              genericJsonEntity.getJsonVal());
+          //updates all columns in the index table by default
+          ret = update(abstractIndexEntity, null, connection);
+        }
+      }
+      if(ret > 1) {
+        throw new ThirdEyeException(ThirdEyeStatus.ERR_UNKNOWN, "Too many rows updated");
+      }
+      return ret;
+    }, 0);
+  }
+
+  public Integer deleteByIds(final List<Long> idsToDelete, Class<? extends AbstractIndexEntity> indexClass) {
+    return runTask(connection -> {
+      // delete entry from base table
+      delete(idsToDelete, GenericJsonEntity.class, connection);
+      // delete entry from index table
+      return deleteByBaseId(idsToDelete, indexClass, connection);
+    }, 0);
+  }
+
 }

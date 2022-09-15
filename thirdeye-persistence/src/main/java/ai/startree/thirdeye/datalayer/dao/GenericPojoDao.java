@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.datalayer.dao;
 
-import static ai.startree.thirdeye.datalayer.mapper.DtoIndexMapper.toAbstractIndexEntity;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -21,8 +20,6 @@ import ai.startree.thirdeye.datalayer.database.DatabaseService;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
-import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -33,8 +30,6 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,53 +79,13 @@ public class GenericPojoDao {
     if(pojo.getId() != null) {
       return null;
     }
-    // TODO : shounak
-    // remove the connection management part
-    Connection connection = null;
-    //insert into its base table
-    //get the generated id
-    //update indexes
     try {
-      final Long ret;
-      connection = databaseService.getConnection();
-      // Enable transaction
-      connection.setAutoCommit(false);
-      final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(pojo.getClass());
-      final GenericJsonEntity genericJsonEntity = toGenericJsonEntity(pojo);
-      final Long generatedKey = databaseService.save(genericJsonEntity, connection);
-      pojo.setId(generatedKey);
-      if (indexClass != null) {
-        final AbstractIndexEntity abstractIndexEntity = toAbstractIndexEntity(
-            pojo,
-            indexClass,
-            genericJsonEntity.getJsonVal());
-        abstractIndexEntity.setVersion(1);
-        abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        ret = databaseService.save(abstractIndexEntity, connection);
-      } else {
-        ret = pojo.getId();
-      }
-      // Commit this transaction
-      connection.commit();
-      return ret;
-    } catch (final Exception e) {
-      if (connection != null) {
-        try {
-          connection.rollback();
-        } catch (final SQLException e1) {
-          LOG.error("Failed to rollback SQL execution", e);
-        }
-      }
+      return databaseService.save(pojo,
+          toGenericJsonEntity(pojo),
+          SubEntities.BEAN_INDEX_MAP.get(pojo.getClass()));
+    } catch (JsonProcessingException e) {
       LOG.error(e.getMessage(), e);
       return null;
-    } finally {
-      if (connection != null) {
-        try {
-          connection.close();
-        } catch (final SQLException e) {
-          LOG.error("Failed to close connection", e);
-        }
-      }
     }
   }
 
@@ -198,54 +153,13 @@ public class GenericPojoDao {
   }
 
   private <E extends AbstractDTO> int addUpdateToConnection(final E pojo, final Predicate predicate) {
-    // TODO : shounak
-    // remove the connection management part
-    Connection connection = null;
-    Integer ret;
     try {
-      connection = databaseService.getConnection();
-      // Enable transaction
-      connection.setAutoCommit(false);
-      //update base table
       final GenericJsonEntity genericJsonEntity = toGenericJsonEntity(pojo);
       final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(pojo.getClass());
-      ret = databaseService.update(genericJsonEntity, predicate, connection);
-
-      //update indexes
-      if (ret == 1) {
-        if (indexClass != null) {
-          final AbstractIndexEntity abstractIndexEntity = toAbstractIndexEntity(pojo,
-              indexClass,
-              genericJsonEntity.getJsonVal());
-
-          //updates all columns in the index table by default
-          ret = databaseService.update(abstractIndexEntity, null, connection);
-        }
-      }
-      if(ret > 1) {
-        throw new ThirdEyeException(ThirdEyeStatus.ERR_UNKNOWN, "Too many rows updated");
-      }
-      // Commit this transaction
-      connection.commit();
-      return ret;
-    } catch (Exception e) {
-      if (connection != null) {
-        try {
-          connection.rollback();
-        } catch (final SQLException e1) {
-          LOG.error("Failed to rollback SQL execution", e);
-        }
-      }
+      return databaseService.update(pojo, genericJsonEntity, indexClass, predicate);
+    } catch (JsonProcessingException e) {
       LOG.error(e.getMessage(), e);
       return 0;
-    } finally {
-      if (connection != null) {
-        try {
-          connection.close();
-        } catch (final SQLException e) {
-          LOG.error("Failed to close connection", e);
-        }
-      }
     }
   }
 
@@ -463,40 +377,9 @@ public class GenericPojoDao {
 
   public <E extends AbstractDTO> int delete(final List<Long> idsToDelete,
       final Class<E> pojoClass) {
-    // TODO : shounak
-    // remove the connection management part
-    Connection connection = null;
     final Class<? extends AbstractIndexEntity> indexEntityClass = SubEntities.BEAN_INDEX_MAP.get(
         pojoClass);
-    try {
-      connection = databaseService.getConnection();
-      // Enable transaction
-      connection.setAutoCommit(false);
-      // delete entry from base table
-      databaseService.delete(idsToDelete, GenericJsonEntity.class, connection);
-      // delete entry from index table
-      Integer ret = databaseService.deleteByBaseId(idsToDelete, indexEntityClass, connection);
-      connection.commit();
-      return ret;
-    } catch (Exception e) {
-      if (connection != null) {
-        try {
-          connection.rollback();
-        } catch (final SQLException e1) {
-          LOG.error("Failed to rollback SQL execution", e);
-        }
-      }
-      LOG.error(e.getMessage(), e);
-      return 0;
-    } finally {
-      if (connection != null) {
-        try {
-          connection.close();
-        } catch (final SQLException e) {
-          LOG.error("Failed to close connection", e);
-        }
-      }
-    }
+    return databaseService.deleteByIds(idsToDelete, indexEntityClass);
   }
 
   public <E extends AbstractDTO> int deleteByPredicate(final Predicate predicate,

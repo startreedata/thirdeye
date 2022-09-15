@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Link, useTheme } from "@material-ui/core";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { Box, Button, Grid, Link } from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Breadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -89,7 +89,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const style = useAnomaliesViewPageStyles();
-    const theme = useTheme();
 
     useEffect(() => {
         anomalyId && getInvestigations(Number(anomalyId));
@@ -202,13 +201,17 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         <PageV1>
             <PageHeaderV1>
                 <Box display="inline">
-                    <Link
-                        className={style.linkButton}
-                        href={getAnomaliesAllPath()}
-                    >
-                        <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
-                        {t("label.back-to-anomalies")}
-                    </Link>
+                    <Breadcrumbs
+                        crumbs={[
+                            {
+                                link: getAnomaliesAllPath(),
+                                label: t("label.anomalies"),
+                            },
+                            {
+                                label: anomalyId,
+                            },
+                        ]}
+                    />
 
                     <PageHeaderTextV1>
                         {anomaly && uiAnomaly && (

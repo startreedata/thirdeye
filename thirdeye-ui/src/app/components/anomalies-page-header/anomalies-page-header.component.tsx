@@ -36,10 +36,6 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
     const { t } = useTranslation();
     const crumbs: Crumb[] = [
         {
-            label: t("label.home"),
-            link: "/",
-        },
-        {
             label: t("label.anomalies"),
             link: getAnomaliesAllPath(),
         },

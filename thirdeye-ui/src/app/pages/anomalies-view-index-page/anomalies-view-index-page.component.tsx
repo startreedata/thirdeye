@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +21,10 @@ import {
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
-    AppLoadingIndicatorV1,
+    PageContentsGridV1,
+    PageHeaderV1,
+    PageV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
@@ -87,5 +91,28 @@ export const AnomaliesViewIndexPage: FunctionComponent = () => {
         );
     }, [anomalyRequestStatus, errorMessages]);
 
-    return <AppLoadingIndicatorV1 />;
+    return (
+        <PageV1>
+            <PageHeaderV1>
+                <SkeletonV1 />
+            </PageHeaderV1>
+
+            <PageContentsGridV1>
+                {/* Anomaly */}
+                <Grid item xs={12}>
+                    <SkeletonV1 />
+                </Grid>
+
+                {/* Alert evaluation time series */}
+                <Grid item xs={12}>
+                    <SkeletonV1 />
+                </Grid>
+
+                {/* Existing investigations */}
+                <Grid item xs={12}>
+                    <SkeletonV1 />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
+    );
 };

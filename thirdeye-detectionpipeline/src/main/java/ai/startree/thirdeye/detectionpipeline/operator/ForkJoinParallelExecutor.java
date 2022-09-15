@@ -78,7 +78,7 @@ public class ForkJoinParallelExecutor {
         final Map<ContextKey, OperatorResult> context = new HashMap<>();
 
         /* Execute the DAG */
-        executePlanNode(clonedPipelinePlanNodes, context, rootClone);
+        executePlanNode(clonedPipelinePlanNodes, rootClone, context);
 
         /* Return the output */
         return new ForkJoinResultItem(enumerationItem, PlanExecutor.getOutput(context, rootClone.getName()));

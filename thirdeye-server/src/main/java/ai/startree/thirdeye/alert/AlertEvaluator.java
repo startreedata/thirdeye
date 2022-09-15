@@ -93,7 +93,7 @@ public class AlertEvaluator {
       }
 
       final Map<String, OperatorResult> result = executorService
-          .submit(() -> planExecutor.runPipeline(templateWithProperties.getNodes(),
+          .submit(() -> planExecutor.runPipelineAndGetRootOutputs(templateWithProperties.getNodes(),
               detectionInterval))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 

@@ -260,7 +260,8 @@
         "id": "ID",
         "activity": "Activity",
         "options": "Options",
-        "view": "View"
+        "view": "View",
+        "enumeration-item": "Enumeration Item"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

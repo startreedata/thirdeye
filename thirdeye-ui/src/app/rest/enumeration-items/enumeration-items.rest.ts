@@ -35,3 +35,11 @@ export const getEnumerationItems = async ({
 
     return response.data;
 };
+
+export const getEnumerationItem = async (
+    id: number
+): Promise<EnumerationItem> => {
+    const response = await axios.get(`${BASE_URL_ENUMERATION_ITEM}/${id}`);
+
+    return response.data;
+};

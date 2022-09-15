@@ -20,6 +20,10 @@ export interface GetEnumerationItems extends ActionHook {
         getEnumerationItemsParams?: GetEnumerationItemsProps
     ) => Promise<EnumerationItem[] | undefined>;
 }
+export interface GetEnumerationItem extends ActionHook {
+    enumerationItem: EnumerationItem | null;
+    getEnumerationItem: (id: number) => Promise<EnumerationItem | undefined>;
+}
 
 export interface GetEnumerationItemsProps {
     ids?: number[];

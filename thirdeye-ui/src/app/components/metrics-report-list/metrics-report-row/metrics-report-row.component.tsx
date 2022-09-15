@@ -34,6 +34,7 @@ import {
     extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { getAlertsAlertViewPath } from "../../../utils/routes/routes.util";
+import { Pluralize } from "../../pluralize/pluralize.component";
 import { generateChartOptionsForMetricsReport } from "../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
 import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
@@ -128,8 +129,35 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
                                     color="textSecondary"
                                     variant="caption"
                                 >
-                                    Show {anomalyAlert.anomalies.length}{" "}
-                                    anomalies
+                                    {!isOpen &&
+                                        anomalyAlert.anomalies.length === 1 &&
+                                        t(
+                                            "message.show-count-entity-for-time-range",
+                                            {
+                                                count: anomalyAlert.anomalies
+                                                    .length,
+                                                entity: t("label.anomaly"),
+                                            }
+                                        )}
+                                    {!isOpen &&
+                                        anomalyAlert.anomalies.length > 1 &&
+                                        t(
+                                            "message.show-count-entity-for-time-range",
+                                            {
+                                                count: anomalyAlert.anomalies
+                                                    .length,
+                                                entity: t("label.anomalies"),
+                                            }
+                                        )}
+                                    {isOpen && (
+                                        <Pluralize
+                                            count={
+                                                anomalyAlert.anomalies.length
+                                            }
+                                            plural={t("label.anomalies")}
+                                            singular={t("label.anomaly")}
+                                        />
+                                    )}
                                 </Typography>
                             </Box>
                         </Grid>

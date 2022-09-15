@@ -359,6 +359,7 @@
         "view-detection-configuration": "View detection configuration",
         "alert-is-active": "Alert is active",
         "alert-is-inactive": "Alert is inactive",
-        "list-of-all-dimensions-related-to-alert": "List of all dimensions related to this alert for the date range selected"
+        "list-of-all-dimensions-related-to-alert": "List of all dimensions related to this alert for the date range selected",
+        "show-count-entity-for-time-range": "Show {{count}} {{entity}} for time range"
     }
 }

@@ -97,9 +97,8 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     }
     SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     checkArgument(sqlLanguage != null,
-        String.format(
             "Sql manipulation not supported for datasource %s, but filters list is not empty. Cannot apply filters.",
-            thirdEyeDataSource.getName()));
+            thirdEyeDataSource.getName());
     return new FilterEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
   }
 

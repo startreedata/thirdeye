@@ -11,22 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
 
-export const useAnomalyQuickFilterStyles = makeStyles((theme) => ({
-    root: {
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        width: "100%",
-        justifyContent: "space-between",
-    },
-    dataGridToolbarSearch: {
-        width: 170,
-        marginLeft: theme.spacing(1),
-    },
-    filterGroup: {
-        display: "flex",
-        flexWrap: "wrap",
-    },
-}));
+import { UiAnomaly } from "../../../rest/dto/ui-anomaly.interfaces";
+
+export interface MetricsReportEvaluationTimeSeriesProps {
+    data: UiAnomaly;
+    searchParams?: URLSearchParams | null;
+}

@@ -49,7 +49,10 @@ const CURSOR_POINTER_STYLE = { cursor: "pointer" };
 export const generateSeriesDataForDetectionEvaluation = (
     detectionEvaluation: DetectionEvaluation,
     filteredAlertEvaluations: [AlertEvaluation, AnomalyFilterOption[]][],
-    translation: (id: string) => string
+    translation: (id: string) => string,
+    hideUpperLowerBound?: boolean,
+    hideActivity?: boolean,
+    hidePredicted?: boolean
 ): Series[] => {
     const filteredTimeSeriesData: Series[] = filteredAlertEvaluations.map(
         (alertEvalAndFilters) => {
@@ -80,8 +83,10 @@ export const generateSeriesDataForDetectionEvaluation = (
 
     const timeSeriesData = detectionEvaluation.data;
 
-    return [
-        {
+    const chartSeries: Series[] = [];
+
+    if (!hideUpperLowerBound) {
+        chartSeries.push({
             enabled: false,
             name: translation("label.upper-and-lower-bound"),
             type: SeriesType.AREA_CLOSED,
@@ -106,8 +111,11 @@ export const generateSeriesDataForDetectionEvaluation = (
                 },
             },
             legendIndex: 10,
-        },
-        {
+        });
+    }
+
+    if (!hideActivity) {
+        chartSeries.push({
             name: translation("label.activity"),
             type: SeriesType.LINE,
             color: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
@@ -137,8 +145,11 @@ export const generateSeriesDataForDetectionEvaluation = (
                     />
                 );
             },
-        },
-        {
+        });
+    }
+
+    if (!hidePredicted) {
+        chartSeries.push({
             name: translation("label.predicted"),
             type: SeriesType.LINE,
             color: Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
@@ -156,9 +167,10 @@ export const generateSeriesDataForDetectionEvaluation = (
                     formatLargeNumberV1(d.y),
             },
             strokeDasharray: `${Dimension.DASHARRAY_VISUALIZATION_BASELINE}`,
-        },
-        ...filteredTimeSeriesData,
-    ];
+        });
+    }
+
+    return [...chartSeries, ...filteredTimeSeriesData];
 };
 
 export const generateChartOptions = (
@@ -448,6 +460,44 @@ export const generateChartOptionsForAlert = (
         yAxis: {
             position: Orientation.right,
         },
+    };
+};
+
+export const generateChartOptionsForMetricsReport = (
+    detectionEvaluation: DetectionEvaluation,
+    anomalies: Anomaly[],
+    translation: (id: string) => string
+): TimeSeriesChartProps => {
+    let series: Series[] = [];
+
+    if (detectionEvaluation !== null) {
+        series = generateSeriesDataForDetectionEvaluation(
+            detectionEvaluation,
+            [],
+            translation,
+            true,
+            false,
+            true
+        );
+    }
+
+    if (anomalies) {
+        series.push(
+            generateSeriesForAnomalies(
+                anomalies,
+                translation,
+                detectionEvaluation.data.timestamp,
+                detectionEvaluation.data.current
+            )
+        );
+    }
+
+    return {
+        series,
+        legend: false,
+        brush: false,
+        tooltip: false,
+        yAxis: { enabled: false },
     };
 };
 

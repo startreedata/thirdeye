@@ -43,7 +43,7 @@ Content-Type: application/json
           "name": "root",
           "type": "ForkJoin",
           "params": {
-            "dryRun": true,
+            "dryRun": false,
             "enumerator": "enumerator",
             "root": "anomalyDetector",
             "combiner": "combiner"

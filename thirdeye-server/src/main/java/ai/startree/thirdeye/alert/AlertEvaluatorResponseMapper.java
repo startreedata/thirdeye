@@ -17,11 +17,14 @@ package ai.startree.thirdeye.alert;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
+import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
+import ai.startree.thirdeye.spi.api.EnumerationItemApi;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -68,6 +71,30 @@ public abstract class AlertEvaluatorResponseMapper {
     return api;
   }
 
+  private static Map<String, DetectionEvaluationApi> operatorResultToApi(
+      final OperatorResult result) {
+    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
+    if (result instanceof CombinerResult) {
+      final List<OperatorResult> operatorResults = ((CombinerResult) result).getDetectionResults();
+      for (int i = 0; i < operatorResults.size(); i++) {
+        final DetectionEvaluationApi api = toDetectionEvaluationApi(operatorResults.get(i));
+        map.put(String.valueOf(i), api);
+      }
+    } else if (result instanceof EnumeratorResult) {
+      final List<EnumerationItemDTO> enumerationItems = ((EnumeratorResult) result).getResults();
+      for (int i = 0; i < enumerationItems.size(); i++) {
+        final EnumerationItemApi api = ApiBeanMapper.toApi(enumerationItems.get(i));
+        map.put(String.valueOf(i), new DetectionEvaluationApi()
+            .setIdx(i)
+            .setEnumerationItem(api));
+      }
+    } else {
+      map.put(String.valueOf(0), toDetectionEvaluationApi(result));
+    }
+
+    return map;
+  }
+
   private static DetectionEvaluationApi toDetectionEvaluationApi(
       final OperatorResult operatorResult) {
     final DetectionEvaluationApi api = new DetectionEvaluationApi();
@@ -79,21 +106,5 @@ public abstract class AlertEvaluatorResponseMapper {
     api.setData(getData(operatorResult));
     api.setEnumerationItem(ApiBeanMapper.toApi(operatorResult.getEnumerationItem()));
     return api;
-  }
-
-  private static Map<String, DetectionEvaluationApi> operatorResultToApi(
-      final OperatorResult result) {
-    final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    if (result instanceof CombinerResult) {
-      final List<OperatorResult> operatorResults = ((CombinerResult) result).getDetectionResults();
-      for (int i = 0; i < operatorResults.size(); i++) {
-        final DetectionEvaluationApi api = toDetectionEvaluationApi(operatorResults.get(i));
-        map.put(String.valueOf(i), api);
-      }
-    } else {
-      map.put(String.valueOf(0), toDetectionEvaluationApi(result));
-    }
-
-    return map;
   }
 }

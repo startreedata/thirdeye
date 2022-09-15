@@ -247,10 +247,9 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     public NullReplacer buildNullReplacer(String fillNullMethod,
         Map<String, Object> fillNullParams) {
       //fillNullParams to be used by factories when pluginized - eg method=SPLINE, params={order=3, kind="smooth"}
-      checkArgument(nullReplacerMap.containsKey(fillNullMethod),
-          String.format("fillNull Method not registered: %s. Available null replacers: %s",
+      checkArgument(nullReplacerMap.containsKey(fillNullMethod), "fillNull Method not registered: %s. Available null replacers: %s",
               fillNullMethod,
-              nullReplacerMap.keySet()));
+              nullReplacerMap.keySet());
 
       return nullReplacerMap.get(fillNullMethod);
     }

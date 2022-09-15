@@ -29,6 +29,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.util.TimeUtils;
@@ -41,11 +42,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -370,6 +373,11 @@ public class AnomalyMerger {
     // merge the anomaly's properties into parent
     mergeAnomalyProperties(parent.getProperties(), child.getProperties());
 
+    // merge the anomaly labels
+    final List<AnomalyLabelDTO> mergedAnomalyLabels = mergeAnomalyLabels(parent.getAnomalyLabels(),
+        child.getAnomalyLabels());
+    parent.setAnomalyLabels(mergedAnomalyLabels);
+
     // merge the anomaly severity
     if (parent.getSeverityLabel().compareTo(child.getSeverityLabel()) > 0) {
       // set the highest severity
@@ -382,6 +390,23 @@ public class AnomalyMerger {
     } else {
       children.addAll(child.getChildren());
     }
+  }
+
+  private @Nullable List<AnomalyLabelDTO> mergeAnomalyLabels(final @Nullable List<AnomalyLabelDTO> parentLabels,
+      @Nullable final List<AnomalyLabelDTO> childLabels) {
+    if (parentLabels == null && childLabels == null) {
+      return null;
+    } else if (parentLabels == null) {
+      return childLabels;
+    } else if (childLabels == null) {
+      return parentLabels;
+    }
+
+    // simple merging logic based on hash - can be enhanced later
+    final Set<AnomalyLabelDTO> labels = new HashSet<>(childLabels);
+    labels.addAll(parentLabels);
+
+    return new ArrayList<>(labels);
   }
 
   /**
@@ -401,12 +426,25 @@ public class AnomalyMerger {
       final DateTimeZone dateTimeZone) {
     requireNonNull(parent);
 
+    final boolean parentDefaultIgnore = getDefaultIgnore(parent);
+    final boolean childDefaultIgnore = getDefaultIgnore(child);
+    if (parentDefaultIgnore != childDefaultIgnore) {
+      // never merge anomalies with different ignore value
+      return false;
+    }
+
     final DateTime childStartTime = new DateTime(child.getStartTime(), dateTimeZone);
     final DateTime childEndTime = new DateTime(child.getEndTime(), dateTimeZone);
 
     return childStartTime.minus(maxGap).isBefore(parent.getEndTime())
         && (child.getEndTime() <= parent.getEndTime()
         || childEndTime.minus(maxDuration).isBefore(parent.getStartTime()));
+  }
+
+  private Boolean getDefaultIgnore(final MergedAnomalyResultDTO parent) {
+    return optional(parent.getAnomalyLabels())
+        .map(labels -> labels.stream().anyMatch(AnomalyLabelDTO::isIgnore))
+        .orElse(false);
   }
 
   private String getPatternKey(final MergedAnomalyResultDTO anomaly) {
@@ -485,7 +523,8 @@ public class AnomalyMerger {
    * @param parent The parent anomaly's properties.
    * @param child The child anomaly's properties.
    */
-  private void mergeAnomalyProperties(final Map<String, String> parent, final Map<String, String> child) {
+  private void mergeAnomalyProperties(final Map<String, String> parent,
+      final Map<String, String> child) {
     for (final String key : child.keySet()) {
       if (!parent.containsKey(key)) {
         parent.put(key, child.get(key));

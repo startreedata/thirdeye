@@ -83,6 +83,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   private boolean renotify = false;
 
   private EnumerationItemDTO enumerationItem;
+  private List<AnomalyLabelDTO> anomalyLabels;
 
   public MergedAnomalyResultDTO() {
     setCreatedTime(System.currentTimeMillis());
@@ -307,12 +308,22 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     this.severityLabel = severityLabel;
   }
 
+  public List<AnomalyLabelDTO> getAnomalyLabels() {
+    return anomalyLabels;
+  }
+
+  public MergedAnomalyResultDTO setAnomalyLabels(
+      final List<AnomalyLabelDTO> anomalyLabels) {
+    this.anomalyLabels = anomalyLabels;
+    return this;
+  }
+
   @Override
   public int hashCode() {
     return Objects
         .hash(getId(), startTime, endTime, collection, metric, score, impactToGlobal,
             avgBaselineVal, avgCurrentVal, anomalyResultSource, detectionConfigId,
-            childIds, isChild);
+            childIds, isChild, anomalyLabels);
   }
 
   @Override
@@ -332,7 +343,8 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
         Objects.equals(anomalyResultSource, m.getAnomalyResultSource()) &&
         Objects.equals(detectionConfigId, m.getDetectionConfigId()) && Objects
         .equals(childIds, m.getChildIds()) &&
-        Objects.equals(isChild, m.isChild());
+        Objects.equals(isChild, m.isChild()) &&
+        Objects.equals(anomalyLabels, m.getAnomalyLabels());
   }
 
   @Override

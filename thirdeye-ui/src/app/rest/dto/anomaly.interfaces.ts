@@ -35,6 +35,9 @@ export interface Anomaly {
     child: boolean;
     feedback?: AnomalyFeedback;
     metadata: AnomalyMetadata;
+    enumerationItem?: {
+        id: number;
+    };
 }
 
 export interface AnomalyFeedback {

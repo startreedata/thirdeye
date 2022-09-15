@@ -26,11 +26,29 @@ import org.testng.annotations.Test;
 
 public class PostProcessorOperatorTest {
 
+  // timeseries can be null - it is not used by the TestPostProcessor
+  private static final AnomalyDetectionResult DETECTION_RES_WITH_2_ANOMALIES = AnomalyDetectionResult.from(
+      List.of(new MergedAnomalyResultDTO(), new MergedAnomalyResultDTO()),
+      null);
+  private static final AnomalyDetectionResult DETECTION_RES_WITH_ZERO_ANOMALY = AnomalyDetectionResult.from(
+      List.of(),
+      null);
+  private static final AnomalyDetectionResult DETECTION_RES_WITH_1_ANOMALY = AnomalyDetectionResult.from(
+      List.of(new MergedAnomalyResultDTO()),
+      null);
   private static final String TEST_POST_PROCESSOR_NAME = "TestPostProcessor";
   private static final String TEST_POST_PROCESSOR_LABEL_NAME = "testLabel";
+  private static final TemplatableMap<String, Object> TEST_POST_PROCESSOR_CONFIG = TemplatableMap.fromValueMap(
+      ImmutableMap.of("type",
+          TEST_POST_PROCESSOR_NAME,
+          "component.labelName",
+          TEST_POST_PROCESSOR_LABEL_NAME));
   private static final String METADATA_TEST_VALUE = "testValue";
   private static final String METADATA_TEST_KEY = "testKey";
-  public static final String NODE_BEAN_NAME = "NodeBeanName";
+  private static final String NODE_BEAN_NAME = "NodeBeanName";
+  private static final Interval NOT_USED_DETECTION_INTERVAL = new Interval(0L,
+      1L,
+      DateTimeZone.UTC);
 
   private PostProcessorRegistry postProcessorRegistry;
 
@@ -43,24 +61,20 @@ public class PostProcessorOperatorTest {
   @Test
   public void testPostProcessorOperatorWithAnomalyDetectionResults() throws Exception {
     final PlanNodeBean planNodeBean = new PlanNodeBean().setName(NODE_BEAN_NAME)
-        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of(
-            "type", TEST_POST_PROCESSOR_NAME,
-            "component.labelName", TEST_POST_PROCESSOR_LABEL_NAME)));
+        .setParams(TEST_POST_PROCESSOR_CONFIG);
     // timeseries is not used by the TestPostProcessor
-    final AnomalyDetectionResult detectionResult0 = AnomalyDetectionResult.from(List.of(), null);
     final AnomalyDetectionResult detectionResult1 = AnomalyDetectionResult.from(List.of(new MergedAnomalyResultDTO()),
         null);
     final AnomalyDetectionResult detectionResult2 = AnomalyDetectionResult.from(List.of(new MergedAnomalyResultDTO(),
         new MergedAnomalyResultDTO()), null);
     final Map<String, OperatorResult> inputsMap = Map.of("detectionResult0",
-        detectionResult0,
+        DETECTION_RES_WITH_ZERO_ANOMALY,
         "detectionResult1",
-        detectionResult1,
+        DETECTION_RES_WITH_1_ANOMALY,
         "detectionResult2",
         detectionResult2);
-    final OperatorContext context = new OperatorContext().setDetectionInterval(new Interval(0L,
-            1L,
-            DateTimeZone.UTC)) // not used
+    final OperatorContext context = new OperatorContext().setDetectionInterval(
+            NOT_USED_DETECTION_INTERVAL)
         .setPlanNode(planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
         .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry));
@@ -69,7 +83,9 @@ public class PostProcessorOperatorTest {
     operator.execute();
     final Map<String, OperatorResult> outputs = operator.getOutputs();
     assertThat(outputs.size()).isEqualTo(3);
-    for (final String inputName: List.of("detectionResult0", "detectionResult1", "detectionResult2")) {
+    for (final String inputName : List.of("detectionResult0",
+        "detectionResult1",
+        "detectionResult2")) {
       assertThat(outputs.containsKey(inputName)).isTrue();
       final OperatorResult r = outputs.get(inputName);
       assertLabelsAreCorrect(r);
@@ -79,19 +95,15 @@ public class PostProcessorOperatorTest {
   @Test
   public void testPostProcessorOperatorWithCombinerResult() throws Exception {
     final PlanNodeBean planNodeBean = new PlanNodeBean().setName(NODE_BEAN_NAME)
-        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of(
-            "type", TEST_POST_PROCESSOR_NAME,
-            "component.labelName", TEST_POST_PROCESSOR_LABEL_NAME)));
-    // timeseries is not used by the TestPostProcessor
-    final AnomalyDetectionResult detectionResult1 = AnomalyDetectionResult.from(List.of(new MergedAnomalyResultDTO()),
-        null);
-    final AnomalyDetectionResult detectionResult2 = AnomalyDetectionResult.from(List.of(new MergedAnomalyResultDTO(),
-        new MergedAnomalyResultDTO()), null);
-    final Map<String, OperatorResult> detectionMap = Map.of("detectionResult1",detectionResult1, "detectionResult2", detectionResult2);
-    final Map<String, OperatorResult> inputsMap = Map.of("combinerResult1", new CombinerResult(detectionMap));
-    final OperatorContext context = new OperatorContext().setDetectionInterval(new Interval(0L,
-            1L,
-            DateTimeZone.UTC)) // not used
+        .setParams(TEST_POST_PROCESSOR_CONFIG);
+    final Map<String, OperatorResult> detectionMap = Map.of("detectionResult1",
+        DETECTION_RES_WITH_1_ANOMALY,
+        "detectionResult2",
+        DETECTION_RES_WITH_2_ANOMALIES);
+    final CombinerResult combinerResult = new CombinerResult(detectionMap);
+    final Map<String, OperatorResult> inputsMap = Map.of("combinerResult1", combinerResult);
+    final OperatorContext context = new OperatorContext().setDetectionInterval(
+            NOT_USED_DETECTION_INTERVAL)
         .setPlanNode(planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
         .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry));
@@ -107,7 +119,7 @@ public class PostProcessorOperatorTest {
   }
 
   private void assertLabelsAreCorrect(final OperatorResult r) {
-    for (final MergedAnomalyResultDTO anomaly: r.getAnomalies()) {
+    for (final MergedAnomalyResultDTO anomaly : r.getAnomalies()) {
       assertThat(anomaly.getAnomalyLabels().size()).isEqualTo(1);
       final AnomalyLabelDTO label = anomaly.getAnomalyLabels().get(0);
       assertThat(label.getName()).isEqualTo(TEST_POST_PROCESSOR_LABEL_NAME);

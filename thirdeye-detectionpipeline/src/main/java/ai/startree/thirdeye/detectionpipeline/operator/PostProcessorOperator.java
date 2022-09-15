@@ -69,16 +69,16 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    // split combiner results - to add combinerResult from PostProcessor implementations
-    final Map<String, OperatorResult> inputWithSplitCombinerResults = splitCombinerResults(inputMap);
+    // split combiner results - to hide CombinerResult from PostProcessor implementations
+    final Map<String, OperatorResult> inputWithCombinerResultsSplit = splitCombinerResults(inputMap);
 
-    final Map<String, OperatorResult> outputsWithSplitCombinerResults = postProcessor.postProcess(
+    final Map<String, OperatorResult> outputsWithCombinerResultsSplit = postProcessor.postProcess(
         detectionInterval,
-        inputWithSplitCombinerResults);
-    outputsWithSplitCombinerResults.values().forEach(this::enrichAnomalyLabels);
+        inputWithCombinerResultsSplit);
+    outputsWithCombinerResultsSplit.values().forEach(this::enrichAnomalyLabels);
 
     // merge back combiner results
-    final Map<String, OperatorResult> output = mergeCombinerResults(outputsWithSplitCombinerResults);
+    final Map<String, OperatorResult> output = mergeCombinerResults(outputsWithCombinerResultsSplit);
 
     resultMap.putAll(output);
   }
@@ -89,7 +89,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
       if (entry.getValue() instanceof CombinerResult) {
         inputWithSplitCombinerResults.remove(entry.getKey());
         final Map<String, OperatorResult> combinedResults = ((CombinerResult) entry.getValue()).getResults();
-        // potential key override - assumes there will not be 2 CombinerResult in the resultMap that have internal results with the same key - at implementation time this can't happen
+        // potential key override - assumes there will not be 2 CombinerResult in the resultMap that have internal results with the same key
         inputWithSplitCombinerResults.putAll(combinedResults);
         combinerKeyToResultsKeys.put(entry.getKey(), combinedResults.keySet());
       }
@@ -99,12 +99,12 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
   }
 
   private Map<String, OperatorResult> mergeCombinerResults(
-      final Map<String, OperatorResult> outputsWithSplitCombinerResults) {
-    final Map<String, OperatorResult> output = new HashMap<>(outputsWithSplitCombinerResults);
+      final Map<String, OperatorResult> outputsWithCombinerResultsSplit) {
+    final Map<String, OperatorResult> output = new HashMap<>(outputsWithCombinerResultsSplit);
     for (final Entry<String, Set<String>> entry : combinerKeyToResultsKeys.entrySet()) {
       final Map<String, OperatorResult> combinedResults = new HashMap<>();
       for (final String resultKey : entry.getValue()) {
-        combinedResults.put(resultKey, outputsWithSplitCombinerResults.get(resultKey));
+        combinedResults.put(resultKey, outputsWithCombinerResultsSplit.get(resultKey));
         output.remove(resultKey);
       }
       output.put(entry.getKey(), new CombinerResult(combinedResults));
@@ -114,7 +114,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
 
   private void enrichAnomalyLabels(final OperatorResult result) {
     final List<MergedAnomalyResultDTO> anomalies;
-    // todo cyril default implementation of getAnomalies throws error - obliged to catch here
+    // todo cyril default implementation of getAnomalies throws error - obliged to catch here - change default implem?
     try {
       anomalies = result.getAnomalies();
     } catch (final UnsupportedOperationException e) {

@@ -254,11 +254,13 @@
         "am": "AM",
         "pm": "PM",
         "time": "Time",
-        "activity": "Activity",
         "anomalies-list": "Anomalies List",
         "metrics-report": "Metrics Report",
         "chart": "Chart",
-        "id": "ID"
+        "id": "ID",
+        "activity": "Activity",
+        "options": "Options",
+        "view": "View"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -353,6 +355,10 @@
         "url-required": "Please enter a URL",
         "select-days-of-week": "Select day(s) of week",
         "change-cron-warning": "Using simple mode will cause the current cron string to change since it is more advanced",
-        "click-to-view-anomaly": "Click to view anomaly"
+        "click-to-view-anomaly": "Click to view anomaly",
+        "view-detection-configuration": "View detection configuration",
+        "alert-is-active": "Alert is active",
+        "alert-is-inactive": "Alert is inactive",
+        "list-of-all-dimensions-related-to-alert": "List of all dimensions related to this alert for the date range selected"
     }
 }

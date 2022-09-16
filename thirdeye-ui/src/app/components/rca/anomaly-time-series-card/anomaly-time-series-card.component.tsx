@@ -19,7 +19,7 @@ import {
     CardContent,
     Grid,
 } from "@material-ui/core";
-import { debounce } from "lodash";
+import { debounce, isEqual } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -30,6 +30,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
+    NotificationTypeV1,
     PageContentsCardV1,
     SkeletonV1,
     TooltipV1,
@@ -39,6 +40,8 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
+import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
+import { useGetEnumerationItem } from "../../../rest/enumeration-items/enumeration-items.actions";
 import {
     DEFAULT_FEEDBACK,
     extractDetectionEvaluation,
@@ -87,7 +90,11 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const { notify } = useNotificationProviderV1();
     const [timeSeriesOptions, setTimeSeriesOptions] =
         useState<TimeSeriesChartProps>();
-
+    const {
+        enumerationItem,
+        getEnumerationItem,
+        status: getEnumerationItemRequest,
+    } = useGetEnumerationItem();
     const {
         getEvaluation,
         errorMessages,
@@ -156,6 +163,12 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     };
 
     useEffect(() => {
+        !!anomaly &&
+            anomaly.enumerationItem &&
+            getEnumerationItem(anomaly.enumerationItem.id);
+    }, [anomaly]);
+
+    useEffect(() => {
         fetchAlertEvaluation();
     }, [anomaly, startTime, endTime]);
 
@@ -175,17 +188,65 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     }, [errorMessages, getEvaluationRequestStatus]);
 
     useEffect(() => {
-        if (alertEvaluation && anomaly) {
-            setTimeSeriesOptions(
-                generateChartOptions(
-                    extractDetectionEvaluation(alertEvaluation)[0],
-                    anomaly,
-                    filteredAlertEvaluation,
-                    t
-                )
-            );
+        if (!alertEvaluation || !anomaly) {
+            return;
         }
-    }, [alertEvaluation, anomaly, filteredAlertEvaluation]);
+
+        if (anomaly.enumerationItem) {
+            if (getEnumerationItemRequest === ActionStatus.Working) {
+                return;
+            }
+
+            if (!enumerationItem) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.experienced-issue-fetching-enumeration-item-required-for-charting"
+                    )
+                );
+
+                return;
+            }
+        }
+
+        const detectionsEvaluations =
+            extractDetectionEvaluation(alertEvaluation);
+        let detectionEvalForAnomaly: DetectionEvaluation | undefined =
+            detectionsEvaluations[0];
+
+        if (anomaly.enumerationItem && enumerationItem) {
+            detectionEvalForAnomaly = detectionsEvaluations.find(
+                (candidate) => {
+                    if (candidate.enumerationItem === undefined) {
+                        return false;
+                    }
+
+                    return isEqual(
+                        enumerationItem.params,
+                        candidate.enumerationItem?.params
+                    );
+                }
+            );
+
+            if (!detectionEvalForAnomaly) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.could-not-find-matching-chart-data-for-anomaly")
+                );
+
+                return;
+            }
+        }
+
+        setTimeSeriesOptions(
+            generateChartOptions(
+                detectionEvalForAnomaly,
+                anomaly,
+                filteredAlertEvaluation,
+                t
+            )
+        );
+    }, [alertEvaluation, anomaly, filteredAlertEvaluation, enumerationItem]);
 
     const handleChartHeightChange = (height: number): void => {
         setChartHeight(height);
@@ -233,6 +294,16 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             </PageContentsCardV1>
         );
     }
+
+    /**
+     * Chart data will have issues if the evaluation request errors or
+     * anomaly belongs to an enumeration item and its request errors
+     */
+    const chartDataHasIssues =
+        getEvaluationRequestStatus === ActionStatus.Error ||
+        (anomaly &&
+            anomaly.enumerationItem &&
+            getEnumerationItemRequest === ActionStatus.Error);
 
     return (
         <Card variant="outlined">
@@ -295,7 +366,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
                     <SkeletonV1 height={350} variant="rect" />
                 </CardContent>
             )}
-            {getEvaluationRequestStatus === ActionStatus.Error && (
+            {chartDataHasIssues && (
                 <CardContent>
                     <Box pb={20} pt={20}>
                         <NoDataIndicator />

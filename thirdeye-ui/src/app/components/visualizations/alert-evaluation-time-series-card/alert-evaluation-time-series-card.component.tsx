@@ -16,7 +16,6 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { generateChartOptionsForAlert } from "../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeSeriesChart } from "../time-series-chart/time-series-chart.component";
@@ -25,7 +24,7 @@ import { AlertEvaluationTimeSeriesCardProps } from "./alert-evaluation-time-seri
 export const AlertEvaluationTimeSeriesCard: FunctionComponent<
     AlertEvaluationTimeSeriesCardProps
 > = ({
-    alertEvaluation,
+    detectionEvaluation,
     alertEvaluationTimeSeriesHeight,
     isLoading,
     header,
@@ -65,11 +64,11 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<
                 />
             )}
             <CardContent>
-                {alertEvaluation && (
+                {detectionEvaluation && (
                     <TimeSeriesChart
                         height={alertEvaluationTimeSeriesHeight}
                         {...generateChartOptionsForAlert(
-                            extractDetectionEvaluation(alertEvaluation)[0],
+                            detectionEvaluation,
                             anomalies,
                             t,
                             disableNavigation ? undefined : navigate

@@ -12,7 +12,7 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import { clone, isEmpty, toNumber } from "lodash";
+import { clone, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
@@ -34,6 +34,7 @@ import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { getUiAnomaly } from "../../utils/anomalies/anomalies.util";
 import { getFromSavedInvestigationOrDefault } from "../../utils/investigation/investigation.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
     isValidNumberId,
     serializeKeyValuePair,
@@ -117,16 +118,14 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     }
 
     useEffect(() => {
-        const genericMsg = t("message.error-while-fetching", {
-            entity: t("label.anomaly"),
-        });
-        if (getAnomalyRequestStatus === ActionStatus.Error) {
-            isEmpty(anomalyRequestErrors)
-                ? notify(NotificationTypeV1.Error, genericMsg)
-                : anomalyRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, `${genericMsg}: ${msg}`)
-                  );
-        }
+        notifyIfErrors(
+            getAnomalyRequestStatus,
+            anomalyRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.anomaly"),
+            })
+        );
     }, [getAnomalyRequestStatus, anomalyRequestErrors]);
 
     const handleAddFilterSetClick = (filters: AnomalyFilterOption[]): void => {

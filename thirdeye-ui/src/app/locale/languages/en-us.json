@@ -362,6 +362,8 @@
         "alert-is-active": "Alert is active",
         "alert-is-inactive": "Alert is inactive",
         "list-of-all-dimensions-related-to-alert": "List of all dimensions related to this alert for the date range selected",
-        "show-count-entity-for-time-range": "Show {{count}} {{entity}} for time range"
+        "show-count-entity-for-time-range": "Show {{count}} {{entity}} for time range",
+        "experienced-issue-fetching-enumeration-item-required-for-charting": "Experienced error fetching enumeration item for anomaly which is required for charting",
+        "could-not-find-matching-chart-data-for-anomaly": "Could not find matching chart data for anomaly"
     }
 }

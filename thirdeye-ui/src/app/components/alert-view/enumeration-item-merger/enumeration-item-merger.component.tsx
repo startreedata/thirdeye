@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Card, CardContent } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -73,12 +74,14 @@ export const EnumerationItemMerger: FunctionComponent<
 
     if (mergedContent === undefined) {
         return (
-            <>
-                <SkeletonV1 />
-                <SkeletonV1 />
-                <SkeletonV1 />
-                <SkeletonV1 />
-            </>
+            <Card variant="outlined">
+                <CardContent>
+                    <SkeletonV1 />
+                    <SkeletonV1 />
+                    <SkeletonV1 />
+                    <SkeletonV1 />
+                </CardContent>
+            </Card>
         );
     }
 

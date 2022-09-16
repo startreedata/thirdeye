@@ -59,12 +59,12 @@ import {
     extractDetectionEvaluation,
 } from "../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
+import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 const QUERY_PARAM_KEY_FOR_SEARCH = "search";
 const QUERY_PARAM_KEY_FOR_SORT = "sort";
-const QUERY_PARAM_KEY_FOR_EXPANDED = "expanded";
 const CONCAT_SEPARATOR = "+";
 
 export const AlertsViewPage: FunctionComponent = () => {

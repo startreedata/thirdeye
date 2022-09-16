@@ -12,10 +12,11 @@
  * the License.
  */
 import { Box, Button, Grid, Link } from "@material-ui/core";
-import { isEmpty, toNumber } from "lodash";
+import { isEmpty, isEqual, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { generateNameForEnumerationItem } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -40,9 +41,10 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
-import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
 import {
@@ -51,7 +53,10 @@ import {
 } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { isValidNumberId } from "../../utils/params/params.util";
+import {
+    isValidNumberId,
+    QUERY_PARAM_KEY_FOR_EXPANDED,
+} from "../../utils/params/params.util";
 import {
     getAlertsAlertPath,
     getAnomaliesAllPath,
@@ -61,6 +66,11 @@ import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
+    const {
+        enumerationItem,
+        getEnumerationItem,
+        status: getEnumerationItemRequest,
+    } = useGetEnumerationItem();
     const {
         investigations,
         getInvestigations,
@@ -79,8 +89,8 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         errorMessages: anomalyRequestErrors,
     } = useGetAnomaly();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
-    const [alertEvaluation, setAlertEvaluation] =
-        useState<AlertEvaluation | null>(null);
+    const [detectionEvaluation, setDetectionEvaluation] =
+        useState<DetectionEvaluation | null>(null);
     const [searchParams] = useSearchParams();
     const { showDialog } = useDialogProviderV1();
     const { id: anomalyId } = useParams<AnomaliesViewPageParams>();
@@ -98,18 +108,73 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         !!anomaly && setUiAnomaly(getUiAnomaly(anomaly));
+        /**
+         * If anomaly has an enumeration id, fetch the enumeration item so
+         * that we can use the correct detection evaluation
+         */
+        !!anomaly &&
+            anomaly.enumerationItem &&
+            getEnumerationItem(anomaly.enumerationItem.id);
     }, [anomaly]);
 
     useEffect(() => {
         if (!evaluation || !anomaly) {
             return;
         }
+
+        /**
+         * If anomaly is part of an enumeration item and its fetch
+         * request has not been completed, skip
+         */
+        if (anomaly.enumerationItem) {
+            if (getEnumerationItemRequest === ActionStatus.Working) {
+                return;
+            }
+
+            if (!enumerationItem) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.experienced-issue-fetching-enumeration-item-required-for-charting"
+                    )
+                );
+
+                return;
+            }
+        }
+
+        const extractedDetectionEvaluations =
+            extractDetectionEvaluation(evaluation);
+        let detectionEvalForAnomaly: DetectionEvaluation | undefined =
+            extractedDetectionEvaluations[0];
+
+        if (anomaly.enumerationItem && enumerationItem) {
+            detectionEvalForAnomaly = extractedDetectionEvaluations.find(
+                (candidate) => {
+                    if (candidate.enumerationItem === undefined) {
+                        return false;
+                    }
+
+                    return isEqual(
+                        enumerationItem.params,
+                        candidate.enumerationItem?.params
+                    );
+                }
+            );
+
+            if (!detectionEvalForAnomaly) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.could-not-find-matching-chart-data-for-anomaly")
+                );
+
+                return;
+            }
+        }
         // Only filter for the current anomaly
-        const anomalyDetectionResults =
-            extractDetectionEvaluation(evaluation)[0];
-        anomalyDetectionResults.anomalies = [anomaly];
-        setAlertEvaluation(evaluation);
-    }, [evaluation, anomaly]);
+        detectionEvalForAnomaly.anomalies = [anomaly];
+        setDetectionEvaluation(detectionEvalForAnomaly);
+    }, [evaluation, anomaly, enumerationItem]);
 
     useEffect(() => {
         // Fetched alert or time range changed, fetch alert evaluation
@@ -145,7 +210,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
 
         if (!anomaly || !anomaly.alert || !start || !end) {
-            setAlertEvaluation(null);
+            setDetectionEvaluation(null);
 
             return;
         }
@@ -196,6 +261,26 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         }
     }, [anomalyRequestStatus, anomalyRequestErrors]);
 
+    const enumerationItemSearchParams =
+        anomaly && anomaly.enumerationItem && enumerationItem
+            ? new URLSearchParams([
+                  [
+                      QUERY_PARAM_KEY_FOR_EXPANDED,
+                      generateNameForEnumerationItem(enumerationItem),
+                  ],
+              ])
+            : undefined;
+
+    /**
+     * Chart data will have issues if the evaluation request errors or
+     * anomaly belongs to an enumeration item and its request errors
+     */
+    const chartDataHasIssues =
+        getEvaluationRequestStatus === ActionStatus.Error ||
+        (anomaly &&
+            anomaly.enumerationItem &&
+            getEnumerationItemRequest === ActionStatus.Error);
+
     return (
         <PageV1>
             <PageHeader
@@ -231,11 +316,21 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         </Button>
                     </PageHeaderActionsV1>
                 }
+                subtitle={
+                    anomaly && anomaly.enumerationItem && enumerationItem
+                        ? generateNameForEnumerationItem(enumerationItem)
+                        : undefined
+                }
             >
                 <PageHeaderTextV1>
                     {anomaly && uiAnomaly && (
                         <>
-                            <Link href={getAlertsAlertPath(anomaly.alert.id)}>
+                            <Link
+                                href={getAlertsAlertPath(
+                                    anomaly.alert.id,
+                                    enumerationItemSearchParams
+                                )}
+                            >
                                 {anomaly.alert.name}
                             </Link>
                             : {uiAnomaly.name}
@@ -275,19 +370,19 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    {getEvaluationRequestStatus === ActionStatus.Error && (
+                    {chartDataHasIssues && (
                         <PageContentsCardV1>
                             <Box pb={20} pt={20}>
                                 <NoDataIndicator />
                             </Box>
                         </PageContentsCardV1>
                     )}
-                    {getEvaluationRequestStatus !== ActionStatus.Error && (
+                    {!chartDataHasIssues && (
                         <AlertEvaluationTimeSeriesCard
                             disableNavigation
-                            alertEvaluation={alertEvaluation}
                             alertEvaluationTimeSeriesHeight={500}
                             anomalies={[anomaly as Anomaly]}
+                            detectionEvaluation={detectionEvaluation}
                             header={
                                 <ViewAnomalyHeader
                                     anomaly={anomaly}

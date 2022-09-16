@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 
 export interface AlertEvaluationTimeSeriesCardProps {
     alertEvaluationTimeSeriesHeight: number;
-    alertEvaluation: AlertEvaluation | null;
+    detectionEvaluation: DetectionEvaluation | null;
     onRefresh?: (start?: number, end?: number) => void;
     isLoading?: boolean;
     header?: React.ReactElement;

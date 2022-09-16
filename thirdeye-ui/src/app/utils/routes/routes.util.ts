@@ -168,11 +168,14 @@ export const getAlertsAllPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS_ALL);
 };
 
-export const getAlertsAlertPath = (id: number): string => {
+export const getAlertsAlertPath = (
+    id: number,
+    additionalParams?: URLSearchParams
+): string => {
     let path: string = AppRoute.ALERTS_ALERT;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
-    return createPathWithRecognizedQueryString(path);
+    return createPathWithRecognizedQueryString(path, additionalParams);
 };
 
 export const getAlertsAlertViewPath = (id: number): string => {
@@ -469,8 +472,19 @@ export const getLogoutPath = (): string => {
 
 // Creates path with only the recognized app query string key-value pairs from URL that are allowed
 // to be carried forward when navigating
-export const createPathWithRecognizedQueryString = (path: string): string => {
-    return `${path}?${getRecognizedQuery().toString()}`;
+export const createPathWithRecognizedQueryString = (
+    path: string,
+    additionalParams?: URLSearchParams
+): string => {
+    const currentSet = getRecognizedQuery();
+
+    if (additionalParams) {
+        additionalParams.forEach((value, key) => {
+            currentSet.set(key, value);
+        });
+    }
+
+    return `${path}?${currentSet.toString()}`;
 };
 
 /**

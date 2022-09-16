@@ -24,6 +24,7 @@ import { createTimeRangeDuration } from "../time-range/time-range.util";
 
 const SINGLE_SEARCH_PARAM_SEPARATOR = ",";
 
+export const QUERY_PARAM_KEY_FOR_EXPANDED = "expanded";
 export const HASH_KEY_ACCESS_TOKEN = "access_token";
 export const SEARCH_TERM_QUERY_PARAM_KEY =
     SearchQueryStringKey.SEARCH.toLowerCase();

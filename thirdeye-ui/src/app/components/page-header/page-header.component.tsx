@@ -99,7 +99,11 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
                 )}
             >
                 <Grid container>
-                    <Grid item xs={12}>
+                    <Grid
+                        item
+                        className={pageHeaderStyles.noPaddingBottom}
+                        xs={12}
+                    >
                         {breadcrumbs && <Breadcrumbs crumbs={breadcrumbs} />}
                     </Grid>
 

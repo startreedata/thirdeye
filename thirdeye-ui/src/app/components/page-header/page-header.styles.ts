@@ -31,7 +31,7 @@ export const usePageHeaderStyles = makeStyles((theme) => {
             marginBottom: theme.spacing(2),
         },
         noPaddingBottom: {
-            paddingBottom: "0",
+            paddingBottom: "0 !important",
         },
     };
 });

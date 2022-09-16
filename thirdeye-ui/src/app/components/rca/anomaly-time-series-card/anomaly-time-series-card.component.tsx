@@ -41,7 +41,6 @@ import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
-import { useGetEnumerationItem } from "../../../rest/enumeration-items/enumeration-items.actions";
 import {
     DEFAULT_FEEDBACK,
     extractDetectionEvaluation,
@@ -84,17 +83,14 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     events,
     isLoading,
     onEventSelectionChange,
+    getEnumerationItemRequest,
+    enumerationItem,
 }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const [timeSeriesOptions, setTimeSeriesOptions] =
         useState<TimeSeriesChartProps>();
-    const {
-        enumerationItem,
-        getEnumerationItem,
-        status: getEnumerationItemRequest,
-    } = useGetEnumerationItem();
     const {
         getEvaluation,
         errorMessages,
@@ -161,12 +157,6 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             );
         });
     };
-
-    useEffect(() => {
-        !!anomaly &&
-            anomaly.enumerationItem &&
-            getEnumerationItem(anomaly.enumerationItem.id);
-    }, [anomaly]);
 
     useEffect(() => {
         fetchAlertEvaluation();

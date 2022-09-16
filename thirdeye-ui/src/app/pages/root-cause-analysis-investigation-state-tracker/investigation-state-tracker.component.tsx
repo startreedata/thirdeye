@@ -11,11 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Card, CardContent, Link } from "@material-ui/core";
+import { Box, Card, CardContent } from "@material-ui/core";
 import { cloneDeep, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams, useSearchParams } from "react-router-dom";
+import { generateNameForEnumerationItem } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
@@ -31,6 +32,7 @@ import {
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
+import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
 import { useGetInvestigation } from "../../rest/rca/rca.actions";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
@@ -38,9 +40,9 @@ import {
     determineInvestigationIDFromSearchParams,
     INVESTIGATION_ID_QUERY_PARAM,
 } from "../../utils/investigation/investigation.util";
+import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import {
     getAlertsAlertPath,
-    getAnomaliesAllPath,
     getAnomaliesAnomalyViewPath,
 } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
@@ -61,6 +63,11 @@ export const InvestigationStateTracker: FunctionComponent = () => {
     const { anomaly, getAnomaly } = useGetAnomaly();
 
     const {
+        enumerationItem,
+        getEnumerationItem,
+        status: getEnumerationItemRequest,
+    } = useGetEnumerationItem();
+    const {
         getInvestigation,
         status: getInvestigationRequestStatus,
         errorMessages: getInvestigationRequestErrors,
@@ -69,6 +76,12 @@ export const InvestigationStateTracker: FunctionComponent = () => {
     useEffect(() => {
         getAnomaly(Number(anomalyId));
     }, [anomalyId]);
+
+    useEffect(() => {
+        !!anomaly &&
+            anomaly.enumerationItem &&
+            getEnumerationItem(anomaly.enumerationItem.id);
+    }, [anomaly]);
 
     /**
      * If investigation's associated anomaly id does not match current anomalyId
@@ -186,8 +199,30 @@ export const InvestigationStateTracker: FunctionComponent = () => {
             <PageHeader
                 breadcrumbs={[
                     {
-                        link: getAnomaliesAllPath(),
-                        label: t("label.anomalies"),
+                        link: anomaly
+                            ? enumerationItem
+                                ? getAlertsAlertPath(
+                                      anomaly.alert.id,
+                                      new URLSearchParams([
+                                          [
+                                              QUERY_PARAM_KEY_FOR_EXPANDED,
+                                              generateNameForEnumerationItem(
+                                                  enumerationItem
+                                              ),
+                                          ],
+                                      ])
+                                  )
+                                : getAlertsAlertPath(anomaly.alert.id)
+                            : undefined,
+                        label: anomaly
+                            ? enumerationItem
+                                ? `${
+                                      anomaly.alert.name
+                                  } (${generateNameForEnumerationItem(
+                                      enumerationItem
+                                  )})`
+                                : anomaly.alert.name
+                            : "",
                     },
                     {
                         label: anomalyId,
@@ -224,19 +259,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                 }
             >
                 <PageHeaderTextV1>
-                    {anomaly && (
-                        <>
-                            {t("label.investigate")}:{" "}
-                            <Link href={getAlertsAlertPath(anomaly.alert.id)}>
-                                {anomaly.alert.name}
-                            </Link>
-                            :{" "}
-                        </>
-                    )}
-                    {!anomaly && <>{t("label.investigate")}: </>}
-                    <Link href={getAnomaliesAnomalyViewPath(Number(anomalyId))}>
-                        {t("label.anomaly")} #{anomalyId}
-                    </Link>
+                    {t("label.investigate")}
                     <TooltipV1
                         placement="top"
                         title={
@@ -261,6 +284,8 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                 context={{
                     investigation: localInvestigation,
                     investigationHasChanged: handleInvestigationChange,
+                    getEnumerationItemRequest,
+                    enumerationItem,
                 }}
             />
         </PageV1>

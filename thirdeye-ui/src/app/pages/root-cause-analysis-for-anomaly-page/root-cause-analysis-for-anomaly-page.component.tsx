@@ -44,8 +44,12 @@ import { RootCauseAnalysisForAnomalyPageParams } from "./root-cause-analysis-for
 import { useRootCauseAnalysisForAnomalyPageStyles } from "./root-cause-analysis-for-anomaly-page.style";
 
 export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
-    const { investigation, investigationHasChanged } =
-        useOutletContext<InvestigationContext>();
+    const {
+        investigation,
+        investigationHasChanged,
+        getEnumerationItemRequest,
+        enumerationItem,
+    } = useOutletContext<InvestigationContext>();
     const {
         anomaly,
         getAnomaly,
@@ -187,7 +191,9 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                 <AnomalyTimeSeriesCard
                     anomaly={anomaly}
                     // Selected events should be shown on the graph
+                    enumerationItem={enumerationItem}
                     events={selectedEvents}
+                    getEnumerationItemRequest={getEnumerationItemRequest}
                     isLoading={getAnomalyRequestStatus === ActionStatus.Working}
                     timeSeriesFiltersSet={chartTimeSeriesFilterSet}
                     onEventSelectionChange={handleEventSelectionChange}

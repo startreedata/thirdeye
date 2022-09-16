@@ -11,7 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
 import { AnomalyFilterOption } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
@@ -22,4 +24,6 @@ export interface AnomalyTimeSeriesCardProps {
     onRemoveBtnClick: (idx: number) => void;
     isLoading: boolean;
     onEventSelectionChange: (events: Event[]) => void;
+    getEnumerationItemRequest: ActionStatus;
+    enumerationItem: EnumerationItem | null;
 }

@@ -19,4 +19,5 @@ export interface TimeRangeButtonProps {
     onChange?: (timeRangeDuration: TimeRangeDuration) => void;
     maxDate?: number;
     minDate?: number;
+    btnGroupColor?: "secondary" | "inherit" | "primary" | "default";
 }

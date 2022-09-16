@@ -30,7 +30,10 @@ import {
     TimeRangeQueryStringKey,
 } from "../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
-import { AnomalyFilterQueryStringKey } from "./anomaly-quick-filter.interface";
+import {
+    AnomalyFilterQueryStringKey,
+    AnomalyQuickFiltersProps,
+} from "./anomaly-quick-filter.interface";
 import { useAnomalyQuickFilterStyles } from "./anomaly-quick-filters.styles";
 
 function initializeSelected(
@@ -47,7 +50,9 @@ function initializeSelected(
     return null;
 }
 
-export const AnomalyQuickFilters: FunctionComponent = () => {
+export const AnomalyQuickFilters: FunctionComponent<
+    AnomalyQuickFiltersProps
+> = ({ showTimeSelectorOnly }) => {
     const {
         timeRangeDuration,
         recentCustomTimeRangeDurations,
@@ -141,80 +146,84 @@ export const AnomalyQuickFilters: FunctionComponent = () => {
     return (
         <div className={classes.root}>
             <div className={classes.filterGroup}>
-                <div className={classes.dataGridToolbarSearch}>
-                    <FilterOptionsAutoComplete<Metric>
-                        fetchOptions={getUniqMetrics}
-                        formatOptionFromServer={(rawOption) => {
-                            return {
-                                id: rawOption.name,
-                                label: rawOption.name,
-                            };
-                        }}
-                        label={t("label.metric")}
-                        name={t("label.metric")}
-                        selected={selectedMetric}
-                        onSelectionChange={(selected) =>
-                            handleChange(
-                                selected,
-                                AnomalyFilterQueryStringKey.METRIC,
-                                setSelectedMetric
-                            )
-                        }
-                    />
-                </div>
-                <div className={classes.dataGridToolbarSearch}>
-                    <FilterOptionsAutoComplete<Dataset>
-                        fetchOptions={getAllDatasets}
-                        formatOptionFromServer={(rawOption) => {
-                            return {
-                                id: rawOption.name,
-                                label: rawOption.name,
-                            };
-                        }}
-                        label={t("label.dataset")}
-                        name={t("label.dataset")}
-                        selected={selectedDataset}
-                        onSelectionChange={(selected) =>
-                            handleChange(
-                                selected,
-                                AnomalyFilterQueryStringKey.DATASET,
-                                setSelectedDataset
-                            )
-                        }
-                    />
-                </div>
-                <div className={classes.dataGridToolbarSearch}>
-                    <FilterOptionsAutoComplete<Alert>
-                        fetchOptions={getAllAlerts}
-                        formatOptionFromServer={(rawOption) => {
-                            return {
-                                id: rawOption.id,
-                                label: rawOption.name,
-                            };
-                        }}
-                        formatSelectedAfterOptionsFetch={(
-                            selected: FilterOption,
-                            options: FilterOption[]
-                        ) => {
-                            const selectedId = Number(selected.id);
-                            const matching = options.find(
-                                (item) => item.id === selectedId
-                            );
+                {!showTimeSelectorOnly && (
+                    <>
+                        <div className={classes.dataGridToolbarSearch}>
+                            <FilterOptionsAutoComplete<Metric>
+                                fetchOptions={getUniqMetrics}
+                                formatOptionFromServer={(rawOption) => {
+                                    return {
+                                        id: rawOption.name,
+                                        label: rawOption.name,
+                                    };
+                                }}
+                                label={t("label.metric")}
+                                name={t("label.metric")}
+                                selected={selectedMetric}
+                                onSelectionChange={(selected) =>
+                                    handleChange(
+                                        selected,
+                                        AnomalyFilterQueryStringKey.METRIC,
+                                        setSelectedMetric
+                                    )
+                                }
+                            />
+                        </div>
+                        <div className={classes.dataGridToolbarSearch}>
+                            <FilterOptionsAutoComplete<Dataset>
+                                fetchOptions={getAllDatasets}
+                                formatOptionFromServer={(rawOption) => {
+                                    return {
+                                        id: rawOption.name,
+                                        label: rawOption.name,
+                                    };
+                                }}
+                                label={t("label.dataset")}
+                                name={t("label.dataset")}
+                                selected={selectedDataset}
+                                onSelectionChange={(selected) =>
+                                    handleChange(
+                                        selected,
+                                        AnomalyFilterQueryStringKey.DATASET,
+                                        setSelectedDataset
+                                    )
+                                }
+                            />
+                        </div>
+                        <div className={classes.dataGridToolbarSearch}>
+                            <FilterOptionsAutoComplete<Alert>
+                                fetchOptions={getAllAlerts}
+                                formatOptionFromServer={(rawOption) => {
+                                    return {
+                                        id: rawOption.id,
+                                        label: rawOption.name,
+                                    };
+                                }}
+                                formatSelectedAfterOptionsFetch={(
+                                    selected: FilterOption,
+                                    options: FilterOption[]
+                                ) => {
+                                    const selectedId = Number(selected.id);
+                                    const matching = options.find(
+                                        (item) => item.id === selectedId
+                                    );
 
-                            return matching || selected;
-                        }}
-                        label={t("label.alert")}
-                        name={t("label.alert")}
-                        selected={selectedAlert}
-                        onSelectionChange={(selected) =>
-                            handleChange(
-                                selected,
-                                AnomalyFilterQueryStringKey.ALERT,
-                                setSelectedAlert
-                            )
-                        }
-                    />
-                </div>
+                                    return matching || selected;
+                                }}
+                                label={t("label.alert")}
+                                name={t("label.alert")}
+                                selected={selectedAlert}
+                                onSelectionChange={(selected) =>
+                                    handleChange(
+                                        selected,
+                                        AnomalyFilterQueryStringKey.ALERT,
+                                        setSelectedAlert
+                                    )
+                                }
+                            />
+                        </div>
+                    </>
+                )}
             </div>
             <div>
                 <TimeRangeSelector

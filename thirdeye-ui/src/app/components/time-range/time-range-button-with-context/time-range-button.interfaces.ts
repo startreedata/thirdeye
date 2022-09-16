@@ -22,6 +22,7 @@ export interface TimeRangeButtonProps {
 }
 
 export interface TimeRangeButtonWithContextProps {
+    btnGroupColor?: "secondary" | "inherit" | "primary" | "default";
     onTimeRangeChange?: (start: number, end: number) => void;
     maxDate?: number;
     minDate?: number;

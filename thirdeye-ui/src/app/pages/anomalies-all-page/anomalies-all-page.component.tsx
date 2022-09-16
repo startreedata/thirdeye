@@ -17,6 +17,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { AnomaliesPageHeader } from "../../components/anomalies-page-header/anomalies-page-header.component";
+import {
+    makeDeleteRequest,
+    promptDeleteConfirmation,
+} from "../../components/anomaly-list-v1/anomaly-list-v1.utils";
 import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
@@ -28,9 +32,7 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
@@ -104,81 +106,27 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         });
     };
 
-    const handleAnomalyDelete = (uiAnomalies: UiAnomaly[]): void => {
-        let promptMsg = t("message.delete-confirmation", {
-            name: uiAnomalies[0].name,
-        });
-
-        if (uiAnomalies.length > 1) {
-            promptMsg = t("message.delete-confirmation", {
-                name: `${uiAnomalies.length} ${t("label.anomalies")}`,
-            });
-        }
-
-        showDialog({
-            type: DialogType.ALERT,
-            contents: promptMsg,
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => handleAnomalyDeleteOk(uiAnomalies),
-        });
-    };
-
-    const handleAnomalyDeleteOk = (uiAnomalies: UiAnomaly[]): void => {
-        Promise.allSettled(
-            uiAnomalies.map((uiAnomaly) => deleteAnomaly(uiAnomaly.id))
-        ).then((completedRequests) => {
-            let numSuccessful = 0;
-            let errored = 0;
-
-            completedRequests.forEach((settled) => {
-                if (settled.status === "fulfilled") {
-                    numSuccessful = numSuccessful + 1;
-                    removeUiAnomaly(settled.value);
-                } else {
-                    errored = errored + 1;
-                }
-            });
-
-            if (uiAnomalies.length === 1 && numSuccessful === 1) {
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.delete-success", { entity: t("label.anomaly") })
-                );
-            } else {
-                if (numSuccessful > 0) {
-                    notify(
-                        NotificationTypeV1.Success,
-                        t("message.num-delete-success", {
-                            entity: t("label.anomalies"),
-                            num: numSuccessful,
-                        })
+    const handleAnomalyDelete = (uiAnomaliesToDelete: UiAnomaly[]): void => {
+        promptDeleteConfirmation(
+            uiAnomaliesToDelete,
+            () => {
+                anomalies &&
+                    makeDeleteRequest(uiAnomaliesToDelete, t, notify).then(
+                        (deletedAnomalies) => {
+                            setAnomalies(() => {
+                                return [...anomalies].filter((candidate) => {
+                                    return (
+                                        deletedAnomalies.findIndex(
+                                            (d) => d.id === candidate.id
+                                        ) === -1
+                                    );
+                                });
+                            });
+                        }
                     );
-                }
-                if (errored > 0) {
-                    notify(
-                        NotificationTypeV1.Error,
-                        t("message.num-delete-error", {
-                            entity: t("label.anomalies"),
-                            num: errored,
-                        })
-                    );
-                }
-            }
-        });
-    };
-
-    const removeUiAnomaly = (anomalyToRemove: Anomaly): void => {
-        if (!anomalyToRemove) {
-            return;
-        }
-
-        setAnomalies(
-            (currentAnomalies) =>
-                currentAnomalies &&
-                currentAnomalies.filter(
-                    (candidate) => candidate.id !== anomalyToRemove.id
-                )
+            },
+            t,
+            showDialog
         );
     };
 
@@ -203,7 +151,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
             <PageContentsGridV1 fullHeight>
                 {getAnomaliesRequestStatus === ActionStatus.Working && (
-                    <Grid xs={12}>
+                    <Grid item xs={12}>
                         <PageContentsCardV1>
                             <SkeletonV1 animation="pulse" />
                             <SkeletonV1 animation="pulse" />

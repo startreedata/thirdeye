@@ -24,7 +24,7 @@ import { TimeRangeButtonWithContextProps } from "./time-range-button.interfaces"
 
 export const TimeRangeButtonWithContext: FunctionComponent<
     TimeRangeButtonWithContextProps
-> = ({ onTimeRangeChange, maxDate, minDate }) => {
+> = ({ onTimeRangeChange, maxDate, minDate, btnGroupColor = "secondary" }) => {
     const { recentCustomTimeRangeDurations, setTimeRangeDuration } =
         useTimeRange();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -68,6 +68,7 @@ export const TimeRangeButtonWithContext: FunctionComponent<
 
     return (
         <TimeRangeButton
+            btnGroupColor={btnGroupColor}
             maxDate={maxDate}
             minDate={minDate}
             recentCustomTimeRangeDurations={recentCustomTimeRangeDurations}

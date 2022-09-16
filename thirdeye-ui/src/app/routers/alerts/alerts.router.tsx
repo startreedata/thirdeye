@@ -23,7 +23,6 @@ import {
     AppRouteRelative,
     generateDateRangeMonthsFromNow,
 } from "../../utils/routes/routes.util";
-import { SaveLastUsedSearchParams } from "../../utils/routes/save-last-used-search-params/save-last-used-search-params.component";
 
 const AlertsAllPage = lazy(() =>
     import(
@@ -35,6 +34,12 @@ const AlertsViewPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-view-page" */ "../../pages/alerts-view-page/alerts-view-page.component"
     ).then((module) => ({ default: module.AlertsViewPage }))
+);
+
+const AlertsAnomaliesPage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-view-page" */ "../../pages/alerts-anomalies-page/alerts-anomalies-page.component"
+    ).then((module) => ({ default: module.AlertsAnomaliesPage }))
 );
 
 const AlertsCreateAdvancePage = lazy(() =>
@@ -197,9 +202,23 @@ export const AlertsRouter: FunctionComponent = () => {
                                 ]}
                                 to=".."
                             >
-                                <SaveLastUsedSearchParams>
-                                    <AlertsViewPage />
-                                </SaveLastUsedSearchParams>
+                                <AlertsAnomaliesPage />
+                            </RedirectValidation>
+                        }
+                        path={AppRouteRelative.ALERTS_ANOMALIES}
+                    />
+
+                    <Route
+                        element={
+                            <RedirectValidation
+                                queryParams={[
+                                    TimeRangeQueryStringKey.TIME_RANGE,
+                                    TimeRangeQueryStringKey.START_TIME,
+                                    TimeRangeQueryStringKey.END_TIME,
+                                ]}
+                                to=".."
+                            >
+                                <AlertsViewPage />
                             </RedirectValidation>
                         }
                         path={AppRouteRelative.ALERTS_VIEW}

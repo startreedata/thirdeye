@@ -40,6 +40,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     onDelete,
     searchFilterValue,
     onSearchFilterValueChange,
+    toolbar = <AnomalyQuickFilters />,
 }) => {
     const [selectedAnomaly, setSelectedAnomaly] =
         useState<DataGridSelectionModelV1<UiAnomaly>>();
@@ -244,7 +245,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                     >
                         {t("label.delete")}
                     </Button>
-                    <AnomalyQuickFilters />
+                    {toolbar}
                 </Box>
             }
             onSearchFilterValueChange={onSearchFilterValueChange}

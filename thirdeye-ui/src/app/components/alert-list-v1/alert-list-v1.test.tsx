@@ -27,10 +27,6 @@ jest.mock("react-router-dom", () => ({
     useNavigate: jest.fn().mockReturnValue(() => null),
 }));
 
-jest.mock("../entity-cards/alert-card-v1/alert-card-v1.component", () => ({
-    AlertCardV1: jest.fn().mockImplementation((props) => props.uiAlert),
-}));
-
 jest.mock("../../platform/components", () => ({
     PageContentsCardV1: jest.fn().mockImplementation((props) => props.children),
     DataGridV1: jest.fn().mockImplementation((props) => (

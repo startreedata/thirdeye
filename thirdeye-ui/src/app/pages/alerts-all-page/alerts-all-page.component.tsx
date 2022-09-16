@@ -12,7 +12,6 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
@@ -92,22 +91,18 @@ export const AlertsAllPage: FunctionComponent = () => {
                             ? subscriptionGroupsResponse.reason
                             : ({} as AxiosError);
 
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      alertsResponse.status ===
-                                          PROMISES.REJECTED
-                                          ? "label.alerts"
-                                          : "label.subscription-groups"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
+                    notifyIfErrors(
+                        ActionStatus.Error,
+                        getErrorMessages(axiosError),
+                        notify,
+                        t("message.error-while-fetching", {
+                            entity: t(
+                                alertsResponse.status === PROMISES.REJECTED
+                                    ? "label.alerts"
+                                    : "label.subscription-groups"
+                            ),
+                        })
+                    );
                 }
 
                 // Attempt to gather data
@@ -186,7 +181,11 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader showCreateButton title={t("label.alerts")} />
+            <PageHeader
+                showCreateButton
+                transparentBackground
+                title={t("label.alerts")}
+            />
 
             <PageContentsGridV1 fullHeight>
                 {/* Alert list */}

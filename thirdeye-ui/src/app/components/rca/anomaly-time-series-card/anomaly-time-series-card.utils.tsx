@@ -349,7 +349,10 @@ export const generateSeriesForAnomalies = (
                         style={pointerStyleOrNot}
                         onClick={() => {
                             navigate &&
-                                navigate(getAnomaliesAnomalyPath(anomaly.id));
+                                window.open(
+                                    getAnomaliesAnomalyPath(anomaly.id),
+                                    "_blank"
+                                );
                         }}
                     >
                         {anomalySeriesData.length > 1 &&

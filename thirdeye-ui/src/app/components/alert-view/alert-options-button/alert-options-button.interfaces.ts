@@ -11,12 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export enum AnomalyFilterQueryStringKey {
-    ALERT = "alert",
-    METRIC = "metric",
-    DATASET = "dataset",
-}
+import { MouseEvent, ReactNode } from "react";
+import { Alert } from "../../../rest/dto/alert.interfaces";
 
-export interface AnomalyQuickFiltersProps {
-    showTimeSelectorOnly?: boolean;
+export interface AlertOptionsButtonProps {
+    alert: Alert;
+    onChange?: (alert: Alert) => void;
+    onDelete?: (alert: Alert) => void;
+    showViewDetails?: boolean;
+    openButtonRenderer?: (
+        clickCallback: (event: MouseEvent<HTMLElement>) => void
+    ) => ReactNode;
 }

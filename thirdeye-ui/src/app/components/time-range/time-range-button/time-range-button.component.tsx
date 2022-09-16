@@ -34,6 +34,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
     onChange,
     maxDate,
     minDate,
+    btnGroupColor = "secondary",
 }: TimeRangeButtonProps) => {
     const { t } = useTranslation();
     const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
@@ -72,9 +73,9 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
 
     return (
         <>
-            <ButtonGroup color="secondary" variant="outlined">
+            <ButtonGroup color={btnGroupColor} variant="outlined">
                 <Button
-                    color="secondary"
+                    color={btnGroupColor}
                     disabled={!isDateStartExtendable}
                     variant="outlined"
                     onClick={() => handleWeekExtensionClick(Direction.BACK)}
@@ -91,7 +92,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
                     </TooltipV1>
                 </Button>
                 <Button
-                    color="secondary"
+                    color={btnGroupColor}
                     startIcon={<CalendarTodayIcon />}
                     variant="outlined"
                     onClick={handleTimeRangeSelectorClick}
@@ -99,7 +100,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
                     {formatTimeRangeDuration(timeRangeDuration)}
                 </Button>
                 <Button
-                    color="secondary"
+                    color={btnGroupColor}
                     disabled={!isDateEndExtendable}
                     variant="outlined"
                     onClick={() => handleWeekExtensionClick(Direction.FORWARD)}

@@ -11,261 +11,295 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
-import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import {
+    Box,
+    Button,
+    ButtonGroup,
+    Card,
+    CardContent,
+    Grid,
+} from "@material-ui/core";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import React, {
+    FunctionComponent,
+    MouseEvent,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
+import { useParams, useSearchParams } from "react-router-dom";
+import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
+import { EnumerationItemMerger } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.component";
+import { DetectionEvaluationForRender } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.interfaces";
+import { EnumerationItemsTable } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.component";
+import { generateNameForDetectionResult } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
+import { AlertViewSubHeader } from "../../components/alert-view/sub-header/alert-sub-header.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import {
-    JSONEditorV1,
+    DataGridSortOrderV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
     SkeletonV1,
-    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
-    deleteAlert,
-    getAlert,
-    updateAlert,
-} from "../../rest/alerts/alerts.rest";
+    useGetAlert,
+    useGetEvaluation,
+} from "../../rest/alerts/alerts.actions";
+import { updateAlert } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
-import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
-import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
+import { Alert } from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
-    getUiAlert,
 } from "../../utils/alerts/alerts.util";
-import { PROMISES } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { isValidNumberId } from "../../utils/params/params.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
+const QUERY_PARAM_KEY_FOR_SEARCH = "search";
+const QUERY_PARAM_KEY_FOR_SORT = "sort";
+const QUERY_PARAM_KEY_FOR_EXPANDED = "expanded";
+const CONCAT_SEPARATOR = "+";
+
 export const AlertsViewPage: FunctionComponent = () => {
+    const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
+    const { id: alertId } = useParams<AlertsViewPageParams>();
+    const {
+        alert,
+        getAlert,
+        errorMessages: getAlertErrorMessages,
+        status: getAlertStatus,
+    } = useGetAlert();
     const {
         evaluation,
         getEvaluation,
-        errorMessages,
+        errorMessages: getEvaluationErrorMessages,
         status: evaluationRequestStatus,
     } = useGetEvaluation();
     const {
         anomalies,
         getAnomalies,
+        errorMessages: getAnomaliesErrorsMessages,
         status: anomaliesRequestStatus,
-        errorMessages: anomaliesRequestErrors,
     } = useGetAnomalies();
-    const [uiAlert, setUiAlert] = useState<UiAlert | null>(null);
-    const [subscriptionGroups, setSubscriptionGroups] = useState<
-        SubscriptionGroup[]
-    >([]);
-    const [alertEvaluation, setAlertEvaluation] =
-        useState<AlertEvaluation | null>(null);
-    const [searchParams] = useSearchParams();
-    const { showDialog } = useDialogProviderV1();
-    const { id: alertId } = useParams<AlertsViewPageParams>();
-    const navigate = useNavigate();
-    const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [expanded, setExpanded] = useState<string[]>(
+        searchParams.has(QUERY_PARAM_KEY_FOR_EXPANDED)
+            ? (searchParams.get(QUERY_PARAM_KEY_FOR_EXPANDED) as string).split(
+                  CONCAT_SEPARATOR
+              )
+            : []
+    );
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
+    const [searchTerm, sortOrder] = useMemo(
+        () => [
+            searchParams.get(QUERY_PARAM_KEY_FOR_SEARCH),
+            (searchParams.get(
+                QUERY_PARAM_KEY_FOR_SORT
+            ) as DataGridSortOrderV1) || DataGridSortOrderV1.DESC,
+        ],
+        [searchParams]
+    );
+
+    const fetchData = (): void => {
+        if (!alert || !startTime || !endTime) {
+            return;
+        }
+        getAnomalies({
+            alertId: alert.id,
+            startTime,
+            endTime,
+        });
+        getEvaluation(createAlertEvaluation(alert, startTime, endTime)).then(
+            (evaluation) => {
+                if (!evaluation) {
+                    return;
+                }
+                const extracted = extractDetectionEvaluation(evaluation);
+
+                // Automatically expand the only item in the response
+                if (extracted.length === 1) {
+                    const nameForOnlyItem = generateNameForDetectionResult(
+                        extracted[0]
+                    );
+                    searchParams.set(
+                        QUERY_PARAM_KEY_FOR_EXPANDED,
+                        nameForOnlyItem
+                    );
+                    setSearchParams(searchParams, { replace: true });
+                    setExpanded([nameForOnlyItem]);
+                }
+            }
+        );
+    };
 
     useEffect(() => {
-        fetchAlert();
+        getAlert(Number(alertId));
     }, [alertId]);
 
     useEffect(() => {
-        if (evaluation) {
-            if (anomalies) {
-                extractDetectionEvaluation(evaluation)[0].anomalies = anomalies;
-            }
-            setAlertEvaluation(evaluation);
-        }
-    }, [evaluation, anomalies]);
+        // Fetched alert changed, fetch alert evaluation
+        fetchData();
+    }, [alert, startTime, endTime]);
 
     useEffect(() => {
-        // Fetched alert changed, fetch alert evaluation
-        fetchAlertEvaluation();
-    }, [uiAlert, searchParams]);
+        notifyIfErrors(
+            getAlertStatus,
+            getAlertErrorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.alert"),
+            })
+        );
+    }, [getAlertErrorMessages, getAlertStatus]);
 
     useEffect(() => {
         notifyIfErrors(
             evaluationRequestStatus,
-            errorMessages,
+            getEvaluationErrorMessages,
             notify,
             t("message.error-while-fetching", {
                 entity: t("label.chart-data"),
             })
         );
-    }, [errorMessages, evaluationRequestStatus]);
+    }, [getEvaluationErrorMessages, evaluationRequestStatus]);
 
-    const fetchAlertEvaluation = (): void => {
-        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
-
-        if (!uiAlert || !uiAlert.alert || !start || !end) {
-            setAlertEvaluation(null);
-
-            return;
-        }
-        getAnomalies({
-            alertId: uiAlert.alert.id,
-            startTime: Number(start),
-            endTime: Number(end),
-        });
-        getEvaluation(
-            createAlertEvaluation(uiAlert.alert, Number(start), Number(end))
-        );
-    };
-
-    const fetchAlert = (): void => {
-        setUiAlert(null);
-        let fetchedUiAlert = {} as UiAlert;
-        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-
-        if (alertId && !isValidNumberId(alertId)) {
-            // Invalid id
-            notify(
-                NotificationTypeV1.Error,
-                t("message.invalid-id", {
-                    entity: t("label.alert"),
-                    id: alertId,
-                })
-            );
-
-            setUiAlert(fetchedUiAlert);
-            setSubscriptionGroups(fetchedSubscriptionGroups);
-
-            return;
-        }
-
-        Promise.allSettled([
-            getAlert(toNumber(alertId)),
-            getAllSubscriptionGroups(),
-        ])
-            .then(([alertResponse, subscriptionGroupsResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
-                    alertResponse.status === PROMISES.REJECTED
-                ) {
-                    const axiosError =
-                        alertResponse.status === PROMISES.REJECTED
-                            ? alertResponse.reason
-                            : subscriptionGroupsResponse.status ===
-                              PROMISES.REJECTED
-                            ? subscriptionGroupsResponse.reason
-                            : ({} as AxiosError);
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      alertResponse.status === PROMISES.REJECTED
-                                          ? "label.alert"
-                                          : "label.subscription-groups"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
-                }
-
-                // Attempt to gather data
-                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
-                    fetchedSubscriptionGroups =
-                        subscriptionGroupsResponse.value;
-                }
-                if (alertResponse.status === PROMISES.FULFILLED) {
-                    fetchedUiAlert = getUiAlert(
-                        alertResponse.value,
-                        fetchedSubscriptionGroups
-                    );
-                }
+    useEffect(() => {
+        notifyIfErrors(
+            anomaliesRequestStatus,
+            getAnomaliesErrorsMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.anomalies"),
             })
-            .finally(() => {
-                setUiAlert(fetchedUiAlert);
-                setSubscriptionGroups(fetchedSubscriptionGroups);
-            });
+        );
+    }, [anomaliesRequestStatus, getAnomaliesErrorsMessages]);
+
+    const handleExpandedChange = (newExpanded: string[]): void => {
+        if (newExpanded.length > 0) {
+            searchParams.set(
+                QUERY_PARAM_KEY_FOR_EXPANDED,
+                newExpanded.join(CONCAT_SEPARATOR)
+            );
+        } else {
+            searchParams.delete(QUERY_PARAM_KEY_FOR_EXPANDED);
+        }
+        setSearchParams(searchParams, { replace: true });
+        setExpanded(newExpanded);
     };
 
-    const handleAlertChange = (uiAlert: UiAlert): void => {
-        if (!uiAlert.alert) {
+    const handleAlertChange = (updatedAlert: Alert): void => {
+        if (!updatedAlert) {
             return;
         }
 
-        updateAlert(uiAlert.alert).then((alert) => {
+        updateAlert(updatedAlert).then(() => {
             notify(
                 NotificationTypeV1.Success,
                 t("message.update-success", { entity: t("label.alert") })
             );
 
             // Replace updated alert as fetched alert
-            setUiAlert(getUiAlert(alert, subscriptionGroups));
+            fetchData();
         });
     };
 
-    const handleAlertDelete = (): void => {
-        if (!uiAlert) {
-            return;
+    const handleSearchTermChange = (newTerm: string): void => {
+        if (newTerm) {
+            searchParams.set(QUERY_PARAM_KEY_FOR_SEARCH, newTerm);
+        } else {
+            searchParams.delete(QUERY_PARAM_KEY_FOR_SEARCH);
         }
-        showDialog({
-            type: DialogType.ALERT,
-            contents: t("message.delete-confirmation", {
-                name: uiAlert.name,
-            }),
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => handleAlertDeleteOk(uiAlert),
-        });
+        setSearchParams(searchParams, { replace: true });
     };
 
-    const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
-        deleteAlert(uiAlert.id).then(() => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.delete-success", { entity: t("label.alert") })
-            );
-
-            // Redirect to alerts all path
-            navigate(getAlertsAllPath());
-        });
+    const handleSortOrderChange = (newOrder: DataGridSortOrderV1): void => {
+        console.log("handsklajd", newOrder);
+        if (newOrder) {
+            searchParams.set(QUERY_PARAM_KEY_FOR_SORT, newOrder);
+        } else {
+            searchParams.delete(QUERY_PARAM_KEY_FOR_SORT);
+        }
+        setSearchParams(searchParams, { replace: true });
     };
-
-    useEffect(() => {
-        notifyIfErrors(
-            anomaliesRequestStatus,
-            anomaliesRequestErrors,
-            notify,
-            t("message.error-while-fetching", {
-                entity: t("label.anomalies"),
-            })
-        );
-    }, [anomaliesRequestStatus, anomaliesRequestErrors]);
 
     return (
         <PageV1>
-            <PageHeader showCreateButton title={uiAlert?.name ?? ""}>
-                {!uiAlert && <SkeletonV1 width="512px" />}
+            <PageHeader
+                transparentBackground
+                breadcrumbs={[
+                    {
+                        label: t("label.alerts"),
+                        link: getAlertsAllPath(),
+                    },
+                    {
+                        label: alert ? alert.name : "",
+                    },
+                ]}
+                customActions={
+                    alert ? (
+                        <AlertOptionsButton
+                            alert={alert}
+                            openButtonRenderer={(
+                                clickHandler: (
+                                    event: MouseEvent<HTMLElement>
+                                ) => void
+                            ) => {
+                                return (
+                                    <ButtonGroup
+                                        size="small"
+                                        variant="contained"
+                                        onClick={clickHandler}
+                                    >
+                                        <Button variant="contained">
+                                            {t("label.options")}
+                                        </Button>
+                                        <Button variant="contained">
+                                            <KeyboardArrowDownIcon />
+                                        </Button>
+                                    </ButtonGroup>
+                                );
+                            }}
+                            onChange={handleAlertChange}
+                        />
+                    ) : (
+                        ""
+                    )
+                }
+                title={alert ? alert.name : ""}
+            >
+                {getAlertStatus === ActionStatus.Working && (
+                    <SkeletonV1 width="512px" />
+                )}
             </PageHeader>
+
             <PageContentsGridV1>
+                {/* Alert sub header */}
+                <Grid item xs={12}>
+                    {getAlertStatus === ActionStatus.Working ? (
+                        <SkeletonV1 />
+                    ) : (
+                        alert && <AlertViewSubHeader alert={alert} />
+                    )}
+                </Grid>
+
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    {evaluationRequestStatus === ActionStatus.Error ? (
+                    {(evaluationRequestStatus === ActionStatus.Error ||
+                        getAlertStatus === ActionStatus.Error) && (
                         <Card variant="outlined">
                             <CardContent>
                                 <Box pb={20} pt={20}>
@@ -273,84 +307,55 @@ export const AlertsViewPage: FunctionComponent = () => {
                                 </Box>
                             </CardContent>
                         </Card>
-                    ) : (
-                        uiAlert && (
-                            <AlertEvaluationTimeSeriesCard
-                                alertEvaluation={alertEvaluation}
-                                alertEvaluationTimeSeriesHeight={500}
-                                anomalies={anomalies || []}
-                                isLoading={
-                                    evaluationRequestStatus ===
-                                    ActionStatus.Working
-                                }
-                                onRefresh={fetchAlertEvaluation}
-                            />
-                        )
                     )}
-                </Grid>
-
-                {/* Alert Details Card*/}
-                <Grid item xs={12}>
-                    {uiAlert ? (
-                        <AlertCard
-                            anomalies={anomalies}
-                            uiAlert={uiAlert}
-                            onChange={handleAlertChange}
-                            onDelete={handleAlertDelete}
-                        />
-                    ) : (
+                    {(evaluationRequestStatus === ActionStatus.Working ||
+                        getAlertStatus === ActionStatus.Working) && (
                         <Card variant="outlined">
                             <CardContent>
-                                <Box width="100%">
-                                    <SkeletonV1
-                                        animation="pulse"
-                                        height={196}
-                                        variant="rect"
-                                        width="100%"
-                                    />
-                                </Box>
+                                <SkeletonV1 />
+                                <SkeletonV1 />
+                                <SkeletonV1 />
+                                <SkeletonV1 />
+                                <SkeletonV1 />
+                                <SkeletonV1 />
                             </CardContent>
                         </Card>
                     )}
-                </Grid>
 
-                {/* Readonly detection configuration */}
-                <Grid item xs={12}>
-                    <Card variant="outlined">
-                        {uiAlert ? (
-                            <>
-                                <CardHeader
-                                    title={t("label.detection-configuration")}
-                                    titleTypographyProps={{
-                                        variant: "h6",
-                                    }}
-                                />
-                                <CardContent>
-                                    <JSONEditorV1
-                                        disableValidation
-                                        readOnly
-                                        value={
-                                            uiAlert.alert as unknown as Record<
-                                                string,
-                                                unknown
-                                            >
-                                        }
-                                    />
-                                </CardContent>
-                            </>
-                        ) : (
-                            <CardContent>
-                                <Box width="100%">
-                                    <SkeletonV1
-                                        animation="pulse"
-                                        height={196}
-                                        variant="rect"
-                                        width="100%"
-                                    />
-                                </Box>
-                            </CardContent>
+                    {evaluationRequestStatus === ActionStatus.Done &&
+                        evaluation && (
+                            <EnumerationItemMerger
+                                anomalies={anomalies || []}
+                                detectionEvaluations={extractDetectionEvaluation(
+                                    evaluation
+                                )}
+                            >
+                                {(
+                                    detectionEvaluations: DetectionEvaluationForRender[]
+                                ) => {
+                                    return (
+                                        <EnumerationItemsTable
+                                            alertId={Number(alertId)}
+                                            detectionEvaluations={
+                                                detectionEvaluations
+                                            }
+                                            expanded={expanded}
+                                            initialSearchTerm={searchTerm || ""}
+                                            sortOrder={sortOrder}
+                                            onExpandedChange={
+                                                handleExpandedChange
+                                            }
+                                            onSearchTermChange={
+                                                handleSearchTermChange
+                                            }
+                                            onSortOrderChange={
+                                                handleSortOrderChange
+                                            }
+                                        />
+                                    );
+                                }}
+                            </EnumerationItemMerger>
                         )}
-                    </Card>
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

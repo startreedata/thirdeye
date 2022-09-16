@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import React from "react";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 
 export interface AnomalyListV1Props {
@@ -18,4 +19,5 @@ export interface AnomalyListV1Props {
     onDelete?: (uiAnomalies: UiAnomaly[]) => void;
     searchFilterValue?: string | null;
     onSearchFilterValueChange?: (value: string) => void;
+    toolbar?: React.ReactNode;
 }

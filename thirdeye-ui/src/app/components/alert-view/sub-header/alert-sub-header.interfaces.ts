@@ -11,14 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
-import { UiAlert } from "../../../rest/dto/ui-alert.interfaces";
+import { Alert } from "../../../rest/dto/alert.interfaces";
 
-export interface AlertCardProps {
-    uiAlert: UiAlert | null;
-    anomalies: Anomaly[] | null;
-    searchWords?: string[];
-    showViewDetails?: boolean;
-    onChange?: (uiAlert: UiAlert) => void;
-    onDelete?: (uiAlert: UiAlert) => void;
+export interface AlertViewSubHeaderProps {
+    alert: Alert;
 }

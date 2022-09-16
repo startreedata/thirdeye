@@ -31,4 +31,5 @@ export interface UiAnomaly {
     startTimeVal: number;
     endTime: string;
     endTimeVal: number;
+    datasetName: string;
 }

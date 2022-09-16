@@ -31,4 +31,5 @@ export interface GetAnomaliesProps {
     endTime?: number;
     dataset?: string;
     metric?: string;
+    enumerationItemId?: number;
 }

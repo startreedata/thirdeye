@@ -14,11 +14,9 @@
 import { Grid, Typography } from "@material-ui/core";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     SkeletonV1,
     useNotificationProviderV1,
@@ -26,6 +24,7 @@ import {
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../../rest/alerts/alerts.actions";
 import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
+import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardDetail } from "./anomaly-summary-card-deatil.component";
 import { AnomalySummaryCardProps } from "./anomaly-summary-card.interfaces";
@@ -48,18 +47,14 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     }, [uiAnomaly]);
 
     useEffect(() => {
-        if (status === ActionStatus.Error) {
-            isEmpty(errorMessages)
-                ? notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.alert"),
-                      })
-                  )
-                : errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  );
-        }
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.alert"),
+            })
+        );
     }, [status, errorMessages]);
 
     if (alert && alert.templateProperties) {
@@ -87,9 +82,9 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
     return (
         <PageContentsCardV1 className={className}>
             {uiAnomaly && (
-                <Grid container spacing={4}>
+                <Grid container spacing={8}>
                     {/* Metric */}
-                    <Grid item lg={2} sm={6} xs={12}>
+                    <Grid item>
                         <AnomalySummaryCardDetail
                             label={`${t("label.metric")} ${
                                 status === ActionStatus.Done &&
@@ -107,8 +102,8 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
                     </Grid>
 
                     {/* Current and Predicted */}
-                    <Grid item lg={3} sm={6} xs={12}>
-                        <Grid container spacing={4}>
+                    <Grid item>
+                        <Grid container spacing={2}>
                             <Grid item>
                                 <AnomalySummaryCardDetail
                                     label={t("label.current")}
@@ -146,7 +141,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
                     </Grid>
 
                     {/* Start */}
-                    <Grid item lg={2} sm={6} xs={12}>
+                    <Grid item>
                         <AnomalySummaryCardDetail
                             label={t("label.start")}
                             value={uiAnomaly.startTime}
@@ -154,7 +149,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
                     </Grid>
 
                     {/* Duration */}
-                    <Grid item lg sm={6} xs={12}>
+                    <Grid item>
                         <AnomalySummaryCardDetail
                             label={t("label.duration")}
                             value={uiAnomaly.duration}

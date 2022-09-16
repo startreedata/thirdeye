@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.68.0-SNAPSHOT</version>
+  <version>1.73.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -58,7 +58,7 @@
     <assertj.version>3.17.2</assertj.version>
     <auto-service.version>1.0.1</auto-service.version>
     <avro.version>1.7.7</avro.version>
-    <calcite.version>1.30.0</calcite.version>
+    <calcite.version>1.32.0</calcite.version>
     <calendar-api.version>v3-rev300-1.23.0</calendar-api.version>
     <checkerframework.version>3.21.2</checkerframework.version>
     <classgraph.version>4.8.84</classgraph.version>
@@ -715,13 +715,6 @@
         <version>${jackson.version}</version>
       </dependency>
 
-      <!-- yaml parser -->
-      <dependency>
-        <groupId>org.yaml</groupId>
-        <artifactId>snakeyaml</artifactId>
-        <version>1.26</version>
-      </dependency>
-
       <!-- utils -->
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -845,7 +838,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.4</version>
+        <version>2.11.0</version>
       </dependency>
       <dependency>
         <groupId>org.freemarker</groupId>

@@ -14,11 +14,11 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
-import static ai.startree.thirdeye.resources.RcaResource.getRcaDimensions;
+import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
-import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -61,14 +61,14 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class RcaDimensionAnalysisResource {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RcaDimensionAnalysisResource.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  private static final String DEFAULT_BASELINE_OFFSET = "P1W";
   public static final String DEFAULT_HIERARCHIES = "[]";
   public static final String DEFAULT_ONE_SIDE_ERROR = "true";
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
+
+  private static final Logger LOG = LoggerFactory.getLogger(RcaDimensionAnalysisResource.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final String DEFAULT_BASELINE_OFFSET = "P1W";
 
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
@@ -107,12 +107,12 @@ public class RcaDimensionAnalysisResource {
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) {
     try {
-      final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+      final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
           anomalyId);
       final Interval currentInterval = new Interval(
-          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-          rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-          rootCauseAnalysisInfo.getTimezone());
+          rcaInfo.getAnomaly().getStartTime(),
+          rcaInfo.getAnomaly().getEndTime(),
+          rcaInfo.getTimezone());
 
       Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
       final Interval baselineInterval = new Interval(
@@ -121,7 +121,7 @@ public class RcaDimensionAnalysisResource {
       );
 
       // override dimensions
-      final DatasetConfigDTO datasetConfigDTO = rootCauseAnalysisInfo.getDatasetConfigDTO();
+      final DatasetConfigDTO datasetConfigDTO = rcaInfo.getDataset();
       List<String> rcaDimensions = getRcaDimensions(dimensions,
           excludedDimensions,
           datasetConfigDTO);
@@ -130,7 +130,7 @@ public class RcaDimensionAnalysisResource {
       final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
       final ContributorsSearchConfiguration searchConfiguration = new ContributorsSearchConfiguration(
-          rootCauseAnalysisInfo.getMetricConfigDTO(),
+          rcaInfo.getMetric(),
           datasetConfigDTO,
           currentInterval,
           baselineInterval,

@@ -13,11 +13,14 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import java.util.List;
 import java.util.Map;
@@ -43,26 +46,40 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
+    final Boolean dryRun = optional(planNode.getParams().get("dryRun"))
+        .map(Templatable::value)
+        .map(b -> (Boolean) b)
+        .orElse(false);
+
     /* Get all enumerations */
-    final List<EnumerationItemDTO> enumeratorResults = getEnumeratorResults();
+    final EnumeratorResult enumeratorResult = getEnumeratorResult();
+    if (dryRun) {
+      resultMap.put(dryRunOutputName(), enumeratorResult);
+      return;
+    }
+    final List<EnumerationItemDTO> enumerationItems = enumeratorResult.getResults();
 
     /* Execute in parallel */
-    final var allResults = new ForkJoinParallelExecutor(root, enumeratorResults).execute();
+    final var allResults = new ForkJoinParallelExecutor(root, enumerationItems).execute();
 
     /* Combine results */
-    final Map<String, DetectionResult> outputs = runCombiner(new ForkJoinResult(allResults));
+    final Map<String, OperatorResult> outputs = runCombiner(new ForkJoinResult(allResults));
     resultMap.putAll(outputs);
   }
 
-  private List<EnumerationItemDTO> getEnumeratorResults() throws Exception {
-    final Operator op = enumerator.buildOperator();
-    op.execute();
-    final Map<String, DetectionResult> outputs = op.getOutputs();
-    final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
-    return enumeratorResult.getResults();
+  private String dryRunOutputName() {
+    return String.format("%s:%s:%s", getPlanNode().getType(), getPlanNode().getName(), "dryRun");
   }
 
-  private Map<String, DetectionResult> runCombiner(final ForkJoinResult forkJoinResult) throws Exception {
+  private EnumeratorResult getEnumeratorResult() throws Exception {
+    final Operator op = enumerator.buildOperator();
+    op.execute();
+    final Map<String, OperatorResult> outputs = op.getOutputs();
+    final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
+    return enumeratorResult;
+  }
+
+  private Map<String, OperatorResult> runCombiner(final ForkJoinResult forkJoinResult) throws Exception {
     final Operator combinerOp = combiner.buildOperator();
     combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY, forkJoinResult);
     combinerOp.execute();

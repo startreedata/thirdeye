@@ -138,8 +138,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       this.seasonality = seasonality;
     }
 
-    checkArgument(lookback >= 5,
-        String.format("Lookback is %d. Lookback should be greater than 5.", lookback));
+    checkArgument(lookback >= 5, "Lookback is %d. Lookback should be greater than 5.", lookback);
   }
 
   @Override

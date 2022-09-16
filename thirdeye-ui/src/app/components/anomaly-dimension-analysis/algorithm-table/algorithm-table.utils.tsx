@@ -16,12 +16,14 @@ import React from "react";
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
+import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import {
     baselineComparisonOffsetToHumanReadable,
     baselineOffsetToMilliseconds,
     parseBaselineComparisonOffset,
 } from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
+import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import {
@@ -84,47 +86,19 @@ export const generateComparisonChartOptions = (
     comparisonOffset: string,
     translation: (labelName: string) => string = (s) => s
 ): TimeSeriesChartProps => {
-    const filteredTimeSeriesData =
-        filtered.detectionEvaluations.output_AnomalyDetectorResult_0.data;
+    const filteredTimeSeriesData = extractDetectionEvaluation(filtered)[0].data;
+    const nonFilteredTimeSeriesData =
+        extractDetectionEvaluation(nonFiltered)[0].data;
+
     const series = [
-        {
-            name: translation("label.non-filtered"),
-            data: nonFiltered.detectionEvaluations.output_AnomalyDetectorResult_0.data.current.map(
-                (value, idx) => {
-                    return {
-                        y: value,
-                        x: nonFiltered.detectionEvaluations
-                            .output_AnomalyDetectorResult_0.data.timestamp[idx],
-                    };
-                }
-            ),
-            enabled: false,
-        },
-        {
-            name: translation("label.filtered"),
-            data: filteredTimeSeriesData.current.map((value, idx) => {
-                return {
-                    y: value,
-                    x: filtered.detectionEvaluations
-                        .output_AnomalyDetectorResult_0.data.timestamp[idx],
-                };
-            }),
-        },
-        {
-            name: translation("label.baseline"),
-            data: filteredTimeSeriesData.expected.map((value, idx) => {
-                return {
-                    y: value,
-                    x: filtered.detectionEvaluations
-                        .output_AnomalyDetectorResult_0.data.timestamp[idx],
-                };
-            }),
-        },
         {
             enabled: false,
             name: translation("label.upper-and-lower-bound"),
             type: SeriesType.AREA_CLOSED,
+            fillOpacity: 0.1,
             color: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+            stroke: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
+            strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
             data: filteredTimeSeriesData.lowerBound.map((value, idx) => {
                 return {
                     y: value,
@@ -134,6 +108,34 @@ export const generateComparisonChartOptions = (
             }),
             tooltipValueFormatter: (value: number): string =>
                 formatLargeNumberV1(value),
+        },
+        {
+            name: translation("label.non-filtered"),
+            data: nonFilteredTimeSeriesData.current.map((value, idx) => {
+                return {
+                    y: value,
+                    x: nonFilteredTimeSeriesData.timestamp[idx],
+                };
+            }),
+            enabled: false,
+        },
+        {
+            name: translation("label.filtered"),
+            data: filteredTimeSeriesData.current.map((value, idx) => {
+                return {
+                    y: value,
+                    x: filteredTimeSeriesData.timestamp[idx],
+                };
+            }),
+        },
+        {
+            name: translation("label.predicted"),
+            data: filteredTimeSeriesData.expected.map((value, idx) => {
+                return {
+                    y: value,
+                    x: filteredTimeSeriesData.timestamp[idx],
+                };
+            }),
         },
     ];
 

@@ -12,11 +12,11 @@
  * the License.
  */
 import { AxisScale } from "@visx/axis";
-import { UseTooltipParams } from "@visx/tooltip/lib/hooks/useTooltip";
-import React from "react";
+import React, { MouseEvent } from "react";
 import {
     NormalizedSeries,
     XAxisOptions,
+    YAxisOptions,
 } from "../time-series-chart.interfaces";
 
 export interface ChartCoreProps {
@@ -24,13 +24,14 @@ export interface ChartCoreProps {
     xScale?: AxisScale<number>;
     yScale?: AxisScale<number>;
     width: number;
+    height: number;
     yMax: number;
     xMax: number;
     margin: { top: number; right: number; bottom: number; left: number };
     showXAxis?: boolean;
     xAxisOptions?: XAxisOptions;
+    yAxisOptions?: YAxisOptions;
     showYAxis?: boolean;
-    tooltipUtils?: UseTooltipParams<{ xValue: number }>;
     top?: number;
     left?: number;
     children?: (
@@ -38,4 +39,7 @@ export interface ChartCoreProps {
         yScale: AxisScale<number>
     ) => React.ReactElement | undefined;
     colorScale: (name: string) => string;
+    onMouseLeave?: () => void;
+    onMouseMove?: (event: MouseEvent<SVGSVGElement>) => void;
+    onMouseEnter?: (event: MouseEvent<SVGSVGElement>) => void;
 }

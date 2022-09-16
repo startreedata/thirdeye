@@ -37,8 +37,8 @@ import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,14 +96,14 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
 
-    DetectionResult detectionResult = buildDetectionResult(detectorResult);
+    OperatorResult operatorResult = buildDetectionResult(detectorResult);
 
-    addMetadata(detectionResult);
+    addMetadata(operatorResult);
 
-    setOutput(DEFAULT_OUTPUT_KEY, detectionResult);
+    setOutput(DEFAULT_OUTPUT_KEY, operatorResult);
   }
 
-  private void addMetadata(final DetectionResult detectionResult) {
+  private void addMetadata(final OperatorResult operatorResult) {
     final Optional<String> anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
         .map(Templatable::value)
         .map(Object::toString);
@@ -115,7 +115,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         .map(Object::toString);
 
     // annotate each anomaly with the available metadata
-    for (MergedAnomalyResultDTO anomaly : detectionResult.getAnomalies()) {
+    for (MergedAnomalyResultDTO anomaly : operatorResult.getAnomalies()) {
       anomalyMetric.ifPresent(anomaly::setMetric);
       anomalyDataset.ifPresent(anomaly::setCollection);
       anomalySource.ifPresent(anomaly::setSource);
@@ -127,7 +127,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     return "AnomalyDetectorOperator";
   }
 
-  private DetectionResult buildDetectionResult(
+  private OperatorResult buildDetectionResult(
       final AnomalyDetectorResult detectorV2Result) {
 
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(

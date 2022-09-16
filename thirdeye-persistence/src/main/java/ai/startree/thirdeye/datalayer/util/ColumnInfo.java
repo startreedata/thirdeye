@@ -17,8 +17,44 @@ import java.lang.reflect.Field;
 
 class ColumnInfo {
 
-  String columnNameInDB;
-  int sqlType;
-  String columnNameInEntity;
-  Field field;
+  private String columnNameInDB;
+  private int sqlType;
+  private String columnNameInEntity;
+  private Field field;
+
+  public String getColumnNameInDB() {
+    return columnNameInDB;
+  }
+
+  public ColumnInfo setColumnNameInDB(final String columnNameInDB) {
+    this.columnNameInDB = columnNameInDB;
+    return this;
+  }
+
+  public int getSqlType() {
+    return sqlType;
+  }
+
+  public ColumnInfo setSqlType(final int sqlType) {
+    this.sqlType = sqlType;
+    return this;
+  }
+
+  public String getColumnNameInEntity() {
+    return columnNameInEntity;
+  }
+
+  public ColumnInfo setColumnNameInEntity(final String columnNameInEntity) {
+    this.columnNameInEntity = columnNameInEntity;
+    return this;
+  }
+
+  public Field getField() {
+    return field;
+  }
+
+  public ColumnInfo setField(final Field field) {
+    this.field = field;
+    return this;
+  }
 }

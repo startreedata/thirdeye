@@ -34,6 +34,7 @@ import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { PROMISES } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
@@ -58,18 +59,12 @@ export const AlertsAllPage: FunctionComponent = () => {
                 })
             );
         }
-        if (status === ActionStatus.Error) {
-            if (!isEmpty(errorMessages)) {
-                errorMessages.forEach((msg) =>
-                    notify(NotificationTypeV1.Error, msg)
-                );
-            } else {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.alert-reset-error")
-                );
-            }
-        }
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.alert-reset-error")
+        );
     }, [status]);
 
     useEffect(() => {

@@ -11,7 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { isEmpty, toNumber } from "lodash";
+import { Grid } from "@material-ui/core";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -20,12 +21,14 @@ import {
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
-    AppLoadingIndicatorV1,
-    NotificationTypeV1,
+    PageContentsGridV1,
+    PageHeaderV1,
+    PageV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAnomaliesAnomalyViewPath } from "../../utils/routes/routes.util";
 import { WEEK_IN_MILLISECONDS } from "../../utils/time/time.util";
@@ -78,19 +81,38 @@ export const AnomaliesViewIndexPage: FunctionComponent = () => {
     }, [anomaly]);
 
     useEffect(() => {
-        if (anomalyRequestStatus === ActionStatus.Error) {
-            isEmpty(errorMessages)
-                ? notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.anomaly"),
-                      })
-                  )
-                : errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  );
-        }
+        notifyIfErrors(
+            anomalyRequestStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.anomaly"),
+            })
+        );
     }, [anomalyRequestStatus, errorMessages]);
 
-    return <AppLoadingIndicatorV1 />;
+    return (
+        <PageV1>
+            <PageHeaderV1>
+                <SkeletonV1 />
+            </PageHeaderV1>
+
+            <PageContentsGridV1>
+                {/* Anomaly */}
+                <Grid item xs={12}>
+                    <SkeletonV1 />
+                </Grid>
+
+                {/* Alert evaluation time series */}
+                <Grid item xs={12}>
+                    <SkeletonV1 />
+                </Grid>
+
+                {/* Existing investigations */}
+                <Grid item xs={12}>
+                    <SkeletonV1 />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
+    );
 };

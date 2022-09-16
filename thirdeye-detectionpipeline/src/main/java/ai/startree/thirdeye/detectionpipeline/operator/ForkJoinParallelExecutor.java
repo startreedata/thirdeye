@@ -23,7 +23,7 @@ import ai.startree.thirdeye.mapper.PlanNodeMapper;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import ai.startree.thirdeye.util.StringTemplateUtils;
@@ -75,10 +75,10 @@ public class ForkJoinParallelExecutor {
       /* Create a callable for parallel execution */
       callables.add((() -> {
         /* The context stores all the outputs from all the nodes */
-        final Map<ContextKey, DetectionResult> context = new HashMap<>();
+        final Map<ContextKey, OperatorResult> context = new HashMap<>();
 
         /* Execute the DAG */
-        executePlanNode(clonedPipelinePlanNodes, context, rootClone);
+        executePlanNode(clonedPipelinePlanNodes, rootClone, context);
 
         /* Return the output */
         return new ForkJoinResultItem(enumerationItem, PlanExecutor.getOutput(context, rootClone.getName()));

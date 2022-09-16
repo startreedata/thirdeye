@@ -27,7 +27,7 @@ export const TOOLTIP_LINE_COLOR = "#AAAAAA";
  * x value the mouse is event represents.
  */
 export const determineXPointForHover = (
-    event: MouseEvent<SVGRectElement>,
+    event: MouseEvent<SVGSVGElement>,
     series: NormalizedSeries[],
     dateScale: ScaleTime<number, number, never>,
     marginLeft: number

@@ -41,21 +41,19 @@ import {
 } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     createAlertEvaluation,
+    extractDetectionEvaluation,
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { PROMISES } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import {
-    getAlertsAllPath,
-    getAnomaliesAnomalyPath,
-} from "../../utils/routes/routes.util";
+import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 export const AlertsViewPage: FunctionComponent = () => {
@@ -91,8 +89,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     useEffect(() => {
         if (evaluation) {
             if (anomalies) {
-                evaluation.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies =
-                    anomalies;
+                extractDetectionEvaluation(evaluation)[0].anomalies = anomalies;
             }
             setAlertEvaluation(evaluation);
         }
@@ -104,18 +101,14 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, [uiAlert, searchParams]);
 
     useEffect(() => {
-        if (evaluationRequestStatus === ActionStatus.Error) {
-            !isEmpty(errorMessages)
-                ? errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.chart-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            evaluationRequestStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.chart-data"),
+            })
+        );
     }, [errorMessages, evaluationRequestStatus]);
 
     const fetchAlertEvaluation = (): void => {
@@ -253,23 +246,15 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    const onAnomalyBarClick = (anomaly: Anomaly): void => {
-        navigate(getAnomaliesAnomalyPath(anomaly.id));
-    };
-
     useEffect(() => {
-        if (anomaliesRequestStatus === ActionStatus.Error) {
-            !isEmpty(anomaliesRequestErrors)
-                ? anomaliesRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.anomalies"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            anomaliesRequestStatus,
+            anomaliesRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.anomalies"),
+            })
+        );
     }, [anomaliesRequestStatus, anomaliesRequestErrors]);
 
     return (
@@ -293,11 +278,11 @@ export const AlertsViewPage: FunctionComponent = () => {
                             <AlertEvaluationTimeSeriesCard
                                 alertEvaluation={alertEvaluation}
                                 alertEvaluationTimeSeriesHeight={500}
+                                anomalies={anomalies || []}
                                 isLoading={
                                     evaluationRequestStatus ===
                                     ActionStatus.Working
                                 }
-                                onAnomalyBarClick={onAnomalyBarClick}
                                 onRefresh={fetchAlertEvaluation}
                             />
                         )

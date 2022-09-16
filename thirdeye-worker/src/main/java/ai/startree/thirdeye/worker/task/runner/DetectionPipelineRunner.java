@@ -25,7 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.DetectionResult;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -66,17 +66,17 @@ public class DetectionPipelineRunner {
         && Objects.equals(o1.getParams(), o2.getParams());
   }
 
-  public DetectionResult run(final AlertDTO alert,
+  public OperatorResult run(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
-    final DetectionResult result = executePlan(alert, detectionInterval);
+    final OperatorResult result = executePlan(alert, detectionInterval);
     enrichAnomalies(result, alert);
     return result;
   }
 
-  private void enrichAnomalies(final DetectionResult result, final AlertDTO alert) {
+  private void enrichAnomalies(final OperatorResult result, final AlertDTO alert) {
     // generic enrichment
     result.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
 
@@ -95,7 +95,7 @@ public class DetectionPipelineRunner {
         .forEach(this::enrichAnomaliesWithEnumerationItem);
   }
 
-  private void enrichAnomaliesWithEnumerationItem(final DetectionResult result) {
+  private void enrichAnomaliesWithEnumerationItem(final OperatorResult result) {
     final EnumerationItemDTO enumerationItemDTO = findExistingOrCreate(
         requireNonNull(result.getEnumerationItem(), "enumerationItem is null"));
     result
@@ -122,13 +122,13 @@ public class DetectionPipelineRunner {
     return filtered.get();
   }
 
-  private DetectionResult executePlan(final AlertDTO alert,
+  private OperatorResult executePlan(final AlertDTO alert,
       final Interval detectionInterval) throws Exception {
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
         detectionInterval);
 
-    final Map<String, DetectionResult> detectionPipelineResultMap = planExecutor.runPipeline(
+    final Map<String, OperatorResult> detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(
         templateWithProperties.getNodes(),
         detectionInterval);
     checkState(detectionPipelineResultMap.size() == 1,

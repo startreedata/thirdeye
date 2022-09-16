@@ -23,6 +23,11 @@ public class AlertInsightsApi {
   private long datasetStartTime;
   private long datasetEndTime;
   /**
+   * If the datasetEndTime fetched from the database looks incorrect, it is stored in this field. A
+   * safe value is put in the datasetEndTime field.
+   */
+  private long suspiciousDatasetEndTime;
+  /**
    * Recommended start time and end time to use in the UI time selector if no time
    * is set.
    */
@@ -71,6 +76,15 @@ public class AlertInsightsApi {
 
   public AlertInsightsApi setDefaultEndTime(final long defaultEndTime) {
     this.defaultEndTime = defaultEndTime;
+    return this;
+  }
+
+  public long getSuspiciousDatasetEndTime() {
+    return suspiciousDatasetEndTime;
+  }
+
+  public AlertInsightsApi setSuspiciousDatasetEndTime(final long suspiciousDatasetEndTime) {
+    this.suspiciousDatasetEndTime = suspiciousDatasetEndTime;
     return this;
   }
 }

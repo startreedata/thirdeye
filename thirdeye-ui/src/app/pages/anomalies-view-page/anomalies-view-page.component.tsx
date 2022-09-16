@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Link, useTheme } from "@material-ui/core";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { Box, Button, Grid, Link } from "@material-ui/core";
 import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Breadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -42,16 +42,19 @@ import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
+import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import {
-    getAlertsViewPath,
+    getAlertsAlertPath,
     getAnomaliesAllPath,
     getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../utils/routes/routes.util";
@@ -86,7 +89,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const style = useAnomaliesViewPageStyles();
-    const theme = useTheme();
 
     useEffect(() => {
         anomalyId && getInvestigations(Number(anomalyId));
@@ -105,7 +107,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         }
         // Only filter for the current anomaly
         const anomalyDetectionResults =
-            evaluation.detectionEvaluations.output_AnomalyDetectorResult_0;
+            extractDetectionEvaluation(evaluation)[0];
         anomalyDetectionResults.anomalies = [anomaly];
         setAlertEvaluation(evaluation);
     }, [evaluation, anomaly]);
@@ -116,18 +118,14 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     }, [anomaly, searchParams]);
 
     useEffect(() => {
-        if (getEvaluationRequestStatus === ActionStatus.Error) {
-            !isEmpty(errorMessages)
-                ? errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.chart-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            getEvaluationRequestStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.chart-data"),
+            })
+        );
     }, [errorMessages, getEvaluationRequestStatus]);
 
     if (anomalyId && !isValidNumberId(anomalyId)) {
@@ -203,19 +201,23 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         <PageV1>
             <PageHeaderV1>
                 <Box display="inline">
-                    <Link
-                        className={style.linkButton}
-                        href={getAnomaliesAllPath()}
-                    >
-                        <ArrowBackIcon htmlColor={theme.palette.primary.dark} />{" "}
-                        {t("label.back-to-anomalies")}
-                    </Link>
+                    <Breadcrumbs
+                        crumbs={[
+                            {
+                                link: getAnomaliesAllPath(),
+                                label: t("label.anomalies"),
+                            },
+                            {
+                                label: anomalyId,
+                            },
+                        ]}
+                    />
 
                     <PageHeaderTextV1>
                         {anomaly && uiAnomaly && (
                             <>
                                 <Link
-                                    href={getAlertsViewPath(anomaly.alert.id)}
+                                    href={getAlertsAlertPath(anomaly.alert.id)}
                                 >
                                     {anomaly.alert.name}
                                 </Link>
@@ -266,22 +268,14 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
             <PageContentsGridV1>
                 {/* Anomaly */}
-                <Grid
-                    container
-                    item
-                    alignItems="stretch"
-                    justifyContent="space-between"
-                    xs={12}
-                >
-                    <Grid item xs={12}>
-                        <AnomalyCard
-                            className={style.fullHeight}
-                            isLoading={
-                                anomalyRequestStatus === ActionStatus.Working
-                            }
-                            uiAnomaly={uiAnomaly}
-                        />
-                    </Grid>
+                <Grid item xs={12}>
+                    <AnomalyCard
+                        className={style.fullHeight}
+                        isLoading={
+                            anomalyRequestStatus === ActionStatus.Working
+                        }
+                        uiAnomaly={uiAnomaly}
+                    />
                 </Grid>
 
                 {/* Alert evaluation time series */}
@@ -295,8 +289,10 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                     )}
                     {getEvaluationRequestStatus !== ActionStatus.Error && (
                         <AlertEvaluationTimeSeriesCard
+                            disableNavigation
                             alertEvaluation={alertEvaluation}
                             alertEvaluationTimeSeriesHeight={500}
+                            anomalies={[anomaly as Anomaly]}
                             header={
                                 <ViewAnomalyHeader
                                     anomaly={anomaly}

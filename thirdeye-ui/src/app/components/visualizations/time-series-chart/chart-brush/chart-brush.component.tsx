@@ -14,6 +14,7 @@
 import { Brush } from "@visx/brush";
 import BaseBrush from "@visx/brush/lib/BaseBrush";
 import { PartialBrushStartEnd } from "@visx/brush/lib/types";
+import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import React, { FunctionComponent, useMemo, useRef } from "react";
 import { Palette } from "../../../../utils/material-ui/palette.util";
@@ -40,6 +41,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     xAxisOptions,
     initialZoom,
     margins,
+    onMouseEnter,
 }) => {
     const brushRef = useRef<BaseBrush>(null);
 
@@ -78,6 +80,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     const chartOptions: ChartCoreProps = {
         series,
         width,
+        height,
         yMax: yBrushMax,
         xMax: xBrushMax,
         showXAxis: true,
@@ -102,32 +105,34 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     }
 
     return (
-        <ChartCore {...chartOptions}>
-            {() => (
-                <Brush
-                    useWindowMoveEvents
-                    brushDirection="horizontal"
-                    handleSize={8}
-                    height={yBrushMax}
-                    initialBrushPosition={
-                        initialZoom
-                            ? ({
-                                  start: { x: dateScale(initialZoom.x0) },
-                                  end: { x: dateScale(initialZoom.x1) },
-                              } as PartialBrushStartEnd)
-                            : undefined
-                    }
-                    innerRef={brushRef}
-                    margin={{ ...margins }}
-                    resizeTriggerAreas={["left", "right"]}
-                    selectedBoxStyle={SELECTED_BRUSH_STYLE}
-                    width={xBrushMax}
-                    xScale={dateScale}
-                    yScale={dataScale}
-                    onChange={onBrushChange}
-                    onClick={onBrushClick}
-                />
-            )}
-        </ChartCore>
+        <Group onMouseEnter={onMouseEnter}>
+            <ChartCore {...chartOptions}>
+                {() => (
+                    <Brush
+                        useWindowMoveEvents
+                        brushDirection="horizontal"
+                        handleSize={8}
+                        height={yBrushMax}
+                        initialBrushPosition={
+                            initialZoom
+                                ? ({
+                                      start: { x: dateScale(initialZoom.x0) },
+                                      end: { x: dateScale(initialZoom.x1) },
+                                  } as PartialBrushStartEnd)
+                                : undefined
+                        }
+                        innerRef={brushRef}
+                        margin={{ ...margins }}
+                        resizeTriggerAreas={["left", "right"]}
+                        selectedBoxStyle={SELECTED_BRUSH_STYLE}
+                        width={xBrushMax}
+                        xScale={dateScale}
+                        yScale={dataScale}
+                        onChange={onBrushChange}
+                        onClick={onBrushClick}
+                    />
+                )}
+            </ChartCore>
+        </Group>
     );
 };

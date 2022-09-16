@@ -16,10 +16,10 @@ import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Breadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { ViewAnomalyHeader } from "../../components/visualizations/alert-evaluation-time-series-card/headers/view-anomaly-header.component";
@@ -30,7 +30,6 @@ import {
     PageContentsGridV1,
     PageHeaderActionsV1,
     PageHeaderTextV1,
-    PageHeaderV1,
     PageV1,
     TooltipV1,
     useDialogProviderV1,
@@ -199,72 +198,68 @@ export const AnomaliesViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
-                <Box display="inline">
-                    <Breadcrumbs
-                        crumbs={[
-                            {
-                                link: getAnomaliesAllPath(),
-                                label: t("label.anomalies"),
-                            },
-                            {
-                                label: anomalyId,
-                            },
-                        ]}
-                    />
-
-                    <PageHeaderTextV1>
-                        {anomaly && uiAnomaly && (
-                            <>
-                                <Link
-                                    href={getAlertsAlertPath(anomaly.alert.id)}
-                                >
-                                    {anomaly.alert.name}
-                                </Link>
-                                : {uiAnomaly.name}
-                            </>
-                        )}
-                        <TooltipV1
-                            placement="top"
-                            title={
-                                t(
-                                    "label.how-to-perform-root-cause-analysis-doc"
-                                ) as string
-                            }
+            <PageHeader
+                breadcrumbs={[
+                    {
+                        link: getAnomaliesAllPath(),
+                        label: t("label.anomalies"),
+                    },
+                    {
+                        label: anomalyId,
+                    },
+                ]}
+                customActions={
+                    <PageHeaderActionsV1>
+                        <Button
+                            color="primary"
+                            component="button"
+                            href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
+                                Number(anomalyId)
+                            )}?${searchParams.toString()}`}
+                            variant="contained"
                         >
-                            <span>
-                                <HelpLinkIconV1
-                                    displayInline
-                                    enablePadding
-                                    externalLink
-                                    href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
-                                />
-                            </span>
-                        </TooltipV1>
-                    </PageHeaderTextV1>
-                </Box>
-                <PageHeaderActionsV1>
-                    <Button
-                        color="primary"
-                        component="button"
-                        href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
-                            Number(anomalyId)
-                        )}?${searchParams.toString()}`}
-                        variant="contained"
+                            {t("label.investigate-entity", {
+                                entity: t("label.anomaly"),
+                            })}
+                        </Button>
+                        <Button
+                            component="button"
+                            variant="contained"
+                            onClick={handleAnomalyDelete}
+                        >
+                            {t("label.delete")}
+                        </Button>
+                    </PageHeaderActionsV1>
+                }
+            >
+                <PageHeaderTextV1>
+                    {anomaly && uiAnomaly && (
+                        <>
+                            <Link href={getAlertsAlertPath(anomaly.alert.id)}>
+                                {anomaly.alert.name}
+                            </Link>
+                            : {uiAnomaly.name}
+                        </>
+                    )}
+                    <TooltipV1
+                        placement="top"
+                        title={
+                            t(
+                                "label.how-to-perform-root-cause-analysis-doc"
+                            ) as string
+                        }
                     >
-                        {t("label.investigate-entity", {
-                            entity: t("label.anomaly"),
-                        })}
-                    </Button>
-                    <Button
-                        component="button"
-                        variant="contained"
-                        onClick={handleAnomalyDelete}
-                    >
-                        {t("label.delete")}
-                    </Button>
-                </PageHeaderActionsV1>
-            </PageHeaderV1>
+                        <span>
+                            <HelpLinkIconV1
+                                displayInline
+                                enablePadding
+                                externalLink
+                                href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
+                            />
+                        </span>
+                    </TooltipV1>
+                </PageHeaderTextV1>
+            </PageHeader>
 
             <PageContentsGridV1>
                 {/* Anomaly */}

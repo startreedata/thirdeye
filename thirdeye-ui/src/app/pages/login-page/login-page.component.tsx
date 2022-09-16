@@ -13,12 +13,12 @@
  */
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     AppLoadingIndicatorV1,
     AuthExceptionCodeV1,
     NotificationTypeV1,
     PageHeaderTextV1,
-    PageHeaderV1,
     PageV1,
     useAuthProviderV1,
     useNotificationProviderV1,
@@ -70,11 +70,11 @@ export const LoginPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
+            <PageHeader>
                 <PageHeaderTextV1>
                     {t("label.authentication-error")}
                 </PageHeaderTextV1>
-            </PageHeaderV1>
+            </PageHeader>
         </PageV1>
     );
 };

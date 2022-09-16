@@ -34,6 +34,10 @@ jest.mock("../../platform/components", () => ({
     PageV1: jest.fn().mockImplementation((props) => props.children),
 }));
 
+jest.mock("../../components/page-header/page-header.component", () => ({
+    PageHeader: jest.fn().mockImplementation((props) => props.children),
+}));
+
 describe("Page Not Found Page", () => {
     it("should set appropriate page title", async () => {
         act(() => {

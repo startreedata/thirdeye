@@ -51,6 +51,10 @@ jest.mock("react-i18next", () => ({
     })),
 }));
 
+jest.mock("../../components/page-header/page-header.component", () => ({
+    PageHeader: jest.fn().mockImplementation((props) => props.children),
+}));
+
 describe("Login Page", () => {
     it("should invoke login when no blocking auth exception", () => {
         mockAuthExceptionCode = AuthExceptionCodeV1.UnauthorizedAccess;

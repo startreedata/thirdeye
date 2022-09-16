@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Card, CardContent, Link, Typography } from "@material-ui/core";
+import { Box, Card, CardContent, Link } from "@material-ui/core";
 import { cloneDeep, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams, useSearchParams } from "react-router-dom";
-import { Breadcrumbs } from "../../components/breadcrumbs/breadcrumbs.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
     AppLoadingIndicatorV1,
@@ -24,7 +24,6 @@ import {
     NotificationTypeV1,
     PageHeaderActionsV1,
     PageHeaderTextV1,
-    PageHeaderV1,
     PageV1,
     TooltipV1,
     useNotificationProviderV1,
@@ -184,92 +183,79 @@ export const InvestigationStateTracker: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
-                <Box display="inline">
-                    <Breadcrumbs
-                        crumbs={[
-                            {
-                                link: getAnomaliesAllPath(),
-                                label: t("label.anomalies"),
-                            },
-                            {
-                                label: anomalyId,
-                                link: getAnomaliesAnomalyViewPath(
-                                    Number(anomalyId)
-                                ),
-                            },
-                            {
-                                label: t("label.investigate"),
-                            },
-                        ]}
-                    />
-                    <div>
-                        <PageHeaderTextV1>
-                            {anomaly && (
-                                <>
-                                    {t("label.investigate")}:{" "}
-                                    <Link
-                                        href={getAlertsAlertPath(
-                                            anomaly.alert.id
-                                        )}
-                                    >
-                                        {anomaly.alert.name}
-                                    </Link>
-                                    :{" "}
-                                </>
-                            )}
-                            {!anomaly && <>{t("label.investigate")}: </>}
-                            <Link
-                                href={getAnomaliesAnomalyViewPath(
-                                    Number(anomalyId)
-                                )}
-                            >
-                                {t("label.anomaly")} #{anomalyId}
+            <PageHeader
+                breadcrumbs={[
+                    {
+                        link: getAnomaliesAllPath(),
+                        label: t("label.anomalies"),
+                    },
+                    {
+                        label: anomalyId,
+                        link: getAnomaliesAnomalyViewPath(Number(anomalyId)),
+                    },
+                    {
+                        label: t("label.investigate"),
+                    },
+                ]}
+                customActions={
+                    <PageHeaderActionsV1>
+                        <InvestigationOptions
+                            investigationId={investigationId}
+                            localInvestigation={localInvestigation}
+                            serverInvestigation={investigationFromServer}
+                            onRemoveInvestigationAssociation={
+                                handleRemoveInvestigationAssociation
+                            }
+                            onSuccessfulUpdate={
+                                handleServerUpdatedInvestigation
+                            }
+                        />
+                    </PageHeaderActionsV1>
+                }
+                subtitle={
+                    investigationId ? (
+                        <>
+                            Viewing saved investigation (#
+                            {investigationId}):{" "}
+                            {investigationFromServer &&
+                                investigationFromServer.name}
+                        </>
+                    ) : undefined
+                }
+            >
+                <PageHeaderTextV1>
+                    {anomaly && (
+                        <>
+                            {t("label.investigate")}:{" "}
+                            <Link href={getAlertsAlertPath(anomaly.alert.id)}>
+                                {anomaly.alert.name}
                             </Link>
-                            <TooltipV1
-                                placement="top"
-                                title={
-                                    t(
-                                        "label.how-to-perform-root-cause-analysis-doc"
-                                    ) as string
-                                }
-                            >
-                                <span>
-                                    <HelpLinkIconV1
-                                        displayInline
-                                        enablePadding
-                                        externalLink
-                                        href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
-                                    />
-                                </span>
-                            </TooltipV1>
-                        </PageHeaderTextV1>
-                    </div>
-
-                    {investigationId && (
-                        <div>
-                            <Typography variant="subtitle1">
-                                Viewing saved investigation (#
-                                {investigationId}):{" "}
-                                {investigationFromServer &&
-                                    investigationFromServer.name}
-                            </Typography>
-                        </div>
+                            :{" "}
+                        </>
                     )}
-                </Box>
-
-                <PageHeaderActionsV1>
-                    <InvestigationOptions
-                        investigationId={investigationId}
-                        localInvestigation={localInvestigation}
-                        serverInvestigation={investigationFromServer}
-                        onRemoveInvestigationAssociation={
-                            handleRemoveInvestigationAssociation
+                    {!anomaly && <>{t("label.investigate")}: </>}
+                    <Link href={getAnomaliesAnomalyViewPath(Number(anomalyId))}>
+                        {t("label.anomaly")} #{anomalyId}
+                    </Link>
+                    <TooltipV1
+                        placement="top"
+                        title={
+                            t(
+                                "label.how-to-perform-root-cause-analysis-doc"
+                            ) as string
                         }
-                        onSuccessfulUpdate={handleServerUpdatedInvestigation}
-                    />
-                </PageHeaderActionsV1>
-            </PageHeaderV1>
+                    >
+                        <span>
+                            <HelpLinkIconV1
+                                displayInline
+                                enablePadding
+                                externalLink
+                                href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
+                            />
+                        </span>
+                    </TooltipV1>
+                </PageHeaderTextV1>
+            </PageHeader>
 
             <Outlet
                 context={{

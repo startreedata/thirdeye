@@ -16,13 +16,13 @@ import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     TimeRange,
     TimeRangeQueryStringKey,
 } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     PageContentsGridV1,
-    PageHeaderV1,
     PageV1,
     SkeletonV1,
     useNotificationProviderV1,
@@ -93,9 +93,9 @@ export const AnomaliesViewIndexPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
+            <PageHeader>
                 <SkeletonV1 />
-            </PageHeaderV1>
+            </PageHeader>
 
             <PageContentsGridV1>
                 {/* Anomaly */}

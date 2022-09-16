@@ -39,6 +39,10 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
+jest.mock("../../components/page-header/page-header.component", () => ({
+    PageHeader: jest.fn().mockImplementation((props) => props.children),
+}));
+
 describe("Logout Page", () => {
     it("should set appropriate page title", async () => {
         render(<LogoutPage />);

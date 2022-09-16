@@ -18,12 +18,12 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AlertTemplateWizard } from "../../components/alert-template-wizard/altert-template-wizard.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageHeaderTextV1,
-    PageHeaderV1,
     PageV1,
     TooltipV1,
     useNotificationProviderV1,
@@ -81,7 +81,7 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
+            <PageHeader>
                 <PageHeaderTextV1>
                     {t("label.create-entity", {
                         entity: t("label.alert-template"),
@@ -100,7 +100,7 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
                         </span>
                     </TooltipV1>
                 </PageHeaderTextV1>
-            </PageHeaderV1>
+            </PageHeader>
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <AlertTemplateWizard<NewAlertTemplate>

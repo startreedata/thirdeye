@@ -23,6 +23,7 @@ import {
     useSearchParams,
 } from "react-router-dom";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
@@ -30,7 +31,6 @@ import {
     PageContentsGridV1,
     PageHeaderActionsV1,
     PageHeaderTextV1,
-    PageHeaderV1,
     PageV1,
     TooltipV1,
     useDialogProviderV1,
@@ -236,7 +236,45 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
 
     return (
         <PageV1>
-            <PageHeaderV1>
+            <PageHeader
+                customActions={
+                    <PageHeaderActionsV1>
+                        <Box padding={1}>View:</Box>
+                        <ButtonGroup color="primary" variant="outlined">
+                            <Button
+                                component={NavLink}
+                                to={{
+                                    pathname:
+                                        AppRouteRelative.ALERTS_CREATE_SIMPLE,
+                                    search: searchParams.toString(),
+                                }}
+                                variant={
+                                    location.pathname.includes("simple")
+                                        ? "contained"
+                                        : "outlined"
+                                }
+                            >
+                                Simple
+                            </Button>
+                            <Button
+                                component={NavLink}
+                                to={{
+                                    pathname:
+                                        AppRouteRelative.ALERTS_CREATE_ADVANCED,
+                                    search: searchParams.toString(),
+                                }}
+                                variant={
+                                    location.pathname.includes("advanced")
+                                        ? "contained"
+                                        : "outlined"
+                                }
+                            >
+                                Advanced
+                            </Button>
+                        </ButtonGroup>
+                    </PageHeaderActionsV1>
+                }
+            >
                 <PageHeaderTextV1>
                     {pageTitle}
                     <TooltipV1
@@ -253,42 +291,7 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                         </span>
                     </TooltipV1>
                 </PageHeaderTextV1>
-
-                <PageHeaderActionsV1>
-                    <Box padding={1}>View:</Box>
-                    <ButtonGroup color="primary" variant="outlined">
-                        <Button
-                            component={NavLink}
-                            to={{
-                                pathname: AppRouteRelative.ALERTS_CREATE_SIMPLE,
-                                search: searchParams.toString(),
-                            }}
-                            variant={
-                                location.pathname.includes("simple")
-                                    ? "contained"
-                                    : "outlined"
-                            }
-                        >
-                            Simple
-                        </Button>
-                        <Button
-                            component={NavLink}
-                            to={{
-                                pathname:
-                                    AppRouteRelative.ALERTS_CREATE_ADVANCED,
-                                search: searchParams.toString(),
-                            }}
-                            variant={
-                                location.pathname.includes("advanced")
-                                    ? "contained"
-                                    : "outlined"
-                            }
-                        >
-                            Advanced
-                        </Button>
-                    </ButtonGroup>
-                </PageHeaderActionsV1>
-            </PageHeaderV1>
+            </PageHeader>
             <PageContentsGridV1>
                 <Outlet
                     context={[

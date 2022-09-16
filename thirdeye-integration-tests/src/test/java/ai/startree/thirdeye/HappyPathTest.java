@@ -29,7 +29,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
-import ai.startree.thirdeye.spi.api.HeatMapResultApi;
+import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
@@ -252,7 +252,7 @@ public class HappyPathTest {
   public void testGetHeatmap() {
     Response response = request("api/rca/metrics/heatmap?id=" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    HeatMapResultApi heatmap = response.readEntity(HeatMapResultApi.class);
+    HeatMapResponseApi heatmap = response.readEntity(HeatMapResponseApi.class);
     assertThat(heatmap.getBaseline().getBreakdown().size()).isGreaterThan(0);
     assertThat(heatmap.getCurrent().getBreakdown().size()).isGreaterThan(0);
   }

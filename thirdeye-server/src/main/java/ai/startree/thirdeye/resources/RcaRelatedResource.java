@@ -15,8 +15,8 @@ package ai.startree.thirdeye.resources;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
-import ai.startree.thirdeye.rca.RootCauseAnalysisInfo;
 import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
@@ -91,12 +91,12 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
-    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        rootCauseAnalysisInfo.getTimezone()
+        rcaInfo.getAnomaly().getStartTime(),
+        rcaInfo.getAnomaly().getEndTime(),
+        rcaInfo.getTimezone()
     );
     final long startWithLookback = anomalyInterval.getStart()
         .minus(lookaroundPeriod)
@@ -135,12 +135,12 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
-    final RootCauseAnalysisInfo rootCauseAnalysisInfo = rcaInfoFetcher.getRootCauseAnalysisInfo(
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getStartTime(),
-        rootCauseAnalysisInfo.getMergedAnomalyResultDTO().getEndTime(),
-        rootCauseAnalysisInfo.getTimezone()
+        rcaInfo.getAnomaly().getStartTime(),
+        rcaInfo.getAnomaly().getEndTime(),
+        rcaInfo.getTimezone()
     );
     final long startWithLookback = anomalyInterval.getStart()
         .minus(lookaroundPeriod)

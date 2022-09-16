@@ -15,18 +15,16 @@ import { Grid } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
-import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
+import { Outlet, useSearchParams } from "react-router-dom";
+import { AnomaliesPageHeader } from "../../components/anomalies-page-header/anomalies-page-header.component";
 import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
-import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
-    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
-    TooltipV1,
+    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -37,13 +35,11 @@ import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
-import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
-import { SEARCH_TERM_QUERY_PARAM_KEY } from "../../utils/params/params.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
+    const [searchParams] = useSearchParams();
+    // Use state so we can remove anomalies locally without having to fetch again
+    const [anomalies, setAnomalies] = useState<Anomaly[] | null>(null);
     const {
         getAnomalies,
         status: getAnomaliesRequestStatus,
@@ -61,8 +57,8 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     useEffect(() => {
         if (
             getAnomaliesRequestStatus === ActionStatus.Done &&
-            uiAnomalies &&
-            uiAnomalies.length === 0
+            anomalies &&
+            anomalies.length === 0
         ) {
             notify(
                 NotificationTypeV1.Info,
@@ -71,10 +67,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 })
             );
         }
-    }, [getAnomaliesRequestStatus, uiAnomalies]);
+    }, [getAnomaliesRequestStatus, anomalies]);
 
     const fetchAnomaliesByTime = (): void => {
-        setUiAnomalies(null);
+        setAnomalies(null);
 
         const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
         const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
@@ -101,15 +97,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             ) as string;
         }
 
-        let fetchedUiAnomalies: UiAnomaly[] = [];
-
-        getAnomalies(params)
-            .then((anomalies) => {
-                if (anomalies && anomalies.length) {
-                    fetchedUiAnomalies = getUiAnomalies(anomalies);
-                }
-            })
-            .finally(() => setUiAnomalies(fetchedUiAnomalies));
+        getAnomalies(params).then((anomalies) => {
+            if (anomalies && anomalies.length > 0) {
+                setAnomalies(anomalies);
+            }
+        });
     };
 
     const handleAnomalyDelete = (uiAnomalies: UiAnomaly[]): void => {
@@ -176,25 +168,18 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         });
     };
 
-    const removeUiAnomaly = (anomaly: Anomaly): void => {
-        if (!anomaly) {
+    const removeUiAnomaly = (anomalyToRemove: Anomaly): void => {
+        if (!anomalyToRemove) {
             return;
         }
 
-        setUiAnomalies(
-            (uiAnomalies) =>
-                uiAnomalies &&
-                uiAnomalies.filter((uiAnomaly) => uiAnomaly.id !== anomaly.id)
+        setAnomalies(
+            (currentAnomalies) =>
+                currentAnomalies &&
+                currentAnomalies.filter(
+                    (candidate) => candidate.id !== anomalyToRemove.id
+                )
         );
-    };
-
-    const onSearchFilterValueChange = (value: string): void => {
-        if (value) {
-            searchParams.set(SEARCH_TERM_QUERY_PARAM_KEY, value);
-        } else {
-            searchParams.delete(SEARCH_TERM_QUERY_PARAM_KEY);
-        }
-        setSearchParams(searchParams);
     };
 
     useEffect(() => {
@@ -214,46 +199,27 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader
-                showCreateButton
-                showTimeRange
-                title={t("label.anomalies")}
-            >
-                <TooltipV1
-                    placement="top"
-                    title={
-                        t(
-                            "label.how-to-perform-root-cause-analysis-doc"
-                        ) as string
-                    }
-                >
-                    <span>
-                        <HelpLinkIconV1
-                            displayInline
-                            enablePadding
-                            externalLink
-                            href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
-                        />
-                    </span>
-                </TooltipV1>
-            </PageHeader>
+            <AnomaliesPageHeader />
 
             <PageContentsGridV1 fullHeight>
-                <Grid item xs={12}>
-                    {/* Anomaly list */}
-                    <PageContentsCardV1 disablePadding fullHeight>
-                        <AnomalyListV1
-                            anomalies={uiAnomalies}
-                            searchFilterValue={searchParams.get(
-                                SEARCH_TERM_QUERY_PARAM_KEY
-                            )}
-                            onDelete={handleAnomalyDelete}
-                            onSearchFilterValueChange={
-                                onSearchFilterValueChange
-                            }
-                        />
-                    </PageContentsCardV1>
-                </Grid>
+                {getAnomaliesRequestStatus === ActionStatus.Working && (
+                    <Grid xs={12}>
+                        <PageContentsCardV1>
+                            <SkeletonV1 animation="pulse" />
+                            <SkeletonV1 animation="pulse" />
+                            <SkeletonV1 animation="pulse" />
+                        </PageContentsCardV1>
+                    </Grid>
+                )}
+
+                {getAnomaliesRequestStatus === ActionStatus.Done && (
+                    <Outlet
+                        context={{
+                            anomalies,
+                            handleAnomalyDelete,
+                        }}
+                    />
+                )}
             </PageContentsGridV1>
         </PageV1>
     );

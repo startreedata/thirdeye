@@ -128,7 +128,7 @@ public class DetectionPipelineRunner {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
         detectionInterval);
 
-    final Map<String, OperatorResult> detectionPipelineResultMap = planExecutor.runPipeline(
+    final Map<String, OperatorResult> detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(
         templateWithProperties.getNodes(),
         detectionInterval);
     checkState(detectionPipelineResultMap.size() == 1,

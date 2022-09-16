@@ -24,6 +24,7 @@ import {
 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
@@ -45,10 +46,13 @@ export const ZOOM_START_KEY = "zoomStart";
 export const ZOOM_END_KEY = "zoomEnd";
 const CURSOR_POINTER_STYLE = { cursor: "pointer" };
 
-export const generateSeriesDataForEvaluation = (
-    alertEvaluation: AlertEvaluation,
+export const generateSeriesDataForDetectionEvaluation = (
+    detectionEvaluation: DetectionEvaluation,
     filteredAlertEvaluations: [AlertEvaluation, AnomalyFilterOption[]][],
-    translation: (id: string) => string
+    translation: (id: string) => string,
+    hideUpperLowerBound?: boolean,
+    hideActivity?: boolean,
+    hidePredicted?: boolean
 ): Series[] => {
     const filteredTimeSeriesData: Series[] = filteredAlertEvaluations.map(
         (alertEvalAndFilters) => {
@@ -77,10 +81,12 @@ export const generateSeriesDataForEvaluation = (
         }
     );
 
-    const timeSeriesData = extractDetectionEvaluation(alertEvaluation)[0].data;
+    const timeSeriesData = detectionEvaluation.data;
 
-    return [
-        {
+    const chartSeries: Series[] = [];
+
+    if (!hideUpperLowerBound) {
+        chartSeries.push({
             enabled: false,
             name: translation("label.upper-and-lower-bound"),
             type: SeriesType.AREA_CLOSED,
@@ -105,8 +111,11 @@ export const generateSeriesDataForEvaluation = (
                 },
             },
             legendIndex: 10,
-        },
-        {
+        });
+    }
+
+    if (!hideActivity) {
+        chartSeries.push({
             name: translation("label.activity"),
             type: SeriesType.LINE,
             color: Palette.COLOR_VISUALIZATION_STROKE_CURRENT,
@@ -136,8 +145,11 @@ export const generateSeriesDataForEvaluation = (
                     />
                 );
             },
-        },
-        {
+        });
+    }
+
+    if (!hidePredicted) {
+        chartSeries.push({
             name: translation("label.predicted"),
             type: SeriesType.LINE,
             color: Palette.COLOR_VISUALIZATION_STROKE_BASELINE,
@@ -155,25 +167,25 @@ export const generateSeriesDataForEvaluation = (
                     formatLargeNumberV1(d.y),
             },
             strokeDasharray: `${Dimension.DASHARRAY_VISUALIZATION_BASELINE}`,
-        },
-        ...filteredTimeSeriesData,
-    ];
+        });
+    }
+
+    return [...chartSeries, ...filteredTimeSeriesData];
 };
 
 export const generateChartOptions = (
-    alertEvaluation: AlertEvaluation,
+    detectionEvaluation: DetectionEvaluation,
     anomaly: Anomaly,
     filteredAlertEvaluation: [AlertEvaluation, AnomalyFilterOption[]][],
     translation: (id: string) => string
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
-    if (alertEvaluation) {
-        const timeseriesData =
-            extractDetectionEvaluation(alertEvaluation)[0].data;
+    if (detectionEvaluation) {
+        const timeseriesData = detectionEvaluation.data;
 
-        series = generateSeriesDataForEvaluation(
-            alertEvaluation,
+        series = generateSeriesDataForDetectionEvaluation(
+            detectionEvaluation,
             filteredAlertEvaluation,
             translation
         );
@@ -413,17 +425,16 @@ export const generateSeriesForAnomalies = (
 };
 
 export const generateChartOptionsForAlert = (
-    alertEvaluation: AlertEvaluation,
+    detectionEvaluation: DetectionEvaluation,
     anomalies: Anomaly[],
     translation: (id: string) => string,
     navigate?: NavigateFunction
 ): TimeSeriesChartProps => {
-    const data = extractDetectionEvaluation(alertEvaluation)[0].data;
     let series: Series[] = [];
 
-    if (alertEvaluation !== null) {
-        series = generateSeriesDataForEvaluation(
-            alertEvaluation,
+    if (detectionEvaluation !== null) {
+        series = generateSeriesDataForDetectionEvaluation(
+            detectionEvaluation,
             [],
             translation
         );
@@ -434,8 +445,8 @@ export const generateChartOptionsForAlert = (
             generateSeriesForAnomalies(
                 anomalies,
                 translation,
-                data.timestamp,
-                data.current,
+                detectionEvaluation.data.timestamp,
+                detectionEvaluation.data.current,
                 navigate
             )
         );
@@ -449,6 +460,44 @@ export const generateChartOptionsForAlert = (
         yAxis: {
             position: Orientation.right,
         },
+    };
+};
+
+export const generateChartOptionsForMetricsReport = (
+    detectionEvaluation: DetectionEvaluation,
+    anomalies: Anomaly[],
+    translation: (id: string) => string
+): TimeSeriesChartProps => {
+    let series: Series[] = [];
+
+    if (detectionEvaluation !== null) {
+        series = generateSeriesDataForDetectionEvaluation(
+            detectionEvaluation,
+            [],
+            translation,
+            true,
+            false,
+            true
+        );
+    }
+
+    if (anomalies) {
+        series.push(
+            generateSeriesForAnomalies(
+                anomalies,
+                translation,
+                detectionEvaluation.data.timestamp,
+                detectionEvaluation.data.current
+            )
+        );
+    }
+
+    return {
+        series,
+        legend: false,
+        brush: false,
+        tooltip: false,
+        yAxis: { enabled: false },
     };
 };
 

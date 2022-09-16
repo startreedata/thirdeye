@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,15 +45,15 @@ public class AlertCreater {
   private final AlertManager alertManager;
   private final AlertApiBeanMapper alertApiBeanMapper;
   private final TaskManager taskManager;
+  private final AlertInsightsProvider alertInsightsProvider;
 
   @Inject
-  public AlertCreater(
-      final AlertManager alertManager,
-      final AlertApiBeanMapper alertApiBeanMapper,
-      final TaskManager taskManager) {
+  public AlertCreater(final AlertManager alertManager, final AlertApiBeanMapper alertApiBeanMapper,
+      final TaskManager taskManager, final AlertInsightsProvider alertInsightsProvider) {
     this.alertManager = alertManager;
     this.alertApiBeanMapper = alertApiBeanMapper;
     this.taskManager = taskManager;
+    this.alertInsightsProvider = alertInsightsProvider;
   }
 
   public AlertDTO create(AlertApi api) {
@@ -67,9 +69,8 @@ public class AlertCreater {
   }
 
   public void ensureCreationIsPossible(final AlertApi api) {
-    ensure(alertManager
-        .findByPredicate(Predicate.EQ("name", api.getName()))
-        .isEmpty(), ERR_DUPLICATE_NAME);
+    ensure(alertManager.findByPredicate(Predicate.EQ("name", api.getName())).isEmpty(),
+        ERR_DUPLICATE_NAME);
   }
 
   private void createOnboardingTask(final AlertDTO dto) {
@@ -77,25 +78,33 @@ public class AlertCreater {
     long start = dto.getLastTimestamp();
     // If no value is present, set the default lookback
     if (start <= 0) {
-      // replay from JAN 1 2000 quickfix because replaying from 1970 was too slow with small granularity
-      // this default replay period should depend on the granularity
-      start = JAN_1_2000_UTC;
+      start = getDefaultStart(dto);
     }
 
     createOnboardingTask(dto, start, end);
+  }
+
+  private long getDefaultStart(final AlertDTO dto) {
+    try {
+      final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
+      return insights.getDatasetStartTime();
+    } catch (final WebApplicationException e) {
+      throw e;
+    } catch (Exception e) {
+      // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
+      LOG.error("Could not fetch insights for alert {}. Defaulting onboarding task startTime to {}",
+          dto,
+          JAN_1_2000_UTC);
+      return JAN_1_2000_UTC;
+    }
   }
 
   public void createOnboardingTask(final AlertDTO dto, final long start, final long end) {
     createOnboardingTask(dto, start, end, 0, 0);
   }
 
-  private void createOnboardingTask(
-      final AlertDTO alertDTO,
-      long start,
-      long end,
-      long tuningWindowStart,
-      long tuningWindowEnd
-  ) {
+  private void createOnboardingTask(final AlertDTO alertDTO, long start, long end,
+      long tuningWindowStart, long tuningWindowEnd) {
     OnboardingTaskInfo info = new OnboardingTaskInfo();
     info.setConfigId(alertDTO.getId());
     if (tuningWindowStart == 0L && tuningWindowEnd == 0L) {
@@ -107,12 +116,10 @@ public class AlertCreater {
     checkArgument(start <= end);
     checkArgument(tuningWindowStart <= tuningWindowEnd);
 
-    info
-        .setTuningWindowStart(tuningWindowStart)
+    info.setTuningWindowStart(tuningWindowStart)
         .setTuningWindowEnd(tuningWindowEnd)
         .setStart(start)
-        .setEnd(end)
-    ;
+        .setEnd(end);
 
     try {
       TaskDTO taskDTO = taskManager.createTaskDto(alertDTO.getId(), info, TaskType.ONBOARDING);
@@ -122,7 +129,8 @@ public class AlertCreater {
           taskDTO);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",
-          OnboardingTaskInfo.class.getSimpleName(), info), e);
+          OnboardingTaskInfo.class.getSimpleName(),
+          info), e);
     }
   }
 }

@@ -234,6 +234,7 @@ const mockEmptyUiAnomaly = {
     endTime: "label.no-data-marker",
     startTimeVal: -1,
     endTimeVal: -1,
+    datasetName: "label.no-data-marker",
 };
 
 const mockAnomaly1 = {
@@ -303,6 +304,7 @@ const mockUiAnomaly1 = {
     endTime: "3",
     startTimeVal: 2,
     endTimeVal: 3,
+    datasetName: "label.no-data-marker",
 };
 
 const mockUiAnomaly2 = {
@@ -325,6 +327,7 @@ const mockUiAnomaly2 = {
     endTime: "9",
     startTimeVal: 8,
     endTimeVal: 9,
+    datasetName: "label.no-data-marker",
 };
 
 const mockUiAnomaly3 = {
@@ -347,6 +350,7 @@ const mockUiAnomaly3 = {
     endTime: "8",
     startTimeVal: 3,
     endTimeVal: 8,
+    datasetName: "label.no-data-marker",
 };
 
 const mockUiAnomaly4 = {
@@ -369,6 +373,7 @@ const mockUiAnomaly4 = {
     endTime: "label.no-data-marker",
     startTimeVal: -1,
     endTimeVal: -1,
+    datasetName: "label.no-data-marker",
 };
 
 const mockUiAnomaly5 = {
@@ -391,6 +396,7 @@ const mockUiAnomaly5 = {
     endTime: "110",
     startTimeVal: 100,
     endTimeVal: 110,
+    datasetName: "label.no-data-marker",
 };
 
 const mockUiAnomalies = [

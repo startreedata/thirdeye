@@ -12,8 +12,10 @@
  * the License.
  */
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { AnomaliesListAllPage } from "../../pages/anomalies-list-page/anomalies-list-page.component";
+import { MetricsReportAllPage } from "../../pages/anomalies-metrics-report-page/anomalies-metrics-report-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
@@ -48,6 +50,8 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const AnomaliesRouter: FunctionComponent = () => {
+    const { search } = useLocation();
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
@@ -91,7 +95,29 @@ export const AnomaliesRouter: FunctionComponent = () => {
                             </RedirectValidation>
                         }
                         path={AppRouteRelative.ANOMALIES_ALL_RANGE}
-                    />
+                    >
+                        <Route
+                            index
+                            element={
+                                /**
+                                 * Navigate will strip away the query params
+                                 * so we have to pass it
+                                 */
+                                <Navigate
+                                    replace
+                                    to={`${AppRouteRelative.ANOMALIES_LIST}${search}`}
+                                />
+                            }
+                        />
+                        <Route
+                            element={<AnomaliesListAllPage />}
+                            path={AppRouteRelative.ANOMALIES_LIST}
+                        />
+                        <Route
+                            element={<MetricsReportAllPage />}
+                            path={AppRouteRelative.ANOMALIES_METRICS_REPORT}
+                        />
+                    </Route>
                 </Route>
 
                 <Route path={`${AppRouteRelative.ALERTS_ALERT}/*`}>

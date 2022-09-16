@@ -15,13 +15,13 @@ import { DateTime } from "luxon";
 import {
     createPathWithRecognizedQueryString,
     generateDateRangeMonthsFromNow,
+    getAlertsAlertViewPath,
     getAlertsAllPath,
     getAlertsCreateNewAdvancedPath,
     getAlertsCreateNewSimplePath,
     getAlertsCreatePath,
     getAlertsPath,
     getAlertsUpdatePath,
-    getAlertsViewPath,
     getAlertTemplatesAllPath,
     getAlertTemplatesCreatePath,
     getAlertTemplatesPath,
@@ -72,8 +72,10 @@ describe("Routes Util", () => {
         expect(getAlertsAllPath()).toEqual("/alerts/all?testQueryString");
     });
 
-    it("getAlertsViewPath should return appropriate path with appropriate query string for id", () => {
-        expect(getAlertsViewPath(1)).toEqual("/alerts/1?testQueryString");
+    it("getAlertsAlertViewPath should return appropriate path with appropriate query string for id", () => {
+        expect(getAlertsAlertViewPath(1)).toEqual(
+            "/alerts/1/view?testQueryString"
+        );
     });
 
     it("getAlertsCreatePath should return appropriate path with appropriate query string", () => {

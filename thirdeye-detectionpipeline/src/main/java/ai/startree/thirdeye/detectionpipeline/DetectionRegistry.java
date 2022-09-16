@@ -73,10 +73,9 @@ public class DetectionRegistry {
   public EventTrigger<AbstractSpec> buildTrigger(
       String factoryName,
       EventTriggerFactoryContext context) {
-    checkArgument(triggerFactoryMap.containsKey(factoryName),
-        String.format("Trigger type not registered: %s. Available triggers: %s",
+    checkArgument(triggerFactoryMap.containsKey(factoryName), "Trigger type not registered: %s. Available triggers: %s",
             factoryName,
-            triggerFactoryMap.keySet()));
+            triggerFactoryMap.keySet());
     return triggerFactoryMap.get(factoryName).build(context);
   }
 }

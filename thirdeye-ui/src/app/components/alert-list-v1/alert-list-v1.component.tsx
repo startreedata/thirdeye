@@ -28,9 +28,9 @@ import {
 } from "../../platform/components";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
+    getAlertsAlertPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
-    getAlertsViewPath,
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
@@ -70,7 +70,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     }, [alerts]);
 
     const handleAlertViewDetails = (id: number): void => {
-        navigate(getAlertsViewPath(id));
+        navigate(getAlertsAlertPath(id));
     };
 
     const renderLink = (

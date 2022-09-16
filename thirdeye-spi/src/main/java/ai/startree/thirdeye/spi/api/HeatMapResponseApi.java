@@ -15,7 +15,8 @@ package ai.startree.thirdeye.spi.api;
 
 import java.util.Map;
 
-public class HeatMapResultApi {
+public class HeatMapResponseApi implements ThirdEyeApi {
+
   private MetricApi metric;
   private HeatMapBreakdownApi baseline;
   private HeatMapBreakdownApi current;
@@ -24,7 +25,7 @@ public class HeatMapResultApi {
     return metric;
   }
 
-  public HeatMapResultApi setMetric(final MetricApi metric) {
+  public HeatMapResponseApi setMetric(final MetricApi metric) {
     this.metric = metric;
     return this;
   }
@@ -33,7 +34,7 @@ public class HeatMapResultApi {
     return baseline;
   }
 
-  public HeatMapResultApi setBaseline(
+  public HeatMapResponseApi setBaseline(
       final HeatMapBreakdownApi baseline) {
     this.baseline = baseline;
     return this;
@@ -43,13 +44,14 @@ public class HeatMapResultApi {
     return current;
   }
 
-  public HeatMapResultApi setCurrent(
+  public HeatMapResponseApi setCurrent(
       final HeatMapBreakdownApi current) {
     this.current = current;
     return this;
   }
 
   public static class HeatMapBreakdownApi {
+
     private Map<String, Map<String, Double>> breakdown;
 
     public Map<String, Map<String, Double>> getBreakdown() {

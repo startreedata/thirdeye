@@ -11,7 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+
+package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.Constants.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +32,7 @@ import ai.startree.thirdeye.spi.metric.DimensionType;
 import java.util.List;
 import org.testng.annotations.Test;
 
-public class AlertEvaluatorTest {
+public class EvaluationContextProcessorTest {
 
   private static final String DATASET_NAME = "dataset";
   private static final String ANOMALY_DETECTOR_TYPE = new AnomalyDetectorPlanNode().getType();
@@ -40,7 +41,6 @@ public class AlertEvaluatorTest {
 
   @Test
   public void testInjectFilters() {
-    AlertEvaluator evaluatorV2 = new AlertEvaluator(null, null, null);
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setDataset(DATASET_NAME);
     AlertTemplateDTO alertTemplateDTO = new AlertTemplateDTO()
         .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO))
@@ -48,14 +48,14 @@ public class AlertEvaluatorTest {
             new PlanNodeBean().setName("root").setType(ANOMALY_DETECTOR_TYPE),
             new PlanNodeBean().setName("indexFiller1").setType(INDEX_FILLER_TYPE),
             new PlanNodeBean().setName("indexFiller2").setType(INDEX_FILLER_TYPE)
-            .setParams(new TemplatableMap<>()),
+                .setParams(new TemplatableMap<>()),
             new PlanNodeBean().setName("dataFetcher1").setType(DATA_FETCHER_TYPE),
             new PlanNodeBean().setName("dataFetcher2").setType(DATA_FETCHER_TYPE)
                 .setParams(new TemplatableMap<>())
         ));
     List<String> filters = List.of("browser=chrome");
 
-    evaluatorV2.injectFilters(alertTemplateDTO, filters);
+    new EvaluationContextProcessor().injectFilters(alertTemplateDTO, filters);
 
     // test that filters are not injected in detector and index filler nodes
     assertThat(alertTemplateDTO.getNodes().get(0).getParams()).isNull();

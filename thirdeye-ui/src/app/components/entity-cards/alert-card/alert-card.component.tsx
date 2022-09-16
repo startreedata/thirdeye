@@ -30,9 +30,9 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import {
+    getAlertsAlertPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
-    getAlertsViewPath,
     getAnomaliesAllRangePath,
 } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
@@ -61,7 +61,7 @@ export const AlertCard: FunctionComponent<AlertCardProps> = (
             return;
         }
 
-        navigate(getAlertsViewPath(props.uiAlert.id));
+        navigate(getAlertsAlertPath(props.uiAlert.id));
         handleAlertOptionsClose();
     };
 

@@ -29,6 +29,7 @@ export const getAnomalies = async ({
     endTime,
     dataset,
     metric,
+    enumerationItemId,
 }: GetAnomaliesProps = {}): Promise<Anomaly[]> => {
     const queryParams = new URLSearchParams([["isChild", "false"]]);
 
@@ -50,6 +51,10 @@ export const getAnomalies = async ({
 
     if (metric) {
         queryParams.set("metadata.metric.name", metric);
+    }
+
+    if (enumerationItemId) {
+        queryParams.set("enumerationItem.id", enumerationItemId.toString());
     }
 
     const response = await axios.get(

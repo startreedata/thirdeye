@@ -19,7 +19,7 @@ import {
     CardContent,
     Grid,
 } from "@material-ui/core";
-import { debounce, isEmpty } from "lodash";
+import { debounce } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -30,7 +30,6 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     SkeletonV1,
     TooltipV1,
@@ -40,8 +39,12 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
-import { DEFAULT_FEEDBACK } from "../../../utils/alerts/alerts.util";
+import {
+    DEFAULT_FEEDBACK,
+    extractDetectionEvaluation,
+} from "../../../utils/alerts/alerts.util";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { AnomalyFeedback } from "../../anomaly-feedback/anomaly-feedback.component";
@@ -161,25 +164,21 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     }, [anomaly, timeSeriesFiltersSet]);
 
     useEffect(() => {
-        if (getEvaluationRequestStatus === ActionStatus.Error) {
-            !isEmpty(errorMessages)
-                ? errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.chart-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            getEvaluationRequestStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.chart-data"),
+            })
+        );
     }, [errorMessages, getEvaluationRequestStatus]);
 
     useEffect(() => {
         if (alertEvaluation && anomaly) {
             setTimeSeriesOptions(
                 generateChartOptions(
-                    alertEvaluation,
+                    extractDetectionEvaluation(alertEvaluation)[0],
                     anomaly,
                     filteredAlertEvaluation,
                     t

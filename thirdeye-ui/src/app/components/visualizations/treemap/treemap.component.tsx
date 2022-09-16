@@ -24,6 +24,7 @@ import { scaleLinear } from "@visx/scale";
 import { useTooltip } from "@visx/tooltip";
 import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
 import React, { MouseEvent } from "react";
+import { TooltipV1 } from "../../../platform/components";
 import { checkIfOtherDimension } from "../../../utils/visualization/visualization.util";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
 import { GenericTreemapTooltip } from "./generic-treemap-tooltip";
@@ -33,6 +34,7 @@ import {
     TreemapProps,
     TreemapPropsInternal,
 } from "./treemap.interfaces";
+import { useTreemapStyles } from "./treemap.styles";
 
 // #TODO move to a constants file
 const RIGHT_BOUNDS_PADDING = 30;
@@ -51,10 +53,19 @@ function Treemap<Data>({
     tooltipElement = GenericTreemapTooltip,
     ...props
 }: TreemapProps<Data>): JSX.Element {
+    const styles = useTreemapStyles();
+
     return (
         <Grid container alignItems="center">
             <Grid item sm={2}>
-                <Typography variant="subtitle1">{props.name}</Typography>
+                <TooltipV1 placement="top" title={props.name}>
+                    <Typography
+                        className={styles.textOverflowEllipses}
+                        variant="subtitle1"
+                    >
+                        {props.name}
+                    </Typography>
+                </TooltipV1>
             </Grid>
             <Grid item sm={10}>
                 <ParentSize>

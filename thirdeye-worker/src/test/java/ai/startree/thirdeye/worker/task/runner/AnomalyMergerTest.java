@@ -30,11 +30,13 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -82,8 +84,7 @@ public class AnomalyMergerTest {
   }
 
   public static boolean isSameAnomaly(MergedAnomalyResultDTO a1, MergedAnomalyResultDTO a2) {
-    return Objects.equals(a1.getId(), a2.getId())
-        && a1.getStartTime() == a2.getStartTime()
+    return Objects.equals(a1.getId(), a2.getId()) && a1.getStartTime() == a2.getStartTime()
         && a1.getEndTime() == a2.getEndTime();
   }
 
@@ -91,46 +92,39 @@ public class AnomalyMergerTest {
   public void setUp() throws ParseException, IOException, ClassNotFoundException {
     mergedAnomalyResultManager = mock(MergedAnomalyResultManager.class);
     alertTemplateRenderer = mock(AlertTemplateRenderer.class);
-    when(alertTemplateRenderer.renderAlert(any(AlertDTO.class), any(Interval.class)))
-        .thenReturn(new AlertTemplateDTO());
+    when(alertTemplateRenderer.renderAlert(any(AlertDTO.class),
+        any(Interval.class))).thenReturn(new AlertTemplateDTO());
     anomalyMerger = new AnomalyMerger(mergedAnomalyResultManager, alertTemplateRenderer);
   }
 
   @Test
   public void testPrepareSortedAnomalyList() {
-    assertThat(anomalyMerger.combineAndSort(emptyList(), emptyList()))
-        .isEqualTo(emptyList());
+    assertThat(anomalyMerger.combineAndSort(emptyList(), emptyList())).isEqualTo(emptyList());
 
     final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final MergedAnomalyResultDTO new2 = newAnomaly(JANUARY_1_2021_01H,
         plusMin(JANUARY_1_2021_01H, 10));
     final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
-    final MergedAnomalyResultDTO existing2 = existingAnomaly(JANUARY_1_2021_01H, plusMin(
-        JANUARY_1_2021_01H, 10));
+    final MergedAnomalyResultDTO existing2 = existingAnomaly(JANUARY_1_2021_01H,
+        plusMin(JANUARY_1_2021_01H, 10));
 
-    assertThat(anomalyMerger.combineAndSort(emptyList(), singletonList(existing1)))
-        .isEqualTo(singletonList(existing1));
+    assertThat(anomalyMerger.combineAndSort(emptyList(), singletonList(existing1))).isEqualTo(
+        singletonList(existing1));
 
-    assertThat(anomalyMerger.combineAndSort(singletonList(new1), emptyList()))
-        .isEqualTo(singletonList(new1));
+    assertThat(anomalyMerger.combineAndSort(singletonList(new1), emptyList())).isEqualTo(
+        singletonList(new1));
 
-    assertThat(anomalyMerger.combineAndSort(
-        singletonList(new1),
-        singletonList(existing1)))
-        .isEqualTo(List.of(existing1, new1));
+    assertThat(anomalyMerger.combineAndSort(singletonList(new1),
+        singletonList(existing1))).isEqualTo(List.of(existing1, new1));
 
-    assertThat(anomalyMerger.combineAndSort(
-        List.of(new1, new2),
-        List.of(existing1, existing2)))
-        .isEqualTo(List.of(existing1, new1, existing2, new2));
+    assertThat(anomalyMerger.combineAndSort(List.of(new1, new2),
+        List.of(existing1, existing2))).isEqualTo(List.of(existing1, new1, existing2, new2));
   }
 
   @Test
   public void testEmptyMergeAndSave() {
-    anomalyMerger.mergeAndSave(
-        newAlert(),
-        emptyList());
+    anomalyMerger.mergeAndSave(newAlert(), emptyList());
   }
 
   @Test
@@ -138,13 +132,10 @@ public class AnomalyMergerTest {
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        any()))
-        .thenAnswer(i -> emptyList());
+        any())).thenAnswer(i -> emptyList());
 
     final MergedAnomalyResultDTO newAnomaly = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
-    anomalyMerger.mergeAndSave(
-        newAlert(),
-        singletonList(newAnomaly));
+    anomalyMerger.mergeAndSave(newAlert(), singletonList(newAnomaly));
     verify(mergedAnomalyResultManager).save(newAnomaly);
   }
 
@@ -153,15 +144,12 @@ public class AnomalyMergerTest {
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        any()))
-        .thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H)));
+        any())).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H)));
 
-    anomalyMerger.mergeAndSave(
-        newAlert(),
-        List.of(
-            newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H),
-            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10))
-        ));
+    anomalyMerger.mergeAndSave(newAlert(),
+        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H),
+            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10))));
     verify(mergedAnomalyResultManager, times(1)).save(any());
   }
 
@@ -172,15 +160,16 @@ public class AnomalyMergerTest {
         plusMin(JANUARY_1_2021_01H, 10));
     final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
-    final MergedAnomalyResultDTO existing2 = existingAnomaly(JANUARY_1_2021_01H, plusMin(
-        JANUARY_1_2021_01H, 10));
+    final MergedAnomalyResultDTO existing2 = existingAnomaly(JANUARY_1_2021_01H,
+        plusMin(JANUARY_1_2021_01H, 10));
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1, new2),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1, new2),
         List.of(existing1, existing2));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
     assertThat(merged.size()).isEqualTo(1);
 
     assertThat(isSameAnomaly(merged.get(0), existing1)).isTrue();
@@ -191,18 +180,17 @@ public class AnomalyMergerTest {
     final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     // new anomaly that happens after the merge gap
     final long afterMergeGapStart = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(
-            DEFAULT_MERGE_MAX_GAP)
-        .plus(1)
-        .getMillis();
+        DEFAULT_MERGE_MAX_GAP).plus(1).getMillis();
     final long afterMergeGapEnd = plusMin(afterMergeGapStart, 60);
     final MergedAnomalyResultDTO new2 = newAnomaly(afterMergeGapStart, afterMergeGapEnd);
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1, new2),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1, new2),
         List.of());
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(2);
     assertThat(merged.get(0)).isEqualTo(new1);
@@ -215,25 +203,22 @@ public class AnomalyMergerTest {
         JANUARY_1_2021_02H);
     // new anomaly that happens before the merge gap
     final long afterMergeGapStart = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(
-            DEFAULT_MERGE_MAX_GAP)
-        .plus(1)
-        .getMillis();
+        DEFAULT_MERGE_MAX_GAP).plus(1).getMillis();
     final long afterMergeGapEnd = plusMin(afterMergeGapStart, 60);
     final MergedAnomalyResultDTO new1 = newAnomaly(afterMergeGapStart, afterMergeGapEnd);
 
     final long afterMergeGapStart2 = new DateTime(afterMergeGapEnd, DateTimeZone.UTC).plus(
-            DEFAULT_MERGE_MAX_GAP)
-        .plus(1)
-        .getMillis();
+        DEFAULT_MERGE_MAX_GAP).plus(1).getMillis();
     final long afterMergeGapEnd2 = plusMin(afterMergeGapStart2, 60);
     final MergedAnomalyResultDTO new2 = newAnomaly(afterMergeGapStart2, afterMergeGapEnd2);
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1, new2),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1, new2),
         List.of(existing1));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(3);
     assertThat(merged.get(0)).isEqualTo(existing1);
@@ -250,16 +235,16 @@ public class AnomalyMergerTest {
 
     final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
         .getMillis();
-    final MergedAnomalyResultDTO new1 = newAnomaly(
-        new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(1)).getMillis(),
-        newEndTime);
+    final MergedAnomalyResultDTO new1 = newAnomaly(new DateTime(JANUARY_1_2021_02H,
+        DateTimeZone.UTC).plus(Period.hours(1)).getMillis(), newEndTime);
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
         List.of(existing1));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(1);
     MergedAnomalyResultDTO parent = merged.get(0);
@@ -274,14 +259,11 @@ public class AnomalyMergerTest {
     final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
 
-    final long expectedId = existing1.getId();
-
     final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
         .getMillis();
     final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime);
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
         List.of(existing1));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
@@ -292,22 +274,143 @@ public class AnomalyMergerTest {
   }
 
   @Test
-  public void testMergeExistingInNew() {
-    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
+  public void testMergeNoMergeWithLabelsWithIgnoreDefaultDifferent() {
+    // never merge anomalies with different ignore default
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
 
     final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
         .getMillis();
-    final MergedAnomalyResultDTO existing1 = existingAnomaly(
-        new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(1)).getMillis(),
-        newEndTime);
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime).setAnomalyLabels(
+        List.of(new AnomalyLabelDTO().setIgnore(false)));
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
         List.of(existing1));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(2);
+  }
+
+  @Test
+  public void testMergeDoMergeWithLabelsWithIgnoreDefaultSameFalse() {
+    // merge anomalies with ignore default both false
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H)
+        // ignore=false if there is no label
+        .setAnomalyLabels(List.of());
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime).setAnomalyLabels(
+        List.of(new AnomalyLabelDTO().setIgnore(false)));
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testMergeDoMergeWithLabelsWithIgnoreDefaultSameTrue() {
+    // merge anomalies with ignore default both true
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime).setAnomalyLabels(
+        List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testMergeLabelsAreMergedCorrectly() {
+    // check that labels that are equal are not duplicated in the merger
+    final AnomalyLabelDTO christmasEveLabel = new AnomalyLabelDTO().setName("Holiday")
+        .setMetadata(Map.of("eventName", "Christmas Eve"))
+        .setIgnore(false);
+    final AnomalyLabelDTO coldStartLabel = new AnomalyLabelDTO().setName("ColdStart")
+        .setIgnore(true);
+    final List<AnomalyLabelDTO> existingLabels = List.of(christmasEveLabel, coldStartLabel);
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setAnomalyLabels(existingLabels);
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final AnomalyLabelDTO christmasDayLabel = new AnomalyLabelDTO().setName("Holiday")
+        .setMetadata(Map.of("eventName", "Christmas Day"))
+        .setIgnore(false);
+    final List<AnomalyLabelDTO> newLabels = List.of(christmasDayLabel, coldStartLabel);
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime).setAnomalyLabels(
+        newLabels);
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(1);
+    assertThat(merged.get(0).getAnomalyLabels().size()).isEqualTo(3);
+  }
+
+  @Test
+  public void testMergeDoMergeWithLabelsWithExistingIgnoreDefaultSameTrue() {
+    // never merge anomalies with different ignore default
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, newEndTime).setAnomalyLabels(
+        List.of(new AnomalyLabelDTO().setIgnore(true)));
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
+
+    assertThat(merged.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testMergeExistingInNew() {
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+
+    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
+        .getMillis();
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(new DateTime(JANUARY_1_2021_02H,
+        DateTimeZone.UTC).plus(Period.hours(1)).getMillis(), newEndTime);
+
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
+        List.of(existing1));
+
+    final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(1);
     MergedAnomalyResultDTO parent = merged.get(0);
@@ -324,16 +427,17 @@ public class AnomalyMergerTest {
 
     final long expectedId = existing1.getId();
 
-    final MergedAnomalyResultDTO new1 = newAnomaly(
-        new DateTime(JANUARY_1_2021_01H, DateTimeZone.UTC).plus(Period.minutes(10)).getMillis(),
+    final MergedAnomalyResultDTO new1 = newAnomaly(new DateTime(JANUARY_1_2021_01H,
+            DateTimeZone.UTC).plus(Period.minutes(10)).getMillis(),
         new DateTime(JANUARY_1_2021_01H, DateTimeZone.UTC).plus(Period.minutes(30)).getMillis());
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
         List.of(existing1));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(1);
     MergedAnomalyResultDTO parent = merged.get(0);
@@ -345,19 +449,19 @@ public class AnomalyMergerTest {
 
   @Test
   public void testMergeExistingIncludedInNew() {
-    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
 
-    final MergedAnomalyResultDTO existing1 = existingAnomaly(
-        new DateTime(JANUARY_1_2021_01H, DateTimeZone.UTC).plus(Period.minutes(10)).getMillis(),
+    final MergedAnomalyResultDTO existing1 = existingAnomaly(new DateTime(JANUARY_1_2021_01H,
+            DateTimeZone.UTC).plus(Period.minutes(10)).getMillis(),
         new DateTime(JANUARY_1_2021_01H, DateTimeZone.UTC).plus(Period.minutes(30)).getMillis());
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
         List.of(existing1));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(1);
     MergedAnomalyResultDTO parent = merged.get(0);
@@ -375,15 +479,16 @@ public class AnomalyMergerTest {
     final MergedAnomalyResultDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, endExisting);
 
     // 4 days anomaly
-    final MergedAnomalyResultDTO new1 = newAnomaly(endExisting, new DateTime(endExisting,
-        DateTimeZone.UTC).plus(Period.days(4)).getMillis());
+    final MergedAnomalyResultDTO new1 = newAnomaly(endExisting,
+        new DateTime(endExisting, DateTimeZone.UTC).plus(Period.days(4)).getMillis());
 
-    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(
-        List.of(new1),
+    final List<MergedAnomalyResultDTO> sorted = anomalyMerger.combineAndSort(List.of(new1),
         List.of(existing1));
 
     final List<MergedAnomalyResultDTO> merged = anomalyMerger.merge(sorted,
-        DEFAULT_MERGE_MAX_GAP, DEFAULT_ANOMALY_MAX_DURATION, DateTimeZone.UTC);
+        DEFAULT_MERGE_MAX_GAP,
+        DEFAULT_ANOMALY_MAX_DURATION,
+        DateTimeZone.UTC);
 
     assertThat(merged.size()).isEqualTo(2);
     assertThat(merged.get(0)).isEqualTo(existing1);
@@ -396,18 +501,13 @@ public class AnomalyMergerTest {
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        eq(1L)))
-        .thenAnswer(i -> singletonList(
-            existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H)
-                .setEnumerationItem(ei1)
-        ));
+        eq(1L))).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setEnumerationItem(ei1)));
 
-    anomalyMerger.mergeAndSave(
-        newAlert(),
-        List.of(
-            newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
-            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1)
-        ));
+    anomalyMerger.mergeAndSave(newAlert(),
+        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
+            newAnomaly(JANUARY_1_2021_01H,
+                plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1)));
     verify(mergedAnomalyResultManager, times(1)).save(any());
   }
 
@@ -418,38 +518,28 @@ public class AnomalyMergerTest {
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        eq(1L)))
-        .thenAnswer(i -> singletonList(
-            existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H)
-                .setEnumerationItem(ei1)
-        ));
+        eq(1L))).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setEnumerationItem(ei1)));
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        eq(2L)))
-        .thenAnswer(i -> singletonList(
-            existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H)
-                .setEnumerationItem(ei2)
-        ));
+        eq(2L))).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setEnumerationItem(ei2)));
 
-    anomalyMerger.mergeAndSave(
-        newAlert(),
-        List.of(
-            newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
+    anomalyMerger.mergeAndSave(newAlert(),
+        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
-            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1)
-        ));
+            newAnomaly(JANUARY_1_2021_01H,
+                plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1)));
     verify(mergedAnomalyResultManager, times(1)).save(any());
 
-    anomalyMerger.mergeAndSave(
-        newAlert(),
-        List.of(
-            newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
+    anomalyMerger.mergeAndSave(newAlert(),
+        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei2),
-            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei2)
-        ));
+            newAnomaly(JANUARY_1_2021_01H,
+                plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei2)));
 
     // expecting 2 more invocations
     verify(mergedAnomalyResultManager, times(3)).save(any());

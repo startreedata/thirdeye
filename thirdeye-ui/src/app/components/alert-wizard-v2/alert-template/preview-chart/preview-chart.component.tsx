@@ -90,9 +90,13 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
     useEffect(() => {
         if (currentAlertEvaluation) {
+            const detectionEvaluation = extractDetectionEvaluation(
+                currentAlertEvaluation
+            )[0];
+
             const timeseriesConfiguration = generateChartOptionsForAlert(
-                currentAlertEvaluation,
-                extractDetectionEvaluation(currentAlertEvaluation)[0].anomalies,
+                detectionEvaluation,
+                detectionEvaluation.anomalies,
                 t
             );
 

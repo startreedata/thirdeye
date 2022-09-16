@@ -326,7 +326,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
             event,
             processedMainChartSeries,
             dateScaleForHandleMouseOver,
-            CHART_MARGINS.left
+            margins.left
         );
 
         if (xValue === null || coords === null) {
@@ -337,7 +337,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
 
         showTooltip({
             tooltipLeft: dateScaleForHandleMouseOver(xValue),
-            tooltipTop: coords.y - CHART_MARGINS.top,
+            tooltipTop: coords.y - margins.top,
             tooltipData: {
                 xValue: xValue,
             },
@@ -350,7 +350,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 <EventsChart
                     events={processedEvents}
                     isTooltipEnabled={isTooltipEnabled}
-                    margin={{ ...CHART_MARGINS, bottom: topChartBottomMargin }}
+                    margin={{ ...margins, bottom: topChartBottomMargin }}
                     series={processedMainChartSeries}
                     tooltipUtils={tooltipUtils}
                     width={width}
@@ -361,7 +361,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 <ChartCore
                     colorScale={colorScale}
                     height={height}
-                    margin={{ ...CHART_MARGINS, bottom: topChartBottomMargin }}
+                    margin={{ ...margins, bottom: topChartBottomMargin }}
                     series={processedMainChartSeries}
                     showXAxis={isXAxisEnabled}
                     showYAxis={isYAxisEnabled}
@@ -385,7 +385,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                                     <ChartZoom
                                         colorScale={colorScale}
                                         height={topChartHeight}
-                                        margins={CHART_MARGINS}
+                                        margins={margins}
                                         series={processedMainChartSeries}
                                         width={width}
                                         onZoomChange={handleBrushChange}

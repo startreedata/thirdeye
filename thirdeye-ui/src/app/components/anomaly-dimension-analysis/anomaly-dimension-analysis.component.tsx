@@ -12,11 +12,9 @@
  * the License.
  */
 import { CardContent } from "@material-ui/core";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    NotificationTypeV1,
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -24,6 +22,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { AnomalyDimensionAnalysisData } from "../../rest/dto/rca.interfaces";
 import { useGetAnomalyDimensionAnalysis } from "../../rest/rca/rca.actions";
 import { getFilterDimensionAnalysisData } from "../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { AnomalyDimensionAnalysisTable } from "./algorithm-table/algorithm-table.component";
 import { AnomalyDimensionAnalysisProps } from "./anomaly-dimension-analysis.interfaces";
 
@@ -60,18 +59,14 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
     }, [anomalyId, comparisonOffset]);
 
     useEffect(() => {
-        if (anomalyDimensionAnalysisReqStatus === ActionStatus.Error) {
-            !isEmpty(errorMessages)
-                ? errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.dimension-analysis-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            anomalyDimensionAnalysisReqStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.dimension-analysis-data"),
+            })
+        );
     }, [anomalyDimensionAnalysisReqStatus]);
 
     return (

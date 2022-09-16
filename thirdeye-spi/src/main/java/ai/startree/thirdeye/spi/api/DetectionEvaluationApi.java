@@ -21,6 +21,7 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class DetectionEvaluationApi {
 
+  private Integer idx;
   private Double mape;
   private DetectionDataApi data;
   private List<AnomalyApi> anomalies = new ArrayList<>();
@@ -33,6 +34,15 @@ public class DetectionEvaluationApi {
 
   public DetectionEvaluationApi setMape(final Double mape) {
     this.mape = mape;
+    return this;
+  }
+
+  public Integer getIdx() {
+    return idx;
+  }
+
+  public DetectionEvaluationApi setIdx(final Integer idx) {
+    this.idx = idx;
     return this;
   }
 

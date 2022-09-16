@@ -27,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
 import {
-    getAlertsViewPath,
+    getAlertsAlertPath,
     getSubscriptionGroupsUpdatePath,
     getSubscriptionGroupsViewPath,
 } from "../../../utils/routes/routes.util";
@@ -91,7 +91,7 @@ export const SubscriptionGroupCard: FunctionComponent<
             return;
         }
 
-        navigate(getAlertsViewPath(uiSubscriptionGroupAlert.id));
+        navigate(getAlertsAlertPath(uiSubscriptionGroupAlert.id));
     };
 
     return (

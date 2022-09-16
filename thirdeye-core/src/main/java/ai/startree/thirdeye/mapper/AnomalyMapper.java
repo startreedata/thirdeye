@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertMetadataApi;
 import ai.startree.thirdeye.spi.api.AlertNodeApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
@@ -31,10 +32,20 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses={AnomalyFeedbackMapper.class, MetricMapper.class, EnumerationItemMapper.class})
+@Mapper(uses={AnomalyFeedbackMapper.class, AnomalyLabelMapper.class, MetricMapper.class, EnumerationItemMapper.class})
 public interface AnomalyMapper {
 
   AnomalyMapper INSTANCE = Mappers.getMapper(AnomalyMapper.class);
+
+  private static AlertNodeApi toDetectionAlertNodeApi(final String detectorComponentName) {
+    final String[] splitted = detectorComponentName.split(":");
+    checkState(splitted.length == 2);
+
+    return new AlertNodeApi()
+        .setName(splitted[0])
+        .setType(AlertNodeType.DETECTION)
+        .setSubType(splitted[1]);
+  }
 
   @Mapping(source = "alert.id", target = "detectionConfigId")
   @Mapping(source = "metadata.metric.name", target = "metric")
@@ -48,7 +59,7 @@ public interface AnomalyMapper {
     return value.getTime();
   }
 
-  default AnomalyApi toApi(MergedAnomalyResultDTO dto) {
+  default AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
     if (dto == null) {
       return null;
     }
@@ -86,6 +97,11 @@ public interface AnomalyMapper {
               .setDataset(datasetApi)
           );
     }
+
+    optional(dto.getAnomalyFeedbackId())
+        .map(anomalyFeedbackId -> new AnomalyFeedbackApi().setId(anomalyFeedbackId))
+        .ifPresent(anomalyApi::setFeedback);
+
     anomalyApi.setAlert(new AlertApi()
             .setId(dto.getDetectionConfigId())
         )
@@ -97,15 +113,5 @@ public interface AnomalyMapper {
             .map(ApiBeanMapper::toApi)
             .orElse(null));
     return anomalyApi;
-  }
-
-  private static AlertNodeApi toDetectionAlertNodeApi(final String detectorComponentName) {
-    final String[] splitted = detectorComponentName.split(":");
-    checkState(splitted.length == 2);
-
-    return new AlertNodeApi()
-        .setName(splitted[0])
-        .setType(AlertNodeType.DETECTION)
-        .setSubType(splitted[1]);
   }
 }

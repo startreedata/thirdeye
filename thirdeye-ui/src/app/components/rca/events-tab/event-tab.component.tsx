@@ -12,7 +12,7 @@
  * the License.
  */
 import { Box, CardContent } from "@material-ui/core";
-import { isEmpty, map } from "lodash";
+import { map } from "lodash";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -26,7 +26,6 @@ import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
-    NotificationTypeV1,
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
@@ -38,6 +37,7 @@ import {
     getSearchDataKeysForEvents,
     handleEventsSearch,
 } from "../../../utils/events/events.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EventsTabProps } from "./event-tab.interfaces";
 
@@ -88,18 +88,14 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     }, [anomalyId]);
 
     useEffect(() => {
-        if (status === ActionStatus.Error) {
-            !isEmpty(errorMessages)
-                ? errorMessages.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.dimension-analysis-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.dimension-analysis-data"),
+            })
+        );
     }, [status]);
 
     // Update event, searchDataKey and selectedEvents data

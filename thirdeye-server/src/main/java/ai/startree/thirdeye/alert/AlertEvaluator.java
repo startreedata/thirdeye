@@ -26,7 +26,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -75,7 +74,9 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      final Interval detectionInterval = computeDetectionInterval(request);
+      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
+          request.getStart().getTime(),
+          request.getEnd().getTime());
 
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
@@ -106,15 +107,5 @@ public class AlertEvaluator {
       handleAlertEvaluationException(e);
     }
     return null;
-  }
-
-  private Interval computeDetectionInterval(final AlertEvaluationApi request)
-      throws IOException, ClassNotFoundException {
-    // this method only exists to catch exception and translate into a TE exception
-    final Interval detectionInterval;
-    detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
-        request.getStart().getTime(),
-        request.getEnd().getTime());
-    return detectionInterval;
   }
 }

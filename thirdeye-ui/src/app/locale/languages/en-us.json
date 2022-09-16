@@ -260,7 +260,9 @@
         "activity": "Activity",
         "options": "Options",
         "view": "View",
-        "enumeration-item": "Enumeration Item"
+        "enumeration-item": "Enumeration Item",
+        "latest-one-first": "Latest one first",
+        "latest-one-last": "Latest one last"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

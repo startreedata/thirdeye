@@ -12,6 +12,7 @@
  * the License.
  */
 import { DateTime, DurationUnit } from "luxon";
+import { ENUMERATION_ITEM_QUERY_PARAM_KEY } from "../../pages/alerts-anomalies-page/alerts-anomalies-page.interfaces";
 import {
     getRecognizedQuery,
     SEARCH_TERM_QUERY_PARAM_KEY,
@@ -26,6 +27,7 @@ export const AppRouteRelative = {
     ALERTS: "alerts",
     ALERTS_ALL: "all",
     ALERTS_ALERT: `${PLACEHOLDER_ROUTE_ID}`,
+    ALERTS_ANOMALIES: `anomalies`,
     ALERTS_VIEW: `view`,
     ALERTS_CREATE: "create",
     ALERTS_CREATE_NEW: "new",
@@ -96,6 +98,7 @@ export const AppRoute = {
     ALERTS_CREATE_EXISTING_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
     ALERTS_ALERT_VIEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_VIEW}`,
+    ALERTS_ALERT_ANOMALIES: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_ANOMALIES}`,
     ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
     ALERTS_UPDATE_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
     ALERTS_UPDATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
@@ -177,6 +180,22 @@ export const getAlertsAlertViewPath = (id: number): string => {
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);
+};
+
+export const getAlertsAlertAnomaliesPath = (
+    id: number,
+    enumerationItemId?: number
+): string => {
+    let path: string = AppRoute.ALERTS_ALERT_ANOMALIES;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    let url = createPathWithRecognizedQueryString(path);
+
+    if (enumerationItemId) {
+        url += `&${ENUMERATION_ITEM_QUERY_PARAM_KEY}=${enumerationItemId}`;
+    }
+
+    return url;
 };
 
 export const getAlertsCreatePath = (): string => {

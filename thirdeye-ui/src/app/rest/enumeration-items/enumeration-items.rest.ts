@@ -24,7 +24,7 @@ export const getEnumerationItems = async ({
     let url = BASE_URL_ENUMERATION_ITEM;
 
     if (ids) {
-        queryParams.set("id", ids.join(","));
+        queryParams.set("id", `[in]${ids.join(",")}`);
     }
 
     if (queryParams.toString()) {

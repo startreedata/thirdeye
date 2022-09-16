@@ -22,6 +22,7 @@ import {
     promptDeleteConfirmation,
 } from "../../components/anomaly-list-v1/anomaly-list-v1.utils";
 import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     NotificationTypeV1,
@@ -167,6 +168,14 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                             handleAnomalyDelete,
                         }}
                     />
+                )}
+
+                {getAnomaliesRequestStatus === ActionStatus.Error && (
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            <NoDataIndicator />
+                        </PageContentsCardV1>
+                    </Grid>
                 )}
             </PageContentsGridV1>
         </PageV1>

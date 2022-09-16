@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Fade } from "@material-ui/core";
+import { Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import classNames from "classnames";
 import { delay, isEmpty } from "lodash";
@@ -62,7 +62,10 @@ export const NotificationDisplayV1: FunctionComponent<
             className={classNames(className, "notification-display-v1")}
         >
             {notification && (
-                <Fade in={Boolean(notification)} timeout={{ enter: 1000 }}>
+                <Snackbar
+                    open
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
                     <Alert
                         className="notification-display-v1-notification"
                         classes={{
@@ -75,7 +78,7 @@ export const NotificationDisplayV1: FunctionComponent<
                     >
                         {notification.message}
                     </Alert>
-                </Fade>
+                </Snackbar>
             )}
         </div>
     );

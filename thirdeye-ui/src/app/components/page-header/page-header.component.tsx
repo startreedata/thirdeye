@@ -22,7 +22,10 @@ import {
 import classNames from "classnames";
 import React, { FunctionComponent } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
-import { PageHeaderActionsV1 } from "../../platform/components";
+import {
+    NotificationDisplayV1,
+    PageHeaderActionsV1,
+} from "../../platform/components";
 import { getTimeRangeDuration } from "../../utils/time-range/time-range.util";
 import { Breadcrumbs } from "../breadcrumbs/breadcrumbs.component";
 import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
@@ -84,77 +87,81 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
     };
 
     return (
-        <div
-            className={classNames(
-                transparentBackground
-                    ? pageHeaderStyles.transparent
-                    : pageHeaderStyles.pageHeader,
-                subNavigation && subNavigation.length > 0
-                    ? pageHeaderStyles.noPaddingBottom
-                    : undefined
-            )}
-        >
-            <Grid container>
-                <Grid item xs={12}>
-                    {breadcrumbs && <Breadcrumbs crumbs={breadcrumbs} />}
-                </Grid>
-
-                <Grid container item justifyContent="space-between" xs={12}>
-                    <Grid item>
-                        {title && (
-                            <Typography noWrap variant="h4">
-                                {title}
-                            </Typography>
-                        )}
-                        {children}
-                        {subtitle && (
-                            <Typography noWrap variant="subtitle1">
-                                {subtitle}
-                            </Typography>
-                        )}
-                    </Grid>
-
-                    <Grid item>
-                        <PageHeaderActionsV1>
-                            {/* Time range selector */}
-                            {showTimeRange && (
-                                <TimeRangeSelector
-                                    hideTimeRange={!screenWidthSmUp}
-                                    recentCustomTimeRangeDurations={
-                                        recentCustomTimeRangeDurations
-                                    }
-                                    timeRangeDuration={timeRangeDuration}
-                                    onChange={onHandleTimeRangeChange}
-                                    onRefresh={onHandleRefresh}
-                                />
-                            )}
-
-                            {/* Create options button */}
-                            {showCreateButton && <CreateMenuButton />}
-
-                            {customActions}
-                        </PageHeaderActionsV1>
-                    </Grid>
-                </Grid>
-
-                {subNavigation && subNavigation.length > 0 && (
-                    <Grid item xs={12}>
-                        <Tabs value={subNavigationSelected}>
-                            {subNavigation.map((subNavConfig, idx) => {
-                                return (
-                                    <Tab
-                                        component={RouterLink}
-                                        key={subNavConfig.link}
-                                        label={subNavConfig.label}
-                                        to={subNavConfig.link}
-                                        value={idx}
-                                    />
-                                );
-                            })}
-                        </Tabs>
-                    </Grid>
+        <>
+            <div
+                className={classNames(
+                    transparentBackground
+                        ? pageHeaderStyles.transparent
+                        : pageHeaderStyles.pageHeader,
+                    subNavigation && subNavigation.length > 0
+                        ? pageHeaderStyles.noPaddingBottom
+                        : undefined
                 )}
-            </Grid>
-        </div>
+            >
+                <Grid container>
+                    <Grid item xs={12}>
+                        {breadcrumbs && <Breadcrumbs crumbs={breadcrumbs} />}
+                    </Grid>
+
+                    <Grid container item justifyContent="space-between" xs={12}>
+                        <Grid item>
+                            {title && (
+                                <Typography noWrap variant="h4">
+                                    {title}
+                                </Typography>
+                            )}
+                            {children}
+                            {subtitle && (
+                                <Typography noWrap variant="subtitle1">
+                                    {subtitle}
+                                </Typography>
+                            )}
+                        </Grid>
+
+                        <Grid item>
+                            <PageHeaderActionsV1>
+                                {/* Time range selector */}
+                                {showTimeRange && (
+                                    <TimeRangeSelector
+                                        hideTimeRange={!screenWidthSmUp}
+                                        recentCustomTimeRangeDurations={
+                                            recentCustomTimeRangeDurations
+                                        }
+                                        timeRangeDuration={timeRangeDuration}
+                                        onChange={onHandleTimeRangeChange}
+                                        onRefresh={onHandleRefresh}
+                                    />
+                                )}
+
+                                {/* Create options button */}
+                                {showCreateButton && <CreateMenuButton />}
+
+                                {customActions}
+                            </PageHeaderActionsV1>
+                        </Grid>
+                    </Grid>
+
+                    {subNavigation && subNavigation.length > 0 && (
+                        <Grid item xs={12}>
+                            <Tabs value={subNavigationSelected}>
+                                {subNavigation.map((subNavConfig, idx) => {
+                                    return (
+                                        <Tab
+                                            component={RouterLink}
+                                            key={subNavConfig.link}
+                                            label={subNavConfig.label}
+                                            to={subNavConfig.link}
+                                            value={idx}
+                                        />
+                                    );
+                                })}
+                            </Tabs>
+                        </Grid>
+                    )}
+                </Grid>
+            </div>
+
+            <NotificationDisplayV1 />
+        </>
     );
 };

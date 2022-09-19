@@ -46,8 +46,11 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
     final var params = new ObjectMapper().convertValue(paramsMap,
         EnumeratorOperatorParameters.class);
 
+    /* Populate names if not present */
     final EnumerationItemNameGenerator generator = new EnumerationItemNameGenerator();
-    params.getItems().forEach(ei -> ei.setName(generator.generateName(ei)));
+    params.getItems().stream()
+        .filter(ei -> ei.getName() == null)
+        .forEach(ei -> ei.setName(generator.generateName(ei)));
 
     setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(params.getItems()));
   }

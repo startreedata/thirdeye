@@ -25,10 +25,17 @@ import org.slf4j.LoggerFactory;
 public class EnumerationItemNameGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(EnumerationItemNameGenerator.class);
+  private static final int NAME_MAX_LENGTH = 150;
 
   public String generateName(EnumerationItemDTO enumerationItem) {
     final Map<String, Object> params = requireNonNull(enumerationItem.getParams(),
         "params null in enumeration items");
-    return Joiner.on(",").withKeyValueSeparator("=").join(params);
+    final String joined = Joiner.on(",").withKeyValueSeparator("=").join(params);
+    if (joined.length() <= NAME_MAX_LENGTH) {
+      return joined;
+    }
+
+    /* -3 to adjust for the ellipsis */
+    return joined.substring(0, NAME_MAX_LENGTH - 3) + "...";
   }
 }

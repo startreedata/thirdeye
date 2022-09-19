@@ -34,7 +34,7 @@ spec:
                 - /bin/sh
                 - -c
                 - >
-                  mysqldump -P 3306 -h {{ include "thirdeye.mysql.fullname" . }} -u{{ .Values.mysql.mysqlUser }} -p{{ .Values.mysql.mysqlPassword }} thirdeye > /home/dump/backup.sql
+                  mysqldump -P 3306 -h {{ include "thirdeye.mysql.fullname" . }} -uroot -p{{ .Values.mysql.mysqlRootPassword }} thirdeye > /home/dump/backup.sql
               volumeMounts:
                 - name: dump
                   mountPath: /home/dump

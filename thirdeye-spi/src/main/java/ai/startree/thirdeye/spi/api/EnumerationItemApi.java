@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.List;
 import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
@@ -24,6 +25,7 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
   private String name;
   private String description;
   private Map<String, Object> params;
+  private List<AlertApi> alerts;
 
   @Override
   public Long getId() {
@@ -60,6 +62,15 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
 
   public EnumerationItemApi setParams(final Map<String, Object> params) {
     this.params = params;
+    return this;
+  }
+
+  public List<AlertApi> getAlerts() {
+    return alerts;
+  }
+
+  public EnumerationItemApi setAlerts(final List<AlertApi> alerts) {
+    this.alerts = alerts;
     return this;
   }
 }

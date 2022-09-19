@@ -16,6 +16,7 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -26,6 +27,7 @@ public class EnumerationItemDTO extends AbstractDTO {
   private String name;
   private String description;
   private Map<String, Object> params;
+  private List<AlertDTO> alerts;
 
   public String getName() {
     return name;
@@ -51,6 +53,16 @@ public class EnumerationItemDTO extends AbstractDTO {
 
   public EnumerationItemDTO setParams(final Map<String, Object> params) {
     this.params = params;
+    return this;
+  }
+
+  public List<AlertDTO> getAlerts() {
+    return alerts;
+  }
+
+  public EnumerationItemDTO setAlerts(
+      final List<AlertDTO> alerts) {
+    this.alerts = alerts;
     return this;
   }
 

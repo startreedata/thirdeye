@@ -18,7 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses = {AlertMapper.class})
 public interface EnumerationItemMapper {
 
   EnumerationItemMapper INSTANCE = Mappers.getMapper(EnumerationItemMapper.class);

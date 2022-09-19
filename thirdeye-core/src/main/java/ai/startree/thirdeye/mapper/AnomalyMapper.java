@@ -108,9 +108,6 @@ public interface AnomalyMapper {
         .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))
             .map(AnomalyMapper::toDetectionAlertNodeApi)
-            .orElse(null))
-        .setFeedback(optional(dto.getFeedback())
-            .map(ApiBeanMapper::toApi)
             .orElse(null));
     return anomalyApi;
   }

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.util;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import com.google.common.collect.BiMap;
@@ -54,7 +55,9 @@ public class EntityMappingHolder {
   private static ResultSet getColumns(final DatabaseMetaData databaseMetaData,
       final String tableNamePattern)
       throws SQLException {
-    return databaseMetaData.getColumns(null, null, tableNamePattern, null);
+    final String catalog = requireNonNull(databaseMetaData.getConnection().getCatalog(),
+        "Unable to get database schema.");
+    return databaseMetaData.getColumns(catalog, null, tableNamePattern, null);
   }
 
   private static LinkedHashMap<String, ColumnInfo> buildColumnInfoMap(final String tableName,

@@ -57,6 +57,10 @@ public class ThirdEyeServerModuleTest {
 
     final Connection connection = mock(Connection.class);
     when(connection.getMetaData()).thenReturn(databaseMetaData);
+    when(connection.getCatalog()).thenReturn("thirdeye-test-db");
+
+    /* Add a back reference as well */
+    when(databaseMetaData.getConnection()).thenReturn(connection);
 
     final DataSource dataSource = mock(DataSource.class);
     when(dataSource.getConnection()).thenReturn(connection);

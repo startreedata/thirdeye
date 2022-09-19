@@ -28,7 +28,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
 import { EnumerationItemMerger } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.component";
 import { DetectionEvaluationForRender } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.interfaces";
@@ -44,14 +44,16 @@ import {
     PageContentsGridV1,
     PageV1,
     SkeletonV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import {
     useGetAlert,
     useGetEvaluation,
 } from "../../rest/alerts/alerts.actions";
-import { updateAlert } from "../../rest/alerts/alerts.rest";
+import { deleteAlert, updateAlert } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
@@ -68,8 +70,10 @@ const QUERY_PARAM_KEY_FOR_SORT = "sort";
 const CONCAT_SEPARATOR = "+";
 
 export const AlertsViewPage: FunctionComponent = () => {
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
     const {
         alert,
@@ -227,13 +231,39 @@ export const AlertsViewPage: FunctionComponent = () => {
     };
 
     const handleSortOrderChange = (newOrder: DataGridSortOrderV1): void => {
-        console.log("handsklajd", newOrder);
         if (newOrder) {
             searchParams.set(QUERY_PARAM_KEY_FOR_SORT, newOrder);
         } else {
             searchParams.delete(QUERY_PARAM_KEY_FOR_SORT);
         }
         setSearchParams(searchParams, { replace: true });
+    };
+
+    const handleAlertDelete = (): void => {
+        if (!alert) {
+            return;
+        }
+        showDialog({
+            type: DialogType.ALERT,
+            contents: t("message.delete-confirmation", {
+                name: alert.name,
+            }),
+            okButtonText: t("label.confirm"),
+            cancelButtonText: t("label.cancel"),
+            onOk: () => handleAlertDeleteOk(alert),
+        });
+    };
+
+    const handleAlertDeleteOk = (alert: Alert): void => {
+        deleteAlert(alert.id).then(() => {
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.alert") })
+            );
+
+            // Redirect to alerts all path
+            navigate(getAlertsAllPath());
+        });
     };
 
     return (
@@ -274,6 +304,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                                 );
                             }}
                             onChange={handleAlertChange}
+                            onDelete={handleAlertDelete}
                         />
                     ) : (
                         ""

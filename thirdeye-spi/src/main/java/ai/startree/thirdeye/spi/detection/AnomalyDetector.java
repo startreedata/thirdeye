@@ -20,6 +20,7 @@ import org.joda.time.Interval;
 public interface AnomalyDetector<T extends AbstractSpec> extends BaseComponent<T> {
 
   // Keys available in Map<String, DataTable> timeSeriesMap
+  // todo cyril move this to Constants
   String KEY_CURRENT = "current";
   String KEY_BASELINE = "baseline";
   String KEY_CURRENT_EVENTS = "current_events";

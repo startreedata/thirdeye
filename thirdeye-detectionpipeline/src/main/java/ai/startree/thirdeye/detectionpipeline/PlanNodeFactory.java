@@ -71,14 +71,18 @@ public class PlanNodeFactory {
   private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap;
   private final DataSourceCache dataSourceCache;
   private final DetectionRegistry detectionRegistry;
+  private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventDao;
   private final DatasetConfigManager datasetDao;
 
   @Inject
-  public PlanNodeFactory(final DataSourceCache dataSourceCache, final DetectionRegistry detectionRegistry, final EventManager eventDao,
+  public PlanNodeFactory(final DataSourceCache dataSourceCache,
+      final DetectionRegistry detectionRegistry, final PostProcessorRegistry postProcessorRegistry,
+      final EventManager eventDao,
       final DatasetConfigManager datasetDao) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
+    this.postProcessorRegistry = postProcessorRegistry;
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
     this.eventDao = eventDao;
     this.datasetDao = datasetDao;
@@ -117,6 +121,7 @@ public class PlanNodeFactory {
         .setProperties(ImmutableMap.of(
             Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
             Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry,
+            Constants.POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry,
             Constants.EVENT_MANAGER_REF_KEY, eventDao,
             Constants.DATASET_DAO_REF_KEY, datasetDao
         ));

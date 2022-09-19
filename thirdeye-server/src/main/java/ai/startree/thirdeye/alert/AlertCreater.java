@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
+import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -38,20 +38,16 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AlertCreater {
 
-  private static final long JAN_1_2000_UTC = 946684800000L;
-
   protected static final Logger LOG = LoggerFactory.getLogger(AlertCreater.class);
-
+  private static final long JAN_1_2000_UTC = 946684800000L;
   private final AlertManager alertManager;
-  private final AlertApiBeanMapper alertApiBeanMapper;
   private final TaskManager taskManager;
   private final AlertInsightsProvider alertInsightsProvider;
 
   @Inject
-  public AlertCreater(final AlertManager alertManager, final AlertApiBeanMapper alertApiBeanMapper,
+  public AlertCreater(final AlertManager alertManager,
       final TaskManager taskManager, final AlertInsightsProvider alertInsightsProvider) {
     this.alertManager = alertManager;
-    this.alertApiBeanMapper = alertApiBeanMapper;
     this.taskManager = taskManager;
     this.alertInsightsProvider = alertInsightsProvider;
   }
@@ -59,7 +55,7 @@ public class AlertCreater {
   public AlertDTO create(AlertApi api) {
     ensureCreationIsPossible(api);
 
-    final AlertDTO dto = alertApiBeanMapper.toAlertDTO(api);
+    final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
 
     final Long id = alertManager.save(dto);
     dto.setId(id);

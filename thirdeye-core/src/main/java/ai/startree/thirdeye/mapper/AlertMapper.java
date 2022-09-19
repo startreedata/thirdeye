@@ -18,22 +18,38 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.sql.Timestamp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Date;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-@Singleton
-public class AlertApiBeanMapper {
+@Mapper(uses = {
+    AlertTemplateMapper.class,
+    DatasetMapper.class,
+    DataSourceMapper.class,
+    MetricMapper.class})
+public interface AlertMapper {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(AlertApiBeanMapper.class);
+  AlertMapper INSTANCE = Mappers.getMapper(AlertMapper.class);
 
-  @Inject
-  public AlertApiBeanMapper() {
+  default AlertApi toApi(final AlertDTO dto) {
+    return new AlertApi()
+        .setId(dto.getId())
+        .setName(dto.getName())
+        .setDescription(dto.getDescription())
+        .setActive(dto.isActive())
+        .setCron(dto.getCron())
+        .setTemplate(optional(dto.getTemplate())
+            .map(ApiBeanMapper::toAlertTemplateApi)
+            .orElse(null))
+        .setTemplateProperties(dto.getTemplateProperties())
+        .setLastTimestamp(new Date(dto.getLastTimestamp()))
+        .setOwner(new UserApi()
+            .setPrincipal(dto.getCreatedBy()))
+        ;
   }
 
-  public AlertDTO toAlertDTO(final AlertApi api) {
+  default AlertDTO toAlertDTO(final AlertApi api) {
     final AlertDTO dto = new AlertDTO();
 
     dto.setName(api.getName());

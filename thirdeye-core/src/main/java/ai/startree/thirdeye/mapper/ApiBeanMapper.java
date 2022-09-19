@@ -31,7 +31,6 @@ import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
-import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
@@ -49,7 +48,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,20 +74,11 @@ public abstract class ApiBeanMapper {
   }
 
   public static AlertApi toApi(final AlertDTO dto) {
-    return new AlertApi()
-        .setId(dto.getId())
-        .setName(dto.getName())
-        .setDescription(dto.getDescription())
-        .setActive(dto.isActive())
-        .setCron(dto.getCron())
-        .setTemplate(optional(dto.getTemplate())
-            .map(ApiBeanMapper::toAlertTemplateApi)
-            .orElse(null))
-        .setTemplateProperties(dto.getTemplateProperties())
-        .setLastTimestamp(new Date(dto.getLastTimestamp()))
-        .setOwner(new UserApi()
-            .setPrincipal(dto.getCreatedBy()))
-        ;
+    return AlertMapper.INSTANCE.toApi(dto);
+  }
+
+  public static AlertDTO toAlertDto(final AlertApi alertApi) {
+    return AlertMapper.INSTANCE.toAlertDTO(alertApi);
   }
 
   public static AlertTemplateApi toAlertTemplateApi(final AlertTemplateDTO alertTemplateDTO) {

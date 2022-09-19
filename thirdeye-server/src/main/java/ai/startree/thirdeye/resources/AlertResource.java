@@ -25,7 +25,6 @@ import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.mapper.AlertApiBeanMapper;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
@@ -76,7 +75,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private final AlertCreater alertCreater;
   private final AlertDeleter alertDeleter;
-  private final AlertApiBeanMapper alertApiBeanMapper;
   private final AlertEvaluator alertEvaluator;
   private final AlertInsightsProvider alertInsightsProvider;
 
@@ -85,13 +83,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertManager alertManager,
       final AlertCreater alertCreater,
       final AlertDeleter alertDeleter,
-      final AlertApiBeanMapper alertApiBeanMapper,
       final AlertEvaluator alertEvaluator,
       final AlertInsightsProvider alertInsightsProvider) {
     super(alertManager, ImmutableMap.of());
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
-    this.alertApiBeanMapper = alertApiBeanMapper;
     this.alertEvaluator = alertEvaluator;
     this.alertInsightsProvider = alertInsightsProvider;
   }
@@ -114,7 +110,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   @Override
   protected AlertDTO toDto(final AlertApi api) {
-    return alertApiBeanMapper.toAlertDTO(api);
+    return ApiBeanMapper.toAlertDto(api);
   }
 
   @Override

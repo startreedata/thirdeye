@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Grid, Typography } from "@material-ui/core";
 import { isEmpty, isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -47,9 +47,6 @@ import {
     AppRouteRelative,
     getAlertsAllPath,
 } from "../../utils/routes/routes.util";
-import { validateConfiguration } from "../alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.util";
-import { useAlertCreatePageStyles } from "../alerts-create-page/alerts-create-page-component.styles";
-import { CreateAlertConfigurationSection } from "../alerts-create-page/alerts-create-page.interfaces";
 import { AlertsEditPageProps } from "./alerts-update-page.interfaces";
 
 export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
@@ -60,7 +57,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     selectedSubscriptionGroups,
     onSubscriptionGroupChange,
 }) => {
-    const classes = useAlertCreatePageStyles();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const location = useLocation();
@@ -73,10 +69,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     const [alertTemplateOptions, setAlertTemplateOptions] = useState<
         AlertTemplateType[]
     >([]);
-    const [isAlertValid, setIsAlertValid] = useState(false);
-    const [validationEntries, setValidationEntries] = useState<{
-        [key: string]: boolean;
-    }>({});
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
 
@@ -85,21 +77,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
         status: alertTemplatesRequestStatus,
         errorMessages: getAlertTemplatesRequestErrors,
     } = useGetAlertTemplates();
-
-    useEffect(() => {
-        if (selectedAlertTemplate) {
-            validateConfiguration(
-                alert,
-                selectedAlertTemplate,
-                handleValidationEntryChange
-            );
-        } else {
-            handleValidationEntryChange(
-                CreateAlertConfigurationSection.TEMPLATE_PROPERTIES,
-                false
-            );
-        }
-    }, [selectedAlertTemplate, alert]);
 
     useEffect(() => {
         setAlertTemplateOptions([]);
@@ -135,12 +112,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                   );
         }
     }, [getAlertTemplatesRequestErrors, alertTemplatesRequestStatus]);
-
-    useEffect(() => {
-        setIsAlertValid(
-            Object.values(validationEntries).every((isValid) => isValid)
-        );
-    }, [validationEntries]);
 
     const handleAlertPropertyChange = (
         contentsToReplace: Partial<EditableAlert>,
@@ -184,18 +155,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
         updatedGroups: SubscriptionGroup[]
     ): void => {
         onSubscriptionGroupChange(updatedGroups);
-    };
-
-    const handleValidationEntryChange = (
-        key: CreateAlertConfigurationSection,
-        isValid: boolean
-    ): void => {
-        setValidationEntries((current) => {
-            return {
-                ...current,
-                [key]: isValid,
-            };
-        });
     };
 
     const handleSubmitAlertClick = (): void => {
@@ -306,23 +265,26 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                 />
             </PageContentsGridV1>
 
-            <Box textAlign="right" width="100%">
+            <Box width="100%">
                 <PageContentsCardV1>
-                    <Button
-                        className={classes.footerBtn}
-                        color="secondary"
-                        onClick={handlePageExitChecks}
-                    >
-                        {t("label.cancel")}
-                    </Button>
-                    <Button
-                        className={classes.footerBtn}
-                        color="primary"
-                        disabled={!isAlertValid}
-                        onClick={handleSubmitAlertClick}
-                    >
-                        {submitButtonLabel}
-                    </Button>
+                    <Grid container justifyContent="flex-end">
+                        <Grid item>
+                            <Button
+                                color="secondary"
+                                onClick={handlePageExitChecks}
+                            >
+                                {t("label.cancel")}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                color="primary"
+                                onClick={handleSubmitAlertClick}
+                            >
+                                {submitButtonLabel}
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </PageContentsCardV1>
             </Box>
         </PageV1>

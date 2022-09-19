@@ -231,6 +231,11 @@ public class GenericPojoDao {
       if (genericJsonEntity == null) {
         return null;
       }
+      final String type = SubEntities.getType(pojoClass);
+      /* Object with id just not match type. Hence, return null */
+      if (!type.equals(genericJsonEntity.getType())) {
+        return null;
+      }
       final E e = getBean(genericJsonEntity, pojoClass);
       e.setId(genericJsonEntity.getId());
       e.setVersion(genericJsonEntity.getVersion());

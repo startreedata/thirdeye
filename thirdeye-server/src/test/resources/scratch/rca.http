@@ -1,0 +1,48 @@
+GET http://localhost:7004/api/rca/metrics/heatmap?id=247717&baselineOffset=P1W
+Accept: application/json
+
+###
+
+GET http://localhost:7004/api/rca/metrics/heatmap?id=247717&baselineOffset=P1W&filters=device=desktop
+Accept: application/json
+
+###
+
+POST http://localhost:7004/api/rca/metrics/breakdown
+accept: application/json
+Content-Type: application/json
+
+{
+  "metric": {
+    "id": 12746
+  },
+  "dataset": {
+    "id": 247729
+  },
+  "threshold": 400000,
+  "start": "1623110400000",
+  "end": "1623283200000"
+}
+
+
+###
+
+POST http://localhost:7004/api/rca/metrics/breakdown
+accept: application/json
+Content-Type: application/json
+
+{
+  "metric": {
+    "id": 12746
+  },
+  "dataset": {
+    "id": 247729
+  },
+  "threshold": 400000,
+  "start": "1623110400000",
+  "end": "1623283200000"
+}
+
+
+###
+

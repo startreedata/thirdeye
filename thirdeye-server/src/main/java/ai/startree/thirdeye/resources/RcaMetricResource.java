@@ -17,7 +17,9 @@ import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmExcep
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.rca.CohortComputation;
 import ai.startree.thirdeye.rca.HeatmapCalculator;
+import ai.startree.thirdeye.spi.api.BreakdownApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,6 +35,7 @@ import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -65,10 +68,13 @@ public class RcaMetricResource {
   private static final String DEFAULT_BASELINE_OFFSET = "P1W";
 
   private final HeatmapCalculator heatmapCalculator;
+  private final CohortComputation cohortComputation;
 
   @Inject
-  public RcaMetricResource(final HeatmapCalculator heatmapCalculator) {
+  public RcaMetricResource(final HeatmapCalculator heatmapCalculator,
+      final CohortComputation cohortComputation) {
     this.heatmapCalculator = heatmapCalculator;
+    this.cohortComputation = cohortComputation;
   }
 
   @GET
@@ -111,5 +117,16 @@ public class RcaMetricResource {
       handleRcaAlgorithmException(e);
     }
     return null;
+  }
+
+  @POST
+  @Path("/breakdown")
+  @ApiOperation(value = "Builds cohorts based on threshold")
+  public Response getAnomalyHeatmap(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      final BreakdownApi request) throws Exception {
+    final BreakdownApi resultApi = cohortComputation.computeBreakdown(request,
+        List.of(),
+        LIMIT_DEFAULT);
+    return respondOk(resultApi);
   }
 }

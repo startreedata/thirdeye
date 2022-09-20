@@ -83,6 +83,18 @@ public class HeatmapCalculator {
     }
   }
 
+  /**
+   * Returns a baseline equivalent to "current" in the wo1w format.
+   * Ie when used for a scatter/gather operation, this baseline will only generate one slice,
+   * on the startTime/endTime provided.
+   *
+   * Hack to keep the compatibility with complex baselines.
+   * May be removed once timeseries filtering and timeseries baseline is implemented.
+   */
+  public static Baseline getSimpleRange() {
+    return BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM, 1, 0, DateTimeZone.UTC);
+  }
+
   public HeatMapResponseApi compute(final long anomalyId,
       final String baselineOffset,
       final List<String> filters,
@@ -156,19 +168,7 @@ public class HeatmapCalculator {
     }
   }
 
-  /**
-   * Returns a baseline equivalent to "current" in the wo1w format.
-   * Ie when used for a scatter/gather operation, this baseline will only generate one slice,
-   * on the startTime/endTime provided.
-   *
-   * Hack to keep the compatibility with complex baselines.
-   * May be removed once timeseries filtering and timeseries baseline is implemented.
-   */
-  private Baseline getSimpleRange() {
-    return BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM, 1, 0, DateTimeZone.UTC);
-  }
-
-  private Map<String, Map<String, Double>> computeBreakdown(final MetricConfigDTO metricConfigDTO,
+  public Map<String, Map<String, Double>> computeBreakdown(final MetricConfigDTO metricConfigDTO,
       final List<Predicate> predicates,
       final Interval interval,
       final Baseline range,

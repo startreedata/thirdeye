@@ -17,11 +17,6 @@ export interface EventWizardProps {
     event?: Event | EditableEvent;
     showCancel?: boolean;
     onCancel?: () => void;
-    onChange?: (eventWizardStep: EventsWizardStep) => void;
-    onFinish?: (event: EditableEvent) => void;
-}
-
-export enum EventsWizardStep {
-    EVENT_PROPERTIES,
-    REVIEW_AND_SUBMIT,
+    onChange?: (event: EditableEvent) => void;
+    onSubmit?: (event: EditableEvent) => void;
 }

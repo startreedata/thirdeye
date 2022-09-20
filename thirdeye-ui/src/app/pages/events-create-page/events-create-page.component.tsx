@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
@@ -21,14 +20,16 @@ import { EventsWizard } from "../../components/event-wizard/event-wizard.compone
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
-    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
 import { createEvent } from "../../rest/event/events.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getEventsViewPath } from "../../utils/routes/routes.util";
+import {
+    getEventsAllPath,
+    getEventsViewPath,
+} from "../../utils/routes/routes.util";
 
 export const EventsCreatePage: FunctionComponent = () => {
     const navigate = useNavigate();
@@ -74,11 +75,11 @@ export const EventsCreatePage: FunctionComponent = () => {
                     entity: t("label.event"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <EventsWizard onFinish={onEventWizardFinish} />
-                </Grid>
-            </PageContentsGridV1>
+            <EventsWizard
+                showCancel
+                onCancel={() => navigate(getEventsAllPath())}
+                onSubmit={onEventWizardFinish}
+            />
         </PageV1>
     );
 };

@@ -12,407 +12,124 @@
  * the License.
  */
 import LuxonUtils from "@date-io/luxon";
-import { yupResolver } from "@hookform/resolvers/yup";
-import {
-    Box,
-    Button,
-    Chip,
-    Grid,
-    TextField,
-    Typography,
-} from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
+import { Grid, TextField, Typography } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
-import { isEmpty, map } from "lodash";
-import React, { FunctionComponent, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import React, { FunctionComponent } from "react";
+import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import * as yup from "yup";
-import { Event, TargetDimensionMap } from "../../../rest/dto/event.interfaces";
-import { createEmptyEvent } from "../../../utils/events/events.util";
+import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { DateTimePickerToolbar } from "../../time-range/time-range-selector/date-time-picker-toolbar/date-time-picker-toolbar.component";
-import {
-    DynamicFormType,
-    EventPropertiesFormProps,
-} from "./event-properties-form.interfaces";
-import { useEventPropertiesFormStyles } from "./event-properties-form.styles";
+import { EventPropertiesFormProps } from "./event-properties-form.interfaces";
 
 export const EventPropertiesForm: FunctionComponent<
     EventPropertiesFormProps
-> = ({ event, id, onSubmit }: EventPropertiesFormProps) => {
-    const eventPropertiesFormStyles = useEventPropertiesFormStyles();
-
+> = ({ formRegister, formErrors, formControl }) => {
     const { t } = useTranslation();
-    const defaultValues = event || createEmptyEvent();
-
-    const { register, handleSubmit, errors, control } = useForm<Event>({
-        defaultValues,
-        resolver: yupResolver(
-            yup.object().shape({
-                name: yup.string().required(t("message.event-name-required")),
-                type: yup.string(),
-                startTime: yup
-                    .number()
-                    .required(t("message.event-start-time-required")),
-                endTime: yup
-                    .number()
-                    .required(t("message.event-end-time-required")),
-            })
-        ),
-    });
-
-    const onSubmitEventPropertiesForm = (event: Event): void => {
-        const { name, type, startTime, endTime } = event;
-        const targetDimensionMap = {} as TargetDimensionMap;
-        dynamicFormState.map(({ propertyName, propertyValue }) => {
-            if (!isEmpty(propertyName) && !isEmpty(propertyValue)) {
-                targetDimensionMap[propertyName] = propertyValue;
-            }
-        });
-
-        const newEvent: Event = {
-            name,
-            type,
-            startTime,
-            endTime,
-            targetDimensionMap,
-        } as Event;
-        onSubmit && onSubmit(newEvent);
-    };
-
-    const [dynamicFormState, setDynamicFormState] = useState<DynamicFormType[]>(
-        () => {
-            let dynamicForm: DynamicFormType[] = [];
-            if (!isEmpty(event.targetDimensionMap)) {
-                dynamicForm = map(event.targetDimensionMap, (value, key) => {
-                    return {
-                        key,
-                        propertyName: key,
-                        propertyValue: value,
-                    };
-                });
-            } else {
-                dynamicForm = [
-                    {
-                        key: "0",
-                        propertyName: "",
-                        propertyValue: [],
-                    },
-                ];
-            }
-
-            return dynamicForm;
-        }
-    );
-
-    const handleListChange = (
-        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-        item: DynamicFormType
-    ): void => {
-        const { value } = e.target;
-        setDynamicFormState((prev) => {
-            const newArr = prev.map((subItem) => {
-                return subItem.key === item.key
-                    ? {
-                          ...item,
-                          propertyName: value,
-                      }
-                    : subItem;
-            });
-
-            return newArr;
-        });
-    };
-
-    const handleAddListItem = (): void => {
-        const newItem = {
-            key: dynamicFormState.length.toString(),
-            propertyName: "",
-            propertyValue: [],
-        };
-        setDynamicFormState((prev) => [...prev, newItem]);
-    };
 
     return (
-        <form
-            noValidate
-            id={id}
-            onSubmit={handleSubmit(onSubmitEventPropertiesForm)}
-        >
-            <Grid container alignItems="center">
-                {/* Name label */}
-                <Grid item lg={2} md={3} sm={5} xs={12}>
-                    <Typography variant="subtitle2">
-                        {t("label.name")}
-                    </Typography>
-                </Grid>
-
+        <Grid container>
+            <Grid item xs={12}>
+                <Typography variant="h5">
+                    {t("label.event-properties")}
+                </Typography>
+            </Grid>
+            <Grid container item alignItems="center" xs={12}>
                 {/* Name input */}
-                <Grid item lg={4} md={5} sm={6} xs={12}>
-                    <TextField
-                        fullWidth
-                        required
-                        error={Boolean(errors && errors.name)}
-                        helperText={
-                            errors && errors.name && errors.name.message
-                        }
-                        inputRef={register}
-                        name="name"
-                        placeholder={t("label.enter-name-of-event")}
-                        type="string"
-                        variant="outlined"
-                    />
-                </Grid>
-
-                {/* Spacer */}
-                <Grid item sm={12} />
+                <InputSection
+                    inputComponent={
+                        <TextField
+                            fullWidth
+                            required
+                            error={Boolean(formErrors && formErrors.name)}
+                            helperText={
+                                formErrors &&
+                                formErrors.name &&
+                                formErrors.name.message
+                            }
+                            inputRef={formRegister}
+                            name="name"
+                            placeholder={t("label.enter-name-of-event")}
+                            type="string"
+                            variant="outlined"
+                        />
+                    }
+                    label={t("label.name")}
+                />
 
                 {/* Type label */}
-                <Grid item lg={2} md={3} sm={5} xs={12}>
-                    <Typography variant="subtitle2">
-                        {t("label.type")}
-                    </Typography>
-                </Grid>
+                <InputSection
+                    inputComponent={
+                        <TextField
+                            fullWidth
+                            required
+                            inputRef={formRegister}
+                            name="type"
+                            placeholder={t("label.enter-a-type-event")}
+                            type="string"
+                            variant="outlined"
+                        />
+                    }
+                    label={t("label.type")}
+                />
 
-                {/* Type input */}
-                <Grid item lg={4} md={5} sm={6} xs={12}>
-                    <TextField
-                        fullWidth
-                        required
-                        inputRef={register}
-                        name="type"
-                        placeholder={t("label.enter-a-type-event")}
-                        type="string"
-                        variant="outlined"
-                    />
-                </Grid>
-
-                {/* Spacer */}
-                <Grid item sm={12} />
-
-                <Grid item lg={2} md={3} sm={5} xs={12}>
-                    <Typography variant="subtitle2">
-                        {t("label.start-time")}
-                    </Typography>
-                </Grid>
-
-                <Grid
-                    item
-                    className={eventPropertiesFormStyles.datePickerContainer}
-                    lg={4}
-                    md={5}
-                    sm={6}
-                    xs={12}
-                >
-                    <Controller
-                        control={control}
-                        name="startTime"
-                        render={({ onChange, value }) => (
-                            <MuiPickersUtilsProvider utils={LuxonUtils}>
-                                <DateTimePicker
-                                    autoOk
-                                    fullWidth
-                                    ToolbarComponent={DateTimePickerToolbar}
-                                    error={Boolean(errors.startTime)}
-                                    helperText={
-                                        errors.startTime &&
-                                        errors.startTime.message
-                                    }
-                                    value={new Date(value)}
-                                    variant="inline"
-                                    onChange={(e) => {
-                                        onChange(e?.valueOf());
-                                    }}
-                                />
-                            </MuiPickersUtilsProvider>
-                        )}
-                    />
-                </Grid>
-
-                {/* Spacer */}
-                <Grid item sm={12} />
-
-                <Grid item lg={2} md={3} sm={5} xs={12}>
-                    <Typography variant="subtitle2">
-                        {t("label.end-time")}
-                    </Typography>
-                </Grid>
-
-                <Grid
-                    item
-                    className={eventPropertiesFormStyles.datePickerContainer}
-                    lg={4}
-                    md={5}
-                    sm={6}
-                    xs={12}
-                >
-                    <Controller
-                        control={control}
-                        name="endTime"
-                        render={({ onChange, value }) => (
-                            <MuiPickersUtilsProvider utils={LuxonUtils}>
-                                <DateTimePicker
-                                    autoOk
-                                    fullWidth
-                                    ToolbarComponent={DateTimePickerToolbar}
-                                    error={Boolean(errors.endTime)}
-                                    helperText={
-                                        errors.endTime && errors.endTime.message
-                                    }
-                                    value={new Date(value)}
-                                    variant="inline"
-                                    onChange={(e) => onChange(e?.valueOf())}
-                                />
-                            </MuiPickersUtilsProvider>
-                        )}
-                    />
-                </Grid>
-
-                {/* Spacer */}
-                <Grid item sm={12} />
-
-                <Grid item xs={12}>
-                    <Box marginBottom={2}>
-                        <Typography variant="h5">
-                            {t("label.event-metadata")}
-                        </Typography>
-                        <Typography variant="body2">
-                            {t(
-                                "message.create-custom-event-properties-and-values"
-                            )}
-                        </Typography>
-                    </Box>
-                </Grid>
-
-                <Grid item xs={6}>
-                    <Box paddingBottom={1}>{t("label.property-name")}</Box>
-                </Grid>
-                <Grid item xs={6}>
-                    <Box paddingBottom={1}>{t("label.property-value")}</Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                    {dynamicFormState.map((item) => {
-                        return (
-                            <Grid container item key={item.key} xs={12}>
-                                <Grid item xs={5}>
-                                    <TextField
+                {/* Start time */}
+                <InputSection
+                    inputComponent={
+                        <Controller
+                            control={formControl}
+                            name="startTime"
+                            render={({ onChange, value }) => (
+                                <MuiPickersUtilsProvider utils={LuxonUtils}>
+                                    <DateTimePicker
+                                        autoOk
                                         fullWidth
-                                        inputProps={{ tabIndex: -1 }}
-                                        inputRef={register}
-                                        name="propertyName"
-                                        placeholder={t(
-                                            "label.add-property-key"
-                                        )}
-                                        value={item.propertyName}
-                                        onChange={(
-                                            e: React.ChangeEvent<
-                                                | HTMLTextAreaElement
-                                                | HTMLInputElement
-                                            >
-                                        ) => handleListChange(e, item)}
+                                        ToolbarComponent={DateTimePickerToolbar}
+                                        error={Boolean(formErrors.startTime)}
+                                        helperText={
+                                            formErrors.startTime &&
+                                            formErrors.startTime.message
+                                        }
+                                        value={new Date(value)}
+                                        variant="inline"
+                                        onChange={(e) => {
+                                            onChange(e?.valueOf());
+                                        }}
                                     />
-                                </Grid>
-                                <Grid item xs={1} />
-                                <Grid item xs={5}>
-                                    <Controller
-                                        control={control}
-                                        name="propertyValue"
-                                        render={({ onChange }) => (
-                                            <Autocomplete
-                                                freeSolo
-                                                multiple
-                                                classes={{
-                                                    inputRoot:
-                                                        eventPropertiesFormStyles.autoCompleteInput,
-                                                    tag: eventPropertiesFormStyles.autoCompleteTag,
-                                                }}
-                                                defaultValue={
-                                                    item.propertyValue.length >
-                                                    0
-                                                        ? item.propertyValue
-                                                        : undefined
-                                                }
-                                                options={[] as string[]}
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        name="propertyValue"
-                                                        placeholder={t(
-                                                            "message.property-value-placeholder"
-                                                        )}
-                                                        variant="outlined"
-                                                    />
-                                                )}
-                                                renderTags={(
-                                                    value: readonly string[],
-                                                    getTagProps
-                                                ) =>
-                                                    value.map(
-                                                        (
-                                                            option: string,
-                                                            index: number
-                                                        ) => (
-                                                            <Chip
-                                                                key={index}
-                                                                variant="outlined"
-                                                                {...getTagProps(
-                                                                    {
-                                                                        index,
-                                                                    }
-                                                                )}
-                                                                label={option}
-                                                                size="small"
-                                                            />
-                                                        )
-                                                    )
-                                                }
-                                                onChange={(
-                                                    _event: React.ChangeEvent<
-                                                        Record<string, unknown>
-                                                    >,
-                                                    value: string[]
-                                                ) => {
-                                                    onChange(value);
-                                                    setDynamicFormState(
-                                                        (prev) => {
-                                                            const newArr =
-                                                                prev.map(
-                                                                    (
-                                                                        subItem
-                                                                    ) => {
-                                                                        return subItem.key ===
-                                                                            item.key
-                                                                            ? {
-                                                                                  ...item,
-                                                                                  propertyValue:
-                                                                                      value,
-                                                                              }
-                                                                            : subItem;
-                                                                    }
-                                                                );
+                                </MuiPickersUtilsProvider>
+                            )}
+                        />
+                    }
+                    label={t("label.start-time")}
+                />
 
-                                                            return newArr;
-                                                        }
-                                                    );
-                                                }}
-                                            />
-                                        )}
+                {/* End time */}
+                <InputSection
+                    inputComponent={
+                        <Controller
+                            control={formControl}
+                            name="endTime"
+                            render={({ onChange, value }) => (
+                                <MuiPickersUtilsProvider utils={LuxonUtils}>
+                                    <DateTimePicker
+                                        autoOk
+                                        fullWidth
+                                        ToolbarComponent={DateTimePickerToolbar}
+                                        error={Boolean(formErrors.endTime)}
+                                        helperText={
+                                            formErrors.endTime &&
+                                            formErrors.endTime.message
+                                        }
+                                        value={new Date(value)}
+                                        variant="inline"
+                                        onChange={(e) => onChange(e?.valueOf())}
                                     />
-                                </Grid>
-
-                                {/* Spacer */}
-                                <Grid item sm={12} />
-                            </Grid>
-                        );
-                    })}
-                    <Grid item xs={12}>
-                        <Button variant="contained" onClick={handleAddListItem}>
-                            {t("label.add-metadata-entry")}
-                        </Button>
-                    </Grid>
-                </Grid>
+                                </MuiPickersUtilsProvider>
+                            )}
+                        />
+                    }
+                    label={t("label.end-time")}
+                />
             </Grid>
-        </form>
+        </Grid>
     );
 };

@@ -13,15 +13,8 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const useEventPropertiesFormStyles = makeStyles({
-    datePickerContainer: {
-        display: "flex",
-    },
-    autoCompleteInput: {
-        minHeight: "auto",
-    },
-    autoCompleteTag: {
-        marginTop: 0,
-        marginBottom: 0,
+export const useEventMetadataFormStyles = makeStyles({
+    input: {
+        paddingRight: "45px",
     },
 });

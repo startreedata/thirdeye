@@ -11,249 +11,157 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Typography } from "@material-ui/core";
-import { kebabCase } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Box, Button, Grid } from "@material-ui/core";
+import { isEmpty, map } from "lodash";
+import React, { FunctionComponent, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1, StepperV1 } from "../../platform/components";
-import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
+import * as yup from "yup";
+import {
+    PageContentsCardV1,
+    PageContentsGridV1,
+} from "../../platform/components";
+import {
+    EditableEvent,
+    Event,
+    TargetDimensionMap,
+} from "../../rest/dto/event.interfaces";
 import { createEmptyEvent } from "../../utils/events/events.util";
-import { Dimension } from "../../utils/material-ui/dimension.util";
-import { Palette } from "../../utils/material-ui/palette.util";
+import { EventMetadataForm } from "./event-metadata-form/event-metadata-form.component";
+import { PropertyData } from "./event-metadata-form/event-metadata-form.interfaces";
 import { EventPropertiesForm } from "./event-properties-form/event-properties-form.component";
-import { EventRenderer } from "./event-renderer/event-renderer.component";
-import { EventsWizardStep, EventWizardProps } from "./event-wizard.interface";
-import { useEventWizardStyles } from "./event-wizard.styles";
+import { EventWizardProps } from "./event-wizard.interface";
 
 const FORM_ID_EVENT_PROPERTIES = "FORM_ID_EVENT_PROPERTIES";
 
-export const EventsWizard: FunctionComponent<EventWizardProps> = (
-    props: EventWizardProps
-) => {
-    const [newEvent, setNewEvent] = useState<EditableEvent>(
-        props.event || createEmptyEvent()
-    );
-    const [currentWizardStep, setCurrentWizardStep] =
-        useState<EventsWizardStep>(EventsWizardStep.EVENT_PROPERTIES);
+export const EventsWizard: FunctionComponent<EventWizardProps> = ({
+    event,
+    showCancel,
+    onCancel,
+    onSubmit,
+}) => {
     const { t } = useTranslation();
-
-    const eventWizardStyles = useEventWizardStyles();
-
-    useEffect(() => {
-        // Notify
-        props.onChange && props.onChange(currentWizardStep);
-    }, [currentWizardStep]);
-
-    const onNext = (): void => {
-        if (currentWizardStep === EventsWizardStep.REVIEW_AND_SUBMIT) {
-            // On last step
-            props.onFinish && props.onFinish(newEvent);
-
-            return;
+    const [editedEvent, setEditedEvent] = useState<EditableEvent>(
+        event || createEmptyEvent()
+    );
+    const [propertiesData, setPropertiesData] = useState<PropertyData[]>(() => {
+        if (!isEmpty(editedEvent.targetDimensionMap)) {
+            return map(editedEvent.targetDimensionMap, (value, key) => {
+                return {
+                    originalKey: key,
+                    propertyName: key,
+                    propertyValue: value,
+                };
+            });
         }
 
-        // Determine next step
-        setCurrentWizardStep(
-            EventsWizardStep[
-                EventsWizardStep[
-                    currentWizardStep + 1
-                ] as keyof typeof EventsWizardStep
-            ]
-        );
-    };
+        return [
+            {
+                originalKey: null,
+                propertyName: "",
+                propertyValue: [],
+            },
+        ];
+    });
+
+    const { register, handleSubmit, errors, control } = useForm<Event>({
+        defaultValues: editedEvent,
+        resolver: yupResolver(
+            yup.object().shape({
+                name: yup.string().required(t("message.event-name-required")),
+                type: yup.string(),
+                startTime: yup
+                    .number()
+                    .required(t("message.event-start-time-required")),
+                endTime: yup
+                    .number()
+                    .required(t("message.event-end-time-required")),
+            })
+        ),
+    });
 
     const onSubmitEventsPropertiesForm = (event: Event): void => {
-        // Update event with form inputs
-        setNewEvent((newEvent) => Object.assign(newEvent, event));
+        setEditedEvent(event);
 
-        // Next step
-        onNext();
-    };
+        const cloned = { ...event };
+        const filteredPropertiesData = propertiesData.filter(
+            (item) => !!item.propertyName
+        );
 
-    const stepLabelFn = (step: string): string => {
-        return t(`label.${kebabCase(EventsWizardStep[+step])}`);
-    };
+        delete cloned.targetDimensionMap;
 
-    const onBack = (): void => {
-        if (currentWizardStep === EventsWizardStep.EVENT_PROPERTIES) {
-            // Already on first step
-            return;
+        if (filteredPropertiesData.length > 0) {
+            const newTargetDimensionMap: TargetDimensionMap = {};
+            filteredPropertiesData.forEach((item) => {
+                newTargetDimensionMap[item.propertyName] = item.propertyValue;
+            });
+            cloned.targetDimensionMap = newTargetDimensionMap;
         }
 
-        // Determine previous step
-        setCurrentWizardStep(
-            EventsWizardStep[
-                EventsWizardStep[
-                    currentWizardStep - 1
-                ] as keyof typeof EventsWizardStep
-            ]
-        );
-    };
-
-    const onCancel = (): void => {
-        props.onCancel && props.onCancel();
+        onSubmit && onSubmit(cloned);
     };
 
     return (
         <>
-            {/* Stepper */}
-            <Grid container>
-                <Grid item sm={12}>
-                    <StepperV1
-                        activeStep={currentWizardStep.toString()}
-                        stepLabelFn={stepLabelFn}
-                        steps={Object.values(EventsWizardStep).reduce(
-                            (steps, eventsWizardStep) => {
-                                if (typeof eventsWizardStep === "number") {
-                                    steps.push(eventsWizardStep.toString());
-                                }
+            <PageContentsGridV1>
+                <Grid
+                    container
+                    item
+                    noValidate
+                    component="form"
+                    id={FORM_ID_EVENT_PROPERTIES}
+                    xs={12}
+                    onSubmit={handleSubmit(onSubmitEventsPropertiesForm)}
+                >
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            {/* The useForm functions handles sending data up */}
+                            <EventPropertiesForm
+                                formControl={control}
+                                formErrors={errors}
+                                formRegister={register}
+                            />
+                        </PageContentsCardV1>
+                    </Grid>
 
-                                return steps;
-                            },
-                            [] as string[]
-                        )}
-                    />
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            <EventMetadataForm
+                                initialPropertiesData={propertiesData}
+                                onChange={setPropertiesData}
+                            />
+                        </PageContentsCardV1>
+                    </Grid>
                 </Grid>
+            </PageContentsGridV1>
+            {/* Controls */}
+            <Box width="100%">
+                <PageContentsCardV1>
+                    <Grid container justifyContent="flex-end">
+                        {showCancel && (
+                            <Grid item>
+                                <Button color="secondary" onClick={onCancel}>
+                                    {t("label.cancel")}
+                                </Button>
+                            </Grid>
+                        )}
 
-                <PageContentsCardV1 className={eventWizardStyles.pageContents}>
-                    <Grid container>
-                        {/* Step label */}
-                        <Grid item sm={12}>
-                            <Typography variant="h5">
-                                {t(
-                                    `label.${kebabCase(
-                                        EventsWizardStep[currentWizardStep]
-                                    )}`
+                        <Grid item>
+                            <Button
+                                color="primary"
+                                onClick={handleSubmit(
+                                    onSubmitEventsPropertiesForm
                                 )}
-                            </Typography>
-                        </Grid>
-
-                        {/* Spacer */}
-                        <Grid item sm={12} />
-
-                        {/* Event properties */}
-                        {currentWizardStep ===
-                            EventsWizardStep.EVENT_PROPERTIES && (
-                            <>
-                                {/* Event Properties Form */}
-                                <Grid item xs={12}>
-                                    <EventPropertiesForm
-                                        event={newEvent}
-                                        id={FORM_ID_EVENT_PROPERTIES}
-                                        onSubmit={onSubmitEventsPropertiesForm}
-                                    />
-                                </Grid>
-                            </>
-                        )}
-
-                        {/* Review and submit */}
-                        {currentWizardStep ===
-                            EventsWizardStep.REVIEW_AND_SUBMIT && (
-                            <>
-                                {/* Event information */}
-                                <EventRenderer event={newEvent} />
-                            </>
-                        )}
-
-                        {/* Spacer */}
-                        <Box width="100%" />
-
-                        {/* Controls */}
-                        <Grid
-                            container
-                            alignItems="stretch"
-                            className={eventWizardStyles.controlsContainer}
-                            direction="column"
-                            justifyContent="flex-end"
-                        >
-                            {/* Separator */}
-                            <Grid item>
-                                <Box
-                                    border={Dimension.WIDTH_BORDER_DEFAULT}
-                                    borderBottom={0}
-                                    borderColor={Palette.COLOR_BORDER_DEFAULT}
-                                    borderLeft={0}
-                                    borderRight={0}
-                                />
-                            </Grid>
-
-                            <Grid item>
-                                <Grid container justifyContent="space-between">
-                                    {/* Cancel button */}
-                                    <Grid item>
-                                        {props.showCancel && (
-                                            <Button
-                                                color="primary"
-                                                size="large"
-                                                variant="outlined"
-                                                onClick={onCancel}
-                                            >
-                                                {t("label.cancel")}
-                                            </Button>
-                                        )}
-                                    </Grid>
-
-                                    <Grid item>
-                                        <Grid container>
-                                            {/* Back button */}
-                                            <Grid item>
-                                                <Button
-                                                    color="primary"
-                                                    disabled={
-                                                        currentWizardStep ===
-                                                        EventsWizardStep.EVENT_PROPERTIES
-                                                    }
-                                                    size="large"
-                                                    variant="outlined"
-                                                    onClick={onBack}
-                                                >
-                                                    {t("label.back")}
-                                                </Button>
-                                            </Grid>
-
-                                            {/* Next button */}
-                                            <Grid item>
-                                                {/* Submit button for event properties form in
-                                    first step */}
-                                                {currentWizardStep ===
-                                                    EventsWizardStep.EVENT_PROPERTIES && (
-                                                    <Button
-                                                        color="primary"
-                                                        form={
-                                                            FORM_ID_EVENT_PROPERTIES
-                                                        }
-                                                        size="large"
-                                                        type="submit"
-                                                        variant="contained"
-                                                    >
-                                                        {t("label.next")}
-                                                    </Button>
-                                                )}
-
-                                                {/* Next button for all other steps */}
-                                                {currentWizardStep !==
-                                                    EventsWizardStep.EVENT_PROPERTIES && (
-                                                    <Button
-                                                        color="primary"
-                                                        size="large"
-                                                        variant="contained"
-                                                        onClick={onNext}
-                                                    >
-                                                        {currentWizardStep ===
-                                                        EventsWizardStep.REVIEW_AND_SUBMIT
-                                                            ? t("label.finish")
-                                                            : t("label.next")}
-                                                    </Button>
-                                                )}
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
+                            >
+                                {t("label.create-entity", {
+                                    entity: t("label.event"),
+                                })}
+                            </Button>
                         </Grid>
                     </Grid>
                 </PageContentsCardV1>
-            </Grid>
+            </Box>
         </>
     );
 };

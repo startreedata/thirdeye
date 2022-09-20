@@ -165,6 +165,22 @@ export const EventCard: FunctionComponent<EventCardProps> = (
                                 ]}
                             />
                         </Grid>
+
+                        <Grid item md={4} xs={12}>
+                            <NameValueDisplayCard<string>
+                                name={t("label.metadata")}
+                                searchWords={props.searchWords}
+                                values={
+                                    props.event.targetDimensionMap
+                                        ? Object.entries(
+                                              props.event.targetDimensionMap
+                                          ).map(([k, v]) => {
+                                              return `${k}: ${v}`;
+                                          })
+                                        : [t("label.no-data-marker")]
+                                }
+                            />
+                        </Grid>
                     </Grid>
                 )}
 

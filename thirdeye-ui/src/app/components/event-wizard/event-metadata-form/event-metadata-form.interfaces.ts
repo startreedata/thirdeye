@@ -11,8 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableEvent } from "../../../rest/dto/event.interfaces";
 
-export interface EventRendererProps {
-    event: EditableEvent;
+export interface EventMetadataFormProps {
+    initialPropertiesData: PropertyData[];
+    onChange: (newPropertiesData: PropertyData[]) => void;
+}
+
+export interface PropertyData {
+    originalKey: string | null;
+    propertyName: string;
+    propertyValue: string[];
 }

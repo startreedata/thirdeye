@@ -49,7 +49,7 @@ describe("Enumeration Items REST", () => {
         ]);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/enumeration-items?id=1%2C2%2C3"
+            "/api/enumeration-items?id=%5Bin%5D1%2C2%2C3"
         );
     });
 

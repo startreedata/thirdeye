@@ -65,7 +65,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     const { t } = useTranslation();
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const [selectedTabIndex, setSelectedTabIndex] = useState(
-        Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 0
+        Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 1
     );
     const [eventsSearchValue, setEventsSearchValue] = useState("");
     const { baselineOffsetValue, unit } = parseBaselineComparisonOffset(
@@ -125,11 +125,11 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             value={selectedTabIndex}
                             onChange={handleTabIndexChange}
                         >
+                            <Tab label={t("label.heatmap")} value={1} />
                             <Tab
                                 label={t("label.top-contributors")}
                                 value={0}
                             />
-                            <Tab label={t("label.heatmap")} value={1} />
                             <Tab label={t("label.events")} value={2} />
                         </Tabs>
                     </Grid>

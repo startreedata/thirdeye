@@ -37,7 +37,10 @@ import {
 import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
+import {
+    getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsViewPath,
+} from "../../utils/routes/routes.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
@@ -152,6 +155,10 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             });
     };
 
+    const handleOnCancelClick = (): void => {
+        navigate(getSubscriptionGroupsAllPath());
+    };
+
     if (loading) {
         return <AppLoadingIndicatorV1 />;
     }
@@ -170,6 +177,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                         entity: t("label.subscription-group"),
                     })}
                     subscriptionGroup={subscriptionGroup}
+                    onCancel={handleOnCancelClick}
                     onFinish={onSubscriptionGroupWizardFinish}
                 />
             )}

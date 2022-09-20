@@ -215,16 +215,22 @@ export const SubscriptionGroupWizard: FunctionComponent<
             {/* Controls */}
             <Box textAlign="right" width="100%">
                 <PageContentsCardV1>
-                    <Button color="secondary" onClick={handleCancel}>
-                        {t("label.cancel")}
-                    </Button>
-                    <Button
-                        color="primary"
-                        disabled={!isSubscriptionGroupValid}
-                        onClick={handleSubmitClick}
-                    >
-                        {submitBtnLabel}
-                    </Button>
+                    <Grid container justifyContent="flex-end">
+                        <Grid item>
+                            <Button color="secondary" onClick={handleCancel}>
+                                {t("label.cancel")}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                color="primary"
+                                disabled={!isSubscriptionGroupValid}
+                                onClick={handleSubmitClick}
+                            >
+                                {submitBtnLabel}
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </PageContentsCardV1>
             </Box>
         </>

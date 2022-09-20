@@ -29,7 +29,10 @@ import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
+import {
+    getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsViewPath,
+} from "../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
@@ -88,6 +91,10 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             });
     };
 
+    const handleOnCancelClick = (): void => {
+        navigate(getSubscriptionGroupsAllPath());
+    };
+
     if (loading) {
         return <AppLoadingIndicatorV1 />;
     }
@@ -106,6 +113,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                     entity: t("label.subscription-group"),
                 })}
                 subscriptionGroup={createEmptySubscriptionGroup()}
+                onCancel={handleOnCancelClick}
                 onFinish={onSubscriptionGroupWizardFinish}
             />
         </PageV1>

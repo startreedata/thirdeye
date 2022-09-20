@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.74.0</version>
+  <version>1.75.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -119,7 +119,7 @@
     <url>https://github.com/startreedata/thirdeye.git</url>
     <connection>scm:git:git@github.com:startreedata/thirdeye.git</connection>
     <developerConnection>scm:git:git@github.com:startreedata/thirdeye.git</developerConnection>
-    <tag>thirdeye-1.74.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <inceptionYear>2014-2018</inceptionYear>

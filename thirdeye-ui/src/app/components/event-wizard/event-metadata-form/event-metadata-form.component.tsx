@@ -43,13 +43,12 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
         item: PropertyData
     ): void => {
         item.propertyName = newKeyString;
-        setPropertiesData((prev) => {
-            const cloned = [...prev];
 
-            onChange(cloned);
+        const cloned = [...propertiesData];
 
-            return cloned;
-        });
+        setPropertiesData(cloned);
+
+        onChange(cloned);
     };
 
     const handleAddListItem = (): void => {

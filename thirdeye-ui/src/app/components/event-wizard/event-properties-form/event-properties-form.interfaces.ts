@@ -22,6 +22,7 @@ export interface EventPropertiesFormProps {
     formErrors: FieldErrors<Event>;
     formControl: Control<Event>;
     onSubmit?: (event: Event) => void;
+    fullWidth?: boolean;
 }
 
 export interface DynamicFormType {

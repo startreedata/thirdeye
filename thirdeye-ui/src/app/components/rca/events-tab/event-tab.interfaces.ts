@@ -18,4 +18,5 @@ export interface EventsTabProps {
     onCheckClick: (events: Event[]) => void;
     selectedEvents: Event[];
     searchValue: string;
+    triggerUpdate: boolean;
 }

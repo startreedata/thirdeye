@@ -12,7 +12,6 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -23,8 +22,10 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { EditableEvent, Event } from "../../rest/dto/event.interfaces";
 import { createEvent } from "../../rest/event/events.rest";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getEventsAllPath,
@@ -55,16 +56,14 @@ export const EventsCreatePage: FunctionComponent = () => {
             .catch((error: AxiosError): void => {
                 const errMessages = getErrorMessages(error);
 
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.create-error", {
-                              entity: t("label.event"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    errMessages,
+                    notify,
+                    t("message.create-error", {
+                        entity: t("label.event"),
+                    })
+                );
             });
     };
 

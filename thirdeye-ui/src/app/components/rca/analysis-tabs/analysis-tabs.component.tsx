@@ -13,6 +13,7 @@
  */
 import {
     Box,
+    Button,
     Card,
     CardContent,
     Divider,
@@ -23,6 +24,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import { AxiosError } from "axios";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,20 +34,31 @@ import {
     BASELINE_OPTIONS,
 } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
 import {
+    NotificationTypeV1,
     PageContentsCardV1,
     SearchInputV1,
     SkeletonV1,
+    useDialogProviderV1,
+    useNotificationProviderV1,
 } from "../../../platform/components";
+import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { EditableEvent, Event } from "../../../rest/dto/event.interfaces";
+import { createEvent } from "../../../rest/event/events.rest";
 import {
     baselineComparisonOffsetToHumanReadable,
     parseBaselineComparisonOffset,
 } from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
+import { createEmptyEvent } from "../../../utils/events/events.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { getErrorMessages } from "../../../utils/rest/rest.util";
 import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
 import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
 import { AnomalyDimensionAnalysis } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.component";
+import { EventsWizard } from "../../event-wizard/event-wizard.component";
 import { EventsTab } from "../events-tab/event-tab.component";
 import { AnalysisTabsProps } from "./analysis-tabs.interfaces";
 
@@ -61,7 +74,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     onEventSelectionChange,
     isLoading,
 }) => {
+    const { notify } = useNotificationProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
+    const { showDialog, hideDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const [selectedTabIndex, setSelectedTabIndex] = useState(() => {
@@ -72,6 +87,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         return 1;
     });
     const [eventsSearchValue, setEventsSearchValue] = useState("");
+    const [triggerUpdateEvents, setTriggerUpdateEvents] = useState(false);
     const { baselineOffsetValue, unit } = parseBaselineComparisonOffset(
         searchParams.get(ANALYSIS_TAB_OFFSET) ?? ""
     );
@@ -93,6 +109,56 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         setSelectedTabIndex(newValue);
         searchParams.set(ANALYSIS_TAB_IDX_KEY, newValue.toString());
         setSearchParams(searchParams);
+    };
+
+    const handleAddEventClick = (): void => {
+        const event = createEmptyEvent();
+        event.startTime = anomaly?.startTime as number;
+        event.endTime = anomaly?.endTime as number;
+
+        showDialog({
+            width: "md",
+            type: DialogType.CUSTOM,
+            contents: (
+                <EventsWizard
+                    fullWidth
+                    showCancel
+                    event={event}
+                    onCancel={hideDialog}
+                    onSubmit={(newEvent: EditableEvent) => {
+                        createEvent(newEvent)
+                            .then((event: Event): void => {
+                                notify(
+                                    NotificationTypeV1.Success,
+                                    t("message.create-success", {
+                                        entity: t("label.event"),
+                                    })
+                                );
+                                onEventSelectionChange([
+                                    ...selectedEvents,
+                                    event,
+                                ]);
+                                setTriggerUpdateEvents(!triggerUpdateEvents);
+                                hideDialog();
+                            })
+                            .catch((error: AxiosError): void => {
+                                const errMessages = getErrorMessages(error);
+
+                                notifyIfErrors(
+                                    ActionStatus.Error,
+                                    errMessages,
+                                    notify,
+                                    t("message.create-error", {
+                                        entity: t("label.event"),
+                                    })
+                                );
+                            });
+                    }}
+                />
+            ),
+            hideCancelButton: true,
+            hideOkButton: true,
+        });
     };
 
     const comparisonOffset = useMemo(() => {
@@ -123,7 +189,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     return (
         <Card variant="outlined">
             <CardContent>
-                <Grid container justifyContent="space-between">
+                <Grid container>
                     <Grid item md={5} sm={6} xs={12}>
                         <Tabs
                             value={selectedTabIndex}
@@ -209,14 +275,35 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             </Grid>
                         </Grid>
                     ) : (
-                        <Grid item md={3} sm={3} xs={12}>
-                            <SearchInputV1
-                                fullWidth
-                                placeholder={t("label.search-entity", {
-                                    entity: t("label.event"),
-                                })}
-                                onChange={setEventsSearchValue}
-                            />
+                        <Grid
+                            container
+                            item
+                            justifyContent="flex-end"
+                            md={7}
+                            sm={6}
+                            xs={12}
+                        >
+                            <Grid item>
+                                <Button
+                                    color="primary"
+                                    variant="outlined"
+                                    onClick={handleAddEventClick}
+                                >
+                                    {t("label.add-entity", {
+                                        entity: t("label.event"),
+                                    })}
+                                </Button>
+                            </Grid>
+
+                            <Grid item>
+                                <SearchInputV1
+                                    fullWidth
+                                    placeholder={t("label.search-entity", {
+                                        entity: t("label.event"),
+                                    })}
+                                    onChange={setEventsSearchValue}
+                                />
+                            </Grid>
                         </Grid>
                     )}
                 </Grid>
@@ -308,6 +395,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         anomalyId={anomalyId}
                         searchValue={eventsSearchValue}
                         selectedEvents={selectedEvents}
+                        triggerUpdate={triggerUpdateEvents}
                         onCheckClick={onEventSelectionChange}
                     />
                 </Box>

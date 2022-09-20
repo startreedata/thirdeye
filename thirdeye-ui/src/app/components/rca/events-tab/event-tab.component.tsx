@@ -46,6 +46,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     selectedEvents,
     onCheckClick,
     searchValue,
+    triggerUpdate,
 }: EventsTabProps) => {
     const { t } = useTranslation();
     const { getEventsForAnomaly, errorMessages, status, events } =
@@ -85,7 +86,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
         getEventsForAnomaly({
             anomalyId,
         });
-    }, [anomalyId]);
+    }, [anomalyId, triggerUpdate]);
 
     useEffect(() => {
         notifyIfErrors(
@@ -205,6 +206,15 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
                 <Box pb={20} pt={20}>
                     <NoDataIndicator
                         text={t("message.no-data-for-entity", {
+                            entity: t("label.events"),
+                        })}
+                    />
+                </Box>
+            )}
+            {status === ActionStatus.Error && (
+                <Box pb={20} pt={20}>
+                    <NoDataIndicator
+                        text={t("message.error-while-fetching", {
                             entity: t("label.events"),
                         })}
                     />

@@ -40,6 +40,7 @@ export const EventsWizard: FunctionComponent<EventWizardProps> = ({
     showCancel,
     onCancel,
     onSubmit,
+    fullWidth,
 }) => {
     const { t } = useTranslation();
     const [editedEvent, setEditedEvent] = useState<EditableEvent>(
@@ -121,6 +122,7 @@ export const EventsWizard: FunctionComponent<EventWizardProps> = ({
                                 formControl={control}
                                 formErrors={errors}
                                 formRegister={register}
+                                fullWidth={fullWidth}
                             />
                         </PageContentsCardV1>
                     </Grid>

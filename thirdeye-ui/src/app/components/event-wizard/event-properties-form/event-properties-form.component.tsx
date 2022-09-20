@@ -23,7 +23,7 @@ import { EventPropertiesFormProps } from "./event-properties-form.interfaces";
 
 export const EventPropertiesForm: FunctionComponent<
     EventPropertiesFormProps
-> = ({ formRegister, formErrors, formControl }) => {
+> = ({ formRegister, formErrors, formControl, fullWidth }) => {
     const { t } = useTranslation();
 
     return (
@@ -36,6 +36,7 @@ export const EventPropertiesForm: FunctionComponent<
             <Grid container item alignItems="center" xs={12}>
                 {/* Name input */}
                 <InputSection
+                    fullWidth={fullWidth}
                     inputComponent={
                         <TextField
                             fullWidth
@@ -58,6 +59,7 @@ export const EventPropertiesForm: FunctionComponent<
 
                 {/* Type label */}
                 <InputSection
+                    fullWidth={fullWidth}
                     inputComponent={
                         <TextField
                             fullWidth
@@ -74,6 +76,7 @@ export const EventPropertiesForm: FunctionComponent<
 
                 {/* Start time */}
                 <InputSection
+                    fullWidth={fullWidth}
                     inputComponent={
                         <Controller
                             control={formControl}
@@ -104,6 +107,7 @@ export const EventPropertiesForm: FunctionComponent<
 
                 {/* End time */}
                 <InputSection
+                    fullWidth={fullWidth}
                     inputComponent={
                         <Controller
                             control={formControl}

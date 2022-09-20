@@ -18,4 +18,5 @@ export interface InputSectionProps {
     helperLabel?: string;
     labelComponent?: ReactElement;
     inputComponent: ReactElement;
+    fullWidth?: boolean;
 }

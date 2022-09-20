@@ -150,10 +150,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                     >
                                         <label>
                                             <strong>
-                                                {t(
-                                                    "label.baseline-week-offset"
-                                                )}
-                                                :
+                                                {t("label.baseline-offset")}:
                                             </strong>
                                         </label>
                                     </Box>

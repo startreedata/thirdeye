@@ -65,7 +65,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     const { t } = useTranslation();
     const classes = useAnomalyBreakdownComparisonHeatmapStyles();
     const [selectedTabIndex, setSelectedTabIndex] = useState(
-        Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) || 1
+        Number(searchParams.get(ANALYSIS_TAB_IDX_KEY)) ?? 1
     );
     const [eventsSearchValue, setEventsSearchValue] = useState("");
     const { baselineOffsetValue, unit } = parseBaselineComparisonOffset(

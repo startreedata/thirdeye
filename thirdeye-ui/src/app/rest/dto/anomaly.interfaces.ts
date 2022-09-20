@@ -41,6 +41,7 @@ export interface Anomaly {
 }
 
 export interface AnomalyFeedback {
+    id?: number;
     type: AnomalyFeedbackType;
     comment: string;
 }

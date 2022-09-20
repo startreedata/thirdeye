@@ -64,6 +64,7 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         endTimeVal: -1,
         startTimeVal: -1,
         datasetName: noDataMarker,
+        hasFeedback: false,
     };
 };
 
@@ -151,6 +152,18 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     if (anomaly.metadata) {
         if (anomaly.metadata.dataset) {
             uiAnomaly.datasetName = anomaly.metadata.dataset.name;
+        }
+    }
+
+    // has feedback
+    if (anomaly.feedback) {
+        // In the get all anomalies response, an id may exist
+        // In the get one anomaly response, type may exist if there is feedback
+        if (
+            anomaly.feedback.id ||
+            anomaly.feedback.type !== AnomalyFeedbackType.NO_FEEDBACK
+        ) {
+            uiAnomaly.hasFeedback = true;
         }
     }
 

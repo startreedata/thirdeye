@@ -11,7 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Typography } from "@material-ui/core";
+import { Box, Button, Typography, useTheme } from "@material-ui/core";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -45,6 +47,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     const [selectedAnomaly, setSelectedAnomaly] =
         useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const anomalyNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
@@ -62,7 +65,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const metricNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            // currently we don't have id with us
+            // currently we don't have id with us3
             // but it will be good to have id to redirect
             return data.metricId
                 ? linkRendererV1(cellValue, getMetricsViewPath(data.metricId))
@@ -113,6 +116,20 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     const endTimeRenderer = useCallback(
         // use formatted value to display
         (_, data: UiAnomaly) => data.endTime,
+        []
+    );
+
+    const hasFeedbackRenderer = useCallback(
+        // use formatted value to display
+        (hasFeedback) => {
+            return hasFeedback ? (
+                <CheckCircleOutlineIcon
+                    htmlColor={theme.palette.success.main}
+                />
+            ) : (
+                <HighlightOffIcon color="secondary" />
+            );
+        },
         []
     );
 
@@ -208,6 +225,14 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                 sortable: true,
                 minWidth: 150,
                 customCellRenderer: deviationRenderer,
+            },
+            {
+                key: "hasFeedback",
+                dataKey: "hasFeedback",
+                header: t("label.has-feedback"),
+                sortable: true,
+                minWidth: 150,
+                customCellRenderer: hasFeedbackRenderer,
             },
         ],
         [

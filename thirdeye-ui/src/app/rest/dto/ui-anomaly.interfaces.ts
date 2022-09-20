@@ -32,4 +32,5 @@ export interface UiAnomaly {
     endTime: string;
     endTimeVal: number;
     datasetName: string;
+    hasFeedback: boolean;
 }

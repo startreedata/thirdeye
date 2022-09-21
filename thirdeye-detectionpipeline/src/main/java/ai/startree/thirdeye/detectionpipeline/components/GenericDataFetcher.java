@@ -20,6 +20,7 @@ import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.detectionpipeline.sql.filter.FilterEngine;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.MacroEngine;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
@@ -65,6 +66,11 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     return tableName;
   }
 
+  @VisibleForTesting
+  public void setTableName(final String tableName) {
+    this.tableName = tableName;
+  }
+
   @Override
   public void init(final DataFetcherSpec dataFetcherSpec) {
     this.query = dataFetcherSpec.getQuery();
@@ -87,7 +93,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           "tableName is not set in DataFetcherSpec. Cannot inject filters without tableName");
       this.timeseriesFilters = dataFetcherSpec.getTimeseriesFilters()
           .stream()
-          .map(p -> QueryPredicate.of(p, getDimensionType(p.getLhs(), tableName), tableName))
+          .map(this::toQueryPredicate)
           .collect(Collectors.toList());
     }
   }
@@ -126,6 +132,13 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           queryWithFilters).prepareRequest();
     }
     return new DataSourceRequest(tableName, query, ImmutableMap.of());
+  }
+
+  @VisibleForTesting
+  protected QueryPredicate toQueryPredicate(final Predicate p) {
+    // pre-condition: tableName is not null
+    final DimensionType dimensionType = getDimensionType(p.getLhs(), tableName);
+    return QueryPredicate.of(p, dimensionType, tableName);
   }
 
   // fixme datatype from metricDTO is always string + abstraction metric/dimension needs refactoring

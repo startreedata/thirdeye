@@ -28,16 +28,17 @@ public class PlanNodeContext {
   private List<Predicate> predicates;
   private Map<String, Object> properties;
 
-  public PlanNodeContext() {}
-
-  public PlanNodeContext(final PlanNodeContext toCopy) {
+  public static PlanNodeContext copy(final PlanNodeContext toCopy) {
     // shallow copy
-    this.name = toCopy.name;
-    this.pipelinePlanNodes = toCopy.pipelinePlanNodes;
-    this.planNodeBean = toCopy.planNodeBean;
-    this.detectionInterval = toCopy.detectionInterval;
-    this.predicates = toCopy.predicates;
-    this.properties = toCopy.properties;
+    final PlanNodeContext copy = new PlanNodeContext();
+    copy.name = toCopy.name;
+    copy.pipelinePlanNodes = toCopy.pipelinePlanNodes;
+    copy.planNodeBean = toCopy.planNodeBean;
+    copy.detectionInterval = toCopy.detectionInterval;
+    copy.predicates = toCopy.predicates;
+    copy.properties = toCopy.properties;
+
+    return copy;
   }
 
   public String getName() {

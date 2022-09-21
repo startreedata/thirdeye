@@ -112,7 +112,7 @@ public class PlanNodeFactory {
   public PlanNode build(final PlanNodeBean planNodeBean,
       final PlanNodeContext runTimeContext,
       final Map<String, PlanNode> pipelinePlanNodes) {
-    final PlanNodeContext context = new PlanNodeContext(runTimeContext)
+    final PlanNodeContext context = PlanNodeContext.copy(runTimeContext)
         .setName(planNodeBean.getName())
         .setPlanNodeBean(planNodeBean)
         .setPipelinePlanNodes(pipelinePlanNodes)

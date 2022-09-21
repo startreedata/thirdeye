@@ -18,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;
@@ -201,26 +200,20 @@ public class SqlQueryBuilder {
     return prepareStatement;
   }
 
-  public PreparedStatement createFindAllStatement(final Connection connection,
-      final Class<? extends AbstractEntity> entityClass) throws Exception {
-    final String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
-    final String sql = "Select * from " + tableName;
-    return connection.prepareStatement(sql);
-  }
-
-  public PreparedStatement createfindByParamsStatementWithLimit(final Connection connection,
+  public PreparedStatement createFindByParamsStatementWithLimit(final Connection connection,
       final Class<? extends AbstractEntity> entityClass, final Predicate predicate, final Long limit, final Long offset)
       throws Exception {
     final String tableName = entityMappingHolder.tableToEntityNameMap.inverse()
         .get(entityClass.getSimpleName());
-    final BiMap<String, String> entityNameToDBNameMapping =
-        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
     final StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM " + tableName);
-    final StringBuilder whereClause = new StringBuilder(" WHERE ");
     final List<Pair<String, Object>> parametersList = new ArrayList<>();
-    generateWhereClause(entityNameToDBNameMapping, predicate, parametersList, whereClause);
-    sqlBuilder.append(whereClause);
+    if(predicate != null) {
+      final BiMap<String, String> entityNameToDBNameMapping =
+          entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
+      final StringBuilder whereClause = new StringBuilder(" WHERE ");
+      generateWhereClause(entityNameToDBNameMapping, predicate, parametersList, whereClause);
+      sqlBuilder.append(whereClause);
+    }
     if (limit != null) {
       sqlBuilder.append(" LIMIT ").append(limit);
     }
@@ -228,54 +221,52 @@ public class SqlQueryBuilder {
       sqlBuilder.append(" OFFSET ").append(offset);
     }
     final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
-    int parameterIndex = 1;
-    final LinkedHashMap<String, ColumnInfo> columnInfoMap =
-        entityMappingHolder.columnInfoPerTable.get(tableName);
-    for (final Pair<String, Object> pair : parametersList) {
-      final String dbFieldName = pair.getKey();
-      final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      checkNotNull(info,
-          String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
-      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
+    if (!parametersList.isEmpty()) {
+      int parameterIndex = 1;
+      final LinkedHashMap<String, ColumnInfo> columnInfoMap =
+          entityMappingHolder.columnInfoPerTable.get(tableName);
+      for (final Pair<String, Object> pair : parametersList) {
+        final String dbFieldName = pair.getKey();
+        final ColumnInfo info = columnInfoMap.get(dbFieldName);
+        checkNotNull(info,
+            String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
+        prepareStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
+      }
     }
     return prepareStatement;
   }
 
-  public PreparedStatement createCountStatement(final Connection connection,
-      final Class<? extends AbstractIndexEntity> indexEntityClass) throws Exception {
-    final String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(indexEntityClass.getSimpleName());
-    final String sql = "Select count(*) from " + tableName;
-    return connection.prepareStatement(sql);
-  }
-
-  public PreparedStatement createCountWhereStatement(final Connection connection, final DaoFilter daoFilter,
+  public PreparedStatement createCountStatement(final Connection connection, final Predicate predicate,
       final Class<? extends AbstractIndexEntity> indexEntityClass) throws Exception {
     final String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(indexEntityClass.getSimpleName());
     final BiMap<String, String> entityNameToDBNameMapping =
         entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
 
+    final StringBuilder sqlBuilder = new StringBuilder("SELECT count(*) FROM " + tableName);
     final List<Pair<String, Object>> parametersList = new ArrayList<>();
 
-    final StringBuilder whereClause = new StringBuilder(" WHERE ");
-    generateWhereClause(entityNameToDBNameMapping,
-        daoFilter.getPredicate(),
-        parametersList,
-        whereClause);
-    final StringBuilder sqlBuilder = new StringBuilder("SELECT count(*) FROM " + tableName);
-    sqlBuilder.append(whereClause);
+    if(predicate != null) {
+      final StringBuilder whereClause = new StringBuilder(" WHERE ");
+      generateWhereClause(entityNameToDBNameMapping,
+          predicate,
+          parametersList,
+          whereClause);
+      sqlBuilder.append(whereClause);
+    }
     final PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString());
-    int parameterIndex = 1;
-    final Map<String, ColumnInfo> columnInfoMap =
-        entityMappingHolder.columnInfoPerTable.get(tableName);
+    if (!parametersList.isEmpty()) {
+      int parameterIndex = 1;
+      final Map<String, ColumnInfo> columnInfoMap =
+          entityMappingHolder.columnInfoPerTable.get(tableName);
 
-    for (final Pair<String, Object> pair : parametersList) {
-      final String dbFieldName = pair.getKey();
-      final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      checkNotNull(info,
-          String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
-      preparedStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
+      for (final Pair<String, Object> pair : parametersList) {
+        final String dbFieldName = pair.getKey();
+        final ColumnInfo info = columnInfoMap.get(dbFieldName);
+        checkNotNull(info,
+            String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
+        preparedStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
+      }
     }
     return preparedStatement;
   }

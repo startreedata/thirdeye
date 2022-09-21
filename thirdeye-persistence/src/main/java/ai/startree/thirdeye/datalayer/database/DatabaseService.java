@@ -22,7 +22,6 @@ import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
 import ai.startree.thirdeye.datalayer.util.SqlQueryBuilder;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.codahale.metrics.Counter;
@@ -81,20 +80,7 @@ public class DatabaseService {
   }
 
   public <E extends AbstractEntity> List<E> findAll(final Class<E> clazz) {
-    final long tStart = System.nanoTime();
-    try {
-      return runTask(connection -> {
-        try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createFindAllStatement(connection, clazz)) {
-          try (final ResultSet resultSet = selectStatement.executeQuery()) {
-            return genericResultSetMapper.mapAll(resultSet, clazz);
-          }
-        }
-      }, Collections.emptyList());
-    } finally {
-      dbReadCallCounter.inc();
-      dbReadDuration.update(System.nanoTime() - tStart);
-    }
+    return findAll(null, null, null, clazz);
   }
 
   public <E extends AbstractEntity> List<E> findAll(final Predicate predicate, final Class<E> clazz) {
@@ -106,7 +92,7 @@ public class DatabaseService {
     try {
       return runTask(connection -> {
         try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createfindByParamsStatementWithLimit(connection,
+            .createFindByParamsStatementWithLimit(connection,
                 clazz,
                 predicate,
                 limit,
@@ -235,23 +221,7 @@ public class DatabaseService {
   }
 
   public <E extends AbstractIndexEntity> Long count(Class<E> clazz) {
-    final long tStart = System.nanoTime();
-    try {
-      return runTask(connection -> {
-        try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createCountStatement(connection, clazz)) {
-          try (final ResultSet resultSet = selectStatement.executeQuery()) {
-            if (resultSet.next()) {
-              return resultSet.getLong(1);
-            }
-          }
-        }
-        return -1L;
-      }, -1L);
-    } finally {
-      dbReadCallCounter.inc();
-      dbReadDuration.update(System.nanoTime() - tStart);
-    }
+    return count(null, clazz);
   }
 
   public <E extends AbstractIndexEntity> Long count(Predicate predicate, Class<E> clazz) {
@@ -259,8 +229,8 @@ public class DatabaseService {
     try {
       return runTask(connection -> {
         try (final PreparedStatement selectStatement = sqlQueryBuilder
-            .createCountWhereStatement(connection,
-                new DaoFilter().setPredicate(predicate),
+            .createCountStatement(connection,
+                predicate,
                 clazz)) {
           try (final ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {

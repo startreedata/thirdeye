@@ -63,7 +63,7 @@ public class SimpleContributorsFinderResult implements ContributorsFinderResult 
         dimensions.add(dimensionName);
       }
     }
-    dimensionAnalysisResultApi.setDimensions(new ArrayList<>(dimensionToIndex.keySet()));
+    dimensionAnalysisResultApi.setDimensions(dimensions);
 
     for (int i = 0; i < stats.size(); i++) {
       final SummaryResponseRow row = new SummaryResponseRow();

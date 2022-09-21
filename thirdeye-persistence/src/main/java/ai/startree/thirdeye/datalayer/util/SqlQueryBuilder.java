@@ -176,26 +176,29 @@ public class SqlQueryBuilder {
 
   public PreparedStatement createDeleteStatement(final Connection connection,
       final Class<? extends AbstractEntity> entityClass,
-      final List<Long> ids, final boolean useBaseId) throws Exception {
-    if (ids == null || ids.isEmpty()) {
-      throw new IllegalArgumentException("ids to delete cannot be null/empty");
+      final Predicate predicate) throws Exception {
+    if (predicate == null || predicate.getOper() == null) {
+      throw new IllegalArgumentException("Predicate to delete cannot be null/empty");
     }
     final String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
+    final LinkedHashMap<String, ColumnInfo> columnInfoMap =
+        entityMappingHolder.columnInfoPerTable.get(tableName);
     final StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + tableName);
-    String whereString = " WHERE id IN( ";
-    if (useBaseId) {
-      whereString = " WHERE base_id IN( ";
-    }
-    final StringBuilder whereClause = new StringBuilder(whereString);
-    String delim = "";
-    for (final Long id : ids) {
-      whereClause.append(delim).append(id);
-      delim = ",";
-    }
-    whereClause.append(")");
+    final BiMap<String, String> entityNameToDBNameMapping =
+        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
+    List<Pair<String, Object>> parametersList = new ArrayList<>();
+    StringBuilder whereClause = new StringBuilder(" WHERE ");
+    generateWhereClause(entityNameToDBNameMapping, predicate, parametersList, whereClause);
     sqlBuilder.append(whereClause);
-    return connection.prepareStatement(sqlBuilder.toString());
+    final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
+    int parameterIndex = 1;
+    for (final Pair<String, Object> paramEntry : parametersList) {
+      final String dbFieldName = paramEntry.getKey();
+      final ColumnInfo info = columnInfoMap.get(dbFieldName);
+      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.getSqlType());
+    }
+    return prepareStatement;
   }
 
   public PreparedStatement createFindAllStatement(final Connection connection,

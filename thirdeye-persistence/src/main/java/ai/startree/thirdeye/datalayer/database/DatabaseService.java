@@ -199,46 +199,32 @@ public class DatabaseService {
     return AbstractIndexEntity.class.isAssignableFrom(clazz) ? "baseId" : "id";
   }
 
-  // TODO shounak
-  // replace the below method by delete(Predicate predicate, ...)
-  // after supporting a delete by predicate SqlQueryBuilder method
-  public Integer deleteByBaseId(final List<Long> idsToDelete, final Class<? extends AbstractIndexEntity> entityClass, final Connection managedConnection)
-      throws Exception {
-    final long tStart = System.nanoTime();
+  public Integer delete(final Predicate predicate, final Class<? extends AbstractEntity> entityClass) {
     try {
-      return runTask(connection -> {
-        if (CollectionUtils.isEmpty(idsToDelete)) {
-          return 0;
-        }
-        try (final PreparedStatement baseTableDeleteStatement = sqlQueryBuilder
-            .createDeleteStatement(connection, entityClass, idsToDelete, true)) {
-          return baseTableDeleteStatement.executeUpdate();
-        }
-      }, 0, managedConnection);
-    } finally {
-      dbWriteCallCounter.inc();
-      dbWriteDuration.update(System.nanoTime() - tStart);
-    }
-  }
-
-  public Integer delete(final List<Long> idsToDelete, final Class<? extends AbstractEntity> entityClass) {
-    try {
-      return delete(idsToDelete, entityClass, null);
+      return delete(predicate, entityClass, null);
     } catch (Exception e) {
       return 0;
     }
   }
 
-  public Integer delete(final List<Long> idsToDelete, final Class<? extends AbstractEntity> entityClass, final Connection managedConnection)
+  public Integer delete(final List<Long> idsToDelete, final Class<? extends AbstractEntity> entityClass) {
+    if (CollectionUtils.isEmpty(idsToDelete)) {
+      return 0;
+    }
+    try {
+      return delete(Predicate.IN(getIdColumnName(entityClass), idsToDelete.toArray()), entityClass, null);
+    } catch (Exception e) {
+      return 0;
+    }
+  }
+
+  public Integer delete(final Predicate predicate, final Class<? extends AbstractEntity> entityClass, final Connection managedConnection)
       throws Exception {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
-        if (CollectionUtils.isEmpty(idsToDelete)) {
-          return 0;
-        }
         try (final PreparedStatement baseTableDeleteStatement = sqlQueryBuilder
-            .createDeleteStatement(connection, entityClass, idsToDelete, false)) {
+            .createDeleteStatement(connection, entityClass, predicate)) {
           return baseTableDeleteStatement.executeUpdate();
         }
       }, 0, managedConnection);
@@ -422,9 +408,9 @@ public class DatabaseService {
   public Integer deleteByIds(final List<Long> idsToDelete, Class<? extends AbstractIndexEntity> indexClass) {
     return runTask(connection -> {
       // delete entry from base table
-      delete(idsToDelete, GenericJsonEntity.class, connection);
+      delete(Predicate.IN(getIdColumnName(GenericJsonEntity.class), idsToDelete.toArray()), GenericJsonEntity.class, connection);
       // delete entry from index table
-      return deleteByBaseId(idsToDelete, indexClass, connection);
+      return delete(Predicate.IN(getIdColumnName(indexClass), idsToDelete.toArray()), indexClass, connection);
     }, 0);
   }
 

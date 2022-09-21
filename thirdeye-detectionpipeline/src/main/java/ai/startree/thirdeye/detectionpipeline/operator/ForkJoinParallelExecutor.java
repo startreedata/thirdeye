@@ -106,22 +106,14 @@ public class ForkJoinParallelExecutor {
     try {
       /* Cloned context should contain the new nodes */
       final PlanNodeContext context = sourceNode.getContext();
-      final PlanNodeContext clonedContext = cloneContext(context, templateProperties)
+      final PlanNodeContext clonedContext = PlanNodeContext.copy(context)
+          .setPlanNodeBean(clonePlanNodeBean(templateProperties, context.getPlanNodeBean()))
           .setPipelinePlanNodes(clonedPipelinePlanNodes);
 
       return PlanNodeFactory.build(sourceNode.getClass(), clonedContext);
     } catch (final ReflectiveOperationException e) {
       throw new RuntimeException("Failed to clone PlanNode: " + sourceNode.getName(), e);
     }
-  }
-
-  private PlanNodeContext cloneContext(final PlanNodeContext context,
-      final Map<String, Object> templateProperties) {
-    return new PlanNodeContext()
-        .setName(context.getName())
-        .setPlanNodeBean(clonePlanNodeBean(templateProperties, context.getPlanNodeBean()))
-        .setProperties(context.getProperties())
-        .setDetectionInterval(context.getDetectionInterval());
   }
 
   private PlanNodeBean clonePlanNodeBean(final Map<String, Object> templateProperties,

@@ -35,8 +35,4 @@ public class EvaluationContextProcessor {
 
     return context;
   }
-
-  // fixme cyril this is to do in the datafetcher
-  //assertThat(injectedFilters.get(0).getDataset()).isEqualTo(DATASET_NAME);
-  //assertThat(injectedFilters.get(0).getMetricType()).isEqualTo(DimensionType.STRING);
 }

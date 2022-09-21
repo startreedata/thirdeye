@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.datalayer.util;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;
 
@@ -26,7 +25,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -51,7 +49,6 @@ public class SqlQueryBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(SqlQueryBuilder.class);
 
-  private static final String BASE_ID = "base_id";
   private static final String NAME_REGEX = "[a-z][_a-z0-9]*";
   private static final String PARAM_REGEX = ":(" + NAME_REGEX + ")";
   private static final Pattern PARAM_PATTERN =
@@ -134,30 +131,6 @@ public class SqlQueryBuilder {
     return preparedStatement;
   }
 
-  public PreparedStatement createFindByIdStatement(final Connection connection,
-      final Class<? extends AbstractEntity> entityClass, final Long id) throws Exception {
-    final String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
-    final String sql = String.format("Select * from %s where id=?", tableName);
-    final PreparedStatement prepareStatement = connection.prepareStatement(sql);
-    prepareStatement.setLong(1, id);
-    return prepareStatement;
-  }
-
-  public PreparedStatement createFindByIdStatement(final Connection connection,
-      final Class<? extends AbstractEntity> entityClass, final List<Long> ids) throws Exception {
-    final String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
-    final StringBuilder sql = new StringBuilder("Select * from " + tableName + " where id IN (");
-    String delim = "";
-    for (final Long id : ids) {
-      sql.append(delim).append(id);
-      delim = ", ";
-    }
-    sql.append(")");
-    return connection.prepareStatement(sql.toString());
-  }
-
   public PreparedStatement createUpdateStatement(final Connection connection, final AbstractEntity entity,
       final Set<String> fieldsToUpdate, final Predicate predicate) throws Exception {
     final String tableName =
@@ -225,44 +198,12 @@ public class SqlQueryBuilder {
     return connection.prepareStatement(sqlBuilder.toString());
   }
 
-  public PreparedStatement createDeleteByIdStatement(final Connection connection,
-      final Class<? extends AbstractEntity> entityClass, final Map<String, Object> filters) throws Exception {
-    final String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
-    final BiMap<String, String> entityNameToDBNameMapping =
-        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
-    final StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + tableName);
-    final StringBuilder whereClause = new StringBuilder(" WHERE ");
-    final LinkedHashMap<String, Object> parametersMap = new LinkedHashMap<>();
-    for (final String columnName : filters.keySet()) {
-      final String dbFieldName = entityNameToDBNameMapping.get(columnName);
-      whereClause.append(dbFieldName).append("=").append("?");
-      parametersMap.put(dbFieldName, filters.get(columnName));
-    }
-    sqlBuilder.append(whereClause);
-    final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
-    int parameterIndex = 1;
-    final LinkedHashMap<String, ColumnInfo> columnInfoMap =
-        entityMappingHolder.columnInfoPerTable.get(tableName);
-    for (final Entry<String, Object> paramEntry : parametersMap.entrySet()) {
-      final String dbFieldName = paramEntry.getKey();
-      final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.getSqlType());
-    }
-    return prepareStatement;
-  }
-
   public PreparedStatement createFindAllStatement(final Connection connection,
       final Class<? extends AbstractEntity> entityClass) throws Exception {
     final String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
     final String sql = "Select * from " + tableName;
     return connection.prepareStatement(sql);
-  }
-
-  public PreparedStatement createFindByParamsStatement(final Connection connection,
-      final Class<? extends AbstractEntity> entityClass, final Predicate predicate) throws Exception {
-    return createfindByParamsStatementWithLimit(connection, entityClass, predicate, null, null);
   }
 
   public PreparedStatement createfindByParamsStatementWithLimit(final Connection connection,
@@ -287,51 +228,6 @@ public class SqlQueryBuilder {
     int parameterIndex = 1;
     final LinkedHashMap<String, ColumnInfo> columnInfoMap =
         entityMappingHolder.columnInfoPerTable.get(tableName);
-    for (final Pair<String, Object> pair : parametersList) {
-      final String dbFieldName = pair.getKey();
-      final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      checkNotNull(info,
-          String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
-      prepareStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
-    }
-    return prepareStatement;
-  }
-
-  public PreparedStatement createStatement(final Connection connection, final DaoFilter daoFilter,
-      final Class<? extends AbstractIndexEntity> entityClass)
-      throws Exception {
-    final String tableName = entityMappingHolder.tableToEntityNameMap.inverse()
-        .get(entityClass.getSimpleName());
-    final BiMap<String, String> entityNameToDBNameMapping =
-        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
-
-    final List<Pair<String, Object>> parametersList = new ArrayList<>();
-
-    final StringBuilder whereClause = new StringBuilder(" WHERE ");
-    generateWhereClause(entityNameToDBNameMapping,
-        daoFilter.getPredicate(),
-        parametersList,
-        whereClause);
-    final StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM " + tableName);
-    sqlBuilder.append(whereClause);
-
-    optional(daoFilter.getOrderByKey())
-        .ifPresent(key -> sqlBuilder
-            .append(" ORDER BY ")
-            .append(key)
-            .append(daoFilter.isDesc() ? " DESC" : ""));
-
-    optional(daoFilter.getLimit())
-        .ifPresent(limit -> sqlBuilder.append(" LIMIT ").append(limit));
-
-    optional(daoFilter.getOffset())
-        .ifPresent(offset -> sqlBuilder.append(" OFFSET ").append(offset));
-
-    final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
-    int parameterIndex = 1;
-    final Map<String, ColumnInfo> columnInfoMap =
-        entityMappingHolder.columnInfoPerTable.get(tableName);
-
     for (final Pair<String, Object> pair : parametersList) {
       final String dbFieldName = pair.getKey();
       final ColumnInfo info = columnInfoMap.get(dbFieldName);
@@ -500,52 +396,5 @@ public class SqlQueryBuilder {
     }
 
     return ps;
-  }
-
-  public PreparedStatement createUpdateStatementForIndexTable(final Connection connection,
-      final AbstractIndexEntity entity) throws Exception {
-    final String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(entity.getClass().getSimpleName());
-    final LinkedHashMap<String, ColumnInfo> columnInfoMap =
-        entityMappingHolder.columnInfoPerTable.get(tableName);
-
-    final StringBuilder sqlBuilder = new StringBuilder("UPDATE " + tableName + " SET ");
-    String delim = "";
-    final LinkedHashMap<String, Object> parameterMap = new LinkedHashMap<>();
-    for (final ColumnInfo columnInfo : columnInfoMap.values()) {
-      final String columnNameInDB = columnInfo.getColumnNameInDB();
-      if (!columnNameInDB.equalsIgnoreCase(BASE_ID) && !AUTO_UPDATE_COLUMN_SET.contains(
-          columnNameInDB)) {
-        final Field field = columnInfo.getField();
-        if (field == null) {
-          LOG.error(String.format("DB schema update required. field %s is no longer in table: %s",
-              columnNameInDB, tableName));
-          continue;
-        }
-        Object val = field.get(entity);
-        if (val != null) {
-          if (Enum.class.isAssignableFrom(val.getClass())) {
-            val = val.toString();
-          }
-          sqlBuilder.append(delim);
-          sqlBuilder.append(columnNameInDB);
-          sqlBuilder.append("=");
-          sqlBuilder.append("?");
-          delim = ",";
-          parameterMap.put(columnNameInDB, val);
-        }
-      }
-    }
-    //ADD WHERE CLAUSE TO CHECK FOR ENTITY ID
-    sqlBuilder.append(" WHERE base_id=?");
-    parameterMap.put(BASE_ID, entity.getBaseId());
-    int parameterIndex = 1;
-    final PreparedStatement prepareStatement = connection.prepareStatement(sqlBuilder.toString());
-    for (final Entry<String, Object> paramEntry : parameterMap.entrySet()) {
-      final String dbFieldName = paramEntry.getKey();
-      final ColumnInfo info = columnInfoMap.get(dbFieldName);
-      prepareStatement.setObject(parameterIndex++, paramEntry.getValue(), info.getSqlType());
-    }
-    return prepareStatement;
   }
 }

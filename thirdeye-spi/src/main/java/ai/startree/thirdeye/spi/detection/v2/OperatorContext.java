@@ -13,12 +13,15 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import java.util.List;
 import java.util.Map;
 import org.joda.time.Interval;
 
 public class OperatorContext {
   private Interval detectionInterval;
+  private List<Predicate> predicates;
   private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, OperatorResult> inputsMap;
@@ -56,6 +59,16 @@ public class OperatorContext {
 
   public OperatorContext setInputsMap(final Map<String, OperatorResult> inputsMap) {
     this.inputsMap = inputsMap;
+    return this;
+  }
+
+  public List<Predicate> getPredicates() {
+    return predicates;
+  }
+
+  public OperatorContext setPredicates(
+      final List<Predicate> predicates) {
+    this.predicates = predicates;
     return this;
   }
 }

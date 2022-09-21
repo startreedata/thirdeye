@@ -28,10 +28,12 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.joda.time.Interval;
 
@@ -47,7 +49,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   private String tableName;
   private ThirdEyeDataSource thirdEyeDataSource;
   private DatasetConfigDTO datasetConfigDTO;
-  private List<QueryPredicate> timeseriesFilters;
+  private List<QueryPredicate> timeseriesFilters = List.of();
 
   public String getQuery() {
     return query;
@@ -79,7 +81,15 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           .getDataSourceCache()
           .getDataSource(dataSource), "data source is unavailable");
     }
-    this.timeseriesFilters = dataFetcherSpec.getTimeseriesFilters();
+
+    if (!dataFetcherSpec.getTimeseriesFilters().isEmpty()) {
+      checkArgument(tableName != null,
+          "tableName is not set in DataFetcherSpec. Cannot inject filters without tableName");
+      this.timeseriesFilters = dataFetcherSpec.getTimeseriesFilters()
+          .stream()
+          .map(p -> QueryPredicate.of(p, getDimensionType(p.getLhs(), tableName), tableName))
+          .collect(Collectors.toList());
+    }
   }
 
   @Override
@@ -97,8 +107,8 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     }
     SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     checkArgument(sqlLanguage != null,
-            "Sql manipulation not supported for datasource %s, but filters list is not empty. Cannot apply filters.",
-            thirdEyeDataSource.getName());
+        "Sql manipulation not supported for datasource %s, but filters list is not empty. Cannot apply filters.",
+        thirdEyeDataSource.getName());
     return new FilterEngine(sqlLanguage, query, timeseriesFilters).prepareQuery();
   }
 
@@ -116,5 +126,12 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           queryWithFilters).prepareRequest();
     }
     return new DataSourceRequest(tableName, query, ImmutableMap.of());
+  }
+
+  // fixme datatype from metricDTO is always string + abstraction metric/dimension needs refactoring
+  private DimensionType getDimensionType(final String metric, final String dataset) {
+    // first version: assume dimension is always of type String
+    // todo fetch info from database with a DAO
+    return DimensionType.STRING;
   }
 }

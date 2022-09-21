@@ -41,7 +41,6 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,12 +110,11 @@ public class PlanNodeFactory {
   }
 
   public PlanNode build(final PlanNodeBean planNodeBean,
-      final Interval detectionInterval,
+      final PlanNodeContext runTimeContext,
       final Map<String, PlanNode> pipelinePlanNodes) {
-    final PlanNodeContext context = new PlanNodeContext()
+    final PlanNodeContext context = runTimeContext.clone()
         .setName(planNodeBean.getName())
         .setPlanNodeBean(planNodeBean)
-        .setDetectionInterval(detectionInterval)
         .setPipelinePlanNodes(pipelinePlanNodes)
         .setProperties(ImmutableMap.of(
             Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,

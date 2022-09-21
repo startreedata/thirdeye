@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.spec;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -49,7 +49,7 @@ public class DataFetcherSpec extends AbstractSpec {
   /**
    * Expected to be set during DataFetcherOperator init.
    */
-  private List<QueryPredicate> timeseriesFilters;
+  private List<Predicate> timeseriesFilters;
 
   public String getDataSource() {
     return dataSource;
@@ -95,12 +95,12 @@ public class DataFetcherSpec extends AbstractSpec {
     return this;
   }
 
-  public List<QueryPredicate> getTimeseriesFilters() {
+  public List<Predicate> getTimeseriesFilters() {
     return timeseriesFilters;
   }
 
   public DataFetcherSpec setTimeseriesFilters(
-      final List<QueryPredicate> timeseriesFilters) {
+      final List<Predicate> timeseriesFilters) {
     this.timeseriesFilters = timeseriesFilters;
     return this;
   }

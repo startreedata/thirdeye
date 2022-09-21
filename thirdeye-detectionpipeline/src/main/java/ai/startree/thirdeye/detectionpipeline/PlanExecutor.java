@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
+import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.joda.time.Interval;
 
 @Singleton
 public class PlanExecutor {
@@ -89,11 +89,9 @@ public class PlanExecutor {
    */
   public Map<String, OperatorResult> runPipelineAndGetRootOutputs(
       final List<PlanNodeBean> planNodeBeans,
-      final Interval detectionInterval)
+      final PlanNodeContext runTimeContext)
       throws Exception {
-    final Map<ContextKey, OperatorResult> context = runPipeline(
-        planNodeBeans,
-        detectionInterval);
+    final Map<ContextKey, OperatorResult> context = runPipeline(planNodeBeans, runTimeContext);
 
     /* Return the output */
     return getOutput(context, ROOT_OPERATOR_KEY);
@@ -108,11 +106,11 @@ public class PlanExecutor {
    */
   public Map<ContextKey, OperatorResult> runPipeline(
       final List<PlanNodeBean> planNodeBeans,
-      final Interval detectionInterval) throws Exception {
+      final PlanNodeContext runTimeContext) throws Exception {
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(
         planNodeBeans,
-        detectionInterval);
+        runTimeContext);
 
     /* The context stores all the outputs from all the nodes */
     final Map<ContextKey, OperatorResult> resultMap = new HashMap<>();
@@ -126,12 +124,12 @@ public class PlanExecutor {
 
   @VisibleForTesting
   Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
-      final Interval detectionInterval) {
+      final PlanNodeContext runTimeContext) {
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean planNodeBean : planNodeBeans) {
       final PlanNode planNode = planNodeFactory.build(
           planNodeBean,
-          detectionInterval,
+          runTimeContext,
           pipelinePlanNodes
       );
 

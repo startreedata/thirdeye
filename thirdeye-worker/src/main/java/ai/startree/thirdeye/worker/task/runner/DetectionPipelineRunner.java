@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -128,9 +129,10 @@ public class DetectionPipelineRunner {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
         detectionInterval);
 
+    final PlanNodeContext runTimeContext = new PlanNodeContext().setDetectionInterval(detectionInterval);
     final Map<String, OperatorResult> detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(
         templateWithProperties.getNodes(),
-        detectionInterval);
+        runTimeContext);
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     return detectionPipelineResultMap.values().iterator().next();

@@ -132,8 +132,14 @@ public class PlanExecutorTest {
     );
 
     final Map<ContextKey, OperatorResult> resultMap = new HashMap<>();
+    final Interval detectionInterval = new Interval(
+        0L,
+        System.currentTimeMillis(),
+        DateTimeZone.UTC);
+    final PlanNodeContext runTimeContext = new PlanNodeContext().setDetectionInterval(
+        detectionInterval);
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,
-        new Interval(0L, System.currentTimeMillis(), DateTimeZone.UTC));
+        runTimeContext);
     PlanExecutor.executePlanNode(
         pipelinePlanNodes,
         pipelinePlanNodes.get("root"),

@@ -69,26 +69,6 @@
       <artifactId>calcite-babel</artifactId>
     </dependency>
 
-    <!--UI dependencies -->
-    <dependency>
-      <groupId>com.github.jknack</groupId>
-      <artifactId>handlebars</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jknack</groupId>
-      <artifactId>handlebars-guava-cache</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jfree</groupId>
-      <artifactId>jfreechart</artifactId>
-    </dependency>
-
     <!-- from detector dep tree -->
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -97,10 +77,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.scireum</groupId>
-      <artifactId>parsii</artifactId>
     </dependency>
     <dependency>
       <groupId>com.couchbase.client</groupId>

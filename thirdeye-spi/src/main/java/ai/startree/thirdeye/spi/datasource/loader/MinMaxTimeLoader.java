@@ -6,11 +6,9 @@ import org.joda.time.Interval;
 
 public interface MinMaxTimeLoader {
 
-  enum Extremum {
-    MIN,
-    MAX
-  }
+  @Nullable Long fetchMinTime(final DatasetConfigDTO datasetConfigDTO,
+      final @Nullable Interval timeFilterInterval) throws Exception;
 
-  Long fetchExtremumTime(final Extremum extremum, final DatasetConfigDTO datasetConfigDTO,
+  @Nullable Long fetchMaxTime(final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception;
 }

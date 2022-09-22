@@ -39,7 +39,19 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     this.dataSourceCache = dataSourceCache;
   }
 
-  public Long fetchExtremumTime(final Extremum extremum, final DatasetConfigDTO datasetConfigDTO,
+  @Override
+  public @Nullable Long fetchMinTime(final DatasetConfigDTO datasetConfigDTO,
+      final @Nullable Interval timeFilterInterval) throws Exception {
+    return fetchExtremumTime(Extremum.MIN, datasetConfigDTO, timeFilterInterval);
+  }
+
+  @Override
+  public @Nullable Long fetchMaxTime(final DatasetConfigDTO datasetConfigDTO,
+      final @Nullable Interval timeFilterInterval) throws Exception {
+    return fetchExtremumTime(Extremum.MAX, datasetConfigDTO, timeFilterInterval);
+  }
+
+  private @Nullable Long fetchExtremumTime(final Extremum extremum, final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception {
     final String dataSourceName = Objects.requireNonNull(datasetConfigDTO.getDataSource());
     final @NonNull ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
@@ -94,7 +106,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
         dialect);
 
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
-    final QueryProjection orderByProjection = orderByProjection(extremum, quoteSafeTimeColumn);
+    final QueryProjection orderByProjection = extremum.orderByProjection(quoteSafeTimeColumn);
 
     final CalciteRequest.Builder calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
         .addSelectProjection(projection)
@@ -111,17 +123,6 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     return calciteRequestBuilder.build().getSql(sqlLanguage, sqlExpressionBuilder);
   }
 
-  private QueryProjection orderByProjection(final Extremum extremum, final String quoteSafeTimeColumn) {
-    switch (extremum) {
-      case MIN:
-        return QueryProjection.of(quoteSafeTimeColumn);
-      case MAX:
-        return QueryProjection.of(quoteSafeTimeColumn).withDescOrder();
-      default:
-        throw new UnsupportedOperationException();
-    }
-  }
-
   private QueryProjection getTimeColumnToMillisProjection(final DatasetConfigDTO datasetConfigDTO,
       final SqlExpressionBuilder sqlExpressionBuilder, final SqlDialect dialect) {
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
@@ -132,5 +133,21 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
         datasetConfigDTO.getTimeUnit().toString(),
         DateTimeZone.UTC.toString());
     return QueryProjection.of(timeGroupExpression).withAlias(TIME_ALIAS);
+  }
+
+  private enum Extremum {
+    MIN {
+      @Override
+      @NonNull QueryProjection orderByProjection(final String quoteSafeTimeColumn) {
+        return QueryProjection.of(quoteSafeTimeColumn);
+      }
+    }, MAX {
+      @Override
+      @NonNull QueryProjection orderByProjection(final String quoteSafeTimeColumn) {
+        return QueryProjection.of(quoteSafeTimeColumn).withDescOrder();
+      }
+    };
+
+    abstract @NonNull QueryProjection orderByProjection(final String quoteSafeTimeColumn);
   }
 }

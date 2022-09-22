@@ -27,7 +27,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader.Extremum;
 import ai.startree.thirdeye.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -56,7 +55,8 @@ public class AlertInsightsProvider {
 
   @Inject
   public AlertInsightsProvider(final AlertTemplateRenderer alertTemplateRenderer,
-      final DatasetConfigManager datasetConfigManager, final DefaultMinMaxTimeLoader minMaxTimeLoader) {
+      final DatasetConfigManager datasetConfigManager,
+      final DefaultMinMaxTimeLoader minMaxTimeLoader) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.datasetConfigManager = datasetConfigManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
@@ -116,17 +116,13 @@ public class AlertInsightsProvider {
 
   private void addDatasetStart(final AlertInsightsApi insights,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
-    final Long datasetMinTime = minMaxTimeLoader.fetchExtremumTime(Extremum.MIN,
-        datasetConfigDTO,
-        null);
+    final Long datasetMinTime = minMaxTimeLoader.fetchMinTime(datasetConfigDTO, null);
     insights.setDatasetStartTime(datasetMinTime);
   }
 
   private void addDatasetEnd(final AlertInsightsApi insights,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
-    final Long datasetMaxTime = minMaxTimeLoader.fetchExtremumTime(Extremum.MAX,
-        datasetConfigDTO,
-        null);
+    final Long datasetMaxTime = minMaxTimeLoader.fetchMaxTime(datasetConfigDTO, null);
     if (datasetMaxTime == null) {
       return;
     }
@@ -147,9 +143,7 @@ public class AlertInsightsProvider {
         System.currentTimeMillis(),
         maximumPossibleEndTime);
     final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
-    final Long safeMaxTime = minMaxTimeLoader.fetchExtremumTime(Extremum.MAX,
-        datasetConfigDTO,
-        safeInterval);
+    final Long safeMaxTime = minMaxTimeLoader.fetchMaxTime(datasetConfigDTO, safeInterval);
     if (safeMaxTime == null) {
       LOG.warn("Could not fetch the maxTime on a safe time interval for dataset {}.",
           datasetConfigDTO.getDataset());

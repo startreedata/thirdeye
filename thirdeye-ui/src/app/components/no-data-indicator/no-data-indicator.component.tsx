@@ -47,6 +47,13 @@ export const NoDataIndicator: FunctionComponent<NoDataIndicatorProps> = (
                     <Typography variant="body2">{props.text}</Typography>
                 </div>
             )}
+
+            {/* children */}
+            {props.children && (
+                <div className={noDataIndicatorClasses.text}>
+                    {props.children}
+                </div>
+            )}
         </div>
     );
 };

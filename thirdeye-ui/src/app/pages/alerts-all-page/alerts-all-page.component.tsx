@@ -11,11 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
 import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -35,8 +39,11 @@ import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { PROMISES } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
+import { getAlertsCreatePath } from "../../utils/routes/routes.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
@@ -72,6 +79,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     }, []);
 
     const fetchAllAlerts = (): void => {
+        setIsLoading(true);
         setUiAlerts(null);
 
         let fetchedUiAlerts: UiAlert[] = [];
@@ -83,6 +91,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                     subscriptionGroupsResponse.status === PROMISES.REJECTED ||
                     alertsResponse.status === PROMISES.REJECTED
                 ) {
+                    setIsError(true);
                     const axiosError =
                         alertsResponse.status === PROMISES.REJECTED
                             ? alertsResponse.reason
@@ -103,6 +112,8 @@ export const AlertsAllPage: FunctionComponent = () => {
                             ),
                         })
                     );
+                } else {
+                    setIsError(false);
                 }
 
                 // Attempt to gather data
@@ -118,6 +129,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                 }
             })
             .finally(() => {
+                setIsLoading(false);
                 setUiAlerts(fetchedUiAlerts);
             });
     };
@@ -179,6 +191,52 @@ export const AlertsAllPage: FunctionComponent = () => {
         });
     };
 
+    const loadingErrorStateParams = {
+        isError,
+        isLoading,
+    };
+
+    const emptyStateParams = {
+        emptyState: (
+            <Grid xs={12}>
+                <Card variant="outlined">
+                    <CardContent>
+                        <Box pb={20} pt={20}>
+                            <NoDataIndicator>
+                                <Box>
+                                    {t("message.no-alerts-created")}{" "}
+                                    <Link
+                                        href="https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/create-your-first-alert"
+                                        target="_blank"
+                                    >
+                                        {t("message.view-documentation")}
+                                    </Link>{" "}
+                                    {t("message.on-how-to-create-entity", {
+                                        entity: t("label.alert"),
+                                    })}
+                                </Box>
+                                <Box marginTop={2} textAlign="center">
+                                    or
+                                </Box>
+                                <Box marginTop={2} textAlign="center">
+                                    <Button
+                                        color="primary"
+                                        href={getAlertsCreatePath()}
+                                    >
+                                        {t("label.create-an-entity", {
+                                            entity: t("label.alert"),
+                                        })}
+                                    </Button>
+                                </Box>
+                            </NoDataIndicator>
+                        </Box>
+                    </CardContent>
+                </Card>
+            </Grid>
+        ),
+        isEmpty: !!uiAlerts && uiAlerts.length === 0,
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -188,12 +246,15 @@ export const AlertsAllPage: FunctionComponent = () => {
             />
 
             <PageContentsGridV1 fullHeight>
-                {/* Alert list */}
-                <AlertListV1
-                    alerts={uiAlerts}
-                    onAlertReset={handleAlertReset}
-                    onDelete={handleAlertDelete}
-                />
+                <LoadingErrorStateSwitch {...loadingErrorStateParams}>
+                    <EmptyStateSwitch {...emptyStateParams}>
+                        <AlertListV1
+                            alerts={uiAlerts}
+                            onAlertReset={handleAlertReset}
+                            onDelete={handleAlertDelete}
+                        />
+                    </EmptyStateSwitch>
+                </LoadingErrorStateSwitch>
             </PageContentsGridV1>
         </PageV1>
     );

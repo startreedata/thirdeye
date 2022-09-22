@@ -16,6 +16,7 @@ import { Alert, AlertEvaluation, AlertInsight } from "../dto/alert.interfaces";
 import {
     GetAlert,
     GetAlertInsight,
+    GetAlerts,
     GetEvaluation,
     ResetAlert,
     UseGetEvaluationParams,
@@ -24,6 +25,7 @@ import {
     getAlert as getAlertREST,
     getAlertEvaluation,
     getAlertInsight as getAlertInsightREST,
+    getAllAlerts,
     resetAlert as resetAlertREST,
 } from "./alerts.rest";
 
@@ -50,6 +52,17 @@ export const useGetAlert = (): GetAlert => {
     };
 
     return { alert: data, getAlert, status, errorMessages };
+};
+
+export const useGetAlerts = (): GetAlerts => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<Alert[]>(getAllAlerts);
+
+    const getAlerts = (): Promise<Alert[] | undefined> => {
+        return makeRequest();
+    };
+
+    return { alerts: data, getAlerts, status, errorMessages };
 };
 
 export const useGetAlertInsight = (): GetAlertInsight => {

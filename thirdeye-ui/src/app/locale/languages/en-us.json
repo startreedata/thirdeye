@@ -32,6 +32,7 @@
         "page-not-found": "Page Not Found",
         "create": "Create",
         "create-entity": "Create {{entity}}",
+        "create-an-entity": "Create an {{entity}}",
         "add": "Add",
         "add-entity": "Add {{entity}}",
         "update": "Update",
@@ -242,6 +243,7 @@
         "yes": "Yes",
         "no": "No",
         "reset": "Reset",
+        "clear-filters": "Clear Filters",
         "confirm": "Confirm",
         "add-more-channels": "Add More Channels",
         "webhook-url": "Webhook URL",
@@ -365,6 +367,12 @@
         "list-of-all-dimensions-related-to-alert": "List of all dimensions related to this alert for the date range selected",
         "show-count-entity-for-time-range": "Show {{count}} {{entity}} for time range",
         "experienced-issue-fetching-enumeration-item-required-for-charting": "Experienced error fetching enumeration item for anomaly which is required for charting",
-        "could-not-find-matching-chart-data-for-anomaly": "Could not find matching chart data for anomaly"
+        "could-not-find-matching-chart-data-for-anomaly": "Could not find matching chart data for anomaly",
+        "no-alerts-created": "No alerts created. Visit",
+        "create-your-first-alert-documentation": "create your first alert documentation",
+        "for-more-information-on-creating-alert": "for more information on how to create an alert.",
+        "on-how-to-create-entity": "on how to create a {{entity}}.",
+        "no-entity-created": "No {{entity}} created.",
+        "view-documentation": "View documentation"
     }
 }

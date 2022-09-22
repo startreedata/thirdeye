@@ -11,13 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box, Button, Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTemplateListV1 } from "../../components/alert-template-list-v1/alert-template-list-v1.component";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
@@ -33,6 +38,7 @@ import {
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
+import { getAlertTemplatesCreatePath } from "../../utils/routes/routes.util";
 
 export const AlertTemplatesAllPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
@@ -124,12 +130,59 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
             <ConfigurationPageHeader selectedIndex={3} />
 
             <PageContentsGridV1 fullHeight>
-                {/* Alert Template list */}
-                <AlertTemplateListV1
-                    alertTemplates={alertTemplates}
-                    onChange={handleAlertTemplateChange}
-                    onDelete={handleAlertTemplateDelete}
-                />
+                <LoadingErrorStateSwitch
+                    isError={alertTemplatesRequestStatus == ActionStatus.Error}
+                    isLoading={
+                        alertTemplatesRequestStatus == ActionStatus.Working
+                    }
+                >
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Grid item xs={12}>
+                                <PageContentsCardV1>
+                                    <Box padding={20}>
+                                        <NoDataIndicator>
+                                            <Box textAlign="center">
+                                                {t(
+                                                    "message.no-entity-created",
+                                                    {
+                                                        entity: t(
+                                                            "label.alert-templates"
+                                                        ),
+                                                    }
+                                                )}
+                                            </Box>
+                                            <Box
+                                                marginTop={2}
+                                                textAlign="center"
+                                            >
+                                                <Button
+                                                    color="primary"
+                                                    href={getAlertTemplatesCreatePath()}
+                                                >
+                                                    {t("label.create-entity", {
+                                                        entity: t(
+                                                            "label.alert-template"
+                                                        ),
+                                                    })}
+                                                </Button>
+                                            </Box>
+                                        </NoDataIndicator>
+                                    </Box>
+                                </PageContentsCardV1>
+                            </Grid>
+                        }
+                        isEmpty={
+                            !!alertTemplates && alertTemplates.length === 0
+                        }
+                    >
+                        <AlertTemplateListV1
+                            alertTemplates={alertTemplates}
+                            onChange={handleAlertTemplateChange}
+                            onDelete={handleAlertTemplateDelete}
+                        />
+                    </EmptyStateSwitch>
+                </LoadingErrorStateSwitch>
             </PageContentsGridV1>
         </PageV1>
     );

@@ -11,9 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import { Box, Button, Grid } from "@material-ui/core";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { AnomaliesPageHeader } from "../../components/anomalies-page-header/anomalies-page-header.component";
@@ -22,10 +21,12 @@ import {
     promptDeleteConfirmation,
 } from "../../components/anomaly-list-v1/anomaly-list-v1.utils";
 import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
+import { AnomalyQuickFilters } from "../../components/anomaly-quick-filters/anomaly-quick-filters.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
@@ -38,11 +39,12 @@ import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     // Use state so we can remove anomalies locally without having to fetch again
-    const [anomalies, setAnomalies] = useState<Anomaly[] | null>(null);
+    const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
     const {
         getAnomalies,
         status: getAnomaliesRequestStatus,
@@ -51,37 +53,15 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        // Time range refreshed, fetch anomalies
-        fetchAnomaliesByTime();
-    }, [searchParams]);
-
-    useEffect(() => {
-        if (
-            getAnomaliesRequestStatus === ActionStatus.Done &&
-            anomalies &&
-            anomalies.length === 0
-        ) {
-            notify(
-                NotificationTypeV1.Info,
-                t("message.no-data-for-entity-for-date-range", {
-                    entity: t("label.anomalies"),
-                })
-            );
-        }
-    }, [getAnomaliesRequestStatus, anomalies]);
-
-    const fetchAnomaliesByTime = (): void => {
-        setAnomalies(null);
-
-        const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-        const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
-        const params: GetAnomaliesProps = {
-            startTime: Number(start),
-            endTime: Number(end),
-        };
-
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
+    const anomalyFilters = useMemo(() => {
+        const params: GetAnomaliesProps = {};
         if (searchParams.has(AnomalyFilterQueryStringKey.ALERT)) {
             params.alertId = parseInt(
                 searchParams.get(AnomalyFilterQueryStringKey.ALERT) || ""
@@ -100,9 +80,28 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             ) as string;
         }
 
+        return params;
+    }, [searchParams]);
+
+    useEffect(() => {
+        // Time range refreshed, fetch anomalies
+        fetchAnomaliesByTime();
+    }, [startTime, endTime, anomalyFilters]);
+
+    const fetchAnomaliesByTime = (): void => {
+        setAnomalies([]);
+
+        const params: GetAnomaliesProps = {
+            startTime: Number(startTime),
+            endTime: Number(endTime),
+            ...anomalyFilters,
+        };
+
         getAnomalies(params).then((anomalies) => {
             if (anomalies && anomalies.length > 0) {
                 setAnomalies(anomalies);
+            } else {
+                setAnomalies([]);
             }
         });
     };
@@ -131,19 +130,22 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         );
     };
 
+    const handleResetFiltersClick = (): void => {
+        searchParams.delete(AnomalyFilterQueryStringKey.ALERT);
+        searchParams.delete(AnomalyFilterQueryStringKey.DATASET);
+        searchParams.delete(AnomalyFilterQueryStringKey.METRIC);
+        setSearchParams(searchParams, { replace: true });
+    };
+
     useEffect(() => {
-        if (getAnomaliesRequestStatus === ActionStatus.Error) {
-            !isEmpty(anomaliesRequestErrors)
-                ? anomaliesRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.anomalies"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            getAnomaliesRequestStatus,
+            anomaliesRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.anomalies"),
+            })
+        );
     }, [getAnomaliesRequestStatus, anomaliesRequestErrors]);
 
     return (
@@ -151,32 +153,85 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             <AnomaliesPageHeader />
 
             <PageContentsGridV1 fullHeight>
-                {getAnomaliesRequestStatus === ActionStatus.Working && (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <SkeletonV1 animation="pulse" />
-                            <SkeletonV1 animation="pulse" />
-                            <SkeletonV1 animation="pulse" />
-                        </PageContentsCardV1>
-                    </Grid>
-                )}
-
-                {getAnomaliesRequestStatus === ActionStatus.Done && (
-                    <Outlet
-                        context={{
-                            anomalies,
-                            handleAnomalyDelete,
-                        }}
-                    />
-                )}
-
-                {getAnomaliesRequestStatus === ActionStatus.Error && (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <NoDataIndicator />
-                        </PageContentsCardV1>
-                    </Grid>
-                )}
+                <LoadingErrorStateSwitch
+                    errorState={
+                        <Grid item xs={12}>
+                            <PageContentsCardV1>
+                                <NoDataIndicator />
+                            </PageContentsCardV1>
+                        </Grid>
+                    }
+                    isError={getAnomaliesRequestStatus === ActionStatus.Error}
+                    isLoading={
+                        getAnomaliesRequestStatus === ActionStatus.Working
+                    }
+                    loadingState={
+                        <Grid item xs={12}>
+                            <PageContentsCardV1>
+                                <SkeletonV1 animation="pulse" />
+                                <SkeletonV1 animation="pulse" />
+                                <SkeletonV1 animation="pulse" />
+                            </PageContentsCardV1>
+                        </Grid>
+                    }
+                >
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Grid item xs={12}>
+                                <PageContentsCardV1>
+                                    <AnomalyQuickFilters />
+                                    <Box pb={20} pt={20}>
+                                        <NoDataIndicator>
+                                            <Box>
+                                                {t(
+                                                    "message.no-data-for-entity-for-date-range",
+                                                    {
+                                                        entity: t(
+                                                            "label.anomalies"
+                                                        ),
+                                                    }
+                                                )}
+                                            </Box>
+                                            {Object.keys(anomalyFilters)
+                                                .length > 0 && (
+                                                <>
+                                                    <Box
+                                                        marginTop={3}
+                                                        textAlign="center"
+                                                    >
+                                                        or
+                                                    </Box>
+                                                    <Box
+                                                        marginTop={3}
+                                                        textAlign="center"
+                                                    >
+                                                        <Button
+                                                            onClick={
+                                                                handleResetFiltersClick
+                                                            }
+                                                        >
+                                                            {t(
+                                                                "label.clear-filters"
+                                                            )}
+                                                        </Button>
+                                                    </Box>
+                                                </>
+                                            )}
+                                        </NoDataIndicator>
+                                    </Box>
+                                </PageContentsCardV1>
+                            </Grid>
+                        }
+                        isEmpty={anomalies.length === 0}
+                    >
+                        <Outlet
+                            context={{
+                                anomalies,
+                                handleAnomalyDelete,
+                            }}
+                        />
+                    </EmptyStateSwitch>
+                </LoadingErrorStateSwitch>
             </PageContentsGridV1>
         </PageV1>
     );

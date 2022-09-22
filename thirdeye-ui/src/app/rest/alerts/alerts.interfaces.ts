@@ -35,6 +35,11 @@ export interface GetAlert extends ActionHook {
     getAlert: (id: number) => Promise<Alert | undefined>;
 }
 
+export interface GetAlerts extends ActionHook {
+    alerts: Alert[] | null;
+    getAlerts: () => Promise<Alert[] | undefined>;
+}
+
 export interface GetAlertInsight extends ActionHook {
     alertInsight: AlertInsight | null;
     getAlertInsight: (id: number) => Promise<AlertInsight | undefined>;

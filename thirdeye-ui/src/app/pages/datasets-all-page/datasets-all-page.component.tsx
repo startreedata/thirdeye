@@ -11,31 +11,37 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box, Button, Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import { DatasetListV1 } from "../../components/dataset-list-v1/dataset-list-v1.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import {
-    deleteDataset,
-    getAllDatasets,
-} from "../../rest/datasets/datasets.rest";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetDatasets } from "../../rest/datasets/datasets.actions";
+import { deleteDataset } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
+import { getDatasetsOnboardPath } from "../../utils/routes/routes.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
-    const [uiDatasets, setUiDatasets] = useState<UiDataset[] | null>(null);
+    const { getDatasets, status, errorMessages } = useGetDatasets();
+    const [uiDatasets, setUiDatasets] = useState<UiDataset[]>([]);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -45,29 +51,25 @@ export const DatasetsAllPage: FunctionComponent = () => {
         fetchAllDatasets();
     }, []);
 
+    useEffect(() => {
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.datasets"),
+            })
+        );
+    }, [status]);
+
     const fetchAllDatasets = (): void => {
-        setUiDatasets(null);
+        setUiDatasets([]);
 
-        let fetchedUiDatasets: UiDataset[] = [];
-        getAllDatasets()
-            .then((datasets) => {
-                fetchedUiDatasets = getUiDatasets(datasets);
-            })
-            .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.error-while-fetching", {
-                              entity: t("label.datasets"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
-            })
-            .finally(() => setUiDatasets(fetchedUiDatasets));
+        getDatasets().then((datasets) => {
+            if (datasets) {
+                setUiDatasets(getUiDatasets(datasets));
+            }
+        });
     };
 
     const handleDatasetDelete = (uiDataset: UiDataset): void => {
@@ -94,18 +96,14 @@ export const DatasetsAllPage: FunctionComponent = () => {
                 removeUiDataset(dataset);
             })
             .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.delete-error", {
-                              entity: t("label.dataset"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.delete-error", {
+                        entity: t("label.dataset"),
+                    })
+                );
             });
     };
 
@@ -125,10 +123,54 @@ export const DatasetsAllPage: FunctionComponent = () => {
         <PageV1>
             <ConfigurationPageHeader selectedIndex={1} />
             <PageContentsGridV1 fullHeight>
-                <DatasetListV1
-                    datasets={uiDatasets}
-                    onDelete={handleDatasetDelete}
-                />
+                <LoadingErrorStateSwitch
+                    isError={status == ActionStatus.Error}
+                    isLoading={status == ActionStatus.Working}
+                >
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Grid item xs={12}>
+                                <PageContentsCardV1>
+                                    <Box padding={20}>
+                                        <NoDataIndicator>
+                                            <Box textAlign="center">
+                                                {t(
+                                                    "message.no-entity-created",
+                                                    {
+                                                        entity: t(
+                                                            "label.datasets"
+                                                        ),
+                                                    }
+                                                )}
+                                            </Box>
+                                            <Box
+                                                marginTop={2}
+                                                textAlign="center"
+                                            >
+                                                <Button
+                                                    color="primary"
+                                                    href={getDatasetsOnboardPath()}
+                                                >
+                                                    {t("label.create-entity", {
+                                                        entity: t(
+                                                            "label.dataset"
+                                                        ),
+                                                    })}
+                                                </Button>
+                                            </Box>
+                                        </NoDataIndicator>
+                                    </Box>
+                                </PageContentsCardV1>
+                            </Grid>
+                        }
+                        isEmpty={uiDatasets.length === 0}
+                    >
+                        <DatasetListV1
+                            datasets={uiDatasets}
+                            onDelete={handleDatasetDelete}
+                        />
+                    </EmptyStateSwitch>
+                </LoadingErrorStateSwitch>
             </PageContentsGridV1>
         </PageV1>
     );

@@ -11,36 +11,51 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
+import { Box, Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
 import {
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { getAllAlerts } from "../../rest/alerts/alerts.rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
-import {
-    deleteSubscriptionGroup,
-    getAllSubscriptionGroups,
-} from "../../rest/subscription-groups/subscription-groups.rest";
-import { PROMISES } from "../../utils/constants/constants.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
+import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
+import { deleteSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
+import { getSubscriptionGroupsCreatePath } from "../../utils/routes/routes.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
+    const {
+        subscriptionGroups,
+        getSubscriptionGroups,
+        status: getSubscriptionGroupStatus,
+        errorMessages: getSubscriptionGroupErrorMessages,
+    } = useGetSubscriptionGroups();
+
+    const {
+        alerts,
+        getAlerts,
+        status: getAlertsStatus,
+        errorMessages: getAlertsErrorMessages,
+    } = useGetAlerts();
+
     const [uiSubscriptionGroups, setUiSubscriptionGroups] = useState<
-        UiSubscriptionGroup[] | null
-    >(null);
+        UiSubscriptionGroup[]
+    >([]);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -50,57 +65,42 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         fetchAllSubscriptionGroups();
     }, []);
 
-    const fetchAllSubscriptionGroups = (): void => {
-        setUiSubscriptionGroups(null);
-
-        let fetchedUiSubscriptionGroups: UiSubscriptionGroup[] = [];
-        let fetchedAlerts: Alert[] = [];
-        Promise.allSettled([getAllSubscriptionGroups(), getAllAlerts()])
-            .then(([subscriptionGroupsResponse, alertsResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
-                    alertsResponse.status === PROMISES.REJECTED
-                ) {
-                    const axiosError =
-                        alertsResponse.status === PROMISES.REJECTED
-                            ? alertsResponse.reason
-                            : subscriptionGroupsResponse.status ===
-                              PROMISES.REJECTED
-                            ? subscriptionGroupsResponse.reason
-                            : ({} as AxiosError);
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      alertsResponse.status ===
-                                          PROMISES.REJECTED
-                                          ? "label.alerts"
-                                          : "label.subscription-groups"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
-                }
-
-                // Attempt to gather data
-                if (alertsResponse.status === PROMISES.FULFILLED) {
-                    fetchedAlerts = alertsResponse.value;
-                }
-                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
-                    fetchedUiSubscriptionGroups = getUiSubscriptionGroups(
-                        subscriptionGroupsResponse.value,
-                        fetchedAlerts
-                    );
-                }
+    useEffect(() => {
+        notifyIfErrors(
+            getSubscriptionGroupStatus,
+            getSubscriptionGroupErrorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.subscription-groups"),
             })
-            .finally(() => {
-                setUiSubscriptionGroups(fetchedUiSubscriptionGroups);
-            });
+        );
+    }, [getSubscriptionGroupStatus]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            getAlertsStatus,
+            getAlertsErrorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.alerts"),
+            })
+        );
+    }, [getAlertsStatus]);
+
+    useEffect(() => {
+        if (!alerts || !subscriptionGroups) {
+            return;
+        }
+        setUiSubscriptionGroups(
+            getUiSubscriptionGroups(subscriptionGroups, alerts)
+        );
+    }, [alerts, subscriptionGroups]);
+
+    const fetchAllSubscriptionGroups = (): void => {
+        setUiSubscriptionGroups([]);
+
+        getSubscriptionGroups();
+        getAlerts();
     };
 
     const handleSubscriptionGroupDelete = (
@@ -156,10 +156,60 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         <PageV1>
             <ConfigurationPageHeader selectedIndex={4} />
             <PageContentsGridV1 fullHeight>
-                <SubscriptionGroupListV1
-                    subscriptionGroups={uiSubscriptionGroups}
-                    onDelete={handleSubscriptionGroupDelete}
-                />
+                <LoadingErrorStateSwitch
+                    isError={
+                        getSubscriptionGroupStatus === ActionStatus.Error ||
+                        getAlertsStatus === ActionStatus.Error
+                    }
+                    isLoading={
+                        getSubscriptionGroupStatus === ActionStatus.Working ||
+                        getAlertsStatus === ActionStatus.Working
+                    }
+                >
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Grid item xs={12}>
+                                <PageContentsCardV1>
+                                    <Box padding={20}>
+                                        <NoDataIndicator>
+                                            <Box textAlign="center">
+                                                {t(
+                                                    "message.no-entity-created",
+                                                    {
+                                                        entity: t(
+                                                            "label.subscription-groups"
+                                                        ),
+                                                    }
+                                                )}
+                                            </Box>
+                                            <Box
+                                                marginTop={2}
+                                                textAlign="center"
+                                            >
+                                                <Button
+                                                    color="primary"
+                                                    href={getSubscriptionGroupsCreatePath()}
+                                                >
+                                                    {t("label.create-entity", {
+                                                        entity: t(
+                                                            "label.subscription-group"
+                                                        ),
+                                                    })}
+                                                </Button>
+                                            </Box>
+                                        </NoDataIndicator>
+                                    </Box>
+                                </PageContentsCardV1>
+                            </Grid>
+                        }
+                        isEmpty={uiSubscriptionGroups.length === 0}
+                    >
+                        <SubscriptionGroupListV1
+                            subscriptionGroups={uiSubscriptionGroups}
+                            onDelete={handleSubscriptionGroupDelete}
+                        />
+                    </EmptyStateSwitch>
+                </LoadingErrorStateSwitch>
             </PageContentsGridV1>
         </PageV1>
     );

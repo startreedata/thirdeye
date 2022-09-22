@@ -11,9 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ReactNode } from "react";
+import React, { FunctionComponent } from "react";
+import { EmptyStateSwitchProps } from "./empty-state-switch.interfaces";
 
-export interface NoDataIndicatorProps {
-    text?: string;
-    children?: ReactNode;
-}
+export const EmptyStateSwitch: FunctionComponent<EmptyStateSwitchProps> = ({
+    isEmpty,
+    emptyState,
+    children,
+}) => {
+    return (
+        <>
+            {isEmpty && emptyState}
+            {!isEmpty && children}
+        </>
+    );
+};

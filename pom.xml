@@ -933,6 +933,8 @@
         <artifactId>dropwizard-swagger</artifactId>
         <version>${swagger.version}</version>
         <exclusions>
+          <!-- javax.validation:validation-api conflicting with -->
+          <!-- jakarta.validation:jakarta.validation-api which is a dropwizard dependency -->
           <exclusion>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>

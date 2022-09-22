@@ -433,7 +433,7 @@ public class CalciteRequestTest {
       throws SqlParseException {
     final String textPredicate = "col2 = 'test2'";
     final SqlNode sqlNodePredicate = new SqlBasicCall(EQUALS_OPERATOR,
-        new SqlNode[]{identifierOf("col3"), stringLiteralOf("test3")},
+        List.of(identifierOf("col3"), stringLiteralOf("test3")),
         SqlParserPos.ZERO);
     final Interval timeFilterInterval = new Interval(100L, 100000L, DateTimeZone.UTC);
     final String epoch_date = "epoch_date";

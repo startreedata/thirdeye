@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
@@ -34,6 +35,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
+  public static final Pattern SIMPLE_DATE_FORMAT_PATTERN = Pattern.compile("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:");
   private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(
       Period.years(1), "year",
       Period.months(1), "month",
@@ -67,11 +69,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
       @NonNull final String timeColumnFormat) {
     final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
 
-    return String.format("%s >= %s AND %s < %s",
-        timeColumn,
-        timeFormat.timeFormatter.apply(filterInterval.getStart()),
-        timeColumn,
-        timeFormat.timeFormatter.apply(filterInterval.getEnd()));
+    return timeColumn + " >= " + timeFormat.timeFormatter.apply(filterInterval.getStart()) + " AND "
+        + timeColumn + " < " + timeFormat.timeFormatter.apply(filterInterval.getEnd());
   }
 
   @Override
@@ -138,7 +137,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   @VisibleForTesting
   protected static String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
     // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
-    return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
+    return SIMPLE_DATE_FORMAT_PATTERN.matcher(timeColumnFormat).replaceFirst("");
   }
 
   private String periodToDateTimeConvertFormat(final Period period) {
@@ -189,13 +188,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
         checkArgument(operands.size() == 1,
             "Incorrect number of operands for percentile sql generation. Expected: 1. Got: %s",
             operands.size());
-        return new StringBuilder().append(PERCENTILE_TDIGEST_PREFIX)
-            .append("(")
-            .append(operands.get(0))
-            .append(",")
-            .append(percentile)
-            .append(")")
-            .toString();
+        return PERCENTILE_TDIGEST_PREFIX + "(" + operands.get(0) + "," + percentile + ")";
       default:
         throw new UnsupportedOperationException();
     }
@@ -253,16 +246,16 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           // assume simple date format
           final String cleanSimpleDateFormat = removeSimpleDateFormatPrefix(
               userFacingTimeColumnFormat);
-          // fail if invalid format
+          // fail if invalid format - note: this is slow because this instantiate calendars - maybe extract
           new SimpleDateFormat(cleanSimpleDateFormat);
-          dateTimeConvertString = String.format("1:DAYS:SIMPLE_DATE_FORMAT:%s",
-              cleanSimpleDateFormat);
+          dateTimeConvertString = "1:DAYS:SIMPLE_DATE_FORMAT:" + cleanSimpleDateFormat;
           dateTruncString = null;
           isEpochFormat = false;
           timeFormatter = d -> {
             final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
                 cleanSimpleDateFormat).withChronology(d.getChronology());
-            return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d) + STRING_LITERAL_QUOTE;
+            return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d)
+                + STRING_LITERAL_QUOTE;
           };
       }
     }

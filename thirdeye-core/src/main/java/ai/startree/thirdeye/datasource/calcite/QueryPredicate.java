@@ -71,9 +71,9 @@ public class QueryPredicate {
   }
 
   public SqlNode toSqlNode() {
-    SqlIdentifier leftOperand = prepareLeftOperand();
-    SqlNode rightOperand = prepareRightOperand();
-    SqlNode[] operands = List.of(leftOperand, rightOperand).toArray(new SqlNode[0]);
+    final SqlIdentifier leftOperand = prepareLeftOperand();
+    final SqlNode rightOperand = prepareRightOperand();
+    final List<SqlNode> operands = List.of(leftOperand, rightOperand);
 
     SqlOperator operator = optional(FILTER_PREDICATE_OPER_TO_CALCITE.get(predicate.getOper()))
         .orElseThrow();

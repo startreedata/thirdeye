@@ -28,6 +28,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -46,10 +49,24 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
   private static final String TIME_ALIAS = "timeMillis";
 
   private final DataSourceCache dataSourceCache;
+  private final ExecutorService executorService;
 
   @Inject
   public DefaultMinMaxTimeLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
+    executorService = Executors.newCachedThreadPool();
+  }
+
+  @Override
+  public Future<@Nullable Long> fetchMinTimeAsync(final DatasetConfigDTO datasetConfigDTO,
+      final @Nullable Interval timeFilterInterval) throws Exception {
+    return executorService.submit(() -> fetchMinTime(datasetConfigDTO, timeFilterInterval));
+  }
+
+  @Override
+  public Future<@Nullable Long> fetchMaxTimeAsync(final DatasetConfigDTO datasetConfigDTO,
+      final @Nullable Interval timeFilterInterval) throws Exception {
+    return executorService.submit(() -> fetchMaxTime(datasetConfigDTO, timeFilterInterval));
   }
 
   @Override

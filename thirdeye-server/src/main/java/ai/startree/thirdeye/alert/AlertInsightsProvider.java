@@ -31,8 +31,11 @@ import ai.startree.thirdeye.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.WebApplicationException;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -48,6 +51,7 @@ public class AlertInsightsProvider {
   private static final Interval NOT_USED_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   // computer clock difference is usually order of seconds - but here taking 1 hour is safe and does not impact the logic
   private static final long COMPUTER_CLOCK_MARGIN_MILLIS = 3600_000;
+  private static final long FETCH_TIMEOUT_MILLIS = 30_000;
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final DatasetConfigManager datasetConfigManager;
@@ -110,45 +114,52 @@ public class AlertInsightsProvider {
           datasetConfigDTO.getDataset());
       return;
     }
-    addDatasetStart(insights, datasetConfigDTO);
-    addDatasetEnd(insights, datasetConfigDTO);
+
+    // launch min, max, safeMax queries async
+    final Future<@Nullable Long> minTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(datasetConfigDTO,
+        null);
+    final Future<@Nullable Long> maxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(datasetConfigDTO,
+        null);
+    final long maximumPossibleEndTime = currentMaximumPossibleEndTime();
+    final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
+    final Future<@Nullable Long> safeMaxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
+        datasetConfigDTO,
+        safeInterval);
+
+    // process futures
+    addDatasetStart(insights, minTimeFuture);
+    addDatasetEnd(insights, maxTimeFuture, safeMaxTimeFuture, maximumPossibleEndTime);
   }
 
   private void addDatasetStart(final AlertInsightsApi insights,
-      final DatasetConfigDTO datasetConfigDTO) throws Exception {
-    final Long datasetMinTime = minMaxTimeLoader.fetchMinTime(datasetConfigDTO, null);
-    insights.setDatasetStartTime(datasetMinTime);
+      final Future<@Nullable Long> minTimeFuture) throws Exception {
+    final Long datasetStartTime = minTimeFuture.get(FETCH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+    insights.setDatasetStartTime(datasetStartTime);
   }
 
   private void addDatasetEnd(final AlertInsightsApi insights,
-      final DatasetConfigDTO datasetConfigDTO) throws Exception {
-    final Long datasetMaxTime = minMaxTimeLoader.fetchMaxTime(datasetConfigDTO, null);
+      final Future<@Nullable Long> maxTimeFuture, final Future<@Nullable Long> safeMaxTimeFuture,
+      final long maximumPossibleEndTime) throws Exception {
+    final @Nullable Long datasetMaxTime = maxTimeFuture.get(FETCH_TIMEOUT_MILLIS,
+        TimeUnit.MILLISECONDS);
     if (datasetMaxTime == null) {
       return;
     }
-    // if there is bad data in the dataset, datasetEndTime can have an incorrect value, bigger than the current time - see TE-860
-    final long maximumPossibleEndTime = currentMaximumPossibleEndTime();
-    final boolean endTimeLooksLegit = datasetMaxTime <= maximumPossibleEndTime;
-    if (endTimeLooksLegit) {
-      // nominal case
+    if (datasetMaxTime <= maximumPossibleEndTime) {
       insights.setDatasetEndTime(datasetMaxTime);
-      return;
+    } else {
+      // there is bad data in the dataset, datasetMaxTime has an incorrect value, bigger than the current time - see TE-860
+      // use the safe endTime
+      insights.setSuspiciousDatasetEndTime(datasetMaxTime);
+      LOG.warn(
+          "Dataset maxTime is too big: {}. Current system time: {}.Most likely a data issue in the dataset. Rerunning query with a filter < safeEndTime={} to get a safe maxTime.",
+          datasetMaxTime,
+          System.currentTimeMillis(),
+          maximumPossibleEndTime);
+      final @Nullable Long safeMaxTime = safeMaxTimeFuture.get(FETCH_TIMEOUT_MILLIS,
+          TimeUnit.MILLISECONDS);
+      insights.setDatasetEndTime(safeMaxTime);
     }
-
-    // endTime looks incorrect - re-fetch a safer endTime with a timefilter
-    insights.setSuspiciousDatasetEndTime(datasetMaxTime);
-    LOG.warn(
-        "Dataset maxTime is too big: {}. Current system time: {}.Most likely a data issue in the dataset. Rerunning query with a filter < safeEndTime={} to get a safe maxTime.",
-        datasetMaxTime,
-        System.currentTimeMillis(),
-        maximumPossibleEndTime);
-    final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
-    final Long safeMaxTime = minMaxTimeLoader.fetchMaxTime(datasetConfigDTO, safeInterval);
-    if (safeMaxTime == null) {
-      LOG.warn("Could not fetch the maxTime on a safe time interval for dataset {}.",
-          datasetConfigDTO.getDataset());
-    }
-    insights.setDatasetEndTime(safeMaxTime);
   }
 
   // default times for chart - to call after dataset times are set in insights

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { OFFSET_TO_MILLISECONDS } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
+import { OFFSET_TO_MILLISECONDS } from "../../components/rca/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
 import {
     BaselineOffsetUnitsKey,
     OFFSET_TO_HUMAN_READABLE,

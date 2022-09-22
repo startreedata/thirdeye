@@ -31,18 +31,18 @@ import {
     NotificationTypeV1,
     SkeletonV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetAnomalyMetricBreakdown } from "../../rest/rca/rca.actions";
-import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
+} from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { useGetAnomalyMetricBreakdown } from "../../../rest/rca/rca.actions";
+import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import {
     concatKeyValueWithEqual,
     deserializeKeyValuePair,
     serializeKeyValuePair,
-} from "../../utils/params/params.util";
-import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
-import { Treemap } from "../visualizations/treemap/treemap.component";
-import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
+} from "../../../utils/params/params.util";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { Treemap } from "../../visualizations/treemap/treemap.component";
+import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
 import {
     AnomalyBreakdownComparisonData,
     AnomalyBreakdownComparisonDataByDimensionColumn,
@@ -95,7 +95,7 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
             : []
     );
 
-    // Sync the anomaly filters if it the search params changed
+    // Sync the anomaly filters if the search params changed
     useEffect(() => {
         const currentQueryFilterSearchQuery = searchParams.get(
             HEATMAP_FILTERS_URL_KEY
@@ -109,7 +109,10 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
             setAnomalyFilters(
                 deserializeKeyValuePair(currentQueryFilterSearchQuery)
             );
-        } else if (currentQueryFilterSearchQuery === null) {
+        } else if (
+            currentQueryFilterSearchQuery === null &&
+            anomalyFilters.length !== 0 // check for 0 so we don't trigger necessary change
+        ) {
             setAnomalyFilters([]);
         }
     }, [searchParams]);

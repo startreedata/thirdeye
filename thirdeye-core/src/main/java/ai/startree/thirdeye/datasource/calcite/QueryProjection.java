@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.util.CalciteUtils;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -101,7 +102,7 @@ public class QueryProjection {
           SqlParserPos.ZERO,
           quantifier != null ? symbolLiteralOf(quantifier) : null));
     } else if (operands.size() == 1 && quantifier == null) {
-      return applySpecialOperators(operandNodes(sqlParserConfig)[0]);
+      return applySpecialOperators(operandNodes(sqlParserConfig).get(0));
     } else {
       throw new UnsupportedOperationException(String.format(
           "Unsupported combination for QueryProjection: %s",
@@ -109,10 +110,10 @@ public class QueryProjection {
     }
   }
 
-  private SqlNode[] operandNodes(final Config sqlParserConfig) throws SqlParseException {
-    final SqlNode[] operandNodes = new SqlNode[this.operands.size()];
-    for (int i = 0; i < operands.size(); i++) {
-      operandNodes[i] = CalciteUtils.expressionToNode(operands.get(i), sqlParserConfig);
+  private List<SqlNode> operandNodes(final Config sqlParserConfig) throws SqlParseException {
+    final List<SqlNode> operandNodes = new ArrayList<>(this.operands.size());
+    for (final String operand : operands) {
+      operandNodes.add(CalciteUtils.expressionToNode(operand, sqlParserConfig));
     }
     return operandNodes;
   }

@@ -105,7 +105,7 @@ public class SchedulingTest {
   private long alertId;
 
   @BeforeClass
-  public void beforeClass() {
+  public void beforeClass() throws Exception {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
 

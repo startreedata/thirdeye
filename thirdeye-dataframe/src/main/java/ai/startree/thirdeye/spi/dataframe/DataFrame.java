@@ -13,10 +13,8 @@
  */
 package ai.startree.thirdeye.spi.dataframe;
 
-import com.udojava.evalex.Expression;
 import java.io.IOException;
 import java.io.Reader;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1409,63 +1407,6 @@ public class DataFrame {
    */
   public DataFrame mapInPlace(Series.Function function, String seriesName) {
     return this.addSeries(seriesName, map(function, this.get(seriesName)));
-  }
-
-  /**
-   * Applies {@code doubleExpression} compiled to an expression to the series referenced by
-   * {@code seriesNames} row by row and returns the results as a new series. The series' values
-   * are mapped to variables in {@code doubleExpression} by series names. Only series referenced
-   * by {@code seriesNames} can be referenced by the expression.
-   * The series are converted to {@code DoubleSeries} transparently and the results
-   * are returned as DoubleSeries as well.
-   *
-   * <br/><b>NOTE:</b> doubleExpression is compiled to an {@code EvalEx} expression.
-   *
-   * @param doubleExpression expression to be compiled and applied using EvalEx
-   * @return series with evaluation results
-   * @throws IllegalArgumentException if the series does not exist
-   */
-  public DoubleSeries map(String doubleExpression, final String... seriesNames) {
-    // TODO support escaping of "}"
-    final String[] vars = new String[seriesNames.length];
-    for (int i = 0; i < seriesNames.length; i++) {
-      String pattern = String.format("${%s}", seriesNames[i]);
-      String replace = String.format("__%d", i);
-      vars[i] = replace;
-      doubleExpression = doubleExpression.replace(pattern, replace);
-    }
-
-    final Expression e = new Expression(doubleExpression);
-
-    return this.map(new Series.DoubleFunction() {
-      @Override
-      public double apply(double[] values) {
-        for (int i = 0; i < values.length; i++) {
-          e.with(vars[i], new BigDecimal(values[i]));
-        }
-        return e.eval().doubleValue();
-      }
-    }, seriesNames);
-  }
-
-  /**
-   * Applies {@code doubleExpression} compiled to an expression to the series referenced by
-   * {@code seriesNames} row by row and returns the results as a new series. The series' values
-   * are mapped to variables in {@code doubleExpression} by series names. All series contained
-   * in the DataFrame can be referenced by the expression.
-   * The series are converted to {@code DoubleSeries} transparently and the results
-   * are returned as DoubleSeries as well.
-   *
-   * <br/><b>NOTE:</b> doubleExpression is compiled to an {@code EvalEx} expression.
-   *
-   * @param doubleExpression expression to be compiled and applied using EvalEx
-   * @return series with evaluation results
-   * @throws IllegalArgumentException if the series does not exist
-   */
-  // fixme cyril remove this method and EvalEx dependency
-  public DoubleSeries map(String doubleExpression) {
-    Set<String> variables = extractSeriesNames(doubleExpression);
-    return this.map(doubleExpression, variables.toArray(new String[variables.size()]));
   }
 
   /**

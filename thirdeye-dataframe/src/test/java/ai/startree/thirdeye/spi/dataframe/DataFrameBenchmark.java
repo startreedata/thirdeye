@@ -227,28 +227,6 @@ public class DataFrameBenchmark {
     logResults("benchmarkMapLongObjectArray", checksum);
   }
 
-  private void benchmarkMapTwoSeriesExpression() {
-    startTimerOuter();
-    long checksum = 0;
-
-    for (int r = 0; r < N_ROUNDS_SLOW; r++) {
-      long[] longValues = generateLongData(N_ELEMENTS);
-      double[] doubleValues = generateDoubleData(N_ELEMENTS);
-
-      DataFrame df = new DataFrame();
-      df.addSeries("long", longValues);
-      df.addSeries("double", doubleValues);
-
-      startTimer();
-      DoubleSeries res = df.map("long * double");
-      stopTimer();
-
-      checksum ^= checksum(res.values());
-    }
-
-    logResults("benchmarkMapTwoSeriesExpression", checksum);
-  }
-
   private void benchmarkMapTwoSeries() {
     startTimerOuter();
     long checksum = 0;
@@ -1060,7 +1038,6 @@ public class DataFrameBenchmark {
     benchmarkMapThreeArrays();
     benchmarkMapFourSeriesGeneric();
     benchmarkMapFourArrays();
-    benchmarkMapTwoSeriesExpression();
   }
 
   private void startTimer() {

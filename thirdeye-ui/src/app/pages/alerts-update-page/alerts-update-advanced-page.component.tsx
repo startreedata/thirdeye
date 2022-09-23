@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid } from "@material-ui/core";
+import { Box, Divider, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
@@ -77,7 +77,10 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
                         alert={alert}
                         onAlertPropertyChange={onAlertPropertyChange}
                     />
-                    <Box marginTop={2}>
+                    <Box marginBottom={3} marginTop={3}>
+                        <Divider />
+                    </Box>
+                    <Box>
                         <PreviewChart
                             alert={alert}
                             displayState={

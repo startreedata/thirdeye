@@ -49,8 +49,11 @@ export const generateNameForDetectionResult = (
     detectionEvaluation: DetectionEvaluation
 ): string => {
     if (detectionEvaluation.enumerationItem) {
-        return generateNameForEnumerationItem(
-            detectionEvaluation.enumerationItem as EnumerationItem
+        return (
+            detectionEvaluation.enumerationItem.name ??
+            generateNameForEnumerationItem(
+                detectionEvaluation.enumerationItem as EnumerationItem
+            )
         );
     }
 

@@ -265,7 +265,8 @@
         "enumeration-item": "Enumeration Item",
         "latest-one-first": "Latest one first",
         "latest-one-last": "Latest one last",
-        "has-feedback": "Has Feedback"
+        "has-feedback": "Has Feedback",
+        "dimension-expression": "Dimension expression"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

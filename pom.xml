@@ -61,7 +61,6 @@
     <calcite.version>1.32.0</calcite.version>
     <calendar-api.version>v3-rev300-1.23.0</calendar-api.version>
     <checkerframework.version>3.21.2</checkerframework.version>
-    <classgraph.version>4.8.84</classgraph.version>
     <commons-cli.version>1.3</commons-cli.version>
     <commons-collection4.version>4.1</commons-collection4.version>
     <commons-csv.version>1.3</commons-csv.version>
@@ -756,11 +755,6 @@
         <groupId>org.quartz-scheduler</groupId>
         <artifactId>quartz</artifactId>
         <version>${quartz.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.classgraph</groupId>
-        <artifactId>classgraph</artifactId>
-        <version>${classgraph.version}</version>
       </dependency>
       <dependency>
         <groupId>com.squareup.retrofit2</groupId>

@@ -58,6 +58,10 @@
       <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-bootstrap-open-core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>
@@ -74,10 +78,6 @@
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
     </dependency>
     <dependency>
       <groupId>io.dropwizard</groupId>

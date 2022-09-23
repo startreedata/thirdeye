@@ -24,7 +24,7 @@ const CLAUSE_SEPARATOR = "AND";
 const SINGLE_QUOTE = "'";
 const DOUBLE_QUOTE = '"';
 
-export const generateNameForEnumerationItem = (
+export const generateNameFromParams = (
     enumerationItem: EnumerationItem,
     includeQuotes = true
 ): string => {
@@ -45,15 +45,22 @@ export const generateNameForEnumerationItem = (
         .join(DISPLAY_SEPARATOR);
 };
 
+export const generateNameForEnumerationItem = (
+    enumerationItem: EnumerationItem,
+    includeQuotes = true
+): string => {
+    return (
+        enumerationItem.name ??
+        generateNameFromParams(enumerationItem, includeQuotes)
+    );
+};
+
 export const generateNameForDetectionResult = (
     detectionEvaluation: DetectionEvaluation
 ): string => {
     if (detectionEvaluation.enumerationItem) {
-        return (
-            detectionEvaluation.enumerationItem.name ??
-            generateNameForEnumerationItem(
-                detectionEvaluation.enumerationItem as EnumerationItem
-            )
+        return generateNameForEnumerationItem(
+            detectionEvaluation.enumerationItem as EnumerationItem
         );
     }
 
@@ -109,8 +116,8 @@ export const doesMatchString = (
     candidate: EnumerationItemInEvaluation,
     criteria: string
 ): boolean => {
-    const name = generateNameForEnumerationItem(candidate as EnumerationItem);
-    const nameWithoutQuotes = generateNameForEnumerationItem(
+    const name = generateNameFromParams(candidate as EnumerationItem);
+    const nameWithoutQuotes = generateNameFromParams(
         candidate as EnumerationItem,
         false
     );

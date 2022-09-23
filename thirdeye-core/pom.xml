@@ -63,10 +63,6 @@
 
     <!-- from detector dep tree -->
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-email</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -83,11 +79,6 @@
     </dependency>
 
     <!-- test dependencies -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -107,23 +98,6 @@
     <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-annotations</artifactId>
-    </dependency>
-
-    <!-- Holiday loader dependencies -->
-    <dependency>
-      <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-calendar</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava-jdk5</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.ibm.icu</groupId>
-      <artifactId>icu4j</artifactId>
-      <version>62.1</version>
     </dependency>
 
     <!-- Subscription/Notification dependencies -->
@@ -147,14 +121,6 @@
       <groupId>io.atlassian.fugue</groupId>
       <artifactId>fugue</artifactId>
       <version>4.7.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup.retrofit2</groupId>
-      <artifactId>retrofit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup.retrofit2</groupId>
-      <artifactId>converter-jackson</artifactId>
     </dependency>
 
 

@@ -40,10 +40,6 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.nimbusds</groupId>
-      <artifactId>nimbus-jose-jwt</artifactId>
-    </dependency>
 
     <!-- Pin jackson version and omit from third party dependencies-->
     <dependency>

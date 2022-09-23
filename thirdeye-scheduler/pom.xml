@@ -34,5 +34,22 @@
       <artifactId>quartz</artifactId>
     </dependency>
 
+    <!-- Holiday loader dependencies -->
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-calendar</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava-jdk5</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>62.1</version>
+    </dependency>
+
   </dependencies>
 </project>

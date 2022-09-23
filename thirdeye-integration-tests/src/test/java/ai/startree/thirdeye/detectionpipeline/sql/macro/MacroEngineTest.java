@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import ai.startree.thirdeye.IntegrationTestUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlLanguage;
@@ -26,11 +29,9 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.calcite.sql.parser.SqlParseException;
-import org.assertj.core.api.Assertions;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -76,13 +77,13 @@ public class MacroEngineTest {
         inputQuery);
     try {
       DataSourceRequest output = macroEngine.prepareRequest();
-      Assert.assertEquals(TABLE_NAME, output.getTable());
-      Assertions.assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
+      assertThat(TABLE_NAME).isEqualTo(output.getTable());
+      assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
           IntegrationTestUtils.cleanSql(
           expectedQuery));
-      Assert.assertEquals(expectedProperties, output.getProperties());
+      assertThat(expectedProperties).isEqualTo(output.getProperties());
     } catch (SqlParseException e) {
-      Assert.fail("SQL query parsing failed: " + e);
+      fail("SQL query parsing failed: " + e);
     }
   }
 

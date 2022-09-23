@@ -232,13 +232,6 @@ public class DataFrameTest {
     df.addSeries(name, VALUES_DOUBLE);
   }
 
-  @Test(dataProvider = "testSeriesNameExceptionalProvider")
-  public void testSeriesNameExceptionalExpression(String name) {
-    df.addSeries(name, 1, 2, 3, 4, 5);
-    DoubleSeries s = df.map(String.format("${%s}", name));
-    assertEquals(s, 1, 2, 3, 4, 5);
-  }
-
   @DataProvider(name = "testSeriesNameExceptionalProvider")
   public Object[][] testSeriesNameFailProvider() {
     return new Object[][]{{""}, {"1a"}, {"a,b"}, {"a-b"}, {"a+b"}, {"a*b"}, {"a/b"}, {"a=b"},
@@ -1820,36 +1813,6 @@ public class DataFrameTest {
     Assert.assertEquals(ddf.size(), 3);
     Assert.assertEquals(new HashSet<>(ddf.getSeriesNames()),
         new HashSet<>(Arrays.asList("double", "long", "string", "boolean", "object")));
-  }
-
-  @Test
-  public void testMapExpression() {
-    DoubleSeries s = df.map("(${double} * 2 + ${long} + ${boolean}) / 2");
-    assertEquals(s, -2.6, 0.9, 0.0, 1.5, 2.8);
-  }
-
-  @Test
-  public void testMapExpressionNull() {
-    DataFrame mdf = new DataFrame(VALUES_LONG)
-        .addSeries("null", 1.0, 1.0, DNULL, 1.0, 1.0);
-    DoubleSeries out = mdf.map("${null} + 1");
-    assertEquals(out, 2.0, 2.0, DNULL, 2.0, 2.0);
-  }
-
-  @Test
-  public void testMapExpressionOtherNullPass() {
-    DataFrame mdf = new DataFrame(VALUES_LONG)
-        .addSeries("null", 1.0, 1.0, DNULL, 1.0, 1.0)
-        .addSeries("notnull", 1.0, 1.0, 1.0, 1.0, 1.0);
-    mdf.map("${notnull} + 1");
-  }
-
-  @Test
-  public void testMapExpressionWithNull() {
-    DataFrame mdf = new DataFrame(VALUES_LONG)
-        .addSeries("null", 1.0, 1.0, DNULL, 1.0, 1.0);
-    DoubleSeries s = mdf.map("${null} + 1");
-    assertEquals(s, 2.0, 2.0, DNULL, 2.0, 2.0);
   }
 
   @Test

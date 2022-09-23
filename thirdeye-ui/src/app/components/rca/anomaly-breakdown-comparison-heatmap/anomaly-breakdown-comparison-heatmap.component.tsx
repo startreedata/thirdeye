@@ -28,13 +28,13 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
-    NotificationTypeV1,
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import {
     concatKeyValueWithEqual,
     deserializeKeyValuePair,
@@ -205,18 +205,14 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<
     };
 
     useEffect(() => {
-        if (anomalyBreakdownReqStatus === ActionStatus.Error) {
-            !isEmpty(anomalyBreakdownReqErrors)
-                ? anomalyBreakdownReqErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.heatmap-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            anomalyBreakdownReqStatus,
+            anomalyBreakdownReqErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.heatmap-data"),
+            })
+        );
     }, [anomalyBreakdownReqStatus, anomalyBreakdownReqErrors]);
 
     return (

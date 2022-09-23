@@ -60,19 +60,16 @@ import {
 } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyTimeSeriesCardProps } from "./anomaly-time-series-card.interfaces";
 import {
+    CHART_SIZE_OPTIONS,
     determineInitialZoom,
     generateChartOptions,
+    SMALL_CHART_SIZE,
     ZOOM_END_KEY,
     ZOOM_START_KEY,
 } from "./anomaly-time-series-card.utils";
 import { RCAChartLegend } from "./rca-chart-legend/rca-chart-legend.component";
 
 const CHART_HEIGHT_KEY = "chartHeight";
-const CHART_SIZE_OPTIONS = [
-    ["S", 500],
-    ["M", 800],
-    ["L", 1100],
-];
 
 export const AnomalyTimeSeriesCard: FunctionComponent<
     AnomalyTimeSeriesCardProps
@@ -111,7 +108,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
     const [chartHeight, setChartHeight] = useState<number>(
         searchParams.get(CHART_HEIGHT_KEY) !== null
             ? Number(searchParams.get(CHART_HEIGHT_KEY))
-            : 500
+            : SMALL_CHART_SIZE
     );
 
     const [initialZoom, setInitialZoom] = useState<ZoomDomain | undefined>(

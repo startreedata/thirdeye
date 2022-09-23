@@ -267,7 +267,8 @@
         "latest-one-last": "Latest one last",
         "has-feedback": "Has Feedback",
         "dimension-expression": "Dimension expression",
-        "reset-anomalies-for-alert": "Reset anomalies for Alert"
+        "reset-anomalies-for-alert": "Reset anomalies for Alert",
+        "chart-height": "Chart height"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

@@ -13,11 +13,13 @@
  */
 package ai.startree.thirdeye.spi.detection.model;
 
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Anomaly detection result. Contains a list of anomalies detected and the associated timeseries
@@ -28,37 +30,16 @@ public class AnomalyDetectionResult implements OperatorResult {
   private final List<MergedAnomalyResultDTO> anomalies;
   private final TimeSeries timeseries;
   private final Map<String, List> rawData;
+  private final EnumerationItemDTO enumerationItem;
 
-  private AnomalyDetectionResult(final List<MergedAnomalyResultDTO> anomalies, final TimeSeries timeseries) {
-    this(anomalies, timeseries, Collections.emptyMap());
-  }
-
-  private AnomalyDetectionResult(final List<MergedAnomalyResultDTO> anomalies, final TimeSeries timeseries, final Map<String, List> rawData) {
+  private AnomalyDetectionResult(final List<MergedAnomalyResultDTO> anomalies,
+      final TimeSeries timeseries,
+      final Map<String, List> rawData,
+      final EnumerationItemDTO enumerationItem) {
     this.anomalies = anomalies;
     this.timeseries = timeseries;
     this.rawData = rawData;
-  }
-
-  /**
-   * TODO spyne refactor. this is just to accomodate the needs of OperatorResult Interface.
-   * This needs  cleanup.
-   * @param source
-   */
-  protected AnomalyDetectionResult(final OperatorResult source) {
-    this(source.getAnomalies(), source.getTimeseries(), source.getRawData());
-  }
-
-  /**
-   * Create a detection result from a list of anomalies and time series
-   *
-   * @param anomalies the list of anomalies generated
-   * @param timeSeries the time series which including the current, predicted baseline and
-   *     optionally upper and lower bounds
-   * @return the detection result contains the list of anomalies and the time series
-   */
-  public static AnomalyDetectionResult from(final List<MergedAnomalyResultDTO> anomalies,
-      final TimeSeries timeSeries) {
-    return new AnomalyDetectionResult(anomalies, timeSeries);
+    this.enumerationItem = enumerationItem;
   }
 
   @Override
@@ -70,12 +51,50 @@ public class AnomalyDetectionResult implements OperatorResult {
     return timeseries;
   }
 
+  public Map<String, List> getRawData() {
+    return rawData;
+  }
+
+  @Override
+  public @Nullable EnumerationItemDTO getEnumerationItem() {
+    return enumerationItem;
+  }
+
   @Override
   public String toString() {
     return "OperatorResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries + ", rawdata=" + rawData + '}';
   }
 
-  public Map<String, List> getRawData() {
-    return rawData;
+  public static class Builder {
+
+    private List<MergedAnomalyResultDTO> anomalies;
+    private TimeSeries timeseries;
+    private Map<String, List> rawData = Collections.emptyMap();
+    private EnumerationItemDTO enumerationItem;
+
+    public Builder setAnomalies(final List<MergedAnomalyResultDTO> anomalies) {
+      this.anomalies = anomalies;
+      return this;
+    }
+
+    public Builder setTimeseries(final TimeSeries timeseries) {
+      this.timeseries = timeseries;
+      return this;
+    }
+
+    public Builder setRawData(final Map<String, List> rawData) {
+      this.rawData = rawData;
+      return this;
+    }
+
+    public Builder setEnumerationItem(
+        final EnumerationItemDTO enumerationItem) {
+      this.enumerationItem = enumerationItem;
+      return this;
+    }
+
+    public AnomalyDetectionResult build() {
+      return new AnomalyDetectionResult(anomalies, timeseries, rawData, enumerationItem);
+    }
   }
 }

@@ -17,6 +17,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,10 +65,7 @@ public class CombinerResult implements OperatorResult {
   }
 
   public List<OperatorResult> getDetectionResults() {
-    return results.values().stream()
-        // fixme cyril suvodeep not sure to understand why only WrappedAnomalyDetectionResult are returned
-        .filter(r -> r instanceof WrappedAnomalyDetectionResult)
-        .collect(Collectors.toList());
+    return new ArrayList<>(results.values());
   }
 
   public Map<String, OperatorResult> getResults() {

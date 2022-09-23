@@ -26,6 +26,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
+import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult.Builder;
+import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -40,13 +42,13 @@ import org.testng.annotations.Test;
 public class PostProcessorOperatorTest {
 
   // timeseries can be null - it is not used by the TestPostProcessor
-  private static final AnomalyDetectionResult DETECTION_RES_WITH_2_ANOMALIES = AnomalyDetectionResult.from(
+  private static final AnomalyDetectionResult DETECTION_RES_WITH_2_ANOMALIES = from(
       List.of(new MergedAnomalyResultDTO(), new MergedAnomalyResultDTO()),
       null);
-  private static final AnomalyDetectionResult DETECTION_RES_WITH_ZERO_ANOMALY = AnomalyDetectionResult.from(
+  private static final AnomalyDetectionResult DETECTION_RES_WITH_ZERO_ANOMALY = from(
       List.of(),
       null);
-  private static final AnomalyDetectionResult DETECTION_RES_WITH_1_ANOMALY = AnomalyDetectionResult.from(
+  private static final AnomalyDetectionResult DETECTION_RES_WITH_1_ANOMALY = from(
       List.of(new MergedAnomalyResultDTO()),
       null);
   private static final String TEST_POST_PROCESSOR_NAME = "TestPostProcessor";
@@ -65,6 +67,22 @@ public class PostProcessorOperatorTest {
 
   private PostProcessorRegistry postProcessorRegistry;
 
+  /**
+   * Create a detection result from a list of anomalies and time series
+   *
+   * @param anomalies the list of anomalies generated
+   * @param timeSeries the time series which including the current, predicted baseline and
+   *     optionally upper and lower bounds
+   * @return the detection result contains the list of anomalies and the time series
+   */
+  private static AnomalyDetectionResult from(final List<MergedAnomalyResultDTO> anomalies,
+      final TimeSeries timeSeries) {
+    return new Builder()
+        .setAnomalies(anomalies)
+        .setTimeseries(timeSeries)
+        .build();
+  }
+
   @BeforeClass
   public void setUp() {
     postProcessorRegistry = mock(PostProcessorRegistry.class);
@@ -76,9 +94,9 @@ public class PostProcessorOperatorTest {
     final PlanNodeBean planNodeBean = new PlanNodeBean().setName(NODE_BEAN_NAME)
         .setParams(TEST_POST_PROCESSOR_CONFIG);
     // timeseries is not used by the TestPostProcessor
-    final AnomalyDetectionResult detectionResult1 = AnomalyDetectionResult.from(List.of(new MergedAnomalyResultDTO()),
+    final AnomalyDetectionResult detectionResult1 = from(List.of(new MergedAnomalyResultDTO()),
         null);
-    final AnomalyDetectionResult detectionResult2 = AnomalyDetectionResult.from(List.of(new MergedAnomalyResultDTO(),
+    final AnomalyDetectionResult detectionResult2 = from(List.of(new MergedAnomalyResultDTO(),
         new MergedAnomalyResultDTO()), null);
     final Map<String, OperatorResult> inputsMap = Map.of("detectionResult0",
         DETECTION_RES_WITH_ZERO_ANOMALY,

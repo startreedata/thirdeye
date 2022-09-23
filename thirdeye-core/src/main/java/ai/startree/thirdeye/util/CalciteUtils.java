@@ -195,15 +195,15 @@ public class CalciteUtils {
 
   @NonNull
   public static SqlNode addAlias(final SqlNode node, @NonNull final String alias) {
-    List<SqlNode> aliasOperands = List.of(node, identifierOf(alias));
+    final List<SqlNode> aliasOperands = List.of(node, identifierOf(alias));
     return new SqlBasicCall(new SqlAsOperator(),
-        aliasOperands.toArray(new SqlNode[0]),
+        aliasOperands,
         SqlParserPos.ZERO);
   }
 
   @NonNull
   public static SqlNode addDesc(final SqlNode node) {
-    return new SqlBasicCall(CalciteUtils.DESC_OPERATOR, new SqlNode[]{node}, SqlParserPos.ZERO);
+    return new SqlBasicCall(CalciteUtils.DESC_OPERATOR, List.of(node), SqlParserPos.ZERO);
   }
 
   /**
@@ -227,8 +227,7 @@ public class CalciteUtils {
       return whereNodeWithPredicates;
     }
     for (SqlNode newPredicate : predicates) {
-      SqlNode[] whereOperands = List.of(whereNodeWithPredicates, newPredicate)
-          .toArray(new SqlNode[0]);
+      List<SqlNode> whereOperands = List.of(whereNodeWithPredicates, newPredicate);
       whereNodeWithPredicates = new SqlBasicCall(AND_OPERATOR, whereOperands, SqlParserPos.ZERO);
     }
     return whereNodeWithPredicates;

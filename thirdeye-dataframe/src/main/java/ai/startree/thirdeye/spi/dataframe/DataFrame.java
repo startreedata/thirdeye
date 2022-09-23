@@ -1462,6 +1462,7 @@ public class DataFrame {
    * @return series with evaluation results
    * @throws IllegalArgumentException if the series does not exist
    */
+  // fixme cyril remove this method and EvalEx dependency
   public DoubleSeries map(String doubleExpression) {
     Set<String> variables = extractSeriesNames(doubleExpression);
     return this.map(doubleExpression, variables.toArray(new String[variables.size()]));

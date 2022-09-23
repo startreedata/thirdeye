@@ -28,14 +28,17 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeResultSetDataTable.class);
 
   private final ThirdEyeResultSet thirdEyeResultSet;
-  private final List<String> columns = new ArrayList<>();
-  private final List<ColumnType> columnTypes = new ArrayList<>();
+  private final List<String> columns;
+  private final List<ColumnType> columnTypes;
   private final int groupKeyLength;
   private DataFrame dataFrame;
 
   public ThirdEyeResultSetDataTable(final ThirdEyeResultSet thirdEyeResultSet) {
     this.thirdEyeResultSet = thirdEyeResultSet;
     this.groupKeyLength = thirdEyeResultSet.getGroupKeyLength();
+    final int initialCapacity = thirdEyeResultSet.getGroupKeyLength() + thirdEyeResultSet.getColumnCount();
+    columns = new ArrayList<>(initialCapacity);
+    columnTypes = new ArrayList<>(initialCapacity);
     for (int i = 0; i < thirdEyeResultSet.getGroupKeyLength(); i++) {
       columns.add(thirdEyeResultSet.getGroupKeyColumnName(i));
       columnTypes.add(thirdEyeResultSet.getGroupKeyColumnType(i));

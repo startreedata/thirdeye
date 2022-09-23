@@ -12,14 +12,14 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import { clone, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import { clone } from "lodash";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
-import { AnomalyFilterOption } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
+import { AnomalyFilterOption } from "../../components/rca/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { AnomalyTimeSeriesCard } from "../../components/rca/anomaly-time-series-card/anomaly-time-series-card.component";
 import {
     NotificationTypeV1,
@@ -28,7 +28,6 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Event } from "../../rest/dto/event.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
@@ -49,13 +48,10 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         investigationHasChanged,
         getEnumerationItemRequest,
         enumerationItem,
-    } = useOutletContext<InvestigationContext>();
-    const {
         anomaly,
-        getAnomaly,
-        status: getAnomalyRequestStatus,
-        errorMessages: anomalyRequestErrors,
-    } = useGetAnomaly();
+        getAnomalyRequestStatus,
+        anomalyRequestErrors,
+    } = useOutletContext<InvestigationContext>();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [chartTimeSeriesFilterSet, setChartTimeSeriesFilterSet] = useState<
         AnomalyFilterOption[][]
@@ -79,6 +75,15 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { t } = useTranslation();
     const style = useRootCauseAnalysisForAnomalyPageStyles();
+    const parsedAnomalyId = useMemo(() => {
+        console.log("parsedAnomalyId");
+
+        return Number(anomalyId);
+    }, [anomalyId]);
+
+    useEffect(() => {
+        console.log("parsedAnomalyIdUseEfecct");
+    }, [parsedAnomalyId]);
 
     useEffect(() => {
         if (investigation) {
@@ -97,12 +102,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             investigationHasChanged(copied);
         }
     }, [selectedEvents]);
-
-    useEffect(() => {
-        !!anomalyId &&
-            isValidNumberId(anomalyId) &&
-            getAnomaly(toNumber(anomalyId));
-    }, [anomalyId]);
 
     useEffect(() => {
         !!anomaly && setUiAnomaly(getUiAnomaly(anomaly));
@@ -205,7 +204,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             <Grid item xs={12}>
                 <AnalysisTabs
                     anomaly={anomaly}
-                    anomalyId={toNumber(anomalyId)}
+                    anomalyId={parsedAnomalyId}
                     chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                     isLoading={getAnomalyRequestStatus === ActionStatus.Working}
                     selectedEvents={selectedEvents}

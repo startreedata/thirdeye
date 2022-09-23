@@ -48,6 +48,14 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
         useState<AnomalyDimensionAnalysisData | null>();
 
     useEffect(() => {
+        console.log("comparisonOffset", comparisonOffset);
+    }, [comparisonOffset]);
+
+    useEffect(() => {
+        console.log("anomalyId", anomalyId);
+    }, [anomalyId]);
+
+    useEffect(() => {
         getDimensionAnalysisData(anomalyId, {
             baselineOffset: comparisonOffset,
         }).then((data: AnomalyDimensionAnalysisData | undefined) => {

@@ -25,7 +25,6 @@ import {
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { AxiosError } from "axios";
-import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -54,11 +53,11 @@ import {
 import { createEmptyEvent } from "../../../utils/events/events.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../utils/rest/rest.util";
-import { AnomalyBreakdownComparisonHeatmap } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
-import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
-import { OFFSET_TO_MILLISECONDS } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
 import { AnomalyDimensionAnalysis } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.component";
 import { EventsWizard } from "../../event-wizard/event-wizard.component";
+import { AnomalyBreakdownComparisonHeatmap } from "../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
+import { useAnomalyBreakdownComparisonHeatmapStyles } from "../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
+import { OFFSET_TO_MILLISECONDS } from "../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
 import { EventsTab } from "../events-tab/event-tab.component";
 import { AnalysisTabsProps } from "./analysis-tabs.interfaces";
 
@@ -88,6 +87,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     });
     const [eventsSearchValue, setEventsSearchValue] = useState("");
     const [triggerUpdateEvents, setTriggerUpdateEvents] = useState(false);
+
     const { baselineOffsetValue, unit } = parseBaselineComparisonOffset(
         searchParams.get(ANALYSIS_TAB_OFFSET) ?? ""
     );
@@ -372,7 +372,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                 <Box mt={-4}>
                     <AnomalyDimensionAnalysis
                         anomaly={anomaly as Anomaly}
-                        anomalyId={toNumber(anomalyId)}
+                        anomalyId={anomalyId}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
                         onCheckClick={onAddFilterSetClick}
@@ -382,7 +382,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             {selectedTabIndex === 1 && (
                 <Box mt={-4}>
                     <AnomalyBreakdownComparisonHeatmap
-                        anomalyId={toNumber(anomalyId)}
+                        anomalyId={anomalyId}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
                         onAddFilterSetClick={onAddFilterSetClick}

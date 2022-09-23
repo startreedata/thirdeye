@@ -20,34 +20,34 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class AlertInsightsApi {
 
   private AlertTemplateApi templateWithProperties;
-  private long datasetStartTime;
-  private long datasetEndTime;
+  private Long datasetStartTime;
+  private Long datasetEndTime;
   /**
    * If the datasetEndTime fetched from the database looks incorrect, it is stored in this field. A
    * safe value is put in the datasetEndTime field.
    */
-  private long suspiciousDatasetEndTime;
+  private Long suspiciousDatasetEndTime;
   /**
    * Recommended start time and end time to use in the UI time selector if no time
    * is set.
    */
-  private long defaultStartTime;
-  private long defaultEndTime;
+  private Long defaultStartTime;
+  private Long defaultEndTime;
 
-  public long getDatasetStartTime() {
+  public Long getDatasetStartTime() {
     return datasetStartTime;
   }
 
-  public AlertInsightsApi setDatasetStartTime(final long datasetStartTime) {
+  public AlertInsightsApi setDatasetStartTime(final Long datasetStartTime) {
     this.datasetStartTime = datasetStartTime;
     return this;
   }
 
-  public long getDatasetEndTime() {
+  public Long getDatasetEndTime() {
     return datasetEndTime;
   }
 
-  public AlertInsightsApi setDatasetEndTime(final long datasetEndTime) {
+  public AlertInsightsApi setDatasetEndTime(final Long datasetEndTime) {
     this.datasetEndTime = datasetEndTime;
     return this;
   }
@@ -61,29 +61,29 @@ public class AlertInsightsApi {
     return this;
   }
 
-  public long getDefaultStartTime() {
+  public Long getDefaultStartTime() {
     return defaultStartTime;
   }
 
-  public AlertInsightsApi setDefaultStartTime(final long defaultStartTime) {
+  public AlertInsightsApi setDefaultStartTime(final Long defaultStartTime) {
     this.defaultStartTime = defaultStartTime;
     return this;
   }
 
-  public long getDefaultEndTime() {
+  public Long getDefaultEndTime() {
     return defaultEndTime;
   }
 
-  public AlertInsightsApi setDefaultEndTime(final long defaultEndTime) {
+  public AlertInsightsApi setDefaultEndTime(final Long defaultEndTime) {
     this.defaultEndTime = defaultEndTime;
     return this;
   }
 
-  public long getSuspiciousDatasetEndTime() {
+  public Long getSuspiciousDatasetEndTime() {
     return suspiciousDatasetEndTime;
   }
 
-  public AlertInsightsApi setSuspiciousDatasetEndTime(final long suspiciousDatasetEndTime) {
+  public AlertInsightsApi setSuspiciousDatasetEndTime(final Long suspiciousDatasetEndTime) {
     this.suspiciousDatasetEndTime = suspiciousDatasetEndTime;
     return this;
   }

@@ -60,7 +60,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         useState<Investigation | null>(null);
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
-    const { anomaly, getAnomaly } = useGetAnomaly();
+    const { anomaly, getAnomaly, status, errorMessages } = useGetAnomaly();
 
     const {
         enumerationItem,
@@ -286,6 +286,9 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                     investigationHasChanged: handleInvestigationChange,
                     getEnumerationItemRequest,
                     enumerationItem,
+                    anomaly,
+                    getAnomalyRequestStatus: status,
+                    anomalyRequestErrors: errorMessages,
                 }}
             />
         </PageV1>

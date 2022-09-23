@@ -12,8 +12,8 @@
  * the License.
  */
 import { ScaleOrdinal } from "d3-scale";
-import { AnomalyFilterOption } from "../../../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { Series } from "../../../../visualizations/time-series-chart/time-series-chart.interfaces";
+import { AnomalyFilterOption } from "../../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
 export interface FilteredTimeSeriesProps {
     filterSet: AnomalyFilterOption[];

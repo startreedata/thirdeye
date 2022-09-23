@@ -12,16 +12,16 @@
  * the License.
  */
 import { isEmpty, map } from "lodash";
-import { BaselineOffsetUnitsKey } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import { AnomalyBreakdown } from "../../rest/dto/rca.interfaces";
-import { EMPTY_STRING_DISPLAY } from "../../utils/anomalies/anomalies.util";
+import { BaselineOffsetUnitsKey } from "../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { AnomalyBreakdown } from "../../../rest/dto/rca.interfaces";
+import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import {
     DAY_IN_MILLISECONDS,
     MONTH_IN_MILLISECONDS,
     WEEK_IN_MILLISECONDS,
     YEAR_IN_MILLISECONDS,
-} from "../../utils/time/time.util";
-import { TreemapData } from "../visualizations/treemap/treemap.interfaces";
+} from "../../../utils/time/time.util";
+import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
 import {
     AnomalyBreakdownComparisonData,
     AnomalyBreakdownComparisonDataByDimensionColumn,

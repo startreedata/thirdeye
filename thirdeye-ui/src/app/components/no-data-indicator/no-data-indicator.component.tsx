@@ -12,7 +12,6 @@
  * the License.
  */
 import { Typography, useTheme } from "@material-ui/core";
-import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { ReactComponent as EmptyGlassIcon } from "../../../assets/images/empty-glass.svg";
 import { NoDataIndicatorProps } from "./no-data-indicator.interfaces";
@@ -29,12 +28,7 @@ export const NoDataIndicator: FunctionComponent<NoDataIndicatorProps> = (
     return (
         <div className={noDataIndicatorClasses.noDataIndicator}>
             {/* Icon */}
-            <div
-                className={classnames({
-                    [noDataIndicatorClasses.icon]: !props.text,
-                    [noDataIndicatorClasses.iconWithText]: props.text,
-                })}
-            >
+            <div>
                 <EmptyGlassIcon
                     fill={theme.palette.primary.main}
                     height={HEIGHT_ICON}
@@ -43,17 +37,13 @@ export const NoDataIndicator: FunctionComponent<NoDataIndicatorProps> = (
 
             {/* Text */}
             {props.text && (
-                <div className={noDataIndicatorClasses.text}>
+                <div>
                     <Typography variant="body2">{props.text}</Typography>
                 </div>
             )}
 
             {/* children */}
-            {props.children && (
-                <div className={noDataIndicatorClasses.text}>
-                    {props.children}
-                </div>
-            )}
+            {props.children && <div>{props.children}</div>}
         </div>
     );
 };

@@ -26,14 +26,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Anomaly detection result. Contains a list of anomalies detected and the associated timeseries
  * which includes timestamps, predicted baseline, current value, upper/lower bounds.
  */
-public class AnomalyDetectorResult implements OperatorResult {
+public class AnomalyDetectorOperatorResult implements OperatorResult {
 
   private final List<MergedAnomalyResultDTO> anomalies;
   private final TimeSeries timeseries;
   private final Map<String, List> rawData;
   private final EnumerationItemDTO enumerationItem;
 
-  private AnomalyDetectorResult(final List<MergedAnomalyResultDTO> anomalies,
+  private AnomalyDetectorOperatorResult(final List<MergedAnomalyResultDTO> anomalies,
       final TimeSeries timeseries,
       final Map<String, List> rawData,
       final EnumerationItemDTO enumerationItem) {
@@ -41,6 +41,10 @@ public class AnomalyDetectorResult implements OperatorResult {
     this.timeseries = timeseries;
     this.rawData = rawData;
     this.enumerationItem = enumerationItem;
+  }
+
+  public static AnomalyDetectorOperatorResult.Builder builder() {
+    return new AnomalyDetectorOperatorResult.Builder();
   }
 
   @Override
@@ -63,7 +67,8 @@ public class AnomalyDetectorResult implements OperatorResult {
 
   @Override
   public String toString() {
-    return "OperatorResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries + ", rawdata=" + rawData + '}';
+    return "OperatorResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries
+        + ", rawdata=" + rawData + '}';
   }
 
   public static class Builder {
@@ -94,8 +99,8 @@ public class AnomalyDetectorResult implements OperatorResult {
       return this;
     }
 
-    public AnomalyDetectorResult build() {
-      return new AnomalyDetectorResult(anomalies, timeseries, rawData, enumerationItem);
+    public AnomalyDetectorOperatorResult build() {
+      return new AnomalyDetectorOperatorResult(anomalies, timeseries, rawData, enumerationItem);
     }
   }
 }

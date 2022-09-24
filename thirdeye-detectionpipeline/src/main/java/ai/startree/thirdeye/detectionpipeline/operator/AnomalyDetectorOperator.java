@@ -21,7 +21,7 @@ import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorResult.Builder;
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;

@@ -19,7 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorResult.Builder;
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -41,13 +41,13 @@ import org.testng.annotations.Test;
 public class PostProcessorOperatorTest {
 
   // timeseries can be null - it is not used by the TestPostProcessor
-  private static final AnomalyDetectorResult DETECTION_RES_WITH_2_ANOMALIES = from(
+  private static final AnomalyDetectorOperatorResult DETECTION_RES_WITH_2_ANOMALIES = from(
       List.of(new MergedAnomalyResultDTO(), new MergedAnomalyResultDTO()),
       null);
-  private static final AnomalyDetectorResult DETECTION_RES_WITH_ZERO_ANOMALY = from(
+  private static final AnomalyDetectorOperatorResult DETECTION_RES_WITH_ZERO_ANOMALY = from(
       List.of(),
       null);
-  private static final AnomalyDetectorResult DETECTION_RES_WITH_1_ANOMALY = from(
+  private static final AnomalyDetectorOperatorResult DETECTION_RES_WITH_1_ANOMALY = from(
       List.of(new MergedAnomalyResultDTO()),
       null);
   private static final String TEST_POST_PROCESSOR_NAME = "TestPostProcessor";
@@ -74,7 +74,7 @@ public class PostProcessorOperatorTest {
    *     optionally upper and lower bounds
    * @return the detection result contains the list of anomalies and the time series
    */
-  private static AnomalyDetectorResult from(final List<MergedAnomalyResultDTO> anomalies,
+  private static AnomalyDetectorOperatorResult from(final List<MergedAnomalyResultDTO> anomalies,
       final TimeSeries timeSeries) {
     return new Builder()
         .setAnomalies(anomalies)
@@ -93,9 +93,9 @@ public class PostProcessorOperatorTest {
     final PlanNodeBean planNodeBean = new PlanNodeBean().setName(NODE_BEAN_NAME)
         .setParams(TEST_POST_PROCESSOR_CONFIG);
     // timeseries is not used by the TestPostProcessor
-    final AnomalyDetectorResult detectionResult1 = from(List.of(new MergedAnomalyResultDTO()),
+    final AnomalyDetectorOperatorResult detectionResult1 = from(List.of(new MergedAnomalyResultDTO()),
         null);
-    final AnomalyDetectorResult detectionResult2 = from(List.of(new MergedAnomalyResultDTO(),
+    final AnomalyDetectorOperatorResult detectionResult2 = from(List.of(new MergedAnomalyResultDTO(),
         new MergedAnomalyResultDTO()), null);
     final Map<String, OperatorResult> inputsMap = Map.of("detectionResult0",
         DETECTION_RES_WITH_ZERO_ANOMALY,
@@ -197,8 +197,8 @@ public class PostProcessorOperatorTest {
     public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
         final Map<String, OperatorResult> resultMap) throws Exception {
       for (final OperatorResult r : resultMap.values()) {
-        if (r instanceof AnomalyDetectorResult) {
-          final AnomalyDetectorResult detectionResult = (AnomalyDetectorResult) r;
+        if (r instanceof AnomalyDetectorOperatorResult) {
+          final AnomalyDetectorOperatorResult detectionResult = (AnomalyDetectorOperatorResult) r;
           for (final MergedAnomalyResultDTO anomaly : detectionResult.getAnomalies()) {
             // override existing labels - don't do this in real implementation - ok for tests
             final AnomalyLabelDTO anomalyLabel = new AnomalyLabelDTO().setIgnore(true)

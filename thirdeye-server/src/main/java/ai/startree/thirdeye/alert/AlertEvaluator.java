@@ -22,6 +22,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
+import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.inject.Inject;
@@ -74,9 +75,12 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(request.getAlert(),
-          request.getStart().getTime(),
-          request.getEnd().getTime());
+      final long startTime = request.getStart().getTime();
+      final long endTime = request.getEnd().getTime();
+      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
+          request.getAlert(),
+          startTime,
+          endTime);
 
       // apply template properties
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
@@ -98,9 +102,15 @@ public class AlertEvaluator {
               detectionInterval))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-      return toAlertEvaluationApi(result)
-          .setAlert(new AlertApi()
-              .setTemplate(toAlertTemplateApi(templateWithProperties)));
+      final boolean postProcessEnabled = optional(request.getEvaluationContext())
+          .map(EvaluationContextApi::getPostProcessEnabled)
+          .orElse(false);
+      final Map<String, OperatorResult> processed = postProcessEnabled
+          ? new DetectionPipelineOutputPostProcessor().process(result, request)
+          : null;
+
+      return toAlertEvaluationApi(optional(processed).orElse(result))
+          .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {

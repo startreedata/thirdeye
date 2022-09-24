@@ -11,10 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection.model;
+package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Collections;
 import java.util.List;
@@ -25,14 +26,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Anomaly detection result. Contains a list of anomalies detected and the associated timeseries
  * which includes timestamps, predicted baseline, current value, upper/lower bounds.
  */
-public class AnomalyDetectionResult implements OperatorResult {
+public class AnomalyDetectorResult implements OperatorResult {
 
   private final List<MergedAnomalyResultDTO> anomalies;
   private final TimeSeries timeseries;
   private final Map<String, List> rawData;
   private final EnumerationItemDTO enumerationItem;
 
-  private AnomalyDetectionResult(final List<MergedAnomalyResultDTO> anomalies,
+  private AnomalyDetectorResult(final List<MergedAnomalyResultDTO> anomalies,
       final TimeSeries timeseries,
       final Map<String, List> rawData,
       final EnumerationItemDTO enumerationItem) {
@@ -93,8 +94,8 @@ public class AnomalyDetectionResult implements OperatorResult {
       return this;
     }
 
-    public AnomalyDetectionResult build() {
-      return new AnomalyDetectionResult(anomalies, timeseries, rawData, enumerationItem);
+    public AnomalyDetectorResult build() {
+      return new AnomalyDetectorResult(anomalies, timeseries, rawData, enumerationItem);
     }
   }
 }

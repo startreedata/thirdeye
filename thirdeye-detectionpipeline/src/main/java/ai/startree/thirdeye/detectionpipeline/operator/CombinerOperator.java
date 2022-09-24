@@ -17,10 +17,9 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
-import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult.Builder;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
@@ -36,8 +35,8 @@ public class CombinerOperator extends DetectionPipelineOperator {
     super();
   }
 
-  private static AnomalyDetectionResult wrap(final EnumerationItemDTO enumerationItem,
-      final AnomalyDetectionResult r) {
+  private static AnomalyDetectorResult wrap(final EnumerationItemDTO enumerationItem,
+      final AnomalyDetectorResult r) {
     return new Builder()
         .setAnomalies(r.getAnomalies())
         .setTimeseries(r.getTimeseries())
@@ -48,8 +47,8 @@ public class CombinerOperator extends DetectionPipelineOperator {
 
   private static OperatorResult wrapIfReqd(final EnumerationItemDTO enumerationItem,
       final OperatorResult result) {
-    return result instanceof AnomalyDetectionResult
-        ? wrap(enumerationItem, (AnomalyDetectionResult) result)
+    return result instanceof AnomalyDetectorResult
+        ? wrap(enumerationItem, (AnomalyDetectorResult) result)
         : result;
   }
 

@@ -107,9 +107,9 @@ public class AlertEvaluator {
           .orElse(false);
       final Map<String, OperatorResult> processed = postProcessEnabled
           ? new DetectionPipelineOutputPostProcessor().process(result, request)
-          : null;
+          : result;
 
-      return toAlertEvaluationApi(optional(processed).orElse(result))
+      return toAlertEvaluationApi(processed)
           .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
     } catch (final WebApplicationException e) {
       throw e;

@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
@@ -87,8 +88,8 @@ public class AlertEvaluator {
           detectionInterval);
 
       // inject custom evaluation context
-      optional(request.getEvaluationContext())
-          .ifPresent(ctx -> evaluationContextProcessor.process(templateWithProperties, ctx));
+      final PlanNodeContext runtimeContext = evaluationContextProcessor.getContext(request.getEvaluationContext());
+      runtimeContext.setDetectionInterval(detectionInterval);
 
       if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()
@@ -99,7 +100,7 @@ public class AlertEvaluator {
 
       final Map<String, OperatorResult> result = executorService
           .submit(() -> planExecutor.runPipelineAndGetRootOutputs(templateWithProperties.getNodes(),
-              detectionInterval))
+              runtimeContext))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
       final boolean postProcessEnabled = optional(request.getEvaluationContext())

@@ -102,7 +102,7 @@ public class HappyPathTest {
   private long alertId;
 
   @BeforeClass
-  public void beforeClass() throws Exception {
+  public void beforeClass() {
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it

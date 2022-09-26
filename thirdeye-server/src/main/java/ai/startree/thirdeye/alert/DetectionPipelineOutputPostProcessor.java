@@ -16,6 +16,7 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
@@ -27,6 +28,7 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -35,17 +37,29 @@ public class DetectionPipelineOutputPostProcessor {
   public Map<String, OperatorResult> process(final Map<String, OperatorResult> result,
       final AlertEvaluationApi request) {
     final Map<String, OperatorResult> m = new HashMap<>(result.size());
-    for (final var e : result.entrySet()) {
-      final Optional<DataFrame> dfOptional = optional(e.getValue())
-          .map(OperatorResult::getTimeseries)
-          .map(TimeSeries::getDataFrame);
-      if (dfOptional.isPresent()) {
-        m.put(e.getKey(), processOperatorResultWithDataframe(e.getValue(), request));
-      } else {
-        m.put(e.getKey(), e.getValue());
-      }
+    for (final Entry<String, OperatorResult> e : result.entrySet()) {
+      final OperatorResult processedOperatorResult = processOperatorResult(request,
+          e.getValue());
+      m.put(e.getKey(), processedOperatorResult);
     }
     return m;
+  }
+
+  private OperatorResult processOperatorResult(final AlertEvaluationApi request,
+      final OperatorResult operatorResult) {
+    if (operatorResult instanceof CombinerResult) {
+      // process the combiner delegate results
+      process(((CombinerResult) operatorResult).getResults(), request);
+      return operatorResult;
+    }
+    final Optional<DataFrame> dfOptional = optional(operatorResult)
+        .map(OperatorResult::getTimeseries)
+        .map(TimeSeries::getDataFrame);
+    if (dfOptional.isPresent()) {
+      return processOperatorResultWithDataframe(operatorResult, request);
+    } else {
+      return operatorResult;
+    }
   }
 
   private OperatorResult processOperatorResultWithDataframe(final OperatorResult delegate,

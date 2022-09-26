@@ -73,7 +73,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     };
     tsData.margins = {
         top: 0,
-        bottom: 40, // This needs to exist for the x axis
+        bottom: 10, // This needs to exist for the x axis
         left: 0,
         right: 0,
     };

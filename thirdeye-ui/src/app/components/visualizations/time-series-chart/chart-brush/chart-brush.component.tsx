@@ -12,22 +12,26 @@
  * the License.
  */
 import { Brush } from "@visx/brush";
-import BaseBrush from "@visx/brush/lib/BaseBrush";
-import { PartialBrushStartEnd } from "@visx/brush/lib/types";
+import BaseBrush, {
+    BaseBrushState,
+    UpdateBrush,
+} from "@visx/brush/lib/BaseBrush";
 import { Group } from "@visx/group";
+import { PatternLines } from "@visx/pattern";
 import { scaleLinear, scaleTime } from "@visx/scale";
-import React, { FunctionComponent, useMemo, useRef } from "react";
-import { Palette } from "../../../../utils/material-ui/palette.util";
+import { isEqual } from "lodash";
+import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
 import { ChartCore } from "../chart-core/chart-core.component";
 import { ChartCoreProps } from "../chart-core/chart-core.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
+import { BrushHandle } from "./chart-brush-handle.component";
 import { ChartBrushProps } from "./chart-brush.interfaces";
 
-const SELECTED_BRUSH_STYLE = {
-    fill: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
-    fillOpacity: 0.4,
-    strokeOpacity: 1,
-    stroke: Palette.COLOR_VISUALIZATION_STROKE_BRUSH,
+const PATTERN_ID = "brush_pattern";
+const accentColor = "#BBBBBB";
+const selectedBrushStyle = {
+    fill: `url(#${PATTERN_ID})`,
+    stroke: "#AAAAAA",
 };
 
 export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
@@ -39,7 +43,7 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     onBrushChange,
     onBrushClick,
     xAxisOptions,
-    initialZoom,
+    currentZoom,
     margins,
     onMouseEnter,
 }) => {
@@ -104,8 +108,57 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
         );
     }
 
+    useEffect(() => {
+        if (!brushRef || !brushRef.current) {
+            return;
+        }
+
+        let newExtent: {
+            x0: number;
+            x1: number;
+            y0: number;
+            y1: number;
+        };
+        if (currentZoom) {
+            newExtent = brushRef.current.getExtent(
+                { x: dateScale(currentZoom.x0) },
+                { x: dateScale(currentZoom.x1) }
+            );
+        } else {
+            newExtent = brushRef.current.getExtent(
+                { x: dateScale(minMaxTimestamp[0]) },
+                { x: dateScale(minMaxTimestamp[1]) }
+            );
+        }
+
+        // Exit if the zoom levels are the same
+        if (isEqual(newExtent, brushRef.current.state.extent)) {
+            return;
+        }
+
+        const updater: UpdateBrush = (prevBrush) => {
+            const newState: BaseBrushState = {
+                ...prevBrush,
+                start: { y: newExtent.y0, x: newExtent.x0 },
+                end: { y: newExtent.y1, x: newExtent.x1 },
+                extent: newExtent,
+            };
+
+            return newState;
+        };
+        brushRef.current.updateBrush(updater);
+    }, [currentZoom, height, brushRef.current]);
+
     return (
         <Group onMouseEnter={onMouseEnter}>
+            <PatternLines
+                height={8}
+                id={PATTERN_ID}
+                orientation={["diagonal"]}
+                stroke={accentColor}
+                strokeWidth={1}
+                width={8}
+            />
             <ChartCore {...chartOptions}>
                 {() => (
                     <Brush
@@ -113,22 +166,17 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
                         brushDirection="horizontal"
                         handleSize={8}
                         height={yBrushMax}
-                        initialBrushPosition={
-                            initialZoom
-                                ? ({
-                                      start: { x: dateScale(initialZoom.x0) },
-                                      end: { x: dateScale(initialZoom.x1) },
-                                  } as PartialBrushStartEnd)
-                                : undefined
-                        }
                         innerRef={brushRef}
                         margin={{ ...margins }}
+                        renderBrushHandle={(props) => (
+                            <BrushHandle {...props} />
+                        )}
                         resizeTriggerAreas={["left", "right"]}
-                        selectedBoxStyle={SELECTED_BRUSH_STYLE}
+                        selectedBoxStyle={selectedBrushStyle}
                         width={xBrushMax}
                         xScale={dateScale}
                         yScale={dataScale}
-                        onChange={onBrushChange}
+                        onBrushEnd={onBrushChange}
                         onClick={onBrushClick}
                     />
                 )}

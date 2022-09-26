@@ -213,6 +213,7 @@ export const generateChartOptions = (
         },
         legend: true,
         brush: true,
+        zoom: true,
         tooltip: true,
     };
 };
@@ -466,6 +467,7 @@ export const generateChartOptionsForAlert = (
         series,
         legend: true,
         brush: true,
+        zoom: true,
         tooltip: true,
         yAxis: {
             position: Orientation.right,
@@ -506,6 +508,7 @@ export const generateChartOptionsForMetricsReport = (
         series,
         legend: false,
         brush: false,
+        zoom: true,
         tooltip: false,
         yAxis: { enabled: false },
     };

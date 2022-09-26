@@ -273,8 +273,8 @@ const mockAnomaly5 = {
     id: 1,
     startTime: 100,
     endTime: 110,
-    avgCurrentVal: 0,
-    avgBaselineVal: 5,
+    avgCurrentVal: 4,
+    avgBaselineVal: -2,
 } as Anomaly;
 
 const mockAnomalies = [
@@ -381,20 +381,21 @@ const mockUiAnomaly4 = {
     hasFeedback: false,
 };
 
+// Make sure a positive current and negative predicted produces a positive deviation
 const mockUiAnomaly5 = {
     id: 1,
     name: "label.anomaly label.entity-id",
     alertId: -1,
     alertName: "label.no-data-marker",
-    current: "0",
+    current: "4",
     metricId: -1,
     metricName: "label.no-data-marker",
-    predicted: "5",
-    deviation: "-1",
-    currentVal: 0,
-    predictedVal: 5,
-    deviationVal: -1,
-    negativeDeviation: true,
+    predicted: "-2",
+    deviation: "3",
+    currentVal: 4,
+    predictedVal: -2,
+    deviationVal: 3,
+    negativeDeviation: false,
     duration: "100 110",
     durationVal: 10,
     startTime: "100",

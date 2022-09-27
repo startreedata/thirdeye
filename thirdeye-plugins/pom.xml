@@ -35,6 +35,7 @@
     <module>thirdeye-pinot</module>
     <module>thirdeye-notification-email</module>
     <module>thirdeye-bootstrap-open-core</module>
+    <module>thirdeye-enumerators</module>
   </modules>
 
   <dependencies>

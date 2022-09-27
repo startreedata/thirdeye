@@ -22,6 +22,7 @@ import ai.startree.thirdeye.plugins.datasource.DefaultDataSourcesPlugin;
 import ai.startree.thirdeye.plugins.datasource.PinotDataSourcePlugin;
 import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
 import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
+import ai.startree.thirdeye.plugins.enumerator.ThirdEyeEnumeratorsPlugin;
 import ai.startree.thirdeye.plugins.notification.email.EmailNotificationPlugin;
 import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.spi.Plugin;
@@ -52,7 +53,8 @@ public class ThirdEyeServerDebug {
             new DetectionComponentsPlugin(),
             new DetectorsPlugin(),
             new EmailNotificationPlugin(),
-            new PinotDataSourcePlugin()
+            new PinotDataSourcePlugin(),
+            new ThirdEyeEnumeratorsPlugin()
         )
         .forEach(plugin -> installPlugin(pluginLoader, plugin));
   }
@@ -63,7 +65,8 @@ public class ThirdEyeServerDebug {
   private static void installPlugin(final PluginLoader pluginLoader,
       final Plugin plugin) {
     try {
-      final Method method = pluginLoader.getClass().getDeclaredMethod("installPlugin", Plugin.class);
+      final Method method = pluginLoader.getClass()
+          .getDeclaredMethod("installPlugin", Plugin.class);
       method.setAccessible(true);
       method.invoke(pluginLoader, plugin);
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

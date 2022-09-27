@@ -18,7 +18,9 @@ import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ROOT;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator;
@@ -32,7 +34,9 @@ import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
@@ -43,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
@@ -51,16 +56,21 @@ import org.testng.annotations.Test;
 public class PlanExecutorTest {
 
   private PlanExecutor planExecutor;
+  private Enumerator enumerator;
 
   @BeforeMethod
   public void setUp() {
+    final DetectionRegistry detectionRegistry = mock(DetectionRegistry.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
         mock(DataSourceCache.class),
-        mock(DetectionRegistry.class),
+        detectionRegistry,
         mock(PostProcessorRegistry.class),
         mock(EventManager.class),
         mock(DatasetConfigManager.class));
     planExecutor = new PlanExecutor(planNodeFactory);
+    enumerator = mock(Enumerator.class);
+
+    when(detectionRegistry.buildEnumerator("default")).thenReturn(enumerator);
   }
 
   @Test
@@ -102,14 +112,21 @@ public class PlanExecutorTest {
             EchoOperator.DEFAULT_INPUT_KEY, "${key}"
         ));
 
+    final List<Map<String, Map<String, Object>>> items = List.of(
+        Map.of("params", Map.of("key", 1)),
+        Map.of("params", Map.of("key", 2)),
+        Map.of("params", Map.of("key", 3))
+    );
     final PlanNodeBean enumeratorNode = new PlanNodeBean()
         .setName("enumerator")
         .setType(EnumeratorPlanNode.TYPE)
-        .setParams(TemplatableMap.ofValue("items", List.of(
-            Map.of("params", Map.of("key", 1)),
-            Map.of("params", Map.of("key", 2)),
-            Map.of("params", Map.of("key", 3))
-        )));
+        .setParams(TemplatableMap.ofValue("items", items));
+
+    when(enumerator.enumerate(any())).thenReturn(items
+        .stream()
+        .map(m -> new EnumerationItemDTO().setParams(m.get("params")))
+        .collect(Collectors.toList())
+    );
 
     final PlanNodeBean combinerNode = new PlanNodeBean()
         .setName("combiner")

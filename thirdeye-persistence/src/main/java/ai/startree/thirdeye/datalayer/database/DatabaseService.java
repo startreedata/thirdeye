@@ -220,11 +220,11 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractIndexEntity> Long count(Class<E> clazz) {
+  public <E extends AbstractEntity> Long count(Class<E> clazz) {
     return count(null, clazz);
   }
 
-  public <E extends AbstractIndexEntity> Long count(Predicate predicate, Class<E> clazz) {
+  public <E extends AbstractEntity> Long count(Predicate predicate, Class<E> clazz) {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -246,7 +246,7 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractIndexEntity> List<E> runSQL(
+  public <E extends AbstractEntity> List<E> runSQL(
       final String parameterizedSQL,
       final Map<String, Object> parameterMap,
       final Class<E> indexClass) {

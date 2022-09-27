@@ -237,7 +237,7 @@ public class SqlQueryBuilder {
   }
 
   public PreparedStatement createCountStatement(final Connection connection, final Predicate predicate,
-      final Class<? extends AbstractIndexEntity> indexEntityClass) throws Exception {
+      final Class<? extends AbstractEntity> indexEntityClass) throws Exception {
     final String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(indexEntityClass.getSimpleName());
     final BiMap<String, String> entityNameToDBNameMapping =

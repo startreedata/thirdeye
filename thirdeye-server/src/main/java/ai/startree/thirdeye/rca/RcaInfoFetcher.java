@@ -25,15 +25,19 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,16 +59,20 @@ public class RcaInfoFetcher {
   private final DatasetConfigManager datasetDAO;
   private final MetricConfigManager metricDAO;
   private final AlertTemplateRenderer alertTemplateRenderer;
-
+  private final EnumerationItemManager enumerationItemManager;
   @Inject
   public RcaInfoFetcher(final MergedAnomalyResultManager mergedAnomalyDAO,
-      final AlertManager alertDAO, final DatasetConfigManager datasetDAO,
-      final MetricConfigManager metricDAO, final AlertTemplateRenderer alertTemplateRenderer) {
+      final AlertManager alertDAO,
+      final DatasetConfigManager datasetDAO,
+      final MetricConfigManager metricDAO,
+      final AlertTemplateRenderer alertTemplateRenderer,
+      final EnumerationItemManager enumerationItemManager) {
     this.mergedAnomalyDAO = mergedAnomalyDAO;
     this.alertDAO = alertDAO;
     this.datasetDAO = datasetDAO;
     this.metricDAO = metricDAO;
     this.alertTemplateRenderer = alertTemplateRenderer;
+    this.enumerationItemManager = enumerationItemManager;
   }
 
   /**
@@ -76,7 +84,7 @@ public class RcaInfoFetcher {
    * This method gets the metric and dataset info from the alert template.
    * It could be more intelligent: metric and dataset could be inferred from the query.
    */
-  public RcaInfo getRcaInfo(long anomalyId)
+  public RcaInfo getRcaInfo(final long anomalyId)
       throws IOException, ClassNotFoundException {
     final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
         String.format("Anomaly ID: %d", anomalyId));
@@ -87,9 +95,10 @@ public class RcaInfoFetcher {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
         new Interval(0L, 0L, DateTimeZone.UTC));
     // parse metadata
-    AlertMetadataDTO alertMetadataDto = ensureExists(templateWithProperties.getMetadata(),
-        ERR_MISSING_CONFIGURATION_FIELD,
-        "metadata.");
+    final AlertMetadataDTO alertMetadataDto = rendeMetadata(
+        anomalyDTO,
+        templateWithProperties);
+
     final MetricConfigDTO metadataMetricDTO = ensureExists(alertMetadataDto.getMetric(),
         ERR_MISSING_CONFIGURATION_FIELD,
         "metadata$metric");
@@ -127,19 +136,36 @@ public class RcaInfoFetcher {
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone);
   }
 
+  private AlertMetadataDTO rendeMetadata(final MergedAnomalyResultDTO anomalyDTO,
+      final AlertTemplateDTO templateWithProperties) throws IOException, ClassNotFoundException {
+    final AlertMetadataDTO metadata = ensureExists(templateWithProperties.getMetadata(),
+        ERR_MISSING_CONFIGURATION_FIELD,
+        "metadata.");
+
+    final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .map(enumerationItemManager::findById)
+        .orElse(null);
+
+    /* Everything can be collapsed in a single line but kept enumeration item for clarity */
+    return enumerationItemDTO != null
+        ? StringTemplateUtils.applyContext(metadata, enumerationItemDTO.getParams())
+        : metadata;
+  }
+
   @VisibleForTesting
-  protected static void addCustomFields(final DatasetConfigDTO datasetConfigDTO,
-      final DatasetConfigDTO metadataDatasetDTO) {
+  protected static void addCustomFields(final DatasetConfigDTO dataset,
+      final DatasetConfigDTO metadataDataset) {
     // fields that can be configured at the alert level are parsed in this method
-    boolean includedListIsNotEmpty = templatableListIsNotEmpty(metadataDatasetDTO.getDimensions());
-    boolean excludedListIsNotEmpty = templatableListIsNotEmpty(metadataDatasetDTO.getRcaExcludedDimensions());
+    final boolean includedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getDimensions());
+    final boolean excludedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getRcaExcludedDimensions());
     checkArgument(!(includedListIsNotEmpty && excludedListIsNotEmpty),
         "Both dimensions and rcaExcludedDimensions are not empty. Cannot use an inclusion and an exclusion list at the same time.");
     if (excludedListIsNotEmpty) {
-      datasetConfigDTO.setRcaExcludedDimensions(metadataDatasetDTO.getRcaExcludedDimensions());
+      dataset.setRcaExcludedDimensions(metadataDataset.getRcaExcludedDimensions());
     }
     if (includedListIsNotEmpty) {
-      datasetConfigDTO.setDimensions(metadataDatasetDTO.getDimensions());
+      dataset.setDimensions(metadataDataset.getDimensions());
     }
   }
 

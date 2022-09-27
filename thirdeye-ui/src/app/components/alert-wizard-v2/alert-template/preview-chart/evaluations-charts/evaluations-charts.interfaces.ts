@@ -11,21 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { DetectionEvaluation } from "../../../../../rest/dto/detection.interfaces";
 
-export const usePreviewChartStyles = makeStyles((theme) => ({
-    heightWholeContainer: {
-        height: "100%",
-    },
-    alertContainer: {
-        paddingLeft: theme.spacing(5),
-        paddingRight: theme.spacing(5),
-        position: "absolute",
-        textAlign: "center",
-        width: "100%",
-        height: "100%",
-    },
-    selected: {
-        color: theme.palette.primary.main,
-    },
-}));
+export interface EvaluationsChartsProps {
+    detectionEvaluations: DetectionEvaluation[];
+    expanded: string[];
+    onExpandedChange: (newExpanded: string[]) => void;
+}

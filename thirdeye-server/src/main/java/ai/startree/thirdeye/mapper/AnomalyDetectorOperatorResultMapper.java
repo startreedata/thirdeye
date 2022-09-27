@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -11,21 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
 
-export const usePreviewChartStyles = makeStyles((theme) => ({
-    heightWholeContainer: {
-        height: "100%",
-    },
-    alertContainer: {
-        paddingLeft: theme.spacing(5),
-        paddingRight: theme.spacing(5),
-        position: "absolute",
-        textAlign: "center",
-        width: "100%",
-        height: "100%",
-    },
-    selected: {
-        color: theme.palette.primary.main,
-    },
-}));
+package ai.startree.thirdeye.mapper;
+
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
+@Mapper
+public interface AnomalyDetectorOperatorResultMapper {
+
+  AnomalyDetectorOperatorResultMapper INSTANCE = Mappers.getMapper(
+      AnomalyDetectorOperatorResultMapper.class);
+
+  AnomalyDetectorOperatorResult clone(AnomalyDetectorOperatorResult o);
+
+}

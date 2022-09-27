@@ -27,6 +27,7 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     alert,
     onChange,
     onDelete,
+    onReset,
     showViewDetails,
     openButtonRenderer,
 }) => {
@@ -89,6 +90,15 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
         handleAlertOptionsClose();
     };
 
+    const handleReset = (): void => {
+        if (!alert) {
+            return;
+        }
+
+        onReset && onReset(alert);
+        handleAlertOptionsClose();
+    };
+
     return (
         <>
             {/* Alert options button */}
@@ -142,6 +152,11 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                     {t("label.delete-entity", {
                         entity: t("label.alert"),
                     })}
+                </MenuItem>
+
+                {/* Reset alert */}
+                <MenuItem onClick={handleReset}>
+                    {t("label.reset-anomalies-for-alert")}
                 </MenuItem>
             </Menu>
         </>

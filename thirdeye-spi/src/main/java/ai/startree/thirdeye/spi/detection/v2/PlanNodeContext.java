@@ -13,7 +13,9 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import java.util.List;
 import java.util.Map;
 import org.joda.time.Interval;
 
@@ -23,7 +25,21 @@ public class PlanNodeContext {
   private Map<String, PlanNode> pipelinePlanNodes;
   private PlanNodeBean planNodeBean;
   private Interval detectionInterval;
+  private List<Predicate> predicates;
   private Map<String, Object> properties;
+
+  public static PlanNodeContext copy(final PlanNodeContext toCopy) {
+    // shallow copy
+    final PlanNodeContext copy = new PlanNodeContext();
+    copy.name = toCopy.name;
+    copy.pipelinePlanNodes = toCopy.pipelinePlanNodes;
+    copy.planNodeBean = toCopy.planNodeBean;
+    copy.detectionInterval = toCopy.detectionInterval;
+    copy.predicates = toCopy.predicates;
+    copy.properties = toCopy.properties;
+
+    return copy;
+  }
 
   public String getName() {
     return name;
@@ -68,5 +84,24 @@ public class PlanNodeContext {
   public PlanNodeContext setProperties(final Map<String, Object> properties) {
     this.properties = properties;
     return this;
+  }
+
+  public List<Predicate> getPredicates() {
+    return predicates;
+  }
+
+  public PlanNodeContext setPredicates(final List<Predicate> predicates) {
+    this.predicates = predicates;
+    return this;
+  }
+
+  @Override
+  public PlanNodeContext clone() {
+    // shallow clone
+    try {
+      return (PlanNodeContext) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();  // Can't happen
+    }
   }
 }

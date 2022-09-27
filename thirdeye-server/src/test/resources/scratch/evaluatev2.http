@@ -571,3 +571,41 @@ Content-Type: application/json
   "start": "1613376000000",
   "end": "1627714800000"
 }
+
+
+
+###
+
+POST http://localhost:7004/api/alerts/evaluate
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "pageviews-meanvariance",
+    "description": "",
+    "cron": "0 0 5 ? * MON-FRI *",
+    "template": {
+      "name": "startree-mean-variance"
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "aggregationFunction": "sum",
+      "seasonalityPeriod": "P7D",
+      "lookback": "P90D",
+      "monitoringGranularity": "P1D",
+      "sensitivity": "3",
+      "aggregationColumn": "views"
+    }
+  },
+  "evaluationContext": {
+    "postProcessEnabled": true
+  },
+  "start": 1613376000000,
+  "end": 1626332400000
+}
+
+###
+

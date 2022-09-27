@@ -115,7 +115,7 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
     if (isNumber(anomaly.avgCurrentVal) && isNumber(anomaly.avgBaselineVal)) {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
-            anomaly.avgBaselineVal;
+            Math.abs(anomaly.avgBaselineVal);
         uiAnomaly.deviation = isNaN(deviation)
             ? i18n.t("label.no-data-marker")
             : formatPercentageV1(deviation);

@@ -11,14 +11,26 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    ButtonGroup,
+    Card,
+    CardContent,
+    Grid,
+    Typography,
+} from "@material-ui/core";
 import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { getAlertsAlertAnomaliesPath } from "../../../../utils/routes/routes.util";
 import { Pluralize } from "../../../pluralize/pluralize.component";
-import { generateChartOptionsForAlert } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
+import {
+    CHART_SIZE_OPTIONS,
+    generateChartOptionsForAlert,
+    SMALL_CHART_SIZE,
+} from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
 import { generateNameForDetectionResult } from "../enumeration-items-table.util";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
@@ -32,6 +44,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const [expandedChartHeight, setExpandedChartHeight] =
+        useState(SMALL_CHART_SIZE);
     const nameForDetectionEvaluation =
         generateNameForDetectionResult(detectionEvaluation);
     const [isExpanded, setIsExpanded] = useState(
@@ -59,7 +73,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     };
     tsData.margins = {
         top: 0,
-        bottom: 40, // This needs to exist for the x axis
+        bottom: 10, // This needs to exist for the x axis
         left: 0,
         right: 0,
     };
@@ -138,7 +152,46 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                 </CardContent>
                 {isExpanded && (
                     <CardContent>
-                        <TimeSeriesChart height={400} {...tsDataForExpanded} />
+                        <Grid
+                            container
+                            alignItems="center"
+                            justifyContent="flex-end"
+                        >
+                            <Grid item>{t("label.chart-height")}:</Grid>
+                            <Grid item>
+                                <Box textAlign="right">
+                                    <ButtonGroup
+                                        color="secondary"
+                                        variant="outlined"
+                                    >
+                                        {CHART_SIZE_OPTIONS.map(
+                                            (sizeOption) => (
+                                                <Button
+                                                    color="primary"
+                                                    disabled={
+                                                        expandedChartHeight ===
+                                                        sizeOption[1]
+                                                    }
+                                                    key={sizeOption[0]}
+                                                    onClick={() =>
+                                                        setExpandedChartHeight(
+                                                            sizeOption[1] as number
+                                                        )
+                                                    }
+                                                >
+                                                    {sizeOption[0]}
+                                                </Button>
+                                            )
+                                        )}
+                                    </ButtonGroup>
+                                </Box>
+                            </Grid>
+                        </Grid>
+
+                        <TimeSeriesChart
+                            height={expandedChartHeight}
+                            {...tsDataForExpanded}
+                        />
                     </CardContent>
                 )}
             </Card>

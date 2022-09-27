@@ -52,6 +52,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import {
     useGetAlert,
     useGetEvaluation,
+    useResetAlert,
 } from "../../rest/alerts/alerts.actions";
 import { deleteAlert, updateAlert } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
@@ -75,6 +76,12 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
+    const {
+        alert: alertThatWasReset,
+        resetAlert,
+        status: resetAlertRequestStatus,
+        errorMessages: resetAlertRequestErrors,
+    } = useResetAlert();
     const {
         alert,
         getAlert,
@@ -149,6 +156,27 @@ export const AlertsViewPage: FunctionComponent = () => {
             }
         );
     };
+
+    // Handle communicating status to the user
+    useEffect(() => {
+        if (
+            resetAlertRequestStatus === ActionStatus.Done &&
+            alertThatWasReset
+        ) {
+            notify(
+                NotificationTypeV1.Success,
+                t("message.alert-reset-success-please-reload", {
+                    alertName: alertThatWasReset.name,
+                })
+            );
+        }
+        notifyIfErrors(
+            resetAlertRequestStatus,
+            resetAlertRequestErrors,
+            notify,
+            t("message.alert-reset-error")
+        );
+    }, [resetAlertRequestStatus]);
 
     useEffect(() => {
         getAlert(Number(alertId));
@@ -266,6 +294,27 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
+    const handleAlertReset = (alert: Alert): void => {
+        showDialog({
+            type: DialogType.CUSTOM,
+            contents: (
+                <>
+                    <p>{t("message.reset-alert-information")}</p>
+                    <p>
+                        {t("message.reset-alert-confirmation-prompt", {
+                            alertName: alert.name,
+                        })}
+                    </p>
+                </>
+            ),
+            okButtonText: t("label.confirm"),
+            cancelButtonText: t("label.cancel"),
+            onOk: () => {
+                resetAlert(alert.id);
+            },
+        });
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -305,6 +354,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                             }}
                             onChange={handleAlertChange}
                             onDelete={handleAlertDelete}
+                            onReset={handleAlertReset}
                         />
                     ) : (
                         ""

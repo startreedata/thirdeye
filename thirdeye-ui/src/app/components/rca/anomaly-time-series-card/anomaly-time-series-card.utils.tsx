@@ -46,6 +46,13 @@ export const ZOOM_START_KEY = "zoomStart";
 export const ZOOM_END_KEY = "zoomEnd";
 const CURSOR_POINTER_STYLE = { cursor: "pointer" };
 
+export const SMALL_CHART_SIZE = 500;
+export const CHART_SIZE_OPTIONS = [
+    ["S", SMALL_CHART_SIZE],
+    ["M", 800],
+    ["L", 1100],
+];
+
 export const generateSeriesDataForDetectionEvaluation = (
     detectionEvaluation: DetectionEvaluation,
     filteredAlertEvaluations: [AlertEvaluation, AnomalyFilterOption[]][],
@@ -206,6 +213,7 @@ export const generateChartOptions = (
         },
         legend: true,
         brush: true,
+        zoom: true,
         tooltip: true,
     };
 };
@@ -459,6 +467,7 @@ export const generateChartOptionsForAlert = (
         series,
         legend: true,
         brush: true,
+        zoom: true,
         tooltip: true,
         yAxis: {
             position: Orientation.right,
@@ -499,6 +508,7 @@ export const generateChartOptionsForMetricsReport = (
         series,
         legend: false,
         brush: false,
+        zoom: true,
         tooltip: false,
         yAxis: { enabled: false },
     };

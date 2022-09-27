@@ -27,7 +27,7 @@ export interface ChartBrushProps {
     onBrushChange: (domain: Bounds | null) => void;
     onBrushClick: () => void;
     xAxisOptions?: XAxisOptions;
-    initialZoom?: ZoomDomain;
+    currentZoom?: ZoomDomain;
     margins: {
         left: number;
         right: number;

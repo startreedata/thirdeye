@@ -265,7 +265,10 @@
         "enumeration-item": "Enumeration Item",
         "latest-one-first": "Latest one first",
         "latest-one-last": "Latest one last",
-        "has-feedback": "Has Feedback"
+        "has-feedback": "Has Feedback",
+        "dimension-expression": "Dimension expression",
+        "reset-anomalies-for-alert": "Reset anomalies for Alert",
+        "chart-height": "Chart height"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -352,6 +355,7 @@
         "reset-alert-information": "Resetting the alert will delete existing anomalies as well as saved investigations and rerun the detection algorithm.",
         "reset-alert-confirmation-prompt": "Are you sure you want to reset the \"{{alertName}}\" alert?",
         "alert-reset-success": "Anomalies deleted and detection algorithm successfully ran for \"{{alertName}}\"",
+        "alert-reset-success-please-reload": "Anomalies deleted and detection algorithm successfully ran for \"{{alertName}}\". Please reload the page.",
         "alert-reset-error": "An issue was experienced while resetting alert. Please try again.",
         "no-notifications-groups": "No notifications groups have been configured",
         "basic-information-about-group": "Basic information about the group",

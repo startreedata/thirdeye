@@ -15,8 +15,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { AnomalyBreakdownComparisonHeatmap } from "./anomaly-breakdown-comparison-heatmap.component";
 
-jest.mock("../../platform/components", () => ({
-    ...(jest.requireActual("../../platform/components") as Record<
+jest.mock("../../../platform/components", () => ({
+    ...(jest.requireActual("../../../platform/components") as Record<
         string,
         unknown
     >),
@@ -25,8 +25,8 @@ jest.mock("../../platform/components", () => ({
     })),
 }));
 
-jest.mock("../../rest/rca/rca.rest", () => ({
-    ...(jest.requireActual("../../rest/rca/rca.rest") as Record<
+jest.mock("../../../rest/rca/rca.rest", () => ({
+    ...(jest.requireActual("../../../rest/rca/rca.rest") as Record<
         string,
         unknown
     >),
@@ -35,7 +35,7 @@ jest.mock("../../rest/rca/rca.rest", () => ({
         .mockImplementation(() => mockedGetAnomalyMetricBreakdownResponse),
 }));
 
-jest.mock("../no-data-indicator/no-data-indicator.component", () => ({
+jest.mock("../../no-data-indicator/no-data-indicator.component", () => ({
     NoDataIndicator: jest
         .fn()
         .mockImplementation(() => <span>MockedNoDataIndicator</span>),

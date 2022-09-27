@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
@@ -34,7 +35,6 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
-import ai.startree.thirdeye.spi.detection.model.AnomalyDetectionResult;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -134,9 +134,10 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         detectorV2Result.getDataFrame());
     final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
         .sortedBy(COL_TIME));
-    final AnomalyDetectionResult detectionResult = AnomalyDetectionResult.from(anomalies,
-        timeSeries);
-    return detectionResult;
+    return new Builder()
+        .setAnomalies(anomalies)
+        .setTimeseries(timeSeries)
+        .build();
   }
 
   private List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {

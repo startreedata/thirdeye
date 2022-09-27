@@ -28,7 +28,6 @@ export const usePageHeaderStyles = makeStyles((theme) => {
         transparent: {
             ...PAGE_HEADER_OVERRIDE,
             backgroundColor: "transparent",
-            marginBottom: theme.spacing(2),
         },
         noPaddingBottom: {
             paddingBottom: "0 !important",

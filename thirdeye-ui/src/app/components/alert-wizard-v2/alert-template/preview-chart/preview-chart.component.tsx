@@ -11,26 +11,35 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    FormControl,
+    Grid,
+    MenuItem,
+    Select,
+    Typography,
+} from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { ReactComponent as ChartSkeleton } from "../../../../../assets/images/chart-skeleton.svg";
 import {
-    NotificationTypeV1,
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { AlertEvaluation } from "../../../../rest/dto/alert.interfaces";
+import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
 } from "../../../../utils/alerts/alerts.util";
+import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
+import { generateNameForDetectionResult } from "../../../alert-view/enumeration-items-table/enumeration-items-table.util";
 import { generateChartOptionsForAlert } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -60,10 +69,12 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         [searchParams]
     );
     const { notify } = useNotificationProviderV1();
-    const [currentAlertEvaluation, setCurrentAlertEvaluation] =
-        useState<AlertEvaluation>();
     const [timeSeriesOptions, setTimeSeriesOptions] =
         useState<TimeSeriesChartProps>();
+    const [detectionEvaluations, setDetectionEvaluations] =
+        useState<DetectionEvaluation[]>();
+    const [selectedEvaluationToDisplay, setSelectedEvaluationToDisplay] =
+        useState<string>("");
 
     const {
         getEvaluation,
@@ -82,17 +93,57 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         );
 
         if (fetchedAlertEvaluation === undefined) {
-            setCurrentAlertEvaluation(undefined);
+            setDetectionEvaluations(undefined);
         }
 
-        setCurrentAlertEvaluation(fetchedAlertEvaluation);
+        const evaluations = extractDetectionEvaluation(
+            fetchedAlertEvaluation as AlertEvaluation
+        );
+
+        if (evaluations.length === 1) {
+            setSelectedEvaluationToDisplay(
+                generateNameForDetectionResult(evaluations[0])
+            );
+        } else if (evaluations.length > 1) {
+            // Reset what's chosen if the current selected is not in the data
+            if (
+                evaluations.find(
+                    (evaluation) =>
+                        selectedEvaluationToDisplay ===
+                        generateNameForDetectionResult(evaluation)
+                ) === undefined
+            ) {
+                setSelectedEvaluationToDisplay(
+                    generateNameForDetectionResult(evaluations[0])
+                );
+            }
+        }
+
+        setDetectionEvaluations(evaluations);
     };
 
     useEffect(() => {
-        if (currentAlertEvaluation) {
-            const detectionEvaluation = extractDetectionEvaluation(
-                currentAlertEvaluation
-            )[0];
+        notifyIfErrors(
+            getEvaluationStatus,
+            getEvaluationRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.chart-data"),
+            })
+        );
+    }, [getEvaluationStatus]);
+
+    useEffect(() => {
+        if (detectionEvaluations) {
+            const detectionEvaluation = detectionEvaluations.find(
+                (evaluation) =>
+                    generateNameForDetectionResult(evaluation) ===
+                    selectedEvaluationToDisplay
+            );
+
+            if (!detectionEvaluation) {
+                return;
+            }
 
             const timeseriesConfiguration = generateChartOptionsForAlert(
                 detectionEvaluation,
@@ -105,41 +156,101 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
             setTimeSeriesOptions(timeseriesConfiguration);
         }
-    }, [currentAlertEvaluation]);
-
-    useEffect(() => {
-        if (getEvaluationStatus === ActionStatus.Error) {
-            !isEmpty(getEvaluationRequestErrors)
-                ? getEvaluationRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.chart-data"),
-                      })
-                  );
-        }
-    }, [getEvaluationRequestErrors, getEvaluationStatus]);
+    }, [detectionEvaluations, selectedEvaluationToDisplay]);
 
     useEffect(() => {
         // If alert changes, reset the evaluation data
-        setCurrentAlertEvaluation(undefined);
+        setDetectionEvaluations(undefined);
     }, [alert]);
 
     return (
         <>
-            <Grid item xs={12}>
-                <Box marginBottom={2}>
+            <Grid container item justifyContent="space-between" xs={12}>
+                <Grid item>
                     <Typography variant="h6">
                         {t("label.alert-preview")}
                     </Typography>
                     <Typography variant="body2">{subtitle}</Typography>
-                </Box>
+                </Grid>
+                <Grid item>
+                    <Button
+                        color="primary"
+                        disabled={
+                            displayState !== MessageDisplayState.GOOD_TO_PREVIEW
+                        }
+                        variant="outlined"
+                        onClick={() => {
+                            fetchAlertEvaluation(startTime, endTime);
+                        }}
+                    >
+                        <RefreshIcon fontSize="small" />
+                        {t("label.reload-preview")}
+                    </Button>
+                </Grid>
             </Grid>
 
-            <Grid container item xs={12}>
-                <Grid item sm={8} xs={12}>
+            <Grid item xs={12}>
+                <Box padding={1} />
+            </Grid>
+
+            <Grid container item justifyContent="space-between" xs={12}>
+                <Grid item>
+                    <Grid
+                        container
+                        alignItems="center"
+                        justifyContent="flex-start"
+                    >
+                        {!!detectionEvaluations &&
+                            detectionEvaluations.length > 1 && (
+                                <>
+                                    <Grid item>
+                                        <span>
+                                            {t("label.dimension-expression")}:
+                                        </span>
+                                    </Grid>
+                                    <Grid item>
+                                        <FormControl>
+                                            <Select
+                                                disableUnderline
+                                                inputProps={{
+                                                    className:
+                                                        previewChartClasses.selected,
+                                                }}
+                                                value={
+                                                    selectedEvaluationToDisplay
+                                                }
+                                                onChange={(event) =>
+                                                    setSelectedEvaluationToDisplay(
+                                                        event.target
+                                                            .value as unknown as string
+                                                    )
+                                                }
+                                            >
+                                                {detectionEvaluations.map(
+                                                    (detectionEvaluation) => {
+                                                        const name =
+                                                            generateNameForDetectionResult(
+                                                                detectionEvaluation
+                                                            );
+
+                                                        return (
+                                                            <MenuItem
+                                                                key={name}
+                                                                value={name}
+                                                            >
+                                                                {name}
+                                                            </MenuItem>
+                                                        );
+                                                    }
+                                                )}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                </>
+                            )}
+                    </Grid>
+                </Grid>
+                <Grid item>
                     <TimeRangeButtonWithContext
                         onTimeRangeChange={(start, end) =>
                             displayState ===
@@ -147,24 +258,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                             fetchAlertEvaluation(start, end)
                         }
                     />
-                </Grid>
-                <Grid item sm={4} xs={12}>
-                    <Box textAlign="right">
-                        <Button
-                            color="primary"
-                            disabled={
-                                displayState !==
-                                MessageDisplayState.GOOD_TO_PREVIEW
-                            }
-                            variant="outlined"
-                            onClick={() => {
-                                fetchAlertEvaluation(startTime, endTime);
-                            }}
-                        >
-                            <RefreshIcon fontSize="small" />
-                            {t("label.reload-preview")}
-                        </Button>
-                    </Box>
                 </Grid>
             </Grid>
 
@@ -217,7 +310,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     </Box>
                 )}
                 {displayState === MessageDisplayState.GOOD_TO_PREVIEW && (
-                    <Box minHeight={100} position="relative">
+                    <Box marginTop={2} minHeight={100} position="relative">
                         {getEvaluationStatus === ActionStatus.Working && (
                             <SkeletonV1
                                 animation="pulse"
@@ -228,7 +321,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
                         {getEvaluationStatus !== ActionStatus.Working && (
                             <>
-                                {!currentAlertEvaluation && (
+                                {!detectionEvaluations && (
                                     <Box marginTop={2} position="relative">
                                         <Box
                                             className={
@@ -265,14 +358,12 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                     </Box>
                                 )}
 
-                                {currentAlertEvaluation && timeSeriesOptions && (
-                                    <Box>
-                                        <Box marginTop={2}>
-                                            <TimeSeriesChart
-                                                height={300}
-                                                {...timeSeriesOptions}
-                                            />
-                                        </Box>
+                                {timeSeriesOptions && (
+                                    <Box marginTop={2}>
+                                        <TimeSeriesChart
+                                            height={300}
+                                            {...timeSeriesOptions}
+                                        />
                                     </Box>
                                 )}
                             </>

@@ -44,8 +44,7 @@ import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 import { determineXPointForHover } from "./tooltip/tooltip.utils";
 
-const TOP_CHART_HEIGHT_RATIO = 0.85;
-const CHART_SEPARATION = 50;
+const CHART_SEPARATION = 30;
 const CHART_MARGINS = {
     top: 20,
     left: 50,
@@ -175,14 +174,16 @@ export const TimeSeriesChartInternal: FunctionComponent<
     const innerHeight = height - margins.top - margins.bottom;
 
     if (brush) {
-        topChartBottomMargin = isXAxisEnabled
-            ? CHART_SEPARATION
-            : CHART_SEPARATION + 10;
-        topChartHeight =
-            TOP_CHART_HEIGHT_RATIO * innerHeight - topChartBottomMargin;
-        brushChartHeight = innerHeight - topChartHeight - CHART_SEPARATION;
+        topChartBottomMargin = CHART_SEPARATION;
+
+        if (innerHeight > 400) {
+            brushChartHeight = 100;
+        } else {
+            brushChartHeight = 75;
+        }
+        topChartHeight = innerHeight - brushChartHeight - topChartBottomMargin;
     } else {
-        topChartBottomMargin = margins.top;
+        topChartBottomMargin = margins.bottom;
         topChartHeight = innerHeight - topChartBottomMargin;
         brushChartHeight = 0;
     }
@@ -408,8 +409,8 @@ export const TimeSeriesChartInternal: FunctionComponent<
                 {isBrushEnabled && (
                     <ChartBrush
                         colorScale={colorScale}
+                        currentZoom={currentZoom}
                         height={brushChartHeight}
-                        initialZoom={currentZoom}
                         margins={margins}
                         series={processedBrushChartSeries}
                         top={

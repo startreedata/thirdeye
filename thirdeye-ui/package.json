@@ -55,7 +55,7 @@
         "@material-ui/lab": "4.0.0-alpha.60",
         "@material-ui/pickers": "^3.2.10",
         "@tippyjs/react": "^4.2.6",
-        "@visx/visx": "^2.9.0",
+        "@visx/visx": "^2.13.0",
         "axios": "^0.21.1",
         "binary-search-bounds": "^2.0.5",
         "classnames": "^2.2.6",

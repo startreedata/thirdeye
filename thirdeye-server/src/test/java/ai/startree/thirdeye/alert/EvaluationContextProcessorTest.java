@@ -14,13 +14,12 @@
 
 package ai.startree.thirdeye.alert;
 
-import static ai.startree.thirdeye.spi.Constants.EVALUATION_FILTERS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
+import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
@@ -28,7 +27,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.metric.DimensionType;
+import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import java.util.List;
 import org.testng.annotations.Test;
 
@@ -53,26 +52,13 @@ public class EvaluationContextProcessorTest {
             new PlanNodeBean().setName("dataFetcher2").setType(DATA_FETCHER_TYPE)
                 .setParams(new TemplatableMap<>())
         ));
-    List<String> filters = List.of("browser=chrome");
+    final List<String> filters = List.of("browser=chrome");
+    final EvaluationContextApi apiContext = new EvaluationContextApi().setFilters(filters);
 
-    new EvaluationContextProcessor().injectFilters(alertTemplateDTO, filters);
+    final PlanNodeContext res = new EvaluationContextProcessor().getContext(apiContext);
 
-    // test that filters are not injected in detector and index filler nodes
-    assertThat(alertTemplateDTO.getNodes().get(0).getParams()).isNull();
-    assertThat(alertTemplateDTO.getNodes().get(1).getParams()).isNull();
-    assertThat(alertTemplateDTO.getNodes().get(2).getParams()).isNotNull();
-    assertThat(alertTemplateDTO.getNodes().get(2).getParams().get(EVALUATION_FILTERS_KEY)).isNull();
-
-    // test that filters are injected in data fetcher nodes
-    assertThat(alertTemplateDTO.getNodes().get(3).getParams().get(EVALUATION_FILTERS_KEY)).isNotNull();
-    assertThat(alertTemplateDTO.getNodes().get(4).getParams().get(EVALUATION_FILTERS_KEY)).isNotNull();
-
-    // check the filter value for one data fetcher
-    List<QueryPredicate> injectedFilters = (List<QueryPredicate>) alertTemplateDTO
-        .getNodes().get(3).getParams().getValue(EVALUATION_FILTERS_KEY);
-    assertThat(injectedFilters.size()).isEqualTo(1);
-    assertThat(injectedFilters.get(0).getDataset()).isEqualTo(DATASET_NAME);
-    assertThat(injectedFilters.get(0).getMetricType()).isEqualTo(DimensionType.STRING);
-    assertThat(injectedFilters.get(0).getPredicate()).isEqualTo(new Predicate("browser", OPER.EQ, "chrome"));
+    assertThat(res.getPredicates()).isNotNull();
+    assertThat(res.getPredicates().size()).isEqualTo(1);
+    assertThat(res.getPredicates().get(0)).isEqualTo(new Predicate("browser", OPER.EQ, "chrome"));
   }
 }

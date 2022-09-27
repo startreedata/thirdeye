@@ -76,14 +76,8 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const style = useRootCauseAnalysisForAnomalyPageStyles();
     const parsedAnomalyId = useMemo(() => {
-        console.log("parsedAnomalyId");
-
         return Number(anomalyId);
     }, [anomalyId]);
-
-    useEffect(() => {
-        console.log("parsedAnomalyIdUseEfecct");
-    }, [parsedAnomalyId]);
 
     useEffect(() => {
         if (investigation) {

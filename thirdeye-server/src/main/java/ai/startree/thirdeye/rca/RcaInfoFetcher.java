@@ -37,7 +37,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
-import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -53,6 +52,7 @@ import org.slf4j.LoggerFactory;
 public class RcaInfoFetcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
+  public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
 
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
@@ -60,6 +60,7 @@ public class RcaInfoFetcher {
   private final MetricConfigManager metricDAO;
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final EnumerationItemManager enumerationItemManager;
+
   @Inject
   public RcaInfoFetcher(final MergedAnomalyResultManager mergedAnomalyDAO,
       final AlertManager alertDAO,
@@ -90,15 +91,18 @@ public class RcaInfoFetcher {
         String.format("Anomaly ID: %d", anomalyId));
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
+    final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .map(enumerationItemManager::findById)
+        .orElse(null);
 
-    // render properties - detectionInterval not important
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-        new Interval(0L, 0L, DateTimeZone.UTC));
-    // parse metadata
-    final AlertMetadataDTO alertMetadataDto = rendeMetadata(
-        anomalyDTO,
-        templateWithProperties);
+        UNUSED_DETECTION_INTERVAL,
+        enumerationItemDTO);
 
+    final AlertMetadataDTO alertMetadataDto = ensureExists(templateWithProperties.getMetadata(),
+        ERR_MISSING_CONFIGURATION_FIELD,
+        "metadata.");
     final MetricConfigDTO metadataMetricDTO = ensureExists(alertMetadataDto.getMetric(),
         ERR_MISSING_CONFIGURATION_FIELD,
         "metadata$metric");
@@ -136,23 +140,6 @@ public class RcaInfoFetcher {
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone);
   }
 
-  private AlertMetadataDTO rendeMetadata(final MergedAnomalyResultDTO anomalyDTO,
-      final AlertTemplateDTO templateWithProperties) throws IOException, ClassNotFoundException {
-    final AlertMetadataDTO metadata = ensureExists(templateWithProperties.getMetadata(),
-        ERR_MISSING_CONFIGURATION_FIELD,
-        "metadata.");
-
-    final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
-        .map(AbstractDTO::getId)
-        .map(enumerationItemManager::findById)
-        .orElse(null);
-
-    /* Everything can be collapsed in a single line but kept enumeration item for clarity */
-    return enumerationItemDTO != null
-        ? StringTemplateUtils.applyContext(metadata, enumerationItemDTO.getParams())
-        : metadata;
-  }
-
   @VisibleForTesting
   protected static void addCustomFields(final DatasetConfigDTO dataset,
       final DatasetConfigDTO metadataDataset) {
@@ -180,6 +167,6 @@ public class RcaInfoFetcher {
   private static <E> boolean templatableListIsNotEmpty(
       final Templatable<List<E>> metadataDatasetDTO) {
     return optional(metadataDatasetDTO).map(
-        Templatable::value).map( l -> !l.isEmpty()).orElse(false);
+        Templatable::value).map(l -> !l.isEmpty()).orElse(false);
   }
 }

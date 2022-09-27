@@ -73,7 +73,7 @@ public class MacroEngineTest {
         detectionInterval,
         DATASET_CONFIG_DTO,
         inputQuery);
-    DataSourceRequest output = macroEngine.prepareRequest();
+    final DataSourceRequest output = macroEngine.prepareRequest();
     assertThat(TABLE_NAME).isEqualTo(output.getTable());
     assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
         IntegrationTestUtils.cleanSql(

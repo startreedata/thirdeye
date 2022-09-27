@@ -20,7 +20,13 @@ import { Group } from "@visx/group";
 import { PatternLines } from "@visx/pattern";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { isEqual } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, {
+    FunctionComponent,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { ChartCore } from "../chart-core/chart-core.component";
 import { ChartCoreProps } from "../chart-core/chart-core.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
@@ -33,6 +39,7 @@ const selectedBrushStyle = {
     fill: `url(#${PATTERN_ID})`,
     stroke: "#AAAAAA",
 };
+const UPDATE_STOP_WAIT = 500;
 
 export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     series,
@@ -47,6 +54,8 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     margins,
     onMouseEnter,
 }) => {
+    const [isChangeFromParent, setIsChangeFromParent] = useState(false);
+    const [isChangeFromDrag, setIsChangeFromDrag] = useState(false);
     const brushRef = useRef<BaseBrush>(null);
 
     // Bounds
@@ -109,7 +118,21 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
     }
 
     useEffect(() => {
-        if (!brushRef || !brushRef.current) {
+        if (isChangeFromDrag) {
+            const id = setTimeout(() => {
+                setIsChangeFromDrag(false);
+            }, UPDATE_STOP_WAIT);
+
+            return (): void => {
+                clearTimeout(id);
+            };
+        }
+
+        if (
+            !brushRef ||
+            !brushRef.current ||
+            brushRef.current.state.isBrushing
+        ) {
             return;
         }
 
@@ -146,7 +169,11 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
 
             return newState;
         };
+
+        setIsChangeFromParent(true);
         brushRef.current.updateBrush(updater);
+
+        return;
     }, [currentZoom, height, brushRef.current]);
 
     return (
@@ -176,7 +203,17 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
                         width={xBrushMax}
                         xScale={dateScale}
                         yScale={dataScale}
-                        onBrushEnd={onBrushChange}
+                        onBrushStart={() => {
+                            setIsChangeFromDrag(true);
+                        }}
+                        onChange={(s) => {
+                            !isChangeFromParent && onBrushChange(s);
+                            isChangeFromParent &&
+                                !isChangeFromDrag &&
+                                setTimeout(() => {
+                                    setIsChangeFromParent(false);
+                                }, UPDATE_STOP_WAIT);
+                        }}
                         onClick={onBrushClick}
                     />
                 )}

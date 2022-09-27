@@ -22,7 +22,7 @@ public class EvaluationContextApi {
    * Format is 'dim1=val1'.
    */
   private List<String> filters;
-  private Boolean postProcessEnabled = false;
+  private Boolean postProcessEnabled = true;
 
   public List<String> getFilters() {
     return filters;

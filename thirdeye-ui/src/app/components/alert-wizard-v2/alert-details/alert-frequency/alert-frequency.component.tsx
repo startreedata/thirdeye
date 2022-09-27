@@ -46,7 +46,11 @@ function AlertFrequency<NewOrExistingAlert extends EditableAlert | Alert>({
     const { t } = useTranslation();
 
     const [cronConfigTab, setCronConfigTab] = useState<CronMode>(
-        isSimpleConvertible(currentCron) ? CronMode.SIMPLE : CronMode.ADVANCED
+        currentCron
+            ? isSimpleConvertible(currentCron)
+                ? CronMode.SIMPLE
+                : CronMode.ADVANCED
+            : CronMode.ADVANCED
     );
 
     const handleCronChange = (cron: string): void => {

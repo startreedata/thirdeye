@@ -11,15 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export const OFFSET_REGEX_EXTRACT = /[pP](-?\d+)([DWMY])/;
 
-export type AnomaliesViewPageParams = {
-    id: string;
-};
-
-export const OFFSET_TO_HUMAN_READABLE: { [key: string]: string } = {
-    D: "Day",
-    W: "Week",
-    M: "Month",
-    Y: "Year",
-};
+export interface BaselineOffsetSelectionProps {
+    baselineOffset: string;
+    onBaselineOffsetChange: (newBaselineOffset: string) => void;
+}

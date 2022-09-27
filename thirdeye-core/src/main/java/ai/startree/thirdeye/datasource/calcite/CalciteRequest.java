@@ -42,7 +42,6 @@ import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
@@ -174,8 +173,7 @@ public class CalciteRequest {
     return builder;
   }
 
-  public String getSql(final SqlLanguage sqlLanguage, final SqlExpressionBuilder expressionBuilder)
-      throws SqlParseException {
+  public String getSql(final SqlLanguage sqlLanguage, final SqlExpressionBuilder expressionBuilder) {
     SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
     SqlDialect sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
 
@@ -184,8 +182,7 @@ public class CalciteRequest {
   }
 
   protected SqlNode getSqlNode(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect)
-      throws SqlParseException {
+      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect) {
 
     return new SqlSelect(
         SqlParserPos.ZERO,
@@ -204,8 +201,7 @@ public class CalciteRequest {
   }
 
   private SqlNodeList getSelectList(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect)
-      throws SqlParseException {
+      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect) {
     List<SqlNode> selectIdentifiers = mergeProjectionsLists(sqlParserConfig, expressionBuilder,
         selectProjections, freeTextSelectProjections, sqlNodeSelectProjections
     );
@@ -231,8 +227,7 @@ public class CalciteRequest {
   }
 
   private SqlNode getWhere(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect)
-      throws SqlParseException {
+      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect) {
     List<SqlNode> predicates = new ArrayList<>();
     if (timeFilterInterval != null) {
       final String preparedTimeColumn = quoteIdentifierIfReserved(timeFilterColumn, sqlParserConfig, dialect);
@@ -261,7 +256,7 @@ public class CalciteRequest {
   }
 
   private SqlNodeList getGroupBy(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder) throws SqlParseException {
+      final SqlExpressionBuilder expressionBuilder) {
     List<SqlNode> groupIdentifiers = mergeProjectionsLists(sqlParserConfig, expressionBuilder,
         groupByProjections, freeTextGroupByProjections, sqlNodeGroupByProjections
     );
@@ -273,7 +268,7 @@ public class CalciteRequest {
   }
 
   private SqlNodeList getOrderBy(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder) throws SqlParseException {
+      final SqlExpressionBuilder expressionBuilder) {
     List<SqlNode> orderIdentifiers = mergeProjectionsLists(sqlParserConfig, expressionBuilder,
         orderByProjections, freeTextOrderByProjections, sqlNodeOrderByProjections);
     // add the alias of the timeAggregation if needed
@@ -289,8 +284,7 @@ public class CalciteRequest {
 
   private static List<SqlNode> mergeProjectionsLists(final SqlParser.Config sqlParserConfig,
       final SqlExpressionBuilder expressionBuilder, final List<QueryProjection> queryProjections,
-      final List<String> freeTextProjections, final List<SqlNode> sqlNodeProjections)
-      throws SqlParseException {
+      final List<String> freeTextProjections, final List<SqlNode> sqlNodeProjections) {
     List<SqlNode> nodes = new ArrayList<>();
     for (QueryProjection queryProjection : queryProjections) {
       nodes.add(queryProjection.toDialectSpecificSqlNode(sqlParserConfig,
@@ -307,8 +301,7 @@ public class CalciteRequest {
   }
 
   private static SqlNode prepareWithAlias(final Config sqlParserConfig,
-      final String freeTextProjection)
-      throws SqlParseException {
+      final String freeTextProjection) {
     String[] expressionAndAlias = freeTextProjection.split(" [aA][sS] ");
     if (expressionAndAlias.length == 1) {
       // no alias

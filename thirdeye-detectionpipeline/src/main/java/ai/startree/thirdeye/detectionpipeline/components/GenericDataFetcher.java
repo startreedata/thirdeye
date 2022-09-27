@@ -35,7 +35,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.joda.time.Interval;
 
 public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
@@ -107,7 +106,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     return result;
   }
 
-  private String injectFilters(final String query) throws SqlParseException {
+  private String injectFilters(final String query) {
     if (timeseriesFilters.isEmpty()) {
       return query;
     }
@@ -119,8 +118,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   }
 
   private DataSourceRequest applyMacros(final Interval detectionInterval,
-      final String queryWithFilters)
-      throws SqlParseException {
+      final String queryWithFilters) {
     SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
     boolean macrosSupported = sqlLanguage != null && sqlExpressionBuilder != null;

@@ -32,7 +32,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTimeZone;
@@ -126,7 +125,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
    */
   private String extremumTimeSqlQuery(final DatasetConfigDTO datasetConfigDTO,
       final ThirdEyeDataSource thirdEyeDataSource, final Extremum extremum,
-      final Interval timeFilterInterval) throws SqlParseException {
+      final Interval timeFilterInterval) {
     final SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
     final SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     final SqlDialect dialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());

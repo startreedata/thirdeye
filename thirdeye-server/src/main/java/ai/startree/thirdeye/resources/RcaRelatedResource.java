@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -24,6 +25,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.google.inject.Inject;
@@ -108,9 +110,20 @@ public class RcaRelatedResource {
 
     // todo add event filters for rca type and dimension filters could be set at the alert metadata level or at call time?
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
-    final List<@NonNull String> types = type == null ? List.of() : List.of(type);
-    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback, endWithLookahead,
-        types, null);
+    // todo spyne fix giant hack with event context
+    final EventContextDto eventContext = rcaInfo.getEventContext();
+    final List<@NonNull String> types = optional(type)
+        .map(List::of)
+        .orElse(optional(eventContext)
+            .map(EventContextDto::getTypes)
+            .orElse(List.of()));
+    final String freeTextSqlFilter = optional(eventContext)
+        .map(EventContextDto::getSqlFilter)
+        .orElse(null);
+    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
+        endWithLookahead,
+        types,
+        freeTextSqlFilter);
 
     final Comparator<EventDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,

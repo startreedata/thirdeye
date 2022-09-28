@@ -36,6 +36,8 @@ public class AlertMetadataApi {
    */
   private String mergeMaxDuration;
 
+  private EventContextApi eventContext;
+
   public DataSourceApi getDatasource() {
     return datasource;
   }
@@ -96,6 +98,15 @@ public class AlertMetadataApi {
 
   public AlertMetadataApi setMergeMaxDuration(final String mergeMaxDuration) {
     this.mergeMaxDuration = mergeMaxDuration;
+    return this;
+  }
+
+  public EventContextApi getEventContext() {
+    return eventContext;
+  }
+
+  public AlertMetadataApi setEventContext(final EventContextApi eventContext) {
+    this.eventContext = eventContext;
     return this;
   }
 }

@@ -12,18 +12,30 @@
  * the License.
  */
 
-package ai.startree.thirdeye.mapper;
+package ai.startree.thirdeye.spi.api;
 
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import java.util.List;
 
-@Mapper
-public interface AnomalyDetectorOperatorResultMapper {
+public class EventContextApi {
 
-  AnomalyDetectorOperatorResultMapper INSTANCE = Mappers.getMapper(
-      AnomalyDetectorOperatorResultMapper.class);
+  private List<String> types;
+  private String sqlFilter;
 
-  AnomalyDetectorOperatorResult clone(AnomalyDetectorOperatorResult o);
+  public List<String> getTypes() {
+    return types;
+  }
 
+  public EventContextApi setTypes(final List<String> types) {
+    this.types = types;
+    return this;
+  }
+
+  public String getSqlFilter() {
+    return sqlFilter;
+  }
+
+  public EventContextApi setSqlFilter(final String sqlFilter) {
+    this.sqlFilter = sqlFilter;
+    return this;
+  }
 }

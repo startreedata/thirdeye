@@ -34,6 +34,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
@@ -42,6 +43,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -51,9 +53,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class RcaInfoFetcher {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
   public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
-
+  private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
   private final DatasetConfigManager datasetDAO;
@@ -74,6 +75,36 @@ public class RcaInfoFetcher {
     this.metricDAO = metricDAO;
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.enumerationItemManager = enumerationItemManager;
+  }
+
+  @VisibleForTesting
+  protected static void addCustomFields(final DatasetConfigDTO dataset,
+      final DatasetConfigDTO metadataDataset) {
+    // fields that can be configured at the alert level are parsed in this method
+    final boolean includedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getDimensions());
+    final boolean excludedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getRcaExcludedDimensions());
+    checkArgument(!(includedListIsNotEmpty && excludedListIsNotEmpty),
+        "Both dimensions and rcaExcludedDimensions are not empty. Cannot use an inclusion and an exclusion list at the same time.");
+    if (excludedListIsNotEmpty) {
+      dataset.setRcaExcludedDimensions(metadataDataset.getRcaExcludedDimensions());
+    }
+    if (includedListIsNotEmpty) {
+      dataset.setDimensions(metadataDataset.getDimensions());
+    }
+  }
+
+  private static void addCustomFields(final MetricConfigDTO metricConfigDTO,
+      final MetricConfigDTO metadataMetricDTO) {
+    // fields that can be configured at the alert level can be added here
+    optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
+    optional(metadataMetricDTO.getDefaultAggFunction()).filter(StringUtils::isNotBlank)
+        .ifPresent(metricConfigDTO::setDefaultAggFunction);
+  }
+
+  private static <E> boolean templatableListIsNotEmpty(
+      final Templatable<List<E>> metadataDatasetDTO) {
+    return optional(metadataDatasetDTO).map(
+        Templatable::value).map(l -> !l.isEmpty()).orElse(false);
   }
 
   /**
@@ -137,36 +168,27 @@ public class RcaInfoFetcher {
 
     final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
 
-    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone);
+    final EventContextDto eventContext = findFromAlert(alertDTO, anomalyDTO.getEnumerationItem());
+    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
   }
 
-  @VisibleForTesting
-  protected static void addCustomFields(final DatasetConfigDTO dataset,
-      final DatasetConfigDTO metadataDataset) {
-    // fields that can be configured at the alert level are parsed in this method
-    final boolean includedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getDimensions());
-    final boolean excludedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getRcaExcludedDimensions());
-    checkArgument(!(includedListIsNotEmpty && excludedListIsNotEmpty),
-        "Both dimensions and rcaExcludedDimensions are not empty. Cannot use an inclusion and an exclusion list at the same time.");
-    if (excludedListIsNotEmpty) {
-      dataset.setRcaExcludedDimensions(metadataDataset.getRcaExcludedDimensions());
+  @SuppressWarnings("unchecked")
+  private EventContextDto findFromAlert(final AlertDTO alertDTO,
+      final EnumerationItemDTO enumerationItem) {
+    final Map<String, Object> properties = optional(enumerationItem)
+            .map(EnumerationItemDTO::getParams)
+            .orElse(alertDTO.getTemplateProperties());
+    try {
+      final List<String> eventTypes = (List<String>) properties.get("eventTypes");
+      final String eventSqlFilter = (String) properties.get("eventSqlFilter");
+      if (eventTypes != null || eventSqlFilter != null) {
+        return new EventContextDto()
+            .setTypes(eventTypes)
+            .setSqlFilter(eventSqlFilter);
+      }
+    } catch (Exception ignored) {
+      LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), ignored);
     }
-    if (includedListIsNotEmpty) {
-      dataset.setDimensions(metadataDataset.getDimensions());
-    }
-  }
-
-  private static void addCustomFields(final MetricConfigDTO metricConfigDTO,
-      final MetricConfigDTO metadataMetricDTO) {
-    // fields that can be configured at the alert level can be added here
-    optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
-    optional(metadataMetricDTO.getDefaultAggFunction()).filter(StringUtils::isNotBlank)
-        .ifPresent(metricConfigDTO::setDefaultAggFunction);
-  }
-
-  private static <E> boolean templatableListIsNotEmpty(
-      final Templatable<List<E>> metadataDatasetDTO) {
-    return optional(metadataDatasetDTO).map(
-        Templatable::value).map(l -> !l.isEmpty()).orElse(false);
+    return null;
   }
 }

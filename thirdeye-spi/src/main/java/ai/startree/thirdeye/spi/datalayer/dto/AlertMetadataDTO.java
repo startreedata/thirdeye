@@ -36,6 +36,8 @@ public class AlertMetadataDTO {
    */
   private String mergeMaxDuration;
 
+  private EventContextDto eventContext;
+
   public DataSourceDTO getDatasource() {
     return datasource;
   }
@@ -98,6 +100,16 @@ public class AlertMetadataDTO {
 
   public AlertMetadataDTO setMergeMaxDuration(final String mergeMaxDuration) {
     this.mergeMaxDuration = mergeMaxDuration;
+    return this;
+  }
+
+  public EventContextDto getEventContext() {
+    return eventContext;
+  }
+
+  public AlertMetadataDTO setEventContext(
+      final EventContextDto eventContext) {
+    this.eventContext = eventContext;
     return this;
   }
 }

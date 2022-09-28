@@ -55,6 +55,7 @@ public class TestTaskDao {
     TaskDTO dto = buildTask();
     Long id = dao.put(dto);
     assertThat(id).isGreaterThan(0L);
+    dto.setId(id);
     TaskDTO dbDto = dao.get(id);
     assertThat(dbDto).isEqualTo(dto);
   }

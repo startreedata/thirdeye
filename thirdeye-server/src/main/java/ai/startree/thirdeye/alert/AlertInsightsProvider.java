@@ -21,7 +21,9 @@ import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.datasource.loader.DefaultMinMaxTimeLoader;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
+import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
@@ -66,23 +68,42 @@ public class AlertInsightsProvider {
     this.minMaxTimeLoader = minMaxTimeLoader;
   }
 
-  public AlertInsightsApi getInsights(final AlertDTO alertDTO) {
+  public AlertInsightsApi getInsights(final AlertInsightsRequestApi request) {
+    final AlertApi alertApi = request.getAlert();
     try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
           NOT_USED_INTERVAL);
-      final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
-
-      final AlertInsightsApi insights = new AlertInsightsApi().setTemplateWithProperties(
-          toAlertTemplateApi(templateWithProperties));
-      addDatasetTimes(insights, metadata);
-
-      return insights;
+      return buildInsights(templateWithProperties);
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
       // can do better exception handling if necessary - see handleAlertEvaluationException
       throw serverError(ERR_UNKNOWN, e);
     }
+  }
+
+  public AlertInsightsApi getInsights(final AlertDTO alertDTO) {
+    try {
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
+          NOT_USED_INTERVAL);
+      return buildInsights(templateWithProperties);
+    } catch (final WebApplicationException e) {
+      throw e;
+    } catch (final Exception e) {
+      // can do better exception handling if necessary - see handleAlertEvaluationException
+      throw serverError(ERR_UNKNOWN, e);
+    }
+  }
+
+  private AlertInsightsApi buildInsights(final AlertTemplateDTO templateWithProperties)
+      throws Exception {
+    final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
+
+    final AlertInsightsApi insights = new AlertInsightsApi().setTemplateWithProperties(
+        toAlertTemplateApi(templateWithProperties));
+    addDatasetTimes(insights, metadata);
+
+    return insights;
   }
 
   private void addDatasetTimes(@NonNull final AlertInsightsApi insights,

@@ -29,6 +29,7 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
+import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -146,11 +147,25 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
+  @Deprecated(forRemoval = true)
   public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
 
+    return Response.ok(insights).build();
+  }
+
+  @Path("insights")
+  @POST
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      final AlertInsightsRequestApi request) {
+    final AlertApi alert = request.getAlert();
+    ensureExists(alert);
+
+    final AlertInsightsApi insights = alertInsightsProvider.getInsights(request);
     return Response.ok(insights).build();
   }
 

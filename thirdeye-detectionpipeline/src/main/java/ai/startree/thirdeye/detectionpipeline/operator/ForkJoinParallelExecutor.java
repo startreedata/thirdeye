@@ -42,25 +42,22 @@ import java.util.stream.Collectors;
 
 public class ForkJoinParallelExecutor {
 
-  private static final int PARALLELISM = 5;
-
-  private final PlanNode root;
-  private final List<EnumerationItemDTO> enumerationItems;
+  private final ForkJoinParallelExecutorConfiguration config;
   private final ExecutorService executorService;
 
-  public ForkJoinParallelExecutor(final PlanNode root,
-      final List<EnumerationItemDTO> enumerationItems) {
-    this.root = root;
-    this.enumerationItems = enumerationItems;
-    executorService = Executors.newFixedThreadPool(PARALLELISM);
+  public ForkJoinParallelExecutor(final ForkJoinParallelExecutorConfiguration config) {
+    this.config = config;
+    executorService = Executors.newFixedThreadPool(config.getParallelism());
   }
 
-  public List<ForkJoinResultItem> execute() {
-    final var callables = prepareCallables();
+  public List<ForkJoinResultItem> execute(final PlanNode root,
+      final List<EnumerationItemDTO> enumerationItems) {
+    final var callables = prepareCallables(root, enumerationItems);
     return executeAll(callables);
   }
 
-  public List<Callable<ForkJoinResultItem>> prepareCallables() {
+  public List<Callable<ForkJoinResultItem>> prepareCallables(
+      final PlanNode root, final List<EnumerationItemDTO> enumerationItems) {
     final List<Callable<ForkJoinResultItem>> callables = new ArrayList<>();
 
     for (final var enumerationItem : enumerationItems) {
@@ -81,7 +78,8 @@ public class ForkJoinParallelExecutor {
         executePlanNode(clonedPipelinePlanNodes, rootClone, context);
 
         /* Return the output */
-        return new ForkJoinResultItem(enumerationItem, PlanExecutor.getOutput(context, rootClone.getName()));
+        return new ForkJoinResultItem(enumerationItem,
+            PlanExecutor.getOutput(context, rootClone.getName()));
       }));
     }
     return callables;
@@ -144,7 +142,7 @@ public class ForkJoinParallelExecutor {
 
       final List<ForkJoinResultItem> results = new ArrayList<>();
       for (final var future : futures) {
-        results.add(future.get(10, TimeUnit.SECONDS));
+        results.add(future.get(config.getTimeout().getSeconds(), TimeUnit.SECONDS));
       }
 
       return results;

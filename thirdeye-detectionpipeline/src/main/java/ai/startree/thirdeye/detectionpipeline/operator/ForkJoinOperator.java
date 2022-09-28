@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.PlanNode;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   public static final String K_ENUMERATOR = "enumerator";
   public static final String K_ROOT = "root";
   public static final String K_COMBINER = "combiner";
+  private static final int PARALLELISM = 5;
 
   private PlanNode enumerator;
   private PlanNode root;
@@ -60,7 +62,11 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final List<EnumerationItemDTO> enumerationItems = enumeratorResult.getResults();
 
     /* Execute in parallel */
-    final var allResults = new ForkJoinParallelExecutor(root, enumerationItems).execute();
+    final ForkJoinParallelExecutor parallelExecutor = new ForkJoinParallelExecutor(
+        new ForkJoinParallelExecutorConfiguration()
+            .setParallelism(PARALLELISM)
+            .setTimeout(Duration.ofHours(1)));
+    final var allResults = parallelExecutor.execute(root, enumerationItems);
 
     /* Combine results */
     final Map<String, OperatorResult> outputs = runCombiner(new ForkJoinResult(allResults));
@@ -75,11 +81,11 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final Operator op = enumerator.buildOperator();
     op.execute();
     final Map<String, OperatorResult> outputs = op.getOutputs();
-    final EnumeratorResult enumeratorResult = (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
-    return enumeratorResult;
+    return (EnumeratorResult) outputs.get(EnumeratorOperator.DEFAULT_OUTPUT_KEY);
   }
 
-  private Map<String, OperatorResult> runCombiner(final ForkJoinResult forkJoinResult) throws Exception {
+  private Map<String, OperatorResult> runCombiner(final ForkJoinResult forkJoinResult)
+      throws Exception {
     final Operator combinerOp = combiner.buildOperator();
     combinerOp.setInput(CombinerOperator.DEFAULT_INPUT_KEY, forkJoinResult);
     combinerOp.execute();

@@ -83,6 +83,10 @@
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-enumerators/target/thirdeye-enumerators-${project.version}-dist</directory>
       <outputDirectory>plugins/enumerators/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-postprocessors/target/thirdeye-postprocessors-${project.version}-dist</directory>
+      <outputDirectory>plugins/postprocessors/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.util;
+package ai.startree.thirdeye.spi.util;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 

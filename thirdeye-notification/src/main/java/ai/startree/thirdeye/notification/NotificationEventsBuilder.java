@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.notification;
 
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.events.EventFilter;
 import ai.startree.thirdeye.events.HolidayEventProvider;
@@ -58,7 +60,7 @@ public class NotificationEventsBuilder {
     this.eventManager = eventManager;
     dateTimeZone = timeConfiguration.getTimezone();
 
-    final Period defaultPeriod = Period.parse(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
+    final Period defaultPeriod = isoPeriod(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
     preEventCrawlOffset = defaultPeriod;
     postEventCrawlOffset = defaultPeriod;
   }

@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.rca.RcaInfo;
@@ -53,7 +55,6 @@ import javax.ws.rs.core.Response;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 
 @Api(authorizations = {@Authorization(value = "oauth")})
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
@@ -90,7 +91,7 @@ public class RcaRelatedResource {
       @ApiParam(value = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
-    final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
+    final Period lookaroundPeriod = isoPeriod(lookaround);
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(
@@ -134,7 +135,7 @@ public class RcaRelatedResource {
       @ApiParam(value = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
-    final Period lookaroundPeriod = Period.parse(lookaround, ISOPeriodFormat.standard());
+    final Period lookaroundPeriod = isoPeriod(lookaround);
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
         anomalyId);
     final Interval anomalyInterval = new Interval(

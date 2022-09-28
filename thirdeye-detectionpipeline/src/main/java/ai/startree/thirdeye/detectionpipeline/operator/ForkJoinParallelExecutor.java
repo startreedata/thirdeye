@@ -18,9 +18,9 @@ import static ai.startree.thirdeye.detectionpipeline.PlanExecutor.executePlanNod
 
 import ai.startree.thirdeye.detectionpipeline.ContextKey;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import ai.startree.thirdeye.spi.detection.v2.PlanNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

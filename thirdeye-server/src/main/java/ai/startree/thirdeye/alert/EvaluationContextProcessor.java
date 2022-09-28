@@ -16,9 +16,9 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class EvaluationContextProcessor {

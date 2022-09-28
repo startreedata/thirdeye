@@ -14,13 +14,13 @@
 
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.detectionpipeline.PlanNode;
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeFactory;
 import ai.startree.thirdeye.mapper.PlanNodeMapper;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.v2.PlanNode;
-import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import ai.startree.thirdeye.util.StringTemplateUtils;
 import java.io.IOException;
 import java.util.HashMap;

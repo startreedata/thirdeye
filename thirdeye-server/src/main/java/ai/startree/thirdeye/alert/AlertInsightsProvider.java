@@ -16,8 +16,8 @@ package ai.startree.thirdeye.alert;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.datasource.loader.DefaultMinMaxTimeLoader;
 import ai.startree.thirdeye.spi.Constants;

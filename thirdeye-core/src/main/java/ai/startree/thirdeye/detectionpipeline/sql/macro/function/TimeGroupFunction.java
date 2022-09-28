@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -22,7 +23,6 @@ import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
 import java.util.Objects;
 import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 
 public class TimeGroupFunction implements MacroFunction {
 
@@ -39,7 +39,7 @@ public class TimeGroupFunction implements MacroFunction {
     final String timeColumn = macroParams.get(0);
     final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
-    Period granularity = Period.parse(granularityText, ISOPeriodFormat.standard());
+    Period granularity = isoPeriod(granularityText);
     final String timezone = context.getDetectionInterval().getChronology().getZone().toString();
 
     //write granularity to metadata

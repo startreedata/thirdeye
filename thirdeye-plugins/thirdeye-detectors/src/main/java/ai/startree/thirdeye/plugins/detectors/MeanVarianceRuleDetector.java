@@ -24,6 +24,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -44,7 +45,6 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
-import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,9 +81,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   protected static int computeSteps(final String periodString,
       final String monitoringGranularityString) {
     // mind that computing lookback only once is not exactly correct when a day has 25 hours or 23 hours - but very minor issue
-    final Period lookbackPeriod = Period.parse(periodString, ISOPeriodFormat.standard());
-    final Period monitoringGranularity = Period.parse(monitoringGranularityString,
-        ISOPeriodFormat.standard());
+    final Period lookbackPeriod = isoPeriod(periodString);
+    final Period monitoringGranularity = isoPeriod(monitoringGranularityString);
 
     return (int) (lookbackPeriod.toStandardDuration().getMillis()
         / monitoringGranularity.toStandardDuration().getMillis());
@@ -119,8 +118,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     if (spec.getSeasonalityPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null,
           "monitoringGranularity is required when seasonalityPeriod is used");
-      final Period seasonality = Period.parse(spec.getSeasonalityPeriod(),
-          ISOPeriodFormat.standard());
+      final Period seasonality = isoPeriod(spec.getSeasonalityPeriod());
       checkArgument(SUPPORTED_SEASONALITIES.contains(seasonality),
           String.format(
               "Unsupported period %s. Supported periods are P7D and P1D, or PTOS for no seasonality.",

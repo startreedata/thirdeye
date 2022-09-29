@@ -28,13 +28,13 @@ public class RcaInfo {
   // avoid passing the whole AlertMetadataDTO
   private final @NonNull DateTimeZone timezone;
 
-  private final @NonNull EventContextDto eventContext;
+  private final EventContextDto eventContext;
 
   public RcaInfo(
       final @NonNull MergedAnomalyResultDTO anomaly,
       final @NonNull MetricConfigDTO metric,
       final @NonNull DatasetConfigDTO dataset,
-      final @NonNull DateTimeZone timezone, @NonNull final EventContextDto eventContext) {
+      final @NonNull DateTimeZone timezone, final EventContextDto eventContext) {
     this.anomaly = anomaly;
     this.metric = metric;
     this.dataset = dataset;
@@ -59,7 +59,7 @@ public class RcaInfo {
     return timezone;
   }
 
-  public @NonNull EventContextDto getEventContext() {
+  public EventContextDto getEventContext() {
     return eventContext;
   }
 }

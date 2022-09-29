@@ -43,6 +43,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -54,7 +55,6 @@ public class RcaInfoFetcher {
 
   public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
-  public static final EventContextDto EMPTY_CONTEXT_DTO = new EventContextDto();
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
   private final DatasetConfigManager datasetDAO;
@@ -103,9 +103,8 @@ public class RcaInfoFetcher {
 
   private static <E> boolean templatableListIsNotEmpty(
       final Templatable<List<E>> metadataDatasetDTO) {
-    return optional(metadataDatasetDTO).map(Templatable::value)
-        .map(l -> !l.isEmpty())
-        .orElse(false);
+    return optional(metadataDatasetDTO).map(
+        Templatable::value).map(l -> !l.isEmpty()).orElse(false);
   }
 
   /**
@@ -168,9 +167,28 @@ public class RcaInfoFetcher {
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
     final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
-    final EventContextDto eventContext = optional(alertMetadataDto.getEventContext()).orElse(
-        EMPTY_CONTEXT_DTO);
 
+    final EventContextDto eventContext = findFromAlert(alertDTO, anomalyDTO.getEnumerationItem());
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
+  }
+
+  @SuppressWarnings("unchecked")
+  private EventContextDto findFromAlert(final AlertDTO alertDTO,
+      final EnumerationItemDTO enumerationItem) {
+    final Map<String, Object> properties = optional(enumerationItem)
+            .map(EnumerationItemDTO::getParams)
+            .orElse(alertDTO.getTemplateProperties());
+    try {
+      final List<String> eventTypes = (List<String>) properties.get("eventTypes");
+      final String eventSqlFilter = (String) properties.get("eventSqlFilter");
+      if (eventTypes != null || eventSqlFilter != null) {
+        return new EventContextDto()
+            .setTypes(eventTypes)
+            .setSqlFilter(eventSqlFilter);
+      }
+    } catch (Exception ignored) {
+      LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), ignored);
+    }
+    return null;
   }
 }

@@ -20,6 +20,7 @@ import org.joda.time.DateTimeZone;
 
 public interface Constants {
 
+  // fixme cyril prefer chronology to timezone
   DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
   String CRON_TIMEZONE = "UTC";
   String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();

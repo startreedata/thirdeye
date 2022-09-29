@@ -23,6 +23,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.google.common.annotations.VisibleForTesting;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,10 +42,11 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
   private boolean ignore;
   private Period coldStartPeriod;
   private String tableName;
-  private String labelName;
 
   private MinMaxTimeLoader minMaxTimeLoader;
   private DatasetConfigManager datasetDao;
+
+  private String labelName;
 
   @Override
   public void init(final ColdStartPostProcessorSpec spec) {
@@ -54,7 +57,12 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
     this.minMaxTimeLoader = spec.getMinMaxTimeLoader();
     this.datasetDao = spec.getDatasetConfigManager();
 
-    this.labelName = coldStartPeriod.toString() + " cold start";
+    this.labelName = labelName(this.coldStartPeriod);
+  }
+
+  @VisibleForTesting
+  protected static String labelName(final Period coldStartPeriod) {
+    return coldStartPeriod.toString() + " cold start";
   }
 
   @Override
@@ -93,8 +101,12 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
       final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
       for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
         if (anomalyResultDTO.getStartTime() <= endOfColdStart.getMillis()) {
-          final AnomalyLabelDTO label = new AnomalyLabelDTO().setIgnore(ignore).setName(labelName);
-          anomalyResultDTO.getAnomalyLabels().add(label);
+          final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore)
+              .setName(labelName);
+          final List<AnomalyLabelDTO> labels = optional(anomalyResultDTO.getAnomalyLabels()).orElse(
+              new ArrayList<>());
+          labels.add(newLabel);
+          anomalyResultDTO.setAnomalyLabels(labels);
         }
       }
     } catch (final UnsupportedOperationException e) {

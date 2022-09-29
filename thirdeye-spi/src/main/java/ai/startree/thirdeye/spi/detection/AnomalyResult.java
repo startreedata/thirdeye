@@ -23,7 +23,7 @@ public interface AnomalyResult {
    *
    * @param startTime start time in millis, inclusive.
    */
-  void setStartTime(long startTime);
+  AnomalyResult setStartTime(long startTime);
 
   /**
    * Get start time in millis, inclusive.
@@ -37,7 +37,7 @@ public interface AnomalyResult {
    *
    * @param endTime end time in millis, exclusive.
    */
-  void setEndTime(long endTime);
+  AnomalyResult setEndTime(long endTime);
 
   /**
    * Get end time in millis, exclusive.

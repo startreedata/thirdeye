@@ -108,9 +108,8 @@ public class RcaRelatedResource {
         .plus(lookaroundPeriod)
         .getMillis(), anomalyInterval.getEnd().getMillis());
 
-    // todo add event filters for rca type and dimension filters could be set at the alert metadata level or at call time?
+    // todo rca dimension filters can be set at call time?
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
-    // todo spyne fix giant hack with event context
     final EventContextDto eventContext = rcaInfo.getEventContext();
     final List<@NonNull String> types = optional(type)
         .map(List::of)

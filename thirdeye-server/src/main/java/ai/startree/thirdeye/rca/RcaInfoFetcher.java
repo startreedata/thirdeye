@@ -43,7 +43,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -167,28 +166,8 @@ public class RcaInfoFetcher {
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
     final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
+    final EventContextDto eventContext = alertMetadataDto.getEventContext();
 
-    final EventContextDto eventContext = findFromAlert(alertDTO, anomalyDTO.getEnumerationItem());
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
-  }
-
-  @SuppressWarnings("unchecked")
-  private EventContextDto findFromAlert(final AlertDTO alertDTO,
-      final EnumerationItemDTO enumerationItem) {
-    final Map<String, Object> properties = optional(enumerationItem)
-            .map(EnumerationItemDTO::getParams)
-            .orElse(alertDTO.getTemplateProperties());
-    try {
-      final List<String> eventTypes = (List<String>) properties.get("eventTypes");
-      final String eventSqlFilter = (String) properties.get("eventSqlFilter");
-      if (eventTypes != null || eventSqlFilter != null) {
-        return new EventContextDto()
-            .setTypes(eventTypes)
-            .setSqlFilter(eventSqlFilter);
-      }
-    } catch (Exception ignored) {
-      LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), ignored);
-    }
-    return null;
   }
 }

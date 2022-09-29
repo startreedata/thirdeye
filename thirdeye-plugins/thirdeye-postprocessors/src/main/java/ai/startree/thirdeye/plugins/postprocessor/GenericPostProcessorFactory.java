@@ -16,6 +16,7 @@ package ai.startree.thirdeye.plugins.postprocessor;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
+import java.lang.reflect.InvocationTargetException;
 
 public class GenericPostProcessorFactory<T extends PostProcessorSpec> implements
     AnomalyPostProcessorFactory {
@@ -38,8 +39,8 @@ public class GenericPostProcessorFactory<T extends PostProcessorSpec> implements
   @Override
   public AnomalyPostProcessor<T> build() {
     try {
-      return clazz.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
+      return clazz.getDeclaredConstructor().newInstance();
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
   }

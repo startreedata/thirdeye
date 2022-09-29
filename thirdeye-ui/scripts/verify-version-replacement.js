@@ -17,28 +17,25 @@ const fs = require("fs");
 const path = require("path");
 const childProcess = require("child_process");
 
-const FILE_CONTAINING_STRING_REPLACEMENT = "dist/thirdeye-ui.js";
+const THIRDEYE_UI_JS_FILE_PATTERN = /thirdeye-ui\.\w*\.js/;
 const VERSION_STRING_TEMPLATE = "0.0.0-development-thirdeye-ui";
-const FILE_CONTAINING_STRING_REPLACEMENT_PATH = path.resolve(
-    FILE_CONTAINING_STRING_REPLACEMENT
-);
 
-function checkIfTemplateVersionStringExists() {
+function checkIfTemplateVersionStringExists(thirdEyeUiFile) {
     const fileContents = fs.readFileSync(
-        FILE_CONTAINING_STRING_REPLACEMENT_PATH
+        thirdEyeUiFile
     );
 
     return fileContents.includes(VERSION_STRING_TEMPLATE);
 }
 
-function replaceWithLatestTaggedVersion() {
+function replaceWithLatestTaggedVersion(thirdEyeUiFile) {
     const latestUIVersionTag = childProcess
         .execSync("git describe --abbrev=0 --tags --match thirdeye-ui\\*")
         .toString()
         .replace("\n", "");
 
     let fileContents = fs
-        .readFileSync(FILE_CONTAINING_STRING_REPLACEMENT_PATH)
+        .readFileSync(thirdEyeUiFile)
         .toString();
 
     fileContents = fileContents.replace(
@@ -46,22 +43,25 @@ function replaceWithLatestTaggedVersion() {
         latestUIVersionTag
     );
 
-    fs.writeFileSync(FILE_CONTAINING_STRING_REPLACEMENT_PATH, fileContents);
+    fs.writeFileSync(thirdEyeUiFile, fileContents);
 }
 
-if (!fs.existsSync(FILE_CONTAINING_STRING_REPLACEMENT_PATH)) {
+const distFiles = fs.readdirSync(path.resolve("dist"));
+const thirdEyeUiFile = distFiles.find((name) => THIRDEYE_UI_JS_FILE_PATTERN.test(name));
+
+if (!thirdEyeUiFile) {
     console.log(
         "File ",
-        FILE_CONTAINING_STRING_REPLACEMENT,
+        FILENAME_START_CONTAINING_STRING_REPLACEMENT,
         " does not exist, skipping verification."
     );
 
     return;
 }
 
-if (checkIfTemplateVersionStringExists()) {
+if (checkIfTemplateVersionStringExists(path.join("dist", thirdEyeUiFile))) {
     console.log("Replacing version template with latest tag");
-    replaceWithLatestTaggedVersion();
+    replaceWithLatestTaggedVersion(path.join("dist", thirdEyeUiFile));
 } else {
     console.log("Version already replaced");
 }

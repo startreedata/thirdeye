@@ -108,21 +108,15 @@ public class RcaRelatedResource {
         .plus(lookaroundPeriod)
         .getMillis(), anomalyInterval.getEnd().getMillis());
 
-    // todo rca dimension filters can be set at call time?
+    final @NonNull EventContextDto eventContext = rcaInfo.getEventContext();
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
-    final EventContextDto eventContext = rcaInfo.getEventContext();
-    final List<@NonNull String> types = optional(type)
-        .map(List::of)
-        .orElse(optional(eventContext)
-            .map(EventContextDto::getTypes)
-            .orElse(List.of()));
-    final String freeTextSqlFilter = optional(eventContext)
-        .map(EventContextDto::getSqlFilter)
-        .orElse(null);
+    final List<@NonNull String> types = optional(type).map(List::of)
+        .orElse(eventContext.getTypes());
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
         endWithLookahead,
         types,
-        freeTextSqlFilter);
+        // todo rca dimension filters can be set at call time?
+        eventContext.getSqlFilter());
 
     final Comparator<EventDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,

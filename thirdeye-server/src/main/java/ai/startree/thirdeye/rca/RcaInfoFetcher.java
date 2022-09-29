@@ -54,6 +54,7 @@ public class RcaInfoFetcher {
 
   public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
+  public static final EventContextDto EMPTY_CONTEXT_DTO = new EventContextDto();
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
   private final DatasetConfigManager datasetDAO;
@@ -102,8 +103,9 @@ public class RcaInfoFetcher {
 
   private static <E> boolean templatableListIsNotEmpty(
       final Templatable<List<E>> metadataDatasetDTO) {
-    return optional(metadataDatasetDTO).map(
-        Templatable::value).map(l -> !l.isEmpty()).orElse(false);
+    return optional(metadataDatasetDTO).map(Templatable::value)
+        .map(l -> !l.isEmpty())
+        .orElse(false);
   }
 
   /**
@@ -166,7 +168,8 @@ public class RcaInfoFetcher {
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
     final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
-    final EventContextDto eventContext = alertMetadataDto.getEventContext();
+    final EventContextDto eventContext = optional(alertMetadataDto.getEventContext()).orElse(
+        EMPTY_CONTEXT_DTO);
 
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
   }

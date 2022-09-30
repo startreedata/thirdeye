@@ -65,8 +65,10 @@ public class RcaInfoFetcher {
 
   @Inject
   public RcaInfoFetcher(final MergedAnomalyResultManager mergedAnomalyDAO,
-      final AlertManager alertDAO, final DatasetConfigManager datasetDAO,
-      final MetricConfigManager metricDAO, final AlertTemplateRenderer alertTemplateRenderer,
+      final AlertManager alertDAO,
+      final DatasetConfigManager datasetDAO,
+      final MetricConfigManager metricDAO,
+      final AlertTemplateRenderer alertTemplateRenderer,
       final EnumerationItemManager enumerationItemManager) {
     this.mergedAnomalyDAO = mergedAnomalyDAO;
     this.alertDAO = alertDAO;

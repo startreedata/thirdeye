@@ -27,12 +27,14 @@ import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Date;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses={AnomalyFeedbackMapper.class, AnomalyLabelMapper.class, MetricMapper.class, EnumerationItemMapper.class})
+@Mapper(uses = {AnomalyFeedbackMapper.class, AnomalyLabelMapper.class, MetricMapper.class,
+    EnumerationItemMapper.class})
 public interface AnomalyMapper {
 
   AnomalyMapper INSTANCE = Mappers.getMapper(AnomalyMapper.class);
@@ -96,6 +98,13 @@ public interface AnomalyMapper {
               .setName(dto.getMetric())
               .setDataset(datasetApi)
           );
+    }
+
+    if (dto.getAnomalyLabels() != null) {
+      anomalyApi.setAnomalyLabels(dto.getAnomalyLabels()
+          .stream()
+          .map(ApiBeanMapper::toApi)
+          .collect(Collectors.toList()));
     }
 
     optional(dto.getAnomalyFeedbackId())

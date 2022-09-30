@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
+import ai.startree.thirdeye.spi.api.AnomalyLabelApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -34,6 +35,7 @@ import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -222,6 +224,14 @@ public abstract class ApiBeanMapper {
 
   public static AlertTemplateDTO toAlertTemplateDto(final AlertTemplateApi api) {
     return AlertTemplateMapper.INSTANCE.toBean(api);
+  }
+
+  public static AnomalyLabelDTO toDto(final AnomalyLabelApi api) {
+    return AnomalyLabelMapper.INSTANCE.toDto(api);
+  }
+
+  public static AnomalyLabelApi toApi(final AnomalyLabelDTO dto) {
+    return AnomalyLabelMapper.INSTANCE.toApi(dto);
   }
 
   public static TaskDTO toTaskDto(TaskApi api) {

@@ -14,9 +14,11 @@
 
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventContextDto {
 
   private List<String> types;

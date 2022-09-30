@@ -70,7 +70,7 @@ plugins:
     - - semantic-release-plugin-update-version-in-files
       # Replace placeholder in released source with the version number being released
       - files:
-            - "dist/thirdeye-ui.js"
+            - "dist/thirdeye-ui.*.js"
         placeholder: "0.0.0-development-thirdeye-ui"
 
 # GitHub tag for the release

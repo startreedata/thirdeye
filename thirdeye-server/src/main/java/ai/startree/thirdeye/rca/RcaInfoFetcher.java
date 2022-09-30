@@ -179,8 +179,8 @@ public class RcaInfoFetcher {
   private EventContextDto findFromAlert(final AlertDTO alertDTO,
       final EnumerationItemDTO enumerationItem) {
     final Map<String, Object> properties = optional(enumerationItem)
-        .map(EnumerationItemDTO::getParams)
-        .orElse(alertDTO.getTemplateProperties());
+            .map(EnumerationItemDTO::getParams)
+            .orElse(alertDTO.getTemplateProperties());
     try {
       final List<String> eventTypes = (List<String>) properties.get("eventTypes");
       final String eventSqlFilter = (String) properties.get("eventSqlFilter");

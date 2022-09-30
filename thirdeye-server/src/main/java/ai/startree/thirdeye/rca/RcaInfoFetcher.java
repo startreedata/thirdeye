@@ -55,6 +55,7 @@ public class RcaInfoFetcher {
 
   public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
+  public static final EventContextDto EMPTY_CONTEXT_DTO = new EventContextDto();
   private final MergedAnomalyResultManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
   private final DatasetConfigManager datasetDAO;
@@ -167,8 +168,13 @@ public class RcaInfoFetcher {
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
     final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
+    EventContextDto eventContext = alertMetadataDto.getEventContext();
+    if (eventContext == null || eventContext.equals(EMPTY_CONTEXT_DTO)) {
+      // fixme suvodeep cyril findFromAlert is a quick hack for a client - to remove once templates are updated
+      eventContext = optional(findFromAlert(alertDTO, anomalyDTO.getEnumerationItem())).orElse(
+          EMPTY_CONTEXT_DTO);
+    }
 
-    final EventContextDto eventContext = findFromAlert(alertDTO, anomalyDTO.getEnumerationItem());
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
   }
 

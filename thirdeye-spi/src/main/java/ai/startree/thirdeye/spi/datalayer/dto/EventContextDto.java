@@ -14,8 +14,11 @@
 
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
+import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventContextDto {
 
   private List<String> types;
@@ -37,5 +40,23 @@ public class EventContextDto {
   public EventContextDto setSqlFilter(final String sqlFilter) {
     this.sqlFilter = sqlFilter;
     return this;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final EventContextDto that = (EventContextDto) o;
+    return Objects.equals(types, that.types) && Objects.equals(sqlFilter,
+        that.sqlFilter);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(types, sqlFilter);
   }
 }

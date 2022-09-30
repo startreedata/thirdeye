@@ -108,7 +108,7 @@
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
     "coldStartIgnore": "true",
-    "coldStartPeriod": "P0S",
+    "coldStartPeriod": "P0D",
     "queryLimit": "100000000"
   }
 }

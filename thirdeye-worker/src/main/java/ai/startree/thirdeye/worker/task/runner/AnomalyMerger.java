@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDat
 import static ai.startree.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
+import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -426,9 +427,9 @@ public class AnomalyMerger {
       final DateTimeZone dateTimeZone) {
     requireNonNull(parent);
 
-    final boolean parentDefaultIgnore = getDefaultIgnore(parent);
-    final boolean childDefaultIgnore = getDefaultIgnore(child);
-    if (parentDefaultIgnore != childDefaultIgnore) {
+    final boolean parentIsIgnore = isIgnore(parent);
+    final boolean childIsIgnore = isIgnore(child);
+    if (parentIsIgnore != childIsIgnore) {
       // never merge anomalies with different ignore value
       return false;
     }
@@ -439,12 +440,6 @@ public class AnomalyMerger {
     return childStartTime.minus(maxGap).isBefore(parent.getEndTime())
         && (child.getEndTime() <= parent.getEndTime()
         || childEndTime.minus(maxDuration).isBefore(parent.getStartTime()));
-  }
-
-  private Boolean getDefaultIgnore(final MergedAnomalyResultDTO parent) {
-    return optional(parent.getAnomalyLabels())
-        .map(labels -> labels.stream().anyMatch(AnomalyLabelDTO::isIgnore))
-        .orElse(false);
   }
 
   private String getPatternKey(final MergedAnomalyResultDTO anomaly) {

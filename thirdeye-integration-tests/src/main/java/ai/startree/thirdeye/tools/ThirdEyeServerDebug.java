@@ -24,6 +24,7 @@ import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlug
 import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
 import ai.startree.thirdeye.plugins.enumerator.ThirdEyeEnumeratorsPlugin;
 import ai.startree.thirdeye.plugins.notification.email.EmailNotificationPlugin;
+import ai.startree.thirdeye.plugins.postprocessor.PostProcessorsPlugin;
 import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.spi.Plugin;
 import com.google.inject.Injector;
@@ -54,7 +55,8 @@ public class ThirdEyeServerDebug {
             new DetectorsPlugin(),
             new EmailNotificationPlugin(),
             new PinotDataSourcePlugin(),
-            new ThirdEyeEnumeratorsPlugin()
+            new ThirdEyeEnumeratorsPlugin(),
+            new PostProcessorsPlugin()
         )
         .forEach(plugin -> installPlugin(pluginLoader, plugin));
   }

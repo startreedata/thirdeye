@@ -23,6 +23,8 @@ public class PostProcessorsPlugin implements Plugin {
 
   @Override
   public Iterable<AnomalyPostProcessorFactory> getAnomalyPostProcessorFactories() {
-    return List.of();
+    return List.of(
+        new GenericPostProcessorFactory<>("COLD_START", ColdStartPostProcessor.class)
+    );
   }
 }

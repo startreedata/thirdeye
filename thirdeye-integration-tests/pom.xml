@@ -63,6 +63,10 @@
       <artifactId>thirdeye-enumerators</artifactId>
     </dependency>
     <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-postprocessors</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
     </dependency>

@@ -43,6 +43,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -64,10 +65,8 @@ public class RcaInfoFetcher {
 
   @Inject
   public RcaInfoFetcher(final MergedAnomalyResultManager mergedAnomalyDAO,
-      final AlertManager alertDAO,
-      final DatasetConfigManager datasetDAO,
-      final MetricConfigManager metricDAO,
-      final AlertTemplateRenderer alertTemplateRenderer,
+      final AlertManager alertDAO, final DatasetConfigManager datasetDAO,
+      final MetricConfigManager metricDAO, final AlertTemplateRenderer alertTemplateRenderer,
       final EnumerationItemManager enumerationItemManager) {
     this.mergedAnomalyDAO = mergedAnomalyDAO;
     this.alertDAO = alertDAO;
@@ -117,16 +116,13 @@ public class RcaInfoFetcher {
    * This method gets the metric and dataset info from the alert template.
    * It could be more intelligent: metric and dataset could be inferred from the query.
    */
-  public RcaInfo getRcaInfo(final long anomalyId)
-      throws IOException, ClassNotFoundException {
+  public RcaInfo getRcaInfo(final long anomalyId) throws IOException, ClassNotFoundException {
     final MergedAnomalyResultDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
         String.format("Anomaly ID: %d", anomalyId));
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
-    final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
-        .map(AbstractDTO::getId)
-        .map(enumerationItemManager::findById)
-        .orElse(null);
+    final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem()).map(
+        AbstractDTO::getId).map(enumerationItemManager::findById).orElse(null);
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
         UNUSED_DETECTION_INTERVAL,
@@ -168,9 +164,31 @@ public class RcaInfoFetcher {
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
     final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
-    final EventContextDto eventContext = optional(alertMetadataDto.getEventContext()).orElse(
-        EMPTY_CONTEXT_DTO);
+    EventContextDto eventContext = alertMetadataDto.getEventContext();
+    if (eventContext == null) {
+      // fixme suvodeep cyril findFromAlert is a quick hack for a client - to remove once templates are updated
+      eventContext = optional(findFromAlert(alertDTO, anomalyDTO.getEnumerationItem())).orElse(
+          EMPTY_CONTEXT_DTO);
+    }
 
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
+  }
+
+  // fixme to remove
+  @SuppressWarnings("unchecked")
+  private EventContextDto findFromAlert(final AlertDTO alertDTO,
+      final EnumerationItemDTO enumerationItem) {
+    final Map<String, Object> properties = optional(enumerationItem).map(EnumerationItemDTO::getParams)
+        .orElse(alertDTO.getTemplateProperties());
+    try {
+      final List<String> eventTypes = (List<String>) properties.get("eventTypes");
+      final String eventSqlFilter = (String) properties.get("eventSqlFilter");
+      if (eventTypes != null || eventSqlFilter != null) {
+        return new EventContextDto().setTypes(eventTypes).setSqlFilter(eventSqlFilter);
+      }
+    } catch (Exception ignored) {
+      LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), ignored);
+    }
+    return null;
   }
 }

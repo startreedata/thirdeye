@@ -20,6 +20,7 @@ import org.joda.time.DateTimeZone;
 
 public interface Constants {
 
+  // fixme cyril prefer chronology to timezone
   DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
   String CRON_TIMEZONE = "UTC";
   String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
@@ -104,6 +105,7 @@ public interface Constants {
   String POST_PROCESSOR_REGISTRY_REF_KEY = "$PostProcessorRegistry";
   String EVENT_MANAGER_REF_KEY = "$EventManager";
   String DATASET_DAO_REF_KEY = "$DatasetDAO";
+  String MIN_MAX_TIME_LOADER_REF_KEY = "$MinMaxTimeLoader";
 
   enum JobStatus {
     SCHEDULED,

@@ -11,13 +11,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection.postprocessing;
+package ai.startree.thirdeye.plugins.postprocessor;
 
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
+import ai.startree.thirdeye.spi.Plugin;
+import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
+import com.google.auto.service.AutoService;
+import java.util.List;
 
-public interface AnomalyPostProcessorFactory {
+@AutoService(Plugin.class)
+public class PostProcessorsPlugin implements Plugin {
 
-  String name();
-
-  <T extends PostProcessorSpec> AnomalyPostProcessor<T> build();
+  @Override
+  public Iterable<AnomalyPostProcessorFactory> getAnomalyPostProcessorFactories() {
+    return List.of(
+        new GenericPostProcessorFactory<>("COLD_START", ColdStartPostProcessor.class)
+    );
+  }
 }

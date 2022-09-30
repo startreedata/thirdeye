@@ -34,6 +34,7 @@ public abstract class AbstractSpec implements Serializable {
   public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   // avoid using this field - interval.getChronology at runtime should be enough most of the time - not sure if this deserves deprecation yet
+  @Deprecated
   private String timezone = Constants.DEFAULT_TIMEZONE_STRING;
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;
@@ -61,10 +62,12 @@ public abstract class AbstractSpec implements Serializable {
     }
   }
 
+  @Deprecated
   public String getTimezone() {
     return timezone;
   }
 
+  @Deprecated
   public AbstractSpec setTimezone(final String timezone) {
     this.timezone = timezone;
     return this;

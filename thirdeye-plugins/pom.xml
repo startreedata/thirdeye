@@ -36,6 +36,7 @@
     <module>thirdeye-notification-email</module>
     <module>thirdeye-bootstrap-open-core</module>
     <module>thirdeye-enumerators</module>
+    <module>thirdeye-postprocessors</module>
   </modules>
 
   <dependencies>

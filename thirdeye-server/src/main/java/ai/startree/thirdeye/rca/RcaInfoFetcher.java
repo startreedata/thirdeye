@@ -179,7 +179,6 @@ public class RcaInfoFetcher {
     return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
   }
 
-  // fixme to remove
   @SuppressWarnings("unchecked")
   private EventContextDto findFromAlert(final AlertDTO alertDTO,
       final EnumerationItemDTO enumerationItem) {

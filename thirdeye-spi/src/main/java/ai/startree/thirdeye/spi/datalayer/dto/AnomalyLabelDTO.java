@@ -13,9 +13,11 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Map;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AnomalyLabelDTO {
   /**Name of the label - displayed in UI.*/
   private String name;

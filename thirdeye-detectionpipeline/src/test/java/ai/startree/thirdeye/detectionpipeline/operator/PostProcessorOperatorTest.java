@@ -30,7 +30,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
-import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -46,14 +45,6 @@ public class PostProcessorOperatorTest {
 
   private static final DatasetConfigManager UNUSED_DATASET_DAO = mock(DatasetConfigManager.class);
   private static final MinMaxTimeLoader UNUSED_MIN_MAX_TIME_LOADER = mock(MinMaxTimeLoader.class);
-  // timeseries can be null - it is not used by the TestPostProcessor
-  private static final AnomalyDetectorOperatorResult DETECTION_RES_WITH_2_ANOMALIES = from(List.of(
-      new MergedAnomalyResultDTO(),
-      new MergedAnomalyResultDTO()), null);
-  private static final AnomalyDetectorOperatorResult DETECTION_RES_WITH_ZERO_ANOMALY = from(List.of(),
-      null);
-  private static final AnomalyDetectorOperatorResult DETECTION_RES_WITH_1_ANOMALY = from(List.of(new MergedAnomalyResultDTO()),
-      null);
   private static final String TEST_POST_PROCESSOR_NAME = "TestPostProcessor";
   private static final String TEST_POST_PROCESSOR_LABEL_NAME = "testLabel";
   private static final TemplatableMap<String, Object> TEST_POST_PROCESSOR_CONFIG = TemplatableMap.fromValueMap(
@@ -70,19 +61,6 @@ public class PostProcessorOperatorTest {
 
   private PostProcessorRegistry postProcessorRegistry;
 
-  /**
-   * Create a detection result from a list of anomalies and time series
-   *
-   * @param anomalies the list of anomalies generated
-   * @param timeSeries the time series which including the current, predicted baseline and
-   *     optionally upper and lower bounds
-   * @return the detection result contains the list of anomalies and the time series
-   */
-  private static AnomalyDetectorOperatorResult from(final List<MergedAnomalyResultDTO> anomalies,
-      final TimeSeries timeSeries) {
-    return new Builder().setAnomalies(anomalies).setTimeseries(timeSeries).build();
-  }
-
   @BeforeClass
   public void setUp() {
     postProcessorRegistry = mock(PostProcessorRegistry.class);
@@ -93,24 +71,22 @@ public class PostProcessorOperatorTest {
   public void testPostProcessorOperatorWithAnomalyDetectionResults() throws Exception {
     final PlanNodeBean planNodeBean = new PlanNodeBean().setName(NODE_BEAN_NAME)
         .setParams(TEST_POST_PROCESSOR_CONFIG);
-    // timeseries is not used by the TestPostProcessor
-    final AnomalyDetectorOperatorResult detectionResult1 = from(List.of(new MergedAnomalyResultDTO()),
-        null);
-    final AnomalyDetectorOperatorResult detectionResult2 = from(List.of(new MergedAnomalyResultDTO(),
-        new MergedAnomalyResultDTO()), null);
     final Map<String, OperatorResult> inputsMap = Map.of("detectionResult0",
-        DETECTION_RES_WITH_ZERO_ANOMALY,
+        detectionResWith0Anomaly(),
         "detectionResult1",
-        DETECTION_RES_WITH_1_ANOMALY,
+        detectionResWith1Anomaly(),
         "detectionResult2",
-        detectionResult2);
+        detectionResWith2Anomalies());
     final OperatorContext context = new OperatorContext().setDetectionInterval(
             NOT_USED_DETECTION_INTERVAL)
         .setPlanNode(planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
-        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry,
-            DATASET_DAO_REF_KEY, UNUSED_DATASET_DAO,
-            MIN_MAX_TIME_LOADER_REF_KEY, UNUSED_MIN_MAX_TIME_LOADER));
+        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY,
+            postProcessorRegistry,
+            DATASET_DAO_REF_KEY,
+            UNUSED_DATASET_DAO,
+            MIN_MAX_TIME_LOADER_REF_KEY,
+            UNUSED_MIN_MAX_TIME_LOADER));
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
     operator.execute();
@@ -130,18 +106,21 @@ public class PostProcessorOperatorTest {
     final PlanNodeBean planNodeBean = new PlanNodeBean().setName(NODE_BEAN_NAME)
         .setParams(TEST_POST_PROCESSOR_CONFIG);
     final Map<String, OperatorResult> detectionMap = Map.of("detectionResult1",
-        DETECTION_RES_WITH_1_ANOMALY,
+        detectionResWith1Anomaly(),
         "detectionResult2",
-        DETECTION_RES_WITH_2_ANOMALIES);
+        detectionResWith2Anomalies());
     final CombinerResult combinerResult = new CombinerResult(detectionMap);
     final Map<String, OperatorResult> inputsMap = Map.of("combinerResult1", combinerResult);
     final OperatorContext context = new OperatorContext().setDetectionInterval(
             NOT_USED_DETECTION_INTERVAL)
         .setPlanNode(planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
-        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry,
-            DATASET_DAO_REF_KEY, UNUSED_DATASET_DAO,
-            MIN_MAX_TIME_LOADER_REF_KEY, UNUSED_MIN_MAX_TIME_LOADER));
+        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY,
+            postProcessorRegistry,
+            DATASET_DAO_REF_KEY,
+            UNUSED_DATASET_DAO,
+            MIN_MAX_TIME_LOADER_REF_KEY,
+            UNUSED_MIN_MAX_TIME_LOADER));
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
     operator.execute();
@@ -163,6 +142,29 @@ public class PostProcessorOperatorTest {
       assertThat(label.getMetadata()).isEqualTo(Map.of(METADATA_TEST_KEY, METADATA_TEST_VALUE));
       assertThat(label.isIgnore()).isTrue();
     }
+  }
+
+  /**
+   * Create a detection result from a list of anomalies and time series
+   *
+   * @param anomalies the list of anomalies generated
+   * @return the detection result contains the list of anomalies and the time series
+   */
+  private static AnomalyDetectorOperatorResult from(final List<MergedAnomalyResultDTO> anomalies) {
+    // timeseries is not used by the TestPostProcessor
+    return new Builder().setAnomalies(anomalies).setTimeseries(null).build();
+  }
+
+  private static AnomalyDetectorOperatorResult detectionResWith1Anomaly() {
+    return from(List.of(new MergedAnomalyResultDTO()));
+  }
+
+  private static AnomalyDetectorOperatorResult detectionResWith2Anomalies() {
+    return from(List.of(new MergedAnomalyResultDTO(), new MergedAnomalyResultDTO()));
+  }
+
+  private static AnomalyDetectorOperatorResult detectionResWith0Anomaly() {
+    return from(List.of());
   }
 
   private static class TestPostProcessorSpec extends PostProcessorSpec {

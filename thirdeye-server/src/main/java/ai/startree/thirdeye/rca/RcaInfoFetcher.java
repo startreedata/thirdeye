@@ -178,13 +178,16 @@ public class RcaInfoFetcher {
   @SuppressWarnings("unchecked")
   private EventContextDto findFromAlert(final AlertDTO alertDTO,
       final EnumerationItemDTO enumerationItem) {
-    final Map<String, Object> properties = optional(enumerationItem).map(EnumerationItemDTO::getParams)
+    final Map<String, Object> properties = optional(enumerationItem)
+        .map(EnumerationItemDTO::getParams)
         .orElse(alertDTO.getTemplateProperties());
     try {
       final List<String> eventTypes = (List<String>) properties.get("eventTypes");
       final String eventSqlFilter = (String) properties.get("eventSqlFilter");
       if (eventTypes != null || eventSqlFilter != null) {
-        return new EventContextDto().setTypes(eventTypes).setSqlFilter(eventSqlFilter);
+        return new EventContextDto()
+            .setTypes(eventTypes)
+            .setSqlFilter(eventSqlFilter);
       }
     } catch (Exception ignored) {
       LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), ignored);

@@ -41,10 +41,7 @@
           "sourceProperty": "preparedCurrentDataWithHistory"
         }
       ],
-      "outputs": [        {
-        "outputKey": "output_AnomalyDetectorResult",
-        "outputName": "output_AnomalyDetectorResult"
-      }]
+      "outputs": []
     },
     {
       "name": "missingDataPointsFiller",

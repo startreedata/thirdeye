@@ -165,7 +165,7 @@ public class RcaInfoFetcher {
 
     final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
     EventContextDto eventContext = alertMetadataDto.getEventContext();
-    if (eventContext == null) {
+    if (eventContext == null || eventContext.equals(EMPTY_CONTEXT_DTO)) {
       // fixme suvodeep cyril findFromAlert is a quick hack for a client - to remove once templates are updated
       eventContext = optional(findFromAlert(alertDTO, anomalyDTO.getEnumerationItem())).orElse(
           EMPTY_CONTEXT_DTO);

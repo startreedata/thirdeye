@@ -51,7 +51,7 @@ import org.joda.time.Period;
 
 public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
-  private static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
+  public static final String DEFAULT_OUTPUT_KEY = "output_AnomalyDetectorResult";
 
   private AnomalyDetector<? extends AbstractSpec> detector;
   private Period monitoringGranularity;

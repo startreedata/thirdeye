@@ -121,8 +121,10 @@ public class RcaInfoFetcher {
         String.format("Anomaly ID: %d", anomalyId));
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
-    final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem()).map(
-        AbstractDTO::getId).map(enumerationItemManager::findById).orElse(null);
+    final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .map(enumerationItemManager::findById)
+        .orElse(null);
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
         UNUSED_DETECTION_INTERVAL,

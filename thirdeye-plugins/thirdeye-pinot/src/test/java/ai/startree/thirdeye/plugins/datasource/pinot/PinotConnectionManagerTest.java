@@ -35,8 +35,9 @@ public class PinotConnectionManagerTest {
   @Test
   public void testGetCallOnce() {
     final PinotConnectionBuilder pinotConnectionBuilder = mock(PinotConnectionBuilder.class);
+    final PinotThirdEyeDataSourceConfig config = new PinotThirdEyeDataSourceConfig();
     final PinotConnectionManager pinotConnectionManager = new PinotConnectionManager(
-        pinotConnectionBuilder, new PinotThirdEyeDataSourceConfig());
+        pinotConnectionBuilder, config, new PinotOauthTokenSupplier(config));
 
     final Connection connection = mock(Connection.class);
     when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class)))
@@ -66,7 +67,7 @@ public class PinotConnectionManagerTest {
         );
     final PinotConnectionBuilder pinotConnectionBuilder = mock(PinotConnectionBuilder.class);
     final PinotConnectionManager pinotConnectionManager = new PinotConnectionManager(
-        pinotConnectionBuilder, config);
+        pinotConnectionBuilder, config, new PinotOauthTokenSupplier(config));
 
     final Connection connection = mock(Connection.class);
     when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class)))

@@ -75,7 +75,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     final var config = buildConfig(properties);
 
     /* Build Connection Manager */
-    pinotConnectionManager = new PinotConnectionManager(new PinotConnectionBuilder(), config);
+    pinotConnectionManager = new PinotConnectionManager(new PinotConnectionBuilder(),
+        config,
+        new PinotOauthTokenSupplier(config));
 
     /* Cache loader uses the connection to fire queries */
     final var pinotResponseCacheLoader = new PinotResponseCacheLoader(pinotConnectionManager);

@@ -149,6 +149,10 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                 } as AlertTemplateType);
             }
         }
+
+        if (!contentsToReplace.template) {
+            setSelectedAlertTemplate(null);
+        }
     };
 
     const handleSubscriptionGroupChange = (

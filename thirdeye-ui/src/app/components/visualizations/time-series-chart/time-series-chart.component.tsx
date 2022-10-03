@@ -382,7 +382,7 @@ export const TimeSeriesChartInternal: FunctionComponent<
                     {(xScale, yScale) => {
                         return (
                             <>
-                                {isZoomEnabled && (
+                                {isZoomEnabled && processedMainChartSeries && (
                                     <ChartZoom
                                         colorScale={colorScale}
                                         height={topChartHeight}

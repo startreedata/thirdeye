@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { SeriesType } from "./time-series-chart.interfaces";
+import { Series, SeriesType } from "./time-series-chart.interfaces";
 import {
     defaultAreaSeriesPointFormatter,
     defaultPointFormatter,
@@ -36,6 +36,10 @@ describe("Time Series Chart Utils", () => {
                     {
                         x: 2,
                         y: 101,
+                    },
+                    {
+                        x: undefined,
+                        y: undefined,
                     },
                     {
                         x: 10,
@@ -73,9 +77,13 @@ describe("Time Series Chart Utils", () => {
                         x: 25,
                         y: 110,
                     },
+                    {
+                        x: undefined,
+                        y: undefined,
+                    },
                 ],
             },
-        ];
+        ] as Pick<Series, "data">[];
 
         expect(getMinMax(testSeries)).toEqual([1, 25]);
         expect(getMinMax(testSeries, (d) => d.y)).toEqual([101, 150]);

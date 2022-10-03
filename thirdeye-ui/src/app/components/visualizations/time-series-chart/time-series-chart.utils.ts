@@ -56,7 +56,7 @@ export function getMinMax(
 
             if (typeof extractedValue === "number") {
                 values.push(extractedValue);
-            } else if (Array.isArray(extractedValue)) {
+            } else {
                 extractedValue.forEach((subItem) => values.push(subItem));
             }
         });

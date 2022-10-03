@@ -15,8 +15,8 @@ package ai.startree.thirdeye.plugins.datasource.pinotsql;
 
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.plugins.datasource.auto.onboard.PinotControllerRestClient;
 import ai.startree.thirdeye.plugins.datasource.auto.onboard.PinotDatasetOnboarder;
-import ai.startree.thirdeye.plugins.datasource.auto.onboard.ThirdEyePinotClient;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -167,7 +167,7 @@ public class PinotSqlThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   private PinotDatasetOnboarder createPinotDatasetOnboarder() {
-    final ThirdEyePinotClient thirdEyePinotSqlClient = new ThirdEyePinotClient(new DataSourceMetaBean()
+    final PinotControllerRestClient thirdEyePinotSqlClient = new PinotControllerRestClient(new DataSourceMetaBean()
         .setProperties(context.getDataSourceDTO().getProperties()), "pinot-sql");
     return new PinotDatasetOnboarder(
         thirdEyePinotSqlClient,

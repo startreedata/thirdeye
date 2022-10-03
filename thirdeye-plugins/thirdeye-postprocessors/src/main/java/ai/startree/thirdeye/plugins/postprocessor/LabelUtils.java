@@ -13,19 +13,20 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import ai.startree.thirdeye.spi.Plugin;
-import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
-import com.google.auto.service.AutoService;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import java.util.ArrayList;
 import java.util.List;
 
-@AutoService(Plugin.class)
-public class PostProcessorsPlugin implements Plugin {
+public class LabelUtils {
 
-  @Override
-  public Iterable<AnomalyPostProcessorFactory> getAnomalyPostProcessorFactories() {
-    return List.of(
-        new GenericPostProcessorFactory<>("COLD_START", ColdStartPostProcessor.class),
-        new GenericPostProcessorFactory<>("TIME_OF_WEEK", TimeOfWeekPostProcessor.class)
-    );
+  public static void addLabel(final MergedAnomalyResultDTO anomalyResultDTO,
+      final AnomalyLabelDTO newLabel) {
+    final List<AnomalyLabelDTO> labels = optional(anomalyResultDTO.getAnomalyLabels()).orElse(
+        new ArrayList<>());
+    labels.add(newLabel);
+    anomalyResultDTO.setAnomalyLabels(labels);
   }
 }

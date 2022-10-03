@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
-import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.GetTablesResponseApi;
@@ -25,6 +24,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -34,14 +34,15 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -57,6 +58,7 @@ import org.apache.pinot.spi.data.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class ThirdEyePinotClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyePinotClient.class);
@@ -72,38 +74,51 @@ public class ThirdEyePinotClient {
   private final CloseableHttpClient pinotControllerClient;
   private final HttpHost pinotControllerHost;
 
+  @Inject
+  public ThirdEyePinotClient(final PinotThirdEyeDataSourceConfig config) {
+    pinotControllerClient = buildPinotControllerClient(config.getControllerConnectionScheme(),
+        config.getHeaders());
+
+    pinotControllerHost = new HttpHost(config.getControllerHost(),
+        config.getControllerPort(),
+        config.getControllerConnectionScheme());
+  }
+
+  /**
+   * TODO shounak refactor constructor
+   */
+  @Deprecated
   public ThirdEyePinotClient(final DataSourceMetaBean dataSourceMeta, final String dataSourceType) {
     final String controllerConnectionScheme;
     final String controllerHost;
     final int controllerPort;
 
-    if(dataSourceType.equals("pinot-sql")) {
-      final PinotSqlThirdEyeDataSourceConfig config = PinotSqlDataSourceConfigFactory.createFromProperties(dataSourceMeta.getProperties());
-      controllerConnectionScheme = config.getControllerConnectionScheme();
-      controllerHost = config.getControllerHost();
-      controllerPort = config.getControllerPort();
-    } else {
-      final PinotThirdEyeDataSourceConfig config = buildConfig(dataSourceMeta.getProperties());
+    final Map<String, Object> properties = dataSourceMeta.getProperties();
+    Preconditions.checkArgument(dataSourceType.equals("pinot-sql"),
+        "This constructor is only called from pinot-sql connector");
+    final PinotSqlThirdEyeDataSourceConfig config = PinotSqlDataSourceConfigFactory.createFromProperties(
+        properties);
+    controllerConnectionScheme = config.getControllerConnectionScheme();
+    controllerHost = config.getControllerHost();
+    controllerPort = config.getControllerPort();
 
-      controllerConnectionScheme = config.getControllerConnectionScheme();
-      controllerHost = config.getControllerHost();
-      controllerPort = config.getControllerPort();
-    }
-    pinotControllerClient = buildPinotControllerClient(controllerConnectionScheme, dataSourceMeta.getProperties());
+    final Map<String, String> headers = properties.containsKey("headers")
+        ? (Map<String, String>) properties.get("headers")
+        : Collections.emptyMap();
+    pinotControllerClient = buildPinotControllerClient(controllerConnectionScheme, headers);
     pinotControllerHost = new HttpHost(controllerHost,
         controllerPort,
         controllerConnectionScheme);
   }
 
   private CloseableHttpClient buildPinotControllerClient(final String controllerConnectionScheme,
-    final Map<String, Object> properties) {
+      final Map<String, String> headers) {
     final HttpClientBuilder customClient = HttpClients.custom();
-    if(properties.containsKey("headers")){
-      final List<Header> headers = new ArrayList<>();
-      ((Map<String, String>)properties.get("headers")).forEach((key, value) ->
-        headers.add(new BasicHeader(key, value))
-      );
-      customClient.setDefaultHeaders(headers);
+    if (headers != null && !headers.isEmpty()) {
+      customClient.setDefaultHeaders(headers.entrySet()
+          .stream()
+          .map(e -> new BasicHeader(e.getKey(), e.getValue()))
+          .collect(Collectors.toList()));
     }
     if (HTTPS_SCHEME.equals(controllerConnectionScheme)) {
       try {
@@ -113,7 +128,7 @@ public class ThirdEyePinotClient {
             .loadTrustMaterial(null, new AcceptAllTrustStrategy())
             .build();
         customClient.setSSLContext(sslContext)
-          .setSSLHostnameVerifier(new NoopHostnameVerifier());
+            .setSSLHostnameVerifier(new NoopHostnameVerifier());
       } catch (final NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
         // This section shouldn't happen because we use Accept All Strategy
         LOG.error("Failed to start auto onboard for Pinot data source.");
@@ -126,12 +141,14 @@ public class ThirdEyePinotClient {
   public List<String> getAllTablesFromPinot() throws IOException {
     final HttpGet tablesReq = new HttpGet(PINOT_TABLES_ENDPOINT);
     LOG.info("Retrieving datasets: {}", tablesReq);
-    final CloseableHttpResponse tablesRes = pinotControllerClient.execute(pinotControllerHost, tablesReq);
+    final CloseableHttpResponse tablesRes = pinotControllerClient.execute(pinotControllerHost,
+        tablesReq);
     if (tablesRes.getStatusLine().getStatusCode() != 200) {
       throw new IllegalStateException(tablesRes.getStatusLine().toString());
     }
     final InputStream tablesContent = tablesRes.getEntity().getContent();
-    final GetTablesResponseApi api = OBJECT_MAPPER.readValue(tablesContent, GetTablesResponseApi.class);
+    final GetTablesResponseApi api = OBJECT_MAPPER.readValue(tablesContent,
+        GetTablesResponseApi.class);
     return optional(api)
         .map(GetTablesResponseApi::getTables)
         .orElse(Collections.emptyList());
@@ -157,7 +174,8 @@ public class ThirdEyePinotClient {
     final HttpGet schemaReq = new HttpGet(
         String.format(endpointTemplate, URLEncoder.encode(dataset, StandardCharsets.UTF_8)));
     LOG.info("Retrieving schema: {}", schemaReq);
-    final CloseableHttpResponse schemaRes = pinotControllerClient.execute(pinotControllerHost, schemaReq);
+    final CloseableHttpResponse schemaRes = pinotControllerClient.execute(pinotControllerHost,
+        schemaReq);
     try {
       if (schemaRes.getStatusLine().getStatusCode() != 200) {
         LOG.error("Schema {} not found, {}", dataset, schemaRes.getStatusLine().toString());
@@ -179,14 +197,16 @@ public class ThirdEyePinotClient {
   /**
    * Verify schema name and presence of field spec for time column
    */
-  public boolean verifySchemaCorrectness(final Schema schema, @Nullable final String timeColumnName) {
+  public boolean verifySchemaCorrectness(final Schema schema,
+      @Nullable final String timeColumnName) {
     return !StringUtils.isBlank(schema.getSchemaName()) && timeColumnName != null
         && schema.getSpecForTimeColumn(timeColumnName) != null;
   }
 
   public JsonNode getTableConfigFromPinotEndpoint(final String dataset) throws IOException {
     final HttpGet request = new HttpGet(String.format(PINOT_TABLES_ENDPOINT_TEMPLATE, dataset));
-    final CloseableHttpResponse response = pinotControllerClient.execute(pinotControllerHost, request);
+    final CloseableHttpResponse response = pinotControllerClient.execute(pinotControllerHost,
+        request);
     LOG.debug("Retrieving dataset's custom config: {}", request);
 
     // Retrieve table config

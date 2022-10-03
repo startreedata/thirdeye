@@ -17,11 +17,9 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.datasource.auto.onboard.ThirdEyePinotClient;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
@@ -29,7 +27,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import java.util.Map;
 import javax.inject.Singleton;
-import org.apache.pinot.client.PinotConnectionBuilder;
 
 public class PinotThirdEyeDataSourceModule extends AbstractModule {
 
@@ -50,15 +47,6 @@ public class PinotThirdEyeDataSourceModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public PinotConnectionManager getPinotConnectionManager(
-      final PinotThirdEyeDataSourceConfig config) {
-    return new PinotConnectionManager(new PinotConnectionBuilder(),
-        config,
-        new PinotOauthTokenSupplier(config));
-  }
-
-  @Singleton
-  @Provides
   public PinotThirdEyeDataSourceConfig getPinotThirdEyeDataSourceConfig(
       final ThirdEyeDataSourceContext context) {
     final DataSourceDTO dataSourceDTO = requireNonNull(context.getDataSourceDTO(),
@@ -70,12 +58,5 @@ public class PinotThirdEyeDataSourceModule extends AbstractModule {
 
     /* Create config class */
     return buildConfig(properties);
-  }
-
-  @Singleton
-  @Provides
-  public ThirdEyePinotClient getThirdEyePinotClient(final ThirdEyeDataSourceContext context) {
-    return new ThirdEyePinotClient(new DataSourceMetaBean()
-        .setProperties(context.getDataSourceDTO().getProperties()), "pinot");
   }
 }

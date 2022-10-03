@@ -22,12 +22,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.http.HttpHeaders;
 
+@Singleton
 public class PinotOauthTokenSupplier {
 
   private final PinotOauthConfiguration oauthConfiguration;
 
+  @Inject
   public PinotOauthTokenSupplier(final PinotThirdEyeDataSourceConfig config) {
     oauthConfiguration = config.getOauth();
 

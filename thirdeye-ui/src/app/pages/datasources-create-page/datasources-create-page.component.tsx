@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
@@ -21,7 +20,6 @@ import { DatasourceWizard } from "../../components/datasource-wizard/datasource-
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
-    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -30,8 +28,12 @@ import {
     onboardAllDatasets,
 } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
+import {
+    getDatasourcesAllPath,
+    getDatasourcesViewPath,
+} from "../../utils/routes/routes.util";
 
 export const DatasourcesCreatePage: FunctionComponent = () => {
     const navigate = useNavigate();
@@ -108,14 +110,16 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
                     entity: t("label.datasource"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <DatasourceWizard
-                        isCreate
-                        onFinish={onDatasourceWizardFinish}
-                    />
-                </Grid>
-            </PageContentsGridV1>
+
+            <DatasourceWizard
+                isCreate
+                datasource={createDefaultDatasource()}
+                submitBtnLabel={t("label.create-entity", {
+                    entity: t("label.datasource"),
+                })}
+                onCancel={() => navigate(getDatasourcesAllPath())}
+                onSubmit={onDatasourceWizardFinish}
+            />
         </PageV1>
     );
 };

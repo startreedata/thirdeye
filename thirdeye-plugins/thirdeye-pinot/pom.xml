@@ -37,6 +37,11 @@
       <artifactId>auto-service-annotations</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.pinot</groupId>
       <artifactId>pinot-jdbc-client</artifactId>
       <exclusions>

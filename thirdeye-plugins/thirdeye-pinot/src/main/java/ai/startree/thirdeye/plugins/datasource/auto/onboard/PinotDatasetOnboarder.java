@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO.DimensionAsMetricProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -60,6 +60,7 @@ public class PinotDatasetOnboarder {
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
 
+  @Inject
   public PinotDatasetOnboarder(
       final ThirdEyePinotClient thirdEyePinotClient,
       final DatasetConfigManager datasetConfigManager,
@@ -90,10 +91,7 @@ public class PinotDatasetOnboarder {
   }
 
   public ImmutableList<String> getAllTables() throws IOException {
-    final Builder<String> tables = ImmutableList.builder();
-    thirdEyePinotClient.getAllTablesFromPinot()
-        .forEach(table -> tables.add(table.asText()));
-    return tables.build();
+    return ImmutableList.copyOf(thirdEyePinotClient.getAllTablesFromPinot());
   }
 
   public List<DatasetConfigDTO> onboardAll(final String dataSourceName) throws IOException {

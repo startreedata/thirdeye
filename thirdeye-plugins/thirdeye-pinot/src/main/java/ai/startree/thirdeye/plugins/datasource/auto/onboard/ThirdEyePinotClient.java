@@ -15,7 +15,9 @@ package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.GetTablesResponseApi;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlDataSourceConfigFactory;
 import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlThirdEyeDataSourceConfig;
@@ -66,12 +68,11 @@ public class ThirdEyePinotClient {
   private static final String PINOT_TABLES_ENDPOINT_TEMPLATE = "/tables/%s";
   private static final String PINOT_SCHEMA_ENDPOINT_TEMPLATE = "/schemas/%s";
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
-  private static final String UTF_8 = "UTF-8";
 
   private final CloseableHttpClient pinotControllerClient;
   private final HttpHost pinotControllerHost;
 
-  public ThirdEyePinotClient(DataSourceMetaBean dataSourceMeta, String dataSourceType) {
+  public ThirdEyePinotClient(final DataSourceMetaBean dataSourceMeta, final String dataSourceType) {
     final String controllerConnectionScheme;
     final String controllerHost;
     final int controllerPort;
@@ -113,7 +114,7 @@ public class ThirdEyePinotClient {
             .build();
         customClient.setSSLContext(sslContext)
           .setSSLHostnameVerifier(new NoopHostnameVerifier());
-      } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+      } catch (final NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
         // This section shouldn't happen because we use Accept All Strategy
         LOG.error("Failed to start auto onboard for Pinot data source.");
         throw new RuntimeException(e);
@@ -122,32 +123,24 @@ public class ThirdEyePinotClient {
     return customClient.build();
   }
 
-  public JsonNode getAllTablesFromPinot() throws IOException {
-    HttpGet tablesReq = new HttpGet(PINOT_TABLES_ENDPOINT);
+  public List<String> getAllTablesFromPinot() throws IOException {
+    final HttpGet tablesReq = new HttpGet(PINOT_TABLES_ENDPOINT);
     LOG.info("Retrieving datasets: {}", tablesReq);
-    CloseableHttpResponse tablesRes = pinotControllerClient.execute(pinotControllerHost, tablesReq);
-    JsonNode tables = null;
-    try {
-      if (tablesRes.getStatusLine().getStatusCode() != 200) {
-        throw new IllegalStateException(tablesRes.getStatusLine().toString());
-      }
-      InputStream tablesContent = tablesRes.getEntity().getContent();
-      tables = OBJECT_MAPPER.readTree(tablesContent).get("tables");
-    } catch (Exception e) {
-      LOG.error("Exception in loading collections", e);
-    } finally {
-      if (tablesRes.getEntity() != null) {
-        EntityUtils.consume(tablesRes.getEntity());
-      }
-      tablesRes.close();
+    final CloseableHttpResponse tablesRes = pinotControllerClient.execute(pinotControllerHost, tablesReq);
+    if (tablesRes.getStatusLine().getStatusCode() != 200) {
+      throw new IllegalStateException(tablesRes.getStatusLine().toString());
     }
-    return tables;
+    final InputStream tablesContent = tablesRes.getEntity().getContent();
+    final GetTablesResponseApi api = OBJECT_MAPPER.readValue(tablesContent, GetTablesResponseApi.class);
+    return optional(api)
+        .map(GetTablesResponseApi::getTables)
+        .orElse(Collections.emptyList());
   }
 
   /**
    * Fetches schema from pinot, from the tables endpoint or schema endpoint
    */
-  public Schema getSchemaFromPinot(String dataset) throws IOException {
+  public Schema getSchemaFromPinot(final String dataset) throws IOException {
     Schema schema = getSchemaFromPinotEndpoint(PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE, dataset);
     if (schema == null) {
       schema = getSchemaFromPinotEndpoint(PINOT_SCHEMA_ENDPOINT_TEMPLATE, dataset);
@@ -158,21 +151,21 @@ public class ThirdEyePinotClient {
     return schema;
   }
 
-  private Schema getSchemaFromPinotEndpoint(String endpointTemplate, String dataset)
+  private Schema getSchemaFromPinotEndpoint(final String endpointTemplate, final String dataset)
       throws IOException {
     Schema schema = null;
-    HttpGet schemaReq = new HttpGet(
+    final HttpGet schemaReq = new HttpGet(
         String.format(endpointTemplate, URLEncoder.encode(dataset, StandardCharsets.UTF_8)));
     LOG.info("Retrieving schema: {}", schemaReq);
-    CloseableHttpResponse schemaRes = pinotControllerClient.execute(pinotControllerHost, schemaReq);
+    final CloseableHttpResponse schemaRes = pinotControllerClient.execute(pinotControllerHost, schemaReq);
     try {
       if (schemaRes.getStatusLine().getStatusCode() != 200) {
         LOG.error("Schema {} not found, {}", dataset, schemaRes.getStatusLine().toString());
       } else {
-        InputStream schemaContent = schemaRes.getEntity().getContent();
+        final InputStream schemaContent = schemaRes.getEntity().getContent();
         schema = CODEHAUS_OBJECT_MAPPER.readValue(schemaContent, Schema.class);
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOG.error("Exception in retrieving schema collections, skipping {}", dataset);
     } finally {
       if (schemaRes.getEntity() != null) {
@@ -186,14 +179,14 @@ public class ThirdEyePinotClient {
   /**
    * Verify schema name and presence of field spec for time column
    */
-  public boolean verifySchemaCorrectness(Schema schema, @Nullable String timeColumnName) {
+  public boolean verifySchemaCorrectness(final Schema schema, @Nullable final String timeColumnName) {
     return !StringUtils.isBlank(schema.getSchemaName()) && timeColumnName != null
         && schema.getSpecForTimeColumn(timeColumnName) != null;
   }
 
-  public JsonNode getTableConfigFromPinotEndpoint(String dataset) throws IOException {
-    HttpGet request = new HttpGet(String.format(PINOT_TABLES_ENDPOINT_TEMPLATE, dataset));
-    CloseableHttpResponse response = pinotControllerClient.execute(pinotControllerHost, request);
+  public JsonNode getTableConfigFromPinotEndpoint(final String dataset) throws IOException {
+    final HttpGet request = new HttpGet(String.format(PINOT_TABLES_ENDPOINT_TEMPLATE, dataset));
+    final CloseableHttpResponse response = pinotControllerClient.execute(pinotControllerHost, request);
     LOG.debug("Retrieving dataset's custom config: {}", request);
 
     // Retrieve table config
@@ -202,9 +195,9 @@ public class ThirdEyePinotClient {
       if (response.getStatusLine().getStatusCode() != 200) {
         throw new IllegalStateException(response.getStatusLine().toString());
       }
-      InputStream tablesContent = response.getEntity().getContent();
+      final InputStream tablesContent = response.getEntity().getContent();
       tables = OBJECT_MAPPER.readTree(tablesContent);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOG.error("Exception in loading dataset {}", dataset, e);
     } finally {
       if (response.getEntity() != null) {
@@ -226,22 +219,22 @@ public class ThirdEyePinotClient {
   /**
    * Returns the map of custom configs of the given dataset from the Pinot table config json.
    */
-  public Map<String, String> extractCustomConfigsFromPinotTable(JsonNode tableConfigJson) {
+  public Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
 
     Map<String, String> customConfigs = Collections.emptyMap();
     try {
-      JsonNode jsonNode = tableConfigJson.get("metadata").get("customConfigs");
+      final JsonNode jsonNode = tableConfigJson.get("metadata").get("customConfigs");
       customConfigs = OBJECT_MAPPER
           .convertValue(jsonNode, new TypeReference<Map<String, String>>() {
           });
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOG.warn("Failed to get custom config from table: {}. Reason: {}", tableConfigJson, e);
     }
     return customConfigs;
   }
 
-  public String extractTimeColumnFromPinotTable(JsonNode tableConfigJson) {
-    JsonNode timeColumnNode = tableConfigJson.get("segmentsConfig").get("timeColumnName");
+  public String extractTimeColumnFromPinotTable(final JsonNode tableConfigJson) {
+    final JsonNode timeColumnNode = tableConfigJson.get("segmentsConfig").get("timeColumnName");
     return (timeColumnNode != null && !timeColumnNode.isNull()) ? timeColumnNode.asText() : null;
   }
 
@@ -251,7 +244,7 @@ public class ThirdEyePinotClient {
   private static class AcceptAllTrustStrategy implements TrustStrategy {
 
     @Override
-    public boolean isTrusted(X509Certificate[] x509Certificates, String s)
+    public boolean isTrusted(final X509Certificate[] x509Certificates, final String s)
         throws CertificateException {
       return true;
     }

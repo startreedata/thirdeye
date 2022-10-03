@@ -24,12 +24,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.http.HttpHeaders;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotConnectionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class PinotConnectionManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionManager.class);
@@ -42,6 +45,7 @@ public class PinotConnectionManager {
   private Connection connection;
   private String prevToken;
 
+  @Inject
   public PinotConnectionManager(final PinotConnectionBuilder pinotConnectionBuilder,
       final PinotThirdEyeDataSourceConfig config,
       final PinotOauthTokenSupplier pinotOauthTokenSupplier) {

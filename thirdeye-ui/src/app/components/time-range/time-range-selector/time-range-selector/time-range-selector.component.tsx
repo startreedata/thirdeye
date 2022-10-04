@@ -27,6 +27,7 @@ import { useTimeRangeSelectorStyles } from "./time-range-selector.styles";
 export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
     hideTimeRangeSelectorButton,
     hideTimeRange,
+    hideRefresh,
     timeRangeDuration,
     recentCustomTimeRangeDurations,
     onRefresh,
@@ -95,17 +96,21 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
                 </Grid>
             )}
 
-            {/* Refresh button */}
-            <Grid item>
-                <Button
-                    className={timeRangeSelectorClasses.timeRangeSelectorButton}
-                    color="primary"
-                    variant="outlined"
-                    onClick={onRefresh}
-                >
-                    <RefreshIcon />
-                </Button>
-            </Grid>
+            {!hideRefresh && (
+                <Grid item>
+                    {/* Refresh button */}
+                    <Button
+                        className={
+                            timeRangeSelectorClasses.timeRangeSelectorButton
+                        }
+                        color="primary"
+                        variant="outlined"
+                        onClick={onRefresh}
+                    >
+                        <RefreshIcon />
+                    </Button>
+                </Grid>
+            )}
 
             {/* Fixes layout in Safari */}
             <SafariMuiGridFix />

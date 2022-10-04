@@ -12,6 +12,8 @@
  * the License.
  */
 import axios from "axios";
+import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
+import { filterOutIgnoredAnomalies } from "../../utils/anomalies/anomalies.util";
 import {
     Alert,
     AlertEvaluation,
@@ -104,6 +106,14 @@ export const getAlertEvaluation = async (
     }
 
     const response = await axios.post(`${BASE_URL_ALERTS}/evaluate`, payload);
+
+    if (response.data.detectionEvaluations) {
+        extractDetectionEvaluation(response.data).forEach((detectionEval) => {
+            detectionEval.anomalies = filterOutIgnoredAnomalies(
+                detectionEval.anomalies
+            );
+        });
+    }
 
     return response.data;
 };

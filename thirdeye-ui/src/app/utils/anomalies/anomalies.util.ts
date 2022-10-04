@@ -14,7 +14,7 @@
 import { AxiosError } from "axios";
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
+import { cloneDeep, every, isEmpty, isNil, isNumber } from "lodash";
 import { NotificationTypeV1 } from "../../platform/components";
 import {
     formatDateAndTimeV1,
@@ -491,4 +491,19 @@ export const handleCreateAlertClickGenerator = (
                       );
             });
     };
+};
+
+export const filterOutIgnoredAnomalies = (anomalies: Anomaly[]): Anomaly[] => {
+    // Filter out anomalies that should be ignored if it has a label with ignore in it
+    return anomalies.filter((anomaly: Anomaly) => {
+        if (!anomaly.anomalyLabels) {
+            return true;
+        }
+
+        return every(
+            anomaly.anomalyLabels.map((label) => {
+                return label.ignore === false || label.ignore === undefined;
+            })
+        );
+    });
 };

@@ -32,6 +32,7 @@ import {
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
+import { getAlertInsight } from "../../../../rest/alerts/alerts.rest";
 import { AlertEvaluation } from "../../../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
 import {
@@ -60,7 +61,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
     const { t } = useTranslation();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [startTime, endTime] = useMemo(
         () => [
             Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
@@ -163,6 +164,30 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         setDetectionEvaluations(undefined);
     }, [alert]);
 
+    const handleAutoRangeClick = (): void => {
+        getAlertInsight({ alert }).then(
+            (insights) => {
+                searchParams.set(
+                    TimeRangeQueryStringKey.START_TIME,
+                    insights.defaultStartTime.toString()
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.END_TIME,
+                    insights.defaultEndTime.toString()
+                );
+                setSearchParams(searchParams, { replace: true });
+                fetchAlertEvaluation(
+                    insights.defaultStartTime,
+                    insights.defaultEndTime
+                );
+            },
+            () => {
+                // If API fails use current start and end
+                fetchAlertEvaluation(startTime, endTime);
+            }
+        );
+    };
+
     return (
         <>
             <Grid container item justifyContent="space-between" xs={12}>
@@ -180,7 +205,11 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                         }
                         variant="outlined"
                         onClick={() => {
-                            fetchAlertEvaluation(startTime, endTime);
+                            if (timeSeriesOptions) {
+                                fetchAlertEvaluation(startTime, endTime);
+                            } else {
+                                handleAutoRangeClick();
+                            }
                         }}
                     >
                         <RefreshIcon fontSize="small" />
@@ -190,80 +219,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             </Grid>
 
             <Grid item xs={12}>
-                <Box padding={1} />
-            </Grid>
-
-            <Grid container item justifyContent="space-between" xs={12}>
-                <Grid item>
-                    <Grid
-                        container
-                        alignItems="center"
-                        justifyContent="flex-start"
-                    >
-                        {!!detectionEvaluations &&
-                            detectionEvaluations.length > 1 && (
-                                <>
-                                    <Grid item>
-                                        <span>
-                                            {t("label.dimension-expression")}:
-                                        </span>
-                                    </Grid>
-                                    <Grid item>
-                                        <FormControl>
-                                            <Select
-                                                disableUnderline
-                                                inputProps={{
-                                                    className:
-                                                        previewChartClasses.selected,
-                                                }}
-                                                value={
-                                                    selectedEvaluationToDisplay
-                                                }
-                                                onChange={(event) =>
-                                                    setSelectedEvaluationToDisplay(
-                                                        event.target
-                                                            .value as unknown as string
-                                                    )
-                                                }
-                                            >
-                                                {detectionEvaluations.map(
-                                                    (detectionEvaluation) => {
-                                                        const name =
-                                                            generateNameForDetectionResult(
-                                                                detectionEvaluation
-                                                            );
-
-                                                        return (
-                                                            <MenuItem
-                                                                key={name}
-                                                                value={name}
-                                                            >
-                                                                {name}
-                                                            </MenuItem>
-                                                        );
-                                                    }
-                                                )}
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </>
-                            )}
-                    </Grid>
-                </Grid>
-                <Grid item>
-                    <TimeRangeButtonWithContext
-                        onTimeRangeChange={(start, end) =>
-                            displayState ===
-                                MessageDisplayState.GOOD_TO_PREVIEW &&
-                            fetchAlertEvaluation(start, end)
-                        }
-                    />
-                </Grid>
-            </Grid>
-
-            <Grid item xs={12}>
                 {displayState === MessageDisplayState.SELECT_TEMPLATE && (
-                    <Box marginTop={2} position="relative">
+                    <Box marginTop={1} position="relative">
                         <Box className={previewChartClasses.alertContainer}>
                             <Grid container justifyContent="space-around">
                                 <Grid item>
@@ -287,7 +244,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 )}
                 {displayState ===
                     MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES && (
-                    <Box marginTop={2} position="relative">
+                    <Box marginTop={1} position="relative">
                         <Box className={previewChartClasses.alertContainer}>
                             <Grid container justifyContent="space-around">
                                 <Grid item>
@@ -310,7 +267,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     </Box>
                 )}
                 {displayState === MessageDisplayState.GOOD_TO_PREVIEW && (
-                    <Box marginTop={2} minHeight={100} position="relative">
+                    <Box marginTop={1} minHeight={100} position="relative">
                         {getEvaluationStatus === ActionStatus.Working && (
                             <SkeletonV1
                                 animation="pulse"
@@ -322,7 +279,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                         {getEvaluationStatus !== ActionStatus.Working && (
                             <>
                                 {!detectionEvaluations && (
-                                    <Box marginTop={2} position="relative">
+                                    <Box marginTop={1} position="relative">
                                         <Box
                                             className={
                                                 previewChartClasses.alertContainer
@@ -340,12 +297,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                                     <Button
                                                         color="primary"
                                                         variant="text"
-                                                        onClick={() => {
-                                                            fetchAlertEvaluation(
-                                                                startTime,
-                                                                endTime
-                                                            );
-                                                        }}
+                                                        onClick={
+                                                            handleAutoRangeClick
+                                                        }
                                                     >
                                                         <RefreshIcon fontSize="large" />
                                                     </Button>
@@ -359,7 +313,103 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                 )}
 
                                 {timeSeriesOptions && (
-                                    <Box marginTop={2}>
+                                    <Grid
+                                        container
+                                        item
+                                        justifyContent="space-between"
+                                        xs={12}
+                                    >
+                                        <Grid item>
+                                            <Grid
+                                                container
+                                                alignItems="center"
+                                                justifyContent="flex-start"
+                                            >
+                                                {!!detectionEvaluations &&
+                                                    detectionEvaluations.length >
+                                                        1 && (
+                                                        <>
+                                                            <Grid item>
+                                                                <span>
+                                                                    {t(
+                                                                        "label.dimension-expression"
+                                                                    )}
+                                                                    :
+                                                                </span>
+                                                            </Grid>
+                                                            <Grid item>
+                                                                <FormControl>
+                                                                    <Select
+                                                                        disableUnderline
+                                                                        inputProps={{
+                                                                            className:
+                                                                                previewChartClasses.selected,
+                                                                        }}
+                                                                        value={
+                                                                            selectedEvaluationToDisplay
+                                                                        }
+                                                                        onChange={(
+                                                                            event
+                                                                        ) =>
+                                                                            setSelectedEvaluationToDisplay(
+                                                                                event
+                                                                                    .target
+                                                                                    .value as unknown as string
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {detectionEvaluations.map(
+                                                                            (
+                                                                                detectionEvaluation
+                                                                            ) => {
+                                                                                const name =
+                                                                                    generateNameForDetectionResult(
+                                                                                        detectionEvaluation
+                                                                                    );
+
+                                                                                return (
+                                                                                    <MenuItem
+                                                                                        key={
+                                                                                            name
+                                                                                        }
+                                                                                        value={
+                                                                                            name
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            name
+                                                                                        }
+                                                                                    </MenuItem>
+                                                                                );
+                                                                            }
+                                                                        )}
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Grid>
+                                                        </>
+                                                    )}
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item>
+                                            <TimeRangeButtonWithContext
+                                                onTimeRangeChange={(
+                                                    start,
+                                                    end
+                                                ) =>
+                                                    displayState ===
+                                                        MessageDisplayState.GOOD_TO_PREVIEW &&
+                                                    fetchAlertEvaluation(
+                                                        start,
+                                                        end
+                                                    )
+                                                }
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                )}
+
+                                {timeSeriesOptions && (
+                                    <Box marginTop={1}>
                                         <TimeSeriesChart
                                             height={300}
                                             {...timeSeriesOptions}

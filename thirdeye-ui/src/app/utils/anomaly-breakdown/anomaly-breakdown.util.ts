@@ -11,60 +11,38 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { OFFSET_TO_MILLISECONDS } from "../../components/rca/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.utils";
 import {
-    BaselineOffsetUnitsKey,
+    OFFSET_REGEX_EXTRACT,
     OFFSET_TO_HUMAN_READABLE,
 } from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
+import { OFFSET_TO_MILLISECONDS } from "../time/time.util";
 
-export const comparisonOffsetReadableValue = (
-    offsetTime: number,
-    baselineOption: BaselineOffsetUnitsKey
-): string => {
-    const baseline = OFFSET_TO_HUMAN_READABLE[baselineOption];
+export const comparisonOffsetReadableValue = (offsetString: string): string => {
+    const result = OFFSET_REGEX_EXTRACT.exec(offsetString);
 
-    if (offsetTime === 1) {
-        return `${offsetTime} ${baseline.toLowerCase()} ago`;
+    if (result === null) {
+        return "could not parse offset";
     }
 
-    return `${offsetTime} ${baseline.toLowerCase()}s ago`;
+    const [, valueStr, unit] = result;
+
+    if (Number(valueStr) === 1) {
+        return `${valueStr} ${OFFSET_TO_HUMAN_READABLE[
+            unit
+        ].toLowerCase()} ago`;
+    }
+
+    return `${valueStr} ${OFFSET_TO_HUMAN_READABLE[unit].toLowerCase()}s ago`;
 };
 
-export const parseBaselineComparisonOffset = (
-    offset: string
-): { baselineOffsetValue: number; unit: BaselineOffsetUnitsKey } => {
-    const value = Number(offset.slice(1, 2));
-    const unit = offset.slice(2) as BaselineOffsetUnitsKey;
+export const baselineOffsetToMilliseconds = (offsetString: string): number => {
+    const result = OFFSET_REGEX_EXTRACT.exec(offsetString);
 
-    const validBaselineUnit = checkIfAnomalyBreakdownAPIOffsetUnitsKey(unit)
-        ? unit
-        : BaselineOffsetUnitsKey.WEEK;
-    const validOffsetValue = isNaN(value) ? 1 : value;
+    if (result === null) {
+        return 0;
+    }
 
-    return { baselineOffsetValue: validOffsetValue, unit: validBaselineUnit };
-};
+    const [, valueStr, unit] = result;
 
-export const baselineComparisonOffsetToHumanReadable = (
-    value: number,
-    unit: BaselineOffsetUnitsKey
-): string => {
-    return `${value} ${
-        OFFSET_TO_HUMAN_READABLE[unit as BaselineOffsetUnitsKey]
-    }${value !== 1 ? "s" : ""} ago`;
-};
-
-export const baselineOffsetToMilliseconds = (
-    value: number,
-    unit: BaselineOffsetUnitsKey
-): number => {
-    return value * OFFSET_TO_MILLISECONDS[unit];
-};
-
-// Type guard for baselineOffsetUnit
-const checkIfAnomalyBreakdownAPIOffsetUnitsKey = (
-    value: string
-): value is BaselineOffsetUnitsKey => {
-    return (
-        OFFSET_TO_HUMAN_READABLE[value as BaselineOffsetUnitsKey] !== undefined
-    );
+    return Number(valueStr) * OFFSET_TO_MILLISECONDS[unit];
 };

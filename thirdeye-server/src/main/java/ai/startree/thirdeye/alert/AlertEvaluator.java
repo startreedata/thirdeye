@@ -17,15 +17,13 @@ import static ai.startree.thirdeye.alert.AlertEvaluatorResponseMapper.toAlertEva
 import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
-import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
@@ -103,12 +101,8 @@ public class AlertEvaluator {
               runtimeContext))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-      final boolean postProcessEnabled = optional(request.getEvaluationContext())
-          .map(EvaluationContextApi::getPostProcessEnabled)
-          .orElse(false);
-      final Map<String, OperatorResult> processed = postProcessEnabled
-          ? new DetectionPipelineOutputPostProcessor().process(result, request)
-          : result;
+      final Map<String, OperatorResult> processed = new DetectionPipelineOutputPostProcessor()
+          .process(result, request);
 
       return toAlertEvaluationApi(processed)
           .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));

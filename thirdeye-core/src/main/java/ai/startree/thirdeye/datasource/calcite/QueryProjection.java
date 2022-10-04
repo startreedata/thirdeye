@@ -33,7 +33,6 @@ import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlUnresolvedFunction;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -89,7 +88,7 @@ public class QueryProjection {
     return new QueryProjection(this.operator, this.operands, this.quantifier, this.alias, true);
   }
 
-  private SqlNode toSqlNode(final Config sqlParserConfig) throws SqlParseException {
+  private SqlNode toSqlNode(final Config sqlParserConfig) {
     if (operator != null) {
       return applySpecialOperators(new SqlBasicCall(
           new SqlUnresolvedFunction(identifierOf(operator),
@@ -110,7 +109,7 @@ public class QueryProjection {
     }
   }
 
-  private List<SqlNode> operandNodes(final Config sqlParserConfig) throws SqlParseException {
+  private List<SqlNode> operandNodes(final Config sqlParserConfig) {
     final List<SqlNode> operandNodes = new ArrayList<>(this.operands.size());
     for (final String operand : operands) {
       operandNodes.add(CalciteUtils.expressionToNode(operand, sqlParserConfig));
@@ -119,8 +118,7 @@ public class QueryProjection {
   }
 
   public SqlNode toDialectSpecificSqlNode(final Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder)
-      throws SqlParseException {
+      final SqlExpressionBuilder expressionBuilder) {
     if (operator != null) {
       final String operatorUpper = operator.toUpperCase(Locale.ENGLISH);
       // 1. a datasource can customize any metricAggFunction based SQL

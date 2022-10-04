@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 import ai.startree.thirdeye.IntegrationTestUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder;
@@ -28,7 +27,6 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -75,31 +73,27 @@ public class MacroEngineTest {
         detectionInterval,
         DATASET_CONFIG_DTO,
         inputQuery);
-    try {
-      DataSourceRequest output = macroEngine.prepareRequest();
-      assertThat(TABLE_NAME).isEqualTo(output.getTable());
-      assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
-          IntegrationTestUtils.cleanSql(
-          expectedQuery));
-      assertThat(expectedProperties).isEqualTo(output.getProperties());
-    } catch (SqlParseException e) {
-      fail("SQL query parsing failed: " + e);
-    }
+    final DataSourceRequest output = macroEngine.prepareRequest();
+    assertThat(TABLE_NAME).isEqualTo(output.getTable());
+    assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
+        IntegrationTestUtils.cleanSql(
+            expectedQuery));
+    assertThat(expectedProperties).isEqualTo(output.getProperties());
   }
 
   @Test
   public void testTimeFilterMacro() {
     // test if a simple macro works - eg: __timeFilter(timeCol, 'EPOCH')
-    String macroArgument = "timeCol";
-    String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
+    final String macroArgument = "timeCol";
+    final String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
         macroArgument,
         INPUT_TIME_COLUMN_FORMAT);
 
-    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
+    final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_INTERVAL,
             INPUT_TIME_COLUMN_FORMAT));
-    Map<String, String> expectedProperties = ImmutableMap.of(
+    final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
         String.valueOf(INPUT_START_TIME),
         MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
@@ -110,18 +104,18 @@ public class MacroEngineTest {
 
   @Test
   public void testTimeFilterMacroWithAutoTimeConfig() {
-    String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
+    final String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
         MacroFunction.AUTO_TIME_CONFIG,
         "NOT_IMPORTANT_SHOULD_NOT_BE_USED");
 
-    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
+    final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
             "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
             INPUT_INTERVAL,
             DATASET_CONFIG_DTO.getTimeFormat(),
             DATASET_CONFIG_DTO.getTimeUnit().toString()));
 
-    Map<String, String> expectedProperties = ImmutableMap.of(
+    final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
         String.valueOf(INPUT_START_TIME),
         MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
@@ -133,17 +127,17 @@ public class MacroEngineTest {
   @Test
   public void testTimeFilterMacroWithFunctionCallInArgument() {
     // test if a function call inside a macro works - eg: __timeFilter(unixTimestamp(timeCol), 'EPOCH')
-    String macroArgument = "unixTimestamp(timeCol)";
+    final String macroArgument = "unixTimestamp(timeCol)";
 
-    String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
+    final String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
         macroArgument,
         INPUT_TIME_COLUMN_FORMAT);
 
-    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
+    final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_INTERVAL,
             INPUT_TIME_COLUMN_FORMAT));
-    Map<String, String> expectedProperties = ImmutableMap.of(
+    final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
         String.valueOf(INPUT_START_TIME),
         MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
@@ -156,22 +150,22 @@ public class MacroEngineTest {
   public void testTimeGroupMacro() {
     // test if a macro with unquoted arguments work - eg: __timeGroup(timeCol, myTestFormat, P0D)
     // support for unquoted arguments is not mandatory and not documented - drop this test if need be
-    String timeColumnMacroArg = "timeCol";
-    String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
-    Period granularityMacroArg = HOUR_PERIOD;
+    final String timeColumnMacroArg = "timeCol";
+    final String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
+    final Period granularityMacroArg = HOUR_PERIOD;
 
-    String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
+    final String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
         timeColumnMacroArg,
         timeColumnFormatMacroArg,
         granularityMacroArg);
 
-    String expectedQuery = String.format("SELECT %s FROM tableName",
+    final String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
             timeColumnFormatMacroArg,
             granularityMacroArg,
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
-    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
@@ -179,12 +173,12 @@ public class MacroEngineTest {
 
   @Test
   public void testTimeGroupMacroWithAutoTimeConfig() {
-    String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
+    final String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
         MacroFunction.AUTO_TIME_CONFIG,
         "NOT_IMPORTANT_SHOULD_NOT_BE_USED",
         HOUR_PERIOD);
 
-    String expectedQuery = String.format("SELECT %s FROM tableName",
+    final String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(
             "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
             DATASET_CONFIG_DTO.getTimeFormat(),
@@ -192,7 +186,7 @@ public class MacroEngineTest {
             DATASET_CONFIG_DTO.getTimeUnit().toString(),
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
-    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
@@ -201,25 +195,25 @@ public class MacroEngineTest {
   @Test
   public void testTimeGroupMacroWithQuotedLiterals() {
     // test if a macro with string literal params is parsed correctly
-    String timeColumnMacroArg = "timeCol";
-    String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
-    String timeColumnFormatMacroArgQuoted =
+    final String timeColumnMacroArg = "timeCol";
+    final String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
+    final String timeColumnFormatMacroArgQuoted =
         LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
-    Period granularityMacroArg = HOUR_PERIOD;
-    String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + HOUR_PERIOD + LITERAL_QUOTE_STRING;
+    final Period granularityMacroArg = HOUR_PERIOD;
+    final String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + HOUR_PERIOD + LITERAL_QUOTE_STRING;
 
-    String inputQuery = String.format("select __timeGroup(%s,%s,%s) FROM tableName",
+    final String inputQuery = String.format("select __timeGroup(%s,%s,%s) FROM tableName",
         timeColumnMacroArg,
         timeColumnFormatMacroArgQuoted,
         granularityMacroArgQuoted);
 
-    String expectedQuery = String.format("SELECT %s FROM tableName",
+    final String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(timeColumnMacroArg,
             timeColumnFormatMacroArg,
             granularityMacroArg,
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
-    Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
@@ -261,26 +255,26 @@ public class MacroEngineTest {
   @Test
   public void testNestedMacro() {
     // test if nested macros work - eg: __timeFilter(__timeGroup(timeCol, myTestFormat, P0D), 'EPOCH')
-    String timeColumnMacroArg = "timeCol";
-    String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
-    Period granularityMacroArg = HOUR_PERIOD;
+    final String timeColumnMacroArg = "timeCol";
+    final String timeColumnFormatMacroArg = SIMPLE_TIME_FORMAT;
+    final Period granularityMacroArg = HOUR_PERIOD;
 
-    String inputQuery = String.format(
+    final String inputQuery = String.format(
         "select * from tableName where __timeFilter(__timeGroup(%s,'%s','%s'), '%s')",
         timeColumnMacroArg,
         timeColumnFormatMacroArg,
         granularityMacroArg,
         INPUT_TIME_COLUMN_FORMAT);
 
-    String expectedTimeGroupMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(
+    final String expectedTimeGroupMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(
         timeColumnMacroArg,
         timeColumnFormatMacroArg,
         granularityMacroArg,
         INPUT_INTERVAL.getChronology().getZone().toString());
-    String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
+    final String expectedNestedMacro = MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
         expectedTimeGroupMacro,
         INPUT_INTERVAL, INPUT_TIME_COLUMN_FORMAT);
-    Map<String, String> expectedProperties = ImmutableMap.of(
+    final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
         String.valueOf(INPUT_START_TIME),
         MacroMetadataKeys.MAX_TIME_MILLIS.toString(),
@@ -288,7 +282,7 @@ public class MacroEngineTest {
         MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
-    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s", expectedNestedMacro);
+    final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s", expectedNestedMacro);
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
   }
@@ -296,16 +290,16 @@ public class MacroEngineTest {
   @Test
   public void testIdentifierQuotesAreConserved() {
     // test if escaping quotes are kept, eg: __timeFilter("date", 'EPOCH') returns "date" >= ...
-    String macroArgument = IDENTIFIER_QUOTE_STRING + "date" + IDENTIFIER_QUOTE_STRING;
-    String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
+    final String macroArgument = IDENTIFIER_QUOTE_STRING + "date" + IDENTIFIER_QUOTE_STRING;
+    final String inputQuery = String.format("select * from tableName where __timeFilter(%s, '%s')",
         macroArgument,
         INPUT_TIME_COLUMN_FORMAT);
 
-    String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
+    final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(macroArgument,
             INPUT_INTERVAL,
             INPUT_TIME_COLUMN_FORMAT));
-    Map<String, String> expectedProperties = ImmutableMap.of(
+    final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
         String.valueOf(INPUT_START_TIME),
         MacroMetadataKeys.MAX_TIME_MILLIS.toString(),

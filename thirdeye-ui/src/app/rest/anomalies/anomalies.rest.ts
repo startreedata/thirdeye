@@ -12,6 +12,7 @@
  * the License.
  */
 import axios from "axios";
+import { every } from "lodash";
 import { Anomaly, AnomalyFeedback } from "../dto/anomaly.interfaces";
 import { GetAnomaliesProps } from "./anomaly.interfaces";
 
@@ -61,7 +62,18 @@ export const getAnomalies = async ({
         `${BASE_URL_ANOMALIES}?${queryParams.toString()}`
     );
 
-    return response.data;
+    // Filter out anomalies that should be ignored if it has a label with ignore in it
+    return response.data.filter((anomaly: Anomaly) => {
+        if (!anomaly.anomalyLabels) {
+            return true;
+        }
+
+        return every(
+            anomaly.anomalyLabels.map((label) => {
+                return label.ignore === false || label.ignore === undefined;
+            })
+        );
+    });
 };
 
 export const deleteAnomaly = async (id: number): Promise<Anomaly> => {

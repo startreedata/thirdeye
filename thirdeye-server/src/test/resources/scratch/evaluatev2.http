@@ -600,9 +600,6 @@ Content-Type: application/json
       "aggregationColumn": "views"
     }
   },
-  "evaluationContext": {
-    "postProcessEnabled": true
-  },
   "start": 1613376000000,
   "end": 1626332400000
 }

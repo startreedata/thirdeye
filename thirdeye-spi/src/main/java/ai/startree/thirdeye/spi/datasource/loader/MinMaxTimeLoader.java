@@ -20,15 +20,16 @@ import org.joda.time.Interval;
 
 public interface MinMaxTimeLoader {
 
+  // fixme cyril remove the non async methods - they don't enforce a well-defined timeout
   @Nullable Long fetchMinTime(final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception;
 
   @Nullable Long fetchMaxTime(final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception;
 
-  @Nullable Future<Long> fetchMinTimeAsync(final DatasetConfigDTO datasetConfigDTO,
+  Future<@Nullable Long> fetchMinTimeAsync(final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception;
 
-  @Nullable Future<Long> fetchMaxTimeAsync(final DatasetConfigDTO datasetConfigDTO,
+  Future<@Nullable Long> fetchMaxTimeAsync(final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception;
 }

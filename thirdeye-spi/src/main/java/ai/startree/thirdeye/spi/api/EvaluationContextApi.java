@@ -22,7 +22,6 @@ public class EvaluationContextApi {
    * Format is 'dim1=val1'.
    */
   private List<String> filters;
-  private Boolean postProcessEnabled = true;
 
   public List<String> getFilters() {
     return filters;
@@ -30,15 +29,6 @@ public class EvaluationContextApi {
 
   public EvaluationContextApi setFilters(final List<String> filters) {
     this.filters = filters;
-    return this;
-  }
-
-  public Boolean getPostProcessEnabled() {
-    return postProcessEnabled;
-  }
-
-  public EvaluationContextApi setPostProcessEnabled(final Boolean postProcessEnabled) {
-    this.postProcessEnabled = postProcessEnabled;
     return this;
   }
 }

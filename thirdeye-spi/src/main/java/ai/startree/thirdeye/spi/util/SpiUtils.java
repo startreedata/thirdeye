@@ -35,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
@@ -55,7 +56,7 @@ public class SpiUtils {
   private SpiUtils() {
   }
 
-  public static <T> Optional<T> optional(T o) {
+  public static <T> Optional<T> optional(@Nullable T o) {
     return Optional.ofNullable(o);
   }
 

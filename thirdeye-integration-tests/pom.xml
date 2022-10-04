@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>ai.startree.thirdeye</groupId>
-    <version>1.78.0-SNAPSHOT</version>
+    <version>1.84.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -57,6 +57,14 @@
     <dependency>
       <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-bootstrap-open-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-enumerators</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-postprocessors</artifactId>
     </dependency>
     <dependency>
       <groupId>com.nimbusds</groupId>

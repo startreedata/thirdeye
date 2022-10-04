@@ -11,41 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+export const OFFSET_REGEX_EXTRACT = /[pP](-?\d+)([DWMY])/;
+
 export type AnomaliesViewPageParams = {
     id: string;
 };
 
-export enum BaselineOffsetUnitsKey {
-    DAY = "D",
-    WEEK = "W",
-    MONTH = "M",
-    YEAR = "Y",
-}
-
-export type BaselineOffsetUnitsValues = "Day" | "Week" | "Month" | "Year";
-
-export const OFFSET_TO_HUMAN_READABLE: Record<
-    BaselineOffsetUnitsKey,
-    BaselineOffsetUnitsValues
-> = {
-    [BaselineOffsetUnitsKey.DAY]: "Day",
-    [BaselineOffsetUnitsKey.WEEK]: "Week",
-    [BaselineOffsetUnitsKey.MONTH]: "Month",
-    [BaselineOffsetUnitsKey.YEAR]: "Year",
+export const OFFSET_TO_HUMAN_READABLE: { [key: string]: string } = {
+    D: "Day",
+    W: "Week",
+    M: "Month",
+    Y: "Year",
 };
-
-export const BASELINE_OPTIONS: BaselineOptionsType[] = [];
-
-Object.values(BaselineOffsetUnitsKey).forEach(
-    (offsetKey: BaselineOffsetUnitsKey) => {
-        BASELINE_OPTIONS.push({
-            key: offsetKey,
-            description: OFFSET_TO_HUMAN_READABLE[offsetKey],
-        });
-    }
-);
-
-export interface BaselineOptionsType {
-    key: BaselineOffsetUnitsKey;
-    description: BaselineOffsetUnitsValues;
-}

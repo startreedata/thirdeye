@@ -12,18 +12,21 @@
  * the License.
  */
 
-package ai.startree.thirdeye.mapper;
+package ai.startree.thirdeye.detectionpipeline.operator;
 
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Mapper
-public interface AnomalyDetectorOperatorResultMapper {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class EnumeratorParams {
 
-  AnomalyDetectorOperatorResultMapper INSTANCE = Mappers.getMapper(
-      AnomalyDetectorOperatorResultMapper.class);
+  private String type;
 
-  AnomalyDetectorOperatorResult clone(AnomalyDetectorOperatorResult o);
+  public String getType() {
+    return type;
+  }
 
+  public EnumeratorParams setType(final String type) {
+    this.type = type;
+    return this;
+  }
 }

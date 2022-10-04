@@ -4,6 +4,22 @@
   "nodes": [
     {
       "name": "root",
+      "type": "PostProcessor",
+      "params": {
+        "type": "COLD_START",
+        "component.ignore": "${coldStartIgnore}",
+        "component.tableName": "${dataset}",
+        "component.coldStartPeriod": "${baselineOffset}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "anomalyDetector"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "anomalyDetector",
       "type": "AnomalyDetector",
       "params": {
         "component.percentageChange": "${percentageChange}",
@@ -131,6 +147,7 @@
     "queryFilters": "",
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
+    "coldStartIgnore": "true",
     "queryLimit": "100000000"
   }
 }

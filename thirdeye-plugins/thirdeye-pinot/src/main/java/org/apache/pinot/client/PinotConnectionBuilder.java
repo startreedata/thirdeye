@@ -18,10 +18,12 @@ import static java.util.Collections.singletonList;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import java.security.NoSuchAlgorithmException;
+import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class PinotConnectionBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionBuilder.class);

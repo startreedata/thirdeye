@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 
 @Singleton
@@ -89,6 +91,35 @@ public class AlertTemplateRenderer {
         alert.getTemplateProperties(),
         detectionInterval,
         alert.getName());
+  }
+
+  /**
+   * Render the alert with an enumeration Item.
+   *
+   * Render the template properties, then render the enumeration item properties.
+   */
+  public AlertTemplateDTO renderAlert(final AlertDTO alert, final Interval detectionInterval,
+      @Nullable final EnumerationItemDTO enumerationItemDTO)
+      throws IOException, ClassNotFoundException {
+    final AlertTemplateDTO templateWithAlertProperties = renderAlert(alert, detectionInterval);
+
+    if (enumerationItemDTO == null || enumerationItemDTO.getParams() == null
+        || enumerationItemDTO.getParams().isEmpty()) {
+      return templateWithAlertProperties;
+    }
+
+    // re-render with enum properties
+    // remove id and name to prevent template being re-fetched from db
+    final Long templateId = templateWithAlertProperties.getId();
+    final String templateName = templateWithAlertProperties.getName();
+    templateWithAlertProperties.setId(null);
+    templateWithAlertProperties.setName(null);
+    final AlertDTO alertWithEnumProperties = new AlertDTO().setTemplate(templateWithAlertProperties)
+        .setTemplateProperties(enumerationItemDTO.getParams());
+    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties, detectionInterval);
+    templateWithEnumProperties.setId(templateId);
+    templateWithEnumProperties.setName(templateName);
+    return templateWithEnumProperties;
   }
 
   private AlertTemplateDTO renderAlertInternal(final AlertTemplateDTO alertTemplateInsideAlertDto,

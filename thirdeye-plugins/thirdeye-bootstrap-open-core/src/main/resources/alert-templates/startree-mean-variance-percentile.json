@@ -4,6 +4,22 @@
   "nodes": [
     {
       "name": "root",
+      "type": "PostProcessor",
+      "params": {
+        "type": "COLD_START",
+        "component.ignore": "${coldStartIgnore}",
+        "component.tableName": "${dataset}",
+        "component.coldStartPeriod": "${lookback}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "anomalyDetector"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "anomalyDetector",
       "type": "AnomalyDetector",
       "params": {
         "component.metric": "met",
@@ -95,6 +111,7 @@
     "queryLimit": "100000000",
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
+    "coldStartIgnore": "true",
     "seasonalityPeriod": "PT0S"
   }
 }

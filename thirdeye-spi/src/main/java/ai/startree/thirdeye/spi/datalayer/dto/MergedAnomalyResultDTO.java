@@ -156,16 +156,18 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return startTime;
   }
 
-  public void setStartTime(long startTime) {
+  public MergedAnomalyResultDTO setStartTime(long startTime) {
     this.startTime = startTime;
+    return this;
   }
 
   public long getEndTime() {
     return endTime;
   }
 
-  public void setEndTime(long endTime) {
+  public MergedAnomalyResultDTO setEndTime(long endTime) {
     this.endTime = endTime;
+    return this;
   }
 
   /**

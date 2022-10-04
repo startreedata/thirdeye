@@ -16,7 +16,7 @@ package ai.startree.thirdeye.detectionpipeline;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import com.google.inject.Inject;
@@ -47,7 +47,7 @@ public class PostProcessorRegistry {
     anomalyPostProcessorFactoryMap.put(f.name(), f);
   }
 
-  public AnomalyPostProcessor<AbstractSpec> getAnomalyPostProcessor(final String factoryName) {
+  public AnomalyPostProcessor<PostProcessorSpec> getAnomalyPostProcessor(final String factoryName) {
     checkArgument(anomalyPostProcessorFactoryMap.containsKey(factoryName),
         String.format("Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
             factoryName,

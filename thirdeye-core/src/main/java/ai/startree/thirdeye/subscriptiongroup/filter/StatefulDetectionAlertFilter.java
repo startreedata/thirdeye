@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.subscriptiongroup.filter;
 
+import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
+
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -87,6 +89,7 @@ public abstract class StatefulDetectionAlertFilter extends DetectionAlertFilter 
           Collections2.filter(candidates, anomaly -> anomaly != null && !anomaly.isChild()
               && !hasFeedback(anomaly)
               && anomaly.getCreatedTime() > finalStartTime
+              && !isIgnore(anomaly)
               && (anomaly.getAnomalyResultSource()
               .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
               anomaly.getAnomalyResultSource()

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.rca.RcaInfo;
@@ -51,7 +52,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +114,7 @@ public class RcaDimensionAnalysisResource {
           rcaInfo.getAnomaly().getEndTime(),
           rcaInfo.getTimezone());
 
-      Period baselineOffsetPeriod = Period.parse(baselineOffset, ISOPeriodFormat.standard());
+      Period baselineOffsetPeriod = isoPeriod(baselineOffset);
       final Interval baselineInterval = new Interval(
           currentInterval.getStart().minus(baselineOffsetPeriod),
           currentInterval.getEnd().minus(baselineOffsetPeriod)

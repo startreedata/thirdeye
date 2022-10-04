@@ -16,6 +16,8 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class PinotThirdEyeDataSourceFactory implements ThirdEyeDataSourceFactory {
 
@@ -26,11 +28,7 @@ public class PinotThirdEyeDataSourceFactory implements ThirdEyeDataSourceFactory
 
   @Override
   public ThirdEyeDataSource build(final ThirdEyeDataSourceContext context) {
-    final ThirdEyeDataSource dataSource = new PinotThirdEyeDataSource(
-        new PinotSqlExpressionBuilder(),
-        new PinotSqlLanguage());
-    dataSource.init(context);
-
-    return dataSource;
+    final Injector injector = Guice.createInjector(new PinotThirdEyeDataSourceModule(context));
+    return injector.getInstance(PinotThirdEyeDataSource.class);
   }
 }

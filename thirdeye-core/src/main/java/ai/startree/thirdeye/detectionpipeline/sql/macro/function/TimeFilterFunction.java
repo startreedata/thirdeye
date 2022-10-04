@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -25,8 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 
 /**
  * Note: To be correct, TimeFilterFunction must take into account the granularity.
@@ -64,9 +63,9 @@ public class TimeFilterFunction implements MacroFunction {
     // compute timeLimits
     final Interval detectionInterval = context.getDetectionInterval();
     final DateTime filterLowerBound = detectionInterval.getStart()
-        .minus(Period.parse(lookbackFromStart, ISOPeriodFormat.standard()));
+        .minus(isoPeriod(lookbackFromStart));
     final DateTime filterUpperBound = detectionInterval.getEnd()
-        .minus(Period.parse(lookbackFromEnd, ISOPeriodFormat.standard()));
+        .minus(isoPeriod(lookbackFromEnd));
     final Interval filterInterval = new Interval(filterLowerBound, filterUpperBound);
 
     //write time limits to metadata

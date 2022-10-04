@@ -12,22 +12,26 @@
  * the License.
  */
 
-package ai.startree.thirdeye.detectionpipeline.operator;
+package ai.startree.thirdeye.spi.detection;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import java.util.List;
+import java.util.Map;
 
-public class EnumeratorOperatorParameters {
+public interface Enumerator {
 
-  private List<EnumerationItemDTO> items;
+  List<EnumerationItemDTO> enumerate(Context context);
 
-  public List<EnumerationItemDTO> getItems() {
-    return items;
-  }
+  class Context {
+    private Map<String, Object> params;
 
-  public EnumeratorOperatorParameters setItems(
-      final List<EnumerationItemDTO> items) {
-    this.items = items;
-    return this;
+    public Map<String, Object> getParams() {
+      return params;
+    }
+
+    public Context setParams(final Map<String, Object> params) {
+      this.params = params;
+      return this;
+    }
   }
 }

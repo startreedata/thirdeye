@@ -79,6 +79,14 @@
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-bootstrap-open-core/target/thirdeye-bootstrap-open-core-${project.version}-dist</directory>
       <outputDirectory>plugins/bootstrap-open-core/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-enumerators/target/thirdeye-enumerators-${project.version}-dist</directory>
+      <outputDirectory>plugins/enumerators/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-postprocessors/target/thirdeye-postprocessors-${project.version}-dist</directory>
+      <outputDirectory>plugins/postprocessors/</outputDirectory>
+    </fileSet>
 
   </fileSets>
   <dependencySets>

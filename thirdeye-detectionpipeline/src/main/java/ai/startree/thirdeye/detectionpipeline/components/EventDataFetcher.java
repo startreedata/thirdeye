@@ -16,7 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.components;
 import static ai.startree.thirdeye.spi.Constants.COL_EVENT_END;
 import static ai.startree.thirdeye.spi.Constants.COL_EVENT_NAME;
 import static ai.startree.thirdeye.spi.Constants.COL_EVENT_START;
-import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.detectionpipeline.spec.EventFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;

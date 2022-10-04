@@ -15,11 +15,11 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.SqlExecutionOperator;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
-import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import java.util.Map;
 
 public class SqlExecutionPlanNode extends DetectionPipelinePlanNode {

@@ -16,28 +16,26 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.cloneConfig;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.util.Pair;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.http.HttpHeaders;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotConnectionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class PinotConnectionManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionManager.class);
-  private static final String AUTHORIZATION_HEADER = "Authorization";
 
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -47,39 +45,13 @@ public class PinotConnectionManager {
   private Connection connection;
   private String prevToken;
 
+  @Inject
   public PinotConnectionManager(final PinotConnectionBuilder pinotConnectionBuilder,
-      final PinotThirdEyeDataSourceConfig config) {
+      final PinotThirdEyeDataSourceConfig config,
+      final PinotOauthTokenSupplier pinotOauthTokenSupplier) {
     this.config = config;
-    tokenSupplier = getTokenSupplier(config.getOauth());
+    tokenSupplier = pinotOauthTokenSupplier.getTokenSupplier();
     this.pinotConnectionBuilder = pinotConnectionBuilder;
-  }
-
-  private Supplier<String> getTokenSupplier(final PinotOauthConfiguration oauthConfiguration) {
-    if (oauthConfiguration != null && oauthConfiguration.isEnabled()) {
-      /* Raise error if there is already an existing Authorization header configured */
-      checkArgument(config.getHeaders() == null
-              || !config.getHeaders().containsKey(AUTHORIZATION_HEADER),
-          "'Authorization' header is already provided. Cannot proceed with oauth. Please remove 'Authorization' header from 'headers'");
-
-      return () -> getOauthToken(oauthConfiguration);
-    }
-    return null;
-  }
-
-  private String getOauthToken(final PinotOauthConfiguration oauthConfiguration) {
-    final String tokenFilePath = requireNonNull(oauthConfiguration.getTokenFilePath(),
-        "tokenFilePath is null");
-
-    final Path path = Paths.get(tokenFilePath);
-    checkArgument(Files.exists(path), "tokenFile does not exist! expecting a text file.");
-    checkArgument(!Files.isDirectory(path), "tokenFile is a directory! expecting a text file.");
-
-    try {
-      final String token = requireNonNull(Files.readString(path), "token is null").strip();
-      return String.format("Bearer %s", token);
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private boolean isNewConnectionReqd() {
@@ -108,7 +80,7 @@ public class PinotConnectionManager {
       final var p = createConnection();
       connection = p.getSecond();
       prevToken = optional(p.getFirst().getHeaders())
-          .map(headers -> headers.get(AUTHORIZATION_HEADER))
+          .map(headers -> headers.get(HttpHeaders.AUTHORIZATION))
           .orElse(null);
     }
     return connection;
@@ -137,7 +109,7 @@ public class PinotConnectionManager {
     }
     newConfig
         .getHeaders()
-        .put(AUTHORIZATION_HEADER, newToken);
+        .put(HttpHeaders.AUTHORIZATION, newToken);
     return newConfig;
   }
 

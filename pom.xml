@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.78.0-SNAPSHOT</version>
+  <version>1.84.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -220,7 +220,7 @@
           <!-- download weaver jar - required for surefire goals-->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.3.0</version>
           <executions>
             <execution>
               <id>resolve</id>
@@ -502,6 +502,16 @@
       <dependency>
         <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-bootstrap-open-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
+        <artifactId>thirdeye-enumerators</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
+        <artifactId>thirdeye-postprocessors</artifactId>
         <version>${project.version}</version>
       </dependency>
 

@@ -16,13 +16,17 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperator;
 import ai.startree.thirdeye.detectionpipeline.operator.PostProcessorOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
+import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
-import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
@@ -30,6 +34,8 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
 
   public static final String TYPE = "PostProcessor";
   private PostProcessorRegistry postProcessorRegistry;
+  private DatasetConfigManager datasetDao;
+  private MinMaxTimeLoader minMaxTimeLoader;
 
   public PostProcessorPlanNode() {
     super();
@@ -38,8 +44,21 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
+    for (final InputBean input : getPlanNodeInputs()) {
+      // an input without source/target property defaults to the default output of an AnomalyDetectorOperator
+      if (input.getSourceProperty() == null && input.getTargetProperty() == null) {
+        input.setSourceProperty(AnomalyDetectorOperator.DEFAULT_OUTPUT_KEY);
+        input.setTargetProperty(AnomalyDetectorOperator.DEFAULT_OUTPUT_KEY);
+      }
+    }
+
     postProcessorRegistry = (PostProcessorRegistry) planNodeContext.getProperties()
         .get(Constants.POST_PROCESSOR_REGISTRY_REF_KEY);
+    datasetDao = (DatasetConfigManager) planNodeContext.getProperties()
+        .get(Constants.DATASET_DAO_REF_KEY);
+    minMaxTimeLoader = (MinMaxTimeLoader) planNodeContext.getProperties()
+        .get(Constants.MIN_MAX_TIME_LOADER_REF_KEY);
+
     requireNonNull(postProcessorRegistry, "PostProcessorRegistry is not set");
   }
 
@@ -56,13 +75,15 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final PostProcessorOperator postProcessorOperator = new PostProcessorOperator();
-    postProcessorOperator.init(new OperatorContext()
-        .setDetectionInterval(this.detectionInterval)
+    postProcessorOperator.init(new OperatorContext().setDetectionInterval(this.detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.POST_PROCESSOR_REGISTRY_REF_KEY,
-            postProcessorRegistry))
-    );
+        .setProperties(ImmutableMap.<String, Object>builder()
+            .put(Constants.POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry)
+            .put(Constants.DATASET_DAO_REF_KEY, datasetDao)
+            .put(Constants.MIN_MAX_TIME_LOADER_REF_KEY, minMaxTimeLoader)
+            .build()));
+
     return postProcessorOperator;
   }
 }

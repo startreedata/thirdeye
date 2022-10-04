@@ -36,7 +36,6 @@ import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.SqlShuttle;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -82,10 +81,10 @@ public class MacroEngine {
     }
   }
 
-  public DataSourceRequest prepareRequest() throws SqlParseException {
-    SqlNode rootNode = queryToNode(query, sqlParserConfig);
-    SqlNode appliedMacrosNode = applyMacros(rootNode);
-    String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
+  public DataSourceRequest prepareRequest() {
+    final SqlNode rootNode = queryToNode(query, sqlParserConfig);
+    final SqlNode appliedMacrosNode = applyMacros(rootNode);
+    final String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
 
     return new DataSourceRequest(tableName, preparedQuery, properties);
   }
@@ -122,13 +121,7 @@ public class MacroEngine {
       if (macroFunction != null) {
         List<String> macroParams = paramsFromCall(call);
         String expandedMacro = macroFunction.expandMacro(macroParams, macroFunctionContext);
-        try {
-          return expressionToNode(expandedMacro, sqlParserConfig);
-        } catch (SqlParseException e) {
-          LOG.error(String.format("Failed parsing expanded macro into a SQL node: %s. %s",
-              expandedMacro,
-              e));
-        }
+        return expressionToNode(expandedMacro, sqlParserConfig);
       }
       // not a macro OR macro expansion parsing failed: return input unchanged
       return call;

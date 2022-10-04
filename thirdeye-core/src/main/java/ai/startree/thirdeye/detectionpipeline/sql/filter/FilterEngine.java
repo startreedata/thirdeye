@@ -31,7 +31,6 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOrderBy;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlWith;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.SqlShuttle;
 
@@ -61,7 +60,7 @@ public class FilterEngine {
     this.filters = filters;
   }
 
-  public String prepareQuery() throws SqlParseException {
+  public String prepareQuery() {
     SqlNode rootNode = queryToNode(query, sqlParserConfig);
     SqlNode rootNodeWithFilters = rootNode.accept(new FilterVisitor());
     String preparedQuery = nodeToQuery(rootNodeWithFilters, sqlDialect, QUOTE_IDENTIFIERS);

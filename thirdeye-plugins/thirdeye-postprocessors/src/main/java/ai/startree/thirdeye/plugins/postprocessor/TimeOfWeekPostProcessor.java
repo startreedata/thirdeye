@@ -39,6 +39,8 @@ import org.joda.time.Interval;
 
 public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekPostProcessorSpec> {
 
+  public static final String NAME = "TIME_OF_WEEK";
+
   private static final boolean DEFAULT_IGNORE = false;
   private static final Set<Integer> DEFAULT_INT_DAYS_OF_WEEK = Set.of();
   private static final Set<Integer> DEFAULT_HOURS_OF_DAY = Set.of();
@@ -82,7 +84,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
 
   @Override
   public String name() {
-    return "TimeOfWeek";
+    return NAME;
   }
 
   @Override

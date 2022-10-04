@@ -35,6 +35,8 @@ import org.joda.time.Period;
 
 public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPostProcessorSpec> {
 
+  public static final String NAME = "COLD_START";
+
   private static final boolean DEFAULT_IGNORE = false;
   private static final Period DEFAULT_COLD_START_PERIOD = Period.ZERO;
   private static final long TIMEOUT = 20_000;
@@ -72,7 +74,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
 
   @Override
   public String name() {
-    return "ColdStart";
+    return NAME;
   }
 
   @Override

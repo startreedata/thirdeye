@@ -175,7 +175,6 @@
           <configuration>
             <showWarnings>true</showWarnings>
             <release>${jdk.version}</release>
-            <forceJavacCompilerUse>true</forceJavacCompilerUse>
             <annotationProcessorPaths>
               <path>
                 <groupId>com.google.auto.service</groupId>

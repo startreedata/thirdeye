@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import static ai.startree.thirdeye.plugins.postprocessor.LabelUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
@@ -24,7 +25,6 @@ import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,8 +35,10 @@ import org.joda.time.Period;
 
 public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPostProcessorSpec> {
 
-  private final boolean DEFAULT_IGNORE = false;
-  private final Period DEFAULT_COLD_START_PERIOD = Period.ZERO;
+  public static final String NAME = "COLD_START";
+
+  private static final boolean DEFAULT_IGNORE = false;
+  private static final Period DEFAULT_COLD_START_PERIOD = Period.ZERO;
   private static final long TIMEOUT = 20_000;
 
   private boolean ignore;
@@ -72,7 +74,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
 
   @Override
   public String name() {
-    return "ColdStart";
+    return NAME;
   }
 
   @Override
@@ -103,10 +105,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
         if (anomalyResultDTO.getStartTime() <= endOfColdStart.getMillis()) {
           final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore)
               .setName(labelName);
-          final List<AnomalyLabelDTO> labels = optional(anomalyResultDTO.getAnomalyLabels()).orElse(
-              new ArrayList<>());
-          labels.add(newLabel);
-          anomalyResultDTO.setAnomalyLabels(labels);
+          addLabel(anomalyResultDTO, newLabel);
         }
       }
     } catch (final UnsupportedOperationException e) {

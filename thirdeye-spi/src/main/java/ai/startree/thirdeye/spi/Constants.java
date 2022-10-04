@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
 
 public interface Constants {
+  // fixme add locale English
 
   // fixme cyril prefer chronology to timezone
   DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;

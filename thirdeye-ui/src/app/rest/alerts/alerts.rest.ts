@@ -28,8 +28,25 @@ export const getAlert = async (id: number): Promise<Alert> => {
     return response.data;
 };
 
-export const getAlertInsight = async (id: number): Promise<AlertInsight> => {
-    const response = await axios.get(`${BASE_URL_ALERTS}/${id}/insights`);
+export const getAlertInsight = async ({
+    alertId,
+    alert,
+}: {
+    alertId?: number;
+    alert?: EditableAlert;
+}): Promise<AlertInsight> => {
+    let requestPayload: { alert: EditableAlert | { id: number } } = {
+        alert: { id: alertId as number },
+    };
+
+    if (alert) {
+        requestPayload = { alert };
+    }
+
+    const response = await axios.post(
+        `${BASE_URL_ALERTS}/insights`,
+        requestPayload
+    );
 
     return response.data;
 };

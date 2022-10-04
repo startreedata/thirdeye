@@ -24,9 +24,14 @@ import { TimeRangeSelectorPopoverContent } from "../../time-range-selector-popov
 import { TimeRangeSelectorProps } from "./time-range-selector.interfaces";
 import { useTimeRangeSelectorStyles } from "./time-range-selector.styles";
 
-export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
-    props: TimeRangeSelectorProps
-) => {
+export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
+    hideTimeRangeSelectorButton,
+    hideTimeRange,
+    timeRangeDuration,
+    recentCustomTimeRangeDurations,
+    onRefresh,
+    onChange,
+}) => {
     const timeRangeSelectorClasses = useTimeRangeSelectorStyles();
     const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
         useState<HTMLElement | null>();
@@ -44,21 +49,21 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
     return (
         <Grid container alignItems="center" justifyContent="flex-end">
             {/* Time range */}
-            {!props.hideTimeRange && props.timeRangeDuration && (
+            {!hideTimeRange && timeRangeDuration && (
                 <Grid item>
                     {/* Time range label */}
                     <Typography variant="overline">
-                        {formatTimeRange(props.timeRangeDuration.timeRange)}
+                        {formatTimeRange(timeRangeDuration.timeRange)}
                     </Typography>
 
                     {/* Time range duration */}
                     <Typography variant="body2">
-                        {formatTimeRangeDuration(props.timeRangeDuration)}
+                        {formatTimeRangeDuration(timeRangeDuration)}
                     </Typography>
                 </Grid>
             )}
 
-            {!props.hideTimeRangeSelectorButton && (
+            {!hideTimeRangeSelectorButton && (
                 <Grid item>
                     {/* Time range selector button */}
                     <Button
@@ -80,10 +85,10 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                     >
                         <TimeRangeSelectorPopoverContent
                             recentCustomTimeRangeDurations={
-                                props.recentCustomTimeRangeDurations
+                                recentCustomTimeRangeDurations
                             }
-                            timeRangeDuration={props.timeRangeDuration}
-                            onChange={props.onChange}
+                            timeRangeDuration={timeRangeDuration}
+                            onChange={onChange}
                             onClose={handleTimeRangeSelectorClose}
                         />
                     </Popover>
@@ -96,7 +101,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = (
                     className={timeRangeSelectorClasses.timeRangeSelectorButton}
                     color="primary"
                     variant="outlined"
-                    onClick={props.onRefresh}
+                    onClick={onRefresh}
                 >
                     <RefreshIcon />
                 </Button>

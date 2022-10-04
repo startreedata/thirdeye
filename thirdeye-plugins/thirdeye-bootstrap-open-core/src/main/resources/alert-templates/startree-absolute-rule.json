@@ -6,6 +6,23 @@
       "name": "root",
       "type": "PostProcessor",
       "params": {
+        "type": "TIME_OF_WEEK",
+        "component.ignore": "${timeOfWeekIgnore}",
+        "component.daysOfWeek": "${daysOfWeek}",
+        "component.hoursOfDay": "${hoursOfDay}",
+        "component.dayHoursOfWeek": "${dayHoursOfWeek}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "coldStartProcessor"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "coldStartProcessor",
+      "type": "PostProcessor",
+      "params": {
         "type": "COLD_START",
         "component.ignore": "${coldStartIgnore}",
         "component.tableName": "${dataset}",
@@ -148,6 +165,10 @@
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
     "coldStartIgnore": "true",
+    "timeOfWeekIgnore": "true",
+    "daysOfWeek": [],
+    "hoursOfDay": [],
+    "dayHoursOfWeek": {},
     "queryLimit": "100000000"
   }
 }

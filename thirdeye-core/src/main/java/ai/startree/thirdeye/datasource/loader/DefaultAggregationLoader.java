@@ -200,7 +200,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     return executorService.submit(() -> getQueryResult(request, dataSource));
   }
 
-  private DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
+  public DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
       throws Exception {
     final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
     final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),

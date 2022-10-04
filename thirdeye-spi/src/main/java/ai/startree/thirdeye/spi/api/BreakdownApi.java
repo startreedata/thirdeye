@@ -23,8 +23,11 @@ public class BreakdownApi implements ThirdEyeApi {
   private Long start;
   private Long end;
   private String timezone;
+  private Double aggregate;
   private Double threshold;
+  private Double percentage;
 
+  private Integer resultSize;
   private List<DimensionFilterContributionApi> results;
 
   public Long getStart() {
@@ -72,6 +75,15 @@ public class BreakdownApi implements ThirdEyeApi {
     return this;
   }
 
+  public Double getAggregate() {
+    return aggregate;
+  }
+
+  public BreakdownApi setAggregate(final Double aggregate) {
+    this.aggregate = aggregate;
+    return this;
+  }
+
   public Double getThreshold() {
     return threshold;
   }
@@ -80,7 +92,25 @@ public class BreakdownApi implements ThirdEyeApi {
     this.threshold = threshold;
     return this;
   }
-  
+
+  public Double getPercentage() {
+    return percentage;
+  }
+
+  public BreakdownApi setPercentage(final Double percentage) {
+    this.percentage = percentage;
+    return this;
+  }
+
+  public Integer getResultSize() {
+    return resultSize;
+  }
+
+  public BreakdownApi setResultSize(final Integer resultSize) {
+    this.resultSize = resultSize;
+    return this;
+  }
+
   public List<DimensionFilterContributionApi> getResults() {
     return results;
   }

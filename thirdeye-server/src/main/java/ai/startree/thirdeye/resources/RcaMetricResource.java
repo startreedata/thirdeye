@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -124,6 +125,8 @@ public class RcaMetricResource {
   @ApiOperation(value = "Builds cohorts based on threshold")
   public Response getAnomalyHeatmap(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       final BreakdownApi request) throws Exception {
+    ensure(request.getThreshold() != null ^ request.getPercentage() != null,
+        "Either threshold or percentage should be set but not both");
     final BreakdownApi resultApi = cohortComputation.computeBreakdown(request,
         List.of(),
         LIMIT_DEFAULT);

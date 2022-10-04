@@ -39,12 +39,12 @@ import org.joda.time.Interval;
 
 public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekPostProcessorSpec> {
 
-  private final static Set<Integer> DEFAULT_INT_DAYS_OF_WEEK = Set.of();
-  private final static Set<Integer> DEFAULT_HOURS_OF_DAY = Set.of();
-  private final static Map<Integer, Set<Integer>> DEFAULT_INT_DAY_HOURS_OF_WEEK = Map.of();
-
+  private static final boolean DEFAULT_IGNORE = false;
+  private static final Set<Integer> DEFAULT_INT_DAYS_OF_WEEK = Set.of();
+  private static final Set<Integer> DEFAULT_HOURS_OF_DAY = Set.of();
+  private static final Map<Integer, Set<Integer>> DEFAULT_INT_DAY_HOURS_OF_WEEK = Map.of();
   // see package org.joda.time.DateTimeConstants;
-  private final static Map<String, Integer> DAY_STRING_TO_JODA_INT = ImmutableMap.<String, Integer>builder()
+  private static final Map<String, Integer> DAY_STRING_TO_JODA_INT = ImmutableMap.<String, Integer>builder()
       .put("MONDAY", 1)
       .put("TUESDAY", 2)
       .put("WEDNESDAY", 3)
@@ -53,30 +53,23 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
       .put("SATURDAY", 6)
       .put("SUNDAY", 7)
       .build();
-
-  private final static Set<String> VALID_DAYS = DAY_STRING_TO_JODA_INT.keySet();
+  private static final  Set<String> VALID_DAYS = DAY_STRING_TO_JODA_INT.keySet();
 
   private Set<Integer> intDaysOfWeek;
   private Set<Integer> hoursOfDay;
   private Map<Integer, Set<Integer>> intDayHoursOfWeek;
-
-  private final boolean DEFAULT_IGNORE = false;
-
   private boolean ignore;
-
   private String labelName;
 
   @Override
   public void init(final TimeOfWeekPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
-
     this.intDaysOfWeek = optional(spec.getDaysOfWeek()).map(l -> l.stream()
         .map(TimeOfWeekPostProcessor::dayStringToDayInt)
         .collect(Collectors.toSet())).orElse(DEFAULT_INT_DAYS_OF_WEEK);
     this.hoursOfDay = optional(spec.getHoursOfDay()).map(TimeOfWeekPostProcessor::parseHours)
         .orElse(DEFAULT_HOURS_OF_DAY);
     this.intDayHoursOfWeek = parseDayHoursOfWeek(spec.getDayHoursOfWeek());
-
     this.labelName = labelName(spec.getDaysOfWeek(),
         spec.getHoursOfDay(),
         spec.getDayHoursOfWeek());

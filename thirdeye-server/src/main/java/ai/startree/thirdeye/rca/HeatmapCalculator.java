@@ -35,6 +35,7 @@ import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.detection.Baseline;
 import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,7 @@ public class HeatmapCalculator {
     this.rcaInfoFetcher = rcaInfoFetcher;
     this.aggregationLoader = aggregationLoader;
 
-    this.executor = Executors.newCachedThreadPool();
+    this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("heatmap-calculator-%d").build());
   }
 
   private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {

@@ -30,6 +30,7 @@ import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
   @Inject
   public DefaultAggregationLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("aggregation-loader-%d").build());
   }
 
   /**

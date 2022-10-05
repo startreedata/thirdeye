@@ -28,6 +28,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.ibm.icu.util.TimeZone;
@@ -85,7 +86,8 @@ public class HolidayEventsLoader implements Runnable {
     this.config = config;
     this.keyPath = config.getGoogleJsonKeyPath();
     this.eventManager = eventManager;
-    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(
+        "holiday-events-loader-%d").build());
   }
 
   public void start() {
@@ -124,7 +126,7 @@ public class HolidayEventsLoader implements Runnable {
 
     // Get the existing holidays within the time range from the database
     List<EventDTO> existingEvents = eventManager
-        .findEventsBetweenTimeRange(start, end,EventType.HOLIDAY.toString());
+        .findEventsBetweenTimeRange(start, end, EventType.HOLIDAY.toString());
 
     mergeWithExistingHolidays(holidayNameToHolidayEvent, existingEvents);
   }

@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * is above the threshold.
  * If not, filters the anomaly.
  */
+@Deprecated
 public class PercentageChangeRuleAnomalyFilter implements
     AnomalyFilter<PercentageChangeRuleAnomalyFilterSpec> {
 

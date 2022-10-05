@@ -23,6 +23,7 @@ import java.time.Duration;
  * USE WITH CAUTION. If min duration is set larger than the maximum possible anomaly duration
  * the detection module produced, all anomalies would potentially be filtered.
  */
+@Deprecated
 public class DurationAnomalyFilter implements AnomalyFilter<DurationAnomalyFilterSpec> {
 
   private Duration minDuration;

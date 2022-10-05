@@ -19,7 +19,6 @@ import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredic
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
-import ai.startree.thirdeye.rootcause.BaselineAggregate;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
@@ -32,20 +31,14 @@ import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
-import ai.startree.thirdeye.spi.detection.Baseline;
-import ai.startree.thirdeye.spi.detection.BaselineAggregateType;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -55,10 +48,10 @@ import org.slf4j.LoggerFactory;
 
 public class HeatmapCalculator {
 
+  public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forStyle("LL");
   private static final Logger LOG = LoggerFactory.getLogger(HeatmapCalculator.class);
-  private static final long TIMEOUT = 600000;
+  private static final long TIMEOUT_MILLIS = 60_000;
 
-  private final ExecutorService executor;
   private final RcaInfoFetcher rcaInfoFetcher;
   private final AggregationLoader aggregationLoader;
 
@@ -67,33 +60,6 @@ public class HeatmapCalculator {
       final AggregationLoader aggregationLoader) {
     this.rcaInfoFetcher = rcaInfoFetcher;
     this.aggregationLoader = aggregationLoader;
-
-    this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("heatmap-calculator-%d").build());
-  }
-
-  private static void logSlices(MetricSlice baseSlice, List<MetricSlice> slices) {
-    final DateTimeFormatter formatter = DateTimeFormat.forStyle("LL");
-    LOG.info("RCA metric analysis - Base slice: {} - {}",
-        formatter.print(baseSlice.getStartMillis()),
-        formatter.print(baseSlice.getEndMillis()));
-    for (int i = 0; i < slices.size(); i++) {
-      LOG.info("RCA metric analysis - Offset Slice {}:  {} - {}",
-          i,
-          formatter.print(slices.get(i).getStartMillis()),
-          formatter.print(slices.get(i).getEndMillis()));
-    }
-  }
-
-  /**
-   * Returns a baseline equivalent to "current" in the wo1w format.
-   * Ie when used for a scatter/gather operation, this baseline will only generate one slice,
-   * on the startTime/endTime provided.
-   *
-   * Hack to keep the compatibility with complex baselines.
-   * May be removed once timeseries filtering and timeseries baseline is implemented.
-   */
-  public static Baseline getSimpleRange() {
-    return BaselineAggregate.fromWeekOverWeek(BaselineAggregateType.SUM, 1, 0, DateTimeZone.UTC);
   }
 
   public HeatMapResponseApi compute(final long anomalyId,
@@ -124,7 +90,6 @@ public class HeatmapCalculator {
         rcaInfo.getMetric(),
         parseAndCombinePredicates(filters),
         currentInterval,
-        getSimpleRange(),
         limit,
         datasetConfigDTO);
 
@@ -132,7 +97,6 @@ public class HeatmapCalculator {
         rcaInfo.getMetric(),
         parseAndCombinePredicates(filters),
         baselineInterval,
-        getSimpleRange(),
         limit,
         datasetConfigDTO);
 
@@ -172,7 +136,6 @@ public class HeatmapCalculator {
   public Map<String, Map<String, Double>> computeBreakdown(final MetricConfigDTO metricConfigDTO,
       final List<Predicate> predicates,
       final Interval interval,
-      final Baseline range,
       final int limit,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
@@ -181,72 +144,38 @@ public class HeatmapCalculator {
         predicates,
         datasetConfigDTO);
 
-    final List<MetricSlice> slices = range.scatter(baseSlice);
-    logSlices(baseSlice, slices);
+    LOG.info("RCA metric analysis - Slice: {} - {}",
+        DATE_TIME_FORMATTER.print(baseSlice.getInterval().getStartMillis()),
+        DATE_TIME_FORMATTER.print(baseSlice.getInterval().getStartMillis()));
 
-    final Map<MetricSlice, DataFrame> dataBreakdown = fetchBreakdowns(slices, limit);
-    final Map<MetricSlice, DataFrame> dataAggregate = fetchAggregates(slices);
+    final DataFrame dataBreakdown = aggregationLoader.loadBreakdown(baseSlice, limit);
+    final DataFrame dataAggregate = fetchAggregate(baseSlice);
 
-    final DataFrame resultBreakdown = range.gather(baseSlice, dataBreakdown);
-    final DataFrame resultAggregate = range.gather(baseSlice, dataAggregate);
-
-    return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
+    return DefaultAggregationLoader.makeBreakdownMap(dataBreakdown, dataAggregate);
   }
 
   /**
    * Returns aggregates for the given set of metric slices.
    *
-   * @param slices metric slices
+   * @param slice metric slice
    * @return map of dataframes (keyed by metric slice, columns: [COL_TIME(1), COL_VALUE])
    * @throws Exception on catch-all execution failure
    */
-  private Map<MetricSlice, DataFrame> fetchAggregates(List<MetricSlice> slices) throws Exception {
-    final Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
-    for (final MetricSlice slice : slices) {
-      futures.put(slice, aggregationLoader.loadAggregateAsync(slice, Collections.emptyList(), 2));
+  private DataFrame fetchAggregate(final MetricSlice slice) throws Exception {
+    final Future<DataFrame> future = aggregationLoader.loadAggregateAsync(slice,
+        Collections.emptyList(),
+        2);
+    DataFrame df = future.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+    if (df.isEmpty()) {
+      df = new DataFrame().addSeries(Constants.COL_VALUE, Double.NaN);
+    } else if (df.size() > 1) {
+      throw new RuntimeException("Aggregation returned more than 1 line.");
     }
+    // fill in timestamps
+    df.addSeries(Constants.COL_TIME,
+            LongSeries.fillValues(df.size(), slice.getInterval().getStartMillis()))
+        .setIndex(Constants.COL_TIME);
 
-    Map<MetricSlice, DataFrame> output = new HashMap<>();
-    for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
-      final MetricSlice slice = entry.getKey();
-      DataFrame df = entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS);
-      if (df.isEmpty()) {
-        df = new DataFrame().addSeries(Constants.COL_VALUE, Double.NaN);
-      } else if (df.size() > 1) {
-        throw new RuntimeException("Aggregation returned more than 1 line.");
-      }
-      // fill in timestamps
-      df.addSeries(Constants.COL_TIME,
-              LongSeries.fillValues(df.size(), slice.getInterval().getStartMillis()))
-          .setIndex(Constants.COL_TIME);
-
-      output.put(entry.getKey(), df);
-    }
-
-    return output;
-  }
-
-  /**
-   * Returns breakdowns (de-aggregations) for a given set of metric slices.
-   *
-   * @param slices metric slices
-   * @param limit top k elements limit
-   * @return map of dataframes (keyed by metric slice,
-   *     columns: [COL_TIME(1), COL_DIMENSION_NAME, COL_DIMENSION_VALUE, COL_VALUE])
-   * @throws Exception on catch-all execution failure
-   */
-  private Map<MetricSlice, DataFrame> fetchBreakdowns(List<MetricSlice> slices, final int limit)
-      throws Exception {
-    final Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
-    for (final MetricSlice slice : slices) {
-      futures.put(slice, this.executor.submit(() -> aggregationLoader.loadBreakdown(slice, limit)));
-    }
-
-    final Map<MetricSlice, DataFrame> output = new HashMap<>();
-    for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
-      output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));
-    }
-
-    return output;
+    return df;
   }
 }

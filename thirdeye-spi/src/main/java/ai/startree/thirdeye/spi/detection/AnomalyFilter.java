@@ -15,6 +15,8 @@ package ai.startree.thirdeye.spi.detection;
 
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 
+// todo cyril can be removed once businessRule threshold is implemented
+@Deprecated
 public interface AnomalyFilter<T extends AbstractSpec> extends BaseComponent<T> {
 
   /**

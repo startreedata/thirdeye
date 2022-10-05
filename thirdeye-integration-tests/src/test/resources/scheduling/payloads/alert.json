@@ -9,7 +9,6 @@
         "type": "AnomalyDetector",
         "params": {
           "type": "THRESHOLD",
-          "component.timezone": "UTC",
           "component.monitoringGranularity": "${monitoringGranularity}",
           "component.timestamp": "ts",
           "component.metric": "met",

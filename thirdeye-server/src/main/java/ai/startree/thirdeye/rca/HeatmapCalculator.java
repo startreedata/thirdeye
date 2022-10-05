@@ -109,13 +109,13 @@ public class HeatmapCalculator {
         rcaInfo.getAnomaly().getEndTime(),
         rcaInfo.getTimezone());
 
-    Period baselineOffsetPeriod = isoPeriod(baselineOffset);
+    final Period baselineOffsetPeriod = isoPeriod(baselineOffset);
     final Interval baselineInterval = new Interval(currentInterval.getStart()
         .minus(baselineOffsetPeriod), currentInterval.getEnd().minus(baselineOffsetPeriod));
 
     // override dimensions
     final DatasetConfigDTO datasetConfigDTO = rcaInfo.getDataset();
-    List<String> rcaDimensions = getRcaDimensions(dimensions,
+    final List<String> rcaDimensions = getRcaDimensions(dimensions,
         excludedDimensions,
         datasetConfigDTO);
     datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
@@ -159,8 +159,8 @@ public class HeatmapCalculator {
       if (!toBreakdown.containsKey(dimensionName)) {
         toBreakdown.put(dimensionName, new HashMap<>());
       }
-      Map<String, Double> fromCounts = fromBreakdown.get(dimensionName);
-      Map<String, Double> toCounts = toBreakdown.get(dimensionName);
+      final Map<String, Double> fromCounts = fromBreakdown.get(dimensionName);
+      final Map<String, Double> toCounts = toBreakdown.get(dimensionName);
       for (String dimensionValue : fromCounts.keySet()) {
         if (!toCounts.containsKey(dimensionValue)) {
           toCounts.put(dimensionValue, 0.);
@@ -176,19 +176,19 @@ public class HeatmapCalculator {
       final int limit,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
 
-    MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
+    final MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,
         predicates,
         datasetConfigDTO);
 
-    List<MetricSlice> slices = range.scatter(baseSlice);
+    final List<MetricSlice> slices = range.scatter(baseSlice);
     logSlices(baseSlice, slices);
 
-    Map<MetricSlice, DataFrame> dataBreakdown = fetchBreakdowns(slices, limit);
-    Map<MetricSlice, DataFrame> dataAggregate = fetchAggregates(slices);
+    final Map<MetricSlice, DataFrame> dataBreakdown = fetchBreakdowns(slices, limit);
+    final Map<MetricSlice, DataFrame> dataAggregate = fetchAggregates(slices);
 
-    DataFrame resultBreakdown = range.gather(baseSlice, dataBreakdown);
-    DataFrame resultAggregate = range.gather(baseSlice, dataAggregate);
+    final DataFrame resultBreakdown = range.gather(baseSlice, dataBreakdown);
+    final DataFrame resultAggregate = range.gather(baseSlice, dataAggregate);
 
     return DefaultAggregationLoader.makeBreakdownMap(resultBreakdown, resultAggregate);
   }
@@ -201,7 +201,7 @@ public class HeatmapCalculator {
    * @throws Exception on catch-all execution failure
    */
   private Map<MetricSlice, DataFrame> fetchAggregates(List<MetricSlice> slices) throws Exception {
-    Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
+    final Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
     for (final MetricSlice slice : slices) {
       futures.put(slice, aggregationLoader.loadAggregateAsync(slice, Collections.emptyList(), 2));
     }
@@ -237,12 +237,12 @@ public class HeatmapCalculator {
    */
   private Map<MetricSlice, DataFrame> fetchBreakdowns(List<MetricSlice> slices, final int limit)
       throws Exception {
-    Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
+    final Map<MetricSlice, Future<DataFrame>> futures = new HashMap<>();
     for (final MetricSlice slice : slices) {
       futures.put(slice, this.executor.submit(() -> aggregationLoader.loadBreakdown(slice, limit)));
     }
 
-    Map<MetricSlice, DataFrame> output = new HashMap<>();
+    final Map<MetricSlice, DataFrame> output = new HashMap<>();
     for (Map.Entry<MetricSlice, Future<DataFrame>> entry : futures.entrySet()) {
       output.put(entry.getKey(), entry.getValue().get(TIMEOUT, TimeUnit.MILLISECONDS));
     }

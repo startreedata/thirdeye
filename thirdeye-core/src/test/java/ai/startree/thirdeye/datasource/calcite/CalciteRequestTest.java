@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.EQUALS_OPERATOR;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
@@ -38,7 +39,6 @@ import java.util.function.Function;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParserPos;
-import org.assertj.core.api.Assertions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
@@ -51,16 +51,14 @@ import org.testng.annotations.Test;
 
 public class CalciteRequestTest {
 
+  public static final String COMPLEX_SQL_PROJECTION_TEXT = "DATETIME(COMPLEX(UN_FN(col1, 3)))";
+  public static final String COMPLEX_SQL_PROJECTION_TEXT_QUOTED_IDENTIFIERS = "\"DATETIME\"(\"COMPLEX\"(\"UN_FN\"(\"col1\", 3)))";
   private static final String DATABASE = "db1";
   private static final String TABLE = "table1";
   private static final String COLUMN_NAME_1 = "col1";
-  private static final String COLUMN_NAME_2 = "col2";
-  private static final String COLUMN_NAME_3 = "col3";
   public static final QueryProjection DIALECT_SPECIFIC_AGGREGATION_PROJECTION = QueryProjection.of(
       MetricAggFunction.PCT90.name(),
       List.of(COLUMN_NAME_1));
-  public static final QueryProjection UNKNOWN_FUNCTION_PROJECTION = QueryProjection.of("UNKNOWN_MOD",
-      List.of(COLUMN_NAME_1, COLUMN_NAME_2));
   public static final QueryProjection COUNT_DISTINCT_AGGREGATION_PROJECTION = QueryProjection.of(
       MetricAggFunction.COUNT_DISTINCT.name(),
       List.of(COLUMN_NAME_1));
@@ -68,12 +66,18 @@ public class CalciteRequestTest {
       MetricAggFunction.SUM.name(),
       List.of(COLUMN_NAME_1));
   public static final QueryProjection SIMPLE_PROJECTION = QueryProjection.of(COLUMN_NAME_1);
-  public static final String COMPLEX_SQL_PROJECTION_TEXT = "DATETIME(COMPLEX(UN_FN(col1, 3)))";
-  public static final String COMPLEX_SQL_PROJECTION_TEXT_QUOTED_IDENTIFIERS = "\"DATETIME\"(\"COMPLEX\"(\"UN_FN\"(\"col1\", 3)))";
+  private static final String COLUMN_NAME_2 = "col2";
+  public static final QueryProjection UNKNOWN_FUNCTION_PROJECTION = QueryProjection.of("UNKNOWN_MOD",
+      List.of(COLUMN_NAME_1, COLUMN_NAME_2));
+  private static final String COLUMN_NAME_3 = "col3";
   public static final SqlNode SIMPLE_SQL_NODE_PROJECTION = identifierOf(COLUMN_NAME_3);
 
   private static final SqlLanguage SQL_LANGUAGE = new TestPinotLikeSqlLanguage();
-  SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new TestPinotLikeSqlExpressionBuilder();
+  private static final SqlExpressionBuilder SQL_EXPRESSION_BUILDER = new TestPinotLikeSqlExpressionBuilder();
+
+  private static void assertEquivalent(final String output, final String expected) {
+    assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+  }
 
   @Test
   public void testGetSqlWithSimpleProjection() {
@@ -88,7 +92,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -104,7 +108,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -122,7 +126,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -138,7 +142,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -153,7 +157,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -169,7 +173,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -186,7 +190,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -212,7 +216,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -226,7 +230,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -242,7 +246,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -257,7 +261,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -276,7 +280,7 @@ public class CalciteRequestTest {
         DATABASE,
         TABLE);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -302,7 +306,7 @@ public class CalciteRequestTest {
           sqlOperator,
           3);
 
-      Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+      assertEquivalent(output, expected);
     }
   }
 
@@ -329,7 +333,7 @@ public class CalciteRequestTest {
           sqlOperator,
           "'myText'");
 
-      Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+      assertEquivalent(output, expected);
     }
   }
 
@@ -356,7 +360,7 @@ public class CalciteRequestTest {
           sqlOperator,
           "TRUE");
 
-      Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+      assertEquivalent(output, expected);
     }
   }
 
@@ -379,7 +383,7 @@ public class CalciteRequestTest {
         "'val1'",
         "'val2'");
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -397,7 +401,7 @@ public class CalciteRequestTest {
         TABLE,
         complexWhereQuotedIdentifiers);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -416,7 +420,7 @@ public class CalciteRequestTest {
         TABLE,
         complexWhereQuotedIdentifiers);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -446,7 +450,7 @@ public class CalciteRequestTest {
         epoch_date,
         timeFilterInterval.getEndMillis());
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -473,7 +477,7 @@ public class CalciteRequestTest {
         TABLE,
         TIME_AGGREGATION_ALIAS);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -500,7 +504,7 @@ public class CalciteRequestTest {
         TABLE,
         TIME_AGGREGATION_ALIAS);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -527,7 +531,7 @@ public class CalciteRequestTest {
         TABLE,
         TIME_AGGREGATION_ALIAS);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -556,7 +560,7 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS,
         TIME_AGGREGATION_ALIAS);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -579,7 +583,7 @@ public class CalciteRequestTest {
         timeAggregationColumn,
         timeFilterInterval.getEndMillis());
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -608,7 +612,7 @@ public class CalciteRequestTest {
         quotedTimeAggregationColumn,
         timeFilterInterval.getEndMillis());
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -637,7 +641,7 @@ public class CalciteRequestTest {
         timeAggregationColumn,
         "20211010");
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -676,7 +680,7 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS,
         TIME_AGGREGATION_ALIAS);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -721,7 +725,22 @@ public class CalciteRequestTest {
         TIME_AGGREGATION_ALIAS,
         TIME_AGGREGATION_ALIAS);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
+  }
+
+  @Test
+  public void testGroupByWithHaving() {
+    final CalciteRequest calciteRequest = CalciteRequest.newBuilder("table")
+        .addSelectProjection("dimension")
+        .addSelectProjection(QueryProjection.of("SUM", List.of("metric")).withAlias("agg"))
+        .addGroupByProjection("dimension")
+        .having(QueryPredicate.of(Predicate.GT("agg", "3"), DimensionType.NUMERIC))
+        .build();
+    final String sql = calciteRequest.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+    assertEquivalent(sql,
+        "SELECT SUM(\"metric\") AS \"agg\", \"dimension\" FROM \"table\" "
+            + "GROUP BY \"dimension\" HAVING \"agg\" > 3"
+    );
   }
 
   @Test
@@ -766,7 +785,7 @@ public class CalciteRequestTest {
         COLUMN_NAME_3,
         TIME_AGGREGATION_ALIAS);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   @Test
@@ -784,7 +803,7 @@ public class CalciteRequestTest {
         TABLE,
         limit);
 
-    Assertions.assertThat(SqlUtils.cleanSql(output)).isEqualTo(SqlUtils.cleanSql(expected));
+    assertEquivalent(output, expected);
   }
 
   // TODO cyril - should be easy to express:
@@ -827,6 +846,13 @@ public class CalciteRequestTest {
 
   private static class TestPinotLikeSqlExpressionBuilder implements SqlExpressionBuilder {
 
+    public static final long SECOND_MILLIS = 1000; // number of milliseconds in a second
+    public static final long MINUTE_MILLIS =
+        60 * SECOND_MILLIS; // number of milliseconds in a minute
+    public static final long HOUR_MILLIS = 60 * MINUTE_MILLIS;
+    public static final long DAY_MILLIS = 24 * HOUR_MILLIS;
+    public static final String STRING_LITERAL_QUOTE = "'";
+    public static final String ESCAPED_STRING_LITERAL_QUOTE = "''";
     private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(
         Period.years(1),
         "year",
@@ -844,22 +870,19 @@ public class CalciteRequestTest {
         "second",
         Period.millis(1),
         "millisecond");
-
     private static final List<Period> DATE_TRUNC_COMPATIBLE_PERIODS = List.copyOf(
         DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING.keySet());
-
     private static final String PERCENTILE_TDIGEST_PREFIX = "PERCENTILETDigest";
 
-    public static final long SECOND_MILLIS = 1000; // number of milliseconds in a second
-    public static final long MINUTE_MILLIS =
-        60 * SECOND_MILLIS; // number of milliseconds in a minute
-    public static final long HOUR_MILLIS = 60 * MINUTE_MILLIS;
-    public static final long DAY_MILLIS = 24 * HOUR_MILLIS;
-    public static final String STRING_LITERAL_QUOTE = "'";
-    public static final String ESCAPED_STRING_LITERAL_QUOTE = "''";
-
-    private static final String escapeLiteralQuote(String s) {
+    private static String escapeLiteralQuote(String s) {
       return s.replace(STRING_LITERAL_QUOTE, ESCAPED_STRING_LITERAL_QUOTE);
+    }
+
+    @NonNull
+    @VisibleForTesting
+    protected static String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
+      // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
+      return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
     }
 
     @Override
@@ -933,13 +956,6 @@ public class CalciteRequestTest {
           escapeLiteralQuote(timeFormat.dateTimeConvertString),
           timezone,
           periodToDateTimeConvertFormat(granularity));
-    }
-
-    @NonNull
-    @VisibleForTesting
-    protected static String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
-      // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
-      return timeColumnFormat.replaceFirst("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:", "");
     }
 
     private String periodToDateTimeConvertFormat(final Period period) {

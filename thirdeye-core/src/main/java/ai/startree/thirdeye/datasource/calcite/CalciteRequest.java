@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
 import static ai.startree.thirdeye.util.CalciteUtils.numericLiteralOf;
 import static ai.startree.thirdeye.util.CalciteUtils.quoteIdentifierIfReserved;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
@@ -52,10 +53,7 @@ import org.joda.time.Period;
 
 /**
  * Class that helps build and generate SQL queries.
- *
  * Use the builder {@link #newBuilder}.
- *
- * todo cyril - later implement having clause
  **/
 public class CalciteRequest {
 
@@ -99,6 +97,9 @@ public class CalciteRequest {
   final private List<String> freeTextGroupByProjections;
   final private List<SqlNode> sqlNodeGroupByProjections;
 
+  // WHERE clause
+  final private List<QueryPredicate> havingPredicates;
+
   // ORDER BY clause
   final private List<QueryProjection> orderByProjections;
   final private List<String> freeTextOrderByProjections;
@@ -137,6 +138,8 @@ public class CalciteRequest {
     this.groupByProjections = List.copyOf(builder.groupByProjections);
     this.freeTextGroupByProjections = List.copyOf(builder.freeTextGroupByProjections);
     this.sqlNodeGroupByProjections = List.copyOf(builder.sqlNodeGroupByProjections);
+
+    this.havingPredicates = List.copyOf(builder.havingPredicates);
 
     this.orderByProjections = List.copyOf(builder.orderByProjections);
     this.freeTextOrderByProjections = List.copyOf(builder.freeTextOrderByProjections);
@@ -191,7 +194,7 @@ public class CalciteRequest {
         getFrom(),
         getWhere(sqlParserConfig, expressionBuilder, dialect),
         getGroupBy(sqlParserConfig, expressionBuilder),
-        null,
+        having(),
         null,
         getOrderBy(sqlParserConfig, expressionBuilder),
         null,
@@ -227,7 +230,8 @@ public class CalciteRequest {
   }
 
   private SqlNode getWhere(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect) {
+      final SqlExpressionBuilder expressionBuilder,
+      final SqlDialect dialect) {
     List<SqlNode> predicates = new ArrayList<>();
     if (timeFilterInterval != null) {
       final String preparedTimeColumn = quoteIdentifierIfReserved(timeFilterColumn, sqlParserConfig, dialect);
@@ -247,6 +251,12 @@ public class CalciteRequest {
     }
     predicates.addAll(sqlNodePredicates);
 
+    return combinePredicates(predicates);
+  }
+
+  private SqlNode having() {
+    List<SqlNode> predicates = new ArrayList<>();
+    havingPredicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
     return combinePredicates(predicates);
   }
 
@@ -437,6 +447,8 @@ public class CalciteRequest {
     final private List<String> freeTextGroupByProjections = new ArrayList<>();
     final private List<SqlNode> sqlNodeGroupByProjections = new ArrayList<>();
 
+    final private List<QueryPredicate> havingPredicates = new ArrayList<>();
+
     final private List<QueryProjection> orderByProjections = new ArrayList<>();
     final private List<String> freeTextOrderByProjections = new ArrayList<>();
     final private List<SqlNode> sqlNodeOrderByProjections = new ArrayList<>();
@@ -444,7 +456,7 @@ public class CalciteRequest {
     private Long limit;
 
     public Builder(final String table) {
-      this.table = Objects.requireNonNull(table);
+      this.table = requireNonNull(table);
     }
 
     public Builder withDatabase(final String database) {
@@ -468,9 +480,9 @@ public class CalciteRequest {
         final @Nullable String timeAggregationColumnUnit,
         final boolean timeAggregationOrderBy,
         final @Nullable String timeAggregationTimezone) {
-      this.timeAggregationGranularity = Objects.requireNonNull(timeAggregationGranularity);
-      this.timeAggregationColumn = Objects.requireNonNull(timeAggregationColumn);
-      this.timeAggregationColumnFormat = Objects.requireNonNull(timeAggregationColumnFormat);
+      this.timeAggregationGranularity = requireNonNull(timeAggregationGranularity);
+      this.timeAggregationColumn = requireNonNull(timeAggregationColumn);
+      this.timeAggregationColumnFormat = requireNonNull(timeAggregationColumnFormat);
       this.timeAggregationColumnUnit = timeAggregationColumnUnit;
       this.timeAggregationOrderBy = timeAggregationOrderBy;
       this.timeAggregationTimezone = timeAggregationTimezone;
@@ -489,16 +501,16 @@ public class CalciteRequest {
      */
     public Builder withTimeFilter(final Interval timeFilterInterval, final String timeFilterColumn,
         final String timeFilterColumnFormat, @Nullable final String timeFilterColumnUnit) {
-      this.timeFilterInterval = Objects.requireNonNull(timeFilterInterval);
-      this.timeFilterColumn = Objects.requireNonNull(timeFilterColumn);
-      this.timeFilterColumnFormat = Objects.requireNonNull(timeFilterColumnFormat);
+      this.timeFilterInterval = requireNonNull(timeFilterInterval);
+      this.timeFilterColumn = requireNonNull(timeFilterColumn);
+      this.timeFilterColumnFormat = requireNonNull(timeFilterColumnFormat);
       this.timeFilterColumnUnit = timeFilterColumnUnit;
 
       return this;
     }
 
     public Builder addSelectProjection(final QueryProjection projection) {
-      this.selectProjections.add(Objects.requireNonNull(projection));
+      this.selectProjections.add(requireNonNull(projection));
       return this;
     }
 
@@ -509,7 +521,7 @@ public class CalciteRequest {
     }
 
     public Builder addSelectProjection(final SqlNode sqlNodeProjection) {
-      this.slqNodeSelectProjections.add(Objects.requireNonNull(sqlNodeProjection));
+      this.slqNodeSelectProjections.add(requireNonNull(sqlNodeProjection));
       return this;
     }
 
@@ -517,7 +529,7 @@ public class CalciteRequest {
      * Add a predicate. Predicates are combined with the AND operator.
      */
     public Builder addPredicate(final QueryPredicate predicate) {
-      this.predicates.add(Objects.requireNonNull(predicate));
+      this.predicates.add(requireNonNull(predicate));
       return this;
     }
 
@@ -527,7 +539,7 @@ public class CalciteRequest {
      */
     public Builder addPredicate(final String predicates) {
       checkArgument(isNotBlank(predicates));
-      this.freeTextPredicates.add(Objects.requireNonNull(predicates));
+      this.freeTextPredicates.add(requireNonNull(predicates));
       return this;
     }
 
@@ -536,7 +548,7 @@ public class CalciteRequest {
      * Predicates are combined with the AND operator.
      */
     public Builder addPredicate(final SqlNode sqlPredicate) {
-      this.sqlNodePredicates.add(Objects.requireNonNull(sqlPredicate));
+      this.sqlNodePredicates.add(requireNonNull(sqlPredicate));
       return this;
     }
 
@@ -545,7 +557,7 @@ public class CalciteRequest {
      * GroupBy projections are NOT automatically added to the select projections.
      */
     public Builder addGroupByProjection(final QueryProjection projection) {
-      this.groupByProjections.add(Objects.requireNonNull(projection));
+      this.groupByProjections.add(requireNonNull(projection));
       return this;
     }
 
@@ -555,7 +567,7 @@ public class CalciteRequest {
      */
     public Builder addGroupByProjection(final String projection) {
       checkArgument(isNotBlank(projection));
-      this.freeTextGroupByProjections.add(Objects.requireNonNull(projection));
+      this.freeTextGroupByProjections.add(requireNonNull(projection));
       return this;
     }
 
@@ -564,23 +576,28 @@ public class CalciteRequest {
      * GroupBy projections are NOT automatically added to the select projections.
      */
     public Builder addGroupByProjection(final SqlNode projection) {
-      this.sqlNodeGroupByProjections.add(Objects.requireNonNull(projection));
+      this.sqlNodeGroupByProjections.add(requireNonNull(projection));
       return this;
     }
 
     public Builder addOrderByProjection(final QueryProjection projection) {
-      this.orderByProjections.add(Objects.requireNonNull(projection));
+      this.orderByProjections.add(requireNonNull(projection));
       return this;
     }
 
     public Builder addOrderByProjection(final String projection) {
       checkArgument(isNotBlank(projection));
-      this.freeTextOrderByProjections.add(Objects.requireNonNull(projection));
+      this.freeTextOrderByProjections.add(requireNonNull(projection));
       return this;
     }
 
     public Builder addOrderByProjection(final SqlNode projection) {
-      this.sqlNodeOrderByProjections.add(Objects.requireNonNull(projection));
+      this.sqlNodeOrderByProjections.add(requireNonNull(projection));
+      return this;
+    }
+
+    public Builder having(final QueryPredicate predicate) {
+      havingPredicates.add(requireNonNull(predicate));
       return this;
     }
 

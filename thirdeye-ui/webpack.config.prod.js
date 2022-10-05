@@ -87,6 +87,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: path.join(__dirname, "src/public/index.html"),
             scriptLoading: "defer",
+            hash: true,
         }),
         // Copy favicon, logo and manifest for index.html
         new CopyWebpackPlugin({

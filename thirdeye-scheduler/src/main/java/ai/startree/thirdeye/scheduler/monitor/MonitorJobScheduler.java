@@ -16,6 +16,7 @@ package ai.startree.thirdeye.scheduler.monitor;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.Executors;
@@ -40,7 +41,8 @@ public class MonitorJobScheduler {
     this.monitorConfiguration = monitorConfiguration;
     this.jobManager = jobManager;
 
-    scheduledExecutorService = Executors.newScheduledThreadPool(10);
+    scheduledExecutorService = Executors.newScheduledThreadPool(10,
+        new ThreadFactoryBuilder().setNameFormat("monitor-job-scheduler-%d").build());
   }
 
   public void start() {

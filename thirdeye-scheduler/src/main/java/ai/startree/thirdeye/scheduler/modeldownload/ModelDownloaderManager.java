@@ -16,6 +16,7 @@ package ai.startree.thirdeye.scheduler.modeldownload;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
@@ -48,7 +49,8 @@ public class ModelDownloaderManager {
   public ModelDownloaderManager(ThirdEyeSchedulerConfiguration configuration) {
     this.configs = configuration.getModelDownloaderConfigs();
     this.modelDownloaders = new HashMap<>();
-    this.scheduledExecutorService = Executors.newScheduledThreadPool(5);
+    this.scheduledExecutorService = Executors.newScheduledThreadPool(5,
+        new ThreadFactoryBuilder().setNameFormat("model-downloader-%d").build());
   }
 
   /**

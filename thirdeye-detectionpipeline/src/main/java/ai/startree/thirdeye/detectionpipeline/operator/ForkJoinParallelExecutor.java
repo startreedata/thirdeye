@@ -21,6 +21,7 @@ import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,8 @@ public class ForkJoinParallelExecutor {
 
   public ForkJoinParallelExecutor(final ForkJoinParallelExecutorConfiguration config) {
     this.config = config;
-    executorService = Executors.newFixedThreadPool(config.getParallelism());
+    executorService = Executors.newFixedThreadPool(config.getParallelism(),
+        new ThreadFactoryBuilder().setNameFormat("fork-join-%d").build());
   }
 
   public List<ForkJoinResultItem> execute(final PlanNode root,

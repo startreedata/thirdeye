@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
@@ -64,7 +65,8 @@ public class AlertEvaluator {
     this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
     this.evaluationContextProcessor = evaluationContextProcessor;
 
-    executorService = Executors.newFixedThreadPool(PARALLELISM);
+    executorService = Executors.newFixedThreadPool(PARALLELISM,
+        new ThreadFactoryBuilder().setNameFormat("alert-evaluator-%d").build());
   }
 
   private void stop() {

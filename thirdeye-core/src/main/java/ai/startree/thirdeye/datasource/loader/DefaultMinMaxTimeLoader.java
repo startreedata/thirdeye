@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
   @Inject
   public DefaultMinMaxTimeLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("minmax-loader-%d").build());
   }
 
   @Override

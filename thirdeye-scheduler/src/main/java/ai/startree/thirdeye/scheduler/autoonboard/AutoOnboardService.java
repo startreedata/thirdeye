@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datasource.AutoOnboard;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -65,7 +66,8 @@ public class AutoOnboardService implements Runnable {
     this.datasetConfigManager = datasetConfigManager;
     this.dataSourceManager = dataSourceManager;
 
-    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(
+        "auto-onboard-%d").build());
   }
 
   public static Map<String, List<AutoOnboard>> getDataSourceToAutoOnboardMap(

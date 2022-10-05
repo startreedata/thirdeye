@@ -13,7 +13,6 @@
         "component.max": "${max}",
         "component.timestamp": "ts",
         "anomaly.metric": "${metric}",
-        "component.timezone": "US/Pacific",
         "type": "THRESHOLD",
         "component.offset": "mo1m",
         "component.pattern": "down"

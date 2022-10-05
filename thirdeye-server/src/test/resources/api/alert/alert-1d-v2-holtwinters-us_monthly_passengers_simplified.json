@@ -12,7 +12,6 @@
           "component.timestamp": "ts",
           "anomaly.metric": "${metric}",
           "anomaly.dataset": "${dataset}",
-          "component.timezone": "US/Pacific",
           "anomaly.source": "us_monthly_passengers_simplified-holtwinters/root",
           "type": "HOLT_WINTERS",
           "component.pattern": "${pattern}",

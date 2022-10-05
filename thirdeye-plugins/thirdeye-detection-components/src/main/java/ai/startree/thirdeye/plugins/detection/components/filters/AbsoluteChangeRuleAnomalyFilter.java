@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  * above the threshold.
  * If not, filters the anomaly.
  */
+@Deprecated
 public class AbsoluteChangeRuleAnomalyFilter implements
     AnomalyFilter<AbsoluteChangeRuleAnomalyFilterSpec> {
 

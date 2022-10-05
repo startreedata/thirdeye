@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.spi.util;
 
-import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.base.Joiner;
@@ -34,7 +32,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTimeFieldType;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Partial;
 import org.joda.time.PeriodType;
 
@@ -61,23 +58,6 @@ public class SpiUtils {
 
   public static String constructMetricAlias(String datasetName, String metricName) {
     return datasetName + MetricConfigDTO.ALIAS_JOINER + metricName;
-  }
-
-  public static String getTimeFormatString(DatasetConfigDTO datasetConfig) {
-    String timeFormat = datasetConfig.getTimeFormat();
-    if (timeFormat.startsWith(TimeFormat.SIMPLE_DATE_FORMAT.toString())) {
-      timeFormat = getSDFPatternFromTimeFormat(timeFormat);
-    }
-    return timeFormat;
-  }
-
-  private static String getSDFPatternFromTimeFormat(String timeFormat) {
-    String pattern = timeFormat;
-    String[] tokens = timeFormat.split(":", 2);
-    if (tokens.length == 2) {
-      pattern = tokens[1];
-    }
-    return pattern;
   }
 
   /**
@@ -124,13 +104,6 @@ public class SpiUtils {
     }
 
     return new Partial(fields.toArray(new DateTimeFieldType[fields.size()]), zeros);
-  }
-
-  public static DateTimeZone getDateTimeZone(final DatasetConfigDTO datasetConfig) {
-    final String timezone = datasetConfig != null
-        ? datasetConfig.getTimezone()
-        : Constants.DEFAULT_TIMEZONE_STRING;
-    return DateTimeZone.forID(timezone);
   }
 
   public static Multimap<String, String> getFilterSet(String filters) {

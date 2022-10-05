@@ -84,15 +84,6 @@ public final class MetricSlice {
   }
 
   @Deprecated
-  public static MetricSlice from(final long metricId, long start, long end) {
-    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
-        new Interval(start, end, DateTimeZone.UTC),
-        List.of(),
-        ArrayListMultimap.create(),
-        new DatasetConfigDTO());
-  }
-
-  @Deprecated
   public static MetricSlice from(final long metricId, long start, long end,
       Multimap<String, String> filters) {
     return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
@@ -100,34 +91,6 @@ public final class MetricSlice {
         List.of(),
         filters,
         new DatasetConfigDTO());
-  }
-
-  @Deprecated
-  public static MetricSlice from(final long metricId, long start, long end,
-      Multimap<String, String> filters, TimeGranularity granularity) {
-    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
-        .setNonAdditiveBucketSize(granularity.getSize())
-        .setNonAdditiveBucketUnit(granularity.getUnit());
-    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
-        new Interval(start, end, DateTimeZone.UTC),
-        List.of(),
-        filters,
-        new DatasetConfigDTO());
-  }
-
-  @Deprecated
-  public long getMetricId() {
-    return metricConfigDTO.getId();
-  }
-
-  @Deprecated
-  public long getStartMillis() {
-    return interval.getStartMillis();
-  }
-
-  @Deprecated
-  public long getEndMillis() {
-    return interval.getEndMillis();
   }
 
   public @NonNull MetricConfigDTO getMetricConfigDTO() {
@@ -154,7 +117,7 @@ public final class MetricSlice {
     return predicates;
   }
 
-  public MetricSlice withStart(DateTime start) {
+  public MetricSlice withStart(final DateTime start) {
     return new MetricSlice(metricConfigDTO,
         interval.withStart(start),
         predicates,
@@ -162,7 +125,7 @@ public final class MetricSlice {
         datasetConfigDTO);
   }
 
-  public MetricSlice withEnd(DateTime end) {
+  public MetricSlice withEnd(final DateTime end) {
     return new MetricSlice(metricConfigDTO,
         interval.withEnd(end),
         predicates,

@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Deprecated
 public class ThresholdRuleFilterSpec extends AbstractSpec {
 
   private double minValueHourly = Double.NaN;

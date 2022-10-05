@@ -3,12 +3,12 @@ Accept: application/json
 
 ###
 
-GET http://localhost:7004/api/rca/metrics/heatmap?id=247717&baselineOffset=P1W&filters=device=desktop
+GET http://localhost:8080/api/rca/metrics/heatmap?id=247717&baselineOffset=P1W&filters=device=desktop
 Accept: application/json
 
 ###
 
-POST http://localhost:7004/api/rca/metrics/breakdown
+POST http://localhost:8080/api/rca/metrics/breakdown
 accept: application/json
 Content-Type: application/json
 
@@ -27,7 +27,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:7004/api/rca/metrics/breakdown
+POST http://localhost:8080/api/rca/metrics/breakdown
 accept: application/json
 Content-Type: application/json
 
@@ -58,7 +58,7 @@ Content-Type: application/json
   "dataset": {
     "id": 247729
   },
-  "percentage": 10,
+  "percentage": 1,
   "start": "1623110400000",
   "end": "1623283200000"
 }

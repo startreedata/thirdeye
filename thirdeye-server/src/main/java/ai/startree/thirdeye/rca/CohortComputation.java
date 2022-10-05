@@ -19,11 +19,13 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
+import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.BreakdownApi;
 import ai.startree.thirdeye.spi.api.DimensionFilterContributionApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -31,6 +33,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +79,7 @@ public class CohortComputation {
 
   private static CalciteRequest calciteRequest(final DatasetConfigDTO dataset,
       final MetricConfigDTO metric,
-      final List<String> dimensions, final Interval currentInterval) {
+      final List<String> dimensions, final Interval currentInterval, final Double threshold) {
     final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
         .withTimeFilter(currentInterval,
             dataset.getTimeColumn(),
@@ -87,7 +90,30 @@ public class CohortComputation {
     builder.addSelectProjection(selectable(metric));
     dimensions.forEach(builder::addGroupByProjection);
 
-    return builder.withLimit(100000).build();
+    final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(threshold));
+    return builder
+        .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
+        .withLimit(100000).build();
+  }
+
+  private static List<DimensionFilterContributionApi> readDf(final DataFrame df) {
+    final Set<String> dimensions = new HashSet<>(df.getSeriesNames());
+    dimensions.remove(COL_AGGREGATE);
+
+    final int nColumns = dimensions.size();
+
+    final List<DimensionFilterContributionApi> results = new ArrayList<>();
+    for (int i = 0; i < df.size(); ++i) {
+      final Map<String, String> dimensionFilters = new HashMap<>(nColumns);
+      final DimensionFilterContributionApi api = new DimensionFilterContributionApi()
+          .setDimensionFilters(dimensionFilters)
+          .setValue(df.getDouble(COL_AGGREGATE, i));
+      for (String seriesName : dimensions) {
+        dimensionFilters.put(seriesName, df.getString(seriesName, i));
+      }
+      results.add(api);
+    }
+    return results;
   }
 
   public BreakdownApi computeBreakdown(final BreakdownApi request)
@@ -99,8 +125,9 @@ public class CohortComputation {
 
     final DatasetConfigDTO dataset = datasetConfigManager.findById(request.getDataset().getId());
     final MetricConfigDTO metric = metricConfigManager.findById(request.getMetric().getId());
+    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataset.getDataSource());
 
-    final Double agg = computeAggregate(metric, dataset, currentInterval);
+    final Double agg = computeAggregate(metric, dataset, currentInterval, dataSource);
 
     final Double threshold = optional(request.getPercentage())
         .map(p -> agg * p / 100.0)
@@ -118,7 +145,8 @@ public class CohortComputation {
         dimensions,
         threshold,
         visited,
-        currentInterval);
+        currentInterval,
+        dataSource);
 
     return new BreakdownApi()
         .setThreshold(threshold)
@@ -128,7 +156,7 @@ public class CohortComputation {
   }
 
   private Double computeAggregate(final MetricConfigDTO metric, final DatasetConfigDTO dataset,
-      final Interval currentInterval)
+      final Interval currentInterval, final ThirdEyeDataSource dataSource)
       throws Exception {
     final CalciteRequest r = CalciteRequest.newBuilder(dataset.getDataset())
         .addSelectProjection(selectable(metric))
@@ -137,7 +165,7 @@ public class CohortComputation {
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name())
         .build();
-    final DataFrame df = query(r, dataSourceCache.getDataSource(dataset.getDataSource()));
+    final DataFrame df = query(r, dataSource);
     return df.get(COL_AGGREGATE).getDouble(0);
   }
 
@@ -148,7 +176,8 @@ public class CohortComputation {
       final List<String> allDimensions,
       final Double threshold,
       final Set<Set<String>> visited,
-      final Interval currentInterval)
+      final Interval currentInterval,
+      final ThirdEyeDataSource dataSource)
       throws Exception {
     final Set<String> dimensionsSet = Set.copyOf(dimensions);
     if (visited.contains(dimensionsSet)) {
@@ -171,8 +200,9 @@ public class CohortComputation {
       final CalciteRequest query = calciteRequest(dataset,
           metric,
           subDimensions,
-          currentInterval);
-      final var l = executeQuery(dataset, query, threshold);
+          currentInterval,
+          threshold);
+      final var l = executeQuery(query, dataSource);
       results.addAll(l);
       if (l.size() > 0) {
         results.addAll(computeBreakdown0(dataset,
@@ -180,39 +210,19 @@ public class CohortComputation {
             subDimensions,
             dimensionsToExplore,
             threshold,
-            visited, currentInterval));
+            visited,
+            currentInterval,
+            dataSource));
       }
     }
     return results;
   }
 
-  private List<DimensionFilterContributionApi> executeQuery(final DatasetConfigDTO dataset,
-      final CalciteRequest query,
-      final Double threshold)
+  private List<DimensionFilterContributionApi> executeQuery(final CalciteRequest calciteRequest,
+      final ThirdEyeDataSource dataSource)
       throws Exception {
-    final DataFrame df = query(query, dataSourceCache.getDataSource(dataset.getDataSource()));
-
-    final List<DimensionFilterContributionApi> results = new ArrayList<>();
-    final Set<String> seriesNames = df.getSeriesNames();
-    final int nColumns = seriesNames.size();
-
-    for (int i = 0; i < df.size(); ++i) {
-      final double value = df.getDouble(COL_AGGREGATE, i);
-      if (value < threshold) {
-        continue;
-      }
-      final Map<String, String> dimensionFilters = new HashMap<>(nColumns);
-      final DimensionFilterContributionApi api = new DimensionFilterContributionApi()
-          .setDimensionFilters(dimensionFilters)
-          .setValue(value);
-      for (String seriesName : seriesNames) {
-        if (!COL_AGGREGATE.equals(seriesName)) {
-          dimensionFilters.put(seriesName, df.getString(seriesName, i));
-        }
-      }
-      results.add(api);
-    }
-    return results;
+    final DataFrame df = query(calciteRequest, dataSource);
+    return readDf(df);
   }
 
   public DataFrame query(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds)

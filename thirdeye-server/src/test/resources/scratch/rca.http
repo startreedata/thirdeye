@@ -47,7 +47,7 @@ Content-Type: application/json
 ###
 
 
-POST http://localhost:7004/api/rca/metrics/breakdown
+POST http://localhost:8080/api/rca/metrics/breakdown
 accept: application/json
 Content-Type: application/json
 
@@ -58,8 +58,7 @@ Content-Type: application/json
   "dataset": {
     "id": 247729
   },
-  "percentage": 0.5,
-  "threshold": 400000,
+  "percentage": 10,
   "start": "1623110400000",
   "end": "1623283200000"
 }

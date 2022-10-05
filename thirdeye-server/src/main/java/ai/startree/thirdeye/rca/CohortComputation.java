@@ -14,27 +14,26 @@
 
 package ai.startree.thirdeye.rca;
 
-import static ai.startree.thirdeye.rca.HeatmapCalculator.getSimpleRange;
-import static ai.startree.thirdeye.spi.datalayer.Predicate.parseAndCombinePredicates;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
+import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.BreakdownApi;
 import ai.startree.thirdeye.spi.api.DimensionFilterContributionApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,17 +47,14 @@ import org.joda.time.Interval;
 public class CohortComputation {
 
   public static final String COL_AGGREGATE = "agg";
-  private final HeatmapCalculator heatmapCalculator;
   private final DataSourceCache dataSourceCache;
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
 
   @Inject
-  public CohortComputation(final HeatmapCalculator heatmapCalculator,
-      final DataSourceCache dataSourceCache,
+  public CohortComputation(final DataSourceCache dataSourceCache,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
-    this.heatmapCalculator = heatmapCalculator;
     this.dataSourceCache = dataSourceCache;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
@@ -71,10 +67,31 @@ public class CohortComputation {
         .orElse(Constants.DEFAULT_TIMEZONE);
   }
 
-  public BreakdownApi computeBreakdown(final BreakdownApi request,
-      final List<String> filters,
-      final Integer limit) throws Exception {
+  private static QueryProjection selectable(final MetricConfigDTO metric) {
+    final String aggregationColumn = optional(metric.getAggregationColumn()).orElse(metric.getName());
+    return QueryProjection
+        .of(metric.getDefaultAggFunction(), List.of(aggregationColumn))
+        .withAlias(COL_AGGREGATE);
+  }
 
+  private static CalciteRequest calciteRequest(final DatasetConfigDTO dataset,
+      final MetricConfigDTO metric,
+      final List<String> dimensions, final Interval currentInterval) {
+    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
+        .withTimeFilter(currentInterval,
+            dataset.getTimeColumn(),
+            dataset.getTimeFormat(),
+            dataset.getTimeUnit().name());
+
+    dimensions.forEach(builder::addSelectProjection);
+    builder.addSelectProjection(selectable(metric));
+    dimensions.forEach(builder::addGroupByProjection);
+
+    return builder.withLimit(100000).build();
+  }
+
+  public BreakdownApi computeBreakdown(final BreakdownApi request)
+      throws Exception {
     final Interval currentInterval = new Interval(
         request.getStart(),
         request.getEnd(),
@@ -83,102 +100,117 @@ public class CohortComputation {
     final DatasetConfigDTO dataset = datasetConfigManager.findById(request.getDataset().getId());
     final MetricConfigDTO metric = metricConfigManager.findById(request.getMetric().getId());
 
-    final String dataSourceName = dataset.getDataSource();
+    final Double agg = computeAggregate(metric, dataset, currentInterval);
 
-    final Double agg = computeAggregate(metric, dataSourceName);
-
-    final Set<Map<String, String>> visited = new HashSet<>();
-    final Map<String, String> dimensionFilters = ImmutableMap.of();
     final Double threshold = optional(request.getPercentage())
         .map(p -> agg * p / 100.0)
         .orElse(request.getThreshold());
 
-    final List<DimensionFilterContributionApi> results = computeBreakdown0(
-        threshold,
-        filters,
-        limit,
-        currentInterval,
+    final List<String> dimensions = new ArrayList<>(optional(dataset.getDimensions())
+        .map(Templatable::value)
+        .orElse(List.of()));
+
+    final Set<Set<String>> visited = new HashSet<>();
+    final List<DimensionFilterContributionApi> results1 = computeBreakdown0(
         dataset,
         metric,
+        List.of(),
+        dimensions,
+        threshold,
         visited,
-        dimensionFilters);
+        currentInterval);
+
     return new BreakdownApi()
         .setThreshold(threshold)
         .setAggregate(agg)
-        .setResultSize(results.size())
-        .setResults(results);
+        .setResultSize(results1.size())
+        .setResults(results1);
   }
 
-  private Double computeAggregate(final MetricConfigDTO metric, final String dataSourceName)
+  private Double computeAggregate(final MetricConfigDTO metric, final DatasetConfigDTO dataset,
+      final Interval currentInterval)
       throws Exception {
-    final String aggregationColumn = optional(metric.getAggregationColumn()).orElse(metric.getName());
-    final CalciteRequest r = CalciteRequest.newBuilder("pageviews")
-        .addSelectProjection(QueryProjection
-            .of(metric.getDefaultAggFunction(), List.of(aggregationColumn))
-            .withAlias(COL_AGGREGATE))
+    final CalciteRequest r = CalciteRequest.newBuilder(dataset.getDataset())
+        .addSelectProjection(selectable(metric))
+        .withTimeFilter(currentInterval,
+            dataset.getTimeColumn(),
+            dataset.getTimeFormat(),
+            dataset.getTimeUnit().name())
         .build();
-    final DataFrame df = query(r, dataSourceCache.getDataSource(dataSourceName));
+    final DataFrame df = query(r, dataSourceCache.getDataSource(dataset.getDataSource()));
     return df.get(COL_AGGREGATE).getDouble(0);
   }
 
   private List<DimensionFilterContributionApi> computeBreakdown0(
-      final Double threshold,
-      final List<String> filters,
-      final Integer limit,
-      final Interval currentInterval,
       final DatasetConfigDTO dataset,
       final MetricConfigDTO metric,
-      final Set<Map<String, String>> visited,
-      final Map<String, String> dimensionFilters)
+      final List<String> dimensions,
+      final List<String> allDimensions,
+      final Double threshold,
+      final Set<Set<String>> visited,
+      final Interval currentInterval)
       throws Exception {
-    if (visited.contains(dimensionFilters)) {
-      return Collections.emptyList();
+    final Set<String> dimensionsSet = Set.copyOf(dimensions);
+    if (visited.contains(dimensionsSet)) {
+      throw new RuntimeException("Invalid code path! Should always explore new pathways");
     }
-    visited.add(dimensionFilters);
-    final var breakdown = heatmapCalculator.computeBreakdown(
-        metric,
-        parseAndCombinePredicates(filters),
-        currentInterval,
-        getSimpleRange(),
-        limit,
-        dataset);
+    visited.add(dimensionsSet);
 
     final List<DimensionFilterContributionApi> results = new ArrayList<>();
-    for (final var e : breakdown.entrySet()) {
-      final String dimension = e.getKey();
-      for (final var entry : e.getValue().entrySet()) {
-        final Double dimensionContribution = entry.getValue();
-        if (dimensionContribution > threshold) {
-          final String dimensionValue = entry.getKey();
-          final Map<String, String> subDimensionFilters = ImmutableMap.<String, String>builder()
-              .putAll(dimensionFilters)
-              .put(dimension, dimensionValue)
-              .build();
 
-          if (!visited.contains(subDimensionFilters)) {
+    final List<String> dimensionsToExplore = new ArrayList<>(allDimensions);
+    dimensionsToExplore.removeAll(dimensions);
 
-            results.add(new DimensionFilterContributionApi()
-                .setValue(dimensionContribution)
-                .setDimensionFilters(subDimensionFilters)
-            );
+    for (String dimension : dimensionsToExplore) {
+      final List<String> subDimensions = new ArrayList<>(dimensions);
+      subDimensions.add(dimension);
+      if (visited.contains(Set.copyOf(subDimensions))) {
+        continue;
+      }
 
-            final List<String> subFilters = new ArrayList<>(filters);
-            subFilters.add(dimension + "=" + dimensionValue);
+      final CalciteRequest query = calciteRequest(dataset,
+          metric,
+          subDimensions,
+          currentInterval);
+      final var l = executeQuery(dataset, query, threshold);
+      results.addAll(l);
+      if (l.size() > 0) {
+        results.addAll(computeBreakdown0(dataset,
+            metric,
+            subDimensions,
+            dimensionsToExplore,
+            threshold,
+            visited, currentInterval));
+      }
+    }
+    return results;
+  }
 
-            final List<DimensionFilterContributionApi> list = computeBreakdown0(
-                threshold,
-                subFilters,
-                limit,
-                currentInterval,
-                dataset,
-                metric,
-                visited,
-                subDimensionFilters);
+  private List<DimensionFilterContributionApi> executeQuery(final DatasetConfigDTO dataset,
+      final CalciteRequest query,
+      final Double threshold)
+      throws Exception {
+    final DataFrame df = query(query, dataSourceCache.getDataSource(dataset.getDataSource()));
 
-            results.addAll(list);
-          }
+    final List<DimensionFilterContributionApi> results = new ArrayList<>();
+    final Set<String> seriesNames = df.getSeriesNames();
+    final int nColumns = seriesNames.size();
+
+    for (int i = 0; i < df.size(); ++i) {
+      final double value = df.getDouble(COL_AGGREGATE, i);
+      if (value < threshold) {
+        continue;
+      }
+      final Map<String, String> dimensionFilters = new HashMap<>(nColumns);
+      final DimensionFilterContributionApi api = new DimensionFilterContributionApi()
+          .setDimensionFilters(dimensionFilters)
+          .setValue(value);
+      for (String seriesName : seriesNames) {
+        if (!COL_AGGREGATE.equals(seriesName)) {
+          dimensionFilters.put(seriesName, df.getString(seriesName, i));
         }
       }
+      results.add(api);
     }
     return results;
   }

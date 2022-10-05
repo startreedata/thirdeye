@@ -127,9 +127,7 @@ public class RcaMetricResource {
       final BreakdownApi request) throws Exception {
     ensure(request.getThreshold() != null ^ request.getPercentage() != null,
         "Either threshold or percentage should be set but not both");
-    final BreakdownApi resultApi = cohortComputation.computeBreakdown(request,
-        List.of(),
-        LIMIT_DEFAULT);
+    final BreakdownApi resultApi = cohortComputation.computeBreakdown(request);
     return respondOk(resultApi);
   }
 }

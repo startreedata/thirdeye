@@ -15,6 +15,7 @@
 package ai.startree.thirdeye.spi.api;
 
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class DimensionFilterContributionApi {
   private Map<String, String> dimensionFilters;
@@ -37,5 +38,13 @@ public class DimensionFilterContributionApi {
   public DimensionFilterContributionApi setValue(final Double value) {
     this.value = value;
     return this;
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", "[", "]")
+        .add(String.valueOf(dimensionFilters))
+        .add(String.valueOf(value))
+        .toString();
   }
 }

@@ -15,6 +15,7 @@ import { AxiosError } from "axios";
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
 import { cloneDeep, every, isEmpty, isNil, isNumber } from "lodash";
+import { Dispatch, SetStateAction } from "react";
 import { NotificationTypeV1 } from "../../platform/components";
 import {
     formatDateAndTimeV1,
@@ -383,9 +384,9 @@ export const ALL_OPTIONS_WITH_NO_FEEDBACK = {
 };
 
 export const handleAlertPropertyChangeGenerator = (
-    setAlert: (alert: EditableAlert) => void,
+    setAlert: Dispatch<SetStateAction<EditableAlert>>,
     alertTemplateOptions: AlertTemplateType[],
-    setSelectedAlertTemplate: (alertTemplate: AlertTemplate | null) => void,
+    setSelectedAlertTemplate: Dispatch<SetStateAction<AlertTemplate | null>>,
     translation: (label: string) => string
 ) => {
     return (
@@ -399,10 +400,12 @@ export const handleAlertPropertyChangeGenerator = (
                 setSelectedAlertTemplate(null);
             }
         } else {
-            setAlert({
-                ...alert,
-                ...contentsToReplace,
-            } as EditableAlert);
+            setAlert((currentAlert) => {
+                return {
+                    ...currentAlert,
+                    ...contentsToReplace,
+                } as EditableAlert;
+            });
         }
 
         if (

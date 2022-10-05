@@ -179,9 +179,14 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
           pinotQuery.getTableName(),
           new Request(queryFormat, pinotQuery.getQuery())
       );
+
+      /* Log slow queries. anything greater than 1s */
       final long end = System.currentTimeMillis();
-      LOG.info("Query:{}  took:{}ms",
-          pinotQuery.getQuery().replace('\n', ' '), (end - start));
+      final long duration = end - start;
+      if (duration > 1000) {
+        LOG.info("Query:{}  took:{}ms",
+            pinotQuery.getQuery().replace('\n', ' '), duration);
+      }
 
       return toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {

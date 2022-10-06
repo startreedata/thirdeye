@@ -115,7 +115,6 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
               "Invalid input. OperatorResult contains anomalies but no timeseries."));
     } else {
       df = customThresholdTable.getDataFrame();
-      // FIXME CYRIL rename to get use custom col_time
     }
 
     final Set<Long> timestampOutOfThresholds = timestampOutOfThresholds(df);

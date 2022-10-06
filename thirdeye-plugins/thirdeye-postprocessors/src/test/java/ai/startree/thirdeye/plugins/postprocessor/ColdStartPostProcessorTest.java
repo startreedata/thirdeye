@@ -136,6 +136,7 @@ public class ColdStartPostProcessorTest {
   @Test
   public void testPostProcess28DaysColdStartAnomaliesWithExistingLabels() throws Exception {
     // check existing labels are not overridden
+    // fixme cyril just test LabelUtils$addLabels
     spec.setColdStartPeriod("P28D").setIgnore(true);
     final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor();
     postProcessor.init(spec);

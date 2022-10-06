@@ -41,8 +41,8 @@ import org.joda.time.Interval;
  * Apply a label on anomalies that have their value out of a threshold.
  *
  * Does not look at the value inside the anomaly object. Directly looks at the timeseries value.
- * By default, the timeseries is the timeseries used for detection,
- * but it can be overridden by a custom DataTable.
+ * By default, the timeseries used is the timeseries contained by the OperatorResult containing the
+ * anomalies. It can be overridden by a custom DataTable.
  * This allows use case like:
  * - monitor metric1
  * - ignore if metric2 was out of threshold

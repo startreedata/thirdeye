@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.plugins.postprocessor;
 
 import static ai.startree.thirdeye.plugins.postprocessor.LabelUtils.addLabel;
+import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
-import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_METRIC;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 import static ai.startree.thirdeye.spi.detection.AnomalyDetector.KEY_CURRENT;
@@ -122,7 +122,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
     final DataFrame df;
     if (customThresholdTable == null) {
       timestampColum = COL_TIME;
-      valueColumn = COL_VALUE;
+      valueColumn = COL_CURRENT;
       df = optional(operatorResult.getTimeseries()).map(TimeSeries::getDataFrame)
           .orElseThrow(() -> new IllegalArgumentException(
               "Invalid input. OperatorResult contains anomalies but no timeseries."));

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.postprocessor;
 
 import static ai.startree.thirdeye.plugins.postprocessor.ThresholdPostProcessor.labelName;
+import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_METRIC;
@@ -54,7 +55,9 @@ public class ThresholdPostProcessorTest {
       JANUARY_1_2022,
       JANUARY_2_2022,
       JANUARY_3_2022,
-      JANUARY_4_2022).addSeries(COL_VALUE, 5, 15, 85, 105);
+      JANUARY_4_2022).addSeries(COL_CURRENT, 5, 15, 85, 105)
+      // not used but necessary to construct a TimeSeries
+      .addSeries(COL_VALUE, 0, 0, 0, 0);
   private static final TimeSeries TEST_TIMESERIES = TimeSeries.fromDataFrame(TEST_DF);
 
   private MergedAnomalyResultDTO january1Anomaly;

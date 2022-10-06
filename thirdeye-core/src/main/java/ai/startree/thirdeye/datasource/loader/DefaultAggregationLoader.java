@@ -61,7 +61,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
   @Inject
   public DefaultAggregationLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("aggregation-loader-%d").build());
+    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
+        "aggregation-loader-%d").build());
   }
 
   /**
@@ -135,13 +136,13 @@ public class DefaultAggregationLoader implements AggregationLoader {
     // submit requests
     for (final String dimension : dimensions) {
       final QueryProjection dimensionProjection = QueryProjection.of(dimension);
-      final CalciteRequest request = CalciteRequest
-          .newBuilderFrom(slice)
-          .addSelectProjection(dimensionProjection)
-          .addGroupByProjection(dimensionProjection)
+      final CalciteRequest request = CalciteRequest.newBuilderFrom(slice)
+          .select(dimensionProjection)
+          .groupBy(dimensionProjection)
           // ensure multiple runs return the same values when num rows > limit - see te-636
-          .addOrderByProjection(QueryProjection.of(Constants.COL_VALUE).withDescOrder())
-          .withLimit(limit).build();
+          .orderBy(QueryProjection.of(Constants.COL_VALUE).withDescOrder())
+          .limit(limit)
+          .build();
       final Future<DataFrame> res = getQueryResultAsync(request,
           datasetConfigDTO.getDataSource());
 
@@ -173,24 +174,24 @@ public class DefaultAggregationLoader implements AggregationLoader {
     LOG.info("Aggregating '{}'", slice);
     final CalciteRequest.Builder requestBuilder = CalciteRequest
         .newBuilderFrom(slice)
-        .withLimit(limit);
+        .limit(limit);
     if (dimensions.isEmpty()) {
       // add this count to help check if there is data in aggregate only queries - some aggregations
       // can return a value even if there is no data see
       // https://docs.pinot.apache.org/users/user-guide-query/supported-aggregations
       // count rows non null
-      requestBuilder.addSelectProjection(QueryProjection.of("COUNT",
+      requestBuilder.select(QueryProjection.of("COUNT",
           List.of(getFunctionName(slice.getMetricConfigDTO()))).withAlias(
           COL_AGGREGATION_ONLY_NON_NULL_ROWS_COUNT));
       // count all rows
-      requestBuilder.addSelectProjection(QueryProjection.of("COUNT", List.of("*")).withAlias(
+      requestBuilder.select(QueryProjection.of("COUNT", List.of("*")).withAlias(
           COL_AGGREGATION_ONLY_ROWS_COUNT));
     }
     for (final String dimension : dimensions) {
       final QueryProjection dimensionProjection = QueryProjection.of(dimension);
       requestBuilder
-          .addSelectProjection(dimensionProjection)
-          .addGroupByProjection(dimensionProjection);
+          .select(dimensionProjection)
+          .groupBy(dimensionProjection);
     }
     final String dataSource = slice.getDatasetConfigDTO().getDataSource();
     return getQueryResultAsync(requestBuilder.build(), dataSource);

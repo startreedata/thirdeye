@@ -54,7 +54,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
   @Inject
   public DefaultMinMaxTimeLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("minmax-loader-%d").build());
+    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
+        "minmax-loader-%d").build());
   }
 
   @Override
@@ -81,7 +82,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     return fetchExtremumTime(Extremum.MAX, datasetConfigDTO, timeFilterInterval);
   }
 
-  private @Nullable Long fetchExtremumTime(final Extremum extremum, final DatasetConfigDTO datasetConfigDTO,
+  private @Nullable Long fetchExtremumTime(final Extremum extremum,
+      final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception {
     final String dataSourceName = Objects.requireNonNull(datasetConfigDTO.getDataSource());
     final @NonNull ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
@@ -138,13 +140,13 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
     final QueryProjection orderByProjection = extremum.orderByProjection(quoteSafeTimeColumn);
 
-    final CalciteRequest.Builder calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
-        .addSelectProjection(projection)
-        .addOrderByProjection(orderByProjection)
-        .withLimit(1);
+    final var calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+        .select(projection)
+        .orderBy(orderByProjection)
+        .limit(1);
 
     if (timeFilterInterval != null) {
-      calciteRequestBuilder.withTimeFilter(timeFilterInterval,
+      calciteRequestBuilder.whereTimeFilter(timeFilterInterval,
           datasetConfigDTO.getTimeColumn(),
           datasetConfigDTO.getTimeFormat(),
           datasetConfigDTO.getTimeUnit().name());

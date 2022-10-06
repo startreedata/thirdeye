@@ -83,19 +83,19 @@ public class CohortComputation {
       final MetricConfigDTO metric,
       final List<String> dimensions, final Interval currentInterval, final Double threshold) {
     final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
-        .withTimeFilter(currentInterval,
+        .whereTimeFilter(currentInterval,
             dataset.getTimeColumn(),
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name());
 
-    dimensions.forEach(builder::addSelectProjection);
-    builder.addSelectProjection(selectable(metric));
-    dimensions.forEach(builder::addGroupByProjection);
+    dimensions.forEach(builder::select);
+    builder.select(selectable(metric));
+    dimensions.forEach(builder::groupBy);
 
     final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(threshold));
     return builder
         .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
-        .withLimit(100000).build();
+        .limit(100000).build();
   }
 
   private static List<DimensionFilterContributionApi> readDf(final DataFrame df) {
@@ -188,8 +188,8 @@ public class CohortComputation {
       final Interval currentInterval, final ThirdEyeDataSource dataSource)
       throws Exception {
     final CalciteRequest r = CalciteRequest.newBuilder(dataset.getDataset())
-        .addSelectProjection(selectable(metric))
-        .withTimeFilter(currentInterval,
+        .select(selectable(metric))
+        .whereTimeFilter(currentInterval,
             dataset.getTimeColumn(),
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name())

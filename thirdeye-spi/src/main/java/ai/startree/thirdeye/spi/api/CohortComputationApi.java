@@ -16,7 +16,7 @@ package ai.startree.thirdeye.spi.api;
 
 import java.util.List;
 
-public class BreakdownApi implements ThirdEyeApi {
+public class CohortComputationApi implements ThirdEyeApi {
 
   private MetricApi metric;
   private DatasetApi dataset;
@@ -26,15 +26,19 @@ public class BreakdownApi implements ThirdEyeApi {
   private Double aggregate;
   private Double threshold;
   private Double percentage;
+  private boolean generateEnumerationItems;
+  private String queryFilters;
 
+  /* Output Fields */
   private Integer resultSize;
   private List<DimensionFilterContributionApi> results;
+  private List<EnumerationItemApi> enumerationItems;
 
   public Long getStart() {
     return start;
   }
 
-  public BreakdownApi setStart(final Long start) {
+  public CohortComputationApi setStart(final Long start) {
     this.start = start;
     return this;
   }
@@ -43,7 +47,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return end;
   }
 
-  public BreakdownApi setEnd(final Long end) {
+  public CohortComputationApi setEnd(final Long end) {
     this.end = end;
     return this;
   }
@@ -52,7 +56,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return metric;
   }
 
-  public BreakdownApi setMetric(final MetricApi metric) {
+  public CohortComputationApi setMetric(final MetricApi metric) {
     this.metric = metric;
     return this;
   }
@@ -61,7 +65,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return dataset;
   }
 
-  public BreakdownApi setDataset(final DatasetApi dataset) {
+  public CohortComputationApi setDataset(final DatasetApi dataset) {
     this.dataset = dataset;
     return this;
   }
@@ -70,7 +74,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return timezone;
   }
 
-  public BreakdownApi setTimezone(final String timezone) {
+  public CohortComputationApi setTimezone(final String timezone) {
     this.timezone = timezone;
     return this;
   }
@@ -79,7 +83,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return aggregate;
   }
 
-  public BreakdownApi setAggregate(final Double aggregate) {
+  public CohortComputationApi setAggregate(final Double aggregate) {
     this.aggregate = aggregate;
     return this;
   }
@@ -88,7 +92,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return threshold;
   }
 
-  public BreakdownApi setThreshold(final Double threshold) {
+  public CohortComputationApi setThreshold(final Double threshold) {
     this.threshold = threshold;
     return this;
   }
@@ -97,7 +101,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return percentage;
   }
 
-  public BreakdownApi setPercentage(final Double percentage) {
+  public CohortComputationApi setPercentage(final Double percentage) {
     this.percentage = percentage;
     return this;
   }
@@ -106,7 +110,7 @@ public class BreakdownApi implements ThirdEyeApi {
     return resultSize;
   }
 
-  public BreakdownApi setResultSize(final Integer resultSize) {
+  public CohortComputationApi setResultSize(final Integer resultSize) {
     this.resultSize = resultSize;
     return this;
   }
@@ -115,9 +119,37 @@ public class BreakdownApi implements ThirdEyeApi {
     return results;
   }
 
-  public BreakdownApi setResults(
+  public CohortComputationApi setResults(
       final List<DimensionFilterContributionApi> results) {
     this.results = results;
+    return this;
+  }
+
+  public boolean isGenerateEnumerationItems() {
+    return generateEnumerationItems;
+  }
+
+  public CohortComputationApi setGenerateEnumerationItems(final boolean generateEnumerationItems) {
+    this.generateEnumerationItems = generateEnumerationItems;
+    return this;
+  }
+
+  public List<EnumerationItemApi> getEnumerationItems() {
+    return enumerationItems;
+  }
+
+  public CohortComputationApi setEnumerationItems(
+      final List<EnumerationItemApi> enumerationItems) {
+    this.enumerationItems = enumerationItems;
+    return this;
+  }
+
+  public String getQueryFilters() {
+    return queryFilters;
+  }
+
+  public CohortComputationApi setQueryFilters(final String queryFilters) {
+    this.queryFilters = queryFilters;
     return this;
   }
 }

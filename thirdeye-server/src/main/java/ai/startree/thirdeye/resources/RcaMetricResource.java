@@ -20,7 +20,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.rca.CohortComputation;
 import ai.startree.thirdeye.rca.HeatmapCalculator;
-import ai.startree.thirdeye.spi.api.BreakdownApi;
+import ai.startree.thirdeye.spi.api.CohortComputationApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -124,10 +124,10 @@ public class RcaMetricResource {
   @Path("/breakdown")
   @ApiOperation(value = "Builds cohorts based on threshold")
   public Response getAnomalyHeatmap(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      final BreakdownApi request) throws Exception {
+      final CohortComputationApi request) throws Exception {
     ensure(request.getThreshold() != null ^ request.getPercentage() != null,
         "Either threshold or percentage should be set but not both");
-    final BreakdownApi resultApi = cohortComputation.computeBreakdown(request);
+    final CohortComputationApi resultApi = cohortComputation.compute(request);
     return respondOk(resultApi);
   }
 }

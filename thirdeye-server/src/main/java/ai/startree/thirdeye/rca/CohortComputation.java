@@ -22,8 +22,9 @@ import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.api.BreakdownApi;
+import ai.startree.thirdeye.spi.api.CohortComputationApi;
 import ai.startree.thirdeye.spi.api.DimensionFilterContributionApi;
+import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -41,6 +42,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
@@ -116,7 +118,7 @@ public class CohortComputation {
     return results;
   }
 
-  public BreakdownApi computeBreakdown(final BreakdownApi request)
+  public CohortComputationApi compute(final CohortComputationApi request)
       throws Exception {
     final Interval currentInterval = new Interval(
         request.getStart(),
@@ -138,7 +140,7 @@ public class CohortComputation {
         .orElse(List.of()));
 
     final Set<Set<String>> visited = new HashSet<>();
-    final List<DimensionFilterContributionApi> results1 = computeBreakdown0(
+    final List<DimensionFilterContributionApi> results = compute0(
         dataset,
         metric,
         List.of(),
@@ -148,11 +150,38 @@ public class CohortComputation {
         currentInterval,
         dataSource);
 
-    return new BreakdownApi()
+    final CohortComputationApi output = new CohortComputationApi()
         .setThreshold(threshold)
+        .setPercentage(request.getPercentage())
         .setAggregate(agg)
-        .setResultSize(results1.size())
-        .setResults(results1);
+        .setResultSize(results.size())
+        .setResults(results);
+
+    if (request.isGenerateEnumerationItems()) {
+      final String queryFilters = optional(request.getQueryFilters()).orElse("queryFilters");
+      output.setEnumerationItems(results.stream()
+          .map(api -> toEnumerationItem(api, queryFilters))
+          .collect(Collectors.toList()));
+    }
+    return output;
+  }
+
+  private EnumerationItemApi toEnumerationItem(final DimensionFilterContributionApi api,
+      final String queryFiltersKey) {
+    return new EnumerationItemApi()
+        .setName(generateName(api.getDimensionFilters()))
+        .setParams(Map.of(queryFiltersKey, toPartialQuery(api.getDimensionFilters())));
+  }
+
+  private String generateName(final Map<String, String> dimensionFilters) {
+    return String.join(",", dimensionFilters.values());
+  }
+
+  private String toPartialQuery(final Map<String, String> dimensionFilters) {
+    return " AND " + dimensionFilters.entrySet()
+        .stream()
+        .map(e -> String.format("'%s' = '%s'", e.getKey(), e.getValue()))
+        .collect(Collectors.joining(" AND "));
   }
 
   private Double computeAggregate(final MetricConfigDTO metric, final DatasetConfigDTO dataset,
@@ -169,7 +198,7 @@ public class CohortComputation {
     return df.get(COL_AGGREGATE).getDouble(0);
   }
 
-  private List<DimensionFilterContributionApi> computeBreakdown0(
+  private List<DimensionFilterContributionApi> compute0(
       final DatasetConfigDTO dataset,
       final MetricConfigDTO metric,
       final List<String> dimensions,
@@ -205,7 +234,7 @@ public class CohortComputation {
       final var l = executeQuery(query, dataSource);
       results.addAll(l);
       if (l.size() > 0) {
-        results.addAll(computeBreakdown0(dataset,
+        results.addAll(compute0(dataset,
             metric,
             subDimensions,
             dimensionsToExplore,

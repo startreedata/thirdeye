@@ -75,6 +75,7 @@ public class TimeSeries {
   public static TimeSeries fromDataFrame(DataFrame detectorResultDf) {
     Preconditions.checkArgument(detectorResultDf.contains(Constants.COL_TIME));
     Preconditions.checkArgument(detectorResultDf.contains(Constants.COL_VALUE));
+    Preconditions.checkArgument(detectorResultDf.contains(Constants.COL_CURRENT));
     // todo cyril see if copy can be avoided
     final DataFrame tsDf = detectorResultDf.copy().setIndex(Constants.COL_TIME);
 

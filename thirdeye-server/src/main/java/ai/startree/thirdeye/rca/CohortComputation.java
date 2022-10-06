@@ -15,6 +15,7 @@
 package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
@@ -52,6 +53,7 @@ import org.joda.time.Interval;
 public class CohortComputation {
 
   public static final String COL_AGGREGATE = "agg";
+  public static final String K_QUERY_FILTERS_DEFAULT = "queryFilters";
   private final DataSourceCache dataSourceCache;
   private final DatasetConfigManager datasetConfigManager;
   private final MetricConfigManager metricConfigManager;
@@ -135,9 +137,11 @@ public class CohortComputation {
         .map(p -> agg * p / 100.0)
         .orElse(request.getThreshold());
 
-    final List<String> dimensions = new ArrayList<>(optional(dataset.getDimensions())
-        .map(Templatable::value)
-        .orElse(List.of()));
+    final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
+        .orElse(optional(dataset.getDimensions())
+            .map(Templatable::value)
+            .orElse(List.of())));
+    ensure(!dimensions.isEmpty(), "Dimension list is empty");
 
     final Set<Set<String>> visited = new HashSet<>();
     final List<DimensionFilterContributionApi> results = compute0(
@@ -158,7 +162,7 @@ public class CohortComputation {
         .setResults(results);
 
     if (request.isGenerateEnumerationItems()) {
-      final String queryFilters = optional(request.getQueryFilters()).orElse("queryFilters");
+      final String queryFilters = optional(request.getQueryFilters()).orElse(K_QUERY_FILTERS_DEFAULT);
       output.setEnumerationItems(results.stream()
           .map(api -> toEnumerationItem(api, queryFilters))
           .collect(Collectors.toList()));

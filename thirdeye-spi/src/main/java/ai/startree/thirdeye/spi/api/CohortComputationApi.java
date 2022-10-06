@@ -28,29 +28,12 @@ public class CohortComputationApi implements ThirdEyeApi {
   private Double percentage;
   private boolean generateEnumerationItems;
   private String queryFilters;
+  private List<String> dimensions;
 
   /* Output Fields */
   private Integer resultSize;
   private List<DimensionFilterContributionApi> results;
   private List<EnumerationItemApi> enumerationItems;
-
-  public Long getStart() {
-    return start;
-  }
-
-  public CohortComputationApi setStart(final Long start) {
-    this.start = start;
-    return this;
-  }
-
-  public Long getEnd() {
-    return end;
-  }
-
-  public CohortComputationApi setEnd(final Long end) {
-    this.end = end;
-    return this;
-  }
 
   public MetricApi getMetric() {
     return metric;
@@ -67,6 +50,24 @@ public class CohortComputationApi implements ThirdEyeApi {
 
   public CohortComputationApi setDataset(final DatasetApi dataset) {
     this.dataset = dataset;
+    return this;
+  }
+
+  public Long getStart() {
+    return start;
+  }
+
+  public CohortComputationApi setStart(final Long start) {
+    this.start = start;
+    return this;
+  }
+
+  public Long getEnd() {
+    return end;
+  }
+
+  public CohortComputationApi setEnd(final Long end) {
+    this.end = end;
     return this;
   }
 
@@ -106,6 +107,33 @@ public class CohortComputationApi implements ThirdEyeApi {
     return this;
   }
 
+  public boolean isGenerateEnumerationItems() {
+    return generateEnumerationItems;
+  }
+
+  public CohortComputationApi setGenerateEnumerationItems(final boolean generateEnumerationItems) {
+    this.generateEnumerationItems = generateEnumerationItems;
+    return this;
+  }
+
+  public String getQueryFilters() {
+    return queryFilters;
+  }
+
+  public CohortComputationApi setQueryFilters(final String queryFilters) {
+    this.queryFilters = queryFilters;
+    return this;
+  }
+
+  public List<String> getDimensions() {
+    return dimensions;
+  }
+
+  public CohortComputationApi setDimensions(final List<String> dimensions) {
+    this.dimensions = dimensions;
+    return this;
+  }
+
   public Integer getResultSize() {
     return resultSize;
   }
@@ -125,15 +153,6 @@ public class CohortComputationApi implements ThirdEyeApi {
     return this;
   }
 
-  public boolean isGenerateEnumerationItems() {
-    return generateEnumerationItems;
-  }
-
-  public CohortComputationApi setGenerateEnumerationItems(final boolean generateEnumerationItems) {
-    this.generateEnumerationItems = generateEnumerationItems;
-    return this;
-  }
-
   public List<EnumerationItemApi> getEnumerationItems() {
     return enumerationItems;
   }
@@ -141,15 +160,6 @@ public class CohortComputationApi implements ThirdEyeApi {
   public CohortComputationApi setEnumerationItems(
       final List<EnumerationItemApi> enumerationItems) {
     this.enumerationItems = enumerationItems;
-    return this;
-  }
-
-  public String getQueryFilters() {
-    return queryFilters;
-  }
-
-  public CohortComputationApi setQueryFilters(final String queryFilters) {
-    this.queryFilters = queryFilters;
     return this;
   }
 }

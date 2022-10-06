@@ -98,18 +98,19 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
 
   private void postProcessResult(final OperatorResult operatorResult,
       final DateTime endOfColdStart) {
+    final List<MergedAnomalyResultDTO> anomalies;
     // todo cyril default implementation of getAnomalies throws error - obliged to catch here - change default implem?
     try {
-      final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
-      for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
-        if (anomalyResultDTO.getStartTime() <= endOfColdStart.getMillis()) {
-          final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore)
-              .setName(labelName);
-          addLabel(anomalyResultDTO, newLabel);
-        }
-      }
+      anomalies = operatorResult.getAnomalies();
     } catch (final UnsupportedOperationException e) {
       // no anomalies - continue
+      return;
+    }
+    for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
+      if (anomalyResultDTO.getStartTime() <= endOfColdStart.getMillis()) {
+        final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore).setName(labelName);
+        addLabel(anomalyResultDTO, newLabel);
+      }
     }
   }
 }

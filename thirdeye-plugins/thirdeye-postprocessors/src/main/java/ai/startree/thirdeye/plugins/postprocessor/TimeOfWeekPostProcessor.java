@@ -55,7 +55,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
       .put("SATURDAY", 6)
       .put("SUNDAY", 7)
       .build();
-  private static final  Set<String> VALID_DAYS = DAY_STRING_TO_JODA_INT.keySet();
+  private static final Set<String> VALID_DAYS = DAY_STRING_TO_JODA_INT.keySet();
 
   private Set<Integer> intDaysOfWeek;
   private Set<Integer> hoursOfDay;
@@ -105,27 +105,30 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
 
   private void postProcessResult(@NonNull final OperatorResult operatorResult,
       final Chronology chronology) {
+    final List<MergedAnomalyResultDTO> anomalies;
     // todo cyril default implementation of getAnomalies throws error - obliged to catch here - change default implem?
     try {
-      final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
-      for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
-        // labeling is just based on the startTime - this may be counter-intuitive for anomalies with length > 1 granularity bucket
-        final DateTime startTime = new DateTime(anomalyResultDTO.getStartTime(), chronology);
-        final int anomalyDayOfWeek = startTime.getDayOfWeek();
-        final int anomalyHourOfDay = startTime.getHourOfDay();
-        final boolean dayMatch = intDaysOfWeek.contains(anomalyDayOfWeek);
-        final boolean hourMatch = hoursOfDay.contains(anomalyHourOfDay);
-        final Set<Integer> hoursOfAnomalyDay = intDayHoursOfWeek.get(anomalyDayOfWeek);
-        final boolean dayHourMatch =
-            hoursOfAnomalyDay != null && hoursOfAnomalyDay.contains(anomalyHourOfDay);
-        if (dayMatch || hourMatch || dayHourMatch) {
-          final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore)
-              .setName(labelName);
-          addLabel(anomalyResultDTO, newLabel);
-        }
-      }
+      anomalies = operatorResult.getAnomalies();
     } catch (final UnsupportedOperationException e) {
-      // no anomalies - continue
+      // no anomalies - do nothing
+      return;
+    }
+
+    for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
+      // labeling is just based on the startTime - this may be counter-intuitive for anomalies with length > 1 granularity bucket
+      final DateTime startTime = new DateTime(anomalyResultDTO.getStartTime(), chronology);
+      final int anomalyDayOfWeek = startTime.getDayOfWeek();
+      final int anomalyHourOfDay = startTime.getHourOfDay();
+      final boolean dayMatch = intDaysOfWeek.contains(anomalyDayOfWeek);
+      final boolean hourMatch = hoursOfDay.contains(anomalyHourOfDay);
+      final Set<Integer> hoursOfAnomalyDay = intDayHoursOfWeek.get(anomalyDayOfWeek);
+      final boolean dayHourMatch =
+          hoursOfAnomalyDay != null && hoursOfAnomalyDay.contains(anomalyHourOfDay);
+      if (dayMatch || hourMatch || dayHourMatch) {
+        final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore)
+            .setName(labelName);
+        addLabel(anomalyResultDTO, newLabel);
+      }
     }
   }
 

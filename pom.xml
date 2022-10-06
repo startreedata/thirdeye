@@ -79,7 +79,7 @@
     <json-schema-validator.version>2.2.14</json-schema-validator.version>
     <mockito.version>4.3.1</mockito.version>
     <mysql.connector.version>8.0.28</mysql.connector.version>
-    <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
+    <org.mapstruct.version>1.5.2.Final</org.mapstruct.version>
     <pinot.version>0.10.0</pinot.version>
     <prometheus.version>0.11.0</prometheus.version>
     <quartz.version>2.3.2</quartz.version>

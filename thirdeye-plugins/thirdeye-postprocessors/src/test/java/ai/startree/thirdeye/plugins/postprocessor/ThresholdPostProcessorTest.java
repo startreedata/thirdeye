@@ -20,7 +20,6 @@ import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_METRIC;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 import static ai.startree.thirdeye.spi.detection.AnomalyDetector.KEY_CURRENT;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
@@ -52,10 +51,10 @@ public class ThresholdPostProcessorTest {
   private static final long JANUARY_5_2022 = 1641340800000L;
   private static final String RES_1_KEY = "res1";
   private static final DataFrame TEST_DF = new DataFrame().addSeries(COL_TIME,
-      JANUARY_1_2022,
-      JANUARY_2_2022,
-      JANUARY_3_2022,
-      JANUARY_4_2022).addSeries(COL_CURRENT, 5, 15, 85, 105)
+          JANUARY_1_2022,
+          JANUARY_2_2022,
+          JANUARY_3_2022,
+          JANUARY_4_2022).addSeries(COL_CURRENT, 5, 15, 85, 105)
       // not used but necessary to construct a TimeSeries
       .addSeries(COL_VALUE, 0, 0, 0, 0);
   private static final TimeSeries TEST_TIMESERIES = TimeSeries.fromDataFrame(TEST_DF);
@@ -131,16 +130,48 @@ public class ThresholdPostProcessorTest {
   }
 
   @DataProvider(name = "customInputTestCases")
-  public static Object[][] customInputTestCases() {
-    final Object[] defaultColumnNames = {null, null, List.of(false, true, false)};
-    final Object[] customColumnNames = {"ts", "met", List.of(false, true, false)};
+  public static Object[][] customInputDataTableTestCases() {
+    final DataFrame dfWithDefaultColNames = new DataFrame().addSeries(DEFAULT_TIMESTAMP,
+            JANUARY_1_2022,
+            JANUARY_2_2022,
+            JANUARY_3_2022,
+            JANUARY_4_2022)
+        .addSeries(DEFAULT_METRIC, 1.1, 2.5, 0.5, 1.4);
+    final DataTable dtWithDefaultColNames = SimpleDataTable.fromDataFrame(dfWithDefaultColNames);
+    final Object[] withDefaultColumnNames = {null, null, dtWithDefaultColNames,
+        List.of(false, true, false)};
 
-    return new Object[][]{defaultColumnNames, customColumnNames};
+    final DataFrame dfWithCustomColNames = new DataFrame().addSeries("ts",
+            JANUARY_1_2022,
+            JANUARY_2_2022,
+            JANUARY_3_2022,
+            JANUARY_4_2022)
+        .addSeries("met", 1.1, 2.5, 0.5, 1.4);
+    final DataTable dtWithCustomColNames = SimpleDataTable.fromDataFrame(dfWithCustomColNames);
+    final Object[] withCustomColumnNames = {"ts", "met", dtWithCustomColNames,
+        List.of(false, true, false)};
+
+    final DataFrame detectionResultDf = new DataFrame().addSeries(COL_TIME,
+            JANUARY_1_2022,
+            JANUARY_2_2022,
+            JANUARY_3_2022,
+            JANUARY_4_2022)
+        .addSeries(COL_CURRENT, 1.1, 2.5, 0.5, 1.4)
+        // not used in test
+        .addSeries(COL_VALUE, 0., 0., 0., 0.);
+    final OperatorResult detectionResultWithCustomColName = AnomalyDetectorOperatorResult.builder()
+        .setTimeseries(TimeSeries.fromDataFrame(detectionResultDf))
+        .build();
+    final Object[] withDetectionResult = {COL_TIME, COL_CURRENT, detectionResultWithCustomColName,
+        List.of(false, true, false)};
+
+    return new Object[][]{withDefaultColumnNames, withCustomColumnNames, withDetectionResult};
   }
 
   @Test(dataProvider = "customInputTestCases")
   public void testPostProcessWithCustomInput(final @Nullable String timestampColumn,
-      final @Nullable String metricColum, final List<Boolean> expectedIsLabelled) throws Exception {
+      final @Nullable String metricColum, final OperatorResult customInput,
+      final List<Boolean> expectedIsLabelled) throws Exception {
     final ThresholdPostProcessorSpec spec = new ThresholdPostProcessorSpec();
     final String metric1 = "Metric1";
     final Double min = 1.;
@@ -162,10 +193,6 @@ public class ThresholdPostProcessorTest {
         .setTimeseries(TEST_TIMESERIES)
         .setAnomalies(anomalies)
         .build();
-    final DataFrame customDataFrame = new DataFrame().addSeries(optional(timestampColumn).orElse(
-            DEFAULT_TIMESTAMP), JANUARY_1_2022, JANUARY_2_2022, JANUARY_3_2022, JANUARY_4_2022)
-        .addSeries(optional(metricColum).orElse(DEFAULT_METRIC), 1.1, 2.5, 0.5, 1.4);
-    final DataTable customInput = SimpleDataTable.fromDataFrame(customDataFrame);
     final Map<String, OperatorResult> resultMap = Map.of(RES_1_KEY, res1, KEY_CURRENT, customInput);
     final Map<String, OperatorResult> outputResultMap = postProcessor.postProcess(
         UTC_DETECTION_INTERVAL,

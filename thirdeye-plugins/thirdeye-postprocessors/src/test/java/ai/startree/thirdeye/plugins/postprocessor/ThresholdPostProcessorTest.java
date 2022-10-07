@@ -129,7 +129,7 @@ public class ThresholdPostProcessorTest {
     }
   }
 
-  @DataProvider(name = "customInputDataTableTestCases")
+  @DataProvider(name = "customInputTestCases")
   public static Object[][] customInputDataTableTestCases() {
     final DataFrame dfWithDefaultColNames = new DataFrame().addSeries(DEFAULT_TIMESTAMP,
             JANUARY_1_2022,
@@ -168,8 +168,8 @@ public class ThresholdPostProcessorTest {
     return new Object[][]{withDefaultColumnNames, withCustomColumnNames, withDetectionResult};
   }
 
-  @Test(dataProvider = "customInputDataTableTestCases")
-  public void testPostProcessWithCustomInputDataTable(final @Nullable String timestampColumn,
+  @Test(dataProvider = "customInputTestCases")
+  public void testPostProcessWithCustomInput(final @Nullable String timestampColumn,
       final @Nullable String metricColum, final OperatorResult customInput,
       final List<Boolean> expectedIsLabelled) throws Exception {
     final ThresholdPostProcessorSpec spec = new ThresholdPostProcessorSpec();

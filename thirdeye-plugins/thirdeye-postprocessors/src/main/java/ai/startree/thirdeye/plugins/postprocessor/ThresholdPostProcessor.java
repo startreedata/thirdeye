@@ -111,12 +111,8 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
 
   private void postProcessResult(final OperatorResult operatorResult,
       @Nullable OperatorResult customThresholdInput) {
-    final List<MergedAnomalyResultDTO> anomalies;
-    // todo cyril default implementation of getAnomalies throws error - obliged to catch here - change default implem?
-    try {
-      anomalies = operatorResult.getAnomalies();
-    } catch (final UnsupportedOperationException e) {
-      // no anomalies - do nothing
+    final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
+    if (anomalies == null) {
       return;
     }
 

@@ -105,12 +105,8 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
 
   private void postProcessResult(@NonNull final OperatorResult operatorResult,
       final Chronology chronology) {
-    final List<MergedAnomalyResultDTO> anomalies;
-    // todo cyril default implementation of getAnomalies throws error - obliged to catch here - change default implem?
-    try {
-      anomalies = operatorResult.getAnomalies();
-    } catch (final UnsupportedOperationException e) {
-      // no anomalies - do nothing
+    final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
+    if (anomalies == null) {
       return;
     }
 

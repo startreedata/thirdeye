@@ -125,14 +125,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
   }
 
   private void enrichAnomalyLabels(final OperatorResult result) {
-    final List<MergedAnomalyResultDTO> anomalies;
-    // todo cyril default implementation of getAnomalies throws error - obliged to catch here - change default implem?
-    try {
-      anomalies = result.getAnomalies();
-    } catch (final UnsupportedOperationException e) {
-      // no anomalies
-      return;
-    }
+    final List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
     if (anomalies == null) {
       return;
     }

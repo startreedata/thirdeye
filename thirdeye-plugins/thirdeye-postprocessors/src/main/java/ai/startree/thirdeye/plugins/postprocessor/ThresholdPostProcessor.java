@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_METRIC;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 import static ai.startree.thirdeye.spi.detection.AnomalyDetector.KEY_CURRENT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
@@ -96,20 +97,20 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
     if (!isActivated(min) && !isActivated(max)) {
       return resultMap;
     }
-    final @Nullable DataTable customThresholdTable = (DataTable) resultMap.get(KEY_CURRENT);
+    final OperatorResult customThresholdInput = resultMap.get(KEY_CURRENT);
 
     for (final Entry<String, OperatorResult> entry : resultMap.entrySet()) {
       if (entry.getKey().equals(KEY_CURRENT)) {
         continue;
       }
-      postProcessResult(entry.getValue(), customThresholdTable);
+      postProcessResult(entry.getValue(), customThresholdInput);
     }
 
     return resultMap;
   }
 
   private void postProcessResult(final OperatorResult operatorResult,
-      @Nullable DataTable customThresholdTable) {
+      @Nullable OperatorResult customThresholdInput) {
     final List<MergedAnomalyResultDTO> anomalies;
     // todo cyril default implementation of getAnomalies throws error - obliged to catch here - change default implem?
     try {
@@ -120,14 +121,20 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
     }
 
     final DataFrame df;
-    if (customThresholdTable == null) {
+    if (customThresholdInput == null) {
       timestampColum = COL_TIME;
       valueColumn = COL_CURRENT;
       df = optional(operatorResult.getTimeseries()).map(TimeSeries::getDataFrame)
           .orElseThrow(() -> new IllegalArgumentException(
               "Invalid input. OperatorResult contains anomalies but no timeseries."));
+    } else if (customThresholdInput instanceof DataTable) {
+      df = ((DataTable) customThresholdInput).getDataFrame();
     } else {
-      df = customThresholdTable.getDataFrame();
+      // extract the df from the timeseries - throw error if OperatorResult does not contain a timeseries
+      final TimeSeries ts = customThresholdInput.getTimeseries();
+      checkArgument(ts != null,
+          "Provided customInput for THRESHOLD does not contain a timeseries.");
+      df = ts.getDataFrame();
     }
 
     final Set<Long> timestampOutOfThresholds = timestampOutOfThresholds(df);

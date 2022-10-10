@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi.metric;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -37,5 +39,35 @@ public enum MetricAggFunction {
       return null;
     }
     return valueOf(aggFunction.toUpperCase(Locale.ROOT));
+  }
+
+  /**
+   * Parse percentile percent of String of format pctXXXX.
+   * The 2 first digits are the digits before the comma.
+   * The other ones are the digits after the comma.
+   * Eg: PCT05, pct95, pct999
+   *
+   * todo cyril clean this interface - the goal is to allow any number for percentile
+   */
+  public static Double parsePercentile(final String percentileString) {
+    final String lowerCase = requireNonNull(percentileString).toLowerCase(Locale.ENGLISH);
+    if (!lowerCase.startsWith("pct")) {
+      return null;
+    }
+    final String percentDigits = lowerCase.substring(3);
+    if (!(percentDigits.length() >= 2)) {
+      return null;
+    }
+    final String beforeCommaDigits = percentDigits.substring(0, 2);
+    double percentile = Double.parseDouble(beforeCommaDigits);
+
+    final String afterCommaDigits = percentDigits.substring(2);
+    if (afterCommaDigits.length() > 0) {
+      double afterComma = Double.parseDouble(afterCommaDigits);
+      afterComma /= Math.pow(10, afterCommaDigits.length());
+      percentile += afterComma;
+    }
+
+    return percentile;
   }
 }

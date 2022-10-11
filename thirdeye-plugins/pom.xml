@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>ai.startree.thirdeye</groupId>
-    <version>1.78.0-SNAPSHOT</version>
+    <version>1.88.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -35,6 +35,8 @@
     <module>thirdeye-pinot</module>
     <module>thirdeye-notification-email</module>
     <module>thirdeye-bootstrap-open-core</module>
+    <module>thirdeye-enumerators</module>
+    <module>thirdeye-postprocessors</module>
   </modules>
 
   <dependencies>

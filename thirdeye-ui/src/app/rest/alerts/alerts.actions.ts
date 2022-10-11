@@ -12,7 +12,12 @@
  * the License.
  */
 import { useHTTPAction } from "../create-rest-action";
-import { Alert, AlertEvaluation, AlertInsight } from "../dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    AlertInsight,
+    EditableAlert,
+} from "../dto/alert.interfaces";
 import {
     GetAlert,
     GetAlertInsight,
@@ -69,10 +74,11 @@ export const useGetAlertInsight = (): GetAlertInsight => {
     const { data, makeRequest, status, errorMessages } =
         useHTTPAction<AlertInsight>(getAlertInsightREST);
 
-    const getAlertInsight = (
-        alertId: number
-    ): Promise<AlertInsight | undefined> => {
-        return makeRequest(alertId);
+    const getAlertInsight = (params: {
+        alertId?: number;
+        alert?: EditableAlert;
+    }): Promise<AlertInsight | undefined> => {
+        return makeRequest(params);
     };
 
     return { alertInsight: data, getAlertInsight, status, errorMessages };

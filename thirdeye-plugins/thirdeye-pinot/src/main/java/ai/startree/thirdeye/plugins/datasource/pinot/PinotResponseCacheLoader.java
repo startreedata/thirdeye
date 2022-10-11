@@ -23,6 +23,8 @@ import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import com.google.common.cache.CacheLoader;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.Request;
@@ -31,6 +33,7 @@ import org.apache.pinot.client.ResultSetGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotResponseCacheLoader.class);
@@ -39,6 +42,7 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
   private static final String PQL_QUERY_FORMAT = "pql";
   private final PinotConnectionManager pinotConnectionManager;
 
+  @Inject
   public PinotResponseCacheLoader(final PinotConnectionManager pinotConnectionManager) {
     this.pinotConnectionManager = pinotConnectionManager;
   }
@@ -175,9 +179,14 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
           pinotQuery.getTableName(),
           new Request(queryFormat, pinotQuery.getQuery())
       );
+
+      /* Log slow queries. anything greater than 1s */
       final long end = System.currentTimeMillis();
-      LOG.info("Query:{}  took:{}ms",
-          pinotQuery.getQuery().replace('\n', ' '), (end - start));
+      final long duration = end - start;
+      if (duration > 1000) {
+        LOG.info("Query:{}  took:{}ms",
+            pinotQuery.getQuery().replace('\n', ' '), duration);
+      }
 
       return toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {

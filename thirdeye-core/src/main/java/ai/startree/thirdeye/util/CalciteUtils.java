@@ -15,6 +15,8 @@ package ai.startree.thirdeye.util;
 
 import static org.apache.calcite.sql.SqlOperator.MDX_PRECEDENCE;
 
+import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import java.util.List;
 import java.util.Locale;
@@ -125,20 +127,27 @@ public class CalciteUtils {
         .withQuoteAllIdentifiers(quoteIdentifiers)).getSql();
   }
 
-  public static SqlNode queryToNode(final String sql, final SqlParser.Config sqlParserConfig)
-      throws SqlParseException {
+  public static SqlNode queryToNode(final String sql, final SqlParser.Config sqlParserConfig) {
     SqlParser sqlParser = SqlParser.create(sql, sqlParserConfig);
-    return sqlParser.parseQuery();
+    try {
+      return sqlParser.parseQuery();
+    } catch (SqlParseException e) {
+      throw new ThirdEyeException(e, ThirdEyeStatus.ERR_INVALID_SQL, sql);
+    }
   }
 
   public static SqlNode expressionToNode(final String sqlExpression,
-      final SqlParser.Config sqlParserConfig) throws SqlParseException {
+      final SqlParser.Config sqlParserConfig) {
     // calcite parser cannot recognize * as a valid expression
     if (sqlExpression.equals("*")) {
       return identifierOf(sqlExpression);
     }
     SqlParser sqlParser = SqlParser.create(sqlExpression, sqlParserConfig);
-    return sqlParser.parseExpression();
+    try {
+      return sqlParser.parseExpression();
+    } catch (SqlParseException e) {
+      throw new ThirdEyeException(e, ThirdEyeStatus.ERR_INVALID_SQL, sqlExpression);
+    }
   }
 
   public static String quoteIdentifierIfReserved(final String identifier,

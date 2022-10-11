@@ -23,6 +23,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -54,7 +55,8 @@ public class AnomaliesCacheBuilder {
   private static final long TIMEOUT = 60000;
 
   private final LoadingCache<AnomalySlice, Collection<MergedAnomalyResultDTO>> cache;
-  private final ExecutorService executor = Executors.newCachedThreadPool();
+  private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
+      "anomalies-cache-%d").build());
   private final MergedAnomalyResultManager anomalyDAO;
   private final CacheConfig cacheConfig;
 

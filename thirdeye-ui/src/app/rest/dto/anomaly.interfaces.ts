@@ -38,6 +38,12 @@ export interface Anomaly {
     enumerationItem?: {
         id: number;
     };
+    anomalyLabels?: {
+        name: string;
+        sourcePostProcessor: string;
+        sourceNodeName: string;
+        ignore: boolean;
+    }[];
 }
 
 export interface AnomalyFeedback {

@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
@@ -32,7 +33,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTimeZone;
@@ -54,7 +54,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
   @Inject
   public DefaultMinMaxTimeLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
+        "minmax-loader-%d").build());
   }
 
   @Override
@@ -81,7 +82,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     return fetchExtremumTime(Extremum.MAX, datasetConfigDTO, timeFilterInterval);
   }
 
-  private @Nullable Long fetchExtremumTime(final Extremum extremum, final DatasetConfigDTO datasetConfigDTO,
+  private @Nullable Long fetchExtremumTime(final Extremum extremum,
+      final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception {
     final String dataSourceName = Objects.requireNonNull(datasetConfigDTO.getDataSource());
     final @NonNull ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
@@ -126,7 +128,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
    */
   private String extremumTimeSqlQuery(final DatasetConfigDTO datasetConfigDTO,
       final ThirdEyeDataSource thirdEyeDataSource, final Extremum extremum,
-      final Interval timeFilterInterval) throws SqlParseException {
+      final Interval timeFilterInterval) {
     final SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
     final SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     final SqlDialect dialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
@@ -138,13 +140,13 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
     final QueryProjection orderByProjection = extremum.orderByProjection(quoteSafeTimeColumn);
 
-    final CalciteRequest.Builder calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
-        .addSelectProjection(projection)
-        .addOrderByProjection(orderByProjection)
-        .withLimit(1);
+    final var calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+        .select(projection)
+        .orderBy(orderByProjection)
+        .limit(1);
 
     if (timeFilterInterval != null) {
-      calciteRequestBuilder.withTimeFilter(timeFilterInterval,
+      calciteRequestBuilder.whereTimeFilter(timeFilterInterval,
           datasetConfigDTO.getTimeColumn(),
           datasetConfigDTO.getTimeFormat(),
           datasetConfigDTO.getTimeUnit().name());

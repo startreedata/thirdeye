@@ -4,6 +4,39 @@
   "nodes": [
     {
       "name": "root",
+      "type": "PostProcessor",
+      "params": {
+        "type": "TIME_OF_WEEK",
+        "component.ignore": "${timeOfWeekIgnore}",
+        "component.daysOfWeek": "${daysOfWeek}",
+        "component.hoursOfDay": "${hoursOfDay}",
+        "component.dayHoursOfWeek": "${dayHoursOfWeek}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "coldStartProcessor"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "coldStartProcessor",
+      "type": "PostProcessor",
+      "params": {
+        "type": "COLD_START",
+        "component.ignore": "${coldStartIgnore}",
+        "component.tableName": "${dataset}",
+        "component.coldStartPeriod": "${coldStartPeriod}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "anomalyDetector"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "anomalyDetector",
       "type": "AnomalyDetector",
       "params": {
         "component.min": "${min}",
@@ -91,6 +124,12 @@
     "queryFilters": "",
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
+    "coldStartIgnore": "true",
+    "coldStartPeriod": "P0D",
+    "timeOfWeekIgnore": "true",
+    "daysOfWeek": [],
+    "hoursOfDay": [],
+    "dayHoursOfWeek": {},
     "queryLimit": "100000000"
   }
 }

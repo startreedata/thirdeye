@@ -15,7 +15,6 @@ Content-Type: application/json
           "type": "AnomalyDetector",
           "params": {
             "type": "THRESHOLD",
-            "component.timezone": "US/Pacific",
             "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
@@ -188,7 +187,6 @@ Content-Type: application/json
           "type": "AnomalyDetector",
           "params": {
             "type": "ABSOLUTE_CHANGE",
-            "component.timezone": "US/Pacific",
             "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
@@ -399,7 +397,6 @@ Content-Type: application/json
           "type": "AnomalyDetector",
           "params": {
             "type": "PERCENTAGE_CHANGE",
-            "component.timezone": "US/Pacific",
             "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "met",
@@ -599,9 +596,6 @@ Content-Type: application/json
       "sensitivity": "3",
       "aggregationColumn": "views"
     }
-  },
-  "evaluationContext": {
-    "postProcessEnabled": true
   },
   "start": 1613376000000,
   "end": 1626332400000

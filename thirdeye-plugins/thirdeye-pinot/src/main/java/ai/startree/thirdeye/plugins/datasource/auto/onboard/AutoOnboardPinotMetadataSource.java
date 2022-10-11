@@ -32,22 +32,22 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
 
   private static final Logger LOG = LoggerFactory.getLogger(AutoOnboardPinotMetadataSource.class);
 
-  private final ThirdEyePinotClient thirdEyePinotClient;
+  private final PinotControllerRestClient pinotControllerRestClient;
   private final String dataSourceName;
 
   public AutoOnboardPinotMetadataSource(DataSourceMetaBean dataSourceMeta) {
     super(dataSourceMeta);
-    thirdEyePinotClient = new ThirdEyePinotClient(dataSourceMeta, "pinot");
+    pinotControllerRestClient = new PinotControllerRestClient(dataSourceMeta, "pinot");
     dataSourceName = MapUtils.getString(dataSourceMeta.getProperties(), "name",
         PinotThirdEyeDataSource.class.getSimpleName());
   }
 
   public AutoOnboardPinotMetadataSource(DataSourceMetaBean dataSourceMeta,
-      final ThirdEyePinotClient thirdEyePinotClient,
+      final PinotControllerRestClient pinotControllerRestClient,
       final DatasetConfigManager datasetConfigManager,
       final MetricConfigManager metricConfigManager) {
     super(dataSourceMeta);
-    this.thirdEyePinotClient = thirdEyePinotClient;
+    this.pinotControllerRestClient = pinotControllerRestClient;
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
 
@@ -59,7 +59,7 @@ public class AutoOnboardPinotMetadataSource extends AutoOnboard {
     try {
       LOG.info("Checking all pinot tables");
       final PinotDatasetOnboarder pinotDatasetOnboarder = new PinotDatasetOnboarder(
-          thirdEyePinotClient,
+          pinotControllerRestClient,
           datasetConfigManager,
           metricConfigManager);
       pinotDatasetOnboarder.onboardAll(dataSourceName);

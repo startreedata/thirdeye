@@ -30,6 +30,7 @@ import org.joda.time.Interval;
  * This threshold rule filter stage filters the anomalies if either the min or max thresholds do not
  * pass. filters the anomalies if either the min or max thresholds do not satisfied.
  */
+@Deprecated
 public class ThresholdRuleAnomalyFilter implements AnomalyFilter<ThresholdRuleFilterSpec> {
 
   private double minValueHourly;

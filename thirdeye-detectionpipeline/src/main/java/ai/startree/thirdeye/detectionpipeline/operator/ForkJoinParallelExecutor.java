@@ -18,16 +18,10 @@ import static ai.startree.thirdeye.detectionpipeline.PlanExecutor.executePlanNod
 
 import ai.startree.thirdeye.detectionpipeline.ContextKey;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
-import ai.startree.thirdeye.detectionpipeline.PlanNodeFactory;
-import ai.startree.thirdeye.mapper.PlanNodeMapper;
-import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import ai.startree.thirdeye.spi.detection.v2.PlanNode;
-import ai.startree.thirdeye.spi.detection.v2.PlanNodeContext;
-import ai.startree.thirdeye.util.StringTemplateUtils;
-import java.io.IOException;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,32 +36,31 @@ import java.util.stream.Collectors;
 
 public class ForkJoinParallelExecutor {
 
-  private static final int PARALLELISM = 5;
-
-  private final PlanNode root;
-  private final List<EnumerationItemDTO> enumerationItems;
+  private final ForkJoinParallelExecutorConfiguration config;
   private final ExecutorService executorService;
 
-  public ForkJoinParallelExecutor(final PlanNode root,
-      final List<EnumerationItemDTO> enumerationItems) {
-    this.root = root;
-    this.enumerationItems = enumerationItems;
-    executorService = Executors.newFixedThreadPool(PARALLELISM);
+  public ForkJoinParallelExecutor(final ForkJoinParallelExecutorConfiguration config) {
+    this.config = config;
+    executorService = Executors.newFixedThreadPool(config.getParallelism(),
+        new ThreadFactoryBuilder().setNameFormat("fork-join-%d").build());
   }
 
-  public List<ForkJoinResultItem> execute() {
-    final var callables = prepareCallables();
+  public List<ForkJoinResultItem> execute(final PlanNode root,
+      final List<EnumerationItemDTO> enumerationItems) {
+    final var callables = prepareCallables(root, enumerationItems);
     return executeAll(callables);
   }
 
-  public List<Callable<ForkJoinResultItem>> prepareCallables() {
+  public List<Callable<ForkJoinResultItem>> prepareCallables(
+      final PlanNode root, final List<EnumerationItemDTO> enumerationItems) {
     final List<Callable<ForkJoinResultItem>> callables = new ArrayList<>();
 
     for (final var enumerationItem : enumerationItems) {
       /* Clone all nodes for execution. Feed enumeration result */
-      final Map<String, PlanNode> clonedPipelinePlanNodes = clonePipelinePlanNodes(root
-          .getContext()
-          .getPipelinePlanNodes(), enumerationItem);
+      final Map<String, PlanNode> clonedPipelinePlanNodes = new ForkJoinPipelineBuilder()
+          .clonePipelinePlanNodes(root
+              .getContext()
+              .getPipelinePlanNodes(), enumerationItem);
 
       /* Get the new root node in the cloned DAG */
       final PlanNode rootClone = clonedPipelinePlanNodes.get(root.getName());
@@ -81,58 +74,11 @@ public class ForkJoinParallelExecutor {
         executePlanNode(clonedPipelinePlanNodes, rootClone, context);
 
         /* Return the output */
-        return new ForkJoinResultItem(enumerationItem, PlanExecutor.getOutput(context, rootClone.getName()));
+        return new ForkJoinResultItem(enumerationItem,
+            PlanExecutor.getOutput(context, rootClone.getName()));
       }));
     }
     return callables;
-  }
-
-  private Map<String, PlanNode> clonePipelinePlanNodes(
-      final Map<String, PlanNode> pipelinePlanNodes,
-      final EnumerationItemDTO enumerationItem) {
-    final Map<String, PlanNode> clonedPipelinePlanNodes = new HashMap<>();
-    for (final Map.Entry<String, PlanNode> key : pipelinePlanNodes.entrySet()) {
-      final PlanNode planNode = deepCloneWithNewContext(key.getValue(),
-          enumerationItem.getParams(),
-          clonedPipelinePlanNodes);
-      clonedPipelinePlanNodes.put(key.getKey(), planNode);
-    }
-    return clonedPipelinePlanNodes;
-  }
-
-  private PlanNode deepCloneWithNewContext(final PlanNode sourceNode,
-      final Map<String, Object> templateProperties,
-      final Map<String, PlanNode> clonedPipelinePlanNodes) {
-    try {
-      /* Cloned context should contain the new nodes */
-      final PlanNodeContext context = sourceNode.getContext();
-      final PlanNodeContext clonedContext = PlanNodeContext.copy(context)
-          .setPlanNodeBean(clonePlanNodeBean(templateProperties, context.getPlanNodeBean()))
-          .setPipelinePlanNodes(clonedPipelinePlanNodes);
-
-      return PlanNodeFactory.build(sourceNode.getClass(), clonedContext);
-    } catch (final ReflectiveOperationException e) {
-      throw new RuntimeException("Failed to clone PlanNode: " + sourceNode.getName(), e);
-    }
-  }
-
-  private PlanNodeBean clonePlanNodeBean(final Map<String, Object> templateProperties,
-      final PlanNodeBean n) {
-    final TemplatableMap<String, Object> params = applyTemplatePropertiesOnParams(n.getParams(),
-        templateProperties);
-    return PlanNodeMapper.INSTANCE.clone(n).setParams(params);
-  }
-
-  private TemplatableMap<String, Object> applyTemplatePropertiesOnParams(
-      final TemplatableMap<String, Object> params, final Map<String, Object> templateProperties) {
-    if (params == null) {
-      return null;
-    }
-    try {
-      return new TemplatableMap<>(StringTemplateUtils.applyContext(params, templateProperties));
-    } catch (final IOException | ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private List<ForkJoinResultItem> executeAll(final List<Callable<ForkJoinResultItem>> callables) {
@@ -144,7 +90,7 @@ public class ForkJoinParallelExecutor {
 
       final List<ForkJoinResultItem> results = new ArrayList<>();
       for (final var future : futures) {
-        results.add(future.get(10, TimeUnit.SECONDS));
+        results.add(future.get(config.getTimeout().getSeconds(), TimeUnit.SECONDS));
       }
 
       return results;

@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANUL
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.spec.TimeIndexFillerSpec;
@@ -31,7 +31,7 @@ import ai.startree.thirdeye.spi.detection.IndexFiller;
 import ai.startree.thirdeye.spi.detection.NullReplacer;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
-import ai.startree.thirdeye.util.TimeUtils;
+import ai.startree.thirdeye.spi.util.TimeUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +39,6 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 
 public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
@@ -106,9 +105,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   private void inferTimeLimits(final Interval detectionInterval, final DataFrame rawDataFrame) {
-    Period lookback = spec.getLookback() != null ?
-        Period.parse(spec.getLookback(), ISOPeriodFormat.standard()) :
-        DEFAULT_LOOKBACK;
+    Period lookback = isoPeriod(spec.getLookback(), DEFAULT_LOOKBACK);
     TimeLimitInferenceStrategy minTimeInference = spec.getMinTimeInference() != null ?
         TimeLimitInferenceStrategy.valueOf(spec.getMinTimeInference().toUpperCase()) :
         DEFAULT_MIN_TIME_INFERENCE_STRATEGY;

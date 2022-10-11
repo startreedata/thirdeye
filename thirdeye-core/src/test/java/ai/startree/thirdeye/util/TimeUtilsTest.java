@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.util;
 
-import static ai.startree.thirdeye.util.TimeUtils.floorByPeriod;
-import static ai.startree.thirdeye.util.TimeUtils.getBiggestDatetime;
-import static ai.startree.thirdeye.util.TimeUtils.getSmallestDatetime;
+import static ai.startree.thirdeye.spi.util.TimeUtils.floorByPeriod;
+import static ai.startree.thirdeye.spi.util.TimeUtils.getBiggestDatetime;
+import static ai.startree.thirdeye.spi.util.TimeUtils.getSmallestDatetime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;

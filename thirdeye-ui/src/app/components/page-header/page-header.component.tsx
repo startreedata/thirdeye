@@ -147,7 +147,10 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
 
                     {subNavigation && subNavigation.length > 0 && (
                         <Grid item xs={12}>
-                            <Tabs value={subNavigationSelected}>
+                            <Tabs
+                                className="page-header-sub-nav"
+                                value={subNavigationSelected}
+                            >
                                 {subNavigation.map((subNavConfig, idx) => {
                                     return (
                                         <Tab

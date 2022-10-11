@@ -50,19 +50,25 @@ describe("Alerts REST", () => {
     });
 
     it("getAlertInsight should invoke axios.get with appropriate input and return appropriate alert insight", async () => {
-        jest.spyOn(axios, "get").mockResolvedValue({
+        jest.spyOn(axios, "post").mockResolvedValue({
             data: mockAlertResponse,
         });
 
-        await expect(getAlertInsight(1)).resolves.toEqual(mockAlertResponse);
+        await expect(getAlertInsight({ alertId: 1 })).resolves.toEqual(
+            mockAlertResponse
+        );
 
-        expect(axios.get).toHaveBeenCalledWith("/api/alerts/1/insights");
+        expect(axios.post).toHaveBeenCalledWith("/api/alerts/insights", {
+            alert: { id: 1 },
+        });
     });
 
     it("getAlertInsight should throw encountered error", async () => {
-        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
-        await expect(getAlertInsight(1)).rejects.toThrow("testError");
+        await expect(getAlertInsight({ alertId: 1 })).rejects.toThrow(
+            "testError"
+        );
     });
 
     it("getAllAlerts should invoke axios.get with appropriate input and return appropriate alerts", async () => {

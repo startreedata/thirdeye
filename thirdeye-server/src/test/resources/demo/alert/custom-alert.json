@@ -20,7 +20,6 @@
         "type": "AnomalyDetector",
         "params": {
           "type": "PERCENTAGE_CHANGE",
-          "component.timezone": "US/Pacific",
           "component.monitoringGranularity": "P1D",
           "component.timestamp": "ts",
           "component.metric": "met",

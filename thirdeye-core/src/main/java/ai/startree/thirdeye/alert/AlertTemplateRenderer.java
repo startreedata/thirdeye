@@ -107,9 +107,19 @@ public class AlertTemplateRenderer {
         || enumerationItemDTO.getParams().isEmpty()) {
       return templateWithAlertProperties;
     }
+
+    // re-render with enum properties
+    // remove id and name to prevent template being re-fetched from db
+    final Long templateId = templateWithAlertProperties.getId();
+    final String templateName = templateWithAlertProperties.getName();
+    templateWithAlertProperties.setId(null);
+    templateWithAlertProperties.setName(null);
     final AlertDTO alertWithEnumProperties = new AlertDTO().setTemplate(templateWithAlertProperties)
         .setTemplateProperties(enumerationItemDTO.getParams());
-    return renderAlert(alertWithEnumProperties, detectionInterval);
+    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties, detectionInterval);
+    templateWithEnumProperties.setId(templateId);
+    templateWithEnumProperties.setName(templateName);
+    return templateWithEnumProperties;
   }
 
   private AlertTemplateDTO renderAlertInternal(final AlertTemplateDTO alertTemplateInsideAlertDto,

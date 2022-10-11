@@ -239,15 +239,17 @@ export const generateSeriesForAnomalies = (
                 for (idx = 0; idx < anomalyRange; idx++) {
                     const currentTimestamp =
                         anomaly.startTime + granularityBestGuess * idx;
-                    const currentStampIdx = timestamps.findIndex(
+                    const currentTimestampIdx = timestamps.findIndex(
                         (ts) => ts === currentTimestamp
                     );
 
-                    anomalySeriesData.push({
-                        x: currentTimestamp,
-                        y: valuesToTrackAgainst[currentStampIdx],
-                        extraData: anomaly,
-                    });
+                    if (currentTimestampIdx > -1) {
+                        anomalySeriesData.push({
+                            x: currentTimestamp,
+                            y: valuesToTrackAgainst[currentTimestampIdx],
+                            extraData: anomaly,
+                        });
+                    }
                 }
             } else {
                 anomalySeriesData.push({

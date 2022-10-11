@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -22,7 +23,9 @@ import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
@@ -46,7 +49,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
-public class EventResource extends CrudResource<EventApi, EventDTO>{
+public class EventResource extends CrudResource<EventApi, EventDTO> {
 
   public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("type", "eventType")
@@ -55,15 +58,18 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
       .build();
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
   private final HolidayEventsLoader holidayEventsLoader;
+  private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   @Inject
   public EventResource(
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
-      final HolidayEventsLoader holidayEventsLoader) {
+      final HolidayEventsLoader holidayEventsLoader,
+      final MergedAnomalyResultManager mergedAnomalyResultManager) {
     super(eventManager, API_TO_INDEX_FILTER_MAP);
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.holidayEventsLoader = holidayEventsLoader;
+    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
   }
 
   @Override
@@ -74,6 +80,11 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
   @Override
   protected EventApi toApi(final EventDTO dto) {
     return ApiBeanMapper.toApi(dto);
+  }
+
+  @Override
+  protected EventDTO toDto(final EventApi api) {
+    return ApiBeanMapper.toEventDto(api);
   }
 
   /**
@@ -94,5 +105,22 @@ public class EventResource extends CrudResource<EventApi, EventDTO>{
         "Holiday events are disabled.");
     holidayEventsLoader.loadHolidays(startTime, endTime);
     return Response.ok().build();
+  }
+
+  @POST
+  @Path("/create-from-anomaly")
+  public Response loadHolidays(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @FormParam("anomalyId") long anomalyId
+  ) {
+    final MergedAnomalyResultDTO anomalyDto = ensureExists(mergedAnomalyResultManager.findById(
+        anomalyId));
+    final EventDTO eventDTO = new EventDTO()
+        .setName("Anomaly " + anomalyId)
+        .setEventType("ANOMALY")
+        .setStartTime(anomalyDto.getStartTime())
+        .setEndTime(anomalyDto.getEndTime());
+    dtoManager.save(eventDTO);
+    return Response.ok(toApi(eventDTO)).build();
   }
 }

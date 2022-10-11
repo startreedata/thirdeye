@@ -13,7 +13,7 @@
  */
 import { Box, Button, ButtonGroup, Grid, Typography } from "@material-ui/core";
 import { isEmpty, isEqual } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NavLink,
@@ -42,6 +42,7 @@ import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates
 import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { handleAlertPropertyChangeGenerator } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
     AppRouteRelative,
@@ -113,43 +114,14 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
         }
     }, [getAlertTemplatesRequestErrors, alertTemplatesRequestStatus]);
 
-    const handleAlertPropertyChange = (
-        contentsToReplace: Partial<EditableAlert>,
-        isTotalReplace = false
-    ): void => {
-        if (isTotalReplace) {
-            setAlert(contentsToReplace as EditableAlert);
-        } else {
-            setAlert({
-                ...alert,
-                ...contentsToReplace,
-            });
-        }
-
-        if (
-            alertTemplateOptions &&
-            contentsToReplace.template &&
-            contentsToReplace.template.name
-        ) {
-            // If the alert template refers to an alert template
-            const selectedAlertTemplateName = contentsToReplace.template.name;
-            const match = alertTemplateOptions.find(
-                (candidate) => candidate.name === selectedAlertTemplateName
-            );
-            setSelectedAlertTemplate(match === undefined ? null : match);
-        } else if (contentsToReplace.template) {
-            if (Object.keys(contentsToReplace.template).length === 0) {
-                // Set empty if user removed contents
-                setSelectedAlertTemplate(null);
-            } else if (contentsToReplace.template.name === undefined) {
-                // If user just throws template into the configuration, treat is as custom
-                setSelectedAlertTemplate({
-                    name: t("message.custom-alert-template-used"),
-                    ...(contentsToReplace.template as Partial<AlertTemplateType>),
-                } as AlertTemplateType);
-            }
-        }
-    };
+    const handleAlertPropertyChange = useMemo(() => {
+        return handleAlertPropertyChangeGenerator(
+            setAlert,
+            alertTemplateOptions,
+            setSelectedAlertTemplate,
+            t
+        );
+    }, [setAlert, alertTemplateOptions, setSelectedAlertTemplate]);
 
     const handleSubscriptionGroupChange = (
         updatedGroups: SubscriptionGroup[]

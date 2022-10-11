@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -67,7 +68,8 @@ public class SubscriptionCronScheduler implements Runnable {
   @Inject
   public SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager) {
     this.subscriptionGroupManager = subscriptionGroupManager;
-    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(
+        "subscription-scheduler-%d").build());
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
     } catch (final SchedulerException e) {

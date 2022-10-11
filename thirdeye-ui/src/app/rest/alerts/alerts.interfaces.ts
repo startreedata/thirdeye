@@ -12,7 +12,12 @@
  * the License.
  */
 import { ActionHook } from "../actions.interfaces";
-import { Alert, AlertEvaluation, AlertInsight } from "../dto/alert.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    AlertInsight,
+    EditableAlert,
+} from "../dto/alert.interfaces";
 
 export interface UseGetEvaluationParams {
     alert: {
@@ -42,7 +47,13 @@ export interface GetAlerts extends ActionHook {
 
 export interface GetAlertInsight extends ActionHook {
     alertInsight: AlertInsight | null;
-    getAlertInsight: (id: number) => Promise<AlertInsight | undefined>;
+    getAlertInsight: ({
+        alertId,
+        alert,
+    }: {
+        alertId?: number;
+        alert?: EditableAlert;
+    }) => Promise<AlertInsight | undefined>;
 }
 
 export interface ResetAlert extends ActionHook {

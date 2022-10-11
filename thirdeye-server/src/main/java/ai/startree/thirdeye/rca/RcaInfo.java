@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.rca;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -27,15 +28,18 @@ public class RcaInfo {
   // avoid passing the whole AlertMetadataDTO
   private final @NonNull DateTimeZone timezone;
 
+  private final @NonNull EventContextDto eventContext;
+
   public RcaInfo(
       final @NonNull MergedAnomalyResultDTO anomaly,
       final @NonNull MetricConfigDTO metric,
       final @NonNull DatasetConfigDTO dataset,
-      final @NonNull DateTimeZone timezone) {
+      final @NonNull DateTimeZone timezone, @NonNull final EventContextDto eventContext) {
     this.anomaly = anomaly;
     this.metric = metric;
     this.dataset = dataset;
     this.timezone = timezone;
+    this.eventContext = eventContext;
   }
 
   // todo cyril for refactoring I expose all objects - once refactored, only expose what is really used
@@ -53,5 +57,9 @@ public class RcaInfo {
 
   public @NonNull DateTimeZone getTimezone() {
     return timezone;
+  }
+
+  public @NonNull EventContextDto getEventContext() {
+    return eventContext;
   }
 }

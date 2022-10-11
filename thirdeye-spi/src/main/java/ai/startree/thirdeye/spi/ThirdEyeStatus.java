@@ -48,6 +48,7 @@ public enum ThirdEyeStatus {
   ERR_CALCITE_FILTERING("Failed running Calcite filtering query with filter: %s"),
   ERR_INVALID_PARAMS_COMPONENTS("Invalid param components: %s for Class %s"),
   ERR_INVALID_DETECTION_REGRESSORS("Invalid regressors configuration. Too few or too many regressors?"),
+  ERR_INVALID_SQL("Invalid SQL:\n%s"),
 
   OK("OK"),
   ;

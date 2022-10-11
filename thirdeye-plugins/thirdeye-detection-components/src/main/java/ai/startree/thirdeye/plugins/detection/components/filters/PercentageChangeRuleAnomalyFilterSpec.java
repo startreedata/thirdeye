@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Deprecated
 public class PercentageChangeRuleAnomalyFilterSpec extends AbstractSpec {
 
   private String offset;

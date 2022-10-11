@@ -11,21 +11,36 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AxiosError } from "axios";
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { cloneDeep, isEmpty, isNil, isNumber } from "lodash";
+import { cloneDeep, every, isEmpty, isNil, isNumber } from "lodash";
+import { Dispatch, SetStateAction } from "react";
+import { NotificationTypeV1 } from "../../platform/components";
 import {
     formatDateAndTimeV1,
     formatDurationV1,
     formatLargeNumberV1,
     formatPercentageV1,
 } from "../../platform/utils";
-import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
+import { createAlert } from "../../rest/alerts/alerts.rest";
+import {
+    AlertTemplate,
+    AlertTemplate as AlertTemplateType,
+} from "../../rest/dto/alert-template.interfaces";
+import {
+    Alert,
+    AlertEvaluation,
+    EditableAlert,
+} from "../../rest/dto/alert.interfaces";
 import {
     Anomaly,
     AnomalyFeedbackType,
 } from "../../rest/dto/anomaly.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
+import { getErrorMessages } from "../rest/rest.util";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const EMPTY_STRING_DISPLAY = "<EMPTY_VALUE>";
@@ -366,4 +381,132 @@ export const ALL_OPTIONS_TO_DESCRIPTIONS = {
 export const ALL_OPTIONS_WITH_NO_FEEDBACK = {
     ...ALL_OPTIONS_TO_DESCRIPTIONS,
     [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: "Select Feedback",
+};
+
+export const handleAlertPropertyChangeGenerator = (
+    setAlert: Dispatch<SetStateAction<EditableAlert>>,
+    alertTemplateOptions: AlertTemplateType[],
+    setSelectedAlertTemplate: Dispatch<SetStateAction<AlertTemplate | null>>,
+    translation: (label: string) => string
+) => {
+    return (
+        contentsToReplace: Partial<EditableAlert>,
+        isTotalReplace = false
+    ): void => {
+        if (isTotalReplace) {
+            setAlert(contentsToReplace as EditableAlert);
+
+            if (!contentsToReplace.template) {
+                setSelectedAlertTemplate(null);
+            }
+        } else {
+            setAlert((currentAlert) => {
+                return {
+                    ...currentAlert,
+                    ...contentsToReplace,
+                } as EditableAlert;
+            });
+        }
+
+        if (
+            alertTemplateOptions &&
+            contentsToReplace.template &&
+            contentsToReplace.template.name
+        ) {
+            // If the alert template refers to an alert template
+            const selectedAlertTemplateName = contentsToReplace.template.name;
+            const match = alertTemplateOptions.find(
+                (candidate) => candidate.name === selectedAlertTemplateName
+            );
+            setSelectedAlertTemplate(match === undefined ? null : match);
+        } else if (contentsToReplace.template) {
+            if (Object.keys(contentsToReplace.template).length === 0) {
+                // Set empty if user removed contents
+                setSelectedAlertTemplate(null);
+            } else if (contentsToReplace.template.name === undefined) {
+                // If user just throws template into the configuration, treat is as custom
+                setSelectedAlertTemplate({
+                    name: translation("message.custom-alert-template-used"),
+                    ...(contentsToReplace.template as Partial<AlertTemplateType>),
+                } as AlertTemplateType);
+            }
+        }
+    };
+};
+
+export const handleCreateAlertClickGenerator = (
+    notify: (type: NotificationTypeV1, msg: string) => void,
+    translation: (label: string, options?: { [key: string]: string }) => string,
+    onSuccess: (alert: Alert) => void
+) => {
+    return (
+        alert: EditableAlert,
+        subscriptionGroups: SubscriptionGroup[]
+    ): void => {
+        createAlert(alert)
+            .then((alert) => {
+                if (isEmpty(subscriptionGroups)) {
+                    // Call the onSuccess callback
+                    onSuccess(alert);
+
+                    return;
+                }
+
+                // Update subscription groups with new alert
+                for (const subscriptionGroup of subscriptionGroups) {
+                    if (subscriptionGroup.alerts) {
+                        // Add to existing list
+                        subscriptionGroup.alerts.push(alert);
+                    } else {
+                        // Create and add to list
+                        subscriptionGroup.alerts = [alert];
+                    }
+                }
+
+                updateSubscriptionGroups(subscriptionGroups)
+                    .then((): void => {
+                        notify(
+                            NotificationTypeV1.Success,
+                            translation("message.update-success", {
+                                entity: translation(
+                                    "label.subscription-groups"
+                                ),
+                            })
+                        );
+                    })
+                    .finally((): void => {
+                        // Call the onSuccess callback
+                        onSuccess(alert);
+                    });
+            })
+            .catch((error: AxiosError) => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          translation("message.create-error", {
+                              entity: translation("label.alert"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
+    };
+};
+
+export const filterOutIgnoredAnomalies = (anomalies: Anomaly[]): Anomaly[] => {
+    // Filter out anomalies that should be ignored if it has a label with ignore in it
+    return anomalies.filter((anomaly: Anomaly) => {
+        if (!anomaly.anomalyLabels) {
+            return true;
+        }
+
+        return every(
+            anomaly.anomalyLabels.map((label) => {
+                return label.ignore === false || label.ignore === undefined;
+            })
+        );
+    });
 };

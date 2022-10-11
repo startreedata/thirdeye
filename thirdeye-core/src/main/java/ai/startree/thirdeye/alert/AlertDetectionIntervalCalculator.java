@@ -21,7 +21,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.util.TimeUtils;
+import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -164,7 +164,7 @@ public class AlertDetectionIntervalCalculator {
     return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getDataset)
         .map(DatasetConfigDTO::getCompletenessDelay)
-        .map(delayString -> Period.parse(delayString, ISOPeriodFormat.standard()))
+        .map(TimeUtils::isoPeriod)
         .orElse(null);
   }
 

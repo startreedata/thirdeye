@@ -13,11 +13,11 @@
  */
 package ai.startree.thirdeye.spi.detection.postprocessing;
 
-import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 
 public interface AnomalyPostProcessorFactory {
 
   String name();
 
-  <T extends AbstractSpec> AnomalyPostProcessor<T> build();
+  <T extends PostProcessorSpec> AnomalyPostProcessor<T> build();
 }

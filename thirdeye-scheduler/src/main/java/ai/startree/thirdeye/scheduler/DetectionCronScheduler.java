@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -61,7 +62,7 @@ public class DetectionCronScheduler implements Runnable {
   public DetectionCronScheduler(final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration, final AlertManager alertManager) {
     this.alertManager = alertManager;
     this.alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
-    executorService = Executors.newSingleThreadScheduledExecutor();
+    executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
     } catch (final SchedulerException e) {

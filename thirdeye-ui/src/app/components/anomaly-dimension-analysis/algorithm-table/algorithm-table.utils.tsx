@@ -19,9 +19,8 @@ import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfa
 import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
 import {
-    baselineComparisonOffsetToHumanReadable,
     baselineOffsetToMilliseconds,
-    parseBaselineComparisonOffset,
+    comparisonOffsetReadableValue,
 } from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
@@ -139,9 +138,6 @@ export const generateComparisonChartOptions = (
         },
     ];
 
-    const { baselineOffsetValue, unit } =
-        parseBaselineComparisonOffset(comparisonOffset);
-
     return {
         brush: true,
         height: 400,
@@ -158,14 +154,11 @@ export const generateComparisonChartOptions = (
                 {
                     start:
                         startTime -
-                        baselineOffsetToMilliseconds(baselineOffsetValue, unit),
+                        baselineOffsetToMilliseconds(comparisonOffset),
                     end:
                         endTime -
-                        baselineOffsetToMilliseconds(baselineOffsetValue, unit),
-                    name: baselineComparisonOffsetToHumanReadable(
-                        baselineOffsetValue,
-                        unit
-                    ),
+                        baselineOffsetToMilliseconds(comparisonOffset),
+                    name: comparisonOffsetReadableValue(comparisonOffset),
                     color: Palette.COLOR_VISUALIZATION_STROKE_ANOMALY,
                     opacity: 0.2,
                 },

@@ -20,6 +20,8 @@ import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
+import ai.startree.thirdeye.spi.detection.Enumerator;
+import ai.startree.thirdeye.spi.detection.EnumeratorFactory;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactoryContext;
@@ -40,10 +42,18 @@ public class DetectionRegistry {
 
   private final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
   private final Map<String, EventTriggerFactory> triggerFactoryMap = new HashMap<>();
+  private final Map<String, EnumeratorFactory> enumeratorFactoryMap = new HashMap<>();
 
   @Inject
   public DetectionRegistry() {
 
+  }
+
+  private static <T> void validate(final String name, final Map<String, T> m, String type) {
+    checkArgument(m.containsKey(name), "%s type not registered: %s. Available: %s",
+        type,
+        name,
+        m.keySet());
   }
 
   public void addAnomalyDetectorFactory(final AnomalyDetectorFactory f) {
@@ -60,22 +70,29 @@ public class DetectionRegistry {
     triggerFactoryMap.put(f.name(), f);
   }
 
+  public void addEnumeratorFactory(final EnumeratorFactory f) {
+    checkState(!enumeratorFactoryMap.containsKey(f.name()),
+        "Duplicate EnumeratorFactory: " + f.name());
+
+    enumeratorFactoryMap.put(f.name(), f);
+  }
+
   public AnomalyDetector<AbstractSpec> buildDetector(
-      String factoryName,
-      AnomalyDetectorFactoryContext context) {
-    checkArgument(anomalyDetectorFactoryMap.containsKey(factoryName),
-        String.format("Detector type not registered: %s. Available detectors: %s",
-            factoryName,
-            anomalyDetectorFactoryMap.keySet()));
+      final String factoryName,
+      final AnomalyDetectorFactoryContext context) {
+    validate(factoryName, anomalyDetectorFactoryMap, "Detector");
     return anomalyDetectorFactoryMap.get(factoryName).build(context);
   }
 
   public EventTrigger<AbstractSpec> buildTrigger(
-      String factoryName,
-      EventTriggerFactoryContext context) {
-    checkArgument(triggerFactoryMap.containsKey(factoryName), "Trigger type not registered: %s. Available triggers: %s",
-            factoryName,
-            triggerFactoryMap.keySet());
+      final String factoryName,
+      final EventTriggerFactoryContext context) {
+    validate(factoryName, triggerFactoryMap, "Trigger");
     return triggerFactoryMap.get(factoryName).build(context);
+  }
+
+  public Enumerator buildEnumerator(final String factoryName) {
+    validate(factoryName, enumeratorFactoryMap, "Enumerator");
+    return enumeratorFactoryMap.get(factoryName).build();
   }
 }

@@ -11,20 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
-import { createAlert } from "../../rest/alerts/alerts.rest";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
+import { useNotificationProviderV1 } from "../../platform/components";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
-import { getErrorMessages } from "../../utils/rest/rest.util";
+import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
 import { AlertsEditBasePage } from "../alerts-update-page/alerts-edit-base-page.component";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
@@ -39,56 +31,11 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         SubscriptionGroup[]
     >([]);
 
-    const handleCreateAlertClick = (alert: EditableAlert): void => {
-        createAlert(alert)
-            .then((alert) => {
-                if (isEmpty(subscriptionGroups)) {
-                    // Redirect to alerts detail path
-                    navigate(getAlertsAlertPath(alert.id));
-
-                    return;
-                }
-
-                // Update subscription groups with new alert
-                for (const subscriptionGroup of subscriptionGroups) {
-                    if (subscriptionGroup.alerts) {
-                        // Add to existing list
-                        subscriptionGroup.alerts.push(alert);
-                    } else {
-                        // Create and add to list
-                        subscriptionGroup.alerts = [alert];
-                    }
-                }
-
-                updateSubscriptionGroups(subscriptionGroups)
-                    .then((): void => {
-                        notify(
-                            NotificationTypeV1.Success,
-                            t("message.update-success", {
-                                entity: t("label.subscription-groups"),
-                            })
-                        );
-                    })
-                    .finally((): void => {
-                        // Redirect to alerts detail path
-                        navigate(getAlertsAlertPath(alert.id));
-                    });
-            })
-            .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.create-error", {
-                              entity: t("label.alert"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
-            });
-    };
+    const handleCreateAlertClick = useMemo(() => {
+        return handleCreateAlertClickGenerator(notify, t, (savedAlert) =>
+            navigate(getAlertsAlertPath(savedAlert.id))
+        );
+    }, [navigate, notify, t]);
 
     return (
         <AlertsEditBasePage
@@ -100,7 +47,9 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             submitButtonLabel={t("label.create-entity", {
                 entity: t("label.alert"),
             })}
-            onSubmit={handleCreateAlertClick}
+            onSubmit={(alert) =>
+                handleCreateAlertClick(alert, subscriptionGroups)
+            }
             onSubscriptionGroupChange={setSubscriptionGroups}
         />
     );

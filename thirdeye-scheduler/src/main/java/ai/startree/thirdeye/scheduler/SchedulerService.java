@@ -24,6 +24,7 @@ import ai.startree.thirdeye.scheduler.monitor.MonitorJobScheduler;
 import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
@@ -85,7 +86,8 @@ public class SchedulerService implements Managed {
     this.subscriptionScheduler = subscriptionScheduler;
     this.taskManager = taskManager;
 
-    executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+    executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+        new ThreadFactoryBuilder().setNameFormat("scheduler-service-%d").build());
   }
 
   @Override

@@ -152,7 +152,12 @@ function AlertTemplate({
             );
         }
 
-        return <li>{option.name}</li>;
+        return (
+            <li>
+                <Typography variant="h6">{option.name}</Typography>
+                <Typography variant="caption">{option.description}</Typography>
+            </li>
+        );
     };
 
     return (

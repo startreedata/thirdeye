@@ -17,7 +17,6 @@ Content-Type: application/json
           "type": "AnomalyDetector",
           "params": {
             "type": "THRESHOLD",
-            "component.timezone": "UTC",
             "component.monitoringGranularity": "P1D",
             "component.timestamp": "ts",
             "component.metric": "${metric}",

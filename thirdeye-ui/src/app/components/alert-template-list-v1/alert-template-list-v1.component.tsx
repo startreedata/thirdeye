@@ -122,7 +122,7 @@ export const AlertTemplateListV1: FunctionComponent<
             dataKey: "name",
             header: t("label.name"),
             minWidth: 0,
-            flex: 1.5,
+            flex: 1,
             sortable: true,
             customCellRenderer: renderLink,
         },
@@ -131,7 +131,7 @@ export const AlertTemplateListV1: FunctionComponent<
             dataKey: "description",
             header: t("label.description"),
             minWidth: 0,
-            flex: 1,
+            flex: 2,
         },
     ];
 

@@ -12,6 +12,7 @@
  * the License.
  */
 import axios from "axios";
+import { filterOutIgnoredAnomalies } from "../../utils/anomalies/anomalies.util";
 import { Anomaly, AnomalyFeedback } from "../dto/anomaly.interfaces";
 import { GetAnomaliesProps } from "./anomaly.interfaces";
 
@@ -61,7 +62,7 @@ export const getAnomalies = async ({
         `${BASE_URL_ANOMALIES}?${queryParams.toString()}`
     );
 
-    return response.data;
+    return filterOutIgnoredAnomalies(response.data);
 };
 
 export const deleteAnomaly = async (id: number): Promise<Anomaly> => {

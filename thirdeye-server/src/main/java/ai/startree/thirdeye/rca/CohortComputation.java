@@ -211,12 +211,6 @@ public class CohortComputation {
       final Set<Set<String>> visited,
       final CohortComputationContext c)
       throws Exception {
-    final Set<String> dimensionsSet = Set.copyOf(dimensions);
-    if (visited.contains(dimensionsSet)) {
-      throw new RuntimeException("Invalid code path! Should always explore new pathways");
-    }
-    visited.add(dimensionsSet);
-
     final List<DimensionFilterContributionApi> results = new ArrayList<>();
 
     final List<String> dimensionsToExplore = new ArrayList<>(c.getAllDimensions());
@@ -226,9 +220,11 @@ public class CohortComputation {
       final List<String> subDimensions = new ArrayList<>(dimensions.size() + 1);
       subDimensions.addAll(dimensions);
       subDimensions.add(dimension);
-      if (visited.contains(Set.copyOf(subDimensions))) {
+      final Set<String> subDimensionSet = Set.copyOf(subDimensions);
+      if (visited.contains(subDimensionSet)) {
         continue;
       }
+      visited.add(subDimensionSet);
 
       final List<DimensionFilterContributionApi> l = query(subDimensions, c);
       results.addAll(l);

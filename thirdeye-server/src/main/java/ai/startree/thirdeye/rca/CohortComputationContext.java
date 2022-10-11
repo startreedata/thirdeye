@@ -29,7 +29,7 @@ public class CohortComputationContext {
   private Interval interval;
   private List<String> allDimensions;
   private int limit = 100;
-  private int maxDepth = 5;
+  private int maxDepth = 10;
 
   private Double threshold;
   private Double aggregate;

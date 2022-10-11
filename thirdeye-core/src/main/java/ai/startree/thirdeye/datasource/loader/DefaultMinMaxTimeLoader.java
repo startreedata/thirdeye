@@ -13,9 +13,13 @@
  */
 package ai.startree.thirdeye.datasource.loader;
 
+import static ai.startree.thirdeye.util.CalciteUtils.addAlias;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
+
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
-import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -24,6 +28,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
+import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,6 +38,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.calcite.sql.SqlDialect;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTimeZone;
@@ -132,17 +140,18 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     final SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
     final SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     final SqlDialect dialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
+    final Config sqlParserConfig = SqlLanguageTranslator.translate(
+        sqlLanguage.getSqlParserConfig());
 
-    final QueryProjection projection = getTimeColumnToMillisProjection(datasetConfigDTO,
+    final SqlNode projection = getTimeColumnToMillisProjection(datasetConfigDTO,
         sqlExpressionBuilder,
-        dialect);
+        dialect, sqlParserConfig);
 
-    final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
-    final QueryProjection orderByProjection = extremum.orderByProjection(quoteSafeTimeColumn);
+    final SqlNode orderByNode = extremum.orderByNode(datasetConfigDTO.getTimeColumn());
 
-    final var calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+    final Builder calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
         .select(projection)
-        .orderBy(orderByProjection)
+        .orderBy(orderByNode)
         .limit(1);
 
     if (timeFilterInterval != null) {
@@ -155,8 +164,10 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     return calciteRequestBuilder.build().getSql(sqlLanguage, sqlExpressionBuilder);
   }
 
-  private QueryProjection getTimeColumnToMillisProjection(final DatasetConfigDTO datasetConfigDTO,
-      final SqlExpressionBuilder sqlExpressionBuilder, final SqlDialect dialect) {
+  // fixme cyril code is duplicated with timeAggregation in calciteRequest - remove this see CalciteRequest L212
+  private SqlNode getTimeColumnToMillisProjection(final DatasetConfigDTO datasetConfigDTO,
+      final SqlExpressionBuilder sqlExpressionBuilder, final SqlDialect dialect,
+      final SqlParser.Config sqlParserConfig) {
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
     final String timeGroupExpression = sqlExpressionBuilder.getTimeGroupExpression(
         quoteSafeTimeColumn,
@@ -164,22 +175,25 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
         Period.millis(1),
         datasetConfigDTO.getTimeUnit().toString(),
         DateTimeZone.UTC.toString());
-    return QueryProjection.of(timeGroupExpression).withAlias(TIME_ALIAS);
+
+    final SqlNode timeGroupNode = CalciteUtils.expressionToNode(timeGroupExpression,
+        sqlParserConfig);
+    return addAlias(timeGroupNode, TIME_ALIAS);
   }
 
   private enum Extremum {
     MIN {
       @Override
-      @NonNull QueryProjection orderByProjection(final String quoteSafeTimeColumn) {
-        return QueryProjection.of(quoteSafeTimeColumn);
+      @NonNull SqlNode orderByNode(final String timeColumn) {
+        return identifierOf(timeColumn);
       }
     }, MAX {
       @Override
-      @NonNull QueryProjection orderByProjection(final String quoteSafeTimeColumn) {
-        return QueryProjection.of(quoteSafeTimeColumn).withDescOrder();
+      @NonNull SqlNode orderByNode(final String timeColumn) {
+        return identifierDescOf(timeColumn);
       }
     };
 
-    abstract @NonNull QueryProjection orderByProjection(final String quoteSafeTimeColumn);
+    abstract @NonNull SqlNode orderByNode(final String timeColumn);
   }
 }

@@ -15,6 +15,8 @@ package ai.startree.thirdeye.datasource.loader;
 
 import static ai.startree.thirdeye.datasource.calcite.QueryProjection.getFunctionName;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
@@ -43,6 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,12 +138,12 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // submit requests
     for (final String dimension : dimensions) {
-      final QueryProjection dimensionProjection = QueryProjection.of(dimension);
+      final SqlIdentifier dimensionIdentifier = identifierOf(dimension);
       final CalciteRequest request = CalciteRequest.newBuilderFrom(slice)
-          .select(dimensionProjection)
-          .groupBy(dimensionProjection)
+          .select(dimensionIdentifier)
+          .groupBy(dimensionIdentifier)
           // ensure multiple runs return the same values when num rows > limit - see te-636
-          .orderBy(QueryProjection.of(Constants.COL_VALUE).withDescOrder())
+          .orderBy(identifierDescOf(Constants.COL_VALUE))
           .limit(limit)
           .build();
       final Future<DataFrame> res = getQueryResultAsync(request,
@@ -188,10 +191,10 @@ public class DefaultAggregationLoader implements AggregationLoader {
           COL_AGGREGATION_ONLY_ROWS_COUNT));
     }
     for (final String dimension : dimensions) {
-      final QueryProjection dimensionProjection = QueryProjection.of(dimension);
+      final SqlIdentifier dimensionIdentifier = identifierOf(dimension);
       requestBuilder
-          .select(dimensionProjection)
-          .groupBy(dimensionProjection);
+          .select(dimensionIdentifier)
+          .groupBy(dimensionIdentifier);
     }
     final String dataSource = slice.getDatasetConfigDTO().getDataSource();
     return getQueryResultAsync(requestBuilder.build(), dataSource);

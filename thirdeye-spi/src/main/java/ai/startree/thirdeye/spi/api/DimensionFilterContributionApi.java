@@ -20,6 +20,7 @@ import java.util.StringJoiner;
 public class DimensionFilterContributionApi {
   private Map<String, String> dimensionFilters;
   private Double value;
+  private Double percentage;
 
   public Map<String, String> getDimensionFilters() {
     return dimensionFilters;
@@ -37,6 +38,15 @@ public class DimensionFilterContributionApi {
 
   public DimensionFilterContributionApi setValue(final Double value) {
     this.value = value;
+    return this;
+  }
+
+  public Double getPercentage() {
+    return percentage;
+  }
+
+  public DimensionFilterContributionApi setPercentage(final Double percentage) {
+    this.percentage = percentage;
     return this;
   }
 

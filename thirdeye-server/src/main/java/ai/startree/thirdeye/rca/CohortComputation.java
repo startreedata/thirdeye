@@ -40,6 +40,7 @@ import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.inject.Singleton;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,7 +85,8 @@ public class CohortComputation {
         .withAlias(COL_AGGREGATE);
   }
 
-  private static List<DimensionFilterContributionApi> readDf(final DataFrame df) {
+  private static List<DimensionFilterContributionApi> readDf(final DataFrame df,
+      final Double aggregate) {
     final Set<String> dimensions = new HashSet<>(df.getSeriesNames());
     dimensions.remove(COL_AGGREGATE);
 
@@ -93,10 +95,14 @@ public class CohortComputation {
     final List<DimensionFilterContributionApi> results = new ArrayList<>();
     for (int i = 0; i < df.size(); ++i) {
       final Map<String, String> dimensionFilters = new HashMap<>(nColumns);
+      final double value = df.getDouble(COL_AGGREGATE, i);
       final DimensionFilterContributionApi api = new DimensionFilterContributionApi()
           .setDimensionFilters(dimensionFilters)
-          .setValue(df.getDouble(COL_AGGREGATE, i));
-      for (String seriesName : dimensions) {
+          .setValue(value);
+      if (aggregate != null) {
+        api.setPercentage(trimDouble(100.0 * value / aggregate));
+      }
+      for (final String seriesName : dimensions) {
         dimensionFilters.put(seriesName, df.getString(seriesName, i));
       }
       results.add(api);
@@ -123,6 +129,11 @@ public class CohortComputation {
         .limit(100000).build();
   }
 
+  private static double trimDouble(final double v) {
+    final DecimalFormat df = new DecimalFormat("#.##");
+    return Double.parseDouble(df.format(v));
+  }
+
   private CohortComputationContext buildContext(final CohortComputationApi request) {
     final Interval currentInterval = new Interval(
         request.getStart(),
@@ -142,13 +153,12 @@ public class CohortComputation {
             .orElse(List.of())));
     ensure(!dimensions.isEmpty(), "Dimension list is empty");
 
-    final CohortComputationContext context = new CohortComputationContext()
+    return new CohortComputationContext()
         .setMetric(metric)
         .setDataset(dataset)
         .setDataSource(dataSource)
         .setInterval(currentInterval)
         .setAllDimensions(dimensions);
-    return context;
   }
 
   private Double computeAggregate(final CohortComputationContext c) throws Exception {
@@ -173,7 +183,9 @@ public class CohortComputation {
         .map(p -> agg * p / 100.0)
         .orElse(request.getThreshold());
 
-    context.setThreshold(threshold);
+    context
+        .setThreshold(threshold)
+        .setAggregate(agg);
 
     final Set<Set<String>> visited = new HashSet<>();
     final var results = compute0(List.of(), visited, context);
@@ -212,7 +224,7 @@ public class CohortComputation {
     final List<String> dimensionsToExplore = new ArrayList<>(c.getAllDimensions());
     dimensionsToExplore.removeAll(dimensions);
 
-    for (String dimension : dimensionsToExplore) {
+    for (final String dimension : dimensionsToExplore) {
       final List<String> subDimensions = new ArrayList<>(dimensions);
       subDimensions.add(dimension);
       if (visited.contains(Set.copyOf(subDimensions))) {
@@ -220,7 +232,7 @@ public class CohortComputation {
       }
 
       final CalciteRequest query = getCalciteRequest(subDimensions, c);
-      final var l = executeQuery(query, c.getDataSource());
+      final var l = executeQuery(query, c.getDataSource(), c.getAggregate());
       results.addAll(l);
       if (l.size() > 0) {
         results.addAll(compute0(subDimensions, visited, c));
@@ -262,10 +274,10 @@ public class CohortComputation {
   }
 
   private List<DimensionFilterContributionApi> executeQuery(final CalciteRequest calciteRequest,
-      final ThirdEyeDataSource dataSource)
+      final ThirdEyeDataSource dataSource, final Double aggregate)
       throws Exception {
     final DataFrame df = query(calciteRequest, dataSource);
-    return readDf(df);
+    return readDf(df, aggregate);
   }
 
   public DataFrame query(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds)

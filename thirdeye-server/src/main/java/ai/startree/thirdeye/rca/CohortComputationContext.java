@@ -27,6 +27,7 @@ public class CohortComputationContext {
   private ThirdEyeDataSource dataSource;
 
   private Double threshold;
+  private Double aggregate;
   private Interval interval;
   private List<String> allDimensions;
 
@@ -63,6 +64,15 @@ public class CohortComputationContext {
 
   public CohortComputationContext setThreshold(final Double threshold) {
     this.threshold = threshold;
+    return this;
+  }
+
+  public Double getAggregate() {
+    return aggregate;
+  }
+
+  public CohortComputationContext setAggregate(final Double aggregate) {
+    this.aggregate = aggregate;
     return this;
   }
 

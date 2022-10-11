@@ -110,25 +110,6 @@ public class CohortComputation {
     return results;
   }
 
-  private static CalciteRequest getCalciteRequest(final List<String> subDimensions,
-      final CohortComputationContext c) {
-    final DatasetConfigDTO dataset = c.getDataset();
-    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
-        .whereTimeFilter(c.getInterval(),
-            dataset.getTimeColumn(),
-            dataset.getTimeFormat(),
-            dataset.getTimeUnit().name());
-
-    subDimensions.forEach(builder::select);
-    builder.select(selectable(c.getMetric()));
-    subDimensions.forEach(builder::groupBy);
-
-    final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
-    return builder
-        .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
-        .limit(100000).build();
-  }
-
   private static double trimDouble(final double v) {
     final DecimalFormat df = new DecimalFormat("#.##");
     return Double.parseDouble(df.format(v));
@@ -153,12 +134,17 @@ public class CohortComputation {
             .orElse(List.of())));
     ensure(!dimensions.isEmpty(), "Dimension list is empty");
 
-    return new CohortComputationContext()
+    final CohortComputationContext context = new CohortComputationContext()
         .setMetric(metric)
         .setDataset(dataset)
         .setDataSource(dataSource)
         .setInterval(currentInterval)
         .setAllDimensions(dimensions);
+
+    optional(request.getLimit())
+        .ifPresent(context::setLimit);
+
+    return context;
   }
 
   private Double computeAggregate(final CohortComputationContext c) throws Exception {
@@ -197,7 +183,8 @@ public class CohortComputation {
         .setAggregate(agg)
         .setGenerateEnumerationItems(request.isGenerateEnumerationItems())
         .setResultSize(results.size())
-        .setResults(results);
+        .setResults(results)
+        .setLimit(context.getLimit());
 
     if (request.isGenerateEnumerationItems()) {
       final String queryFilters = optional(request.getQueryFilters()).orElse(K_QUERY_FILTERS_DEFAULT);
@@ -231,14 +218,37 @@ public class CohortComputation {
         continue;
       }
 
-      final CalciteRequest query = getCalciteRequest(subDimensions, c);
-      final var l = executeQuery(query, c.getDataSource(), c.getAggregate());
+      final List<DimensionFilterContributionApi> l = query(
+          subDimensions, c
+      );
       results.addAll(l);
       if (l.size() > 0) {
         results.addAll(compute0(subDimensions, visited, c));
       }
     }
     return results;
+  }
+
+  private List<DimensionFilterContributionApi> query(
+      final List<String> subDimensions,
+      final CohortComputationContext c) throws Exception {
+    final DatasetConfigDTO dataset = c.getDataset();
+    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
+        .whereTimeFilter(c.getInterval(),
+            dataset.getTimeColumn(),
+            dataset.getTimeFormat(),
+            dataset.getTimeUnit().name());
+
+    subDimensions.forEach(builder::select);
+    builder.select(selectable(c.getMetric()));
+    subDimensions.forEach(builder::groupBy);
+
+    final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
+    final CalciteRequest query = builder
+        .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
+        .limit(c.getLimit())
+        .build();
+    return executeQuery(query, c.getDataSource(), c.getAggregate());
   }
 
   private MetricConfigDTO getMetric(final MetricApi metric) {

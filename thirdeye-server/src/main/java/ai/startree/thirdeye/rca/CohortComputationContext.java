@@ -26,10 +26,12 @@ public class CohortComputationContext {
   private DatasetConfigDTO dataset;
   private ThirdEyeDataSource dataSource;
 
-  private Double threshold;
-  private Double aggregate;
   private Interval interval;
   private List<String> allDimensions;
+  private int limit = 100;
+
+  private Double threshold;
+  private Double aggregate;
 
   public MetricConfigDTO getMetric() {
     return metric;
@@ -91,6 +93,15 @@ public class CohortComputationContext {
 
   public CohortComputationContext setAllDimensions(final List<String> allDimensions) {
     this.allDimensions = allDimensions;
+    return this;
+  }
+
+  public int getLimit() {
+    return limit;
+  }
+
+  public CohortComputationContext setLimit(final int limit) {
+    this.limit = limit;
     return this;
   }
 }

@@ -28,11 +28,21 @@ public class CohortComputationApi implements ThirdEyeApi {
   private boolean generateEnumerationItems;
   private String queryFilters;
   private List<String> dimensions;
+  private Integer limit;
 
   /* Output Fields */
   private Integer resultSize;
   private List<DimensionFilterContributionApi> results;
   private List<EnumerationItemApi> enumerationItems;
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public CohortComputationApi setLimit(final Integer limit) {
+    this.limit = limit;
+    return this;
+  }
 
   public MetricApi getMetric() {
     return metric;

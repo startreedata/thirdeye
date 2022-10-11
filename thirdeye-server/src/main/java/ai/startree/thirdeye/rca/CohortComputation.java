@@ -156,7 +156,7 @@ public class CohortComputation {
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name())
         .build();
-    final DataFrame df = query(r, c.getDataSource());
+    final DataFrame df = runQuery(r, c.getDataSource());
     return df.get(COL_AGGREGATE).getDouble(0);
   }
 
@@ -247,8 +247,10 @@ public class CohortComputation {
     final CalciteRequest query = builder
         .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
         .limit(c.getLimit())
+        .orderBy(QueryProjection.of(COL_AGGREGATE).withDescOrder())
         .build();
-    return executeQuery(query, c.getDataSource(), c.getAggregate());
+    final DataFrame df = runQuery(query, c.getDataSource());
+    return readDf(df, c.getAggregate());
   }
 
   private MetricConfigDTO getMetric(final MetricApi metric) {
@@ -283,14 +285,7 @@ public class CohortComputation {
         .collect(Collectors.joining(" AND "));
   }
 
-  private List<DimensionFilterContributionApi> executeQuery(final CalciteRequest calciteRequest,
-      final ThirdEyeDataSource dataSource, final Double aggregate)
-      throws Exception {
-    final DataFrame df = query(calciteRequest, dataSource);
-    return readDf(df, aggregate);
-  }
-
-  public DataFrame query(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds)
+  public DataFrame runQuery(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds)
       throws Exception {
     final String sql = calciteRequest.getSql(ds.getSqlLanguage(), ds.getSqlExpressionBuilder());
 

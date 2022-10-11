@@ -15,6 +15,7 @@
 package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -39,6 +40,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.metric.DimensionType;
+import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.inject.Singleton;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -239,15 +242,18 @@ public class CohortComputation {
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name());
 
-    subDimensions.forEach(builder::select);
+    final List<SqlIdentifier> subDimensionsIdentifiers = subDimensions.stream()
+        .map(CalciteUtils::identifierOf)
+        .collect(Collectors.toList());
+    subDimensionsIdentifiers.forEach(builder::select);
     builder.select(selectable(c.getMetric()));
-    subDimensions.forEach(builder::groupBy);
+    subDimensionsIdentifiers.forEach(builder::groupBy);
 
     final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
     final CalciteRequest query = builder
         .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
         .limit(c.getLimit())
-        .orderBy(QueryProjection.of(COL_AGGREGATE).withDescOrder())
+        .orderBy(identifierDescOf(COL_AGGREGATE))
         .build();
     final DataFrame df = runQuery(query, c.getDataSource());
     return readDf(df, c.getAggregate());

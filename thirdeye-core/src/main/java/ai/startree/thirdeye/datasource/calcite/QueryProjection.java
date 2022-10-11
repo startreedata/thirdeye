@@ -37,7 +37,7 @@ import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// todo cyril refactor to limit usage of this class - try to deprecate it
+// todo cyril refactor to limit usage of this class - limit to aggregations
 public class QueryProjection {
 
   @Nullable
@@ -73,7 +73,7 @@ public class QueryProjection {
    * For simple columns, prefer CalciteUtils.identifierOf().
    * */
   @Deprecated
-  // todo cyril remove this - enforce operator not null in other constructors
+  // todo cyril remove this - enforce operator not null in other constructors - make it clear operands should be safe sql snippets - update tests
   public static QueryProjection of(final String sqlSnippet) {
     return new QueryProjection(null, List.of(sqlSnippet), null, null, false);
   }

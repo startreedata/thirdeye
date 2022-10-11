@@ -26,7 +26,7 @@ public class CohortComputationApi implements ThirdEyeApi {
   private Double threshold;
   private Double percentage;
   private boolean generateEnumerationItems;
-  private String queryFilters;
+  private String enumerationItemParamKey;
   private List<String> dimensions;
   private Integer limit;
   private Integer maxDepth;
@@ -117,12 +117,12 @@ public class CohortComputationApi implements ThirdEyeApi {
     return this;
   }
 
-  public String getQueryFilters() {
-    return queryFilters;
+  public String getEnumerationItemParamKey() {
+    return enumerationItemParamKey;
   }
 
-  public CohortComputationApi setQueryFilters(final String queryFilters) {
-    this.queryFilters = queryFilters;
+  public CohortComputationApi setEnumerationItemParamKey(final String enumerationItemParamKey) {
+    this.enumerationItemParamKey = enumerationItemParamKey;
     return this;
   }
 

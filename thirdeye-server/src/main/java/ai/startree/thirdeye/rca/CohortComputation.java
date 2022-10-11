@@ -165,6 +165,9 @@ public class CohortComputation {
 
   public CohortComputationApi compute(final CohortComputationApi request)
       throws Exception {
+    optional(request.getMaxDepth())
+        .ifPresent(maxDepth -> ensure(maxDepth > 0, "maxDepth must be a positive integer"));
+
     final CohortComputationContext context = buildContext(request);
 
     final Double agg = computeAggregate(context);
@@ -191,9 +194,10 @@ public class CohortComputation {
         .setMaxDepth(context.getMaxDepth());
 
     if (request.isGenerateEnumerationItems()) {
-      final String queryFilters = optional(request.getQueryFilters()).orElse(K_QUERY_FILTERS_DEFAULT);
+      final String key = optional(request.getEnumerationItemParamKey())
+          .orElse(K_QUERY_FILTERS_DEFAULT);
       output.setEnumerationItems(results.stream()
-          .map(api -> toEnumerationItem(api, queryFilters))
+          .map(api -> toEnumerationItem(api, key))
           .collect(Collectors.toList()));
     }
     return output;

@@ -104,7 +104,7 @@ Content-Type: application/json
     "id": 12746
   },
   "threshold": 400000,
-  "maxDepth": 10,
+  "maxDepth": 0,
   "start": "1623110400000",
   "end": "1623283200000"
 }

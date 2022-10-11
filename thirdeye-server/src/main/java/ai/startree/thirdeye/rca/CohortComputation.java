@@ -70,7 +70,7 @@ public class CohortComputation {
     this.metricConfigManager = metricConfigManager;
   }
 
-  public static DateTimeZone getDateTimeZone(final String timezone) {
+  public static DateTimeZone toDateTimeZone(final String timezone) {
     return optional(timezone)
         .filter(StringUtils::isNotEmpty)
         .map(DateTimeZone::forID)
@@ -82,25 +82,6 @@ public class CohortComputation {
     return QueryProjection
         .of(metric.getDefaultAggFunction(), List.of(aggregationColumn))
         .withAlias(COL_AGGREGATE);
-  }
-
-  private static CalciteRequest calciteRequest(final DatasetConfigDTO dataset,
-      final MetricConfigDTO metric,
-      final List<String> dimensions, final Interval currentInterval, final Double threshold) {
-    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
-        .whereTimeFilter(currentInterval,
-            dataset.getTimeColumn(),
-            dataset.getTimeFormat(),
-            dataset.getTimeUnit().name());
-
-    dimensions.forEach(builder::select);
-    builder.select(selectable(metric));
-    dimensions.forEach(builder::groupBy);
-
-    final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(threshold));
-    return builder
-        .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
-        .limit(100000).build();
   }
 
   private static List<DimensionFilterContributionApi> readDf(final DataFrame df) {
@@ -123,12 +104,30 @@ public class CohortComputation {
     return results;
   }
 
-  public CohortComputationApi compute(final CohortComputationApi request)
-      throws Exception {
+  private static CalciteRequest getCalciteRequest(final List<String> subDimensions,
+      final CohortComputationContext c) {
+    final DatasetConfigDTO dataset = c.getDataset();
+    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
+        .whereTimeFilter(c.getInterval(),
+            dataset.getTimeColumn(),
+            dataset.getTimeFormat(),
+            dataset.getTimeUnit().name());
+
+    subDimensions.forEach(builder::select);
+    builder.select(selectable(c.getMetric()));
+    subDimensions.forEach(builder::groupBy);
+
+    final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
+    return builder
+        .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
+        .limit(100000).build();
+  }
+
+  private CohortComputationContext buildContext(final CohortComputationApi request) {
     final Interval currentInterval = new Interval(
         request.getStart(),
         request.getEnd(),
-        getDateTimeZone(request.getTimezone()));
+        toDateTimeZone(request.getTimezone()));
 
     final MetricConfigDTO metric = getMetric(request.getMetric());
     final DatasetConfigDTO dataset = ensureExists(datasetConfigManager.findByName(metric.getDataset())
@@ -137,31 +136,50 @@ public class CohortComputation {
         .orElse(null), "dataset not found. name: " + metric.getDataset());
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataset.getDataSource());
 
-    final Double agg = computeAggregate(metric, dataset, currentInterval, dataSource);
-
-    final Double threshold = optional(request.getPercentage())
-        .map(p -> agg * p / 100.0)
-        .orElse(request.getThreshold());
-
     final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
         .orElse(optional(dataset.getDimensions())
             .map(Templatable::value)
             .orElse(List.of())));
     ensure(!dimensions.isEmpty(), "Dimension list is empty");
 
+    final CohortComputationContext context = new CohortComputationContext()
+        .setMetric(metric)
+        .setDataset(dataset)
+        .setDataSource(dataSource)
+        .setInterval(currentInterval)
+        .setAllDimensions(dimensions);
+    return context;
+  }
+
+  private Double computeAggregate(final CohortComputationContext c) throws Exception {
+    final DatasetConfigDTO dataset = c.getDataset();
+    final CalciteRequest r = CalciteRequest.newBuilder(dataset.getDataset())
+        .select(selectable(c.getMetric()))
+        .whereTimeFilter(c.getInterval(),
+            dataset.getTimeColumn(),
+            dataset.getTimeFormat(),
+            dataset.getTimeUnit().name())
+        .build();
+    final DataFrame df = query(r, c.getDataSource());
+    return df.get(COL_AGGREGATE).getDouble(0);
+  }
+
+  public CohortComputationApi compute(final CohortComputationApi request)
+      throws Exception {
+    final CohortComputationContext context = buildContext(request);
+
+    final Double agg = computeAggregate(context);
+    final Double threshold = optional(request.getPercentage())
+        .map(p -> agg * p / 100.0)
+        .orElse(request.getThreshold());
+
+    context.setThreshold(threshold);
+
     final Set<Set<String>> visited = new HashSet<>();
-    final List<DimensionFilterContributionApi> results = compute0(
-        dataset,
-        metric,
-        List.of(),
-        dimensions,
-        threshold,
-        visited,
-        currentInterval,
-        dataSource);
+    final var results = compute0(List.of(), visited, context);
 
     final CohortComputationApi output = new CohortComputationApi()
-        .setMetric(ApiBeanMapper.toApi(metric))
+        .setMetric(ApiBeanMapper.toApi(context.getMetric()))
         .setThreshold(threshold)
         .setPercentage(request.getPercentage())
         .setAggregate(agg)
@@ -176,6 +194,39 @@ public class CohortComputation {
           .collect(Collectors.toList()));
     }
     return output;
+  }
+
+  private List<DimensionFilterContributionApi> compute0(
+      final List<String> dimensions,
+      final Set<Set<String>> visited,
+      final CohortComputationContext c)
+      throws Exception {
+    final Set<String> dimensionsSet = Set.copyOf(dimensions);
+    if (visited.contains(dimensionsSet)) {
+      throw new RuntimeException("Invalid code path! Should always explore new pathways");
+    }
+    visited.add(dimensionsSet);
+
+    final List<DimensionFilterContributionApi> results = new ArrayList<>();
+
+    final List<String> dimensionsToExplore = new ArrayList<>(c.getAllDimensions());
+    dimensionsToExplore.removeAll(dimensions);
+
+    for (String dimension : dimensionsToExplore) {
+      final List<String> subDimensions = new ArrayList<>(dimensions);
+      subDimensions.add(dimension);
+      if (visited.contains(Set.copyOf(subDimensions))) {
+        continue;
+      }
+
+      final CalciteRequest query = getCalciteRequest(subDimensions, c);
+      final var l = executeQuery(query, c.getDataSource());
+      results.addAll(l);
+      if (l.size() > 0) {
+        results.addAll(compute0(subDimensions, visited, c));
+      }
+    }
+    return results;
   }
 
   private MetricConfigDTO getMetric(final MetricApi metric) {
@@ -208,69 +259,6 @@ public class CohortComputation {
         .stream()
         .map(e -> String.format("'%s' = '%s'", e.getKey(), e.getValue()))
         .collect(Collectors.joining(" AND "));
-  }
-
-  private Double computeAggregate(final MetricConfigDTO metric, final DatasetConfigDTO dataset,
-      final Interval currentInterval, final ThirdEyeDataSource dataSource)
-      throws Exception {
-    final CalciteRequest r = CalciteRequest.newBuilder(dataset.getDataset())
-        .select(selectable(metric))
-        .whereTimeFilter(currentInterval,
-            dataset.getTimeColumn(),
-            dataset.getTimeFormat(),
-            dataset.getTimeUnit().name())
-        .build();
-    final DataFrame df = query(r, dataSource);
-    return df.get(COL_AGGREGATE).getDouble(0);
-  }
-
-  private List<DimensionFilterContributionApi> compute0(
-      final DatasetConfigDTO dataset,
-      final MetricConfigDTO metric,
-      final List<String> dimensions,
-      final List<String> allDimensions,
-      final Double threshold,
-      final Set<Set<String>> visited,
-      final Interval currentInterval,
-      final ThirdEyeDataSource dataSource)
-      throws Exception {
-    final Set<String> dimensionsSet = Set.copyOf(dimensions);
-    if (visited.contains(dimensionsSet)) {
-      throw new RuntimeException("Invalid code path! Should always explore new pathways");
-    }
-    visited.add(dimensionsSet);
-
-    final List<DimensionFilterContributionApi> results = new ArrayList<>();
-
-    final List<String> dimensionsToExplore = new ArrayList<>(allDimensions);
-    dimensionsToExplore.removeAll(dimensions);
-
-    for (String dimension : dimensionsToExplore) {
-      final List<String> subDimensions = new ArrayList<>(dimensions);
-      subDimensions.add(dimension);
-      if (visited.contains(Set.copyOf(subDimensions))) {
-        continue;
-      }
-
-      final CalciteRequest query = calciteRequest(dataset,
-          metric,
-          subDimensions,
-          currentInterval,
-          threshold);
-      final var l = executeQuery(query, dataSource);
-      results.addAll(l);
-      if (l.size() > 0) {
-        results.addAll(compute0(dataset,
-            metric,
-            subDimensions,
-            dimensionsToExplore,
-            threshold,
-            visited,
-            currentInterval,
-            dataSource));
-      }
-    }
-    return results;
   }
 
   private List<DimensionFilterContributionApi> executeQuery(final CalciteRequest calciteRequest,

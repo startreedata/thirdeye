@@ -29,6 +29,7 @@ public class CohortComputationApi implements ThirdEyeApi {
   private String queryFilters;
   private List<String> dimensions;
   private Integer limit;
+  private Integer maxDepth;
 
   /* Output Fields */
   private Integer resultSize;
@@ -160,6 +161,15 @@ public class CohortComputationApi implements ThirdEyeApi {
   public CohortComputationApi setEnumerationItems(
       final List<EnumerationItemApi> enumerationItems) {
     this.enumerationItems = enumerationItems;
+    return this;
+  }
+
+  public Integer getMaxDepth() {
+    return maxDepth;
+  }
+
+  public CohortComputationApi setMaxDepth(final Integer maxDepth) {
+    this.maxDepth = maxDepth;
     return this;
   }
 }

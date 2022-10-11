@@ -144,6 +144,9 @@ public class CohortComputation {
     optional(request.getLimit())
         .ifPresent(context::setLimit);
 
+    optional(request.getMaxDepth())
+        .ifPresent(context::setMaxDepth);
+
     return context;
   }
 
@@ -184,7 +187,8 @@ public class CohortComputation {
         .setGenerateEnumerationItems(request.isGenerateEnumerationItems())
         .setResultSize(results.size())
         .setResults(results)
-        .setLimit(context.getLimit());
+        .setLimit(context.getLimit())
+        .setMaxDepth(context.getMaxDepth());
 
     if (request.isGenerateEnumerationItems()) {
       final String queryFilters = optional(request.getQueryFilters()).orElse(K_QUERY_FILTERS_DEFAULT);
@@ -212,17 +216,16 @@ public class CohortComputation {
     dimensionsToExplore.removeAll(dimensions);
 
     for (final String dimension : dimensionsToExplore) {
-      final List<String> subDimensions = new ArrayList<>(dimensions);
+      final List<String> subDimensions = new ArrayList<>(dimensions.size() + 1);
+      subDimensions.addAll(dimensions);
       subDimensions.add(dimension);
       if (visited.contains(Set.copyOf(subDimensions))) {
         continue;
       }
 
-      final List<DimensionFilterContributionApi> l = query(
-          subDimensions, c
-      );
+      final List<DimensionFilterContributionApi> l = query(subDimensions, c);
       results.addAll(l);
-      if (l.size() > 0) {
+      if (l.size() > 0 && subDimensions.size() < c.getMaxDepth()) {
         results.addAll(compute0(subDimensions, visited, c));
       }
     }

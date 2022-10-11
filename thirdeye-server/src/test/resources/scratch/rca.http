@@ -65,16 +65,13 @@ Content-Type: application/json
 
 
 ###
-POST http://localhost:8080/api/rca/metrics/breakdown
+POST http://localhost:8080/api/rca/metrics/cohorts
 accept: application/json
 Content-Type: application/json
 
 {
   "metric": {
     "id": 12746
-  },
-  "dataset": {
-    "id": 247729
   },
   "percentage": 50,
   "start": "1623110400000",
@@ -84,7 +81,7 @@ Content-Type: application/json
 
 
 ###
-POST http://localhost:8080/api/rca/metrics/breakdown
+POST http://localhost:8080/api/rca/metrics/cohorts
 accept: application/json
 Content-Type: application/json
 
@@ -92,11 +89,31 @@ Content-Type: application/json
   "metric": {
     "id": 12746
   },
-  "dataset": {
-    "id": 247729
+  "percentage": 50,
+  "dimensions": [
+    "device",
+    "version"
+  ],
+  "start": "1623110400000",
+  "end": "1623283200000",
+  "generateEnumerationItems": true
+}
+
+
+###
+POST http://localhost:8080/api/rca/metrics/cohorts
+accept: application/json
+Content-Type: application/json
+
+{
+  "metric": {
+    "name": "views"
   },
   "percentage": 50,
-  "dimensions": [ "device", "version"],
+  "dimensions": [
+    "device",
+    "version"
+  ],
   "start": "1623110400000",
   "end": "1623283200000",
   "generateEnumerationItems": true

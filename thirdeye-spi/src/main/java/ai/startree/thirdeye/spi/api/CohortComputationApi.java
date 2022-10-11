@@ -19,7 +19,6 @@ import java.util.List;
 public class CohortComputationApi implements ThirdEyeApi {
 
   private MetricApi metric;
-  private DatasetApi dataset;
   private Long start;
   private Long end;
   private String timezone;
@@ -41,15 +40,6 @@ public class CohortComputationApi implements ThirdEyeApi {
 
   public CohortComputationApi setMetric(final MetricApi metric) {
     this.metric = metric;
-    return this;
-  }
-
-  public DatasetApi getDataset() {
-    return dataset;
-  }
-
-  public CohortComputationApi setDataset(final DatasetApi dataset) {
-    this.dataset = dataset;
     return this;
   }
 

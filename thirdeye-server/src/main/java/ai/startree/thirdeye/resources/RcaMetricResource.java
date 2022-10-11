@@ -121,9 +121,9 @@ public class RcaMetricResource {
   }
 
   @POST
-  @Path("/breakdown")
+  @Path("/cohorts")
   @ApiOperation(value = "Builds cohorts based on threshold")
-  public Response getAnomalyHeatmap(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response generateCohorts(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       final CohortComputationApi request) throws Exception {
     ensure(request.getThreshold() != null ^ request.getPercentage() != null,
         "Either threshold or percentage should be set but not both");

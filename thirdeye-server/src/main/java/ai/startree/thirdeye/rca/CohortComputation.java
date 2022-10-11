@@ -16,16 +16,19 @@ package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.CohortComputationApi;
 import ai.startree.thirdeye.spi.api.DimensionFilterContributionApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
+import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -127,8 +130,11 @@ public class CohortComputation {
         request.getEnd(),
         getDateTimeZone(request.getTimezone()));
 
-    final DatasetConfigDTO dataset = datasetConfigManager.findById(request.getDataset().getId());
-    final MetricConfigDTO metric = metricConfigManager.findById(request.getMetric().getId());
+    final MetricConfigDTO metric = getMetric(request.getMetric());
+    final DatasetConfigDTO dataset = ensureExists(datasetConfigManager.findByName(metric.getDataset())
+        .stream()
+        .findFirst()
+        .orElse(null), "dataset not found. name: " + metric.getDataset());
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataset.getDataSource());
 
     final Double agg = computeAggregate(metric, dataset, currentInterval, dataSource);
@@ -155,9 +161,11 @@ public class CohortComputation {
         dataSource);
 
     final CohortComputationApi output = new CohortComputationApi()
+        .setMetric(ApiBeanMapper.toApi(metric))
         .setThreshold(threshold)
         .setPercentage(request.getPercentage())
         .setAggregate(agg)
+        .setGenerateEnumerationItems(request.isGenerateEnumerationItems())
         .setResultSize(results.size())
         .setResults(results);
 
@@ -168,6 +176,20 @@ public class CohortComputation {
           .collect(Collectors.toList()));
     }
     return output;
+  }
+
+  private MetricConfigDTO getMetric(final MetricApi metric) {
+    if (metric.getId() != null) {
+      return ensureExists(metricConfigManager.findById(metric.getId()),
+          "metric not found. id: " + metric.getId());
+    }
+    final String name = metric.getName();
+    ensureExists(name, "metric id or name must be provided.");
+    final MetricConfigDTO dto = ensureExists(metricConfigManager.findByMetricName(name)
+        .stream()
+        .findFirst()
+        .orElse(null), "metric not found: name: " + name);
+    return dto;
   }
 
   private EnumerationItemApi toEnumerationItem(final DimensionFilterContributionApi api,

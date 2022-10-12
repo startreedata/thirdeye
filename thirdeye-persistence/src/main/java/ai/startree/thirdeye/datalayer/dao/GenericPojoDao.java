@@ -167,6 +167,8 @@ public class GenericPojoDao {
     try {
       final Predicate predicate = Predicate.EQ("type", SubEntities.getType(beanClass));
       final List<GenericJsonEntity> entities = databaseService.findAll(predicate,
+          null,
+          null,
           GenericJsonEntity.class);
       final List<E> ret = new ArrayList<>();
       if (CollectionUtils.isNotEmpty(entities)) {
@@ -216,7 +218,7 @@ public class GenericPojoDao {
   public <E extends AbstractDTO> long count(final Class<E> beanClass) {
     final Class<? extends AbstractIndexEntity> indexClass = SubEntities.BEAN_INDEX_MAP.get(
           beanClass);
-      return databaseService.count(indexClass);
+      return databaseService.count(null, indexClass);
   }
 
   public <E extends AbstractDTO> long count(final Predicate predicate, final Class<E> beanClass) {
@@ -266,6 +268,8 @@ public class GenericPojoDao {
     try {
       final Predicate predicate = Predicate.IN("id", idList.toArray());
       final List<GenericJsonEntity> genericJsonEntities = databaseService.findAll(predicate,
+          null,
+          null,
           GenericJsonEntity.class);
       final List<E> result = new ArrayList<>();
       if (CollectionUtils.isNotEmpty(genericJsonEntities)) {
@@ -349,6 +353,8 @@ public class GenericPojoDao {
           daoFilter.getBeanClass());
       //find the matching ids
       final List<? extends AbstractIndexEntity> indexEntities = databaseService.findAll(daoFilter.getPredicate(),
+          null,
+          null,
           indexClass);
       final List<Long> idsToReturn = new ArrayList<>();
       if (CollectionUtils.isNotEmpty(indexEntities)) {
@@ -369,7 +375,10 @@ public class GenericPojoDao {
   @SuppressWarnings("unused")
   private void dumpTable(final Class<? extends AbstractEntity> entityClass) {
     if (IS_DEBUG) {
-      final List<? extends AbstractEntity> entities = databaseService.findAll(entityClass);
+      final List<? extends AbstractEntity> entities = databaseService.findAll(null,
+          null,
+          null,
+          entityClass);
       for (final AbstractEntity entity : entities) {
         LOG.debug("{}", entity);
       }

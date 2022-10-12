@@ -76,15 +76,7 @@ public class DatabaseService {
 
 
   public <E extends AbstractEntity> E find(final Long id, final Class<E> clazz) {
-    return findAll(Predicate.EQ(getIdColumnName(clazz), id), clazz).stream().findFirst().orElse(null);
-  }
-
-  public <E extends AbstractEntity> List<E> findAll(final Class<E> clazz) {
-    return findAll(null, null, null, clazz);
-  }
-
-  public <E extends AbstractEntity> List<E> findAll(final Predicate predicate, final Class<E> clazz) {
-    return findAll(predicate, null, null, clazz);
+    return findAll(Predicate.EQ(getIdColumnName(clazz), id), null, null, clazz).stream().findFirst().orElse(null);
   }
 
   public <E extends AbstractEntity> List<E> findAll(final Predicate predicate, final Long limit, final Long offset, final Class<E> clazz) {
@@ -115,7 +107,7 @@ public class DatabaseService {
       return null;
     }
   }
-  public <E extends AbstractEntity> Long save(final E entity, final Connection managedConnection)
+  private <E extends AbstractEntity> Long save(final E entity, final Connection managedConnection)
       throws Exception {
     final long tStart = System.nanoTime();
     try {
@@ -141,10 +133,6 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractEntity> Integer update(final E entity) {
-    return update(entity, null);
-  }
-
   public <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate) {
     try {
       return update(entity, predicate, null);
@@ -153,7 +141,7 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate, final Connection managedConnection)
+  private <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate, final Connection managedConnection)
       throws Exception {
     final E dbEntity = (E) find(entity.getId(), entity.getClass());
     final Predicate finalPredicate;
@@ -193,18 +181,7 @@ public class DatabaseService {
     }
   }
 
-  public Integer delete(final List<Long> idsToDelete, final Class<? extends AbstractEntity> entityClass) {
-    if (CollectionUtils.isEmpty(idsToDelete)) {
-      return 0;
-    }
-    try {
-      return delete(Predicate.IN(getIdColumnName(entityClass), idsToDelete.toArray()), entityClass, null);
-    } catch (Exception e) {
-      return 0;
-    }
-  }
-
-  public Integer delete(final Predicate predicate, final Class<? extends AbstractEntity> entityClass, final Connection managedConnection)
+  private Integer delete(final Predicate predicate, final Class<? extends AbstractEntity> entityClass, final Connection managedConnection)
       throws Exception {
     final long tStart = System.nanoTime();
     try {
@@ -218,10 +195,6 @@ public class DatabaseService {
       dbWriteCallCounter.inc();
       dbWriteDuration.update(System.nanoTime() - tStart);
     }
-  }
-
-  public <E extends AbstractIndexEntity> Long count(Class<E> clazz) {
-    return count(null, clazz);
   }
 
   public <E extends AbstractIndexEntity> Long count(Predicate predicate, Class<E> clazz) {

@@ -59,6 +59,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
         case LONG:
           df.addSeries(columns.get(colIdx).toLowerCase(), getLongsForColumn(colIdx));
           break;
+        case FLOAT:
         case DOUBLE:
           df.addSeries(columns.get(colIdx).toLowerCase(), getDoublesForColumn(colIdx));
           break;

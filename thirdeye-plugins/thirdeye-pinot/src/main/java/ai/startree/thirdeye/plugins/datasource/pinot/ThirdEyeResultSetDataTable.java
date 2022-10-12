@@ -36,7 +36,8 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   public ThirdEyeResultSetDataTable(final ThirdEyeResultSet thirdEyeResultSet) {
     this.thirdEyeResultSet = thirdEyeResultSet;
     this.groupKeyLength = thirdEyeResultSet.getGroupKeyLength();
-    final int initialCapacity = thirdEyeResultSet.getGroupKeyLength() + thirdEyeResultSet.getColumnCount();
+    final int initialCapacity =
+        thirdEyeResultSet.getGroupKeyLength() + thirdEyeResultSet.getColumnCount();
     columns = new ArrayList<>(initialCapacity);
     columnTypes = new ArrayList<>(initialCapacity);
     for (int i = 0; i < thirdEyeResultSet.getGroupKeyLength(); i++) {
@@ -61,7 +62,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
 
   @Override
   public int getColumnCount() {
-    return this.thirdEyeResultSet.getColumnCount() + thirdEyeResultSet.getGroupKeyLength();
+    return this.columns.size();
   }
 
   @Override
@@ -121,6 +122,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
         return thirdEyeResultSet.getInteger(rowIdx, colIdx - groupKeyLength);
       case LONG:
         return thirdEyeResultSet.getLong(rowIdx, colIdx - groupKeyLength);
+      case FLOAT:
       case DOUBLE:
         return thirdEyeResultSet.getDouble(rowIdx, colIdx - groupKeyLength);
       case STRING:
@@ -132,12 +134,9 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   }
 
   private DataFrame generateDataFrame() {
-    List<String> columnNameWithDataType = new ArrayList<>();
-    for (int i = 0; i < getColumnCount(); i++) {
-      columnNameWithDataType.add(getColumns().get(i));
-    }
-
-    DataFrame.Builder dfBuilder = DataFrame.builder(columnNameWithDataType);
+    // todo cyril- at build() time this creates object series then uses inferType() to cast to correct types
+    //  does not look efficient but I could not identify a hotspot in method profiling - so refactoring was not prioritized
+    DataFrame.Builder dfBuilder = DataFrame.builder(columns);
     for (int rowIdx = 0; rowIdx < getRowCount(); rowIdx++) {
       Object[] row = new Object[getColumnCount()];
       for (int columnIdx = 0; columnIdx < getColumnCount(); columnIdx++) {

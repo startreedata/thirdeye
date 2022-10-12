@@ -55,7 +55,8 @@ public class CalciteUtils {
       null,
       null);
 
-  public static final SqlOperator NOT_EQUALS_OPERATOR = new SqlBinaryOperator(SqlKind.NOT_EQUALS.sql,
+  public static final SqlOperator NOT_EQUALS_OPERATOR = new SqlBinaryOperator(
+      SqlKind.NOT_EQUALS.sql,
       SqlKind.NOT_EQUALS,
       0,
       true,
@@ -79,7 +80,8 @@ public class CalciteUtils {
       null,
       null);
 
-  public static final SqlOperator GTE_OPERATOR = new SqlBinaryOperator(SqlKind.GREATER_THAN_OR_EQUAL.sql,
+  public static final SqlOperator GTE_OPERATOR = new SqlBinaryOperator(
+      SqlKind.GREATER_THAN_OR_EQUAL.sql,
       SqlKind.GREATER_THAN_OR_EQUAL,
       0,
       true,
@@ -95,7 +97,8 @@ public class CalciteUtils {
       null,
       null);
 
-  public static final SqlOperator LTE_OPERATOR = new SqlBinaryOperator(SqlKind.LESS_THAN_OR_EQUAL.sql,
+  public static final SqlOperator LTE_OPERATOR = new SqlBinaryOperator(
+      SqlKind.LESS_THAN_OR_EQUAL.sql,
       SqlKind.LESS_THAN_OR_EQUAL,
       0,
       true,
@@ -200,6 +203,16 @@ public class CalciteUtils {
   @NonNull
   public static SqlIdentifier identifierOf(String name) {
     return new SqlIdentifier(name, SqlParserPos.ZERO);
+  }
+
+  @NonNull
+  public static SqlNode identifierOf(final String name, @NonNull final String alias) {
+    return addAlias(identifierOf(name), alias);
+  }
+
+  @NonNull
+  public static SqlNode identifierDescOf(final String name) {
+    return addDesc(identifierOf(name));
   }
 
   @NonNull

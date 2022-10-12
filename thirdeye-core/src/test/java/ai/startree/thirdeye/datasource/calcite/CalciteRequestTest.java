@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -93,6 +94,38 @@ public class CalciteRequestTest {
         TABLE);
 
     assertEquivalent(output, expected);
+  }
+
+  @Test
+  public void testGetSqlWithProjectionWithOperationCharacterInName() {
+    final SqlIdentifier columnWithMiddleDashIdentifier =  identifierOf("sub-category");
+    final CalciteRequest.Builder builder = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
+        .select(columnWithMiddleDashIdentifier);
+
+    final CalciteRequest request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    final String expected = String.format("SELECT \"sub-category\" FROM \"%s\".\"%s\"",
+        DATABASE,
+        TABLE);
+
+    assertEquivalent(output, expected);
+
+    // asserts behaviour is bad with QueryProjection - to help with future refactorings/changes
+    //see https://cortex-data.slack.com/archives/C031NQQNDPX/p1665467809731999
+    final QueryProjection columnWithMiddleDashProjection =  QueryProjection.of("sub-category");
+    final CalciteRequest.Builder builder2 = new CalciteRequest.Builder(TABLE).withDatabase(DATABASE)
+        .select(columnWithMiddleDashProjection);
+
+    final CalciteRequest request2 = builder2.build();
+    final String output2 = request2.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    // not what a user would want
+    final String expected2 = String.format("SELECT \"sub\" - \"category\" FROM \"%s\".\"%s\"",
+        DATABASE,
+        TABLE);
+
+    assertEquivalent(output2, expected2);
   }
 
   @Test

@@ -14,6 +14,7 @@
 import { isEmpty, map } from "lodash";
 import { AnomalyBreakdown } from "../../../rest/dto/rca.interfaces";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
+import { formatLargeNumberForVisualization } from "../../../utils/visualization/visualization.util";
 import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
 import {
     AnomalyBreakdownComparisonData,
@@ -59,15 +60,17 @@ export function formatTreemapData(
         { id: parentId, size: 0, parent: null, label: parentId },
         ...map(dimensionData.dimensionComparisonData, (comparisonData, k) => {
             const comparisonAndDisplayData = { ...comparisonData, columnName };
-            let label = `${k || EMPTY_STRING_DISPLAY}: ${
+            let label = `${
+                k || EMPTY_STRING_DISPLAY
+            }: ${formatLargeNumberForVisualization(
                 comparisonAndDisplayData.current
-            }`;
+            )}`;
 
             if (comparisonAndDisplayData.metricValueDiffPercentage !== null) {
                 const metricDiffPercentage = Number(
                     comparisonAndDisplayData.metricValueDiffPercentage
                 ).toFixed(2);
-                label += ` (${metricDiffPercentage}%)`;
+                label += ` (${metricDiffPercentage.toLocaleString()}%)`;
             } else if (comparisonAndDisplayData.baseline === 0) {
                 if (comparisonAndDisplayData.current > 0) {
                     label += ` (100.00%)`;

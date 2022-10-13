@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -49,6 +50,9 @@ public class PlanExecutor {
       final ContextKey contextKey = key(input.getSourcePlanNode(), input.getSourceProperty());
       if (!resultMap.containsKey(contextKey)) {
         final PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());
+        checkArgument(inputPlanNode != null,
+            "sourcePlanNode \"%s\" found in \"%s\" node configuration does not exist. Template is invalid.",
+            input.getSourcePlanNode(), node.getName());
         executePlanNode(pipelinePlanNodes, inputPlanNode, resultMap);
       }
       if (!resultMap.containsKey(contextKey)) {

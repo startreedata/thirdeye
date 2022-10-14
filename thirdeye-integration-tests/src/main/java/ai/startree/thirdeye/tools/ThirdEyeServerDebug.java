@@ -19,7 +19,7 @@ import ai.startree.thirdeye.PluginLoader;
 import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProviderPlugin;
 import ai.startree.thirdeye.plugins.datasource.DefaultDataSourcesPlugin;
-import ai.startree.thirdeye.plugins.datasource.PinotDataSourcePlugin;
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotDataSourcePlugin;
 import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
 import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
 import ai.startree.thirdeye.plugins.enumerator.ThirdEyeEnumeratorsPlugin;

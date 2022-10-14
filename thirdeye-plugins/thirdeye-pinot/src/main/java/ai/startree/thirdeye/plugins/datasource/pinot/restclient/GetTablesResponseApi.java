@@ -11,19 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.datasource;
 
-import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceFactory;
-import ai.startree.thirdeye.spi.Plugin;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
-import com.google.auto.service.AutoService;
-import com.google.common.collect.ImmutableList;
+package ai.startree.thirdeye.plugins.datasource.pinot.restclient;
 
-@AutoService(Plugin.class)
-public class PinotDataSourcePlugin implements Plugin {
+import java.util.List;
 
-  @Override
-  public Iterable<ThirdEyeDataSourceFactory> getDataSourceFactories() {
-    return ImmutableList.of(new PinotThirdEyeDataSourceFactory());
+public class GetTablesResponseApi {
+
+  private List<String> tables;
+
+  public List<String> getTables() {
+    return tables;
+  }
+
+  public GetTablesResponseApi setTables(final List<String> tables) {
+    this.tables = tables;
+    return this;
   }
 }

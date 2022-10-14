@@ -12,7 +12,7 @@
  * the License.
  */
 
-package ai.startree.thirdeye.plugins.datasource.auto.onboard;
+package ai.startree.thirdeye.plugins.datasource.pinot.restclient;
 
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;

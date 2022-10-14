@@ -11,18 +11,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.datasource.auto.onboard;
+package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.restclient.PinotControllerRestClient;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO.DimensionAsMetricProperties;
+import ai.startree.thirdeye.spi.detection.TimeSpec;
+import ai.startree.thirdeye.spi.metric.MetricAggFunction;
+import ai.startree.thirdeye.spi.metric.MetricType;
+import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -33,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,12 +57,17 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class PinotDatasetOnboarder {
 
+  public static final MetricAggFunction DEFAULT_AGG_FUNCTION = MetricAggFunction.SUM;
+  public static final MetricAggFunction DEFAULT_TDIGEST_AGG_FUNCTION = MetricAggFunction.PCT90;
   private static final Logger LOG = LoggerFactory.getLogger(PinotDatasetOnboarder.class);
 
   /* Use "ROW_COUNT" as the special token for the count(*) metric for a pinot table */
   private static final String ROW_COUNT = "ROW_COUNT";
   private static final Set<String> DIMENSION_SUFFIX_BLACKLIST = new HashSet<>(
       Arrays.asList("_topk", "_approximate", "_tDigest"));
+  private static final String BYTES_STRING = "BYTES";
+  private static final String NON_ADDITIVE = "non_additive";
+  private static final String PINOT_PRE_AGGREGATED_KEYWORD = "*";
 
   private final PinotControllerRestClient pinotControllerRestClient;
   private final DatasetConfigManager datasetConfigManager;
@@ -88,6 +101,89 @@ public class PinotDatasetOnboarder {
     }
     throw new IllegalArgumentException(
         String.format("Could not resolve column name for '%s'", metricConfig));
+  }
+
+  public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO,
+      DateTimeFieldSpec dateTimeFieldSpec) {
+    Preconditions.checkNotNull(dateTimeFieldSpec);
+    DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
+    String timeFormatStr = formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
+        .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT, formatSpec.getSDFPattern())
+        : TimeFormat.EPOCH.toString();
+    setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec.getName(), timeFormatStr,
+        formatSpec.getColumnSize(),
+        formatSpec.getColumnUnit());
+  }
+
+  public static void setDateTimeSpecs(DatasetConfigDTO datasetConfigDTO, String timeColumnName,
+      String timeFormatStr,
+      int columnSize, TimeUnit columnUnit) {
+    datasetConfigDTO
+        .setTimeColumn(timeColumnName)
+        .setTimeDuration(columnSize)
+        .setTimeUnit(columnUnit)
+        .setTimeFormat(timeFormatStr)
+        .setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
+    // set the data granularity of epoch timestamp dataset to minute-level
+    if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
+        .getTimeUnit()
+        .equals(TimeUnit.MILLISECONDS) && (datasetConfigDTO.getNonAdditiveBucketSize() == null
+        || datasetConfigDTO.getNonAdditiveBucketUnit() == null)) {
+      datasetConfigDTO.setNonAdditiveBucketUnit(TimeUnit.MINUTES);
+      datasetConfigDTO.setNonAdditiveBucketSize(5);
+    }
+  }
+
+  public static DatasetConfigDTO generateDatasetConfig(String dataset, Schema schema,
+      String timeColumnName,
+      Map<String, String> customConfigs, String dataSourceName) {
+    List<String> dimensions = schema.getDimensionNames();
+    DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
+    // Create DatasetConfig
+    DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(dataset)
+        .setDimensions(Templatable.of(dimensions))
+        .setDataSource(dataSourceName)
+        .setProperties(customConfigs)
+        .setActive(Boolean.TRUE);
+    setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec);
+    checkNonAdditive(datasetConfigDTO);
+    return datasetConfigDTO;
+  }
+
+  /**
+   * Check if the dataset is non-additive. If it is, set the additive flag to false and set the
+   * pre-aggregated keyword.
+   *
+   * @param dataset the dataset DTO to check
+   */
+  static void checkNonAdditive(DatasetConfigDTO dataset) {
+    if (dataset.isAdditive() && dataset.getDataset().endsWith(NON_ADDITIVE)) {
+      dataset.setAdditive(false);
+      dataset.setPreAggregatedKeyword(PINOT_PRE_AGGREGATED_KEYWORD);
+    }
+  }
+
+  public static MetricConfigDTO generateMetricConfig(MetricFieldSpec metricFieldSpec,
+      String dataset) {
+    MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
+    String metric = metricFieldSpec.getName();
+    metricConfigDTO.setName(metric);
+    metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(dataset, metric));
+    metricConfigDTO.setDataset(dataset);
+    metricConfigDTO.setActive(Boolean.TRUE);
+
+    String dataTypeStr = metricFieldSpec.getDataType().toString();
+    if (BYTES_STRING.equals(dataTypeStr)) {
+      // Assume if the column is BYTES type, use the default TDigest function and set the return data type to double
+      metricConfigDTO.setDefaultAggFunction(DEFAULT_TDIGEST_AGG_FUNCTION.toString());
+      metricConfigDTO.setDatatype(MetricType.DOUBLE);
+    } else {
+      metricConfigDTO.setDefaultAggFunction(DEFAULT_AGG_FUNCTION.toString());
+      metricConfigDTO.setDatatype(MetricType.valueOf(dataTypeStr));
+    }
+
+    return metricConfigDTO;
   }
 
   public ImmutableList<String> getAllTables() throws IOException {
@@ -187,15 +283,13 @@ public class PinotDatasetOnboarder {
     List<MetricFieldSpec> metricSpecs = schema.getMetricFieldSpecs();
 
     // Create DatasetConfig
-    DatasetConfigDTO datasetConfigDTO = ConfigGenerator
-        .generateDatasetConfig(dataset, schema, timeColumnName, customConfigs, dataSourceName);
+    DatasetConfigDTO datasetConfigDTO = generateDatasetConfig(dataset, schema, timeColumnName, customConfigs, dataSourceName);
     LOG.info("Creating dataset for {}", dataset);
     datasetConfigManager.save(datasetConfigDTO);
 
     // Create MetricConfig
     for (MetricFieldSpec metricFieldSpec : metricSpecs) {
-      MetricConfigDTO metricConfigDTO = ConfigGenerator
-          .generateMetricConfig(metricFieldSpec, dataset);
+      MetricConfigDTO metricConfigDTO = generateMetricConfig(metricFieldSpec, dataset);
       LOG.info("Creating metric {} for {}", metricConfigDTO.getName(), dataset);
       metricConfigManager.save(metricConfigDTO);
     }
@@ -215,7 +309,7 @@ public class PinotDatasetOnboarder {
     checkMetricChanges(dataset, schema);
     checkTimeFieldChanges(datasetConfig, schema, timeColumnName);
     appendNewCustomConfigs(datasetConfig, customConfigs);
-    ConfigGenerator.checkNonAdditive(datasetConfig);
+    checkNonAdditive(datasetConfig);
     datasetConfig.setActive(Boolean.TRUE);
     return datasetConfig;
   }
@@ -318,7 +412,7 @@ public class PinotDatasetOnboarder {
     // add new metrics to ThirdEye
     for (MetricFieldSpec metricSpec : schemaMetricSpecs) {
       if (!datasetMetricNames.contains(metricSpec.getName())) {
-        MetricConfigDTO metricConfigDTO = ConfigGenerator.generateMetricConfig(metricSpec, dataset);
+        MetricConfigDTO metricConfigDTO = generateMetricConfig(metricSpec, dataset);
         LOG.info("Creating metric {} in {}", metricSpec.getName(), dataset);
         metricConfigManager.save(metricConfigDTO);
       }
@@ -381,7 +475,7 @@ public class PinotDatasetOnboarder {
         || !datasetConfig.getTimeFormat().equals(timeFormatStr)
         || datasetConfig.bucketTimeGranularity().getUnit() != formatSpec.getColumnUnit()
         || datasetConfig.bucketTimeGranularity().getSize() != formatSpec.getColumnSize()) {
-      ConfigGenerator.setDateTimeSpecs(datasetConfig, timeColumnName, timeFormatStr,
+      setDateTimeSpecs(datasetConfig, timeColumnName, timeFormatStr,
           formatSpec.getColumnSize(),
           formatSpec.getColumnUnit());
       datasetConfigManager.update(datasetConfig);

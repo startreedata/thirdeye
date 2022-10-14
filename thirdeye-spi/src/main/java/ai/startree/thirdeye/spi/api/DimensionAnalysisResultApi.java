@@ -161,11 +161,11 @@ public class DimensionAnalysisResultApi {
     return sb.toString();
   }
 
-  public AnalysisRunInfo getAnalysisInfo() {
+  public AnalysisRunInfo getAnalysisRunInfo() {
     return analysisRunInfo;
   }
 
-  public DimensionAnalysisResultApi setAnalysisInfo(
+  public DimensionAnalysisResultApi setAnalysisRunInfo(
       final AnalysisRunInfo analysisRunInfo) {
     this.analysisRunInfo = analysisRunInfo;
     return this;

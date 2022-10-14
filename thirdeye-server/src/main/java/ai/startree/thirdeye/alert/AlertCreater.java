@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
@@ -39,17 +40,19 @@ import org.slf4j.LoggerFactory;
 public class AlertCreater {
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertCreater.class);
-  private static final long JAN_1_2000_UTC = 946684800000L;
   private final AlertManager alertManager;
   private final TaskManager taskManager;
   private final AlertInsightsProvider alertInsightsProvider;
+  private final long minimumOnboardingStartTime;
 
   @Inject
   public AlertCreater(final AlertManager alertManager,
-      final TaskManager taskManager, final AlertInsightsProvider alertInsightsProvider) {
+      final TaskManager taskManager, final AlertInsightsProvider alertInsightsProvider,
+      final TimeConfiguration timeConfiguration) {
     this.alertManager = alertManager;
     this.taskManager = taskManager;
     this.alertInsightsProvider = alertInsightsProvider;
+    this.minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
   }
 
   public AlertDTO create(AlertApi api) {
@@ -84,21 +87,21 @@ public class AlertCreater {
     try {
       final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
       final Long datasetStartTime = insights.getDatasetStartTime();
-      if (datasetStartTime < JAN_1_2000_UTC) {
+      if (datasetStartTime < minimumOnboardingStartTime) {
         LOG.warn(
-            "Dataset start time {} is smaller than the minimum onboarding time {}. Using the minimum onboarding time.",
-            datasetStartTime, JAN_1_2000_UTC);
-        return JAN_1_2000_UTC;
+            "Dataset start time {} is smaller than the minimum onboarding time allowed {}. Using the minimum time allowed.",
+            datasetStartTime, minimumOnboardingStartTime);
+        return minimumOnboardingStartTime;
       }
       return datasetStartTime;
     } catch (final WebApplicationException e) {
       throw e;
     } catch (Exception e) {
       // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
-      LOG.error("Could not fetch insights for alert {}. Defaulting onboarding task startTime to {}",
+      LOG.error("Could not fetch insights for alert {}. Using the minimum time allowed. {}",
           dto,
-          JAN_1_2000_UTC);
-      return JAN_1_2000_UTC;
+          minimumOnboardingStartTime);
+      return minimumOnboardingStartTime;
     }
   }
 

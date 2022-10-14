@@ -83,7 +83,14 @@ public class AlertCreater {
   private long getDefaultStart(final AlertDTO dto) {
     try {
       final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
-      return insights.getDatasetStartTime();
+      final Long datasetStartTime = insights.getDatasetStartTime();
+      if (datasetStartTime < JAN_1_2000_UTC) {
+        LOG.warn(
+            "Dataset start time {} is smaller than the minimum onboarding time {}. Using the minimum onboarding time.",
+            datasetStartTime, JAN_1_2000_UTC);
+        return JAN_1_2000_UTC;
+      }
+      return datasetStartTime;
     } catch (final WebApplicationException e) {
       throw e;
     } catch (Exception e) {

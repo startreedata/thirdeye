@@ -21,11 +21,17 @@ import java.util.List;
 
 public class DimensionAnalysisResultApi {
 
-  /**keyword for no filter on a dimension*/
+  /**
+   * keyword for no filter on a dimension
+   */
   public static final String ALL = "(ALL)";
-  /**keyword for a list of values for a dimension*/
+  /**
+   * keyword for a list of values for a dimension
+   */
   public static final String ALL_OTHERS = "(ALL_OTHERS)";
-  /**keyword for no filter after an (ALL_OTHERS) keyword*/
+  /**
+   * keyword for no filter after an (ALL_OTHERS) keyword
+   */
   public static final String EMPTY = "(NO_FILTER)";
 
   // fixme cyril is this really required ? remove if possible
@@ -41,6 +47,7 @@ public class DimensionAnalysisResultApi {
   private List<SummaryGainerLoserResponseRow> gainer = new ArrayList<>();
   private List<SummaryGainerLoserResponseRow> loser = new ArrayList<>();
   private List<DimensionCost> dimensionCosts = new ArrayList<>();
+  private AnalysisRunInfo analysisRunInfo = new AnalysisRunInfo();
 
   public MetricApi getMetric() {
     return metric;
@@ -152,5 +159,15 @@ public class DimensionAnalysisResultApi {
       sb.append("\n\t").append(row);
     }
     return sb.toString();
+  }
+
+  public AnalysisRunInfo getAnalysisInfo() {
+    return analysisRunInfo;
+  }
+
+  public DimensionAnalysisResultApi setAnalysisInfo(
+      final AnalysisRunInfo analysisRunInfo) {
+    this.analysisRunInfo = analysisRunInfo;
+    return this;
   }
 }

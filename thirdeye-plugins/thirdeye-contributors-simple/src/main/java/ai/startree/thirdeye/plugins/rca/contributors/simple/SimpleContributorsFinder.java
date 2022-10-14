@@ -15,14 +15,14 @@ package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOT_ENOUGH_DATA_FOR_RCA;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_NAME;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_VALUE;
 import static ai.startree.thirdeye.spi.rca.Stats.computeContributionChangePercentage;
 import static ai.startree.thirdeye.spi.rca.Stats.computeContributionToOverallChangePercentage;
 import static ai.startree.thirdeye.spi.rca.Stats.computeValueChangePercentage;
 
-import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.api.AnalysisRunInfo;
+import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Series.DoubleConditional;
@@ -75,16 +75,16 @@ public class SimpleContributorsFinder implements ContributorsFinder {
 
     final DataFrame baseline = aggregationLoader.loadBreakdown(baselineSlice, LIMIT_DEFAULT);
     if (baseline.size() <= 0) {
-      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA,
-          "No data on baseline timeframe. Cannot compute top contributors.");
+      return cannotComputeResult(
+          "No data in the baseline timeframe. Cannot compute top contributors. You may try with a different baseline offset.");
     }
     baseline.dropSeries(COL_TIME);
     final double baselineTotal = getTotalFromBreakdown(baseline);
 
     final DataFrame current = aggregationLoader.loadBreakdown(currentSlice, LIMIT_DEFAULT);
     if (current.size() <= 0) {
-      throw new ThirdEyeException(ERR_NOT_ENOUGH_DATA_FOR_RCA,
-          "No data on analysis timeframe. Cannot compute top contributors.");
+      return cannotComputeResult(
+          "No data in the current timeframe. Cannot compute top contributors. Data collect is stopped or broken for this metric.");
     }
     current.dropSeries(COL_TIME);
     final double currentTotal = getTotalFromBreakdown(current);
@@ -108,6 +108,11 @@ public class SimpleContributorsFinder implements ContributorsFinder {
     return new SimpleContributorsFinderResult(stats,
         searchConfiguration.getMetricConfigDTO().getName(),
         searchConfiguration.getDatasetConfigDTO().getDataset());
+  }
+
+  private ContributorsFinderResult cannotComputeResult(final String message) {
+    return () -> new DimensionAnalysisResultApi()
+        .setAnalysisInfo(new AnalysisRunInfo().setSuccess(false).setMessage(message));
   }
 
   /**
@@ -148,7 +153,8 @@ public class SimpleContributorsFinder implements ContributorsFinder {
     DoubleSeries.Builder builder = DoubleSeries.builder();
     for (int i = 0; i < stats.size(); i++) {
       final double valueChangePercentage = stats.getDouble(COL_VALUE_CHANGE_PERCENTAGE, i);
-      final double contributionChangePercentage = stats.getDouble(COL_CONTRIBUTION_CHANGE_PERCENTAGE,
+      final double contributionChangePercentage = stats.getDouble(
+          COL_CONTRIBUTION_CHANGE_PERCENTAGE,
           i);
       final double contributionToOverallChangePercentage = stats.getDouble(
           COL_CONTRIBUTION_TO_OVERALL_CHANGE_PERCENTAGE,

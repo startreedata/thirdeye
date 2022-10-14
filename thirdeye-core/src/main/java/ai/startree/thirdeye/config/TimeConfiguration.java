@@ -19,8 +19,19 @@ import org.joda.time.DateTimeZone;
 
 public class TimeConfiguration {
 
-  /**Timezone used for notifications*/
+  private static final long JAN_1_2000_UTC = 946684800000L;
+
+  /**
+   * Timezone used for notifications
+   */
   private DateTimeZone timezone = DEFAULT_TIMEZONE;
+
+  /**
+   * Onboarding start time >= onboardingStartTimeLimit.
+   * This allows administrators to prevent users from running alert onboardings too far in the past, reading too
+   * much data.
+   */
+  private long minimumOnboardingStartTime = JAN_1_2000_UTC;
 
   public DateTimeZone getTimezone() {
     return timezone;
@@ -28,6 +39,15 @@ public class TimeConfiguration {
 
   public TimeConfiguration setTimezone(final DateTimeZone timezone) {
     this.timezone = timezone;
+    return this;
+  }
+
+  public long getMinimumOnboardingStartTime() {
+    return minimumOnboardingStartTime;
+  }
+
+  public TimeConfiguration setMinimumOnboardingStartTime(final long minimumOnboardingStartTime) {
+    this.minimumOnboardingStartTime = minimumOnboardingStartTime;
     return this;
   }
 }

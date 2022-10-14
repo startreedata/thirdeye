@@ -262,7 +262,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     dtoManager.save(dto);
 
     /* Create a task to rerun all historical anomalies */
-    alertCreater.createOnboardingTask(dto, 0, System.currentTimeMillis());
+    alertCreater.createOnboardingTask(dto);
 
     return respondOk(toApi(dto));
   }

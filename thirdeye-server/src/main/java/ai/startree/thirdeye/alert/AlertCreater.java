@@ -72,7 +72,7 @@ public class AlertCreater {
         ERR_DUPLICATE_NAME);
   }
 
-  private void createOnboardingTask(final AlertDTO dto) {
+  public void createOnboardingTask(final AlertDTO dto) {
     long end = System.currentTimeMillis();
     long start = dto.getLastTimestamp();
     // If no value is present, set the default lookback

@@ -13,12 +13,11 @@
  */
 package ai.startree.thirdeye.plugins.datasource.auto.onboard;
 
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.GetTablesResponseApi;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
-import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlDataSourceConfigFactory;
-import ai.startree.thirdeye.plugins.datasource.pinotsql.PinotSqlThirdEyeDataSourceConfig;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -75,25 +74,13 @@ public class PinotControllerRestClient {
   @Deprecated
   public PinotControllerRestClient(final DataSourceMetaBean dataSourceMeta,
       final String dataSourceType) {
-    final String controllerConnectionScheme;
-    final String controllerHost;
-    final int controllerPort;
-
     final Map<String, Object> properties = dataSourceMeta.getProperties();
     Preconditions.checkArgument(dataSourceType.equals("pinot-sql"),
         "This constructor is only called from pinot-sql connector");
-    final PinotSqlThirdEyeDataSourceConfig config = PinotSqlDataSourceConfigFactory.createFromProperties(
-        properties);
-    controllerConnectionScheme = config.getControllerConnectionScheme();
-    controllerHost = config.getControllerHost();
-    controllerPort = config.getControllerPort();
-
-    final Map<String, String> headers = properties.containsKey("headers")
-        ? (Map<String, String>) properties.get("headers")
-        : Collections.emptyMap();
-    pinotControllerHost = new HttpHost(controllerHost,
-        controllerPort,
-        controllerConnectionScheme);
+    final PinotThirdEyeDataSourceConfig config = buildConfig(properties);
+    pinotControllerHost = new HttpHost(config.getControllerHost(),
+        config.getControllerPort(),
+        config.getControllerConnectionScheme());
 
     pinotControllerRestClientSupplier = null;
   }

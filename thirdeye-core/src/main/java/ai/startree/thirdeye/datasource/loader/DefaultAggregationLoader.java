@@ -15,6 +15,8 @@ package ai.startree.thirdeye.datasource.loader;
 
 import static ai.startree.thirdeye.datasource.calcite.QueryProjection.getFunctionName;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
@@ -30,6 +32,7 @@ import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.metric.MetricSlice;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +64,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
   @Inject
   public DefaultAggregationLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
+        "aggregation-loader-%d").build());
   }
 
   /**
@@ -133,14 +138,14 @@ public class DefaultAggregationLoader implements AggregationLoader {
 
     // submit requests
     for (final String dimension : dimensions) {
-      final QueryProjection dimensionProjection = QueryProjection.of(dimension);
-      final CalciteRequest request = CalciteRequest
-          .newBuilderFrom(slice)
-          .addSelectProjection(dimensionProjection)
-          .addGroupByProjection(dimensionProjection)
+      final SqlIdentifier dimensionIdentifier = identifierOf(dimension);
+      final CalciteRequest request = CalciteRequest.newBuilderFrom(slice)
+          .select(dimensionIdentifier)
+          .groupBy(dimensionIdentifier)
           // ensure multiple runs return the same values when num rows > limit - see te-636
-          .addOrderByProjection(QueryProjection.of(Constants.COL_VALUE).withDescOrder())
-          .withLimit(limit).build();
+          .orderBy(identifierDescOf(Constants.COL_VALUE))
+          .limit(limit)
+          .build();
       final Future<DataFrame> res = getQueryResultAsync(request,
           datasetConfigDTO.getDataSource());
 
@@ -172,24 +177,24 @@ public class DefaultAggregationLoader implements AggregationLoader {
     LOG.info("Aggregating '{}'", slice);
     final CalciteRequest.Builder requestBuilder = CalciteRequest
         .newBuilderFrom(slice)
-        .withLimit(limit);
+        .limit(limit);
     if (dimensions.isEmpty()) {
       // add this count to help check if there is data in aggregate only queries - some aggregations
       // can return a value even if there is no data see
       // https://docs.pinot.apache.org/users/user-guide-query/supported-aggregations
       // count rows non null
-      requestBuilder.addSelectProjection(QueryProjection.of("COUNT",
+      requestBuilder.select(QueryProjection.of("COUNT",
           List.of(getFunctionName(slice.getMetricConfigDTO()))).withAlias(
           COL_AGGREGATION_ONLY_NON_NULL_ROWS_COUNT));
       // count all rows
-      requestBuilder.addSelectProjection(QueryProjection.of("COUNT", List.of("*")).withAlias(
+      requestBuilder.select(QueryProjection.of("COUNT", List.of("*")).withAlias(
           COL_AGGREGATION_ONLY_ROWS_COUNT));
     }
     for (final String dimension : dimensions) {
-      final QueryProjection dimensionProjection = QueryProjection.of(dimension);
+      final SqlIdentifier dimensionIdentifier = identifierOf(dimension);
       requestBuilder
-          .addSelectProjection(dimensionProjection)
-          .addGroupByProjection(dimensionProjection);
+          .select(dimensionIdentifier)
+          .groupBy(dimensionIdentifier);
     }
     final String dataSource = slice.getDatasetConfigDTO().getDataSource();
     return getQueryResultAsync(requestBuilder.build(), dataSource);
@@ -200,7 +205,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     return executorService.submit(() -> getQueryResult(request, dataSource));
   }
 
-  private DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
+  public DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
       throws Exception {
     final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
     final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),

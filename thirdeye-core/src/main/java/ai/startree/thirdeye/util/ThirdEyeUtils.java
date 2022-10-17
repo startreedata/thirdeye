@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,31 +110,6 @@ public abstract class ThirdEyeUtils {
   }
 
   /**
-   * Prints messages and stack traces of the given list of exceptions in a string.
-   *
-   * @param exceptions the list of exceptions to be printed.
-   * @param maxWordCount the length limitation of the string; set to 0 to remove the limitation.
-   * @return the string that contains the messages and stack traces of the given exceptions.
-   */
-  public static String exceptionsToString(List<Exception> exceptions, int maxWordCount) {
-    String message = "";
-    if (CollectionUtils.isNotEmpty(exceptions)) {
-      StringBuilder sb = new StringBuilder();
-      for (Exception exception : exceptions) {
-        sb.append(ExceptionUtils.getStackTrace(exception));
-        if (maxWordCount > 0 && sb.length() > maxWordCount) {
-          message = sb.substring(0, maxWordCount) + "\n...";
-          break;
-        }
-      }
-      if (message.equals("")) {
-        message = sb.toString();
-      }
-    }
-    return message;
-  }
-
-  /**
    * Parse job name to get the detection id
    */
   public static long getDetectionIdFromJobName(String jobName) {
@@ -199,6 +172,7 @@ public abstract class ThirdEyeUtils {
           case LONG:
             rowData[i] = resultSet.getLong(i + 1);
             continue;
+          case FLOAT:
           case DOUBLE:
             rowData[i] = resultSet.getDouble(i + 1);
             continue;

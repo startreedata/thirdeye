@@ -47,7 +47,7 @@ jest.mock(
 
 describe("Alert Fetch Redirect Params", () => {
     it("should have called navigate with the time range values in query string returned from API request", async () => {
-        jest.spyOn(axios, "get").mockResolvedValueOnce({
+        jest.spyOn(axios, "post").mockResolvedValueOnce({
             data: {
                 defaultStartTime: 10,
                 defaultEndTime: 11,
@@ -71,7 +71,7 @@ describe("Alert Fetch Redirect Params", () => {
     });
 
     it("should have called navigate with the time range values from fallbackDurationGenerator in query string is API request fails", async () => {
-        jest.spyOn(axios, "get").mockRejectedValueOnce({
+        jest.spyOn(axios, "post").mockRejectedValueOnce({
             data: {},
         });
         render(

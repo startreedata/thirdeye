@@ -15,7 +15,6 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.datasource.auto.onboard.PinotDatasetOnboarder;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.DataSourceUtils;

@@ -42,7 +42,9 @@ export const AlertFetchRedirectParams: FunctionComponent<
 
     useEffect(() => {
         if (alertId) {
-            getAlertInsight(Number(alertId)).finally(() => setIsLoading(false));
+            getAlertInsight({ alertId: Number(alertId) }).finally(() =>
+                setIsLoading(false)
+            );
         } else {
             setIsLoading(false);
         }

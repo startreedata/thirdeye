@@ -28,6 +28,10 @@ export const usePageHeaderStyles = makeStyles((theme) => {
         transparent: {
             ...PAGE_HEADER_OVERRIDE,
             backgroundColor: "transparent",
+            "& .page-header-sub-nav": {
+                borderBottom: "1px solid #DBDEE7",
+                marginBottom: theme.spacing(2),
+            },
         },
         noPaddingBottom: {
             paddingBottom: "0 !important",

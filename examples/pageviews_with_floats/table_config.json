@@ -1,0 +1,20 @@
+
+{
+  "tableName": "pageviews_with_floats",
+  "segmentsConfig" : {
+    "timeColumnName": "date",
+    "timeType": "DAYS",
+    "replication" : "1",
+    "schemaName" : "pageviews_with_floats"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP"
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

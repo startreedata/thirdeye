@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { assign, isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -22,7 +21,6 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
-    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -31,10 +29,12 @@ import {
     updateDatasource,
 } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
-import { omitNonUpdatableData } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getDatasourcesViewPath } from "../../utils/routes/routes.util";
+import {
+    getDatasourcesAllPath,
+    getDatasourcesViewPath,
+} from "../../utils/routes/routes.util";
 import { DatasourcesUpdatePageParams } from "./datasources-update-page.interfaces";
 
 export const DatasourcesUpdatePage: FunctionComponent = () => {
@@ -138,16 +138,16 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
                     entity: t("label.datasource"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {datasource && (
-                        <DatasourceWizard
-                            datasource={omitNonUpdatableData(datasource)}
-                            onFinish={onDatasourceWizardFinish}
-                        />
-                    )}
-                </Grid>
-            </PageContentsGridV1>
+            {datasource && (
+                <DatasourceWizard
+                    datasource={datasource}
+                    submitBtnLabel={t("label.update-entity", {
+                        entity: t("label.datasource"),
+                    })}
+                    onCancel={() => navigate(getDatasourcesAllPath())}
+                    onSubmit={onDatasourceWizardFinish}
+                />
+            )}
         </PageV1>
     );
 };

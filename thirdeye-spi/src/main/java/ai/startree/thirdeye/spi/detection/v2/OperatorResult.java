@@ -42,8 +42,8 @@ public interface OperatorResult {
         .orElse(-1L);
   }
 
-  default List<MergedAnomalyResultDTO> getAnomalies() {
-    throw new UnsupportedOperationException();
+  default @Nullable List<MergedAnomalyResultDTO> getAnomalies() {
+    return null;
   }
 
   default @Nullable EnumerationItemDTO getEnumerationItem() {

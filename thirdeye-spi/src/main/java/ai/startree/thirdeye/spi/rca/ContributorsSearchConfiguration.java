@@ -21,19 +21,48 @@ import org.joda.time.Interval;
 
 public class ContributorsSearchConfiguration {
 
+  /**
+   * * doOneSideError
+   */
   private final MetricConfigDTO metricConfigDTO;
   private final DatasetConfigDTO datasetConfigDTO;
+  /**
+   * period of the anomaly
+   */
   private final Interval currentInterval;
+  /**
+   * period to use as reference
+   */
   private final Interval baselineInterval;
+  /**
+   * summarySize the number of entries to be put in the summary.
+   */
   private final int summarySize;
+  /**
+   * The number of dimensions to be drilled down when analyzing the summary.
+   * If 0, the order of the dimensions passed as input is respected.
+   * If >0, dimension order should be automatically evaluated.
+   * fixme cyril change this contract - it comes from the cube implementation
+   */
   private final int depth;
+  /**
+   * If the summary should only consider one side error. (global change side)
+   */
   private final boolean doOneSideError;
+  /**
+   * Filters to apply.
+   */
   private final List<Predicate> filters;
+  /**
+   * The hierarchy among the dimensions. The order will always be honored
+   * when determining the order of dimensions.
+   */
   private final List<List<String>> hierarchies;
 
-  public ContributorsSearchConfiguration(final MetricConfigDTO metricConfigDTO, final DatasetConfigDTO datasetConfigDTO,
-      final Interval currentInterval, final Interval baselineInterval, final int summarySize,
-      final int depth, final boolean doOneSideError, final List<Predicate> filters,
+  public ContributorsSearchConfiguration(final MetricConfigDTO metricConfigDTO,
+      final DatasetConfigDTO datasetConfigDTO, final Interval currentInterval,
+      final Interval baselineInterval, final int summarySize, final int depth,
+      final boolean doOneSideError, final List<Predicate> filters,
       final List<List<String>> hierarchies) {
     this.metricConfigDTO = metricConfigDTO;
     this.datasetConfigDTO = datasetConfigDTO;

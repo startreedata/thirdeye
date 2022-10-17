@@ -31,6 +31,11 @@ public class DatasetConfigManagerImpl extends AbstractManagerImpl<DatasetConfigD
   }
 
   @Override
+  public List<DatasetConfigDTO> findByName(final String name) {
+    return findByPredicate(Predicate.EQ("dataset", name));
+  }
+
+  @Override
   public DatasetConfigDTO findByDataset(String dataset) {
     Predicate predicate = Predicate.EQ("dataset", dataset);
     List<DatasetConfigDTO> list = findByPredicate(predicate);

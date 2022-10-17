@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+@Deprecated
 public final class ParsedUrn {
 
   private static final Map<String, String> OPERATOR_TO_FILTER = new HashMap<>();
@@ -39,11 +40,6 @@ public final class ParsedUrn {
 
   final List<String> prefixes;
   final Set<FilterPredicate> predicates;
-
-  public ParsedUrn(List<String> prefixes) {
-    this.prefixes = prefixes;
-    this.predicates = Collections.emptySet();
-  }
 
   public ParsedUrn(List<String> prefixes, Set<FilterPredicate> predicates) {
     this.prefixes = Collections.unmodifiableList(prefixes);
@@ -74,18 +70,6 @@ public final class ParsedUrn {
   @Override
   public int hashCode() {
     return Objects.hash(prefixes, predicates);
-  }
-
-  /**
-   * Convenience method to assert absence of filter predicates at runtime.
-   *
-   * @throws IllegalArgumentException if at least one filter predicate is present
-   */
-  public void assertPrefixOnly() throws IllegalArgumentException {
-    if (!this.getPredicates().isEmpty()) {
-      throw new IllegalArgumentException(
-          String.format("Expected prefix only but got predicates %s", this.getPredicates()));
-    }
   }
 
   /**

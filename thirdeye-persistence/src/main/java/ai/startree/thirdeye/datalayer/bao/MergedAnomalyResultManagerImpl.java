@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
@@ -59,7 +60,8 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   private static final String FIND_BY_FUNCTION_ID = "where functionId=:functionId";
 
   // TODO inject as dependency
-  private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
+  private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10,
+      new ThreadFactoryBuilder().setNameFormat("anomaly-manager-%d").build());
 
   @Inject
   public MergedAnomalyResultManagerImpl(final GenericPojoDao genericPojoDao,

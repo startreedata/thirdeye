@@ -61,6 +61,7 @@ add_dataset "examples/pageviews"
 add_dataset "examples/us_monthly_air_passengers_simplified"
 add_dataset "examples/pageviews_with_missing_data"
 add_dataset "examples/pageviews_with_nulls"
+add_dataset "examples/pageviews_with_floats"
 add_dataset "examples/order_events"
 add_dataset "examples/new_customers_holiday"
 

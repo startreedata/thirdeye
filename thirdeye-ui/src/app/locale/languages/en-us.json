@@ -378,6 +378,7 @@
         "for-more-information-on-creating-alert": "for more information on how to create an alert.",
         "on-how-to-create-entity": "on how to create a {{entity}}.",
         "no-entity-created": "No {{entity}} created.",
-        "view-documentation": "View documentation"
+        "view-documentation": "View documentation",
+        "chart-data-not-reflective": "Chart data not reflective of current configuration"
     }
 }

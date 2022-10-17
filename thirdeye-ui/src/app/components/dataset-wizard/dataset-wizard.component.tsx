@@ -20,6 +20,7 @@ import {
 import { useGetDatasources } from "../../rest/datasources/datasources.actions";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
+import { LoadingErrorStateSwitch } from "../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { DatasetPropertiesForm } from "./dataset-properties-form/dataset-properties-form.component";
 import { DatasetWizardProps } from "./dataset-wizard.interfaces";
 
@@ -55,18 +56,20 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         );
     }, [status]);
 
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
-        <DatasetPropertiesForm
-            dataset={modifiedDataset}
-            datasources={datasources || []}
-            id={FORM_ID_DATASET_PROPERTIES}
-            submitBtnLabel={submitBtnLabel}
-            onCancel={onCancel}
-            onSubmit={onSubmit}
-        />
+        <LoadingErrorStateSwitch
+            isError={false}
+            isLoading={loading}
+            loadingState={<AppLoadingIndicatorV1 />}
+        >
+            <DatasetPropertiesForm
+                dataset={modifiedDataset}
+                datasources={datasources || []}
+                id={FORM_ID_DATASET_PROPERTIES}
+                submitBtnLabel={submitBtnLabel}
+                onCancel={onCancel}
+                onSubmit={onSubmit}
+            />
+        </LoadingErrorStateSwitch>
     );
 };

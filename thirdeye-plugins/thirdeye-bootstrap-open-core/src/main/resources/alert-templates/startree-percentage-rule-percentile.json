@@ -6,6 +6,39 @@
       "name": "root",
       "type": "PostProcessor",
       "params": {
+        "type": "THRESHOLD",
+        "component.ignore": "${thresholdIgnore}",
+        "component.min": "${thresholdFilterMin}",
+        "component.max": "${thresholdFilterMax}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "timeOfWeekProcessor"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "timeOfWeekProcessor",
+      "type": "PostProcessor",
+      "params": {
+        "type": "TIME_OF_WEEK",
+        "component.ignore": "${timeOfWeekIgnore}",
+        "component.daysOfWeek": "${daysOfWeek}",
+        "component.hoursOfDay": "${hoursOfDay}",
+        "component.dayHoursOfWeek": "${dayHoursOfWeek}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "coldStartProcessor"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "coldStartProcessor",
+      "type": "PostProcessor",
+      "params": {
         "type": "COLD_START",
         "component.ignore": "${coldStartIgnore}",
         "component.tableName": "${dataset}",
@@ -148,6 +181,13 @@
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
     "coldStartIgnore": "true",
+    "timeOfWeekIgnore": "true",
+    "daysOfWeek": [],
+    "hoursOfDay": [],
+    "dayHoursOfWeek": {},
+    "thresholdIgnore": "true",
+    "thresholdFilterMin": "-1",
+    "thresholdFilterMax": "-1",
     "queryLimit": "100000000"
   }
 }

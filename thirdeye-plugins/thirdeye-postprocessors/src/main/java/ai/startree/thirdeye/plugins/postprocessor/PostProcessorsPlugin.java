@@ -25,7 +25,8 @@ public class PostProcessorsPlugin implements Plugin {
   public Iterable<AnomalyPostProcessorFactory> getAnomalyPostProcessorFactories() {
     return List.of(
         new GenericPostProcessorFactory<>(ColdStartPostProcessor.NAME, ColdStartPostProcessor.class),
-        new GenericPostProcessorFactory<>(TimeOfWeekPostProcessor.NAME, TimeOfWeekPostProcessor.class)
+        new GenericPostProcessorFactory<>(TimeOfWeekPostProcessor.NAME, TimeOfWeekPostProcessor.class),
+        new GenericPostProcessorFactory<>(ThresholdPostProcessor.NAME, ThresholdPostProcessor.class)
     );
   }
 }

@@ -131,6 +131,8 @@ prometheus:
 
 time:
   timezone: UTC
+  # JAN_1_2000_UTC
+  minimumOnboardingStartTime: 946684800000
 
 rca:
   topContributors:

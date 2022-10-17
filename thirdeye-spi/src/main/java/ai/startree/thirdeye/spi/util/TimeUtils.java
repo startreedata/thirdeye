@@ -30,7 +30,8 @@ public class TimeUtils {
   }
 
   public static Period isoPeriod(@Nullable final String period, final Period defaultIfNull) {
-    return optional(period).map(p -> Period.parse(p, ISOPeriodFormat.standard()))
+    return optional(period)
+        .map(p -> Period.parse(p, ISOPeriodFormat.standard()))
         .orElse(defaultIfNull);
   }
 
@@ -108,8 +109,8 @@ public class TimeUtils {
       return dateTimeFloored;
     }
     // dateTimeConstraint bigger than floored --> add 1 period
-    return dateTimeFloored.plus(
-        timePeriod); //fixme cyril is this even correct? depends on where comes from te minTime not sure of plus - constraint is on the colum, not the aggregation not sure .plus() is required
+    //fixme cyril asap is this even correct? depends on where comes from te minTime not sure of plus - constraint is on the colum, not the aggregation not sure .plus() is required
+    return dateTimeFloored.plus(timePeriod);
   }
 
   /**

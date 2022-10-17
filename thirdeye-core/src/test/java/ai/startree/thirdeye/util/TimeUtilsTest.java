@@ -34,25 +34,22 @@ public class TimeUtilsTest {
   @Test
   public void testFloorByPeriodIsIdempotent() {
     // test that floorByPeriod · floorByPeriod = floorByPeriod
-    final DateTime input = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
+    final DateTime input1 = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
+    final DateTime input2 = DATE_PARSER.parseDateTime("2020-08-27 11:22:33.444 UTC");
 
-    final List<Period> periodList = List.of(
-        Period.years(1),
-        Period.years(2),
-        Period.months(1),
-        Period.months(2),
-        Period.days(1),
-        Period.days(2),
-        Period.minutes(1),
-        Period.minutes(2),
-        Period.seconds(1),
-        Period.seconds(2),
-        Period.millis(1),
-        Period.millis(2));
+    final List<DateTime> inputs = List.of(input1, input2);
 
-    for (Period p : periodList) {
-      DateTime floored = floorByPeriod(input, p);
-      assertThat(floorByPeriod(floored, p)).isEqualTo(floored);
+    for (var input : inputs) {
+
+      final List<Period> periodList = List.of(Period.years(1), Period.years(2), Period.months(1),
+          Period.months(2), Period.days(1), Period.days(2), Period.days(7), Period.minutes(1),
+          Period.minutes(2), Period.seconds(1), Period.seconds(2), Period.millis(1),
+          Period.millis(2));
+
+      for (Period p : periodList) {
+        DateTime floored = floorByPeriod(input, p);
+        assertThat(floorByPeriod(floored, p)).isEqualTo(floored);
+      }
     }
   }
 
@@ -109,7 +106,8 @@ public class TimeUtilsTest {
 
   @Test
   public void testFloorByPeriodRoundBy2Weeks() {
-    final DateTime input = DATE_PARSER.parseDateTime("2021-12-1 11:22:33.444 UTC");  //wednesday december
+    final DateTime input = DATE_PARSER.parseDateTime(
+        "2021-12-1 11:22:33.444 UTC");  //wednesday december
     final DateTime expected = DATE_PARSER.parseDateTime("2021-11-22 00:00:00.000 UTC"); //monday nov
     final Period twoWeeks = Period.weeks(2);
     final DateTime output = floorByPeriod(input, twoWeeks);
@@ -247,8 +245,7 @@ public class TimeUtilsTest {
     final Period inputPeriod = Period.days(1);
     final DateTime expected = DATE_PARSER.parseDateTime("2021-10-23 00:00:00.000 UTC");
     final DateTime output = getSmallestDatetime(
-        new DateTime(inputMinTimeConstraint, DateTimeZone.UTC),
-        inputPeriod);
+        new DateTime(inputMinTimeConstraint, DateTimeZone.UTC), inputPeriod);
 
     assertThat(output).isEqualTo(expected);
   }
@@ -286,7 +283,8 @@ public class TimeUtilsTest {
     final long expectedUTC = 1648771200000L; //APRIL_1_2022_00H00 UTC
     assertThat(flooredUTC).isEqualTo(expectedUTC);
 
-    final DateTime dtCEST = new DateTime(APRIL_1_2022_23H30, DateTimeZone.forID("Europe/Amsterdam"));
+    final DateTime dtCEST = new DateTime(APRIL_1_2022_23H30,
+        DateTimeZone.forID("Europe/Amsterdam"));
     final long flooredCEST = floorByPeriod(dtCEST, Period.days(1)).getMillis();
     final long expectedCEST = 1648850400000L; //APRIL_1_2022_22H00 UTC = APRIL_2_2022_00H00 CEST
     assertThat(flooredCEST).isEqualTo(expectedCEST);

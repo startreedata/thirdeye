@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.util;
 
+import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -29,8 +30,7 @@ public class TimeUtils {
   }
 
   public static Period isoPeriod(@Nullable final String period, final Period defaultIfNull) {
-    return optional(period)
-        .map(p -> Period.parse(p, ISOPeriodFormat.standard()))
+    return optional(period).map(p -> Period.parse(p, ISOPeriodFormat.standard()))
         .orElse(defaultIfNull);
   }
 
@@ -51,9 +51,7 @@ public class TimeUtils {
           .roundFloorCopy()
           .minusWeeks((dt.getWeekOfWeekyear() - 1) % period.getWeeks());
     } else if (period.getDays() != 0) {
-      return dt.dayOfMonth()
-          .roundFloorCopy()
-          .minusDays((dt.getDayOfMonth() - 1) % period.getDays());
+      return pinotFloorByDay(dt, period);
     } else if (period.getHours() != 0) {
       return dt.hourOfDay().roundFloorCopy().minusHours(dt.getHourOfDay() % period.getHours());
     } else if (period.getMinutes() != 0) {
@@ -71,6 +69,34 @@ public class TimeUtils {
   }
 
   /**
+   * Context: datetimeconvert function in Pinot does not implement weekly bucketing.
+   * So users use P7D instead, but P7D in datetimeconvert rounds from Thursday to Thursday, by epoch.
+   *
+   * Moreover, datetimeconvert does not implement timezone.
+   * So datetimetrunc may be used when a custom timezone is used.
+   *
+   * The correct way to solve this is to have Pinot implement timezone and proper weekly bucketing
+   * in datetimeconvert.
+   */
+  private static DateTime pinotFloorByDay(final DateTime dt, final Period period) {
+    if (period.getDays() > 1 && UTC_LIKE_TIMEZONES.contains(
+        dt.getChronology().getZone().getID())) {
+      // assumes datetimeconverter was used in Pinot query. groups from thursday to thursday by doing direct operation on the millis
+      // see BaseDateTimeTransformer.transformToOutputGranularity
+      final long epochRounded =
+          (dt.getMillis() / period.toStandardDuration().getMillis()) * period.toStandardDuration()
+              .getMillis();
+      return new DateTime(epochRounded, dt.getChronology());
+    } else {
+      // if P1D --> no issue. if timezone is not UTC: assumes datetrunc was used - operate on dayOfMonth
+      // note: this logic returns buckets of variable length, which is most-likely an issue
+      return dt.dayOfMonth()
+          .roundFloorCopy()
+          .minusDays((dt.getDayOfMonth() - 1) % period.getDays());
+    }
+  }
+
+  /**
    * Returns the smallest datetime that is of the given period, and that is >=minTimeConstraint.
    * eg: minTimeConstraint is >= Thursday 3 am - period is 1 DAY --> returns Friday.
    * eg: inclusion: minTimeConstraint is >= Thursday 0 am - period is 1 DAY --> returns Thursday.
@@ -82,7 +108,8 @@ public class TimeUtils {
       return dateTimeFloored;
     }
     // dateTimeConstraint bigger than floored --> add 1 period
-    return dateTimeFloored.plus(timePeriod);
+    return dateTimeFloored.plus(
+        timePeriod); //fixme cyril is this even correct? depends on where comes from te minTime not sure of plus - constraint is on the colum, not the aggregation not sure .plus() is required
   }
 
   /**

@@ -136,7 +136,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       this.seasonality = seasonality;
     }
 
-    checkArgument(lookback >= 5, "Lookback is %d. Lookback should be greater than 5.", lookback);
+    checkArgument(lookback >= 5, "Lookback is %s points. Lookback should be greater than 5 points.", lookback);
   }
 
   @Override

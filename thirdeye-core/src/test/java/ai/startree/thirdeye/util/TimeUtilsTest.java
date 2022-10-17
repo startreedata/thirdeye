@@ -137,7 +137,6 @@ public class TimeUtilsTest {
 
   @Test
   public void testFloorByPeriodRoundBy3DaysInUTC() {
-    // rounding by 3 days for first bucket of month
     final DateTime input = DATE_PARSER.parseDateTime("2021-11-03 11:22:33.444 UTC");
     final DateTime expected = DATE_PARSER.parseDateTime("2021-11-02 00:00:00.000 UTC");
     final Period twoDays = Period.days(3);

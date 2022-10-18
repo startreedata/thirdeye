@@ -15,7 +15,7 @@ package ai.startree.thirdeye.datalayer.dao;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.datalayer.database.DatabaseService;
+import ai.startree.thirdeye.datalayer.DatabaseService;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -148,7 +148,7 @@ public class TaskDao {
 
   public List<TaskDTO> getAll() {
     try {
-      final List<TaskEntity> entities = databaseService.findAll(TaskEntity.class);
+      final List<TaskEntity> entities = databaseService.findAll(null, null, null, TaskEntity.class);
       return toDto(entities);
     } catch (final JsonProcessingException e) {
       LOG.error(e.getMessage(), e);
@@ -208,7 +208,7 @@ public class TaskDao {
 
   public List<TaskDTO> get(final Predicate predicate) {
     try {
-      final List<TaskEntity> entities = databaseService.findAll(predicate, TaskEntity.class);
+      final List<TaskEntity> entities = databaseService.findAll(predicate, null, null, TaskEntity.class);
       return toDto(entities);
     } catch (final JsonProcessingException e) {
       LOG.error(e.getMessage(), e);
@@ -217,7 +217,7 @@ public class TaskDao {
   }
 
   public long count() {
-    return databaseService.count(TaskEntity.class);
+    return databaseService.count(null, TaskEntity.class);
   }
 
   public long count(final Predicate predicate) {
@@ -249,7 +249,7 @@ public class TaskDao {
   @SuppressWarnings("unused")
   private void dumpTable() {
     if (IS_DEBUG) {
-      final List<TaskEntity> entities = databaseService.findAll(TaskEntity.class);
+      final List<TaskEntity> entities = databaseService.findAll(null, null, null, TaskEntity.class);
       for (final TaskEntity entity : entities) {
         LOG.debug("{}", entity);
       }
@@ -261,7 +261,7 @@ public class TaskDao {
   }
 
   public int delete(final List<Long> idsToDelete) {
-    return databaseService.delete(idsToDelete, TaskEntity.class);
+    return deleteByPredicate(Predicate.IN("id", idsToDelete.toArray()));
   }
 
   public int deleteByPredicate(final Predicate predicate) {

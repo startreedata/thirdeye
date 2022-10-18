@@ -16,6 +16,7 @@ package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
+import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -24,8 +25,10 @@ import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.CohortComputationApi;
 import ai.startree.thirdeye.spi.api.DimensionFilterContributionApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -39,6 +42,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.inject.Singleton;
@@ -52,6 +56,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.parser.SqlParseException;
+import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -150,18 +157,37 @@ public class CohortComputation {
     optional(request.getMaxDepth())
         .ifPresent(context::setMaxDepth);
 
+    optional(request.getWhere())
+        .map(where -> parseWhere(where, dataSource))
+        .ifPresent(context::setWhere);
+
     return context;
+  }
+
+  private SqlNode parseWhere(final String where, final ThirdEyeDataSource ds) {
+    final ThirdEyeSqlParserConfig teSqlParserConfig = ds.getSqlLanguage()
+        .getSqlParserConfig();
+    final SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(teSqlParserConfig);
+    try {
+      return SqlParser.create(where, sqlParserConfig).parseExpression();
+    } catch (final SqlParseException e) {
+      throw badRequest(ThirdEyeStatus.ERR_UNKNOWN, "Failed to parse where clause: " + where);
+    }
   }
 
   private Double computeAggregate(final CohortComputationContext c) throws Exception {
     final DatasetConfigDTO dataset = c.getDataset();
-    final CalciteRequest r = CalciteRequest.newBuilder(dataset.getDataset())
+    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
         .select(selectable(c.getMetric()))
         .whereTimeFilter(c.getInterval(),
             dataset.getTimeColumn(),
             dataset.getTimeFormat(),
-            dataset.getTimeUnit().name())
-        .build();
+            dataset.getTimeUnit().name());
+
+    optional(c.getWhere())
+        .ifPresent(builder::where);
+
+    final CalciteRequest r = builder.build();
     final DataFrame df = runQuery(r, c.getDataSource());
     return df.get(COL_AGGREGATE).getDouble(0);
   }
@@ -245,6 +271,9 @@ public class CohortComputation {
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name());
 
+    optional(c.getWhere())
+        .ifPresent(builder::where);
+
     final List<SqlIdentifier> subDimensionsIdentifiers = subDimensions.stream()
         .map(CalciteUtils::identifierOf)
         .collect(Collectors.toList());
@@ -299,6 +328,10 @@ public class CohortComputation {
     final String sql = calciteRequest.getSql(ds.getSqlLanguage(), ds.getSqlExpressionBuilder());
 
     final DataSourceRequest request = new DataSourceRequest(null, sql, Map.of());
-    return ds.fetchDataTable(request).getDataFrame();
+    try {
+      return ds.fetchDataTable(request).getDataFrame();
+    } catch (Exception e) {
+      throw badRequest(ThirdEyeStatus.ERR_UNKNOWN, e.getMessage());
+    }
   }
 }

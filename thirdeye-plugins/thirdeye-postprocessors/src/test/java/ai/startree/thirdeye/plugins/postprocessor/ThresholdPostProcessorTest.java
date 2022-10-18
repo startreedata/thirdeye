@@ -30,6 +30,7 @@ import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -104,7 +105,8 @@ public class ThresholdPostProcessorTest {
         .setTimeseries(TEST_TIMESERIES)
         .setAnomalies(anomalies)
         .build();
-    final Map<String, OperatorResult> resultMap = Map.of(RES_1_KEY, res1);
+    final Map<String, OperatorResult> resultMap = new HashMap<>();
+    resultMap.put(RES_1_KEY, res1);
     final Map<String, OperatorResult> outputResultMap = postProcessor.postProcess(
         UTC_DETECTION_INTERVAL,
         resultMap);
@@ -193,12 +195,14 @@ public class ThresholdPostProcessorTest {
         .setTimeseries(TEST_TIMESERIES)
         .setAnomalies(anomalies)
         .build();
-    final Map<String, OperatorResult> resultMap = Map.of(RES_1_KEY, res1, KEY_CURRENT, customInput);
+    final Map<String, OperatorResult> resultMap = new HashMap<>();
+    resultMap.put(RES_1_KEY, res1);
+    resultMap.put(KEY_CURRENT, customInput);
     final Map<String, OperatorResult> outputResultMap = postProcessor.postProcess(
         UTC_DETECTION_INTERVAL,
         resultMap);
 
-    assertThat(resultMap.size()).isEqualTo(2);
+    assertThat(resultMap.size()).isEqualTo(1);
     final OperatorResult outputResult = outputResultMap.get(RES_1_KEY);
     final List<MergedAnomalyResultDTO> outputAnomalies = outputResult.getAnomalies();
     assertThat(outputAnomalies).hasSize(3);

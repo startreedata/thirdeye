@@ -93,41 +93,42 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
   @Override
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
+    // get and remove side-input.
+    // todo cyril - remove is performed because currently downstream logic (eg toDetectionEvaluationApi) makes a lot of assumptions on what is returned by the root node
+    //   it expects size 1 in some places, and AnomalyDetectorResults only in other places
+    final OperatorResult thresholdSideInput = resultMap.remove(KEY_CURRENT);
+
     // short-circuit if no thresholds
     if (!isActivated(min) && !isActivated(max)) {
       return resultMap;
     }
-    final OperatorResult customThresholdInput = resultMap.get(KEY_CURRENT);
 
     for (final Entry<String, OperatorResult> entry : resultMap.entrySet()) {
-      if (entry.getKey().equals(KEY_CURRENT)) {
-        continue;
-      }
-      postProcessResult(entry.getValue(), customThresholdInput);
+      postProcessResult(entry.getValue(), thresholdSideInput);
     }
 
     return resultMap;
   }
 
   private void postProcessResult(final OperatorResult operatorResult,
-      @Nullable OperatorResult customThresholdInput) {
+      @Nullable OperatorResult thresholdSideInput) {
     final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
     if (anomalies == null) {
       return;
     }
 
     final DataFrame df;
-    if (customThresholdInput == null) {
+    if (thresholdSideInput == null) {
       timestampColum = COL_TIME;
       valueColumn = COL_CURRENT;
       df = optional(operatorResult.getTimeseries()).map(TimeSeries::getDataFrame)
           .orElseThrow(() -> new IllegalArgumentException(
               "Invalid input. OperatorResult contains anomalies but no timeseries."));
-    } else if (customThresholdInput instanceof DataTable) {
-      df = ((DataTable) customThresholdInput).getDataFrame();
+    } else if (thresholdSideInput instanceof DataTable) {
+      df = ((DataTable) thresholdSideInput).getDataFrame();
     } else {
       // extract the df from the timeseries - throw error if OperatorResult does not contain a timeseries
-      final TimeSeries ts = customThresholdInput.getTimeseries();
+      final TimeSeries ts = thresholdSideInput.getTimeseries();
       checkArgument(ts != null,
           "Provided customInput for THRESHOLD does not contain a timeseries.");
       df = ts.getDataFrame();

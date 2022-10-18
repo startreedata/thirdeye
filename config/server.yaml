@@ -100,6 +100,8 @@ rca:
 
 time:
   timezone: UTC
+  # Limit onboarding alert replay back to JAN_1_2000_UTC
+  minimumOnboardingStartTime: 946684800000
 
 mockEvents:
   enabled: true

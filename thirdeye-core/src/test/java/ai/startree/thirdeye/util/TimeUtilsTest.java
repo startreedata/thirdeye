@@ -34,25 +34,22 @@ public class TimeUtilsTest {
   @Test
   public void testFloorByPeriodIsIdempotent() {
     // test that floorByPeriod · floorByPeriod = floorByPeriod
-    final DateTime input = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
+    final DateTime input1 = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
+    final DateTime input2 = DATE_PARSER.parseDateTime("2020-08-27 11:22:33.444 UTC");
 
-    final List<Period> periodList = List.of(
-        Period.years(1),
-        Period.years(2),
-        Period.months(1),
-        Period.months(2),
-        Period.days(1),
-        Period.days(2),
-        Period.minutes(1),
-        Period.minutes(2),
-        Period.seconds(1),
-        Period.seconds(2),
-        Period.millis(1),
-        Period.millis(2));
+    final List<DateTime> inputs = List.of(input1, input2);
 
-    for (Period p : periodList) {
-      DateTime floored = floorByPeriod(input, p);
-      assertThat(floorByPeriod(floored, p)).isEqualTo(floored);
+    for (var input : inputs) {
+
+      final List<Period> periodList = List.of(Period.years(1), Period.years(2), Period.months(1),
+          Period.months(2), Period.days(1), Period.days(2), Period.days(7), Period.minutes(1),
+          Period.minutes(2), Period.seconds(1), Period.seconds(2), Period.millis(1),
+          Period.millis(2));
+
+      for (Period p : periodList) {
+        DateTime floored = floorByPeriod(input, p);
+        assertThat(floorByPeriod(floored, p)).isEqualTo(floored);
+      }
     }
   }
 
@@ -139,10 +136,20 @@ public class TimeUtilsTest {
   }
 
   @Test
-  public void testFloorByPeriodRoundBy3DaysForFirstBucket() {
-    // rounding by 3 days for first bucket of month
+  public void testFloorByPeriodRoundBy3DaysInUTC() {
     final DateTime input = DATE_PARSER.parseDateTime("2021-11-03 11:22:33.444 UTC");
-    final DateTime expected = DATE_PARSER.parseDateTime("2021-11-01 00:00:00.000 UTC");
+    final DateTime expected = DATE_PARSER.parseDateTime("2021-11-02 00:00:00.000 UTC");
+    final Period twoDays = Period.days(3);
+    final DateTime output = floorByPeriod(input, twoDays);
+
+    assertThat(output).isEqualTo(expected);
+  }
+
+  @Test
+  public void testFloorByPeriodRoundBy3DaysInNonUTC() {
+    // rounding by 3 days for first bucket of month
+    final DateTime input = DATE_PARSER.parseDateTime("2021-11-03 11:22:33.444 PST");
+    final DateTime expected = DATE_PARSER.parseDateTime("2021-11-01 00:00:00.000 PST");
     final Period twoDays = Period.days(3);
     final DateTime output = floorByPeriod(input, twoDays);
 

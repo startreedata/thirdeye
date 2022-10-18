@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.spi;
 
 import java.time.Duration;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
 
@@ -26,7 +26,7 @@ public interface Constants {
   String CRON_TIMEZONE = "UTC";
   String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
   // tz database names that are equivalent to UTC
-  List<String> UTC_LIKE_TIMEZONES = List.of("Etc/GMT",
+  Set<String> UTC_LIKE_TIMEZONES = Set.of("Etc/GMT",
       "Etc/GMT+0",
       "Etc/GMT0",
       "GMT",

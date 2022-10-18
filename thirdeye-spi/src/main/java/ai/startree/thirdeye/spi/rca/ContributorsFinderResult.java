@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi.rca;
 
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 
+// todo cyril remove this wrapper if it's not necessary
 public interface ContributorsFinderResult {
 
   DimensionAnalysisResultApi getDimensionAnalysisResult();

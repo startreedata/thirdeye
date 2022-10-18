@@ -6,6 +6,29 @@
       "name": "root",
       "type": "PostProcessor",
       "params": {
+        "type": "THRESHOLD",
+        "component.ignore": "${guardrailMetricIgnore}",
+        "component.min": "${guardrailMetricMin}",
+        "component.max": "${guardrailMetricMax}",
+        "component.valueName": "${guardrailMetric}",
+        "component.timestamp": "ts",
+        "component.metric": "guardrail"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "metricThresholdProcessor"
+        },
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "missingDataPointsFiller",
+          "sourceProperty": "preparedCurrentDataWithHistory"
+        }
+      ]
+    },
+    {
+      "name": "metricThresholdProcessor",
+      "type": "PostProcessor",
+      "params": {
         "type": "TIME_OF_WEEK",
         "component.ignore": "${timeOfWeekIgnore}",
         "component.daysOfWeek": "${daysOfWeek}",
@@ -82,7 +105,7 @@
       "params": {
         "component.dataSource": "${dataSource}",
         "component.tableName": "${dataset}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}, ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}, ${aggregationParameter}) as met, ${guardrailMetric} as guardrail FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
@@ -130,6 +153,10 @@
     "daysOfWeek": [],
     "hoursOfDay": [],
     "dayHoursOfWeek": {},
+    "guardrailMetricIgnore": "true",
+    "guardrailMetricMin": "-1",
+    "guardrailMetricMax": "-1",
+    "guardrailMetric": "COUNT(*)",
     "queryLimit": "100000000"
   }
 }

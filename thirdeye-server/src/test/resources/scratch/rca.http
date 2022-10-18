@@ -93,3 +93,19 @@ Content-Type: application/json
   "end": "1623283200000",
   "generateEnumerationItems": false
 }
+
+###
+POST http://localhost:8080/api/rca/metrics/cohorts
+accept: application/json
+Content-Type: application/json
+
+{
+  "metric": {
+    "id": 12746
+  },
+  "threshold": 400000,
+  "maxDepth": 3,
+  "start": "1623110400000",
+  "end": "1623283200000"
+}
+

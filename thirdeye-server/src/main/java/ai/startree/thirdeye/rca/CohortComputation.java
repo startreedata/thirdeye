@@ -15,6 +15,7 @@
 package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -39,6 +40,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.metric.DimensionType;
+import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.inject.Singleton;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -144,6 +147,9 @@ public class CohortComputation {
     optional(request.getLimit())
         .ifPresent(context::setLimit);
 
+    optional(request.getMaxDepth())
+        .ifPresent(context::setMaxDepth);
+
     return context;
   }
 
@@ -162,6 +168,9 @@ public class CohortComputation {
 
   public CohortComputationApi compute(final CohortComputationApi request)
       throws Exception {
+    optional(request.getMaxDepth())
+        .ifPresent(maxDepth -> ensure(maxDepth > 0, "maxDepth must be a positive integer"));
+
     final CohortComputationContext context = buildContext(request);
 
     final Double agg = computeAggregate(context);
@@ -184,12 +193,14 @@ public class CohortComputation {
         .setGenerateEnumerationItems(request.isGenerateEnumerationItems())
         .setResultSize(results.size())
         .setResults(results)
-        .setLimit(context.getLimit());
+        .setLimit(context.getLimit())
+        .setMaxDepth(context.getMaxDepth());
 
     if (request.isGenerateEnumerationItems()) {
-      final String queryFilters = optional(request.getQueryFilters()).orElse(K_QUERY_FILTERS_DEFAULT);
+      final String key = optional(request.getEnumerationItemParamKey())
+          .orElse(K_QUERY_FILTERS_DEFAULT);
       output.setEnumerationItems(results.stream()
-          .map(api -> toEnumerationItem(api, queryFilters))
+          .map(api -> toEnumerationItem(api, key))
           .collect(Collectors.toList()));
     }
     return output;
@@ -200,29 +211,24 @@ public class CohortComputation {
       final Set<Set<String>> visited,
       final CohortComputationContext c)
       throws Exception {
-    final Set<String> dimensionsSet = Set.copyOf(dimensions);
-    if (visited.contains(dimensionsSet)) {
-      throw new RuntimeException("Invalid code path! Should always explore new pathways");
-    }
-    visited.add(dimensionsSet);
-
     final List<DimensionFilterContributionApi> results = new ArrayList<>();
 
     final List<String> dimensionsToExplore = new ArrayList<>(c.getAllDimensions());
     dimensionsToExplore.removeAll(dimensions);
 
     for (final String dimension : dimensionsToExplore) {
-      final List<String> subDimensions = new ArrayList<>(dimensions);
+      final List<String> subDimensions = new ArrayList<>(dimensions.size() + 1);
+      subDimensions.addAll(dimensions);
       subDimensions.add(dimension);
-      if (visited.contains(Set.copyOf(subDimensions))) {
+      final Set<String> subDimensionSet = Set.copyOf(subDimensions);
+      if (visited.contains(subDimensionSet)) {
         continue;
       }
+      visited.add(subDimensionSet);
 
-      final List<DimensionFilterContributionApi> l = query(
-          subDimensions, c
-      );
+      final List<DimensionFilterContributionApi> l = query(subDimensions, c);
       results.addAll(l);
-      if (l.size() > 0) {
+      if (l.size() > 0 && subDimensions.size() < c.getMaxDepth()) {
         results.addAll(compute0(subDimensions, visited, c));
       }
     }
@@ -239,15 +245,18 @@ public class CohortComputation {
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name());
 
-    subDimensions.forEach(builder::select);
+    final List<SqlIdentifier> subDimensionsIdentifiers = subDimensions.stream()
+        .map(CalciteUtils::identifierOf)
+        .collect(Collectors.toList());
+    subDimensionsIdentifiers.forEach(builder::select);
     builder.select(selectable(c.getMetric()));
-    subDimensions.forEach(builder::groupBy);
+    subDimensionsIdentifiers.forEach(builder::groupBy);
 
     final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
     final CalciteRequest query = builder
         .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
         .limit(c.getLimit())
-        .orderBy(QueryProjection.of(COL_AGGREGATE).withDescOrder())
+        .orderBy(identifierDescOf(COL_AGGREGATE))
         .build();
     final DataFrame df = runQuery(query, c.getDataSource());
     return readDf(df, c.getAggregate());

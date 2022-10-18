@@ -172,6 +172,7 @@ public abstract class ThirdEyeUtils {
           case LONG:
             rowData[i] = resultSet.getLong(i + 1);
             continue;
+          case FLOAT:
           case DOUBLE:
             rowData[i] = resultSet.getDouble(i + 1);
             continue;

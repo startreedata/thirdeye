@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.alert.AlertInsightsProvider.defaultChartTimeframe;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.joda.time.DateTimeZone;
@@ -71,5 +72,19 @@ public class AlertInsightsProviderTest {
 
     final Interval expected = new Interval(JULY_2_2021_0AM, JANUARY_1_2022_0AM, DateTimeZone.UTC);
     assertThat(res).isEqualTo(expected);
+  }
+
+  @Test
+  public void testDefaultChartTimeframe() {
+    // test all possible output results
+    assertThat(defaultChartTimeframe(Period.minutes(15))).isEqualTo(Period.months(1));
+    assertThat(defaultChartTimeframe(Period.hours(1))).isEqualTo(Period.months(6));
+    assertThat(defaultChartTimeframe(Period.days(1))).isEqualTo(Period.years(1));
+    assertThat(defaultChartTimeframe(Period.days(14))).isEqualTo(Period.years(2));
+    assertThat(defaultChartTimeframe(Period.weeks(15))).isEqualTo(Period.years(4));
+
+    // test input contains variable length period units: month and year
+    assertThat(defaultChartTimeframe(Period.months(2))).isEqualTo(Period.years(4));
+    assertThat(defaultChartTimeframe(Period.years(1))).isEqualTo(Period.years(4));
   }
 }

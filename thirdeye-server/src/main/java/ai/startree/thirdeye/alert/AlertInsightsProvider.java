@@ -224,7 +224,11 @@ public class AlertInsightsProvider {
    * Returns a default Period for the UI timeseries chart timeframe, based on the alert granularity.
    * Rule of thumb.
    */
-  private static Period defaultChartTimeframe(final Period alertGranularity) {
+  @VisibleForTesting
+  protected static Period defaultChartTimeframe(final Period alertGranularity) {
+    if (alertGranularity.getMonths() != 0 || alertGranularity.getYears() != 0) {
+      return Period.years(4);
+    }
     final long granularityMillis = alertGranularity.toStandardDuration().getMillis();
     if (granularityMillis < Period.hours(1).toStandardDuration().getMillis()) {
       return Period.months(1);
@@ -232,7 +236,7 @@ public class AlertInsightsProvider {
       return Period.months(6);
     } else if (granularityMillis < Period.weeks(1).toStandardDuration().getMillis()) {
       return Period.years(1);
-    } else if (granularityMillis < Period.months(1).toStandardDuration().getMillis()) {
+    } else if (granularityMillis < Period.days(30).toStandardDuration().getMillis()) {
       return Period.years(2);
     }
     return Period.years(4);

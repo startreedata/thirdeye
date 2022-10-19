@@ -5,7 +5,7 @@
     "timeColumnName": "date",
     "timeType": "DAYS",
     "replication" : "1",
-    "schemaName" : "pageviews"
+    "schemaName" : "pageviews_with_missing_data"
   },
   "tableIndexConfig" : {
     "invertedIndexColumns" : [],

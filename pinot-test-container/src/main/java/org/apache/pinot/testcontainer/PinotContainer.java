@@ -36,7 +36,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
 
 
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("apachepinot/pinot");
-    private static final String DEFAULT_TAG = "0.9.3-jdk11";
+    private static final String DEFAULT_TAG = "0.11.0";
     private List<AddTable> addTables;
     private List<ImportData> importDataList;
     private Network network;
@@ -85,7 +85,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
             new WaitAllStrategy()
                 .withStartupTimeout(Duration.ofMinutes(5))
                 .withStrategy(waitStrategy)
-                .withStrategy(Wait.forLogMessage(".*Bootstrap baseballStats table.*", 1))
+                .withStrategy(Wait.forLogMessage(".*Bootstrap tables.*", 1))
         );
     }
 

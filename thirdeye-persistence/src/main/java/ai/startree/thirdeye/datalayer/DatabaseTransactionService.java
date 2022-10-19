@@ -28,17 +28,14 @@ public class DatabaseTransactionService {
 
   private static final Logger LOG = LoggerFactory.getLogger(DatabaseTransactionService.class);
 
-  private final DatabaseService service;
   private final DataSource dataSource;
   private final Counter dbExceptionCounter;
   private final Counter dbCallCounter;
 
   @Inject
-  public DatabaseTransactionService(final DatabaseService service,
-      final DataSource dataSource,
+  public DatabaseTransactionService(final DataSource dataSource,
       final MetricRegistry metricRegistry) {
     this.dataSource = dataSource;
-    this.service = service;
 
     dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
     dbCallCounter = metricRegistry.counter("dbCallCounter");
@@ -50,7 +47,7 @@ public class DatabaseTransactionService {
     Connection connection = dataSource.getConnection();
     try {
       connection.setAutoCommit(false);
-      final T t = operation.handle(service, connection);
+      final T t = operation.handle(connection);
       connection.commit();
       return t;
     } catch (final Exception e) {
@@ -79,6 +76,6 @@ public class DatabaseTransactionService {
   }
 
   public interface DBOperation<T> {
-    T handle(DatabaseService service, Connection connection) throws Exception;
+    T handle(Connection connection) throws Exception;
   }
 }

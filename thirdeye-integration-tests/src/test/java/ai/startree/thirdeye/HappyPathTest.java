@@ -170,6 +170,7 @@ public class HappyPathTest {
 
   @DataProvider(name = "happyPathAlerts")
   public Object[][] happyPathAlerts() {
+    // one alert for each template
     return new Object[][]{{"startree-absolute-rule-alert.json"},
         {"startree-absolute-rule-percentile-alert.json"}, {"startree-mean-variance-alert.json"},
         {"startree-mean-variance-percentile-alert.json"}, {"startree-percentage-rule-alert.json"},
@@ -177,8 +178,8 @@ public class HappyPathTest {
         {"startree-threshold-percentile-alert.json"}};
   }
 
-  @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 10000L, dataProvider = "happyPathTemplates")
-  public void testEvaluateAllHappyPathTemplates(final String alertJson) throws IOException {
+  @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 10000L, dataProvider = "happyPathAlerts")
+  public void testEvaluateAllHappyPathAlerts(final String alertJson) throws IOException {
     final AlertApi alertApi = loadAlertApi("/happypath/payloads/" + alertJson);
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);

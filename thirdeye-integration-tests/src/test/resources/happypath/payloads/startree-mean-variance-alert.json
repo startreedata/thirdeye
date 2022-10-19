@@ -1,0 +1,17 @@
+{
+  "name": "pageviews",
+  "description": "This is a sample detection",
+  "template": {
+    "name": "startree-mean-variance"
+  },
+  "templateProperties": {
+    "dataSource": "PinotContainer",
+    "dataset": "pageviews",
+    "monitoringGranularity": "P1D",
+    "aggregationColumn": "views",
+    "aggregationFunction": "sum",
+    "lookback": "P21D",
+    "sensitivity": "5"
+  },
+  "cron": "0 */15 * * * ?"
+}

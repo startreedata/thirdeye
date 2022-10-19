@@ -149,7 +149,7 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractIndexEntity> Long count(final Predicate predicate, final Class<E> clazz, final Connection connection)
+  public <E extends AbstractEntity> Long count(final Predicate predicate, final Class<E> clazz, final Connection connection)
       throws Exception {
     final long tStart = System.nanoTime();
     try {
@@ -170,7 +170,7 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractIndexEntity> List<E> runSQL(
+  public <E extends AbstractEntity> List<E> runSQL(
       final String parameterizedSQL,
       final Map<String, Object> parameterMap,
       final Class<E> indexClass,

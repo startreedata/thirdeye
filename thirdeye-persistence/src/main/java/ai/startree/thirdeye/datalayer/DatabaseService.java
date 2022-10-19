@@ -195,6 +195,7 @@ public class DatabaseService {
       dbWriteDuration.update(System.nanoTime() - tStart);
     }
   }
+
   public <E extends AbstractEntity> Long count(Predicate predicate, Class<E> clazz) {
     final long tStart = System.nanoTime();
     try {
@@ -220,7 +221,7 @@ public class DatabaseService {
   public <E extends AbstractEntity> List<E> runSQL(
       final String parameterizedSQL,
       final Map<String, Object> parameterMap,
-      final Class<E> indexClass) {
+      final Class<E> clazz) {
     final long tStart = System.nanoTime();
     try {
       return runTask(connection -> {
@@ -228,9 +229,9 @@ public class DatabaseService {
             .createStatementFromSQL(connection,
                 parameterizedSQL,
                 parameterMap,
-                indexClass)) {
+                clazz)) {
           try (final ResultSet rs = findMatchingIdsStatement.executeQuery()) {
-            return genericResultSetMapper.mapAll(rs, indexClass);
+            return genericResultSetMapper.mapAll(rs, clazz);
           }
         }
       }, Collections.emptyList());

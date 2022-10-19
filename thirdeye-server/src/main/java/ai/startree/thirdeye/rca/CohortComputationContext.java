@@ -18,6 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import java.util.List;
+import org.apache.calcite.sql.SqlNode;
 import org.joda.time.Interval;
 
 public class CohortComputationContext {
@@ -30,6 +31,7 @@ public class CohortComputationContext {
   private List<String> allDimensions;
   private int limit = 100;
   private int maxDepth = 10;
+  private SqlNode where;
 
   private Double threshold;
   private Double aggregate;
@@ -112,6 +114,15 @@ public class CohortComputationContext {
 
   public CohortComputationContext setMaxDepth(final int maxDepth) {
     this.maxDepth = maxDepth;
+    return this;
+  }
+
+  public SqlNode getWhere() {
+    return where;
+  }
+
+  public CohortComputationContext setWhere(final SqlNode where) {
+    this.where = where;
     return this;
   }
 }

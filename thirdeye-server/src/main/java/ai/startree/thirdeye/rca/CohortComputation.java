@@ -15,10 +15,12 @@
 package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.combinePredicates;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
@@ -42,6 +44,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.util.CalciteUtils;
@@ -55,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -226,7 +230,7 @@ public class CohortComputation {
       final String key = optional(request.getEnumerationItemParamKey())
           .orElse(K_QUERY_FILTERS_DEFAULT);
       output.setEnumerationItems(results.stream()
-          .map(api -> toEnumerationItem(api, key))
+          .map(api -> toEnumerationItem(api, key, context))
           .collect(Collectors.toList()));
     }
     return output;
@@ -306,31 +310,45 @@ public class CohortComputation {
   }
 
   private EnumerationItemApi toEnumerationItem(final DimensionFilterContributionApi api,
-      final String queryFiltersKey) {
+      final String queryFiltersKey,
+      final CohortComputationContext context) {
+    final String whereFragment = whereFragment(api.getDimensionFilters(), context);
     return new EnumerationItemApi()
         .setName(generateName(api.getDimensionFilters()))
-        .setParams(Map.of(queryFiltersKey, toPartialQuery(api.getDimensionFilters())));
+        .setParams(Map.of(queryFiltersKey, whereFragment));
   }
 
   private String generateName(final Map<String, String> dimensionFilters) {
     return String.join(",", dimensionFilters.values());
   }
 
-  private String toPartialQuery(final Map<String, String> dimensionFilters) {
-    return " AND " + dimensionFilters.entrySet()
+  private String whereFragment(final Map<String, String> dimensionFilters,
+      final CohortComputationContext context) {
+
+    final List<SqlNode> queryPredicates = dimensionFilters.entrySet()
         .stream()
-        .map(e -> String.format("'%s' = '%s'", e.getKey(), e.getValue()))
-        .collect(Collectors.joining(" AND "));
+        .map(e -> Predicate.EQ(e.getKey(), e.getValue()))
+        .map(e -> QueryPredicate.of(e, DimensionType.STRING))
+        .map(QueryPredicate::toSqlNode)
+        .collect(Collectors.toList());
+
+    optional(context.getWhere())
+        .ifPresent(queryPredicates::add);
+
+    final SqlNode combinedPredicates = requireNonNull(combinePredicates(queryPredicates));
+    final SqlLanguage sqlLanguage = context.getDataSource().getSqlLanguage();
+    final SqlDialect sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
+
+    return " AND " + combinedPredicates.toSqlString(sqlDialect);
   }
 
-  public DataFrame runQuery(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds)
-      throws Exception {
+  public DataFrame runQuery(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds) {
     final String sql = calciteRequest.getSql(ds.getSqlLanguage(), ds.getSqlExpressionBuilder());
 
     final DataSourceRequest request = new DataSourceRequest(null, sql, Map.of());
     try {
       return ds.fetchDataTable(request).getDataFrame();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw badRequest(ThirdEyeStatus.ERR_UNKNOWN, e.getMessage());
     }
   }

@@ -66,8 +66,8 @@ Content-Type: application/json
   "percentage": 50,
   "start": "1623110400000",
   "end": "1623283200000",
-  "generateEnumerationItems": false,
-  "where": "'country' = 'US' AND 'device' = 'b'"
+  "generateEnumerationItems": true,
+  "where": "country LIKE 'US%'"
 }
 
 

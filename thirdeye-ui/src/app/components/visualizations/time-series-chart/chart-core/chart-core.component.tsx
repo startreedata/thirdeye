@@ -15,9 +15,12 @@ import { AxisBottom, AxisLeft, AxisRight, Orientation } from "@visx/axis";
 import { LinearGradient } from "@visx/gradient";
 import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
-import { AreaClosed, LinePath } from "@visx/shape";
+import { AreaClosed, Bar, LinePath } from "@visx/shape";
 import React, { FunctionComponent, useMemo } from "react";
-import { formatLargeNumberForVisualization } from "../../../../utils/visualization/visualization.util";
+import {
+    determineGranularity,
+    formatLargeNumberForVisualization,
+} from "../../../../utils/visualization/visualization.util";
 import { PlotBand } from "../plot-band/plot-band.component";
 import {
     DataPoint,
@@ -146,9 +149,8 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
             {series.map((seriesData: NormalizedSeries, idx: number) => {
                 if (seriesData.enabled) {
                     const color =
-                        seriesData.color === undefined
-                            ? colorScale(seriesData.name as string)
-                            : seriesData.color;
+                        seriesData.color ??
+                        colorScale(seriesData.name as string);
                     if (seriesData.type === SeriesType.LINE) {
                         return (
                             <LinePath<DataPoint>
@@ -216,6 +218,51 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                     }
                                     yScale={yScaleToUse}
                                 />
+                            </>
+                        );
+                    } else if (seriesData.type === SeriesType.BAR) {
+                        const data = seriesData.data as DataPoint[];
+
+                        const granularity = determineGranularity(
+                            data.map((d: DataPoint) => d.x)
+                        );
+
+                        return (
+                            <>
+                                {data.map((d: DataPoint) => {
+                                    const barHeight =
+                                        yMax - (dataScale(d.y) ?? 0);
+                                    const barX = dateScale(d.x);
+                                    const barY = yMax - barHeight;
+
+                                    let barWidth =
+                                        dateScale(granularity * 2) -
+                                        dateScale(granularity) -
+                                        2;
+                                    const isOverDomain =
+                                        barX + barWidth / 2 >
+                                        dateScale(dateScale.domain()[1]);
+
+                                    let xValue = barX - barWidth / 2;
+
+                                    if (isOverDomain) {
+                                        xValue =
+                                            dateScale(dateScale.domain()[1]) -
+                                            barWidth / 4;
+                                        barWidth = barWidth / 4;
+                                    }
+
+                                    return (
+                                        <Bar
+                                            fill={d.color ?? color}
+                                            height={barHeight}
+                                            key={`${seriesData.name}-${d.x}`}
+                                            width={barWidth}
+                                            x={xValue}
+                                            y={barY}
+                                        />
+                                    );
+                                })}
                             </>
                         );
                     } else if (seriesData.type === SeriesType.CUSTOM) {

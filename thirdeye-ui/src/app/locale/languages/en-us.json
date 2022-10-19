@@ -157,7 +157,7 @@
 
         "contribution": "Contribution",
         "value": "Value",
-        "alert-performance": "Alert Performance",
+        "alert-performance": "Alert performance",
         "root-cause-analysis": "Root Cause Analysis",
         "heatmap-data": "Heatmap Data",
         "chart-data": "Chart Data",
@@ -269,7 +269,27 @@
         "dimension-expression": "Dimension expression",
         "reset-anomalies-for-alert": "Reset anomalies for Alert",
         "chart-height": "Chart height",
-        "reload": "Reload"
+        "reload": "Reload",
+        "view-all-alerts": "View all alerts",
+        "active-alerts": "Active alerts",
+        "overview": "Overview",
+        "anomalies-reported": "Anomalies reported",
+        "anomalies-pending-feedback": "Anomalies pending feedback",
+        "subscriptions": "Subscriptions",
+        "view-all-entities": "View all {{entity}}",
+        "review-entities": "Review {{entity}}",
+        "improve-alert-accuracy": "Improve alert accuracy",
+        "accuracy": "Accuracy",
+        "daily-anomalies": "Daily anomalies",
+        "view-anomalies-for-zoom-range": "View anomalies for zoom range",
+        "preview": "Preview",
+        "hide-preview": "Hide preview",
+        "recommended-documentation": "Recommended Documentation",
+        "dont-show-again": "Don't show this again",
+        "getting-started": "Getting started",
+        "how-to-investigate-anomaly": "How to investigate an anomaly?",
+        "learn-how-to-use-te": "Learn how to use ThirdEye in 5 minutes (video)",
+        "anomaly-count": "Anomaly count"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -379,6 +399,14 @@
         "on-how-to-create-entity": "on how to create a {{entity}}.",
         "no-entity-created": "No {{entity}} created.",
         "view-documentation": "View documentation",
-        "chart-data-not-reflective": "Chart data not reflective of current configuration"
+        "chart-data-not-reflective": "Chart data not reflective of current configuration",
+        "experienced-issues-fetching-data": "Experienced issues fetching data",
+        "anomaly-precision-tooltip": "(Anomalies labeled as anomalies) / (Anomalies with feedback)"
+    },
+    "link": {
+        "how-to-use-te-video": "https://drive.google.com/file/d/1vsiWz_GHH9E8S8ivsDrwr-B1YA_aSVBj/view",
+        "how-to-investigate-anomaly": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/perform-root-cause-analysis",
+        "create-an-alert": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/create-your-first-alert",
+        "getting-started": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/"
     }
 }

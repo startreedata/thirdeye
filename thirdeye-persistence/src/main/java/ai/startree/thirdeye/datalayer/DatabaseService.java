@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

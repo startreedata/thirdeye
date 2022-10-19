@@ -14,13 +14,17 @@
 package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datasource.loader.DefaultMinMaxTimeLoader;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
@@ -110,15 +114,12 @@ public class AlertInsightsProvider {
       @NonNull final AlertMetadataDTO metadata) throws Exception {
     final String datasetName = metadata.getDataset().getDataset();
     if (datasetName == null) {
-      LOG.warn("Dataset name not found in alert metadata. Cannot fetch start and end time.");
-      return;
+      throw new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
+          "Dataset name not found in alert metadata.");
     }
     final DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
     if (datasetConfigDTO == null) {
-      LOG.warn(
-          "Dataset configuration not found: {}. Dataset not onboarded? Cannot fetch start and end time.",
-          datasetName);
-      return;
+      throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName);
     }
 
     // fetch dataset interval
@@ -129,17 +130,15 @@ public class AlertInsightsProvider {
   private void addDatasetStartEndTimes(final AlertInsightsApi insights,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
     final String dataSource = datasetConfigDTO.getDataSource();
-    if (dataSource == null) {
-      LOG.warn(
-          "Datasource is null in dataset configuration: {}. Could not fetch start and end time.",
-          datasetConfigDTO.getDataset());
-      return;
-    }
+    checkState(dataSource != null, "Datasource is null in configuration of dataset: %s.",
+        datasetConfigDTO.getDataset());
 
     // launch min, max, safeMax queries async
-    final Future<@Nullable Long> minTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(datasetConfigDTO,
+    final Future<@Nullable Long> minTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(
+        datasetConfigDTO,
         null);
-    final Future<@Nullable Long> maxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(datasetConfigDTO,
+    final Future<@Nullable Long> maxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
+        datasetConfigDTO,
         null);
     final long maximumPossibleEndTime = currentMaximumPossibleEndTime();
     final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
@@ -225,7 +224,11 @@ public class AlertInsightsProvider {
    * Returns a default Period for the UI timeseries chart timeframe, based on the alert granularity.
    * Rule of thumb.
    */
-  private static Period defaultChartTimeframe(final Period alertGranularity) {
+  @VisibleForTesting
+  protected static Period defaultChartTimeframe(final Period alertGranularity) {
+    if (alertGranularity.getMonths() != 0 || alertGranularity.getYears() != 0) {
+      return Period.years(4);
+    }
     final long granularityMillis = alertGranularity.toStandardDuration().getMillis();
     if (granularityMillis < Period.hours(1).toStandardDuration().getMillis()) {
       return Period.months(1);
@@ -233,7 +236,7 @@ public class AlertInsightsProvider {
       return Period.months(6);
     } else if (granularityMillis < Period.weeks(1).toStandardDuration().getMillis()) {
       return Period.years(1);
-    } else if (granularityMillis < Period.months(1).toStandardDuration().getMillis()) {
+    } else if (granularityMillis < Period.days(30).toStandardDuration().getMillis()) {
       return Period.years(2);
     }
     return Period.years(4);

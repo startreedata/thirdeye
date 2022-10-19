@@ -73,7 +73,14 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
     for (int i = 0; i < resultSet.getColumnCount(); i++) {
       if (columnName.equalsIgnoreCase(resultSet.getColumnName(i))) {
         try {
-          return ColumnType.pinotTypeToColumnType(resultSet.getColumnDataType(i));
+          final ColumnType columnType = ColumnType.pinotTypeToColumnType(
+              resultSet.getColumnDataType(i));
+          // todo cyril - remove this - temporary adding log to understand when a client has a FLOAT column type
+          if (columnType.getType().equals(ColumnDataType.FLOAT)) {
+            LOG.info(
+                "\"" + resultSet.getColumnName(i) + "\" column returned by Pinot is of type FLOAT");
+          }
+          return columnType;
         } catch (Throwable e) {
           // Pinot client doesn't provide type for pql, so default to DOUBLE type for metric column.
           return new ColumnType(ColumnDataType.DOUBLE);

@@ -24,6 +24,7 @@ import { useGetAnomalyDimensionAnalysis } from "../../rest/rca/rca.actions";
 import { getFilterDimensionAnalysisData } from "../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
+import { LoadingErrorStateSwitch } from "../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnomalyDimensionAnalysisTable } from "./algorithm-table/algorithm-table.component";
 import { AnomalyDimensionAnalysisProps } from "./anomaly-dimension-analysis.interfaces";
 
@@ -72,30 +73,46 @@ export const AnomalyDimensionAnalysis: FunctionComponent<
 
     return (
         <CardContent>
-            {/* Loading Indicator when request is in flight */}
-            {anomalyDimensionAnalysisReqStatus === ActionStatus.Working && (
-                <SkeletonV1 preventDelay height={200} variant="rect" />
-            )}
-
-            {anomalyDimensionAnalysisReqStatus === ActionStatus.Done &&
-                anomalyDimensionAnalysisData && (
-                    <AnomalyDimensionAnalysisTable
-                        anomaly={anomaly}
-                        anomalyDimensionAnalysisData={
-                            anomalyDimensionAnalysisData
-                        }
-                        chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
-                        comparisonOffset={comparisonOffset}
-                        onCheckClick={onCheckClick}
-                    />
-                )}
-
-            {/* Indicate no data if there was an error */}
-            {anomalyDimensionAnalysisReqStatus === ActionStatus.Error && (
-                <Box pb={20} pt={20}>
-                    <NoDataIndicator />
-                </Box>
-            )}
+            <LoadingErrorStateSwitch
+                errorState={
+                    <Box pb={20} pt={20}>
+                        <NoDataIndicator />
+                    </Box>
+                }
+                isError={
+                    anomalyDimensionAnalysisReqStatus === ActionStatus.Error
+                }
+                isLoading={
+                    anomalyDimensionAnalysisReqStatus === ActionStatus.Working
+                }
+                loadingState={
+                    <SkeletonV1 preventDelay height={200} variant="rect" />
+                }
+            >
+                {anomalyDimensionAnalysisData &&
+                    anomalyDimensionAnalysisData.analysisRunInfo.success && (
+                        <AnomalyDimensionAnalysisTable
+                            anomaly={anomaly}
+                            anomalyDimensionAnalysisData={
+                                anomalyDimensionAnalysisData
+                            }
+                            chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
+                            comparisonOffset={comparisonOffset}
+                            onCheckClick={onCheckClick}
+                        />
+                    )}
+                {anomalyDimensionAnalysisData &&
+                    !anomalyDimensionAnalysisData.analysisRunInfo.success && (
+                        <Box pb={20} pt={20}>
+                            <NoDataIndicator
+                                text={
+                                    anomalyDimensionAnalysisData.analysisRunInfo
+                                        .message
+                                }
+                            />
+                        </Box>
+                    )}
+            </LoadingErrorStateSwitch>
         </CardContent>
     );
 };

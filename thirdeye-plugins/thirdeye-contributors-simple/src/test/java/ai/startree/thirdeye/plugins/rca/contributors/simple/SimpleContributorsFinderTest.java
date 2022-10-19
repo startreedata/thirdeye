@@ -17,17 +17,14 @@ import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContrib
 import static ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinder.COL_VALUE_CHANGE_PERCENTAGE;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NOT_ENOUGH_DATA_FOR_RCA;
 import static ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi.ALL;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_NAME;
 import static ai.startree.thirdeye.spi.datasource.loader.AggregationLoader.COL_DIMENSION_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.cube.SummaryResponseRow;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
@@ -84,13 +81,15 @@ public class SimpleContributorsFinderTest {
       DATASET_CONFIG_DTO);
 
   // os in android, osx. browser in chrome, safari
-  private static final Supplier<DataFrame> BASELINE_DATAFRAME = () -> new DataFrame().addSeries(COL_DIMENSION_NAME,
+  private static final Supplier<DataFrame> BASELINE_DATAFRAME = () -> new DataFrame().addSeries(
+          COL_DIMENSION_NAME,
           StringSeries.buildFrom("os", "os", "browser", "browser"))
       .addSeries(COL_DIMENSION_VALUE, StringSeries.buildFrom("android", "osx", "chrome", "safari"))
       .addSeries(COL_VALUE, DoubleSeries.buildFrom(40, 60, 80, 20))
       .addSeries(COL_TIME, LongSeries.buildFrom(1L, 1L, 1L, 1L));
 
-  private static final Supplier<DataFrame> CURRENT_DATAFRAME = () -> new DataFrame().addSeries(COL_DIMENSION_NAME,
+  private static final Supplier<DataFrame> CURRENT_DATAFRAME = () -> new DataFrame().addSeries(
+          COL_DIMENSION_NAME,
           StringSeries.buildFrom("os", "os", "browser", "browser"))
       .addSeries(COL_DIMENSION_VALUE, StringSeries.buildFrom("android", "osx", "chrome", "safari"))
       .addSeries(COL_VALUE, DoubleSeries.buildFrom(50, 70, 50, 70))
@@ -109,16 +108,17 @@ public class SimpleContributorsFinderTest {
         aggregationLoader,
         new SimpleConfiguration());
 
-    final ContributorsFinderResult output = contributorsFinder.search(new ContributorsSearchConfiguration(
-        METRIC_CONFIG_DTO,
-        DATASET_CONFIG_DTO,
-        CURRENT_INTERVAL,
-        BASELINE_INTERVAL,
-        SUMMARY_SIZE,
-        DEPTH,
-        DO_ONE_SIDE_ERROR,
-        FILTERS,
-        HIERARCHIES));
+    final ContributorsFinderResult output = contributorsFinder.search(
+        new ContributorsSearchConfiguration(
+            METRIC_CONFIG_DTO,
+            DATASET_CONFIG_DTO,
+            CURRENT_INTERVAL,
+            BASELINE_INTERVAL,
+            SUMMARY_SIZE,
+            DEPTH,
+            DO_ONE_SIDE_ERROR,
+            FILTERS,
+            HIERARCHIES));
 
     final DimensionAnalysisResultApi dimensionAnalysisResultOutput = output.getDimensionAnalysisResult();
     final List<SummaryResponseRow> rowsOutput = dimensionAnalysisResultOutput.getResponseRows();
@@ -143,7 +143,7 @@ public class SimpleContributorsFinderTest {
         aggregationLoader,
         new SimpleConfiguration());
 
-    assertThatThrownBy(() -> contributorsFinder.search(new ContributorsSearchConfiguration(
+    final DimensionAnalysisResultApi res = contributorsFinder.search(new ContributorsSearchConfiguration(
         METRIC_CONFIG_DTO,
         DATASET_CONFIG_DTO,
         CURRENT_INTERVAL,
@@ -152,8 +152,9 @@ public class SimpleContributorsFinderTest {
         DEPTH,
         DO_ONE_SIDE_ERROR,
         FILTERS,
-        HIERARCHIES))).isInstanceOf(ThirdEyeException.class)
-        .hasFieldOrPropertyWithValue("status", ERR_NOT_ENOUGH_DATA_FOR_RCA);
+        HIERARCHIES)).getDimensionAnalysisResult();
+    assertThat(res.getAnalysisRunInfo().isSuccess()).isFalse();
+    assertThat(res.getAnalysisRunInfo().getMessage()).contains("baseline");
   }
 
   @Test
@@ -167,7 +168,7 @@ public class SimpleContributorsFinderTest {
         aggregationLoader,
         new SimpleConfiguration());
 
-    assertThatThrownBy(() -> contributorsFinder.search(new ContributorsSearchConfiguration(
+    final DimensionAnalysisResultApi res = contributorsFinder.search(new ContributorsSearchConfiguration(
         METRIC_CONFIG_DTO,
         DATASET_CONFIG_DTO,
         CURRENT_INTERVAL,
@@ -176,8 +177,9 @@ public class SimpleContributorsFinderTest {
         DEPTH,
         DO_ONE_SIDE_ERROR,
         FILTERS,
-        HIERARCHIES))).isInstanceOf(ThirdEyeException.class)
-        .hasFieldOrPropertyWithValue("status", ERR_NOT_ENOUGH_DATA_FOR_RCA);
+        HIERARCHIES)).getDimensionAnalysisResult();
+    assertThat(res.getAnalysisRunInfo().isSuccess()).isFalse();
+    assertThat(res.getAnalysisRunInfo().getMessage()).contains("current");
   }
 
   @Test
@@ -185,20 +187,20 @@ public class SimpleContributorsFinderTest {
     final DataFrame baseline = new DataFrame()
         .addSeries(COL_DIMENSION_NAME, "dim1", "dim1")
         .addSeries(COL_DIMENSION_VALUE, "val1", "val2")
-        .addSeries(COL_VALUE, 1D, 1D)
-        ;
+        .addSeries(COL_VALUE, 1D, 1D);
     final double baselineTotal = SimpleContributorsFinder.getTotalFromBreakdown(baseline);
 
     final DataFrame current = new DataFrame()
         .addSeries(COL_DIMENSION_NAME, "dim1", "dim1")
         .addSeries(COL_DIMENSION_VALUE, "val1", "val3") // value is different here
-        .addSeries(COL_VALUE, 1D, 1D)
-        ;
+        .addSeries(COL_VALUE, 1D, 1D);
     final double currentTotal = SimpleContributorsFinder.getTotalFromBreakdown(current);
 
-    final DataFrame stats = SimpleContributorsFinder.computeStats(baseline, baselineTotal, current, currentTotal);
-    assertThat(stats.get(COL_VALUE_CHANGE_PERCENTAGE).getDoubles().values()).isEqualTo(new double[]{0D, -100D, 0d/0d});
-    assertThat(stats.get(COL_CONTRIBUTION_CHANGE_PERCENTAGE).getDoubles().values()).isEqualTo(new double[]{0D, -50, 50});
+    final DataFrame stats = SimpleContributorsFinder.computeStats(baseline, baselineTotal, current,
+        currentTotal);
+    assertThat(stats.get(COL_VALUE_CHANGE_PERCENTAGE).getDoubles().values()).isEqualTo(
+        new double[]{0D, -100D, 0d / 0d});
+    assertThat(stats.get(COL_CONTRIBUTION_CHANGE_PERCENTAGE).getDoubles().values()).isEqualTo(
+        new double[]{0D, -50, 50});
   }
-
 }

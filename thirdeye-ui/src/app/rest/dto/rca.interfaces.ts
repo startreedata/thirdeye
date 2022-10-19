@@ -90,6 +90,10 @@ export interface AnomalyDimensionAnalysisData {
         name: string;
         cost: number;
     }[];
+    analysisRunInfo: {
+        success: boolean;
+        message: string;
+    };
 }
 
 /**

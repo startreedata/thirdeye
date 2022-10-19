@@ -95,7 +95,10 @@ public class ForkJoinParallelExecutor {
 
       return results;
     } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+      futures.forEach(f -> f.cancel(true));
       throw new RuntimeException(e);
+    } finally {
+      executorService.shutdown();
     }
   }
 }

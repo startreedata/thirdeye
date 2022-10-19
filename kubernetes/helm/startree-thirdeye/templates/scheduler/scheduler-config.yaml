@@ -100,6 +100,7 @@ data:
     
     time:
       timezone: {{ .Values.time.timezone }}
+      minimumOnboardingStartTime: {{ .Values.time.minimumOnboardingStartTime }}
     
     rca:
       topContributors:

@@ -17,7 +17,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
-import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;

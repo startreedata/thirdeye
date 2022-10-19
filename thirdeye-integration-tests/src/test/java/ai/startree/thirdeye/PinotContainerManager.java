@@ -57,8 +57,7 @@ public class PinotContainerManager {
   }
 
   private static PinotContainer createPinotContainer() {
-    final URL datasetsBaseResource = PinotContainerManager.class.getClassLoader()
-        .getResource("datasets");
+    final URL datasetsBaseResource = PinotContainerManager.class.getResource("/datasets");
     requireNonNull(datasetsBaseResource);
 
     final String datasetsBasePath = datasetsBaseResource.getFile();

@@ -37,7 +37,6 @@ import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.client.Client;
@@ -51,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -120,20 +120,15 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testCreatePinotDataSource() {
-    DataSourceApi dataSourceApi = new DataSourceApi()
-        .setName(PINOT_DATA_SOURCE_NAME)
+    DataSourceApi dataSourceApi = new DataSourceApi().setName(PINOT_DATA_SOURCE_NAME)
         .setType("pinot")
-        .setProperties(Map.of(
-            "zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(),
-            "brokerUrl", pinotContainer.getPinotBrokerUrl().replace("http://", ""),
-            "clusterName", "QuickStartCluster",
-            "controllerConnectionScheme", "http",
-            "controllerHost", "localhost",
-            "controllerPort", pinotContainer.getControllerPort())
-        );
+        .setProperties(
+            Map.of("zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(), "brokerUrl",
+                pinotContainer.getPinotBrokerUrl().replace("http://", ""), "clusterName",
+                "QuickStartCluster", "controllerConnectionScheme", "http", "controllerHost",
+                "localhost", "controllerPort", pinotContainer.getControllerPort()));
 
-    Response response = request("api/data-sources")
-        .post(Entity.json(List.of(dataSourceApi)));
+    Response response = request("api/data-sources").post(Entity.json(List.of(dataSourceApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
@@ -151,58 +146,50 @@ public class HappyPathTest {
     formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
     formData.add("datasetName", PINOT_DATASET_NAME);
 
-    Response response = request("api/data-sources/onboard-dataset/")
-        .post(Entity.form(formData));
+    Response response = request("api/data-sources/onboard-dataset/").post(Entity.form(formData));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testCreateDataset")
   public void testEvaluateAlert() {
-    AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(
-        MAIN_ALERT_API, PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
+    AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(MAIN_ALERT_API,
+        PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
-    Response response = request("api/alerts/evaluate")
-        .post(Entity.json(alertEvaluationApi));
+    Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testEvaluateAlert")
   public void testCreateAlert() {
-    Response response = request("api/alerts")
-        .post(Entity.json(List.of(MAIN_ALERT_API)));
+    Response response = request("api/alerts").post(Entity.json(List.of(MAIN_ALERT_API)));
 
     assertThat(response.getStatus()).isEqualTo(200);
     List<Map<String, Object>> alerts = response.readEntity(List.class);
     alertId = ((Number) alerts.get(0).get("id")).longValue();
   }
 
-  @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 50000L)
-  public void testEvaluateAllTemplates() throws IOException {
-    final List<String> templatesToTest = new ArrayList<>();
-    templatesToTest.add("startree-absolute-rule-alert.json");
-    templatesToTest.add("startree-absolute-rule-percentile-alert.json");
-    templatesToTest.add("startree-mean-variance-alert.json");
-    templatesToTest.add("startree-mean-variance-percentile-alert.json");
-    templatesToTest.add("startree-percentage-rule-alert.json");
-    templatesToTest.add("startree-percentage-rule-percentile-alert.json");
-    templatesToTest.add("startree-threshold-alert.json");
-    templatesToTest.add("startree-threshold-percentile-alert.json");
+  @DataProvider(name = "happyPathAlerts")
+  public Object[][] happyPathAlerts() {
+    return new Object[][]{{"startree-absolute-rule-alert.json"},
+        {"startree-absolute-rule-percentile-alert.json"}, {"startree-mean-variance-alert.json"},
+        {"startree-mean-variance-percentile-alert.json"}, {"startree-percentage-rule-alert.json"},
+        {"startree-percentage-rule-percentile-alert.json"}, {"startree-threshold-alert.json"},
+        {"startree-threshold-percentile-alert.json"}};
+  }
 
-    for (final var s : templatesToTest) {
-      final AlertApi alertApi = loadAlertApi("/happypath/payloads/" + s);
-      final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi,
-          PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
+  @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 10000L, dataProvider = "happyPathTemplates")
+  public void testEvaluateAllHappyPathTemplates(final String alertJson) throws IOException {
+    final AlertApi alertApi = loadAlertApi("/happypath/payloads/" + alertJson);
+    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi,
+        PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
-      Response response = request("api/alerts/evaluate")
-          .post(Entity.json(alertEvaluationApi));
-      assertThat(response.getStatus()).isEqualTo(200);
-    }
+    Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
+    assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testCreateAlert")
   public void testAlertInsights() {
-    final Response response = request("api/alerts/" + alertId + "/insights")
-        .get();
+    final Response response = request("api/alerts/" + alertId + "/insights").get();
     assertThat(response.getStatus()).isEqualTo(200);
     AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
     assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(
@@ -215,16 +202,14 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testCreateAlert")
   public void testCreateSubscription() {
-    SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi()
-        .setName("testSubscription")
+    SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi().setName(
+            "testSubscription")
         .setCron("")
-        .setNotificationSchemes(new NotificationSchemesApi()
-            .setEmail(new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
-        .setAlerts(List.of(
-            new AlertApi().setId(alertId)
-        ));
-    Response response = request("api/subscription-groups")
-        .post(Entity.json(List.of(subscriptionGroupApi)));
+        .setNotificationSchemes(new NotificationSchemesApi().setEmail(
+            new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
+        .setAlerts(List.of(new AlertApi().setId(alertId)));
+    Response response = request("api/subscription-groups").post(
+        Entity.json(List.of(subscriptionGroupApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
@@ -271,14 +256,14 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testSaveInvestigation() {
-    final RcaInvestigationApi rcaInvestigationApi = new RcaInvestigationApi()
-        .setName("investigationName")
+    final RcaInvestigationApi rcaInvestigationApi = new RcaInvestigationApi().setName(
+            "investigationName")
         .setText("textDescription")
         .setAnomaly(new AnomalyApi().setId(anomalyId))
         .setUiMetadata(Map.of("uiKey1", List.of(1, 2), "uiKey2", "foo"));
 
-    final Response response = request("api/rca/investigations")
-        .post(Entity.json(List.of(rcaInvestigationApi)));
+    final Response response = request("api/rca/investigations").post(
+        Entity.json(List.of(rcaInvestigationApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 

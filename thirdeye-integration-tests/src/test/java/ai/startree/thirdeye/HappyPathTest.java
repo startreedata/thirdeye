@@ -74,7 +74,6 @@ import org.testng.annotations.Test;
 public class HappyPathTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
-  private static final String RESOURCES_PATH = "/happypath";
 
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
   private static final AlertApi MAIN_ALERT_API;
@@ -82,17 +81,23 @@ public class HappyPathTest {
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
   private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
 
-  private static final PinotContainer pinotContainer;
   public static final long EVALUATE_END_TIME = 1596326400000L;
 
   static {
-    pinotContainer = PinotContainerManager.getInstance().getPinotContainer();
     try {
       MAIN_ALERT_API = loadAlertApi("alert.json");
     } catch (IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
     }
   }
+
+  private PinotContainer pinotContainer;
+  private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
+  private Client client;
+
+  // this attribute is shared between tests
+  private long anomalyId;
+  private long alertId;
 
   private static AlertApi loadAlertApi(final String alertJson) throws IOException {
     String alertPath = "/happypath/payloads/" + alertJson;
@@ -107,15 +112,9 @@ public class HappyPathTest {
         .setEnd(Date.from(Instant.ofEpochMilli(EVALUATE_END_TIME)));//Sunday, 2 August 2020 00:00:00
   }
 
-  private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
-  private Client client;
-
-  // this attribute is shared between tests
-  private long anomalyId;
-  private long alertId;
-
   @BeforeClass
   public void beforeClass() throws Exception {
+    pinotContainer = PinotContainerManager.getInstance();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it

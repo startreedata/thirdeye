@@ -37,26 +37,22 @@ public class PinotContainerManager {
   private static final String TABLE_CONFIG_FILENAME = "table-config.json";
   private static final String DATA_FILENAME = "data.csv";
 
-  private static final PinotContainerManager instance = createInstance();
-  private final PinotContainer pinotContainer;
+  private static PinotContainer instance;
 
-  private PinotContainerManager(final PinotContainer pinotContainer) {
-    this.pinotContainer = pinotContainer;
+  private PinotContainerManager() {
   }
 
-  private synchronized static PinotContainerManager createInstance() {
-    final PinotContainer pinotContainer = createPinotContainer();
-
-    try {
-      pinotContainer.start();
-      pinotContainer.addTables();
-    } catch (final IOException | InterruptedException e) {
-      throw new RuntimeException("Could not launch Pinot for integration tests.");
+  public synchronized static PinotContainer getInstance() {
+    if (instance == null) {
+      instance = createPinotContainer();
+      try {
+        instance.start();
+        instance.addTables();
+      } catch (final IOException | InterruptedException e) {
+        throw new RuntimeException("Could not launch Pinot for integration tests.");
+      }
     }
-    return new PinotContainerManager(pinotContainer);
-  }
 
-  public static PinotContainerManager getInstance() {
     return instance;
   }
 
@@ -84,9 +80,5 @@ public class PinotContainerManager {
       importDataList.add(new ImportData(batchJobSpecFile, dataFile));
     }
     return new PinotContainer(addTableList, importDataList);
-  }
-
-  public PinotContainer getPinotContainer() {
-    return pinotContainer;
   }
 }

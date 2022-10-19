@@ -86,10 +86,8 @@ public class SchedulingTest {
   private static final long MARCH_26_2020_05H00 = 1585198800_000L;
   // = MARCH_26_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
   private static final long MARCH_23_2020_00H00 = 1584921600_000L;
-  private static final PinotContainer pinotContainer;
 
   static {
-    pinotContainer = PinotContainerManager.getInstance().getPinotContainer();
     try {
       String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
       String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);
@@ -99,6 +97,7 @@ public class SchedulingTest {
     }
   }
 
+  private PinotContainer pinotContainer;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -109,6 +108,7 @@ public class SchedulingTest {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
 
+    pinotContainer = PinotContainerManager.getInstance();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();

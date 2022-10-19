@@ -51,18 +51,23 @@ import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.inject.Singleton;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.util.SqlBasicVisitor;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -142,18 +147,11 @@ public class CohortComputation {
         .orElse(null), "dataset not found. name: " + metric.getDataset());
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataset.getDataSource());
 
-    final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
-        .orElse(optional(dataset.getDimensions())
-            .map(Templatable::value)
-            .orElse(List.of())));
-    ensure(!dimensions.isEmpty(), "Dimension list is empty");
-
     final CohortComputationContext context = new CohortComputationContext()
         .setMetric(metric)
         .setDataset(dataset)
         .setDataSource(dataSource)
-        .setInterval(currentInterval)
-        .setAllDimensions(dimensions);
+        .setInterval(currentInterval);
 
     optional(request.getLimit())
         .ifPresent(context::setLimit);
@@ -165,7 +163,55 @@ public class CohortComputation {
         .map(where -> parseWhere(where, dataSource))
         .ifPresent(context::setWhere);
 
+    final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
+        .orElse(optional(dataset.getDimensions())
+            .map(Templatable::value)
+            .map(dims -> removeWhereDimensions(dims, context.getWhere()))
+            .orElse(List.of())));
+    ensure(!dimensions.isEmpty(), "Dimension list is empty");
+    context.setAllDimensions(dimensions);
+
     return context;
+  }
+
+  /**
+   * remove only from dataset dimensions. Do not filter dimensions manually fed into request
+   *
+   * @param dims
+   * @param where
+   * @return
+   */
+  private List<String> removeWhereDimensions(final List<String> dims, final SqlNode where) {
+    if (where == null) {
+      return dims;
+    }
+    final List<String> whereClauseDimensions = where.accept(new SqlBasicVisitor<>() {
+      @Override
+      public List<String> visit(final SqlCall sqlCall) {
+        return sqlCall.getOperandList().stream()
+            .map(sqlNode -> sqlNode.accept(this))
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+      }
+
+      @Override
+      public List<String> visit(final SqlNodeList nodeList) {
+        return nodeList.stream()
+            .map(sqlNode -> sqlNode.accept(this))
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+      }
+
+      @Override
+      public List<String> visit(final SqlIdentifier identifier) {
+        return List.of(identifier.getSimple());
+      }
+    });
+
+    dims.removeAll(whereClauseDimensions);
+    return dims;
   }
 
   private SqlNode parseWhere(final String where, final ThirdEyeDataSource ds) {
@@ -224,7 +270,8 @@ public class CohortComputation {
         .setResultSize(results.size())
         .setResults(results)
         .setLimit(context.getLimit())
-        .setMaxDepth(context.getMaxDepth());
+        .setMaxDepth(context.getMaxDepth())
+        .setDimensions(context.getAllDimensions());
 
     if (request.isGenerateEnumerationItems()) {
       final String key = optional(request.getEnumerationItemParamKey())

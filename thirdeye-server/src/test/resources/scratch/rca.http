@@ -67,7 +67,7 @@ Content-Type: application/json
   "start": "1623110400000",
   "end": "1623283200000",
   "generateEnumerationItems": true,
-  "where": "country LIKE 'US%'"
+  "where": "country LIKE 'US%' AND \"device\" = 'phone'"
 }
 
 

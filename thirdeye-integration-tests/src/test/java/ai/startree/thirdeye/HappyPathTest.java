@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye;
 
+import static ai.startree.thirdeye.DropwizardTestUtils.alertEvaluationApi;
+import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
+import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
+import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
-import static io.dropwizard.testing.ConfigOverride.config;
-import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -33,16 +35,9 @@ import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.client.Client;
@@ -54,7 +49,6 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -75,7 +69,6 @@ public class HappyPathTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
   private static final AlertApi MAIN_ALERT_API;
   private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
@@ -85,7 +78,7 @@ public class HappyPathTest {
 
   static {
     try {
-      MAIN_ALERT_API = loadAlertApi("alert.json");
+      MAIN_ALERT_API = loadAlertApi("/happypath/payloads/" + "alert.json");
     } catch (IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
     }
@@ -99,19 +92,6 @@ public class HappyPathTest {
   private long anomalyId;
   private long alertId;
 
-  private static AlertApi loadAlertApi(final String alertJson) throws IOException {
-    String alertPath = "/happypath/payloads/" + alertJson;
-    String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);
-    return OBJECT_MAPPER.readValue(alertApiJson, AlertApi.class);
-  }
-
-  private static AlertEvaluationApi alertEvaluationApi(final AlertApi alertApi) {
-    return new AlertEvaluationApi()
-        .setAlert(alertApi)
-        .setStart(Date.from(Instant.ofEpochMilli(PAGEVIEWS_DATASET_START_TIME))) //Sunday, 2 February 2020 00:00:00
-        .setEnd(Date.from(Instant.ofEpochMilli(EVALUATE_END_TIME)));//Sunday, 2 August 2020 00:00:00
-  }
-
   @BeforeClass
   public void beforeClass() throws Exception {
     pinotContainer = PinotContainerManager.getInstance();
@@ -120,20 +100,9 @@ public class HappyPathTest {
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();
 
-    SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
-        resourceFilePath("happypath/config/server.yaml"),
-        config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", dbConfiguration.getUrl()),
-        config("database.user", dbConfiguration.getUser()),
-        config("database.password", dbConfiguration.getPassword()),
-        config("database.driver", dbConfiguration.getDriver())
-    );
+    SUPPORT = buildSupport(dbConfiguration, "happypath/config/server.yaml");
     SUPPORT.before();
-    final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
-    jerseyClientConfiguration.setTimeout(io.dropwizard.util.Duration.minutes(1)); // for timeout issues
-    client = new JerseyClientBuilder(SUPPORT.getEnvironment())
-        .using(jerseyClientConfiguration)
-        .build("test client");
+    client = buildClient("happy-path-test-client", SUPPORT);
   }
 
   @AfterClass(alwaysRun = true)
@@ -190,7 +159,7 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testCreateDataset")
   public void testEvaluateAlert() {
     AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(
-        MAIN_ALERT_API);  //Sunday, 2 August 2020 00:00:00
+        MAIN_ALERT_API, PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
     Response response = request("api/alerts/evaluate")
         .post(Entity.json(alertEvaluationApi));
@@ -220,8 +189,9 @@ public class HappyPathTest {
     templatesToTest.add("startree-threshold-percentile-alert.json");
 
     for (final var s : templatesToTest) {
-      final AlertApi alertApi = loadAlertApi(s);
-      final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi);
+      final AlertApi alertApi = loadAlertApi("/happypath/payloads/" + s);
+      final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi,
+          PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
       Response response = request("api/alerts/evaluate")
           .post(Entity.json(alertEvaluationApi));

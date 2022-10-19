@@ -117,7 +117,7 @@ export const TrendingAnomalies: FunctionComponent = () => {
                     "#1850A6",
                 ]);
 
-                dataset.forEach((d) => {
+                dataset.forEach((d: DataPoint) => {
                     d.color = colorScale(d.y);
                 });
 

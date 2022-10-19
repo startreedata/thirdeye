@@ -1,0 +1,18 @@
+{
+  "name": "pageviews",
+  "description": "This is a sample detection",
+  "template": {
+    "name": "startree-mean-variance-percentile"
+  },
+  "templateProperties": {
+    "dataSource": "PinotContainer",
+    "dataset": "pageviews",
+    "monitoringGranularity": "P1D",
+    "aggregationColumn": "views",
+    "aggregationFunction": "percentileTdigest",
+    "aggregationParameter": "30",
+    "lookback": "P21D",
+    "sensitivity": "5"
+  },
+  "cron": "0 */15 * * * ?"
+}

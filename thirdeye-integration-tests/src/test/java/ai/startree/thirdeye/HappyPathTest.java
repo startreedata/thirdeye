@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye;
 
+import static ai.startree.thirdeye.DropwizardTestUtils.alertEvaluationApi;
+import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
+import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
+import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
-import static io.dropwizard.testing.ConfigOverride.config;
-import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -33,15 +35,8 @@ import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.client.Client;
@@ -53,9 +48,9 @@ import javax.ws.rs.core.Response;
 import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -73,27 +68,23 @@ import org.testng.annotations.Test;
 public class HappyPathTest {
 
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
-  private static final String RESOURCES_PATH = "/happypath";
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
-  private static final AlertApi ALERT_API;
+  private static final AlertApi MAIN_ALERT_API;
   private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
   private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
 
-  private static final PinotContainer pinotContainer;
+  public static final long EVALUATE_END_TIME = 1596326400000L;
 
   static {
-    pinotContainer = PinotContainerManager.getInstance().getPinotContainer();
     try {
-      String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
-      String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);
-      ALERT_API = OBJECT_MAPPER.readValue(alertApiJson, AlertApi.class);
+      MAIN_ALERT_API = loadAlertApi("/happypath/payloads/" + "alert.json");
     } catch (IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
     }
   }
 
+  private PinotContainer pinotContainer;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -103,25 +94,15 @@ public class HappyPathTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
+    pinotContainer = PinotContainerManager.getInstance();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();
 
-    SUPPORT = new DropwizardTestSupport<>(ThirdEyeServer.class,
-        resourceFilePath("happypath/config/server.yaml"),
-        config("server.connector.port", "0"), // port: 0 implies any port
-        config("database.url", dbConfiguration.getUrl()),
-        config("database.user", dbConfiguration.getUser()),
-        config("database.password", dbConfiguration.getPassword()),
-        config("database.driver", dbConfiguration.getDriver())
-    );
+    SUPPORT = buildSupport(dbConfiguration, "happypath/config/server.yaml");
     SUPPORT.before();
-    final JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
-    jerseyClientConfiguration.setTimeout(io.dropwizard.util.Duration.minutes(1)); // for timeout issues
-    client = new JerseyClientBuilder(SUPPORT.getEnvironment())
-        .using(jerseyClientConfiguration)
-        .build("test client");
+    client = buildClient("happy-path-test-client", SUPPORT);
   }
 
   @AfterClass(alwaysRun = true)
@@ -139,20 +120,15 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testCreatePinotDataSource() {
-    DataSourceApi dataSourceApi = new DataSourceApi()
-        .setName(PINOT_DATA_SOURCE_NAME)
+    DataSourceApi dataSourceApi = new DataSourceApi().setName(PINOT_DATA_SOURCE_NAME)
         .setType("pinot")
-        .setProperties(Map.of(
-            "zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(),
-            "brokerUrl", pinotContainer.getPinotBrokerUrl().replace("http://", ""),
-            "clusterName", "QuickStartCluster",
-            "controllerConnectionScheme", "http",
-            "controllerHost", "localhost",
-            "controllerPort", pinotContainer.getControllerPort())
-        );
+        .setProperties(
+            Map.of("zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(), "brokerUrl",
+                pinotContainer.getPinotBrokerUrl().replace("http://", ""), "clusterName",
+                "QuickStartCluster", "controllerConnectionScheme", "http", "controllerHost",
+                "localhost", "controllerPort", pinotContainer.getControllerPort()));
 
-    Response response = request("api/data-sources")
-        .post(Entity.json(List.of(dataSourceApi)));
+    Response response = request("api/data-sources").post(Entity.json(List.of(dataSourceApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
@@ -170,40 +146,55 @@ public class HappyPathTest {
     formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
     formData.add("datasetName", PINOT_DATASET_NAME);
 
-    Response response = request("api/data-sources/onboard-dataset/")
-        .post(Entity.form(formData));
+    Response response = request("api/data-sources/onboard-dataset/").post(Entity.form(formData));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testCreateDataset")
   public void testEvaluateAlert() {
-    AlertEvaluationApi alertEvaluationApi = new AlertEvaluationApi()
-        .setAlert(ALERT_API)
-        .setStart(Date.from(Instant.ofEpochMilli(PAGEVIEWS_DATASET_START_TIME))) //Sunday, 2 February 2020 00:00:00
-        .setEnd(Date.from(Instant.ofEpochMilli(1596326400000L)));  //Sunday, 2 August 2020 00:00:00
+    AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(MAIN_ALERT_API,
+        PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
-    Response response = request("api/alerts/evaluate")
-        .post(Entity.json(alertEvaluationApi));
+    Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testEvaluateAlert")
   public void testCreateAlert() {
-    Response response = request("api/alerts")
-        .post(Entity.json(List.of(ALERT_API)));
+    Response response = request("api/alerts").post(Entity.json(List.of(MAIN_ALERT_API)));
 
     assertThat(response.getStatus()).isEqualTo(200);
     List<Map<String, Object>> alerts = response.readEntity(List.class);
     alertId = ((Number) alerts.get(0).get("id")).longValue();
   }
 
+  @DataProvider(name = "happyPathAlerts")
+  public Object[][] happyPathAlerts() {
+    // one alert for each template
+    return new Object[][]{{"startree-absolute-rule-alert.json"},
+        {"startree-absolute-rule-percentile-alert.json"}, {"startree-mean-variance-alert.json"},
+        {"startree-mean-variance-percentile-alert.json"}, {"startree-percentage-rule-alert.json"},
+        {"startree-percentage-rule-percentile-alert.json"}, {"startree-threshold-alert.json"},
+        {"startree-threshold-percentile-alert.json"}};
+  }
+
+  @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 10000L, dataProvider = "happyPathAlerts")
+  public void testEvaluateAllHappyPathAlerts(final String alertJson) throws IOException {
+    final AlertApi alertApi = loadAlertApi("/happypath/payloads/" + alertJson);
+    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi,
+        PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
+
+    Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
+    assertThat(response.getStatus()).isEqualTo(200);
+  }
+
   @Test(dependsOnMethods = "testCreateAlert")
   public void testAlertInsights() {
-    final Response response = request("api/alerts/" + alertId + "/insights")
-        .get();
+    final Response response = request("api/alerts/" + alertId + "/insights").get();
     assertThat(response.getStatus()).isEqualTo(200);
     AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
-    assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo("P1D");
+    assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(
+        "P1D");
     assertThat(insights.getDefaultStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY);
     assertThat(insights.getDefaultEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
     assertThat(insights.getDatasetStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
@@ -212,16 +203,14 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testCreateAlert")
   public void testCreateSubscription() {
-    SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi()
-        .setName("testSubscription")
+    SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi().setName(
+            "testSubscription")
         .setCron("")
-        .setNotificationSchemes(new NotificationSchemesApi()
-            .setEmail(new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
-        .setAlerts(List.of(
-            new AlertApi().setId(alertId)
-        ));
-    Response response = request("api/subscription-groups")
-        .post(Entity.json(List.of(subscriptionGroupApi)));
+        .setNotificationSchemes(new NotificationSchemesApi().setEmail(
+            new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
+        .setAlerts(List.of(new AlertApi().setId(alertId)));
+    Response response = request("api/subscription-groups").post(
+        Entity.json(List.of(subscriptionGroupApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
@@ -268,14 +257,14 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testSaveInvestigation() {
-    final RcaInvestigationApi rcaInvestigationApi = new RcaInvestigationApi()
-        .setName("investigationName")
+    final RcaInvestigationApi rcaInvestigationApi = new RcaInvestigationApi().setName(
+            "investigationName")
         .setText("textDescription")
         .setAnomaly(new AnomalyApi().setId(anomalyId))
-        .setUiMetadata(Map.of("uiKey1", List.of(1,2), "uiKey2", "foo"));
+        .setUiMetadata(Map.of("uiKey1", List.of(1, 2), "uiKey2", "foo"));
 
-    final Response response = request("api/rca/investigations")
-        .post(Entity.json(List.of(rcaInvestigationApi)));
+    final Response response = request("api/rca/investigations").post(
+        Entity.json(List.of(rcaInvestigationApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 

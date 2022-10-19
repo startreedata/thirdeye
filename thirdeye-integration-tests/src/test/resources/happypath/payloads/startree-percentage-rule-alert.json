@@ -1,0 +1,17 @@
+{
+  "name": "pageviews",
+  "description": "This is a sample detection",
+  "template": {
+    "name": "startree-percentage-rule"
+  },
+  "templateProperties": {
+    "dataSource": "PinotContainer",
+    "dataset": "pageviews",
+    "monitoringGranularity": "P1D",
+    "aggregationColumn": "views",
+    "aggregationFunction": "sum",
+    "baselineOffset": "P7D",
+    "percentageChange": "50"
+  },
+  "cron": "0 */15 * * * ?"
+}

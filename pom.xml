@@ -72,7 +72,7 @@
     <freemarker.version>2.3.28</freemarker.version>
     <guava.version>20.0</guava.version>
     <guice.version>4.2.3</guice.version>
-    <hsqldb.version>2.3.4</hsqldb.version>
+    <hsqldb.version>2.7.0</hsqldb.version>
     <jackson.version>2.10.2</jackson.version>
     <jetty.version>9.4.21.v20190926</jetty.version>
     <jodatime.version>2.7</jodatime.version>

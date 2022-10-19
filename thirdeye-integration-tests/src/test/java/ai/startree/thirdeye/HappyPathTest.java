@@ -41,6 +41,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -76,22 +77,34 @@ public class HappyPathTest {
   private static final String RESOURCES_PATH = "/happypath";
 
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
-  private static final AlertApi ALERT_API;
+  private static final AlertApi MAIN_ALERT_API;
   private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
   private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
 
   private static final PinotContainer pinotContainer;
+  public static final long EVALUATE_END_TIME = 1596326400000L;
 
   static {
     pinotContainer = PinotContainerManager.getInstance().getPinotContainer();
     try {
-      String alertPath = String.format("%s/payloads/alert.json", RESOURCES_PATH);
-      String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);
-      ALERT_API = OBJECT_MAPPER.readValue(alertApiJson, AlertApi.class);
+      MAIN_ALERT_API = loadAlertApi("alert.json");
     } catch (IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
     }
+  }
+
+  private static AlertApi loadAlertApi(final String alertJson) throws IOException {
+    String alertPath = "/happypath/payloads/" + alertJson;
+    String alertApiJson = IOUtils.resourceToString(alertPath, StandardCharsets.UTF_8);
+    return OBJECT_MAPPER.readValue(alertApiJson, AlertApi.class);
+  }
+
+  private static AlertEvaluationApi alertEvaluationApi(final AlertApi alertApi) {
+    return new AlertEvaluationApi()
+        .setAlert(alertApi)
+        .setStart(Date.from(Instant.ofEpochMilli(PAGEVIEWS_DATASET_START_TIME))) //Sunday, 2 February 2020 00:00:00
+        .setEnd(Date.from(Instant.ofEpochMilli(EVALUATE_END_TIME)));//Sunday, 2 August 2020 00:00:00
   }
 
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
@@ -177,10 +190,8 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testCreateDataset")
   public void testEvaluateAlert() {
-    AlertEvaluationApi alertEvaluationApi = new AlertEvaluationApi()
-        .setAlert(ALERT_API)
-        .setStart(Date.from(Instant.ofEpochMilli(PAGEVIEWS_DATASET_START_TIME))) //Sunday, 2 February 2020 00:00:00
-        .setEnd(Date.from(Instant.ofEpochMilli(1596326400000L)));  //Sunday, 2 August 2020 00:00:00
+    AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(
+        MAIN_ALERT_API);  //Sunday, 2 August 2020 00:00:00
 
     Response response = request("api/alerts/evaluate")
         .post(Entity.json(alertEvaluationApi));
@@ -190,11 +201,33 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testEvaluateAlert")
   public void testCreateAlert() {
     Response response = request("api/alerts")
-        .post(Entity.json(List.of(ALERT_API)));
+        .post(Entity.json(List.of(MAIN_ALERT_API)));
 
     assertThat(response.getStatus()).isEqualTo(200);
     List<Map<String, Object>> alerts = response.readEntity(List.class);
     alertId = ((Number) alerts.get(0).get("id")).longValue();
+  }
+
+  @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 50000L)
+  public void testEvaluateAllTemplates() throws IOException {
+    final List<String> templatesToTest = new ArrayList<>();
+    templatesToTest.add("startree-absolute-rule-alert.json");
+    templatesToTest.add("startree-absolute-rule-percentile-alert.json");
+    templatesToTest.add("startree-mean-variance-alert.json");
+    templatesToTest.add("startree-mean-variance-percentile-alert.json");
+    templatesToTest.add("startree-percentage-rule-alert.json");
+    templatesToTest.add("startree-percentage-rule-percentile-alert.json");
+    templatesToTest.add("startree-threshold-alert.json");
+    templatesToTest.add("startree-threshold-percentile-alert.json");
+
+    for (final var s : templatesToTest) {
+      final AlertApi alertApi = loadAlertApi(s);
+      final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi);
+
+      Response response = request("api/alerts/evaluate")
+          .post(Entity.json(alertEvaluationApi));
+      assertThat(response.getStatus()).isEqualTo(200);
+    }
   }
 
   @Test(dependsOnMethods = "testCreateAlert")
@@ -203,7 +236,8 @@ public class HappyPathTest {
         .get();
     assertThat(response.getStatus()).isEqualTo(200);
     AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
-    assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo("P1D");
+    assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(
+        "P1D");
     assertThat(insights.getDefaultStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY);
     assertThat(insights.getDefaultEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
     assertThat(insights.getDatasetStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
@@ -272,7 +306,7 @@ public class HappyPathTest {
         .setName("investigationName")
         .setText("textDescription")
         .setAnomaly(new AnomalyApi().setId(anomalyId))
-        .setUiMetadata(Map.of("uiKey1", List.of(1,2), "uiKey2", "foo"));
+        .setUiMetadata(Map.of("uiKey1", List.of(1, 2), "uiKey2", "foo"));
 
     final Response response = request("api/rca/investigations")
         .post(Entity.json(List.of(rcaInvestigationApi)));

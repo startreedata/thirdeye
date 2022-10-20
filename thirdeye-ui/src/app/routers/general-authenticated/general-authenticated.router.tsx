@@ -51,7 +51,10 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
                 />
 
                 {/* Home path */}
-                <Route element={<HomePage />} path={AppRouteRelative.HOME} />
+                <Route
+                    element={<HomePage />}
+                    path={`${AppRouteRelative.HOME}`}
+                />
 
                 {/* Login path */}
                 {/* Already authenticated, redirect to base path */}

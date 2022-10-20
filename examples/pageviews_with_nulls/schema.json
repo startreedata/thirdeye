@@ -1,6 +1,6 @@
 
 {
-  "schemaName": "pageviews",
+  "schemaName": "pageviews_with_nulls",
   "dimensionFieldSpecs": [
     {
       "name": "country",

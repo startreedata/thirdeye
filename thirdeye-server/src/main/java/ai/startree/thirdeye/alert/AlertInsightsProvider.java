@@ -22,7 +22,6 @@ import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.datasource.loader.DefaultMinMaxTimeLoader;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -33,6 +32,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -61,12 +61,12 @@ public class AlertInsightsProvider {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final DatasetConfigManager datasetConfigManager;
-  private final DefaultMinMaxTimeLoader minMaxTimeLoader;
+  private final MinMaxTimeLoader minMaxTimeLoader;
 
   @Inject
   public AlertInsightsProvider(final AlertTemplateRenderer alertTemplateRenderer,
       final DatasetConfigManager datasetConfigManager,
-      final DefaultMinMaxTimeLoader minMaxTimeLoader) {
+      final MinMaxTimeLoader minMaxTimeLoader) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.datasetConfigManager = datasetConfigManager;
     this.minMaxTimeLoader = minMaxTimeLoader;

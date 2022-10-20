@@ -48,6 +48,7 @@ import {
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
+import { getErrorMessages } from "../../../utils/rest/rest.util";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { AnomalyFeedback } from "../../anomaly-feedback/anomaly-feedback.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
@@ -146,13 +147,24 @@ export const AnomalyTimeSeriesCard: FunctionComponent<
             );
         });
 
-        Promise.all(dataRequests).then((dataFromRequests) => {
-            setFilteredAlertEvaluation(
-                dataFromRequests.map((alertEval, idx) => {
-                    return [alertEval, timeSeriesFiltersSet[idx]];
-                })
-            );
-        });
+        Promise.all(dataRequests)
+            .then((dataFromRequests) => {
+                setFilteredAlertEvaluation(
+                    dataFromRequests.map((alertEval, idx) => {
+                        return [alertEval, timeSeriesFiltersSet[idx]];
+                    })
+                );
+            })
+            .catch((error) => {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.chart-data"),
+                    })
+                );
+            });
     };
 
     useEffect(() => {

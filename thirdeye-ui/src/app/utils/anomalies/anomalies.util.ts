@@ -14,7 +14,7 @@
 import { AxiosError } from "axios";
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { cloneDeep, every, isEmpty, isNil, isNumber } from "lodash";
+import { cloneDeep, every, isEmpty, isEqual, isNil, isNumber } from "lodash";
 import { Dispatch, SetStateAction } from "react";
 import { NotificationTypeV1 } from "../../platform/components";
 import {
@@ -37,6 +37,8 @@ import {
     Anomaly,
     AnomalyFeedbackType,
 } from "../../rest/dto/anomaly.interfaces";
+import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
@@ -507,6 +509,35 @@ export const filterOutIgnoredAnomalies = (anomalies: Anomaly[]): Anomaly[] => {
             anomaly.anomalyLabels.map((label) => {
                 return label.ignore === false || label.ignore === undefined;
             })
+        );
+    });
+};
+
+export const getEvaluationDatasetForAnomaly = (
+    anomaly: Anomaly,
+    detectionEvaluations: DetectionEvaluation[],
+    enumerationItem: EnumerationItem | null | undefined
+): DetectionEvaluation | undefined => {
+    if (anomaly.enumerationItem === undefined) {
+        return detectionEvaluations[0];
+    }
+
+    /**
+     * If enumerationItem property is not undefined, then the actual
+     * enumeration item is expected to be passed
+     */
+    if (!enumerationItem) {
+        return;
+    }
+
+    return detectionEvaluations.find((candidate) => {
+        if (candidate.enumerationItem === undefined) {
+            return false;
+        }
+
+        return isEqual(
+            enumerationItem.params,
+            candidate.enumerationItem?.params
         );
     });
 };

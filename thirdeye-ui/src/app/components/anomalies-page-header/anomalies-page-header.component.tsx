@@ -57,7 +57,11 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
                 },
             ]}
             subNavigationSelected={
-                pathname.indexOf(AppRouteRelative.ANOMALIES_LIST) > -1 ? 0 : 1
+                pathname.indexOf(AppRouteRelative.ANOMALIES_LIST) > -1
+                    ? 0
+                    : pathname.indexOf(AppRouteRelative.METRICS_REPORT) > -1
+                    ? 1
+                    : undefined
             }
             title={t("label.anomalies")}
         />

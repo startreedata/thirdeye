@@ -16,7 +16,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TE_REPO="${SCRIPT_DIR}/.."
 if [ -z "${PINOT_VERSION}" ]; then
-  PINOT_VERSION=0.9.3
+  PINOT_VERSION=0.11.0
 fi
 if [ -z "${CONTROLLER_HOST}" ]; then
   CONTROLLER_HOST=localhost

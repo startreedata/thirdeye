@@ -12,24 +12,21 @@
  * the License.
  */
 import { Box, Grid, Link, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetAlerts } from "../../../rest/alerts/alerts.actions";
 import { getAlertsCreatePath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { ActiveAlertsCountProps } from "./active-alerts-count.interfaces";
 
-export const ActiveAlertsCount: FunctionComponent = () => {
+export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
+    getAlertsStatus,
+    alerts,
+}) => {
     const { t } = useTranslation();
-
-    const { alerts, getAlerts, status } = useGetAlerts();
-
-    useEffect(() => {
-        getAlerts();
-    }, []);
 
     return (
         <Grid container alignItems="center" justifyContent="space-between">
@@ -50,8 +47,8 @@ export const ActiveAlertsCount: FunctionComponent = () => {
                             text={t("message.experienced-issues-fetching-data")}
                         />
                     }
-                    isError={status === ActionStatus.Error}
-                    isLoading={status === ActionStatus.Working}
+                    isError={getAlertsStatus === ActionStatus.Error}
+                    isLoading={getAlertsStatus === ActionStatus.Working}
                     loadingState={
                         <Box width={100}>
                             <Typography variant="h2">

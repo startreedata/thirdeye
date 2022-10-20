@@ -91,7 +91,7 @@ describe("Anomaly Breakdown Comparison Heatmap Utils", () => {
                     extraData: {
                         ...mockComparisonData,
                     },
-                    label: "apple: 300000000 (0.28%)",
+                    label: "apple: 300m (0.28%)",
                     id: "apple",
                     parent: "column name-parent",
                     size: 300000000,
@@ -100,7 +100,7 @@ describe("Anomaly Breakdown Comparison Heatmap Utils", () => {
                     extraData: {
                         ...mockComparisonData,
                     },
-                    label: "coconut: 300000000 (0.28%)",
+                    label: "coconut: 300m (0.28%)",
                     id: "coconut",
                     parent: "column name-parent",
                     size: 300000000,

@@ -75,7 +75,7 @@
     <guice.version>4.2.3</guice.version>
     <hsqldb.version>2.3.4</hsqldb.version>
     <jackson.version>2.10.5</jackson.version>
-    <jetty.version>9.4.21.v20190926</jetty.version>
+    <jetty.version>9.4.48.v20220622</jetty.version>
     <jodatime.version>2.7</jodatime.version>
     <json-schema-validator.version>2.2.14</json-schema-validator.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>

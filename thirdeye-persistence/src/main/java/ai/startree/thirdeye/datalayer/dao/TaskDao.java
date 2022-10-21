@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer.dao;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.DatabaseService;
+import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,10 +47,13 @@ public class TaskDao {
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   private final DatabaseService databaseService;
+  private final DatabaseTransactionService transactionService;
 
   @Inject
-  public TaskDao(final DatabaseService databaseService) {
+  public TaskDao(final DatabaseService databaseService,
+      final DatabaseTransactionService transactionService) {
     this.databaseService = databaseService;
+    this.transactionService = transactionService;
   }
 
   private TaskEntity toEntity(final TaskDTO dto)
@@ -93,8 +98,11 @@ public class TaskDao {
       return null;
     }
     try {
-      return databaseService.save(toEntity(pojo));
-    } catch (JsonProcessingException e) {
+      final TaskEntity entity = toEntity(pojo);
+      return transactionService.executeTransaction(
+          (connection) -> databaseService.save(entity, connection),
+          null);
+    } catch (JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return null;
     }
@@ -139,8 +147,10 @@ public class TaskDao {
   public int update(final TaskDTO pojo, final Predicate predicate) {
     try {
       final TaskEntity entity = toEntity(pojo);
-      return databaseService.update(entity, predicate);
-    } catch (JsonProcessingException e) {
+      return transactionService.executeTransaction(
+          (connection) -> databaseService.update(entity, predicate, connection),
+          null);
+    } catch (JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return 0;
     }
@@ -148,9 +158,11 @@ public class TaskDao {
 
   public List<TaskDTO> getAll() {
     try {
-      final List<TaskEntity> entities = databaseService.findAll(null, null, null, TaskEntity.class);
+      final List<TaskEntity> entities = transactionService.executeTransaction(
+          (connection) -> databaseService.findAll(null,
+              null, null, TaskEntity.class, connection), Collections.emptyList());
       return toDto(entities);
-    } catch (final JsonProcessingException e) {
+    } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return Collections.emptyList();
     }
@@ -158,12 +170,11 @@ public class TaskDao {
 
   public List<TaskDTO> list(final long limit, final long offset) {
     try {
-      final List<TaskEntity> entities = databaseService.findAll(null,
-          limit,
-          offset,
-          TaskEntity.class);
+      final List<TaskEntity> entities = transactionService.executeTransaction(
+          (connection) -> databaseService.findAll(null,
+              limit, offset, TaskEntity.class, connection), Collections.emptyList());
       return toDto(entities);
-    } catch (final JsonProcessingException e) {
+    } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return Collections.emptyList();
     }
@@ -171,12 +182,14 @@ public class TaskDao {
 
   public TaskDTO get(final Long id) {
     try {
-      final TaskEntity entity = databaseService.find(id, TaskEntity.class);
+      final TaskEntity entity = transactionService.executeTransaction(
+          (connection) -> databaseService.find(id, TaskEntity.class, connection),
+          null);
       if (entity == null) {
         return null;
       }
       return toDto(entity);
-    } catch (final JsonProcessingException e) {
+    } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return null;
     }
@@ -208,20 +221,37 @@ public class TaskDao {
 
   public List<TaskDTO> get(final Predicate predicate) {
     try {
-      final List<TaskEntity> entities = databaseService.findAll(predicate, null, null, TaskEntity.class);
+      final List<TaskEntity> entities = transactionService.executeTransaction(
+          (connection) -> databaseService.findAll(
+              predicate, null, null, TaskEntity.class, connection),
+          Collections.emptyList());
       return toDto(entities);
-    } catch (final JsonProcessingException e) {
+    } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return Collections.emptyList();
     }
   }
 
   public long count() {
-    return databaseService.count(null, TaskEntity.class);
+    try {
+      return transactionService.executeTransaction(
+          (connection) -> databaseService.count(null, TaskEntity.class, connection),
+          0L);
+    } catch (SQLException e) {
+      LOG.error(e.getMessage(), e);
+      return 0;
+    }
   }
 
   public long count(final Predicate predicate) {
-    return databaseService.count(predicate, TaskEntity.class);
+    try {
+      return transactionService.executeTransaction(
+          (connection) -> databaseService.count(predicate, TaskEntity.class, connection),
+          0L);
+    } catch (SQLException e) {
+      LOG.error(e.getMessage(), e);
+      return 0;
+    }
   }
 
   /**
@@ -229,16 +259,18 @@ public class TaskDao {
    */
   public List<TaskDTO> executeParameterizedSQL(final String parameterizedSQL,
       final Map<String, Object> parameterMap) {
-    final List<TaskEntity> entities = databaseService.runSQL(
-        parameterizedSQL,
-        parameterMap,
-        TaskEntity.class);
     try {
+      final List<TaskEntity> entities = transactionService.executeTransaction(
+          (connection) -> databaseService.runSQL(
+              parameterizedSQL,
+              parameterMap,
+              TaskEntity.class,
+              connection), Collections.emptyList());
       return toDto(entities);
-    } catch (JsonProcessingException e) {
-      LOG.error("Parsing error", e);
+    } catch (JsonProcessingException | SQLException e) {
+      LOG.error(e.getMessage(), e);
+      return Collections.emptyList();
     }
-    return Collections.emptyList();
   }
 
   /**
@@ -249,9 +281,16 @@ public class TaskDao {
   @SuppressWarnings("unused")
   private void dumpTable() {
     if (IS_DEBUG) {
-      final List<TaskEntity> entities = databaseService.findAll(null, null, null, TaskEntity.class);
-      for (final TaskEntity entity : entities) {
-        LOG.debug("{}", entity);
+      try {
+        final List<TaskEntity> entities = transactionService.executeTransaction(
+            (connection) -> databaseService.findAll(
+                null, null, null, TaskEntity.class, connection),
+            Collections.emptyList());
+        for (final TaskEntity entity : entities) {
+          LOG.debug("{}", entity);
+        }
+      } catch (SQLException e) {
+        LOG.error(e.getMessage(), e);
       }
     }
   }
@@ -265,6 +304,13 @@ public class TaskDao {
   }
 
   public int deleteByPredicate(final Predicate predicate) {
-    return databaseService.delete(predicate, TaskEntity.class);
+    try {
+      return transactionService.executeTransaction(
+          (connection) -> databaseService.delete(predicate, TaskEntity.class, connection),
+          0);
+    } catch (SQLException e) {
+      LOG.error(e.getMessage(), e);
+      return 0;
+    }
   }
 }

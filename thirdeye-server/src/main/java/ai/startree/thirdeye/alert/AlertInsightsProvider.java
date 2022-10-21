@@ -22,7 +22,6 @@ import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.datasource.loader.DefaultMinMaxTimeLoader;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -33,6 +32,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -61,12 +61,12 @@ public class AlertInsightsProvider {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final DatasetConfigManager datasetConfigManager;
-  private final DefaultMinMaxTimeLoader minMaxTimeLoader;
+  private final MinMaxTimeLoader minMaxTimeLoader;
 
   @Inject
   public AlertInsightsProvider(final AlertTemplateRenderer alertTemplateRenderer,
       final DatasetConfigManager datasetConfigManager,
-      final DefaultMinMaxTimeLoader minMaxTimeLoader) {
+      final MinMaxTimeLoader minMaxTimeLoader) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.datasetConfigManager = datasetConfigManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
@@ -224,7 +224,11 @@ public class AlertInsightsProvider {
    * Returns a default Period for the UI timeseries chart timeframe, based on the alert granularity.
    * Rule of thumb.
    */
-  private static Period defaultChartTimeframe(final Period alertGranularity) {
+  @VisibleForTesting
+  protected static Period defaultChartTimeframe(final Period alertGranularity) {
+    if (alertGranularity.getMonths() != 0 || alertGranularity.getYears() != 0) {
+      return Period.years(4);
+    }
     final long granularityMillis = alertGranularity.toStandardDuration().getMillis();
     if (granularityMillis < Period.hours(1).toStandardDuration().getMillis()) {
       return Period.months(1);
@@ -232,7 +236,7 @@ public class AlertInsightsProvider {
       return Period.months(6);
     } else if (granularityMillis < Period.weeks(1).toStandardDuration().getMillis()) {
       return Period.years(1);
-    } else if (granularityMillis < Period.months(1).toStandardDuration().getMillis()) {
+    } else if (granularityMillis < Period.days(30).toStandardDuration().getMillis()) {
       return Period.years(2);
     }
     return Period.years(4);

@@ -19,12 +19,16 @@ import { Event } from "../../../rest/dto/event.interfaces";
 export enum SeriesType {
     LINE = "line",
     AREA_CLOSED = "areaclosed",
+    BAR = "bar",
     CUSTOM = "custom",
 }
+
 export interface DataPoint<ExtraData = unknown> {
     x: number;
     y: number;
     extraData?: ExtraData;
+    // This will override any color from the series for bar chart
+    color?: string;
 }
 
 export interface ThresholdDataPoint<ExtraData = unknown>

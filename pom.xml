@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.92.0-SNAPSHOT</version>
+  <version>1.94.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -73,7 +73,7 @@
     <freemarker.version>2.3.28</freemarker.version>
     <guava.version>20.0</guava.version>
     <guice.version>4.2.3</guice.version>
-    <hsqldb.version>2.3.4</hsqldb.version>
+    <hsqldb.version>2.7.0</hsqldb.version>
     <jackson.version>2.10.5</jackson.version>
     <jetty.version>9.4.48.v20220622</jetty.version>
     <jodatime.version>2.7</jodatime.version>
@@ -321,6 +321,17 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>2.4</version>
+          <!-- build test jars to re-use test utils in StarTree distribution-->
+          <executions>
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+              <configuration>
+                <skipIfEmpty>true</skipIfEmpty>
+              </configuration>
+            </execution>
+          </executions>
           <configuration>
             <archive>
               <manifestEntries>

@@ -12,7 +12,7 @@
  * the License.
  */
 import { Box, Button, Grid, Link } from "@material-ui/core";
-import { isEmpty, isEqual, toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -49,6 +49,7 @@ import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
+    getEvaluationDatasetForAnomaly,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
@@ -143,34 +144,22 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             }
         }
 
-        const extractedDetectionEvaluations =
-            extractDetectionEvaluation(evaluation);
-        let detectionEvalForAnomaly: DetectionEvaluation | undefined =
-            extractedDetectionEvaluations[0];
+        // At this point enumerationItem should be defined
+        const detectionEvalForAnomaly = getEvaluationDatasetForAnomaly(
+            anomaly,
+            extractDetectionEvaluation(evaluation),
+            enumerationItem
+        );
 
-        if (anomaly.enumerationItem && enumerationItem) {
-            detectionEvalForAnomaly = extractedDetectionEvaluations.find(
-                (candidate) => {
-                    if (candidate.enumerationItem === undefined) {
-                        return false;
-                    }
-
-                    return isEqual(
-                        enumerationItem.params,
-                        candidate.enumerationItem?.params
-                    );
-                }
+        if (!detectionEvalForAnomaly) {
+            notify(
+                NotificationTypeV1.Error,
+                t("message.could-not-find-matching-chart-data-for-anomaly")
             );
 
-            if (!detectionEvalForAnomaly) {
-                notify(
-                    NotificationTypeV1.Error,
-                    t("message.could-not-find-matching-chart-data-for-anomaly")
-                );
-
-                return;
-            }
+            return;
         }
+
         // Only filter for the current anomaly
         detectionEvalForAnomaly.anomalies = [anomaly];
         setDetectionEvaluation(detectionEvalForAnomaly);

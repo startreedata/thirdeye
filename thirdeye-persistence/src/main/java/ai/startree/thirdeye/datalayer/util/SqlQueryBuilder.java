@@ -17,7 +17,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
-import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;
@@ -237,9 +236,9 @@ public class SqlQueryBuilder {
   }
 
   public PreparedStatement createCountStatement(final Connection connection, final Predicate predicate,
-      final Class<? extends AbstractIndexEntity> indexEntityClass) throws Exception {
+      final Class<? extends AbstractEntity> entityClass) throws Exception {
     final String tableName =
-        entityMappingHolder.tableToEntityNameMap.inverse().get(indexEntityClass.getSimpleName());
+        entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
     final BiMap<String, String> entityNameToDBNameMapping =
         entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
 

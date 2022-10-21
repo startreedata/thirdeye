@@ -15,17 +15,22 @@
 package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.CalciteUtils.combinePredicates;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
+import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.CohortComputationApi;
 import ai.startree.thirdeye.spi.api.DimensionFilterContributionApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -39,19 +44,30 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
+import ai.startree.thirdeye.spi.datasource.macro.ThirdEyeSqlParserConfig;
 import ai.startree.thirdeye.spi.metric.DimensionType;
 import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.inject.Singleton;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.apache.calcite.sql.SqlCall;
+import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.parser.SqlParseException;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.util.SqlBasicVisitor;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -131,18 +147,11 @@ public class CohortComputation {
         .orElse(null), "dataset not found. name: " + metric.getDataset());
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataset.getDataSource());
 
-    final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
-        .orElse(optional(dataset.getDimensions())
-            .map(Templatable::value)
-            .orElse(List.of())));
-    ensure(!dimensions.isEmpty(), "Dimension list is empty");
-
     final CohortComputationContext context = new CohortComputationContext()
         .setMetric(metric)
         .setDataset(dataset)
         .setDataSource(dataSource)
-        .setInterval(currentInterval)
-        .setAllDimensions(dimensions);
+        .setInterval(currentInterval);
 
     optional(request.getLimit())
         .ifPresent(context::setLimit);
@@ -150,18 +159,85 @@ public class CohortComputation {
     optional(request.getMaxDepth())
         .ifPresent(context::setMaxDepth);
 
+    optional(request.getWhere())
+        .map(where -> parseWhere(where, dataSource))
+        .ifPresent(context::setWhere);
+
+    final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
+        .orElse(optional(dataset.getDimensions())
+            .map(Templatable::value)
+            .map(dims -> removeWhereDimensions(dims, context.getWhere()))
+            .orElse(List.of())));
+    ensure(!dimensions.isEmpty(), "Dimension list is empty");
+    context.setAllDimensions(dimensions);
+
     return context;
+  }
+
+  /**
+   * remove only from dataset dimensions. Do not filter dimensions manually fed into request
+   *
+   * @param dims
+   * @param where
+   * @return
+   */
+  private List<String> removeWhereDimensions(final List<String> dims, final SqlNode where) {
+    if (where == null) {
+      return dims;
+    }
+    final List<String> whereClauseDimensions = where.accept(new SqlBasicVisitor<>() {
+      @Override
+      public List<String> visit(final SqlCall sqlCall) {
+        return sqlCall.getOperandList().stream()
+            .map(sqlNode -> sqlNode.accept(this))
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+      }
+
+      @Override
+      public List<String> visit(final SqlNodeList nodeList) {
+        return nodeList.stream()
+            .map(sqlNode -> sqlNode.accept(this))
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+      }
+
+      @Override
+      public List<String> visit(final SqlIdentifier identifier) {
+        return List.of(identifier.getSimple());
+      }
+    });
+
+    dims.removeAll(whereClauseDimensions);
+    return dims;
+  }
+
+  private SqlNode parseWhere(final String where, final ThirdEyeDataSource ds) {
+    final ThirdEyeSqlParserConfig teSqlParserConfig = ds.getSqlLanguage()
+        .getSqlParserConfig();
+    final SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(teSqlParserConfig);
+    try {
+      return SqlParser.create(where, sqlParserConfig).parseExpression();
+    } catch (final SqlParseException e) {
+      throw badRequest(ThirdEyeStatus.ERR_UNKNOWN, "Failed to parse where clause: " + where);
+    }
   }
 
   private Double computeAggregate(final CohortComputationContext c) throws Exception {
     final DatasetConfigDTO dataset = c.getDataset();
-    final CalciteRequest r = CalciteRequest.newBuilder(dataset.getDataset())
+    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
         .select(selectable(c.getMetric()))
         .whereTimeFilter(c.getInterval(),
             dataset.getTimeColumn(),
             dataset.getTimeFormat(),
-            dataset.getTimeUnit().name())
-        .build();
+            dataset.getTimeUnit().name());
+
+    optional(c.getWhere())
+        .ifPresent(builder::where);
+
+    final CalciteRequest r = builder.build();
     final DataFrame df = runQuery(r, c.getDataSource());
     return df.get(COL_AGGREGATE).getDouble(0);
   }
@@ -194,13 +270,14 @@ public class CohortComputation {
         .setResultSize(results.size())
         .setResults(results)
         .setLimit(context.getLimit())
-        .setMaxDepth(context.getMaxDepth());
+        .setMaxDepth(context.getMaxDepth())
+        .setDimensions(context.getAllDimensions());
 
     if (request.isGenerateEnumerationItems()) {
       final String key = optional(request.getEnumerationItemParamKey())
           .orElse(K_QUERY_FILTERS_DEFAULT);
       output.setEnumerationItems(results.stream()
-          .map(api -> toEnumerationItem(api, key))
+          .map(api -> toEnumerationItem(api, key, context))
           .collect(Collectors.toList()));
     }
     return output;
@@ -245,6 +322,9 @@ public class CohortComputation {
             dataset.getTimeFormat(),
             dataset.getTimeUnit().name());
 
+    optional(c.getWhere())
+        .ifPresent(builder::where);
+
     final List<SqlIdentifier> subDimensionsIdentifiers = subDimensions.stream()
         .map(CalciteUtils::identifierOf)
         .collect(Collectors.toList());
@@ -277,28 +357,46 @@ public class CohortComputation {
   }
 
   private EnumerationItemApi toEnumerationItem(final DimensionFilterContributionApi api,
-      final String queryFiltersKey) {
+      final String queryFiltersKey,
+      final CohortComputationContext context) {
+    final String whereFragment = whereFragment(api.getDimensionFilters(), context);
     return new EnumerationItemApi()
         .setName(generateName(api.getDimensionFilters()))
-        .setParams(Map.of(queryFiltersKey, toPartialQuery(api.getDimensionFilters())));
+        .setParams(Map.of(queryFiltersKey, whereFragment));
   }
 
   private String generateName(final Map<String, String> dimensionFilters) {
     return String.join(",", dimensionFilters.values());
   }
 
-  private String toPartialQuery(final Map<String, String> dimensionFilters) {
-    return " AND " + dimensionFilters.entrySet()
+  private String whereFragment(final Map<String, String> dimensionFilters,
+      final CohortComputationContext context) {
+
+    final List<SqlNode> queryPredicates = dimensionFilters.entrySet()
         .stream()
-        .map(e -> String.format("'%s' = '%s'", e.getKey(), e.getValue()))
-        .collect(Collectors.joining(" AND "));
+        .map(e -> Predicate.EQ(e.getKey(), e.getValue()))
+        .map(e -> QueryPredicate.of(e, DimensionType.STRING))
+        .map(QueryPredicate::toSqlNode)
+        .collect(Collectors.toList());
+
+    optional(context.getWhere())
+        .ifPresent(queryPredicates::add);
+
+    final SqlNode combinedPredicates = requireNonNull(combinePredicates(queryPredicates));
+    final SqlLanguage sqlLanguage = context.getDataSource().getSqlLanguage();
+    final SqlDialect sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
+
+    return " AND " + combinedPredicates.toSqlString(sqlDialect);
   }
 
-  public DataFrame runQuery(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds)
-      throws Exception {
+  public DataFrame runQuery(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds) {
     final String sql = calciteRequest.getSql(ds.getSqlLanguage(), ds.getSqlExpressionBuilder());
 
     final DataSourceRequest request = new DataSourceRequest(null, sql, Map.of());
-    return ds.fetchDataTable(request).getDataFrame();
+    try {
+      return ds.fetchDataTable(request).getDataFrame();
+    } catch (final Exception e) {
+      throw badRequest(ThirdEyeStatus.ERR_UNKNOWN, e.getMessage());
+    }
   }
 }

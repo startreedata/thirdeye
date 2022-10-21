@@ -107,41 +107,51 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
                         {breadcrumbs && <Breadcrumbs crumbs={breadcrumbs} />}
                     </Grid>
 
-                    <Grid container item justifyContent="space-between" xs={12}>
-                        <Grid item>
-                            {title && (
-                                <Typography noWrap variant="h4">
-                                    {title}
-                                </Typography>
-                            )}
-                            {children}
-                            {subtitle && (
-                                <Typography noWrap variant="subtitle1">
-                                    {subtitle}
-                                </Typography>
-                            )}
-                        </Grid>
+                    <Grid item xs={12}>
+                        <Grid container justifyContent="space-between">
+                            <Grid item>
+                                {title && (
+                                    <Typography noWrap variant="h4">
+                                        {title}
+                                    </Typography>
+                                )}
+                                {children}
+                                {subtitle && (
+                                    <Typography noWrap variant="subtitle1">
+                                        {subtitle}
+                                    </Typography>
+                                )}
+                            </Grid>
 
-                        <Grid item>
-                            <PageHeaderActionsV1>
-                                {/* Time range selector */}
-                                {showTimeRange && (
-                                    <TimeRangeSelector
-                                        hideTimeRange={!screenWidthSmUp}
-                                        recentCustomTimeRangeDurations={
-                                            recentCustomTimeRangeDurations
-                                        }
-                                        timeRangeDuration={timeRangeDuration}
-                                        onChange={onHandleTimeRangeChange}
-                                        onRefresh={onHandleRefresh}
-                                    />
+                            <Grid item>
+                                {(showTimeRange || showCreateButton) && (
+                                    <PageHeaderActionsV1>
+                                        {/* Time range selector */}
+                                        {showTimeRange && (
+                                            <TimeRangeSelector
+                                                hideTimeRange={!screenWidthSmUp}
+                                                recentCustomTimeRangeDurations={
+                                                    recentCustomTimeRangeDurations
+                                                }
+                                                timeRangeDuration={
+                                                    timeRangeDuration
+                                                }
+                                                onChange={
+                                                    onHandleTimeRangeChange
+                                                }
+                                                onRefresh={onHandleRefresh}
+                                            />
+                                        )}
+
+                                        {/* Create options button */}
+                                        {showCreateButton && (
+                                            <CreateMenuButton />
+                                        )}
+                                    </PageHeaderActionsV1>
                                 )}
 
-                                {/* Create options button */}
-                                {showCreateButton && <CreateMenuButton />}
-
                                 {customActions}
-                            </PageHeaderActionsV1>
+                            </Grid>
                         </Grid>
                     </Grid>
 

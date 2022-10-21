@@ -21,6 +21,7 @@ import {
 const PLACEHOLDER_ROUTE_ID = ":id";
 
 export const AppRouteRelative = {
+    ADMIN: "admin",
     HOME: "home",
     LOGIN: "login",
     LOGOUT: "logout",
@@ -89,6 +90,7 @@ export const AppRouteRelative = {
 export const AppRoute = {
     BASE: "/",
     HOME: `/${AppRouteRelative.HOME}`,
+    ADMIN: `/${AppRouteRelative.ADMIN}`,
     LOGIN: "/login",
     LOGOUT: "/logout",
     SETUP: `/${AppRouteRelative.SETUP}`,

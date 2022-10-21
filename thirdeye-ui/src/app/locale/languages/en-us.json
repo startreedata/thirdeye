@@ -289,7 +289,15 @@
         "getting-started": "Getting started",
         "how-to-investigate-anomaly": "How to investigate an anomaly?",
         "learn-how-to-use-te": "Learn how to use ThirdEye in 5 minutes (video)",
-        "anomaly-count": "Anomaly count"
+        "anomaly-count": "Anomaly count",
+        "admin-dashboard": "Admin dashboard",
+        "latest-errors-in-your-alerts": "Latest errors in your alerts",
+        "recent-anomaly-detection-failures": "Recent anomaly detection failures",
+        "show-error": "Show error",
+        "task-id": "Task ID",
+        "more-info": "More info",
+        "timestamp": "Timestamp",
+        "admin": "Admin"
     },
     "message": {
         "page-not-found": "Requested page could not be found",
@@ -401,7 +409,9 @@
         "view-documentation": "View documentation",
         "chart-data-not-reflective": "Chart data not reflective of current configuration",
         "experienced-issues-fetching-data": "Experienced issues fetching data",
-        "anomaly-precision-tooltip": "(Anomalies labeled as anomalies) / (Anomalies with feedback)"
+        "experienced-issues-fetching-data-for-alert-id": "Experienced issue while fetching alert details for id: {alertId}",
+        "anomaly-precision-tooltip": "(Anomalies labeled as anomalies) / (Anomalies with feedback)",
+        "no-recent-failures": "No recent failures"
     },
     "link": {
         "how-to-use-te-video": "https://drive.google.com/file/d/1vsiWz_GHH9E8S8ivsDrwr-B1YA_aSVBj/view",

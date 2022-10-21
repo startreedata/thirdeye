@@ -22,11 +22,8 @@ import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
-import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -35,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -64,19 +60,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
         ERR_MISSING_CONFIGURATION_FIELD,
         "'type' in " + getOperatorName() + "params");
 
-    postProcessor = postProcessorRegistry.getAnomalyPostProcessor(type);
-    final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
-    final PostProcessorSpec postProcessorSpec = AbstractSpec.fromProperties(componentSpec,
-        postProcessor.specClass());
-
-    final DatasetConfigManager datasetDao = (DatasetConfigManager) Objects.requireNonNull(context.getProperties()
-        .get(Constants.DATASET_DAO_REF_KEY));
-    final MinMaxTimeLoader minMaxTimeLoader = (MinMaxTimeLoader) Objects.requireNonNull(context.getProperties()
-        .get(Constants.MIN_MAX_TIME_LOADER_REF_KEY));
-    postProcessorSpec.setDatasetConfigManager(datasetDao);
-    postProcessorSpec.setMinMaxTimeLoader(minMaxTimeLoader);
-
-    postProcessor.init(postProcessorSpec);
+    postProcessor = postProcessorRegistry.build(type, nodeParams);
   }
 
   @Override

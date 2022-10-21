@@ -13,22 +13,22 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.spi.Constants.DATASET_DAO_REF_KEY;
-import static ai.startree.thirdeye.spi.Constants.MIN_MAX_TIME_LOADER_REF_KEY;
+import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
 import static ai.startree.thirdeye.spi.Constants.POST_PROCESSOR_REGISTRY_REF_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
+import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
@@ -43,8 +43,6 @@ import org.testng.annotations.Test;
 
 public class PostProcessorOperatorTest {
 
-  private static final DatasetConfigManager UNUSED_DATASET_DAO = mock(DatasetConfigManager.class);
-  private static final MinMaxTimeLoader UNUSED_MIN_MAX_TIME_LOADER = mock(MinMaxTimeLoader.class);
   private static final String TEST_POST_PROCESSOR_NAME = "TestPostProcessor";
   private static final String TEST_POST_PROCESSOR_LABEL_NAME = "testLabel";
   private static final TemplatableMap<String, Object> TEST_POST_PROCESSOR_CONFIG = TemplatableMap.fromValueMap(
@@ -64,7 +62,17 @@ public class PostProcessorOperatorTest {
   @BeforeClass
   public void setUp() {
     postProcessorRegistry = mock(PostProcessorRegistry.class);
-    when(postProcessorRegistry.getAnomalyPostProcessor(TEST_POST_PROCESSOR_NAME)).thenReturn((AnomalyPostProcessor) new TestPostProcessor());
+    when(postProcessorRegistry.build(anyString(), anyMap())).thenAnswer(
+        i -> {
+          final TestPostProcessor r = new TestPostProcessor();
+          final Map<String, Object> nodeParams = i.getArgument(1);
+          final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
+          final TestPostProcessorSpec postProcessorSpec = AbstractSpec.fromProperties(componentSpec,
+              r.specClass());
+          r.init(postProcessorSpec);
+          return r;
+        }
+    );
   }
 
   @Test
@@ -79,14 +87,11 @@ public class PostProcessorOperatorTest {
         detectionResWith2Anomalies());
     final OperatorContext context = new OperatorContext().setDetectionInterval(
             NOT_USED_DETECTION_INTERVAL)
-        .setPlanNode(planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
+        .setPlanNode(
+            planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
         .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY,
-            postProcessorRegistry,
-            DATASET_DAO_REF_KEY,
-            UNUSED_DATASET_DAO,
-            MIN_MAX_TIME_LOADER_REF_KEY,
-            UNUSED_MIN_MAX_TIME_LOADER));
+            postProcessorRegistry));
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
     operator.execute();
@@ -113,14 +118,10 @@ public class PostProcessorOperatorTest {
     final Map<String, OperatorResult> inputsMap = Map.of("combinerResult1", combinerResult);
     final OperatorContext context = new OperatorContext().setDetectionInterval(
             NOT_USED_DETECTION_INTERVAL)
-        .setPlanNode(planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
+        .setPlanNode(
+            planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
-        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY,
-            postProcessorRegistry,
-            DATASET_DAO_REF_KEY,
-            UNUSED_DATASET_DAO,
-            MIN_MAX_TIME_LOADER_REF_KEY,
-            UNUSED_MIN_MAX_TIME_LOADER));
+        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry));
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
     operator.execute();

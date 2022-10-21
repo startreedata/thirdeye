@@ -106,7 +106,6 @@ public interface Constants {
   String POST_PROCESSOR_REGISTRY_REF_KEY = "$PostProcessorRegistry";
   String EVENT_MANAGER_REF_KEY = "$EventManager";
   String DATASET_DAO_REF_KEY = "$DatasetDAO";
-  String MIN_MAX_TIME_LOADER_REF_KEY = "$MinMaxTimeLoader";
 
   enum JobStatus {
     SCHEDULED,

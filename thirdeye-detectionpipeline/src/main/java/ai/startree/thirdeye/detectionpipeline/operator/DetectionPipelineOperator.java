@@ -42,7 +42,7 @@ public abstract class DetectionPipelineOperator implements Operator {
   protected DetectionPipelineOperator() {
   }
 
-  protected static Map<String, Object> getComponentSpec(final Map<String, Object> params) {
+  public static Map<String, Object> getComponentSpec(final Map<String, Object> params) {
     final Map<String, Object> componentSpec = new HashMap<>();
     if (params == null || params.isEmpty()) {
       return componentSpec;

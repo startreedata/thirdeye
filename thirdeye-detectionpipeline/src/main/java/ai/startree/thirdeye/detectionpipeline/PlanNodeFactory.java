@@ -126,7 +126,6 @@ public class PlanNodeFactory {
             .put(Constants.POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry)
             .put(Constants.EVENT_MANAGER_REF_KEY, eventDao)
             .put(Constants.DATASET_DAO_REF_KEY, datasetDao)
-            .put(Constants.MIN_MAX_TIME_LOADER_REF_KEY, minMaxTimeLoader)
             .build()
         );
 

@@ -13,9 +13,13 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
+import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
+import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
@@ -35,9 +39,13 @@ public class PostProcessorRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(PostProcessorRegistry.class);
 
   private final Map<String, AnomalyPostProcessorFactory> anomalyPostProcessorFactoryMap = new HashMap<>();
+  private final  DatasetConfigManager datasetDao;
+  private final MinMaxTimeLoader minMaxTimeLoader;
 
   @Inject
-  public PostProcessorRegistry() {
+  public PostProcessorRegistry(final DatasetConfigManager datasetDao, final MinMaxTimeLoader minMaxTimeLoader) {
+    this.datasetDao = datasetDao;
+    this.minMaxTimeLoader = minMaxTimeLoader;
   }
 
   public void addAnomalyPostProcessorFactory(final AnomalyPostProcessorFactory f) {
@@ -47,11 +55,21 @@ public class PostProcessorRegistry {
     anomalyPostProcessorFactoryMap.put(f.name(), f);
   }
 
-  public AnomalyPostProcessor<PostProcessorSpec> getAnomalyPostProcessor(final String factoryName) {
+  public AnomalyPostProcessor<PostProcessorSpec> build(final String factoryName, final Map<String, Object> nodeParams) {
     checkArgument(anomalyPostProcessorFactoryMap.containsKey(factoryName),
         String.format("Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
             factoryName,
             anomalyPostProcessorFactoryMap.keySet()));
-    return anomalyPostProcessorFactoryMap.get(factoryName).build();
+    final AnomalyPostProcessor<PostProcessorSpec> postProcessor = anomalyPostProcessorFactoryMap.get(
+        factoryName).build();
+    final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
+    final PostProcessorSpec postProcessorSpec = AbstractSpec.fromProperties(componentSpec,
+        postProcessor.specClass());
+    postProcessorSpec.setDatasetConfigManager(datasetDao);
+    postProcessorSpec.setMinMaxTimeLoader(minMaxTimeLoader);
+
+    postProcessor.init(postProcessorSpec);
+
+    return postProcessor;
   }
 }

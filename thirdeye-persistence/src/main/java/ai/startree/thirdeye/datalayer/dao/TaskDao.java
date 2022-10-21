@@ -29,7 +29,6 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,12 +57,7 @@ public class TaskDao {
 
   private TaskEntity toEntity(final TaskDTO dto)
       throws JsonProcessingException {
-    // todo optimize mapping
     TaskEntity entity = TaskEntityMapper.INSTANCE.toTaskEntity(dto);
-    int version = dto.getVersion() == 0 ? 1 : dto.getVersion();
-    entity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-    entity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-    entity.setVersion(version);
     final String jsonVal = toJsonString(dto);
     entity.setJsonVal(jsonVal);
     return entity;

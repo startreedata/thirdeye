@@ -26,5 +26,8 @@ public interface TaskEntityMapper {
   @Mapping(source = "jobName", target = "name")
   @Mapping(source = "taskType", target = "type")
   @Mapping(target = "jsonVal", ignore = true)
+  @Mapping(target = "createTime", expression = "java(new java.sql.Timestamp(System.currentTimeMillis()))")
+  @Mapping(target = "updateTime", expression = "java(new java.sql.Timestamp(System.currentTimeMillis()))")
+  @Mapping(target = "version", expression = "java(dto.getVersion() == 0 ? 1 : dto.getVersion())")
   TaskEntity toTaskEntity(TaskDTO dto);
 }

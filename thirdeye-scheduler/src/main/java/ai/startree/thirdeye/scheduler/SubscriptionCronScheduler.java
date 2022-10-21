@@ -131,7 +131,7 @@ public class SubscriptionCronScheduler implements Runnable {
   }
 
   public void shutdown() throws SchedulerException {
-    ThirdEyeUtils.safelyShutdownExecutionService(scheduledExecutorService, getClass());
+    ThirdEyeUtils.shutdownExecutionService(scheduledExecutorService);
     scheduler.shutdown();
   }
 

@@ -62,6 +62,6 @@ public class MonitorJobScheduler {
 
   public void shutdown() {
     LOG.info("Stopping monitor service");
-    ThirdEyeUtils.safelyShutdownExecutionService(scheduledExecutorService, getClass());
+    ThirdEyeUtils.shutdownExecutionService(scheduledExecutorService);
   }
 }

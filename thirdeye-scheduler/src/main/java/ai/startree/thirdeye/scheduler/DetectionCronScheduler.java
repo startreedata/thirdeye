@@ -152,7 +152,7 @@ public class DetectionCronScheduler implements Runnable {
   }
 
   public void shutdown() throws SchedulerException {
-    ThirdEyeUtils.safelyShutdownExecutionService(executorService, getClass());
+    ThirdEyeUtils.shutdownExecutionService(executorService);
     scheduler.shutdown();
   }
 

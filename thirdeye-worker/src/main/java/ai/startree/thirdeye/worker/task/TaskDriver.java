@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task;
 
-import static ai.startree.thirdeye.util.ThirdEyeUtils.safelyShutdownExecutionService;
+import static ai.startree.thirdeye.util.ThirdEyeUtils.shutdownExecutionService;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -99,7 +99,7 @@ public class TaskDriver {
   }
 
   public Long getWorkerId() {
-    return this.workerId;
+    return workerId;
   }
 
   public void start() {
@@ -131,11 +131,11 @@ public class TaskDriver {
    * Mark all assigned tasks with RUNNING as FAILED
    */
   private void handleLeftoverTasks() {
-    List<TaskDTO> leftoverTasks = taskManager
+    final List<TaskDTO> leftoverTasks = taskManager
         .findByStatusAndWorkerId(workerId, TaskStatus.RUNNING);
     if (!leftoverTasks.isEmpty()) {
       LOG.info("Found {} RUNNING tasks with worker id {} at start", leftoverTasks.size(), workerId);
-      for (TaskDTO task : leftoverTasks) {
+      for (final TaskDTO task : leftoverTasks) {
         LOG.info("Update task {} from RUNNING to FAILED", task.getId());
         taskManager.updateStatusAndTaskEndTime(task.getId(),
             TaskStatus.RUNNING,
@@ -148,8 +148,8 @@ public class TaskDriver {
 
   public void shutdown() {
     shutdown.set(true);
-    safelyShutdownExecutionService(taskExecutorService, this.getClass());
-    safelyShutdownExecutionService(taskWatcherExecutorService, this.getClass());
-    safelyShutdownExecutionService(heartbeatExecutorService, this.getClass());
+    shutdownExecutionService(taskExecutorService);
+    shutdownExecutionService(taskWatcherExecutorService);
+    shutdownExecutionService(heartbeatExecutorService);
   }
 }

@@ -30,12 +30,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -47,13 +44,13 @@ public class TaskDriverRunnable implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskDriverRunnable.class);
   private static final Random RANDOM = new Random();
-  private static final Set<TaskStatus> ALLOWED_OLD_TASK_STATUS = ImmutableSet
-      .of(TaskStatus.FAILED, TaskStatus.WAITING);
+  private static final Set<TaskStatus> ALLOWED_OLD_TASK_STATUS = ImmutableSet.of(
+      TaskStatus.FAILED,
+      TaskStatus.WAITING
+  );
 
   private final TaskManager taskManager;
   private final TaskContext taskContext;
-  private final AtomicBoolean shutdown;
-  private final ExecutorService taskExecutorService;
   private final TaskDriverConfiguration config;
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
@@ -61,27 +58,18 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
   private final Timer taskRunningTimer;
-  private final ScheduledExecutorService heartbeatExecutorService;
+  private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
 
-  public TaskDriverRunnable(final TaskManager taskManager,
-      final TaskContext taskContext,
-      final AtomicBoolean shutdown,
-      final ExecutorService taskExecutorService,
-      final ScheduledExecutorService heartbeatExecutorService,
-      final TaskDriverConfiguration config,
-      final long workerId,
-      final TaskRunnerFactory taskRunnerFactory,
-      final MetricRegistry metricRegistry) {
-
-    this.taskManager = taskManager;
+  public TaskDriverRunnable(final TaskContext taskContext) {
     this.taskContext = taskContext;
-    this.shutdown = shutdown;
-    this.taskExecutorService = taskExecutorService;
-    this.config = config;
-    this.workerId = workerId;
-    this.taskRunnerFactory = taskRunnerFactory;
-    this.heartbeatExecutorService = heartbeatExecutorService;
+    taskDriverThreadPoolManager = taskContext.getTaskDriverThreadPoolManager();
 
+    this.taskManager = taskContext.getTaskManager();
+    this.config = taskContext.getConfig();
+    this.workerId = taskContext.getWorkerId();
+    this.taskRunnerFactory = taskContext.getTaskRunnerFactory();
+
+    final MetricRegistry metricRegistry = taskContext.getMetricRegistry();
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
@@ -89,7 +77,7 @@ public class TaskDriverRunnable implements Runnable {
   }
 
   public void run() {
-    while (!shutdown.get()) {
+    while (!isShutdown()) {
       // select a task to execute, and update it to RUNNING
       final TaskDTO taskDTO = waitForTask();
       if (taskDTO == null) {
@@ -99,7 +87,12 @@ public class TaskDriverRunnable implements Runnable {
       // a task has acquired and we must finish executing it before termination
       taskRunningTimer.time(() -> runAcquiredTask(taskDTO));
     }
-    LOG.info("Thread safely quiting");
+    LOG.info(String.format("TaskDriverRunnable safely quitting. name: %s",
+        Thread.currentThread().getName()));
+  }
+
+  private boolean isShutdown() {
+    return taskDriverThreadPoolManager.isShutdown();
   }
 
   private void runAcquiredTask(final TaskDTO taskDTO) {
@@ -110,8 +103,8 @@ public class TaskDriverRunnable implements Runnable {
     taskCounter.inc();
 
     Future heartbeat = null;
-    if(config.isRandomWorkerIdEnabled()) {
-      heartbeat = heartbeatExecutorService
+    if (config.isRandomWorkerIdEnabled()) {
+      heartbeat = taskDriverThreadPoolManager.getHeartbeatExecutorService()
           .scheduleAtFixedRate(() -> taskExecutionHeartbeat(taskDTO),
               0,
               config.getHeartbeatInterval().toMillis(),
@@ -153,7 +146,8 @@ public class TaskDriverRunnable implements Runnable {
     final TaskRunner taskRunner = taskRunnerFactory.get(taskType);
 
     // execute the selected task asynchronously
-    return taskExecutorService.submit(() -> taskRunner.execute(taskInfo, taskContext));
+    return taskDriverThreadPoolManager.getTaskExecutorService()
+        .submit(() -> taskRunner.execute(taskInfo, taskContext));
   }
 
   private void handleTimeout(final TaskDTO taskDTO, final Future<List<TaskResult>> future,
@@ -186,7 +180,7 @@ public class TaskDriverRunnable implements Runnable {
    * @return null if system is shutting down.
    */
   private TaskDTO waitForTask() {
-    while (!shutdown.get()) {
+    while (!isShutdown()) {
       final List<TaskDTO> anomalyTasks = findTasks();
 
       final boolean tasksFound = CollectionUtils.isNotEmpty(anomalyTasks);
@@ -208,7 +202,7 @@ public class TaskDriverRunnable implements Runnable {
     for (final TaskDTO taskDTO : anomalyTasks) {
       try {
         // Don't acquire a new task if shutting down.
-        if (!shutdown.get()) {
+        if (!isShutdown()) {
           boolean success = taskManager.updateStatusAndWorkerId(workerId,
               taskDTO.getId(),
               ALLOWED_OLD_TASK_STATUS,
@@ -249,7 +243,7 @@ public class TaskDriverRunnable implements Runnable {
     try {
       Thread.sleep(sleepTime);
     } catch (InterruptedException e) {
-      if (!shutdown.get()) {
+      if (!isShutdown()) {
         LOG.warn(e.getMessage(), e);
       }
     }

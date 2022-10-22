@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.worker.task;
 
-import static ai.startree.thirdeye.util.ThirdEyeUtils.shutdownExecutionService;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -22,15 +21,10 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,53 +33,34 @@ public class TaskDriver {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskDriver.class);
 
-  private final ExecutorService taskExecutorService;
-  private final ExecutorService taskWatcherExecutorService;
-  private final ScheduledExecutorService heartbeatExecutorService;
-
   private final TaskManager taskManager;
   private final TaskContext taskContext;
   private final TaskDriverConfiguration config;
   private final Long workerId;
-  private final AtomicBoolean shutdown = new AtomicBoolean(false);
-  private final TaskRunnerFactory taskRunnerFactory;
-  private final MetricRegistry metricRegistry;
+  private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
 
   @Inject
   public TaskDriver(final TaskManager taskManager,
       final TaskRunnerFactory taskRunnerFactory,
+      final TaskDriverThreadPoolManager taskDriverThreadPoolManager,
       final MetricRegistry metricRegistry,
       final TaskDriverConfiguration taskDriverConfiguration) {
     this.taskManager = taskManager;
-    this.metricRegistry = metricRegistry;
+    this.taskDriverThreadPoolManager = taskDriverThreadPoolManager;
     config = taskDriverConfiguration;
     workerId = fetchWorkerId(config);
 
-    taskExecutorService = Executors.newFixedThreadPool(
-        config.getMaxParallelTasks(),
-        new ThreadFactoryBuilder()
-            .setNameFormat("task-executor-%d")
-            .build());
-
-    taskWatcherExecutorService = Executors.newFixedThreadPool(
-        config.getMaxParallelTasks(),
-        new ThreadFactoryBuilder()
-            .setNameFormat("task-watcher-%d")
-            .setDaemon(true)
-            .build());
-
-    heartbeatExecutorService = Executors.newScheduledThreadPool(config.getMaxParallelTasks(),
-        new ThreadFactoryBuilder()
-            .setNameFormat("task-heartbeat-%d")
-            .build());
-
-    taskContext = new TaskContext();
-
-    this.taskRunnerFactory = taskRunnerFactory;
+    taskContext = new TaskContext()
+        .setTaskManager(taskManager)
+        .setTaskDriverThreadPoolManager(taskDriverThreadPoolManager)
+        .setTaskRunnerFactory(taskRunnerFactory)
+        .setMetricRegistry(metricRegistry)
+        .setConfig(taskDriverConfiguration)
+        .setWorkerId(workerId);
   }
 
   private Long fetchWorkerId(final TaskDriverConfiguration config) {
-    if(config.isRandomWorkerIdEnabled()) {
+    if (config.isRandomWorkerIdEnabled()) {
       checkArgument(isNull(config.getId()),
           "worker id should be null when randomWorkerIdEnabled is true");
       return Math.abs(new Random().nextLong());
@@ -109,22 +84,9 @@ public class TaskDriver {
 
   private void runTasksInParallel() {
     for (int i = 0; i < config.getMaxParallelTasks(); i++) {
-      taskWatcherExecutorService.submit(runTask());
+      taskDriverThreadPoolManager.getTaskWatcherExecutorService()
+          .submit(new TaskDriverRunnable(taskContext));
     }
-  }
-
-  private TaskDriverRunnable runTask() {
-    return new TaskDriverRunnable(
-        taskManager,
-        taskContext,
-        shutdown,
-        taskExecutorService,
-        heartbeatExecutorService,
-        config,
-        workerId,
-        taskRunnerFactory,
-        metricRegistry
-    );
   }
 
   /**
@@ -147,9 +109,6 @@ public class TaskDriver {
   }
 
   public void shutdown() {
-    shutdown.set(true);
-    shutdownExecutionService(taskExecutorService);
-    shutdownExecutionService(taskWatcherExecutorService);
-    shutdownExecutionService(heartbeatExecutorService);
+    taskDriverThreadPoolManager.shutdown();
   }
 }

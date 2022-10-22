@@ -13,12 +13,15 @@
  */
 package ai.startree.thirdeye.worker.task;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -31,101 +34,126 @@ import ai.startree.thirdeye.spi.task.TaskType;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class HeartbeatTest {
 
-  long taskDelay = Duration.ofSeconds(5).toMillis();
+  private static final Logger LOG = LoggerFactory.getLogger(HeartbeatTest.class);
 
-  @Test
-  public void heartbeatPulseCheck() {
-    Timestamp startTime = new Timestamp(System.currentTimeMillis());
-    AtomicBoolean shutdown = new AtomicBoolean();
-    TaskDTO taskDTO = getTaskDTO();
-    final AtomicInteger pulseCount = new AtomicInteger();
+  private static final Duration TASK_DELAY = Duration.ofSeconds(3);
+  private static final Duration HEARTBEAT_INTERVAL = Duration.ofSeconds(1);
+  public static final long TASK_ID = 1L;
 
-    TaskManager taskManager = Mockito.mock(TaskManager.class);
-    when(taskManager.updateStatusAndWorkerId(anyLong(), anyLong(), anySet(), anyInt())).thenReturn(true);
-    when(taskManager.findByStatusOrderByCreateTime(any(TaskStatus.class), anyInt(), anyBoolean())).thenReturn(List.of(taskDTO));
-    doNothing().when(taskManager).updateStatusAndTaskEndTime(anyLong(), any(), any(), anyLong(), any());
-    doAnswer(invocation -> {
-      taskDTO.setLastActive(new Timestamp(System.currentTimeMillis()));
-      pulseCount.getAndIncrement();
-      // to ensure the worker stops after executing one task
-      shutdown.set(true);
-      return null;
-    }).when(taskManager).updateLastActive(anyLong());
+  private TaskManager taskManager;
+  private TaskDriverThreadPoolManager taskDriverThreadPoolManager;
+  private TaskDriverConfiguration config;
+  private TaskRunnerFactory taskRunnerFactory;
+  private int pollingCount = 0;
 
-    TaskDriverConfiguration config = new TaskDriverConfiguration()
-        .setRandomWorkerIdEnabled(true)
-        .setHeartbeatInterval(Duration.ofSeconds(1));
-
-    TaskDriverRunnable taskDriverRunnable = getTaskDriverRunnable(taskManager, shutdown, config);
-    taskDriverRunnable.run();
-
-    assertThat(taskDTO.getLastActive()).isAfter(new Timestamp(startTime.getTime() + taskDelay));
-    // heartbeat should tick for aleast 5 times as task delay is heartbeatInterval*5 (5 seconds)
-    assertThat(pulseCount.get()).isGreaterThanOrEqualTo(5);
-  }
-
-  private TaskDriverRunnable getTaskDriverRunnable(final TaskManager taskManager,
-      final AtomicBoolean shutdown,
-      final TaskDriverConfiguration config) {
-    return new TaskDriverRunnable(taskManager,
-        null,
-        shutdown,
-        getExecutorService(),
-        getHeartbeatExecutorService(),
-        config,
-        0,
-        getTaskRunnerFactory(),
-        new MetricRegistry());
-  }
-
-  private TaskRunnerFactory getTaskRunnerFactory() {
-    TaskRunnerFactory factory = Mockito.mock(TaskRunnerFactory.class);
-    when(factory.get(any())).thenReturn((taskInfo, taskContext) -> {
-      Thread.sleep(taskDelay);
-      return null;
-    });
-    return factory;
-  }
-
-  private ExecutorService getExecutorService() {
-    return Executors.newFixedThreadPool(1,
-        new ThreadFactoryBuilder()
-            .setNameFormat("test-executor-%d")
-            .build());
-  }
-
-  private ScheduledExecutorService getHeartbeatExecutorService() {
-    return Executors.newScheduledThreadPool(1,
-        new ThreadFactoryBuilder()
-            .setNameFormat("test-heartbeat-%d")
-            .build());
-  }
-
-  private TaskDTO getTaskDTO() {
+  private static String toJson(final Object object) {
     try {
-      return (TaskDTO) new TaskDTO()
-          .setStatus(TaskStatus.WAITING)
-          .setJobName("TestJob")
-          .setTaskType(TaskType.DETECTION)
-          .setTaskInfo(new ObjectMapper().writeValueAsString(new DetectionPipelineTaskInfo()))
-          .setId(1L);
-    } catch (JsonProcessingException e) {
+      return new ObjectMapper().writeValueAsString(object);
+    } catch (final JsonProcessingException e) {
       e.printStackTrace();
       return null;
     }
+  }
+
+  @BeforeClass
+  public void setUp() {
+    config = new TaskDriverConfiguration()
+        .setRandomWorkerIdEnabled(true)
+        .setHeartbeatInterval(HEARTBEAT_INTERVAL);
+
+    taskManager = Mockito.mock(TaskManager.class);
+    when(taskManager.updateStatusAndWorkerId(anyLong(), anyLong(), anySet(), anyInt()))
+        .thenReturn(true);
+
+    doNothing().when(taskManager)
+        .updateStatusAndTaskEndTime(anyLong(), any(), any(), anyLong(), any());
+
+    taskDriverThreadPoolManager = new TaskDriverThreadPoolManager(config);
+
+    taskRunnerFactory = Mockito.mock(TaskRunnerFactory.class);
+    when(taskRunnerFactory.get(any())).thenReturn((taskInfo, taskContext) -> {
+      Thread.sleep(TASK_DELAY.toMillis());
+      return null;
+    });
+  }
+
+  @AfterClass
+  public void tearDown() {
+    taskDriverThreadPoolManager.shutdown();
+  }
+
+  @Test
+  public void heartbeatPulseCheck() {
+    final Timestamp startTime = new Timestamp(System.currentTimeMillis());
+    final TaskDTO taskDTO = newTask();
+    when(taskManager.findByStatusOrderByCreateTime(eq(TaskStatus.WAITING), anyInt(), anyBoolean()))
+        .thenAnswer(i -> pollingCount++ == 0? List.of(taskDTO) : List.of());
+
+    doAnswer(invocation -> {
+      taskDTO.setStatus(TaskStatus.COMPLETED);
+
+      // Shutdown after first execution
+      taskDriverThreadPoolManager.shutdown();
+      return null;
+    }).when(taskManager).updateStatusAndTaskEndTime(eq(TASK_ID),
+        eq(TaskStatus.RUNNING),
+        eq(TaskStatus.COMPLETED),
+        any(),
+        anyString());
+    final AtomicInteger pulseCount = new AtomicInteger();
+
+    doAnswer(invocation -> {
+      taskDTO.setLastActive(new Timestamp(System.currentTimeMillis()));
+      final int count = pulseCount.getAndIncrement();
+      LOG.info("PulseCount: " + count);
+      // to ensure the worker stops after executing one task
+//      taskDriverThreadPoolManager.shutdown();
+      return null;
+    }).when(taskManager).updateLastActive(anyLong());
+
+    final TaskContext taskContext = newTaskContext();
+    final TaskDriverRunnable taskDriverRunnable = new TaskDriverRunnable(taskContext);
+    taskDriverRunnable.run();
+
+    assertThat(taskDTO.getLastActive())
+        .isAfter(new Timestamp(startTime.getTime() + TASK_DELAY.toMillis()));
+
+    // heartbeat should tick for aleast 5 times as task delay is heartbeatInterval * 5 (5 seconds)
+    assertThat(pulseCount.get())
+        .isGreaterThanOrEqualTo((int) (TASK_DELAY.toMillis() / HEARTBEAT_INTERVAL.toMillis()));
+  }
+
+  private TaskContext newTaskContext() {
+    return new TaskContext()
+        .setConfig(config)
+        .setWorkerId(0)
+        .setTaskManager(taskManager)
+        .setTaskRunnerFactory(taskRunnerFactory)
+        .setMetricRegistry(new MetricRegistry())
+        .setTaskDriverThreadPoolManager(taskDriverThreadPoolManager);
+  }
+
+  private TaskDTO newTask() {
+    final TaskDTO task = new TaskDTO()
+        .setStatus(TaskStatus.WAITING)
+        .setJobName("TestJob")
+        .setTaskType(TaskType.DETECTION)
+        .setTaskInfo(requireNonNull(toJson(new DetectionPipelineTaskInfo())));
+
+    task.setId(TASK_ID);
+    return task;
   }
 }

@@ -24,6 +24,7 @@ import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { getAlertsAlertAnomaliesPath } from "../../../../utils/routes/routes.util";
 import { Pluralize } from "../../../pluralize/pluralize.component";
 import {
@@ -32,7 +33,6 @@ import {
     SMALL_CHART_SIZE,
 } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
-import { generateNameForDetectionResult } from "../enumeration-items-table.util";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({

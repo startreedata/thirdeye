@@ -11,13 +11,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { DetectionEvaluationForRender } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.interfaces";
 import {
     DetectionEvaluation,
     EnumerationItemInEvaluation,
     EnumerationItemParams,
-} from "../../../rest/dto/detection.interfaces";
-import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
-import { DetectionEvaluationForRender } from "../enumeration-item-merger/enumeration-item-merger.interfaces";
+} from "../../rest/dto/detection.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 
 const DISPLAY_SEPARATOR = " AND ";
 const CLAUSE_SEPARATOR = "AND";

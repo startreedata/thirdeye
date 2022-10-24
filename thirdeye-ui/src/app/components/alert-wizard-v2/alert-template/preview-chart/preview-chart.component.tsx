@@ -45,8 +45,8 @@ import {
     createAlertEvaluation,
     extractDetectionEvaluation,
 } from "../../../../utils/alerts/alerts.util";
+import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
-import { generateNameForDetectionResult } from "../../../alert-view/enumeration-items-table/enumeration-items-table.util";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { generateChartOptionsForAlert } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";

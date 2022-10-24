@@ -16,7 +16,6 @@ import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { generateNameForEnumerationItem } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -53,6 +52,7 @@ import {
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
+import { generateNameForEnumerationItem } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
     isValidNumberId,

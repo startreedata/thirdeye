@@ -16,7 +16,6 @@ import { cloneDeep, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams, useSearchParams } from "react-router-dom";
-import { generateNameForEnumerationItem } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
 import {
@@ -35,6 +34,7 @@ import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
 import { useGetInvestigation } from "../../rest/rca/rca.actions";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
+import { generateNameForEnumerationItem } from "../../utils/enumeration-items/enumeration-items.util";
 import {
     createNewInvestigation,
     determineInvestigationIDFromSearchParams,

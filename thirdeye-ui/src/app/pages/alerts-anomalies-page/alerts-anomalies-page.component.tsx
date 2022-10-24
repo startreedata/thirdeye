@@ -15,7 +15,6 @@ import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
-import { generateNameForEnumerationItem } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
 import {
     makeDeleteRequest,
@@ -36,6 +35,7 @@ import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
+import { generateNameForEnumerationItem } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
     getAlertsAlertPath,

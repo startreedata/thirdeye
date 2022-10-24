@@ -84,6 +84,7 @@ export const generateSeriesDataForDetectionEvaluation = (
                 tooltip: {
                     valueFormatter: formatLargeNumberV1,
                 },
+                strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
             };
         }
     );

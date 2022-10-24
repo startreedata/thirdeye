@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class OperatorContext {
   private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, OperatorResult> inputsMap;
+  private EnumerationItemDTO enumerationItem;
 
   public Interval getDetectionInterval() {
     return detectionInterval;
@@ -69,6 +71,16 @@ public class OperatorContext {
   public OperatorContext setPredicates(
       final List<Predicate> predicates) {
     this.predicates = predicates;
+    return this;
+  }
+
+  public EnumerationItemDTO getEnumerationItem() {
+    return enumerationItem;
+  }
+
+  public OperatorContext setEnumerationItem(
+      final EnumerationItemDTO enumerationItem) {
+    this.enumerationItem = enumerationItem;
     return this;
   }
 }

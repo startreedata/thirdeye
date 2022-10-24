@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class PlanNodeContext {
   private Interval detectionInterval;
   private List<Predicate> predicates;
   private Map<String, Object> properties;
+  private EnumerationItemDTO enumerationItem;
 
   public static PlanNodeContext copy(final PlanNodeContext toCopy) {
     // shallow copy
@@ -95,13 +97,13 @@ public class PlanNodeContext {
     return this;
   }
 
-  @Override
-  public PlanNodeContext clone() {
-    // shallow clone
-    try {
-      return (PlanNodeContext) super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new AssertionError();  // Can't happen
-    }
+  public EnumerationItemDTO getEnumerationItem() {
+    return enumerationItem;
+  }
+
+  public PlanNodeContext setEnumerationItem(
+      final EnumerationItemDTO enumerationItem) {
+    this.enumerationItem = enumerationItem;
+    return this;
   }
 }

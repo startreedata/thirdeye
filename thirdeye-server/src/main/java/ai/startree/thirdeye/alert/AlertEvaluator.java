@@ -87,9 +87,13 @@ public class AlertEvaluator {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
           detectionInterval);
 
+      final PlanNodeContext runtimeContext = new PlanNodeContext()
+          .setDetectionInterval(detectionInterval);
+
       // inject custom evaluation context
-      final PlanNodeContext runtimeContext = evaluationContextProcessor.getContext(request.getEvaluationContext());
-      runtimeContext.setDetectionInterval(detectionInterval);
+      evaluationContextProcessor.process(runtimeContext,
+          request.getEvaluationContext(),
+          templateWithProperties);
 
       if (bool(request.isDryRun())) {
         return new AlertEvaluationApi()

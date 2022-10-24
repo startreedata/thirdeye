@@ -23,12 +23,28 @@ public class EvaluationContextApi {
    */
   private List<String> filters;
 
+  /**
+   * Assumption:
+   * There is only 1 enumerator in the DAG
+   * If there is multiple: then we can have multiple enumerators and multiple contexts.
+   * Not dealing with that complexity for now. That will require a more complex API.
+   */
+  private EnumerationItemApi enumerationItem;
   public List<String> getFilters() {
     return filters;
   }
 
   public EvaluationContextApi setFilters(final List<String> filters) {
     this.filters = filters;
+    return this;
+  }
+  public EnumerationItemApi getEnumerationItem() {
+    return enumerationItem;
+  }
+
+  public EvaluationContextApi setEnumerationItem(
+      final EnumerationItemApi enumerationItem) {
+    this.enumerationItem = enumerationItem;
     return this;
   }
 }

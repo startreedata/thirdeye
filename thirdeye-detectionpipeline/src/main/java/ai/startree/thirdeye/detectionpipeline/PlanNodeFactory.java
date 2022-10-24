@@ -32,7 +32,6 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -74,21 +73,19 @@ public class PlanNodeFactory {
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventDao;
   private final DatasetConfigManager datasetDao;
-  private final MinMaxTimeLoader minMaxTimeLoader;
 
   @Inject
   public PlanNodeFactory(final DataSourceCache dataSourceCache,
-      final DetectionRegistry detectionRegistry, final PostProcessorRegistry postProcessorRegistry,
+      final DetectionRegistry detectionRegistry,
+      final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventDao,
-      final DatasetConfigManager datasetDao,
-      final MinMaxTimeLoader minMaxTimeLoader) {
+      final DatasetConfigManager datasetDao) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
     this.eventDao = eventDao;
     this.datasetDao = datasetDao;
-    this.minMaxTimeLoader = minMaxTimeLoader;
   }
 
   public static PlanNode build(
@@ -120,6 +117,7 @@ public class PlanNodeFactory {
         .setName(planNodeBean.getName())
         .setPlanNodeBean(planNodeBean)
         .setPipelinePlanNodes(pipelinePlanNodes)
+        .setEnumerationItem(runTimeContext.getEnumerationItem())
         .setProperties(ImmutableMap.<String, Object>builder()
             .put(Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)
             .put(Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry)

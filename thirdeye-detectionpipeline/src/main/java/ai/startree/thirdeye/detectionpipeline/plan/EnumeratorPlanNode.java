@@ -22,6 +22,7 @@ import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +33,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   public static final String TYPE = "Enumerator";
   private Map<String, Object> params;
   private DetectionRegistry detectionRegistry;
+  private EnumerationItemDTO enumerationItem;
 
   public EnumeratorPlanNode() {
     super();
@@ -45,6 +47,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
 
     params = optional(planNodeBean.getParams()).map(TemplatableMap::valueMap).orElse(emptyMap());
+    enumerationItem = planNodeContext.getEnumerationItem();
   }
 
   @Override
@@ -65,6 +68,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry))
+        .setEnumerationItem(enumerationItem)
     );
     return operator;
   }

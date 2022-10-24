@@ -76,6 +76,18 @@ describe("Metrics REST", () => {
         expect(axios.get).toHaveBeenCalledWith("/api/metrics");
     });
 
+    it("getAllMetrics should invoke axios.get with appropriate params and return appropriate metrics", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: [mockMetric],
+        });
+
+        await expect(getAllMetrics({ datasetId: 123 })).resolves.toEqual([
+            mockMetric,
+        ]);
+
+        expect(axios.get).toHaveBeenCalledWith("/api/metrics?dataset.id=123");
+    });
+
     it("getAllMetrics should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 

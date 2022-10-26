@@ -47,31 +47,34 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
   private Network network;
 
   public PinotContainer() {
-    this(DEFAULT_IMAGE_NAME.withTag(ImageTag()));
+    this(DEFAULT_IMAGE_NAME.withTag(imageTag()));
   }
 
-  private static String ImageTag() {
-    if (HostArch().endsWith("arm64")) {
+  private static String imageTag() {
+    if (hostArch().endsWith("arm64")) {
       return DEFAULT_TAG_ARM64;
     }
     return DEFAULT_TAG;
   }
 
   // Return the cpu arch for the Docker host.
-  private static String HostArch() {
+  private static String hostArch() {
     if (System.getProperty("os.name").equals("Mac OS X")) {
+      // Java 11 for M1 cpu virtualizes the x86_64 arch, so java and uname reports os.arch as x86_64.
+      // Use sysctl to get cpu brand and infer the arch.
+      String cpuBrand = "";
       try {
-        // Java 11 for M1 virtualizes the x86_64 arch, so java and uname reports os.arch as x86_64.
-        // Use sysctl to get cpu brand and infer the arch.
-        Process process = new ProcessBuilder("sysctl", "-n", "machdep.cpu.brand_string").start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String cpu_brand = reader.readLine().trim();
+        final Process process = new ProcessBuilder(
+            "sysctl", "-n", "machdep.cpu.brand_string").start();
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        cpuBrand = reader.readLine().trim();
         reader.close();
-        if (cpu_brand.startsWith("Apple M1")) {
-          return "arm64";
-        }
       } catch (IOException e) {
-        return System.getProperty("os.arch");
+        throw new RuntimeException(e);
+      }
+
+      if (cpuBrand.startsWith("Apple M1")) {
+        return "arm64";
       }
     }
     return System.getProperty("os.arch");

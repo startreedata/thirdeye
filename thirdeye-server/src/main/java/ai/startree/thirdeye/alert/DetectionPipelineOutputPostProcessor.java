@@ -49,8 +49,9 @@ public class DetectionPipelineOutputPostProcessor {
       final OperatorResult operatorResult) {
     if (operatorResult instanceof CombinerResult) {
       // process the combiner delegate results
-      final Map<String, OperatorResult> postProcessResults = process(((CombinerResult) operatorResult).getResults(), request);
-      return new CombinerResult(postProcessResults);
+      return new CombinerResult(process(
+          ((CombinerResult) operatorResult).getResults(), request
+      ));
     }
     final Optional<DataFrame> dfOptional = optional(operatorResult)
         .map(OperatorResult::getTimeseries)

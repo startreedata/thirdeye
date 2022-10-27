@@ -13,22 +13,26 @@
  */
 import { DialogDataV1, NotificationTypeV1 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+
+export interface GenericEntityWithNameAndId {
+    id: number;
+    name: string;
+}
 
 export const promptDeleteConfirmation = (
-    uiAnomalies: UiAnomaly[],
+    items: GenericEntityWithNameAndId[],
     callbackForOk: () => void,
     translate: (key: string, params?: { [key: string]: string }) => string,
-    showDialog: (dialogParams: DialogDataV1) => void
+    showDialog: (dialogParams: DialogDataV1) => void,
+    entityPluralLabel: string
 ): void => {
     let promptMsg = translate("message.delete-confirmation", {
-        name: uiAnomalies[0].name,
+        name: items[0].name,
     });
 
-    if (uiAnomalies.length > 1) {
+    if (items.length > 1) {
         promptMsg = translate("message.delete-confirmation", {
-            name: `${uiAnomalies.length} ${translate("label.anomalies")}`,
+            name: `${items.length} ${entityPluralLabel}`,
         });
     }
 
@@ -42,34 +46,39 @@ export const promptDeleteConfirmation = (
 };
 
 export const makeDeleteRequest = (
-    uiAnomalies: UiAnomaly[],
+    items: GenericEntityWithNameAndId[],
+    deleteRestFunction: (id: number) => Promise<{ id: number }>,
     translate: (
         key: string,
         params?: { [key: string]: string | number }
     ) => string,
-    notify: (type: NotificationTypeV1, msg: string) => void
-): Promise<UiAnomaly[]> => {
+    notify: (type: NotificationTypeV1, msg: string) => void,
+    entityLabelSingle: string,
+    entityLabelPlural: string
+): Promise<GenericEntityWithNameAndId[]> => {
     return Promise.allSettled(
-        uiAnomalies.map((uiAnomaly) => deleteAnomaly(uiAnomaly.id))
+        items.map((item) => deleteRestFunction(item.id))
     ).then((completedRequests) => {
-        const successfullyRemoved: UiAnomaly[] = [];
+        const successfullyRemoved: GenericEntityWithNameAndId[] = [];
         let numSuccessful = 0;
         let errored = 0;
 
         completedRequests.forEach((settled) => {
             if (settled.status === "fulfilled") {
                 numSuccessful = numSuccessful + 1;
-                successfullyRemoved.push(settled.value as unknown as UiAnomaly);
+                successfullyRemoved.push(
+                    settled.value as GenericEntityWithNameAndId
+                );
             } else {
                 errored = errored + 1;
             }
         });
 
-        if (uiAnomalies.length === 1 && numSuccessful === 1) {
+        if (items.length === 1 && numSuccessful === 1) {
             notify(
                 NotificationTypeV1.Success,
                 translate("message.delete-success", {
-                    entity: translate("label.anomaly"),
+                    entity: entityLabelSingle,
                 })
             );
         } else {
@@ -77,7 +86,7 @@ export const makeDeleteRequest = (
                 notify(
                     NotificationTypeV1.Success,
                     translate("message.num-delete-success", {
-                        entity: translate("label.anomalies"),
+                        entity: entityLabelPlural,
                         num: numSuccessful,
                     })
                 );
@@ -86,7 +95,7 @@ export const makeDeleteRequest = (
                 notify(
                     NotificationTypeV1.Error,
                     translate("message.num-delete-error", {
-                        entity: translate("label.anomalies"),
+                        entity: entityLabelPlural,
                         num: errored,
                     })
                 );

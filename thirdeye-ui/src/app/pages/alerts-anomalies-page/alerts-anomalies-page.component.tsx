@@ -16,10 +16,6 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
-import {
-    makeDeleteRequest,
-    promptDeleteConfirmation,
-} from "../../components/anomaly-list-v1/anomaly-list-v1.utils";
 import { AnomalyQuickFilters } from "../../components/anomaly-quick-filters/anomaly-quick-filters.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
@@ -31,10 +27,15 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { useGetAlert } from "../../rest/alerts/alerts.actions";
+import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
 import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
+import {
+    makeDeleteRequest,
+    promptDeleteConfirmation,
+} from "../../utils/bulk-delete/bulk-delete.util";
 import { generateNameForEnumerationItem } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
@@ -148,22 +149,28 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             uiAnomaliesToDelete,
             () => {
                 uiAnomalies &&
-                    makeDeleteRequest(uiAnomaliesToDelete, t, notify).then(
-                        (deletedAnomalies) => {
-                            setUiAnomalies(() => {
-                                return [...uiAnomalies].filter((candidate) => {
-                                    return (
-                                        deletedAnomalies.findIndex(
-                                            (d) => d.id === candidate.id
-                                        ) === -1
-                                    );
-                                });
+                    makeDeleteRequest(
+                        uiAnomaliesToDelete,
+                        deleteAnomaly,
+                        t,
+                        notify,
+                        t("label.anomaly"),
+                        t("label.anomalies")
+                    ).then((deletedAnomalies) => {
+                        setUiAnomalies(() => {
+                            return [...uiAnomalies].filter((candidate) => {
+                                return (
+                                    deletedAnomalies.findIndex(
+                                        (d) => d.id === candidate.id
+                                    ) === -1
+                                );
                             });
-                        }
-                    );
+                        });
+                    });
             },
             t,
-            showDialog
+            showDialog,
+            t("label.anomalies")
         );
     };
 

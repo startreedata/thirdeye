@@ -35,9 +35,10 @@ import { EventCardV1 } from "../entity-cards/event-card-v1/event-card-v1.compone
 import { TimeRangeButtonWithContext } from "../time-range/time-range-button-with-context/time-range-button.component";
 import { EventListV1Props } from "./event-list-v1.interfaces";
 
-export const EventListV1: FunctionComponent<EventListV1Props> = (
-    props: EventListV1Props
-) => {
+export const EventListV1: FunctionComponent<EventListV1Props> = ({
+    onDelete,
+    events,
+}) => {
     const { t } = useTranslation();
     const [selectedEvent, setSelectedEvent] =
         useState<DataGridSelectionModelV1<Event>>();
@@ -60,34 +61,26 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
     };
 
     useEffect(() => {
-        if (!props.events) {
+        if (!events) {
             return;
         }
 
-        const newEvents = generateDataWithChildren(props.events);
+        const newEvents = generateDataWithChildren(events);
         setUIEvents(newEvents);
 
-        setSearchDataKeys(getSearchDataKeysForEvents(props.events));
-    }, [props.events]);
+        setSearchDataKeys(getSearchDataKeysForEvents(events));
+    }, [events]);
 
     const handleEventDelete = (): void => {
-        if (!isActionButtonDisable) {
-            const selectedUiEvent = props.events?.find(
-                (event) => event.id === selectedEvent?.rowKeyValues[0]
-            );
-
-            selectedUiEvent &&
-                props.onDelete &&
-                props.onDelete(selectedUiEvent);
+        if (!selectedEvent || !selectedEvent.rowKeyValueMap) {
+            return;
         }
+
+        onDelete && onDelete(Array.from(selectedEvent.rowKeyValueMap.values()));
     };
 
     const handleEventViewDetailsById = (id: number): void =>
         navigate(getEventsViewPath(id));
-
-    const isActionButtonDisable = !(
-        selectedEvent && selectedEvent.rowKeyValues.length === 1
-    );
 
     const nameRenderer = useCallback(
         (_: Record<string, unknown>, data: Event): ReactNode => (
@@ -147,42 +140,43 @@ export const EventListV1: FunctionComponent<EventListV1Props> = (
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                {uiEvents && (
-                    <DataGridV1<Event>
-                        hideBorder
-                        columns={eventColumns}
-                        data={uiEvents as Event[]}
-                        expandColumnKey="name"
-                        rowKey="id"
-                        scroll={DataGridScrollV1.Contents}
-                        searchDataKeys={searchDataKeys}
-                        searchPlaceholder={t("label.search-entity", {
-                            entity: t("label.event"),
-                        })}
-                        toolbarComponent={
-                            <Grid
-                                container
-                                alignItems="center"
-                                justifyContent="space-between"
-                                spacing={2}
-                            >
-                                <Grid item>
-                                    <Button
-                                        disabled={isActionButtonDisable}
-                                        variant="contained"
-                                        onClick={handleEventDelete}
-                                    >
-                                        {t("label.delete")}
-                                    </Button>
-                                </Grid>
-                                <Grid item>
-                                    <TimeRangeButtonWithContext />
-                                </Grid>
+                <DataGridV1<Event>
+                    hideBorder
+                    columns={eventColumns}
+                    data={uiEvents as Event[]}
+                    expandColumnKey="name"
+                    rowKey="id"
+                    scroll={DataGridScrollV1.Contents}
+                    searchDataKeys={searchDataKeys}
+                    searchPlaceholder={t("label.search-entity", {
+                        entity: t("label.event"),
+                    })}
+                    toolbarComponent={
+                        <Grid
+                            container
+                            alignItems="center"
+                            justifyContent="space-between"
+                            spacing={2}
+                        >
+                            <Grid item>
+                                <Button
+                                    disabled={
+                                        !selectedEvent ||
+                                        selectedEvent.rowKeyValues.length === 0
+                                    }
+                                    variant="contained"
+                                    onClick={handleEventDelete}
+                                >
+                                    {t("label.delete")}
+                                </Button>
                             </Grid>
-                        }
-                        onSelectionChange={setSelectedEvent}
-                    />
-                )}
+                            <Grid item>
+                                <TimeRangeButtonWithContext />
+                            </Grid>
+                        </Grid>
+                    }
+                    onSelectionChange={setSelectedEvent}
+                />
             </PageContentsCardV1>
         </Grid>
     );

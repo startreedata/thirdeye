@@ -12,8 +12,7 @@
  * the License.
  */
 import { Box, Button, Grid } from "@material-ui/core";
-import { AxiosError } from "axios";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTemplateListV1 } from "../../components/alert-template-list-v1/alert-template-list-v1.component";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -28,7 +27,6 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import {
@@ -36,23 +34,28 @@ import {
     updateAlertTemplate,
 } from "../../rest/alert-templates/alert-templates.rest";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
+import {
+    makeDeleteRequest,
+    promptDeleteConfirmation,
+} from "../../utils/bulk-delete/bulk-delete.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertTemplatesCreatePath } from "../../utils/routes/routes.util";
 
 export const AlertTemplatesAllPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [alertTemplates, setAlertTemplate] = useState<AlertTemplate[]>([]);
     const {
-        alertTemplates,
         getAlertTemplates,
         status: alertTemplatesRequestStatus,
         errorMessages,
     } = useGetAlertTemplates();
 
     useEffect(() => {
-        getAlertTemplates();
+        getAlertTemplates().then((data) => {
+            data && setAlertTemplate(data);
+        });
     }, []);
 
     const handleAlertTemplateChange = (
@@ -75,43 +78,36 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
         });
     };
 
-    const handleAlertTemplateDelete = (alertTemplate: AlertTemplate): void => {
-        showDialog({
-            type: DialogType.ALERT,
-            contents: t("message.delete-confirmation", {
-                name: alertTemplate.name,
-            }),
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => handleAlertTemplateDeleteOk(alertTemplate),
-        });
-    };
-
-    const handleAlertTemplateDeleteOk = (
-        alertTemplate: AlertTemplate
+    const handleAlertTemplateDelete = (
+        alertTemplatesToDelete: AlertTemplate[]
     ): void => {
-        deleteAlertTemplate(alertTemplate.id)
-            .then(() => {
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.delete-success", {
-                        entity: t("label.alert-template"),
-                    })
-                );
-
-                // Refresh list
-                getAlertTemplates();
-            })
-            .catch((errors) => {
-                notifyIfErrors(
-                    ActionStatus.Error,
-                    getErrorMessages(errors as AxiosError),
-                    notify,
-                    t("message.delete-error", {
-                        entity: t("label.alert-template"),
-                    })
-                );
-            });
+        promptDeleteConfirmation(
+            alertTemplatesToDelete,
+            () => {
+                alertTemplates &&
+                    makeDeleteRequest(
+                        alertTemplatesToDelete,
+                        deleteAlertTemplate,
+                        t,
+                        notify,
+                        t("label.alert-template"),
+                        t("label.alert-templates")
+                    ).then((deleted) => {
+                        setAlertTemplate(() => {
+                            return [...alertTemplates].filter((candidate) => {
+                                return (
+                                    deleted.findIndex(
+                                        (d) => d.id === candidate.id
+                                    ) === -1
+                                );
+                            });
+                        });
+                    });
+            },
+            t,
+            showDialog,
+            t("label.alert-templates")
+        );
     };
 
     useEffect(() => {

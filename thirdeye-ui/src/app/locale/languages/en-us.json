@@ -419,7 +419,7 @@
         "view-documentation": "View documentation",
         "chart-data-not-reflective": "Chart data not reflective of current configuration",
         "experienced-issues-fetching-data": "Experienced issues fetching data",
-        "experienced-issues-fetching-data-for-alert-id": "Experienced issue while fetching alert details for id: {alertId}",
+        "experienced-issues-fetching-data-for-alert-id": "Experienced issue while fetching alert details for id: {{alertId}}",
         "anomaly-precision-tooltip": "(Anomalies labeled as anomalies) / (Anomalies with feedback)",
         "no-recent-failures": "No recent failures",
         "no-options-available-entity": "No {{entity}} options available",

@@ -13,7 +13,9 @@
  */
 package org.apache.pinot.testcontainer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.util.List;
 import org.slf4j.Logger;
@@ -38,13 +40,44 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
   private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
       "apachepinot/pinot");
   private static final String DEFAULT_TAG = "0.11.0";
+  private static final String DEFAULT_TAG_ARM64 = DEFAULT_TAG + "-arm64";
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private List<AddTable> addTables;
   private List<ImportData> importDataList;
   private Network network;
 
   public PinotContainer() {
-    this(DEFAULT_IMAGE_NAME.withTag(DEFAULT_TAG));
+    this(DEFAULT_IMAGE_NAME.withTag(imageTag()));
+  }
+
+  private static String imageTag() {
+    if (hostArch().endsWith("arm64")) {
+      return DEFAULT_TAG_ARM64;
+    }
+    return DEFAULT_TAG;
+  }
+
+  // Return the cpu arch for the Docker host.
+  private static String hostArch() {
+    if (System.getProperty("os.name").equals("Mac OS X")) {
+      // Java 11 for M1 cpu virtualizes the x86_64 arch, so java and uname reports os.arch as x86_64.
+      // Use sysctl to get cpu brand and infer the arch.
+      String cpuBrand = "";
+      try {
+        final Process process = new ProcessBuilder(
+            "sysctl", "-n", "machdep.cpu.brand_string").start();
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        cpuBrand = reader.readLine().trim();
+        reader.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+
+      if (cpuBrand.startsWith("Apple M1")) {
+        return "arm64";
+      }
+    }
+    return System.getProperty("os.arch");
   }
 
   public PinotContainer(String pinotVersion) {
@@ -139,7 +172,10 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
 
   private long getTableSize(final String tableName) throws IOException, InterruptedException {
     final ExecResult checkIngestionIsFinished = this.execInContainer(
-        "curl", "-X", "GET", String.format("http://localhost:9000/tables/%s_OFFLINE/size?detailed=false", tableName)
+        "curl",
+        "-X",
+        "GET",
+        String.format("http://localhost:9000/tables/%s_OFFLINE/size?detailed=false", tableName)
     );
     final String stdout = checkIngestionIsFinished.getStdout();
     return OBJECT_MAPPER.readTree(stdout).get("estimatedSizeInBytes").longValue();

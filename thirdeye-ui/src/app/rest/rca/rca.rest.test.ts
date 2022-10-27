@@ -158,7 +158,7 @@ describe("RCA REST", () => {
         ).resolves.toEqual(mockCohortResponse);
 
         expect(axios.post).toHaveBeenCalledWith("/api/rca/metrics/cohorts", {
-            metric: 123,
+            metric: { id: 123 },
             start: 100,
             end: 200,
         });

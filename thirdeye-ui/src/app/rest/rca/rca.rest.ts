@@ -138,6 +138,7 @@ export const getCohorts = async ({
     query,
     threshold,
     percentage,
+    resultSize,
 }: GetCohortParams): Promise<CohortDetectionResponse> => {
     const requestPayload: CohortRequestParams = {
         start,
@@ -146,6 +147,10 @@ export const getCohorts = async ({
             id: metricId,
         },
     };
+
+    if (resultSize) {
+        requestPayload.resultSize = resultSize;
+    }
 
     if (threshold) {
         requestPayload.threshold = threshold;

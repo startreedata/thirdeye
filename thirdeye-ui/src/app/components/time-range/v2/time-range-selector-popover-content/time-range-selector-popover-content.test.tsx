@@ -83,14 +83,20 @@ it("TimeRangeSelectorPopoverContent should change selected value when quick sele
     applyButton.click();
 
     // Make sure initial conditions are correct
-    expect(mockOnChange).toHaveBeenLastCalledWith(JAN_TIME_RANGE_DURATION);
+    expect(mockOnChange).toHaveBeenLastCalledWith(
+        JAN_TIME_RANGE_DURATION.startTime,
+        JAN_TIME_RANGE_DURATION.endTime
+    );
 
     const lastTwelveHoursButton = screen.getByText(/last-12-hours/);
     lastTwelveHoursButton.click();
 
     applyButton.click();
 
-    expect(mockOnChange).not.toHaveBeenLastCalledWith(JAN_TIME_RANGE_DURATION);
+    expect(mockOnChange).not.toHaveBeenLastCalledWith(
+        JAN_TIME_RANGE_DURATION.startTime,
+        JAN_TIME_RANGE_DURATION.endTime
+    );
 });
 
 it("TimeRangeSelectorPopoverContent should call onClose if passed", () => {

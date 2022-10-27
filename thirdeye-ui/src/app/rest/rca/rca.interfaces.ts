@@ -66,6 +66,7 @@ export interface GetCohortParams {
     query?: string;
     threshold?: number;
     percentage?: number;
+    resultSize?: number;
 }
 
 export interface CohortRequestParams {

@@ -31,7 +31,6 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
         if (!appAnalytics) {
             return null;
         }
-        appAnalytics.anomalyStats.countWithFeedback = 0;
         const totalAnomaliesLabeledAsAnomaly =
             appAnalytics.anomalyStats.feedbackStats.ANOMALY +
             appAnalytics.anomalyStats.feedbackStats.ANOMALY_EXPECTED +

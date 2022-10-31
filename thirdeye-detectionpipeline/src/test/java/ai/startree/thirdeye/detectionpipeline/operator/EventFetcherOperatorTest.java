@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
@@ -28,7 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;

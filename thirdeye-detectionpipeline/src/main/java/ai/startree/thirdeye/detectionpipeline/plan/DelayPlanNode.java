@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.detectionpipeline.plan;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.DelayOperator;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 
 public class DelayPlanNode extends DetectionPipelinePlanNode {
 

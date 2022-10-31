@@ -17,11 +17,11 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.Enumerator.Context;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;

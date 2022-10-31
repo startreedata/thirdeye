@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
@@ -28,7 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
 import java.util.Map;

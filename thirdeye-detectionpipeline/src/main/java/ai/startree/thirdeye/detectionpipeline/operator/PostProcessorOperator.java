@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -26,7 +27,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
 import java.util.List;

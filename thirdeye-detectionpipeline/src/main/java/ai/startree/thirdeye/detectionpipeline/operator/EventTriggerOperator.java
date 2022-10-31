@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
@@ -24,7 +25,6 @@ import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactoryContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 

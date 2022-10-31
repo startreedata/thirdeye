@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
@@ -37,7 +38,6 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;

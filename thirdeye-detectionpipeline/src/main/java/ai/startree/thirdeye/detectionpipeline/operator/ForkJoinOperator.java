@@ -15,12 +15,12 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.time.Duration;
 import java.util.List;

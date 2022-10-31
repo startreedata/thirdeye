@@ -11,16 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection.v2;
+package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.Interval;
 
 public class OperatorContext {
+
   private Interval detectionInterval;
   private List<Predicate> predicates;
   private PlanNodeBean planNode;

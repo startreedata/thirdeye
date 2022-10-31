@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
@@ -29,7 +30,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;

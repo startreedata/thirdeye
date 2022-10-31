@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
@@ -31,7 +32,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;

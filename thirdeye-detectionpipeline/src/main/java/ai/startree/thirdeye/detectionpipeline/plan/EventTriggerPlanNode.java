@@ -17,12 +17,12 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.Operator;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EventTriggerOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 

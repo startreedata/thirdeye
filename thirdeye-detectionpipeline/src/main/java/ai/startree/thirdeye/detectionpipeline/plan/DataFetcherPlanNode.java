@@ -43,9 +43,9 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
     this.dataSourceCache = (DataSourceCache) planNodeContext.getProperties()
-        .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
+        .get(Constants.K_DATA_SOURCE_CACHE);
     this.datasetDao = (DatasetConfigManager) Objects.requireNonNull(planNodeContext.getProperties()
-        .get(Constants.DATASET_DAO_REF_KEY));
+        .get(Constants.K_DATASET_MANAGER));
     this.predicates = planNodeContext.getPredicates();
   }
 
@@ -67,8 +67,8 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
         .setPredicates(predicates)
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(
-            Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
-            Constants.DATASET_DAO_REF_KEY, datasetDao))
+            Constants.K_DATA_SOURCE_CACHE, dataSourceCache,
+            Constants.K_DATASET_MANAGER, datasetDao))
     );
     return dataFetcherOperator;
   }

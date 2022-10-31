@@ -13,6 +13,11 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
+import static ai.startree.thirdeye.spi.Constants.K_DATASET_MANAGER;
+import static ai.startree.thirdeye.spi.Constants.K_DATA_SOURCE_CACHE;
+import static ai.startree.thirdeye.spi.Constants.K_DETECTION_REGISTRY;
+import static ai.startree.thirdeye.spi.Constants.K_EVENT_MANAGER;
+import static ai.startree.thirdeye.spi.Constants.K_POST_PROCESSOR_REGISTRY;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -28,7 +33,6 @@ import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.PostProcessorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.SqlExecutionPlanNode;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -71,21 +75,21 @@ public class PlanNodeFactory {
   private final DataSourceCache dataSourceCache;
   private final DetectionRegistry detectionRegistry;
   private final PostProcessorRegistry postProcessorRegistry;
-  private final EventManager eventDao;
-  private final DatasetConfigManager datasetDao;
+  private final EventManager eventManager;
+  private final DatasetConfigManager datasetManager;
 
   @Inject
   public PlanNodeFactory(final DataSourceCache dataSourceCache,
       final DetectionRegistry detectionRegistry,
       final PostProcessorRegistry postProcessorRegistry,
-      final EventManager eventDao,
-      final DatasetConfigManager datasetDao) {
+      final EventManager eventManager,
+      final DatasetConfigManager datasetManager) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
-    this.eventDao = eventDao;
-    this.datasetDao = datasetDao;
+    this.eventManager = eventManager;
+    this.datasetManager = datasetManager;
   }
 
   public static PlanNode build(
@@ -119,11 +123,11 @@ public class PlanNodeFactory {
         .setPipelinePlanNodes(pipelinePlanNodes)
         .setEnumerationItem(runTimeContext.getEnumerationItem())
         .setProperties(ImmutableMap.<String, Object>builder()
-            .put(Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)
-            .put(Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry)
-            .put(Constants.POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry)
-            .put(Constants.EVENT_MANAGER_REF_KEY, eventDao)
-            .put(Constants.DATASET_DAO_REF_KEY, datasetDao)
+            .put(K_DATA_SOURCE_CACHE, dataSourceCache)
+            .put(K_DETECTION_REGISTRY, detectionRegistry)
+            .put(K_POST_PROCESSOR_REGISTRY, postProcessorRegistry)
+            .put(K_EVENT_MANAGER, eventManager)
+            .put(K_DATASET_MANAGER, datasetManager)
             .build()
         );
 

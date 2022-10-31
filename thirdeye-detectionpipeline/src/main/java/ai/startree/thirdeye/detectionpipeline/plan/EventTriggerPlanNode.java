@@ -38,7 +38,7 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
     detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
-        .get(Constants.DETECTION_REGISTRY_REF_KEY);
+        .get(Constants.K_DETECTION_REGISTRY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 
@@ -58,7 +58,7 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
     eventTriggerOperator.init(new OperatorContext()
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.DETECTION_REGISTRY_REF_KEY,
+        .setProperties(ImmutableMap.of(Constants.K_DETECTION_REGISTRY,
             detectionRegistry))
     );
     return eventTriggerOperator;

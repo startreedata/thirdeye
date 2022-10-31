@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.spi.Constants.EVENT_MANAGER_REF_KEY;
+import static ai.startree.thirdeye.spi.Constants.K_EVENT_MANAGER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -105,7 +105,7 @@ public class EventFetcherOperatorTest {
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(new Interval(0L, 1L, DateTimeZone.UTC)) // ignored with FROM_DATA
         .setPlanNode(planNodeBean)
-        .setProperties(Map.of(EVENT_MANAGER_REF_KEY, eventDao));
+        .setProperties(Map.of(K_EVENT_MANAGER, eventDao));
 
     final EventFetcherOperator eventFetcherOperator = new EventFetcherOperator();
     eventFetcherOperator.init(context);

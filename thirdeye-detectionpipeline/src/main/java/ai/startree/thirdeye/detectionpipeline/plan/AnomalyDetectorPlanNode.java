@@ -39,7 +39,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
     detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
-        .get(Constants.DETECTION_REGISTRY_REF_KEY);
+        .get(Constants.K_DETECTION_REGISTRY);
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 
@@ -60,7 +60,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
         .setDetectionInterval(this.detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.DETECTION_REGISTRY_REF_KEY,
+        .setProperties(ImmutableMap.of(Constants.K_DETECTION_REGISTRY,
             detectionRegistry))
     );
     return anomalyDetectorOperator;

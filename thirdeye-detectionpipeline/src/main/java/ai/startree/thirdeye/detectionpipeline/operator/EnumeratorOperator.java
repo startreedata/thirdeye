@@ -43,7 +43,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
   public void init(final OperatorContext context) {
     super.init(context);
     detectionRegistry = (DetectionRegistry) context.getProperties()
-        .get(Constants.DETECTION_REGISTRY_REF_KEY);
+        .get(Constants.K_DETECTION_REGISTRY);
 
     enumerationItemFromContext = context.getEnumerationItem();
   }

@@ -35,7 +35,7 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
     this.eventManager = (EventManager) planNodeContext.getProperties()
-        .get(Constants.EVENT_MANAGER_REF_KEY);
+        .get(Constants.K_EVENT_MANAGER);
     checkArgument(eventManager != null,
         "Internal issue. No EventManager passed to " + EVENT_FETCHER_TYPE);
   }
@@ -55,7 +55,7 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
     final EventFetcherOperator eventFetcherOperator = new EventFetcherOperator();
     eventFetcherOperator.init(new OperatorContext().setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.EVENT_MANAGER_REF_KEY, eventManager)));
+        .setProperties(ImmutableMap.of(Constants.K_EVENT_MANAGER, eventManager)));
     return eventFetcherOperator;
   }
 }

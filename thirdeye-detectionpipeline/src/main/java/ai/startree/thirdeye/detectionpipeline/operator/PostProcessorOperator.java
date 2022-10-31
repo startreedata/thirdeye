@@ -49,7 +49,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
   public void init(final OperatorContext context) {
     super.init(context);
     final PostProcessorRegistry postProcessorRegistry = (PostProcessorRegistry) context.getProperties()
-        .get(Constants.POST_PROCESSOR_REGISTRY_REF_KEY);
+        .get(Constants.K_POST_PROCESSOR_REGISTRY);
     requireNonNull(postProcessorRegistry, "PostProcessorRegistry is not set");
 
     final Map<String, Object> nodeParams = optional(planNode.getParams()).map(TemplatableMap::valueMap)

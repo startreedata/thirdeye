@@ -38,7 +38,7 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
   public void init(final OperatorContext context) {
     super.init(context);
     final EventManager eventDao = (EventManager) context.getProperties()
-        .get(Constants.EVENT_MANAGER_REF_KEY);
+        .get(Constants.K_EVENT_MANAGER);
     this.eventFetcher = createEventFetcher(optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null), eventDao);
 

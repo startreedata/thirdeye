@@ -48,7 +48,7 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
     }
 
     postProcessorRegistry = (PostProcessorRegistry) planNodeContext.getProperties()
-        .get(Constants.POST_PROCESSOR_REGISTRY_REF_KEY);
+        .get(Constants.K_POST_PROCESSOR_REGISTRY);
 
     requireNonNull(postProcessorRegistry, "PostProcessorRegistry is not set");
   }
@@ -70,7 +70,7 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.<String, Object>builder()
-            .put(Constants.POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry)
+            .put(Constants.K_POST_PROCESSOR_REGISTRY, postProcessorRegistry)
             .build()));
 
     return postProcessorOperator;

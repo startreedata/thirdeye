@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
-import static ai.startree.thirdeye.spi.Constants.POST_PROCESSOR_REGISTRY_REF_KEY;
+import static ai.startree.thirdeye.spi.Constants.K_POST_PROCESSOR_REGISTRY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -90,7 +90,7 @@ public class PostProcessorOperatorTest {
         .setPlanNode(
             planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
-        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY,
+        .setProperties(Map.of(K_POST_PROCESSOR_REGISTRY,
             postProcessorRegistry));
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
@@ -121,7 +121,7 @@ public class PostProcessorOperatorTest {
         .setPlanNode(
             planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
-        .setProperties(Map.of(POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry));
+        .setProperties(Map.of(K_POST_PROCESSOR_REGISTRY, postProcessorRegistry));
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
     operator.execute();

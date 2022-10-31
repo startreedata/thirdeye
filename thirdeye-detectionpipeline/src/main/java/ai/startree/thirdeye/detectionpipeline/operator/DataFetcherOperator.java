@@ -51,9 +51,9 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
         "Max 1 output node is currently supported");
 
     final DataSourceCache dataSourceCache = (DataSourceCache) context.getProperties()
-        .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
+        .get(Constants.K_DATA_SOURCE_CACHE);
     final DatasetConfigManager datasetDao = (DatasetConfigManager) Objects.requireNonNull(context.getProperties()
-        .get(Constants.DATASET_DAO_REF_KEY));
+        .get(Constants.K_DATASET_MANAGER));
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
     final List<Predicate> predicates = optional(context.getPredicates()).orElse(List.of());

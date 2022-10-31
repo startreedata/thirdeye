@@ -13,19 +13,26 @@
  */
 package ai.startree.thirdeye.plugins.datasource.sql;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
-import ai.startree.thirdeye.spi.datasource.DataSourceUtils;
 import ai.startree.thirdeye.spi.datasource.RelationalQuery;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
+import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.Weigher;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +54,54 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
     sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
         metricConfigManager,
         datasetConfigManager);
-    sqlResponseCache = DataSourceUtils.buildResponseCache(sqlResponseCacheLoader);
+    sqlResponseCache = buildResponseCache(sqlResponseCacheLoader);
     name = MapUtils.getString(properties, "name", SqlThirdEyeDataSource.class.getSimpleName());
   }
 
+
+  public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildResponseCache(
+      CacheLoader cacheLoader) {
+    Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
+
+    // ResultSetGroup Cache. The size of this cache is limited by the total number of buckets in all ResultSetGroup.
+    // We estimate that 1 bucket (including overhead) consumes 1KB and this cache is allowed to use up to 50% of max
+    // heap space.
+    long maxBucketNumber = getApproximateMaxBucketNumber(
+        Constants.DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
+    LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader,
+        maxBucketNumber);
+
+    return CacheBuilder.newBuilder()
+        .expireAfterWrite(15, TimeUnit.MINUTES)
+        .maximumWeight(maxBucketNumber)
+        .weigher(
+            (Weigher<RelationalQuery, ThirdEyeResultSetGroup>) (relationalQuery, resultSetGroup) -> {
+              int resultSetCount = resultSetGroup.size();
+              int weight = 0;
+              for (int idx = 0; idx < resultSetCount; ++idx) {
+                ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
+                weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
+                    .getRowCount());
+              }
+              return weight;
+            })
+        .build(cacheLoader);
+  }
+
+  private static long getApproximateMaxBucketNumber(int percentage) {
+    long jvmMaxMemoryInBytes = Runtime.getRuntime().maxMemory();
+    if (jvmMaxMemoryInBytes == Long.MAX_VALUE) { // Check upper bound
+      jvmMaxMemoryInBytes = Constants.DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
+          * FileUtils.ONE_MB; // MB to Bytes
+    } else { // Check lower bound
+      long lowerBoundInBytes = Constants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
+          * FileUtils.ONE_MB; // MB to Bytes
+      if (jvmMaxMemoryInBytes < lowerBoundInBytes) {
+        jvmMaxMemoryInBytes = lowerBoundInBytes;
+      }
+    }
+    return (jvmMaxMemoryInBytes / 102400) * percentage;
+  }
   @Override
   public String getName() {
     return this.name;

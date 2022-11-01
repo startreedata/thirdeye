@@ -22,6 +22,7 @@ import org.joda.time.Interval;
 
 public class PlanNodeContext {
 
+  private ApplicationContext applicationContext;
   private String name;
   private Map<String, PlanNode> pipelinePlanNodes;
   private PlanNodeBean planNodeBean;
@@ -29,6 +30,7 @@ public class PlanNodeContext {
   private List<Predicate> predicates;
   private Map<String, Object> properties;
   private EnumerationItemDTO enumerationItem;
+
 
   public static PlanNodeContext copy(final PlanNodeContext toCopy) {
     // shallow copy
@@ -39,8 +41,19 @@ public class PlanNodeContext {
     copy.detectionInterval = toCopy.detectionInterval;
     copy.predicates = toCopy.predicates;
     copy.properties = toCopy.properties;
+    copy.applicationContext = toCopy.applicationContext;
 
     return copy;
+  }
+
+  public ApplicationContext getApplicationContext() {
+    return applicationContext;
+  }
+
+  public PlanNodeContext setApplicationContext(
+      final ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+    return this;
   }
 
   public String getName() {

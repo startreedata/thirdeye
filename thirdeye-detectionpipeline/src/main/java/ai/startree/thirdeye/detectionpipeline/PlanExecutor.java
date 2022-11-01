@@ -17,6 +17,9 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
+import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -35,9 +38,38 @@ public class PlanExecutor {
 
   private final PlanNodeFactory planNodeFactory;
 
+  private final DataSourceCache dataSourceCache;
+  private final DetectionRegistry detectionRegistry;
+  private final PostProcessorRegistry postProcessorRegistry;
+  private final EventManager eventManager;
+  private final DatasetConfigManager datasetConfigManager;
+  private final ApplicationContext applicationContext;
+
   @Inject
-  public PlanExecutor(final PlanNodeFactory planNodeFactory) {
+  public PlanExecutor(final PlanNodeFactory planNodeFactory,
+      final DataSourceCache dataSourceCache,
+      final DetectionRegistry detectionRegistry,
+      final PostProcessorRegistry postProcessorRegistry,
+      final EventManager eventManager,
+      final DatasetConfigManager datasetConfigManager) {
     this.planNodeFactory = planNodeFactory;
+    this.dataSourceCache = dataSourceCache;
+    this.detectionRegistry = detectionRegistry;
+    this.postProcessorRegistry = postProcessorRegistry;
+    this.eventManager = eventManager;
+    this.datasetConfigManager = datasetConfigManager;
+
+    applicationContext = createApplicationContext();
+  }
+
+  private ApplicationContext createApplicationContext() {
+    return new ApplicationContext(
+        dataSourceCache,
+        detectionRegistry,
+        postProcessorRegistry,
+        eventManager,
+        datasetConfigManager
+    );
   }
 
   @VisibleForTesting
@@ -108,6 +140,10 @@ public class PlanExecutor {
   public Map<ContextKey, OperatorResult> runPipeline(
       final List<PlanNodeBean> planNodeBeans,
       final PlanNodeContext runTimeContext) throws Exception {
+
+    /* Set Application Context */
+    runTimeContext.setApplicationContext(applicationContext);
+
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(
         planNodeBeans,

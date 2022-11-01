@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
@@ -57,6 +58,10 @@ public abstract class DetectionPipelinePlanNode implements PlanNode {
   @Override
   public PlanNodeContext getContext() {
     return requireNonNull(context, "node not initialized! " + getClass().getSimpleName());
+  }
+
+  protected OperatorContext createOperatorContext() {
+    return new OperatorContext().setPlanNodeContext(getContext());
   }
 
   public Interval getDetectionInterval() {

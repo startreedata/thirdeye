@@ -18,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.Operator;
-import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperator;
 import ai.startree.thirdeye.spi.Constants;
@@ -56,7 +55,7 @@ public class AnomalyDetectorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final AnomalyDetectorOperator anomalyDetectorOperator = new AnomalyDetectorOperator();
-    anomalyDetectorOperator.init(new OperatorContext()
+    anomalyDetectorOperator.init(createOperatorContext()
         .setDetectionInterval(this.detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)

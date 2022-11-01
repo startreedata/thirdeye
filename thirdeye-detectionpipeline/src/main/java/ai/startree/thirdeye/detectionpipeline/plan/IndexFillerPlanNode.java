@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.detectionpipeline.plan;
 
 import ai.startree.thirdeye.detectionpipeline.Operator;
-import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.TimeIndexFillerOperator;
 
 public class IndexFillerPlanNode extends DetectionPipelinePlanNode {
@@ -27,7 +26,7 @@ public class IndexFillerPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final TimeIndexFillerOperator timeIndexFillerOperator = new TimeIndexFillerOperator();
-    timeIndexFillerOperator.init(new OperatorContext()
+    timeIndexFillerOperator.init(createOperatorContext()
         .setDetectionInterval(this.detectionInterval)
         .setPlanNode(planNodeBean)
         .setInputsMap(inputsMap)

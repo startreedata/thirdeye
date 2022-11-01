@@ -17,7 +17,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.Operator;
-import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.DataFetcherOperator;
 import ai.startree.thirdeye.spi.Constants;
@@ -62,7 +61,7 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
-    dataFetcherOperator.init(new OperatorContext()
+    dataFetcherOperator.init(createOperatorContext()
         .setDetectionInterval(detectionInterval)
         .setPredicates(predicates)
         .setPlanNode(planNodeBean)

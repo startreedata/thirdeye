@@ -59,13 +59,22 @@ public class PlanExecutorTest {
   @BeforeMethod
   public void setUp() {
     final DetectionRegistry detectionRegistry = mock(DetectionRegistry.class);
+    final DataSourceCache dataSourceCache = mock(DataSourceCache.class);
+    final PostProcessorRegistry postProcessorRegistry = mock(PostProcessorRegistry.class);
+    final EventManager eventManager = mock(EventManager.class);
+    final DatasetConfigManager datasetConfigManager = mock(DatasetConfigManager.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
-        mock(DataSourceCache.class),
+        dataSourceCache,
         detectionRegistry,
-        mock(PostProcessorRegistry.class),
-        mock(EventManager.class),
-        mock(DatasetConfigManager.class));
-    planExecutor = new PlanExecutor(planNodeFactory);
+        postProcessorRegistry,
+        eventManager,
+        datasetConfigManager);
+    planExecutor = new PlanExecutor(planNodeFactory,
+        dataSourceCache,
+        detectionRegistry,
+        postProcessorRegistry,
+        eventManager,
+        datasetConfigManager);
     enumerator = mock(Enumerator.class);
 
     when(detectionRegistry.buildEnumerator("default")).thenReturn(enumerator);

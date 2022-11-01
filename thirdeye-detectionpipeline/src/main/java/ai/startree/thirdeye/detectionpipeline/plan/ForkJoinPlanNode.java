@@ -20,7 +20,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.Operator;
-import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator;
@@ -62,7 +61,7 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
     final PlanNode combiner = getPlanNode(K_COMBINER);
 
     final ForkJoinOperator operator = new ForkJoinOperator();
-    operator.init(new OperatorContext()
+    operator.init(createOperatorContext()
         .setDetectionInterval(detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)

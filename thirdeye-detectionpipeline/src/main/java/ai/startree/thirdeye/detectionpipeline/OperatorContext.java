@@ -23,12 +23,23 @@ import org.joda.time.Interval;
 
 public class OperatorContext {
 
+  private PlanNodeContext planNodeContext;
   private Interval detectionInterval;
   private List<Predicate> predicates;
   private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, OperatorResult> inputsMap;
   private EnumerationItemDTO enumerationItem;
+
+  public PlanNodeContext getPlanNodeContext() {
+    return planNodeContext;
+  }
+
+  public OperatorContext setPlanNodeContext(
+      final PlanNodeContext planNodeContext) {
+    this.planNodeContext = planNodeContext;
+    return this;
+  }
 
   public Interval getDetectionInterval() {
     return detectionInterval;

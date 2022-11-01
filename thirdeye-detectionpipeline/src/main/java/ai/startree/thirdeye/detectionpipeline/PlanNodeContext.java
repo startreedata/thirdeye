@@ -30,18 +30,8 @@ public class PlanNodeContext {
   private List<Predicate> predicates;
   private EnumerationItemDTO enumerationItem;
 
-
-  public static PlanNodeContext copy(final PlanNodeContext toCopy) {
-    // shallow copy
-    final PlanNodeContext copy = new PlanNodeContext();
-    copy.name = toCopy.name;
-    copy.pipelinePlanNodes = toCopy.pipelinePlanNodes;
-    copy.planNodeBean = toCopy.planNodeBean;
-    copy.detectionInterval = toCopy.detectionInterval;
-    copy.predicates = toCopy.predicates;
-    copy.applicationContext = toCopy.applicationContext;
-
-    return copy;
+  public static PlanNodeContext copy(final PlanNodeContext src) {
+    return PlanNodeContextMapper.INSTANCE.clone(src);  // shallow copy
   }
 
   public ApplicationContext getApplicationContext() {

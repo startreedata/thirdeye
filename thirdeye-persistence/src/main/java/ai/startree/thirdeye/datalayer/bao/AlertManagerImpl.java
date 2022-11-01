@@ -75,7 +75,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
         .collect(Collectors.toList());
   }
 
-  private Long countActive() {
+  public Long countActive() {
     return count(Predicate.EQ("active", true));
   }
 }

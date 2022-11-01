@@ -19,4 +19,6 @@ import java.util.List;
 public interface AlertManager extends AbstractManager<AlertDTO> {
 
   List<AlertDTO> findAllActive();
+
+  Long countActive();
 }

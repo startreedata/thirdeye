@@ -127,7 +127,7 @@ export const TaskRow: FunctionComponent<TaskRowProps> = ({ task }) => {
                 {task.message && (
                     <LocalThemeProviderV1 primary={lightV1.palette.error}>
                         <Link underline="always" onClick={handleShowError}>
-                            {t("label.show-error")}
+                            {t("label.show-log")}
                         </Link>
                     </LocalThemeProviderV1>
                 )}

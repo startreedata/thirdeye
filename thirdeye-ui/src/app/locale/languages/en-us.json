@@ -293,7 +293,7 @@
         "admin-dashboard": "Admin dashboard",
         "latest-errors-in-your-alerts": "Latest errors in your alerts",
         "recent-anomaly-detection-failures": "Recent anomaly detection failures",
-        "show-error": "Show error",
+        "show-log": "Show log",
         "task-id": "Task ID",
         "more-info": "More info",
         "timestamp": "Timestamp",
@@ -307,7 +307,8 @@
         "result-size": "Result size",
         "cohort-size-filter": "Cohort size filter",
         "find-cohorts": "Find cohorts",
-        "date-range": "Date range"
+        "date-range": "Date range",
+        "view-all-alerts": "View all alerts"
     },
     "message": {
         "page-not-found": "Requested page could not be found",

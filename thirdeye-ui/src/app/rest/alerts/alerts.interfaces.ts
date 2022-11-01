@@ -18,6 +18,8 @@ import {
     AlertInsight,
     EditableAlert,
 } from "../dto/alert.interfaces";
+import { EnumerationItemParams } from "../dto/detection.interfaces";
+import { EnumerationItem } from "../dto/enumeration-item.interfaces";
 
 export interface UseGetEvaluationParams {
     alert: {
@@ -31,7 +33,8 @@ export interface GetEvaluation extends ActionHook {
     evaluation: AlertEvaluation | null;
     getEvaluation: (
         evaluationParams: UseGetEvaluationParams,
-        filters?: string[]
+        filters?: string[],
+        enumerationItem?: { id: number } | EnumerationItem
     ) => Promise<AlertEvaluation | undefined>;
 }
 
@@ -63,6 +66,11 @@ export interface ResetAlert extends ActionHook {
 
 export interface GetEvaluationRequestPayload extends UseGetEvaluationParams {
     evaluationContext?: {
-        filters: string[];
+        filters?: string[];
+        enumerationItem?:
+            | {
+                  id: number;
+              }
+            | EnumerationItemParams;
     };
 }

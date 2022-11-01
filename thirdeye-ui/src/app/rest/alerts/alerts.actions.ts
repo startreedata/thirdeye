@@ -18,6 +18,7 @@ import {
     AlertInsight,
     EditableAlert,
 } from "../dto/alert.interfaces";
+import { EnumerationItem } from "../dto/enumeration-item.interfaces";
 import {
     GetAlert,
     GetAlertInsight,
@@ -40,9 +41,10 @@ export const useGetEvaluation = (): GetEvaluation => {
 
     const getEvaluation = (
         evaluationParams: UseGetEvaluationParams,
-        filters?: string[]
+        filters?: string[],
+        enumerationItem?: { id: number } | EnumerationItem
     ): Promise<AlertEvaluation | undefined> => {
-        return makeRequest(evaluationParams, filters);
+        return makeRequest(evaluationParams, filters, enumerationItem);
     };
 
     return { evaluation: data, getEvaluation, status, errorMessages };

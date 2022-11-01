@@ -22,15 +22,11 @@ import { SkeletonV1 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { UiAnomaly } from "../../../../rest/dto/ui-anomaly.interfaces";
-import { useGetEnumerationItem } from "../../../../rest/enumeration-items/enumeration-items.actions";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
 } from "../../../../utils/alerts/alerts.util";
-import {
-    getEvaluationDatasetForAnomaly,
-    getUiAnomaly,
-} from "../../../../utils/anomalies/anomalies.util";
+import { getUiAnomaly } from "../../../../utils/anomalies/anomalies.util";
 import {
     getAlertsAlertViewPath,
     getAnomaliesAnomalyViewPath,
@@ -64,20 +60,17 @@ export const AnomalyRow: FunctionComponent<AnomalyRowProps> = ({ anomaly }) => {
         getEvaluation,
         status: evaluationRequestStatus,
     } = useGetEvaluation();
-    const { enumerationItem, getEnumerationItem } = useGetEnumerationItem();
 
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
         if (inView) {
             const start = anomaly.startTime - DAY_IN_MILLISECONDS * 14;
             const end = anomaly.endTime + DAY_IN_MILLISECONDS * 14;
-            getEvaluation(createAlertEvaluation(anomaly.alert, start, end));
-            /**
-             * If anomaly has an enumeration id, fetch the enumeration item so
-             * that we can use the correct detection evaluation
-             */
-            anomaly.enumerationItem &&
-                getEnumerationItem(anomaly.enumerationItem.id);
+            getEvaluation(
+                createAlertEvaluation(anomaly.alert, start, end),
+                undefined,
+                anomaly.enumerationItem
+            );
         }
     }, [inView]);
 
@@ -86,16 +79,9 @@ export const AnomalyRow: FunctionComponent<AnomalyRowProps> = ({ anomaly }) => {
             return;
         }
 
-        if (anomaly.enumerationItem && !enumerationItem) {
-            return;
-        }
-
         // At this point enumerationItem should be defined
-        const detectionEvalForAnomaly = getEvaluationDatasetForAnomaly(
-            anomaly,
-            extractDetectionEvaluation(evaluation),
-            enumerationItem
-        );
+        const detectionEvalForAnomaly =
+            extractDetectionEvaluation(evaluation)[0];
 
         if (!detectionEvalForAnomaly) {
             return;
@@ -124,7 +110,7 @@ export const AnomalyRow: FunctionComponent<AnomalyRowProps> = ({ anomaly }) => {
             right: 0,
         };
         setSmallChartOptions(options);
-    }, [enumerationItem, evaluation]);
+    }, [evaluation]);
 
     return (
         <TableBody innerRef={ref}>

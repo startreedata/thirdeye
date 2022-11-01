@@ -23,6 +23,7 @@ import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -241,5 +243,9 @@ public abstract class ThirdEyeUtils {
       }
       Thread.currentThread().interrupt();
     }
+  }
+
+  public static ThreadFactory threadsNamed(final String nameFormat) {
+    return new ThreadFactoryBuilder().setNameFormat(nameFormat).build();
   }
 }

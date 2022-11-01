@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import java.util.concurrent.ExecutorService;
 
 public class ApplicationContext {
 
@@ -24,17 +25,20 @@ public class ApplicationContext {
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final ExecutorService subTaskExecutor;
 
   public ApplicationContext(final DataSourceCache dataSourceCache,
       final DetectionRegistry detectionRegistry,
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final ExecutorService subTaskExecutor) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.subTaskExecutor = subTaskExecutor;
   }
 
   public DataSourceCache getDataSourceCache() {
@@ -55,5 +59,9 @@ public class ApplicationContext {
 
   public DatasetConfigManager getDatasetConfigManager() {
     return datasetConfigManager;
+  }
+
+  public ExecutorService getSubTaskExecutor() {
+    return subTaskExecutor;
   }
 }

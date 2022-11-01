@@ -33,6 +33,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   public static final String K_COMBINER = "combiner";
   private static final int PARALLELISM = 5;
 
+  private OperatorContext operatorContext;
   private PlanNode enumerator;
   private PlanNode root;
   private PlanNode combiner;
@@ -40,6 +41,8 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
+    this.operatorContext = context;
+
     final Map<String, Object> properties = context.getProperties();
     enumerator = (PlanNode) properties.get("enumerator");
     root = (PlanNode) properties.get("root");
@@ -63,6 +66,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
     /* Execute in parallel */
     final ForkJoinParallelExecutor parallelExecutor = new ForkJoinParallelExecutor(
+        operatorContext,
         new ForkJoinParallelExecutorConfiguration()
             .setParallelism(PARALLELISM)
             .setTimeout(Duration.ofHours(1)));

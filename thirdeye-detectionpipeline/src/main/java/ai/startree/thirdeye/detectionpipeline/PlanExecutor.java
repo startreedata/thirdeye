@@ -14,6 +14,8 @@
 package ai.startree.thirdeye.detectionpipeline;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ThirdEyeUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.util.ThirdEyeUtils.threadsNamed;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
@@ -30,11 +32,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Singleton
-public class PlanExecutor {
+public class PlanExecutor implements AutoCloseable {
 
   public static final String ROOT_OPERATOR_KEY = "root";
+  public static final int N_THREADS = 5;
 
   private final PlanNodeFactory planNodeFactory;
 
@@ -43,7 +48,11 @@ public class PlanExecutor {
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
-  private final ApplicationContext applicationContext;
+
+  private final ExecutorService subTaskExecutor;
+
+  @VisibleForTesting
+  final ApplicationContext applicationContext;
 
   @Inject
   public PlanExecutor(final PlanNodeFactory planNodeFactory,
@@ -58,18 +67,9 @@ public class PlanExecutor {
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
+    subTaskExecutor = Executors.newFixedThreadPool(N_THREADS, threadsNamed("fork-join-%d"));
 
     applicationContext = createApplicationContext();
-  }
-
-  private ApplicationContext createApplicationContext() {
-    return new ApplicationContext(
-        dataSourceCache,
-        detectionRegistry,
-        postProcessorRegistry,
-        eventManager,
-        datasetConfigManager
-    );
   }
 
   @VisibleForTesting
@@ -83,7 +83,8 @@ public class PlanExecutor {
         final PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());
         checkArgument(inputPlanNode != null,
             "sourcePlanNode \"%s\" found in \"%s\" node configuration does not exist. Template is invalid.",
-            input.getSourcePlanNode(), node.getName());
+            input.getSourcePlanNode(),
+            node.getName());
         executePlanNode(pipelinePlanNodes, inputPlanNode, resultMap);
       }
       if (!resultMap.containsKey(contextKey)) {
@@ -113,6 +114,17 @@ public class PlanExecutor {
       }
     }
     return results;
+  }
+
+  private ApplicationContext createApplicationContext() {
+    return new ApplicationContext(
+        dataSourceCache,
+        detectionRegistry,
+        postProcessorRegistry,
+        eventManager,
+        datasetConfigManager,
+        subTaskExecutor
+    );
   }
 
   /**
@@ -173,5 +185,10 @@ public class PlanExecutor {
       pipelinePlanNodes.put(planNodeBean.getName(), planNode);
     }
     return pipelinePlanNodes;
+  }
+
+  @Override
+  public void close() throws Exception {
+    shutdownExecutionService(subTaskExecutor);
   }
 }

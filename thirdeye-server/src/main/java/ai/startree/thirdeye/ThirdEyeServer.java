@@ -23,6 +23,7 @@ import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
+import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.json.ThirdEyeJsonProcessingExceptionMapper;
 import ai.startree.thirdeye.resources.RootResource;
@@ -38,7 +39,6 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.lifecycle.Managed;
@@ -168,6 +168,9 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         if (schedulerService != null) {
           schedulerService.stop();
         }
+
+        /* Shutdown the Plan Executor threads */
+        injector.getInstance(PlanExecutor.class).close();
       }
     };
   }

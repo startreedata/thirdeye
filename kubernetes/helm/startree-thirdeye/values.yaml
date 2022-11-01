@@ -36,6 +36,7 @@ ui:
   tolerations: []
   affinity: {}
   podAnnotations: {}
+  serviceAnnotations: {}
 
 coordinator:
   enabled: true
@@ -50,6 +51,7 @@ coordinator:
   affinity: {}
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  serviceAnnotations: {}
   javaOpts: -Xmx1G -XX:+UseG1GC
   strategy:
     type: RollingUpdate
@@ -70,6 +72,7 @@ scheduler:
   javaOpts: -Xmx1G -XX:+UseG1GC
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  serviceAnnotations: {}
   strategy:
     type: Recreate
 
@@ -86,6 +89,7 @@ worker:
   replicas: 1
   podAnnotations:
     prometheus.io/path: "/admin/prometheus"
+  serviceAnnotations: {}
   javaOpts: -Xmx1G -XX:+UseG1GC
   strategy:
     type: RollingUpdate

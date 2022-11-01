@@ -74,7 +74,8 @@ public class PlanExecutorTest {
         detectionRegistry,
         postProcessorRegistry,
         eventManager,
-        datasetConfigManager);
+        datasetConfigManager,
+        new DetectionPipelineConfiguration());
     enumerator = mock(Enumerator.class);
 
     when(detectionRegistry.buildEnumerator("default")).thenReturn(enumerator);

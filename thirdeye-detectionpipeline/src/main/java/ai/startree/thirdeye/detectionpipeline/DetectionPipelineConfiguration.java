@@ -12,30 +12,19 @@
  * the License.
  */
 
-package ai.startree.thirdeye.detectionpipeline.operator;
+package ai.startree.thirdeye.detectionpipeline;
 
-import java.time.Duration;
+public class DetectionPipelineConfiguration {
 
-public class ForkJoinParallelExecutorConfiguration {
+  private ForkJoinConfiguration forkjoin = new ForkJoinConfiguration();
 
-  private int parallelism = 5;
-  private Duration timeout;
-
-  public int getParallelism() {
-    return parallelism;
+  public ForkJoinConfiguration getForkjoin() {
+    return forkjoin;
   }
 
-  public ForkJoinParallelExecutorConfiguration setParallelism(final int parallelism) {
-    this.parallelism = parallelism;
-    return this;
-  }
-
-  public Duration getTimeout() {
-    return timeout;
-  }
-
-  public ForkJoinParallelExecutorConfiguration setTimeout(final Duration timeout) {
-    this.timeout = timeout;
+  public DetectionPipelineConfiguration setForkjoin(
+      final ForkJoinConfiguration forkjoin) {
+    this.forkjoin = forkjoin;
     return this;
   }
 }

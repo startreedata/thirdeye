@@ -26,19 +26,22 @@ public class ApplicationContext {
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
   private final ExecutorService subTaskExecutor;
+  private final DetectionPipelineConfiguration configuration;
 
   public ApplicationContext(final DataSourceCache dataSourceCache,
       final DetectionRegistry detectionRegistry,
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
       final DatasetConfigManager datasetConfigManager,
-      final ExecutorService subTaskExecutor) {
+      final ExecutorService subTaskExecutor,
+      final DetectionPipelineConfiguration detectionPipelineConfiguration) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
     this.subTaskExecutor = subTaskExecutor;
+    configuration = detectionPipelineConfiguration;
   }
 
   public DataSourceCache getDataSourceCache() {
@@ -63,5 +66,9 @@ public class ApplicationContext {
 
   public ExecutorService getSubTaskExecutor() {
     return subTaskExecutor;
+  }
+
+  public DetectionPipelineConfiguration getConfiguration() {
+    return configuration;
   }
 }

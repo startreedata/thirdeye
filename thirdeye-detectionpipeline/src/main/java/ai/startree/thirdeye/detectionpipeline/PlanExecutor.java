@@ -39,7 +39,6 @@ import java.util.concurrent.Executors;
 public class PlanExecutor implements AutoCloseable {
 
   public static final String ROOT_OPERATOR_KEY = "root";
-  public static final int N_THREADS = 5;
 
   private final PlanNodeFactory planNodeFactory;
 
@@ -48,6 +47,7 @@ public class PlanExecutor implements AutoCloseable {
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final DetectionPipelineConfiguration detectionPipelineConfiguration;
 
   private final ExecutorService subTaskExecutor;
 
@@ -60,14 +60,18 @@ public class PlanExecutor implements AutoCloseable {
       final DetectionRegistry detectionRegistry,
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
-      final DatasetConfigManager datasetConfigManager) {
+      final DatasetConfigManager datasetConfigManager,
+      final DetectionPipelineConfiguration detectionPipelineConfiguration) {
     this.planNodeFactory = planNodeFactory;
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
-    subTaskExecutor = Executors.newFixedThreadPool(N_THREADS, threadsNamed("fork-join-%d"));
+    this.detectionPipelineConfiguration = detectionPipelineConfiguration;
+
+    final int nThreads = detectionPipelineConfiguration.getForkjoin().getParallelism();
+    subTaskExecutor = Executors.newFixedThreadPool(nThreads, threadsNamed("fork-join-%d"));
 
     applicationContext = createApplicationContext();
   }
@@ -123,7 +127,8 @@ public class PlanExecutor implements AutoCloseable {
         postProcessorRegistry,
         eventManager,
         datasetConfigManager,
-        subTaskExecutor
+        subTaskExecutor,
+        detectionPipelineConfiguration
     );
   }
 

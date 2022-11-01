@@ -14,7 +14,9 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
 import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
@@ -22,7 +24,6 @@ import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.Enumer
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -65,11 +66,12 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final List<EnumerationItemDTO> enumerationItems = enumeratorResult.getResults();
 
     /* Execute in parallel */
+    final ApplicationContext applicationContext = requireNonNull(operatorContext.getPlanNodeContext()
+        .getApplicationContext(), "application context is null");
+
     final ForkJoinParallelExecutor parallelExecutor = new ForkJoinParallelExecutor(
-        operatorContext,
-        new ForkJoinParallelExecutorConfiguration()
-            .setParallelism(PARALLELISM)
-            .setTimeout(Duration.ofHours(1)));
+        applicationContext.getConfiguration().getForkjoin(),
+        applicationContext.getSubTaskExecutor());
     final var allResults = parallelExecutor.execute(root, enumerationItems);
 
     /* Combine results */

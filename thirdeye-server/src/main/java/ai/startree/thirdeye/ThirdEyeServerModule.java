@@ -25,6 +25,7 @@ import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.auth.oauth.ThirdEyeOAuthAuthenticator;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
+import ai.startree.thirdeye.detectionpipeline.ThirdEyeDetectionPipelineModule;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
@@ -66,6 +67,7 @@ public class ThirdEyeServerModule extends AbstractModule {
         configuration.getUiConfiguration(),
         configuration.getTimeConfiguration()));
     install(new ThirdEyeNotificationModule(configuration.getNotificationConfiguration()));
+    install(new ThirdEyeDetectionPipelineModule(configuration.getDetectionPipelineConfiguration()));
     install(new ThirdEyeWorkerModule(configuration.getTaskDriverConfiguration()));
     install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
 

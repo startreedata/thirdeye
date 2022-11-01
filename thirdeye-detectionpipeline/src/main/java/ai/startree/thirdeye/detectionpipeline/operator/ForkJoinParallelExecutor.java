@@ -17,7 +17,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static ai.startree.thirdeye.detectionpipeline.PlanExecutor.executePlanNode;
 
 import ai.startree.thirdeye.detectionpipeline.ContextKey;
-import ai.startree.thirdeye.detectionpipeline.OperatorContext;
+import ai.startree.thirdeye.detectionpipeline.ForkJoinConfiguration;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -35,14 +35,11 @@ import java.util.stream.Collectors;
 
 public class ForkJoinParallelExecutor {
 
-  private final ForkJoinParallelExecutorConfiguration config;
+  private final ForkJoinConfiguration config;
   private final ExecutorService subTaskExecutor;
 
-  public ForkJoinParallelExecutor(final OperatorContext operatorContext,
-      final ForkJoinParallelExecutorConfiguration config) {
-    subTaskExecutor = operatorContext.getPlanNodeContext()
-        .getApplicationContext()
-        .getSubTaskExecutor();
+  public ForkJoinParallelExecutor(final ForkJoinConfiguration config, final ExecutorService subTaskExecutor) {
+    this.subTaskExecutor = subTaskExecutor;
     this.config = config;
   }
 

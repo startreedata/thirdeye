@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -61,13 +62,15 @@ import javax.ws.rs.core.Response;
 public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDTO> {
 
   private final DataSourceCache dataSourceCache;
+  private final DataSourceOnboarder dataSourceOnboarder;
 
   @Inject
   public DataSourceResource(
       final DataSourceManager dataSourceManager,
-      final DataSourceCache dataSourceCache) {
+      final DataSourceCache dataSourceCache, final DataSourceOnboarder dataSourceOnboarder) {
     super(dataSourceManager, ImmutableMap.of());
     this.dataSourceCache = dataSourceCache;
+    this.dataSourceOnboarder = dataSourceOnboarder;
   }
 
   @Override
@@ -136,7 +139,23 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
     ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, name);
 
-    final List<DatasetConfigDTO> datasets = dataSource.onboardAll();
+    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(dataSource);
+
+    return respondOk(datasets.stream()
+        .map(ApiBeanMapper::toApi)
+        .collect(Collectors.toList()));
+  }
+
+  @DELETE
+  @Path("offboard-all")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response offboardAll(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @FormParam("name") String name) {
+    ensureExists(name, "name is a required field");
+
+    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.offboardAll(name);
 
     return respondOk(datasets.stream()
         .map(ApiBeanMapper::toApi)

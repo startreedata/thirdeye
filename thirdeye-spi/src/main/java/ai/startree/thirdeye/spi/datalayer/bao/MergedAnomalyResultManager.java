@@ -51,4 +51,6 @@ public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomal
   long countParentAnomaliesWithoutFeedback();
 
   List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback();
+
+  List<Long> getParentAnomalyTs(final Long from, final Long to);
 }

@@ -397,4 +397,13 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
         .map(anomaly -> decorate(anomaly, new HashSet<>()))
         .collect(Collectors.toList());
   }
+
+  @Override
+  public List<Long> getParentAnomalyTs(final Long from, final Long to) {
+    return super.findByPredicate(Predicate.AND(
+        Predicate.EQ("child", false),
+        Predicate.GE("createTime", new Timestamp(from)),
+        Predicate.LT("createTime", new Timestamp(to))
+    )).stream().map(MergedAnomalyResultDTO::getCreatedTime).sorted().collect(Collectors.toList());
+  }
 }

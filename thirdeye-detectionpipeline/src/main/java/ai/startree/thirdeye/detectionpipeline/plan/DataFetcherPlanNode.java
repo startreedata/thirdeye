@@ -26,7 +26,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
 
@@ -41,10 +40,8 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    this.dataSourceCache = (DataSourceCache) planNodeContext.getProperties()
-        .get(Constants.K_DATA_SOURCE_CACHE);
-    this.datasetDao = (DatasetConfigManager) Objects.requireNonNull(planNodeContext.getProperties()
-        .get(Constants.K_DATASET_MANAGER));
+    this.dataSourceCache = planNodeContext.getApplicationContext().getDataSourceCache();
+    this.datasetDao = planNodeContext.getApplicationContext().getDatasetConfigManager();
     this.predicates = planNodeContext.getPredicates();
   }
 

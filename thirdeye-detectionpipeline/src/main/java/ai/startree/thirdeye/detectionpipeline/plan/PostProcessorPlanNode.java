@@ -31,6 +31,7 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
 
   public static final String TYPE = "PostProcessor";
   private PostProcessorRegistry postProcessorRegistry;
+
   public PostProcessorPlanNode() {
     super();
   }
@@ -46,9 +47,7 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
       }
     }
 
-    postProcessorRegistry = (PostProcessorRegistry) planNodeContext.getProperties()
-        .get(Constants.K_POST_PROCESSOR_REGISTRY);
-
+    postProcessorRegistry = planNodeContext.getApplicationContext().getPostProcessorRegistry();
     requireNonNull(postProcessorRegistry, "PostProcessorRegistry is not set");
   }
 

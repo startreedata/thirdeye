@@ -64,11 +64,7 @@ public class PlanExecutorTest {
     final EventManager eventManager = mock(EventManager.class);
     final DatasetConfigManager datasetConfigManager = mock(DatasetConfigManager.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
-        dataSourceCache,
-        detectionRegistry,
-        postProcessorRegistry,
-        eventManager,
-        datasetConfigManager);
+    );
     planExecutor = new PlanExecutor(planNodeFactory,
         dataSourceCache,
         detectionRegistry,

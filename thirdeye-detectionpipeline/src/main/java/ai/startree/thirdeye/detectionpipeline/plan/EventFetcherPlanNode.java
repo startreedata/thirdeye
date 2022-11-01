@@ -33,8 +33,7 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    this.eventManager = (EventManager) planNodeContext.getProperties()
-        .get(Constants.K_EVENT_MANAGER);
+    this.eventManager = planNodeContext.getApplicationContext().getEventManager();
     checkArgument(eventManager != null,
         "Internal issue. No EventManager passed to " + EVENT_FETCHER_TYPE);
   }

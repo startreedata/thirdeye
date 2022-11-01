@@ -28,7 +28,6 @@ public class PlanNodeContext {
   private PlanNodeBean planNodeBean;
   private Interval detectionInterval;
   private List<Predicate> predicates;
-  private Map<String, Object> properties;
   private EnumerationItemDTO enumerationItem;
 
 
@@ -40,7 +39,6 @@ public class PlanNodeContext {
     copy.planNodeBean = toCopy.planNodeBean;
     copy.detectionInterval = toCopy.detectionInterval;
     copy.predicates = toCopy.predicates;
-    copy.properties = toCopy.properties;
     copy.applicationContext = toCopy.applicationContext;
 
     return copy;
@@ -89,15 +87,6 @@ public class PlanNodeContext {
 
   public PlanNodeContext setDetectionInterval(final Interval detectionInterval) {
     this.detectionInterval = detectionInterval;
-    return this;
-  }
-
-  public Map<String, Object> getProperties() {
-    return properties;
-  }
-
-  public PlanNodeContext setProperties(final Map<String, Object> properties) {
-    this.properties = properties;
     return this;
   }
 

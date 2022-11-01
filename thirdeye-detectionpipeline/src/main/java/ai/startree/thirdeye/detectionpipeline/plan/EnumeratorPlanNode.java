@@ -41,8 +41,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
-        .get(Constants.K_DETECTION_REGISTRY);
+    detectionRegistry = planNodeContext.getApplicationContext().getDetectionRegistry();
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
 
     params = optional(planNodeBean.getParams()).map(TemplatableMap::valueMap).orElse(emptyMap());

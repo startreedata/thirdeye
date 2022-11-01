@@ -17,6 +17,7 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -25,6 +26,9 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Suppliers;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -48,6 +52,7 @@ public class AppAnalyticsService {
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
   private final MergedAnomalyResultManager anomalyManager;
+  private final SubscriptionGroupManager sgManager;
 
   public Supplier<ConfusionMatrix> confusionMatrixSupplier =
       Suppliers.memoizeWithExpiration(this::computeConfusionMatrixForAnomalies, 5, TimeUnit.MINUTES)::get;
@@ -55,15 +60,27 @@ public class AppAnalyticsService {
       Suppliers.memoizeWithExpiration(this::getAnomalyFeedbacks, 5, TimeUnit.MINUTES)::get;
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
       Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics, 5, TimeUnit.MINUTES)::get;
+  public LoadingCache<String, List<Long>> anomalyTsCache = CacheBuilder.newBuilder()
+      .expireAfterWrite(5,TimeUnit.MINUTES)
+      .build(new CacheLoader<>() {
+        @Override
+        public List<Long> load(String key) {
+          Long from = Long.parseLong(key.split("-")[0]);
+          Long to = Long.parseLong(key.split("-")[1]);
+          return getAnomalyTs(from, to);
+        }
+      });
 
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
       final MergedAnomalyResultManager anomalyManager,
+      final SubscriptionGroupManager sgManager,
       final MetricRegistry metricRegistry) {
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
     this.renderer = renderer;
+    this.sgManager = sgManager;
 
     metricRegistry.register("nMonitoredMetrics", new CachedGauge<Integer>(5, TimeUnit.MINUTES) {
       @Override
@@ -160,5 +177,17 @@ public class AppAnalyticsService {
         .setTotalCount(anomalyManager.countParentAnomalies())
         .setCountWithFeedback((long) feedbacks.size())
         .setFeedbackStats(feedbackStats);
+  }
+
+  public Long countActiveAlerts() {
+    return alertManager.countActive();
+  }
+
+  public Long sgCount() {
+    return sgManager.count();
+  }
+
+  public List<Long> getAnomalyTs(final Long from, final Long to) {
+    return anomalyManager.getParentAnomalyTs(from, to);
   }
 }

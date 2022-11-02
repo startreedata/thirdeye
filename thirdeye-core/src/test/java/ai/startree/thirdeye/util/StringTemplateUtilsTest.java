@@ -38,6 +38,15 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
+  public void testStringReplacementWithBackSlash() throws IOException, ClassNotFoundException {
+    final Map<String, Object> values = Map.of("k1", "v1", "k2", "v2");
+    final Map<String, String> map1 = StringTemplateUtils.applyContext(
+        new HashMap<>(Map.of("k", "${k1}")),
+        values);
+    assertThat(map1).isEqualTo(Map.of("k", "v1"));
+  }
+
+  @Test
   public void testTemplatableFieldReplacement() throws IOException, ClassNotFoundException {
     // check that the replacement is done correctly with Templatable<T>, for different Ts
     final String datasetKey = "datasetDto";

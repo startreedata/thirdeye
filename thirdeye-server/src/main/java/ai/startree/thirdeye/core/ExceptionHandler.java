@@ -15,7 +15,6 @@ package ai.startree.thirdeye.core;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TEMPLATE_MISSING_PROPERTY;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN_RCA_ALGORITHM;
@@ -27,7 +26,6 @@ import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import com.google.common.collect.ImmutableMap;
-import groovy.lang.MissingPropertyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,9 +41,6 @@ public class ExceptionHandler {
   private static final Map<Class<?>, Function<Throwable, StatusApi>> ALERT_HANDLERS = ImmutableMap.<Class<?>, Function<Throwable, StatusApi>>builder()
       .put(TimeoutException.class, e -> statusApi(ERR_TIMEOUT))
       .put(DataProviderException.class, e -> statusApi(ERR_DATA_UNAVAILABLE, e.getMessage()))
-      .put(MissingPropertyException.class,
-          e -> statusApi(ERR_TEMPLATE_MISSING_PROPERTY,
-              ((MissingPropertyException) e).getProperty()))
       .put(ExecutionException.class,
           e -> statusApi(ERR_ALERT_PIPELINE_EXECUTION, e.getCause().getMessage()))
       .put(ThirdEyeException.class,
@@ -59,9 +54,6 @@ public class ExceptionHandler {
 
   private static final Map<Class<?>, Function<Throwable, StatusApi>> RCA_HANDLERS = ImmutableMap.<Class<?>, Function<Throwable, StatusApi>>builder()
       .put(TimeoutException.class, e -> statusApi(ERR_TIMEOUT))
-      .put(MissingPropertyException.class,
-          e -> statusApi(ERR_TEMPLATE_MISSING_PROPERTY,
-              ((MissingPropertyException) e).getProperty()))
       .put(ThirdEyeException.class,
           e -> {
             final ThirdEyeException thirdEyeException = (ThirdEyeException) e;

@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.util;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TEMPLATE_MISSING_PROPERTY;
+
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,8 +40,13 @@ public class StringTemplateUtils {
   public static String renderTemplate(final String template, final Map<String, Object> newContext) {
     final Map<String, Object> contextMap = getDefaultContextMap();
     contextMap.putAll(newContext);
-    final StringSubstitutor sub = new StringSubstitutor(contextMap);
-    return sub.replace(template);
+    final StringSubstitutor sub = new StringSubstitutor(contextMap)
+        .setEnableUndefinedVariableException(true);
+    try {
+      return sub.replace(template);
+    } catch (IllegalArgumentException e) {
+      throw new ThirdEyeException(ERR_TEMPLATE_MISSING_PROPERTY, e);
+    }
   }
 
   /**

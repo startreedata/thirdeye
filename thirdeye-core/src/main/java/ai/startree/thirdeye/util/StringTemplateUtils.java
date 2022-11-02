@@ -41,7 +41,7 @@ public class StringTemplateUtils {
   public static String renderTemplate(final String template, final Map<String, Object> newContext) {
     final Map<String, Object> contextMap = getDefaultContextMap();
     contextMap.putAll(newContext);
-    StringSubstitutor sub = new StringSubstitutor(contextMap);
+    final StringSubstitutor sub = new StringSubstitutor(contextMap);
     return sub.replace(template);
   }
 

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.commons.text.StringSubstitutor;
 
 public class StringTemplateUtils {
 
@@ -37,11 +38,11 @@ public class StringTemplateUtils {
     GROOVY_TEMPLATE_ENGINE.setEscapeBackslash(true);
   }
 
-  public static String renderTemplate(final String template, final Map<String, Object> newContext)
-      throws IOException, ClassNotFoundException {
+  public static String renderTemplate(final String template, final Map<String, Object> newContext) {
     final Map<String, Object> contextMap = getDefaultContextMap();
     contextMap.putAll(newContext);
-    return GROOVY_TEMPLATE_ENGINE.createTemplate(template).make(contextMap).toString();
+    StringSubstitutor sub = new StringSubstitutor(contextMap);
+    return sub.replace(template);
   }
 
   /**

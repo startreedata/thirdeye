@@ -74,8 +74,8 @@
 
     <!-- This is used to replace params in a string template -->
     <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
     </dependency>
 
     <!-- test dependencies -->

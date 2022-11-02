@@ -40,6 +40,8 @@ public class DatasetConfigDTO extends AbstractDTO {
   private String dataSource;
   private Set<String> owners;
   private Boolean active;
+  private List<MetricConfigDTO> metrics;
+
   /**
    * Expected delay for data to be complete. In ISO 8601. Eg P1D
    */
@@ -293,6 +295,16 @@ public class DatasetConfigDTO extends AbstractDTO {
   public DatasetConfigDTO setRcaExcludedDimensions(
       final Templatable<List<String>> rcaExcludedDimensions) {
     this.rcaExcludedDimensions = rcaExcludedDimensions;
+    return this;
+  }
+
+  public List<MetricConfigDTO> getMetrics() {
+    return metrics;
+  }
+
+  public DatasetConfigDTO setMetrics(
+      final List<MetricConfigDTO> metrics) {
+    this.metrics = metrics;
     return this;
   }
 

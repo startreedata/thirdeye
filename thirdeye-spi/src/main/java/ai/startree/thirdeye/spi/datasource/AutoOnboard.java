@@ -35,8 +35,8 @@ public abstract class AutoOnboard {
   }
 
   public void init(ThirdEyeDataSourceContext context) {
-    metricConfigManager = context.getMetricConfigManager();
-    datasetConfigManager = context.getDatasetConfigManager();
+    metricConfigManager = null;
+    datasetConfigManager = null;
   }
 
   /**

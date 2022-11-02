@@ -16,8 +16,6 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 import ai.startree.thirdeye.plugins.datasource.pinot.restclient.PinotControllerRestClient;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeSpec;
@@ -56,32 +54,27 @@ public class PinotDatasetOnboarder {
   private static final String PINOT_PRE_AGGREGATED_KEYWORD = "*";
 
   private final PinotControllerRestClient pinotControllerRestClient;
-  private final DatasetConfigManager datasetConfigManager;
-  private final MetricConfigManager metricConfigManager;
 
   @Inject
-  public PinotDatasetOnboarder(
-      final PinotControllerRestClient pinotControllerRestClient,
-      final DatasetConfigManager datasetConfigManager,
-      final MetricConfigManager metricConfigManager) {
+  public PinotDatasetOnboarder(final PinotControllerRestClient pinotControllerRestClient) {
     this.pinotControllerRestClient = pinotControllerRestClient;
-    this.datasetConfigManager = datasetConfigManager;
-    this.metricConfigManager = metricConfigManager;
   }
 
   public static void setDateTimeSpecs(final DatasetConfigDTO datasetConfigDTO,
       final DateTimeFieldSpec dateTimeFieldSpec) {
     Preconditions.checkNotNull(dateTimeFieldSpec);
     final DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
-    final String timeFormatStr = formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
-        .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT, formatSpec.getSDFPattern())
-        : TimeFormat.EPOCH.toString();
+    final String timeFormatStr =
+        formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
+            .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT, formatSpec.getSDFPattern())
+            : TimeFormat.EPOCH.toString();
     setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec.getName(), timeFormatStr,
         formatSpec.getColumnSize(),
         formatSpec.getColumnUnit());
   }
 
-  public static void setDateTimeSpecs(final DatasetConfigDTO datasetConfigDTO, final String timeColumnName,
+  public static void setDateTimeSpecs(final DatasetConfigDTO datasetConfigDTO,
+      final String timeColumnName,
       final String timeFormatStr,
       final int columnSize, final TimeUnit columnUnit) {
     datasetConfigDTO

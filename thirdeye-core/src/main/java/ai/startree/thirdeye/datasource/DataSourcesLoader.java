@@ -17,8 +17,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
@@ -38,16 +36,10 @@ public class DataSourcesLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSourcesLoader.class);
 
-  private final MetricConfigManager metricConfigManager;
-  private final DatasetConfigManager datasetConfigManager;
   private final Map<String, ThirdEyeDataSourceFactory> dataSourceFactoryMap = new HashMap<>();
 
   @Inject
-  public DataSourcesLoader(
-      final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager) {
-    this.metricConfigManager = metricConfigManager;
-    this.datasetConfigManager = datasetConfigManager;
+  public DataSourcesLoader() {
   }
 
   public void addThirdEyeDataSourceFactory(ThirdEyeDataSourceFactory f) {
@@ -81,9 +73,6 @@ public class DataSourcesLoader {
   }
 
   private ThirdEyeDataSourceContext buildContext(final DataSourceDTO dataSource) {
-    return new ThirdEyeDataSourceContext()
-        .setDataSourceDTO(dataSource)
-        .setMetricConfigManager(metricConfigManager)
-        .setDatasetConfigManager(datasetConfigManager);
+    return new ThirdEyeDataSourceContext().setDataSourceDTO(dataSource);
   }
 }

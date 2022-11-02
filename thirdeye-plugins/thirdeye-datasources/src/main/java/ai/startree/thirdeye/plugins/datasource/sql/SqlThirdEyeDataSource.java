@@ -41,17 +41,18 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
   private static final Logger LOG = LoggerFactory.getLogger(SqlThirdEyeDataSource.class);
 
   private LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> sqlResponseCache;
-  private MetricConfigManager metricConfigManager;
-  private SqlResponseCacheLoader sqlResponseCacheLoader;
   private String name;
 
   @Override
   public void init(final ThirdEyeDataSourceContext context) {
     Map<String, Object> properties = context.getDataSourceDTO().getProperties();
 
-    metricConfigManager = context.getMetricConfigManager();
-    final DatasetConfigManager datasetConfigManager = context.getDatasetConfigManager();
-    sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
+    /* TODO fix onboarding SqlThirdEyeDataSource */
+    MetricConfigManager metricConfigManager = null;
+
+    /* TODO fix onboarding SqlThirdEyeDataSource */
+    final DatasetConfigManager datasetConfigManager = null;
+    SqlResponseCacheLoader sqlResponseCacheLoader = new SqlResponseCacheLoader(properties,
         metricConfigManager,
         datasetConfigManager);
     sqlResponseCache = buildResponseCache(sqlResponseCacheLoader);

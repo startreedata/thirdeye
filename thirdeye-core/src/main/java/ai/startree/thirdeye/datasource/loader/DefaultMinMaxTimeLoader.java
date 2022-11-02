@@ -18,8 +18,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
+import ai.startree.thirdeye.datasource.calcite.SelectQuery;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -149,7 +148,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
 
     final SqlNode orderByNode = extremum.orderByNode(datasetConfigDTO.getTimeColumn());
 
-    final Builder calciteRequestBuilder = CalciteRequest.newBuilder(datasetConfigDTO.getDataset())
+    final SelectQuery calciteRequestBuilder = new SelectQuery(datasetConfigDTO.getDataset())
         .select(projection)
         .orderBy(orderByNode)
         .limit(1);

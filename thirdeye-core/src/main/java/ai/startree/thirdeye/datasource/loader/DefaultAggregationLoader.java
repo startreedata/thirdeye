@@ -19,8 +19,9 @@ import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.datasource.calcite.SelectQuery;
+import ai.startree.thirdeye.datasource.calcite.SelectQueryTranslator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
@@ -139,7 +140,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     // submit requests
     for (final String dimension : dimensions) {
       final SqlIdentifier dimensionIdentifier = identifierOf(dimension);
-      final CalciteRequest request = CalciteRequest.newBuilderFrom(slice)
+      final SelectQueryTranslator request = SelectQuery.from(slice)
           .select(dimensionIdentifier)
           .groupBy(dimensionIdentifier)
           // ensure multiple runs return the same values when num rows > limit - see te-636
@@ -175,8 +176,8 @@ public class DefaultAggregationLoader implements AggregationLoader {
   public Future<DataFrame> loadAggregateAsync(final MetricSlice slice,
       final List<String> dimensions, final int limit) {
     LOG.info("Aggregating '{}'", slice);
-    final CalciteRequest.Builder requestBuilder = CalciteRequest
-        .newBuilderFrom(slice)
+    final SelectQuery requestBuilder = SelectQuery
+        .from(slice)
         .limit(limit);
     if (dimensions.isEmpty()) {
       // add this count to help check if there is data in aggregate only queries - some aggregations
@@ -200,12 +201,12 @@ public class DefaultAggregationLoader implements AggregationLoader {
     return getQueryResultAsync(requestBuilder.build(), dataSource);
   }
 
-  private Future<DataFrame> getQueryResultAsync(final CalciteRequest request,
+  private Future<DataFrame> getQueryResultAsync(final SelectQueryTranslator request,
       final String dataSource) {
     return executorService.submit(() -> getQueryResult(request, dataSource));
   }
 
-  public DataFrame getQueryResult(final CalciteRequest request, final String dataSource)
+  public DataFrame getQueryResult(final SelectQueryTranslator request, final String dataSource)
       throws Exception {
     final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
     final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),

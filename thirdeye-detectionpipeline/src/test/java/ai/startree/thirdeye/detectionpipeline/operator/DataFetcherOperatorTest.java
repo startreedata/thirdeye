@@ -13,14 +13,15 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.spi.Constants.DATASET_DAO_REF_KEY;
-import static ai.startree.thirdeye.spi.Constants.DATA_SOURCE_CACHE_REF_KEY;
+import static ai.startree.thirdeye.spi.Constants.K_DATASET_MANAGER;
+import static ai.startree.thirdeye.spi.Constants.K_DATA_SOURCE_CACHE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
@@ -29,7 +30,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
@@ -67,8 +67,8 @@ public class DataFetcherOperatorTest {
         .setParams(TemplatableMap.fromValueMap(ImmutableMap.of("component.dataSource",
             dataSourceName)))
         .setOutputs(ImmutableList.of());
-    final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
-        dataSourceCache, DATASET_DAO_REF_KEY, datasetDao);
+    final Map<String, Object> properties = ImmutableMap.of(K_DATA_SOURCE_CACHE,
+        dataSourceCache, K_DATASET_MANAGER, datasetDao);
     final long startTime = System.currentTimeMillis();
     final long endTime = startTime + 1000L;
     final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
@@ -96,8 +96,8 @@ public class DataFetcherOperatorTest {
         .setInputs(ImmutableList.of())
         .setParams(TemplatableMap.fromValueMap(params));
 
-    final Map<String, Object> properties = ImmutableMap.of(DATA_SOURCE_CACHE_REF_KEY,
-        dataSourceCache, DATASET_DAO_REF_KEY, datasetDao);
+    final Map<String, Object> properties = ImmutableMap.of(K_DATA_SOURCE_CACHE,
+        dataSourceCache, K_DATASET_MANAGER, datasetDao);
     final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(detectionInterval)

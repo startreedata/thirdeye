@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -28,7 +29,6 @@ import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
@@ -61,13 +61,15 @@ import javax.ws.rs.core.Response;
 public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDTO> {
 
   private final DataSourceCache dataSourceCache;
+  private final DataSourceOnboarder dataSourceOnboarder;
 
   @Inject
   public DataSourceResource(
       final DataSourceManager dataSourceManager,
-      final DataSourceCache dataSourceCache) {
+      final DataSourceCache dataSourceCache, final DataSourceOnboarder dataSourceOnboarder) {
     super(dataSourceManager, ImmutableMap.of());
     this.dataSourceCache = dataSourceCache;
+    this.dataSourceOnboarder = dataSourceOnboarder;
   }
 
   @Override
@@ -114,11 +116,8 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     ensureExists(dataSourceName, "dataSourceName is a required field");
     ensureExists(datasetName, "datasetName is a required field");
 
-    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
-    ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSourceName);
-
-    final DatasetConfigDTO datasetConfigDTO = dataSource.onboardDataset(datasetName);
-    ensureExists(datasetConfigDTO, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
+    final DatasetConfigDTO datasetConfigDTO = dataSourceOnboarder.onboardDataset(dataSourceName,
+        datasetName);
 
     return respondOk(ApiBeanMapper.toApi(datasetConfigDTO));
   }
@@ -132,11 +131,23 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @FormParam("name") String name) {
 
     ensureExists(name, "name is a required field");
+    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(name);
 
-    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
-    ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, name);
+    return respondOk(datasets.stream()
+        .map(ApiBeanMapper::toApi)
+        .collect(Collectors.toList()));
+  }
 
-    final List<DatasetConfigDTO> datasets = dataSource.onboardAll();
+  @DELETE
+  @Path("offboard-all")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response offboardAll(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @FormParam("name") String name) {
+    ensureExists(name, "name is a required field");
+
+    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.offboardAll(name);
 
     return respondOk(datasets.stream()
         .map(ApiBeanMapper::toApi)

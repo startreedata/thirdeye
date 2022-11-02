@@ -23,6 +23,8 @@ metadata:
     component: {{ .Values.ui.name }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  annotations:
+    {{- toYaml .Values.ui.serviceAnnotations | nindent 4 }}
 spec:
   type: {{ .Values.ui.serviceType }}
   ports:

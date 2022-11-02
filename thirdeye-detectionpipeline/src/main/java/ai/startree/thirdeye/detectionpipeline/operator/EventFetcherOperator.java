@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.EventFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
@@ -25,7 +26,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
 
 public class EventFetcherOperator extends DetectionPipelineOperator {
@@ -38,7 +38,7 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
   public void init(final OperatorContext context) {
     super.init(context);
     final EventManager eventDao = (EventManager) context.getProperties()
-        .get(Constants.EVENT_MANAGER_REF_KEY);
+        .get(Constants.K_EVENT_MANAGER);
     this.eventFetcher = createEventFetcher(optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null), eventDao);
 

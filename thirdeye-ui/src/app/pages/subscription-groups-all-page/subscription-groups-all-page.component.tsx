@@ -20,20 +20,21 @@ import { EmptyStateSwitch } from "../../components/page-states/empty-state-switc
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupListV1 } from "../../components/subscription-group-list-v1/subscription-group-list-v1.component";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { deleteSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
+import {
+    makeDeleteRequest,
+    promptDeleteConfirmation,
+} from "../../utils/bulk-delete/bulk-delete.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getSubscriptionGroupsCreatePath } from "../../utils/routes/routes.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
@@ -104,51 +105,36 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     };
 
     const handleSubscriptionGroupDelete = (
-        uiSubscriptionGroup: UiSubscriptionGroup
+        uiSubscriptionGroupToDelete: UiSubscriptionGroup[]
     ): void => {
-        showDialog({
-            type: DialogType.ALERT,
-            contents: t("message.delete-confirmation", {
-                name: uiSubscriptionGroup.name,
-            }),
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => handleSubscriptionGroupDeleteOk(uiSubscriptionGroup),
-        });
-    };
-
-    const handleSubscriptionGroupDeleteOk = (
-        uiSubscriptionGroup: UiSubscriptionGroup
-    ): void => {
-        deleteSubscriptionGroup(uiSubscriptionGroup.id).then(
-            (subscriptionGroup) => {
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.delete-success", {
-                        entity: t("label.subscription-group"),
-                    })
-                );
-
-                // Remove deleted subscription group from fetched subscription groups
-                removeUiSubscriptionGroup(subscriptionGroup);
-            }
-        );
-    };
-
-    const removeUiSubscriptionGroup = (
-        subscriptionGroup: SubscriptionGroup
-    ): void => {
-        if (!subscriptionGroup) {
-            return;
-        }
-
-        setUiSubscriptionGroups(
-            (uiSubscriptionGroups) =>
+        promptDeleteConfirmation(
+            uiSubscriptionGroupToDelete,
+            () => {
                 uiSubscriptionGroups &&
-                uiSubscriptionGroups.filter(
-                    (uiSubscriptionGroup) =>
-                        uiSubscriptionGroup.id !== subscriptionGroup.id
-                )
+                    makeDeleteRequest(
+                        uiSubscriptionGroupToDelete,
+                        deleteSubscriptionGroup,
+                        t,
+                        notify,
+                        t("label.subscription-group"),
+                        t("label.subscription-groups")
+                    ).then((deleted) => {
+                        setUiSubscriptionGroups(() => {
+                            return [...uiSubscriptionGroups].filter(
+                                (candidate) => {
+                                    return (
+                                        deleted.findIndex(
+                                            (d) => d.id === candidate.id
+                                        ) === -1
+                                    );
+                                }
+                            );
+                        });
+                    });
+            },
+            t,
+            showDialog,
+            t("label.subscription-groups")
         );
     };
 

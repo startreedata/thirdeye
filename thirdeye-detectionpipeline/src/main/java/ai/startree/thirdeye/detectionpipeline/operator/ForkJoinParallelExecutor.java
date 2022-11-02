@@ -17,11 +17,11 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static ai.startree.thirdeye.detectionpipeline.PlanExecutor.executePlanNode;
 
 import ai.startree.thirdeye.detectionpipeline.ContextKey;
+import ai.startree.thirdeye.detectionpipeline.ForkJoinConfiguration;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,20 +29,18 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class ForkJoinParallelExecutor {
 
-  private final ForkJoinParallelExecutorConfiguration config;
-  private final ExecutorService executorService;
+  private final ForkJoinConfiguration config;
+  private final ExecutorService subTaskExecutor;
 
-  public ForkJoinParallelExecutor(final ForkJoinParallelExecutorConfiguration config) {
+  public ForkJoinParallelExecutor(final ForkJoinConfiguration config, final ExecutorService subTaskExecutor) {
+    this.subTaskExecutor = subTaskExecutor;
     this.config = config;
-    executorService = Executors.newFixedThreadPool(config.getParallelism(),
-        new ThreadFactoryBuilder().setNameFormat("fork-join-%d").build());
   }
 
   public List<ForkJoinResultItem> execute(final PlanNode root,
@@ -82,9 +80,8 @@ public class ForkJoinParallelExecutor {
   }
 
   private List<ForkJoinResultItem> executeAll(final List<Callable<ForkJoinResultItem>> callables) {
-
     final var futures = callables.stream()
-        .map(executorService::submit)
+        .map(subTaskExecutor::submit)
         .collect(Collectors.toList());
     try {
 
@@ -97,8 +94,6 @@ public class ForkJoinParallelExecutor {
     } catch (final InterruptedException | ExecutionException | TimeoutException e) {
       futures.forEach(f -> f.cancel(true));
       throw new RuntimeException(e);
-    } finally {
-      executorService.shutdown();
     }
   }
 }

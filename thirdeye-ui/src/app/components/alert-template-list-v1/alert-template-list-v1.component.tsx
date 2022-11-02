@@ -94,17 +94,11 @@ export const AlertTemplateListV1: FunctionComponent<
     );
 
     const handleAlertTemplateDelete = (): void => {
-        if (isActionButtonDisable || !selectedAlertTemplate) {
+        if (!selectedAlertTemplate || !selectedAlertTemplate.rowKeyValueMap) {
             return;
         }
-        const alertTemplateToDelete: AlertTemplate | undefined =
-            alertTemplates?.find(
-                (alertTemplate) =>
-                    alertTemplate.id ===
-                    (selectedAlertTemplate.rowKeyValues[0] as number)
-            );
-
-        alertTemplateToDelete && onDelete && onDelete(alertTemplateToDelete);
+        onDelete &&
+            onDelete(Array.from(selectedAlertTemplate.rowKeyValueMap.values()));
     };
 
     const handleAlertEdit = (): void => {
@@ -164,7 +158,11 @@ export const AlertTemplateListV1: FunctionComponent<
                             {/* Delete */}
                             <Grid>
                                 <Button
-                                    disabled={isActionButtonDisable}
+                                    disabled={
+                                        !selectedAlertTemplate ||
+                                        selectedAlertTemplate.rowKeyValues
+                                            .length === 0
+                                    }
                                     variant="contained"
                                     onClick={handleAlertTemplateDelete}
                                 >

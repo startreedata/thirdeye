@@ -20,6 +20,7 @@ import {
     AlertInsight,
     EditableAlert,
 } from "../dto/alert.interfaces";
+import { EnumerationItemParams } from "../dto/detection.interfaces";
 import { GetEvaluationRequestPayload } from "./alerts.interfaces";
 
 const BASE_URL_ALERTS = "/api/alerts";
@@ -97,12 +98,21 @@ export const resetAlert = async (id: number): Promise<Alert> => {
 
 export const getAlertEvaluation = async (
     alertEvaluation: AlertEvaluation,
-    filters?: string[] // array of strings in `column=value` format
+    filters?: string[], // array of strings in `column=value` format
+    enumerationItem?: { id: number } | EnumerationItemParams
 ): Promise<AlertEvaluation> => {
     const payload: GetEvaluationRequestPayload = { ...alertEvaluation };
 
-    if (filters && filters.length > 0) {
-        payload["evaluationContext"] = { filters };
+    if ((filters && filters.length > 0) || enumerationItem) {
+        payload.evaluationContext = {};
+
+        if (filters && filters.length > 0) {
+            payload.evaluationContext = { filters };
+        }
+
+        if (enumerationItem) {
+            payload.evaluationContext.enumerationItem = enumerationItem;
+        }
     }
 
     const response = await axios.post(`${BASE_URL_ALERTS}/evaluate`, payload);

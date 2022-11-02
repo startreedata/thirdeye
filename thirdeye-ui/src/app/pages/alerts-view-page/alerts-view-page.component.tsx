@@ -33,7 +33,6 @@ import { AlertOptionsButton } from "../../components/alert-view/alert-options-bu
 import { EnumerationItemMerger } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.component";
 import { DetectionEvaluationForRender } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.interfaces";
 import { EnumerationItemsTable } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.component";
-import { generateNameForDetectionResult } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
 import { AlertViewSubHeader } from "../../components/alert-view/sub-header/alert-sub-header.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -61,6 +60,7 @@ import {
     createAlertEvaluation,
     extractDetectionEvaluation,
 } from "../../utils/alerts/alerts.util";
+import { generateNameForDetectionResult } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";

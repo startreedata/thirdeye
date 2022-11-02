@@ -36,11 +36,16 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
             appAnalytics.anomalyStats.feedbackStats.ANOMALY_EXPECTED +
             appAnalytics.anomalyStats.feedbackStats.ANOMALY_NEW_TREND;
 
-        return Math.round(
+        // If there are no anomalies with feedback return n/a
+        if (appAnalytics.anomalyStats.countWithFeedback === 0) {
+            return "n/a";
+        }
+
+        return `${Math.round(
             (totalAnomaliesLabeledAsAnomaly /
                 appAnalytics.anomalyStats.countWithFeedback) *
                 100
-        );
+        )}%`;
     }, [appAnalytics]);
 
     return (
@@ -79,7 +84,7 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
                 >
                     <Typography variant="h2">
                         {appAnalytics && precision !== null && (
-                            <span>{precision}%</span>
+                            <span>{precision}</span>
                         )}
                     </Typography>
                 </LoadingErrorStateSwitch>

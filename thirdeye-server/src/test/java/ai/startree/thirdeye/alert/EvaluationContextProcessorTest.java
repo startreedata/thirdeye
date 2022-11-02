@@ -15,6 +15,7 @@
 package ai.startree.thirdeye.alert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
@@ -24,6 +25,7 @@ import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -55,7 +57,9 @@ public class EvaluationContextProcessorTest {
     final List<String> filters = List.of("browser=chrome");
     final EvaluationContextApi apiContext = new EvaluationContextApi().setFilters(filters);
 
-    final PlanNodeContext res = new EvaluationContextProcessor().getContext(apiContext);
+    final PlanNodeContext res = new PlanNodeContext();
+    new EvaluationContextProcessor(mock(EnumerationItemManager.class))
+        .addPredicates(res, apiContext);
 
     assertThat(res.getPredicates()).isNotNull();
     assertThat(res.getPredicates().size()).isEqualTo(1);

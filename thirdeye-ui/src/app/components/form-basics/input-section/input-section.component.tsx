@@ -39,7 +39,7 @@ export const InputSection: FunctionComponent<InputSectionProps> = ({
             </Grid>
             <Grid
                 item
-                lg={fullWidth ? 10 : 3}
+                lg={fullWidth ? 10 : 4}
                 md={fullWidth ? 8 : 5}
                 sm={12}
                 xs={12}

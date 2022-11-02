@@ -17,16 +17,20 @@ import {
     AnomalyBreakdownRequest,
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisRequest,
+    CohortDetectionResponse,
     Investigation,
 } from "../dto/rca.interfaces";
 import {
     GetAnomalyDimensionAnalysis,
     GetAnomalyMetricBreakdown,
+    GetCohortParams,
+    GetCohorts,
     GetInvestigation,
     GetInvestigations,
 } from "./rca.interfaces";
 import {
     getAnomalyMetricBreakdown,
+    getCohorts as getCohortsRest,
     getDimensionAnalysisForAnomaly,
     getInvestigation as getInvestigationRest,
     getInvestigations as getInvestigationsRest,
@@ -108,4 +112,17 @@ export const useGetInvestigation = (): GetInvestigation => {
         status,
         errorMessages,
     };
+};
+
+export const useGetCohort = (): GetCohorts => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<CohortDetectionResponse>(getCohortsRest);
+
+    const getCohorts = (
+        params: GetCohortParams
+    ): Promise<CohortDetectionResponse | undefined> => {
+        return makeRequest(params);
+    };
+
+    return { cohortsResponse: data, getCohorts, status, errorMessages };
 };

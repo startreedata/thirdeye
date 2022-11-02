@@ -16,6 +16,7 @@ import { Investigation } from "../dto/rca.interfaces";
 import {
     createInvestigation,
     deleteInvestigation,
+    getCohorts,
     getInvestigation,
     getInvestigations,
     updateInvestigation,
@@ -142,6 +143,38 @@ describe("RCA REST", () => {
             "testError"
         );
     });
+
+    it("getCohorts should invoke axios.post with appropriate input and return appropriate response", async () => {
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: mockCohortResponse,
+        });
+
+        await expect(
+            getCohorts({
+                metricId: 123,
+                start: 100,
+                end: 200,
+            })
+        ).resolves.toEqual(mockCohortResponse);
+
+        expect(axios.post).toHaveBeenCalledWith("/api/rca/metrics/cohorts", {
+            metric: { id: 123 },
+            start: 100,
+            end: 200,
+        });
+    });
+
+    it("getCohorts should throw encountered error", async () => {
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
+
+        await expect(
+            getCohorts({
+                metricId: 123,
+                start: 100,
+                end: 200,
+            })
+        ).rejects.toThrow("testError");
+    });
 });
 
 const mockError = new Error("testError");
@@ -164,3 +197,41 @@ const mockInvestigation = {
         principal: "no-auth-user",
     },
 } as Investigation;
+
+const mockCohortResponse = {
+    metric: {
+        id: 180203,
+        name: "views",
+        dataset: {
+            name: "pageviews",
+        },
+        active: true,
+        updated: 1665465762000,
+        datatype: "INT",
+        aggregationFunction: "SUM",
+    },
+    aggregate: 1.1250401e8,
+    threshold: 2.81260025e7,
+    percentage: 25.0,
+    generateEnumerationItems: false,
+    dimensions: ["country", "gender", "browser", "version", "device", "os"],
+    limit: 100,
+    maxDepth: 10,
+    resultSize: 25,
+    results: [
+        {
+            dimensionFilters: {
+                country: "US",
+            },
+            value: 4.5076276e7,
+            percentage: 40.07,
+        },
+        {
+            dimensionFilters: {
+                country: "IN",
+            },
+            value: 3.9436916e7,
+            percentage: 35.05,
+        },
+    ],
+};

@@ -14,6 +14,7 @@
 import { AnomalyFilterOption } from "../../components/rca/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { Anomaly } from "./anomaly.interfaces";
 import { Event } from "./event.interfaces";
+import { Metric } from "./metric.interfaces";
 
 export interface AnomalyBreakdown {
     metric: {
@@ -147,4 +148,25 @@ export interface Investigation {
     updatedBy: {
         principal: string;
     };
+}
+
+export interface CohortDetectionResponse {
+    metric: Metric;
+    aggregate: number;
+    threshold: number;
+    percentage: number;
+    generateEnumerationItems: false;
+    dimensions: string[];
+    limit: number;
+    maxDepth: number;
+    resultSize: number;
+    results: CohortResult[];
+}
+
+export interface CohortResult {
+    dimensionFilters: {
+        [dimensionColumn: string]: string;
+    };
+    value: number;
+    percentage: number;
 }

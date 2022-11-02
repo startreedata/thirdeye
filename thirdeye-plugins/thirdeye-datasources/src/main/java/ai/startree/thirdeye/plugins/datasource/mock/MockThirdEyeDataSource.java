@@ -337,8 +337,11 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
     // auto onboarding support
     if (MapUtils.getBooleanValue(properties, PROP_POPULATE_META_DATA, false)) {
 
-      metricConfigManager = context.getMetricConfigManager();
-      datasetConfigManager = context.getDatasetConfigManager();
+      /* todo fix onboarding */
+      metricConfigManager = null;
+
+      /* todo fix onboarding */
+      datasetConfigManager = null;
       AutoOnboardMockDataSource onboarding = new AutoOnboardMockDataSource(
           new DataSourceMetaBean().setProperties(properties),
           metricConfigManager,

@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.Constants;
@@ -28,7 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,9 +51,9 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
         "Max 1 output node is currently supported");
 
     final DataSourceCache dataSourceCache = (DataSourceCache) context.getProperties()
-        .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
+        .get(Constants.K_DATA_SOURCE_CACHE);
     final DatasetConfigManager datasetDao = (DatasetConfigManager) Objects.requireNonNull(context.getProperties()
-        .get(Constants.DATASET_DAO_REF_KEY));
+        .get(Constants.K_DATASET_MANAGER));
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
     final List<Predicate> predicates = optional(context.getPredicates()).orElse(List.of());

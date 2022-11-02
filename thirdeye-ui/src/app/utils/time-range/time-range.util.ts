@@ -204,8 +204,22 @@ export const formatTimeRangeDuration = (
         return "";
     }
 
+    return formatStartAndEndDuration(
+        timeRangeDuration.startTime,
+        timeRangeDuration.endTime
+    );
+};
+
+/**
+ * @param startTime - Expected to be in milliseconds
+ * @param endTime - Expected to be in milliseconds
+ */
+export const formatStartAndEndDuration = (
+    startTime: number,
+    endTime: number
+): string => {
     return i18n.t("label.start-time-end-time", {
-        startTime: formatDateAndTimeV1(timeRangeDuration.startTime),
-        endTime: formatDateAndTimeV1(timeRangeDuration.endTime),
+        startTime: formatDateAndTimeV1(startTime),
+        endTime: formatDateAndTimeV1(endTime),
     });
 };

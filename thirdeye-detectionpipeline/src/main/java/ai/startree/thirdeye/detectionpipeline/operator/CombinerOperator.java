@@ -17,10 +17,10 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
 import java.util.Map;

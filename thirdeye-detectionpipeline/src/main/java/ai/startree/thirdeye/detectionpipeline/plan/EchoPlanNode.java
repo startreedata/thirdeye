@@ -15,11 +15,10 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
 
 public class EchoPlanNode extends DetectionPipelinePlanNode {
@@ -48,7 +47,7 @@ public class EchoPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final EchoOperator operator = new EchoOperator();
-    operator.init(new OperatorContext()
+    operator.init(createOperatorContext()
         .setDetectionInterval(this.detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)

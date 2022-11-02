@@ -15,6 +15,7 @@ package ai.startree.thirdeye.config;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
 import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
@@ -45,6 +46,9 @@ public class ThirdEyeServerConfiguration extends Configuration {
 
   @JsonProperty("scheduler")
   private ThirdEyeSchedulerConfiguration schedulerConfiguration = new ThirdEyeSchedulerConfiguration();
+
+  @JsonProperty("detectionPipeline")
+  private DetectionPipelineConfiguration detectionPipelineConfiguration = new DetectionPipelineConfiguration();
 
   @JsonProperty("cache")
   private CacheConfig cacheConfig = new CacheConfig();
@@ -244,6 +248,16 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setTimeConfiguration(
       final TimeConfiguration timeConfiguration) {
     this.timeConfiguration = timeConfiguration;
+    return this;
+  }
+
+  public DetectionPipelineConfiguration getDetectionPipelineConfiguration() {
+    return detectionPipelineConfiguration;
+  }
+
+  public ThirdEyeServerConfiguration setDetectionPipelineConfiguration(
+      final DetectionPipelineConfiguration detectionPipelineConfiguration) {
+    this.detectionPipelineConfiguration = detectionPipelineConfiguration;
     return this;
   }
 }

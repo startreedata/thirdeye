@@ -17,12 +17,11 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EventTriggerOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
@@ -37,8 +36,7 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
-        .get(Constants.DETECTION_REGISTRY_REF_KEY);
+    detectionRegistry = planNodeContext.getApplicationContext().getDetectionRegistry();
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 
@@ -55,10 +53,10 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final EventTriggerOperator eventTriggerOperator = new EventTriggerOperator();
-    eventTriggerOperator.init(new OperatorContext()
+    eventTriggerOperator.init(createOperatorContext()
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.DETECTION_REGISTRY_REF_KEY,
+        .setProperties(ImmutableMap.of(Constants.K_DETECTION_REGISTRY,
             detectionRegistry))
     );
     return eventTriggerOperator;

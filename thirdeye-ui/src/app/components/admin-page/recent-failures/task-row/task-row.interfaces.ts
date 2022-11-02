@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -11,38 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection.v2;
+import { Task } from "../../../../rest/dto/taks.interface";
 
-import java.util.Map;
-
-
-public interface Operator {
-
-  void init(OperatorContext context);
-
-  void execute()
-      throws Exception;
-
-  String getOperatorName();
-
-  void setProperty(String key, Object value);
-
-
-  /**
-   * Set keyed input
-   * @param key
-   * @param input
-   */
-  void setInput(String key, OperatorResult input);
-
-  /**
-   * Get keyed output
-   * @param key
-   */
-  OperatorResult getOutput(String key);
-
-  /**
-   * Get all keyed outputs
-   */
-  Map<String, OperatorResult> getOutputs();
+export interface TaskRowProps {
+    task: Task;
 }

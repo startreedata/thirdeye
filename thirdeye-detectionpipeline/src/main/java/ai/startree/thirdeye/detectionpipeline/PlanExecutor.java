@@ -14,12 +14,16 @@
 package ai.startree.thirdeye.detectionpipeline;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ThirdEyeUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.util.ThirdEyeUtils.threadsNamed;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
+import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -28,17 +32,48 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Singleton
-public class PlanExecutor {
+public class PlanExecutor implements AutoCloseable {
 
   public static final String ROOT_OPERATOR_KEY = "root";
 
   private final PlanNodeFactory planNodeFactory;
 
+  private final DataSourceCache dataSourceCache;
+  private final DetectionRegistry detectionRegistry;
+  private final PostProcessorRegistry postProcessorRegistry;
+  private final EventManager eventManager;
+  private final DatasetConfigManager datasetConfigManager;
+  private final DetectionPipelineConfiguration detectionPipelineConfiguration;
+
+  private final ExecutorService subTaskExecutor;
+
+  @VisibleForTesting
+  final ApplicationContext applicationContext;
+
   @Inject
-  public PlanExecutor(final PlanNodeFactory planNodeFactory) {
+  public PlanExecutor(final PlanNodeFactory planNodeFactory,
+      final DataSourceCache dataSourceCache,
+      final DetectionRegistry detectionRegistry,
+      final PostProcessorRegistry postProcessorRegistry,
+      final EventManager eventManager,
+      final DatasetConfigManager datasetConfigManager,
+      final DetectionPipelineConfiguration detectionPipelineConfiguration) {
     this.planNodeFactory = planNodeFactory;
+    this.dataSourceCache = dataSourceCache;
+    this.detectionRegistry = detectionRegistry;
+    this.postProcessorRegistry = postProcessorRegistry;
+    this.eventManager = eventManager;
+    this.datasetConfigManager = datasetConfigManager;
+    this.detectionPipelineConfiguration = detectionPipelineConfiguration;
+
+    final int nThreads = detectionPipelineConfiguration.getForkjoin().getParallelism();
+    subTaskExecutor = Executors.newFixedThreadPool(nThreads, threadsNamed("fork-join-%d"));
+
+    applicationContext = createApplicationContext();
   }
 
   @VisibleForTesting
@@ -52,7 +87,8 @@ public class PlanExecutor {
         final PlanNode inputPlanNode = pipelinePlanNodes.get(input.getSourcePlanNode());
         checkArgument(inputPlanNode != null,
             "sourcePlanNode \"%s\" found in \"%s\" node configuration does not exist. Template is invalid.",
-            input.getSourcePlanNode(), node.getName());
+            input.getSourcePlanNode(),
+            node.getName());
         executePlanNode(pipelinePlanNodes, inputPlanNode, resultMap);
       }
       if (!resultMap.containsKey(contextKey)) {
@@ -84,6 +120,18 @@ public class PlanExecutor {
     return results;
   }
 
+  private ApplicationContext createApplicationContext() {
+    return new ApplicationContext(
+        dataSourceCache,
+        detectionRegistry,
+        postProcessorRegistry,
+        eventManager,
+        datasetConfigManager,
+        subTaskExecutor,
+        detectionPipelineConfiguration
+    );
+  }
+
   /**
    * @param planNodeBeans The pipeline DAG as a list of nodes
    * @return Outputs from the root node in the DAG
@@ -109,6 +157,10 @@ public class PlanExecutor {
   public Map<ContextKey, OperatorResult> runPipeline(
       final List<PlanNodeBean> planNodeBeans,
       final PlanNodeContext runTimeContext) throws Exception {
+
+    /* Set Application Context */
+    runTimeContext.setApplicationContext(applicationContext);
+
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(
         planNodeBeans,
@@ -138,5 +190,10 @@ public class PlanExecutor {
       pipelinePlanNodes.put(planNodeBean.getName(), planNode);
     }
     return pipelinePlanNodes;
+  }
+
+  @Override
+  public void close() throws Exception {
+    shutdownExecutionService(subTaskExecutor);
   }
 }

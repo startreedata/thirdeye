@@ -15,7 +15,7 @@ import { Box, Typography } from "@material-ui/core";
 import { Orientation } from "@visx/axis";
 import { Group } from "@visx/group";
 import { Bar, Circle, Line, LinePath } from "@visx/shape";
-import { flatten } from "lodash";
+import { flatten, isEqual } from "lodash";
 import React from "react";
 import { NavigateFunction } from "react-router";
 import {
@@ -24,7 +24,10 @@ import {
 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
-import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
+import {
+    DetectionData,
+    DetectionEvaluation,
+} from "../../../rest/dto/detection.interfaces";
 import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { Dimension } from "../../../utils/material-ui/dimension.util";
 import { Palette } from "../../../utils/material-ui/palette.util";
@@ -61,32 +64,55 @@ export const generateSeriesDataForDetectionEvaluation = (
     hideActivity?: boolean,
     hidePredicted?: boolean
 ): Series[] => {
-    const filteredTimeSeriesData: Series[] = filteredAlertEvaluations.map(
-        (alertEvalAndFilters) => {
-            const [filteredAlertEvaluation, filterOptions] =
-                alertEvalAndFilters;
-            const filteredAlertEvaluationTimeSeriesData =
-                extractDetectionEvaluation(filteredAlertEvaluation)[0].data;
+    const filteredTimeSeriesData: Series[] = [];
 
-            return {
+    filteredAlertEvaluations.forEach((alertEvalAndFilters) => {
+        const [filteredAlertEvaluation, filterOptions] = alertEvalAndFilters;
+        let filteredAlertEvaluationTimeSeriesData: DetectionData | undefined =
+            undefined;
+
+        if (detectionEvaluation.enumerationItem !== undefined) {
+            const matchingDetectionEvaluationForEnumerationItem =
+                extractDetectionEvaluation(filteredAlertEvaluation).find(
+                    (candidate) => {
+                        return isEqual(
+                            candidate.enumerationItem,
+                            detectionEvaluation.enumerationItem
+                        );
+                    }
+                );
+
+            if (matchingDetectionEvaluationForEnumerationItem) {
+                filteredAlertEvaluationTimeSeriesData =
+                    matchingDetectionEvaluationForEnumerationItem.data;
+            }
+        } else {
+            filteredAlertEvaluationTimeSeriesData = extractDetectionEvaluation(
+                filteredAlertEvaluation
+            )[0].data;
+        }
+
+        if (filteredAlertEvaluationTimeSeriesData) {
+            const timestamps = filteredAlertEvaluationTimeSeriesData.timestamp;
+
+            filteredTimeSeriesData.push({
                 name: filterOptions.map(concatKeyValueWithEqual).join(" & "),
                 type: SeriesType.LINE,
                 data: filteredAlertEvaluationTimeSeriesData.current
                     .map((value, idx) => {
                         return {
                             y: value,
-                            x: filteredAlertEvaluationTimeSeriesData.timestamp[
-                                idx
-                            ],
+                            x: timestamps[idx],
                         };
                     })
                     .filter((d) => Number.isFinite(d.y)),
                 tooltip: {
                     valueFormatter: formatLargeNumberV1,
                 },
-            };
+                strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
+            });
         }
-    );
+    });
 
     const timeSeriesData = detectionEvaluation.data;
 

@@ -18,8 +18,10 @@ import {
     AnomalyBreakdownRequest,
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisRequest,
+    CohortDetectionResponse,
     Investigation,
 } from "../dto/rca.interfaces";
+import { CohortRequestParams, GetCohortParams } from "./rca.interfaces";
 
 const ANOMALY_ID_QUERY_PARAM_KEY = "id";
 const ANOMALY_ID_FILTER_QUERY_PARAM_KEY = "anomaly.id";
@@ -126,4 +128,50 @@ export const updateInvestigation = async (
     ]);
 
     return response.data[0];
+};
+
+export const getCohorts = async ({
+    start,
+    end,
+    metricId,
+    dimensions,
+    query,
+    threshold,
+    percentage,
+    resultSize,
+}: GetCohortParams): Promise<CohortDetectionResponse> => {
+    const requestPayload: CohortRequestParams = {
+        start,
+        end,
+        metric: {
+            id: metricId,
+        },
+    };
+
+    if (resultSize) {
+        requestPayload.resultSize = resultSize;
+    }
+
+    if (threshold) {
+        requestPayload.threshold = threshold;
+    }
+
+    if (percentage) {
+        requestPayload.percentage = percentage;
+    }
+
+    if (dimensions && dimensions.length > 0) {
+        requestPayload.dimensions = dimensions;
+    }
+
+    if (query && query.length > 0) {
+        requestPayload.where = query;
+    }
+
+    const response = await axios.post(
+        "/api/rca/metrics/cohorts",
+        requestPayload
+    );
+
+    return response.data;
 };

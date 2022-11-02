@@ -15,16 +15,15 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

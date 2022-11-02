@@ -19,12 +19,11 @@ import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
@@ -62,7 +61,7 @@ public class ForkJoinPlanNode extends DetectionPipelinePlanNode {
     final PlanNode combiner = getPlanNode(K_COMBINER);
 
     final ForkJoinOperator operator = new ForkJoinOperator();
-    operator.init(new OperatorContext()
+    operator.init(createOperatorContext()
         .setDetectionInterval(detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)

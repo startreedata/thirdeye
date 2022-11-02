@@ -12,6 +12,7 @@
  * the License.
  */
 import { Description, ExitToApp, Home, LockOpen } from "@material-ui/icons";
+import DashboardIcon from "@material-ui/icons/Dashboard";
 import ErrorIcon from "@material-ui/icons/Error";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -87,6 +88,17 @@ export const AppBar: FunctionComponent = () => {
                         <ErrorIcon />
                     </NavBarLinkIconV1>
                     <NavBarLinkTextV1>{t("label.anomalies")}</NavBarLinkTextV1>
+                </NavBarLinkV1>
+
+                {/* Admin */}
+                <NavBarLinkV1
+                    href={AppRoute.ADMIN}
+                    selected={isRouteCurrent(AppRoute.ADMIN)}
+                >
+                    <NavBarLinkIconV1>
+                        <DashboardIcon />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>{t("label.admin")}</NavBarLinkTextV1>
                 </NavBarLinkV1>
 
                 {/* Configuration */}

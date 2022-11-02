@@ -16,11 +16,10 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyMap;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import java.util.Map;
 
 public class CombinerPlanNode extends DetectionPipelinePlanNode {
@@ -51,7 +50,7 @@ public class CombinerPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final CombinerOperator operator = new CombinerOperator();
-    operator.init(new OperatorContext()
+    operator.init(createOperatorContext()
         .setDetectionInterval(detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)

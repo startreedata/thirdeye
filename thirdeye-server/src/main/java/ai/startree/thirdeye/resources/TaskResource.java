@@ -56,6 +56,8 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
       .put("status", "status")
       .put("created", "createTime")
       .put("updated", "updateTime")
+      .put("startTime", "startTime")
+      .put("endTime", "endTime")
       .build();
   public static final String N_DAYS_TO_DELETE = "30";
   public static final String MAX_ENTRIES_TO_DELETE = "1000";

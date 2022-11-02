@@ -17,8 +17,6 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -39,8 +37,6 @@ public class PinotThirdEyeDataSourceModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(ThirdEyeDataSourceContext.class).toInstance(context);
-    bind(MetricConfigManager.class).toInstance(context.getMetricConfigManager());
-    bind(DatasetConfigManager.class).toInstance(context.getDatasetConfigManager());
     bind(SqlExpressionBuilder.class).to(PinotSqlExpressionBuilder.class);
     bind(SqlLanguage.class).to(PinotSqlLanguage.class);
   }

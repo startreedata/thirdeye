@@ -23,6 +23,8 @@ metadata:
     component: {{ .Values.scheduler.name }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  annotations:
+    {{- toYaml .Values.scheduler.serviceAnnotations | nindent 4 }}
 spec:
   type: {{ .Values.scheduler.serviceType }}
   ports:

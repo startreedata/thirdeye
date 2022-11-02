@@ -23,10 +23,12 @@ import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,54 +201,51 @@ public abstract class ThirdEyeUtils {
   }
 
   /**
-   * Safely and quietly shutdown executor service. This method waits until all threads are complete,
-   * or timeout occurs (5-minutes), or the current thread is interrupted, whichever happens first.
+   * Safely and quietly shutdown executor service. This method waits until all threads are
+   * complete,
+   * or timeout occurs or the current thread is interrupted, whichever happens first.
+   *
+   * <a
+   * href="https://stackoverflow.com/questions/10504172/how-to-shutdown-an-executorservice">...</a>
    *
    * @param executorService the executor service to be shutdown.
-   * @param ownerClass the class that owns the executor service; it could be null.
    */
-  public static void safelyShutdownExecutionService(ExecutorService executorService,
-      Class ownerClass) {
-    safelyShutdownExecutionService(executorService, 300, ownerClass);
-  }
-
-  /**
-   * Safely and quietly shutdown executor service. This method waits until all threads are complete,
-   * or number of retries is reached, or the current thread is interrupted, whichever happens first.
-   *
-   * @param executorService the executor service to be shutdown.
-   * @param maxWaitTimeInSeconds max wait time for threads that are still running.
-   * @param ownerClass the class that owns the executor service; it could be null.
-   */
-  public static void safelyShutdownExecutionService(ExecutorService executorService,
-      int maxWaitTimeInSeconds,
-      Class ownerClass) {
+  public static void shutdownExecutionService(ExecutorService executorService) {
+    final Duration timeout = Duration.ofSeconds(15);
     if (executorService == null) {
       return;
     }
-    executorService.shutdown(); // Prevent new tasks from being submitted
+
+    // Prevent new tasks from being submitted
+    executorService.shutdown();
     try {
-      // If not all threads are complete, then a retry loop waits until all threads are complete, or timeout occurs,
-      // or the current thread is interrupted, whichever happens first.
-      for (int retryCount = 0; retryCount < maxWaitTimeInSeconds; ++retryCount) {
-        // Wait a while for existing tasks to terminate
-        if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
-          // Force terminate all currently executing tasks if they support such operation
-          executorService.shutdownNow();
-          if (retryCount % 10 == 0) {
-            if (ownerClass != null) {
-              LOG.info("Trying to terminate thread pool for class {}", ownerClass.getSimpleName());
-            } else {
-              LOG.info("Trying to terminate thread pool: {}.", executorService);
-            }
-          }
-        } else {
-          break; // break out retry loop if all threads are complete
+      // wait for tasks to drain
+      if (!executorService.awaitTermination(timeout.getSeconds(), TimeUnit.SECONDS)) {
+
+        // failed to terminate. shutdown all active tasks now.
+        final List<Runnable> runnables = executorService.shutdownNow();
+        if (!runnables.isEmpty()) {
+          LOG.error(String.format("%d tasks pending. Trying one last time.",
+              runnables.size()));
+        }
+
+        // Wait a while for tasks to respond to being cancelled
+        if (!executorService.awaitTermination(timeout.getSeconds(), TimeUnit.SECONDS)) {
+          LOG.error("Executor Service did not terminate. " + executorService);
         }
       }
+
     } catch (InterruptedException e) { // If current thread is interrupted
-      executorService.shutdownNow(); // Interrupt all currently executing tasks for the last time
+      // Interrupt all currently executing tasks for the last time
+      final List<Runnable> runnables = executorService.shutdownNow();
+      if (!runnables.isEmpty()) {
+        LOG.error(String.format("%d tasks still running. Thread interrupted!", runnables.size()));
+      }
       Thread.currentThread().interrupt();
     }
+  }
+
+  public static ThreadFactory threadsNamed(final String nameFormat) {
+    return new ThreadFactoryBuilder().setNameFormat(nameFormat).build();
   }
 }

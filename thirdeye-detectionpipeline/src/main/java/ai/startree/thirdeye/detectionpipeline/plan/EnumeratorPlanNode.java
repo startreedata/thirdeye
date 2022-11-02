@@ -18,12 +18,12 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
@@ -32,6 +32,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   public static final String TYPE = "Enumerator";
   private Map<String, Object> params;
   private DetectionRegistry detectionRegistry;
+  private EnumerationItemDTO enumerationItem;
 
   public EnumeratorPlanNode() {
     super();
@@ -40,11 +41,11 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    detectionRegistry = (DetectionRegistry) planNodeContext.getProperties()
-        .get(Constants.DETECTION_REGISTRY_REF_KEY);
+    detectionRegistry = planNodeContext.getApplicationContext().getDetectionRegistry();
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
 
     params = optional(planNodeBean.getParams()).map(TemplatableMap::valueMap).orElse(emptyMap());
+    enumerationItem = planNodeContext.getEnumerationItem();
   }
 
   @Override
@@ -60,11 +61,12 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final EnumeratorOperator operator = new EnumeratorOperator();
-    operator.init(new OperatorContext()
+    operator.init(createOperatorContext()
         .setDetectionInterval(detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry))
+        .setProperties(ImmutableMap.of(Constants.K_DETECTION_REGISTRY, detectionRegistry))
+        .setEnumerationItem(enumerationItem)
     );
     return operator;
   }

@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EnumerationItemInEvaluation } from "../../../rest/dto/detection.interfaces";
+import { EnumerationItemInEvaluation } from "../../rest/dto/detection.interfaces";
 import {
     doesMatch,
     doesMatchString,
     parseSearchString,
-} from "./enumeration-items-table.util";
+} from "./enumeration-items.util";
 
 describe("Enumeration Item Util", () => {
     it("parseSearchString should return correct key and values for search params", () => {

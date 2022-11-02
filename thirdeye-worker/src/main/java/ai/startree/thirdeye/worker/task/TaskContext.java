@@ -13,6 +13,72 @@
  */
 package ai.startree.thirdeye.worker.task;
 
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import com.codahale.metrics.MetricRegistry;
+
 public class TaskContext {
 
+  private TaskDriverConfiguration config;
+  private long workerId;
+
+  private TaskDriverThreadPoolManager taskDriverThreadPoolManager;
+  private TaskManager taskManager;
+  private TaskRunnerFactory taskRunnerFactory;
+  private MetricRegistry metricRegistry;
+
+  public TaskDriverConfiguration getConfig() {
+    return config;
+  }
+
+  public TaskContext setConfig(final TaskDriverConfiguration config) {
+    this.config = config;
+    return this;
+  }
+
+  public long getWorkerId() {
+    return workerId;
+  }
+
+  public TaskContext setWorkerId(final long workerId) {
+    this.workerId = workerId;
+    return this;
+  }
+
+  public TaskDriverThreadPoolManager getTaskDriverThreadPoolManager() {
+    return taskDriverThreadPoolManager;
+  }
+
+  public TaskContext setTaskDriverThreadPoolManager(
+      final TaskDriverThreadPoolManager taskDriverThreadPoolManager) {
+    this.taskDriverThreadPoolManager = taskDriverThreadPoolManager;
+    return this;
+  }
+
+  public TaskManager getTaskManager() {
+    return taskManager;
+  }
+
+  public TaskContext setTaskManager(final TaskManager taskManager) {
+    this.taskManager = taskManager;
+    return this;
+  }
+
+  public TaskRunnerFactory getTaskRunnerFactory() {
+    return taskRunnerFactory;
+  }
+
+  public TaskContext setTaskRunnerFactory(
+      final TaskRunnerFactory taskRunnerFactory) {
+    this.taskRunnerFactory = taskRunnerFactory;
+    return this;
+  }
+
+  public MetricRegistry getMetricRegistry() {
+    return metricRegistry;
+  }
+
+  public TaskContext setMetricRegistry(final MetricRegistry metricRegistry) {
+    this.metricRegistry = metricRegistry;
+    return this;
+  }
 }

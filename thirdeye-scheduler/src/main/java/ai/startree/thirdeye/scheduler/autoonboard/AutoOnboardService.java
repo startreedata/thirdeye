@@ -137,9 +137,7 @@ public class AutoOnboardService implements Runnable {
 
   @Override
   public void run() {
-    final ThirdEyeDataSourceContext context = new ThirdEyeDataSourceContext()
-        .setMetricConfigManager(metricConfigManager)
-        .setDatasetConfigManager(datasetConfigManager);
+    final ThirdEyeDataSourceContext context = new ThirdEyeDataSourceContext();
     final Map<String, List<AutoOnboard>> dataSourceToOnboardMap = getDataSourceToAutoOnboardMap(
         dataSourceManager.findAll(),
         context);

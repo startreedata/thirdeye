@@ -29,45 +29,31 @@ import {
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { MetricListV1Props } from "./metric-list-v1.interfaces";
 
-export const MetricListV1: FunctionComponent<MetricListV1Props> = (
-    props: MetricListV1Props
-) => {
+export const MetricListV1: FunctionComponent<MetricListV1Props> = ({
+    metrics,
+    onDelete,
+}) => {
     const { t } = useTranslation();
     const [selectedMetric, setSelectedMetric] =
         useState<DataGridSelectionModelV1<UiMetric>>();
     const navigate = useNavigate();
 
     const handleMetricDelete = (): void => {
-        if (!selectedMetric) {
+        if (!selectedMetric || !selectedMetric.rowKeyValueMap) {
             return;
         }
 
-        const selectedSubScriptionGroupId = selectedMetric
-            .rowKeyValues[0] as number;
-        const uiMetric = getUiMetric(selectedSubScriptionGroupId);
-        if (!uiMetric) {
-            return;
-        }
-
-        props.onDelete && props.onDelete(uiMetric);
-    };
-
-    const getUiMetric = (id: number): UiMetric | null => {
-        if (!props.metrics) {
-            return null;
-        }
-
-        return props.metrics.find((metric) => metric.id === id) || null;
+        onDelete &&
+            onDelete(Array.from(selectedMetric.rowKeyValueMap.values()));
     };
 
     const handleMetricEdit = (): void => {
         if (!selectedMetric) {
             return;
         }
-        const selectedSubScriptionGroupId = selectedMetric
-            .rowKeyValues[0] as number;
+        const selectedMetricId = selectedMetric.rowKeyValues[0] as number;
 
-        navigate(getMetricsUpdatePath(selectedSubScriptionGroupId));
+        navigate(getMetricsUpdatePath(selectedMetricId));
     };
 
     const isActionButtonDisable = !(
@@ -157,7 +143,7 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
                 <DataGridV1<UiMetric>
                     hideBorder
                     columns={metricColumns}
-                    data={props.metrics as UiMetric[]}
+                    data={metrics as UiMetric[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {
@@ -177,7 +163,10 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = (
 
                             <Grid>
                                 <Button
-                                    disabled={isActionButtonDisable}
+                                    disabled={
+                                        !selectedMetric ||
+                                        selectedMetric.rowKeyValues.length === 0
+                                    }
                                     variant="contained"
                                     onClick={handleMetricDelete}
                                 >

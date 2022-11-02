@@ -15,7 +15,6 @@ package ai.startree.thirdeye.detectionpipeline;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
@@ -28,13 +27,8 @@ import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.PostProcessorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.SqlExecutionPlanNode;
-import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Constructor;
@@ -69,26 +63,10 @@ public class PlanNodeFactory {
    * TODO spyne implement loading nodes from plugins
    */
   private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap;
-  private final DataSourceCache dataSourceCache;
-  private final DetectionRegistry detectionRegistry;
-  private final PostProcessorRegistry postProcessorRegistry;
-  private final EventManager eventDao;
-  private final DatasetConfigManager datasetDao;
-  private final MinMaxTimeLoader minMaxTimeLoader;
 
   @Inject
-  public PlanNodeFactory(final DataSourceCache dataSourceCache,
-      final DetectionRegistry detectionRegistry, final PostProcessorRegistry postProcessorRegistry,
-      final EventManager eventDao,
-      final DatasetConfigManager datasetDao,
-      final MinMaxTimeLoader minMaxTimeLoader) {
-    this.dataSourceCache = dataSourceCache;
-    this.detectionRegistry = detectionRegistry;
-    this.postProcessorRegistry = postProcessorRegistry;
+  public PlanNodeFactory() {
     this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
-    this.eventDao = eventDao;
-    this.datasetDao = datasetDao;
-    this.minMaxTimeLoader = minMaxTimeLoader;
   }
 
   public static PlanNode build(
@@ -120,15 +98,7 @@ public class PlanNodeFactory {
         .setName(planNodeBean.getName())
         .setPlanNodeBean(planNodeBean)
         .setPipelinePlanNodes(pipelinePlanNodes)
-        .setProperties(ImmutableMap.<String, Object>builder()
-            .put(Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache)
-            .put(Constants.DETECTION_REGISTRY_REF_KEY, detectionRegistry)
-            .put(Constants.POST_PROCESSOR_REGISTRY_REF_KEY, postProcessorRegistry)
-            .put(Constants.EVENT_MANAGER_REF_KEY, eventDao)
-            .put(Constants.DATASET_DAO_REF_KEY, datasetDao)
-            .put(Constants.MIN_MAX_TIME_LOADER_REF_KEY, minMaxTimeLoader)
-            .build()
-        );
+        .setEnumerationItem(runTimeContext.getEnumerationItem());
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");
     final Class<? extends PlanNode> planNodeClass = requireNonNull(planNodeTypeToClassMap.get(type),

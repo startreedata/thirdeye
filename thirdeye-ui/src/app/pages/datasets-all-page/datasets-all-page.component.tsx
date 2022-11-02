@@ -12,7 +12,6 @@
  * the License.
  */
 import { Box, Button, Grid } from "@material-ui/core";
-import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -21,22 +20,22 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDatasets } from "../../rest/datasets/datasets.actions";
 import { deleteDataset } from "../../rest/datasets/datasets.rest";
-import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
+import {
+    makeDeleteRequest,
+    promptDeleteConfirmation,
+} from "../../utils/bulk-delete/bulk-delete.util";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasetsOnboardPath } from "../../utils/routes/routes.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
@@ -72,50 +71,33 @@ export const DatasetsAllPage: FunctionComponent = () => {
         });
     };
 
-    const handleDatasetDelete = (uiDataset: UiDataset): void => {
-        showDialog({
-            type: DialogType.ALERT,
-            contents: t("message.delete-confirmation", {
-                name: uiDataset.name,
-            }),
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => handleDatasetDeleteOk(uiDataset),
-        });
-    };
-
-    const handleDatasetDeleteOk = (uiDataset: UiDataset): void => {
-        deleteDataset(uiDataset.id)
-            .then((dataset) => {
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.delete-success", { entity: t("label.dataset") })
-                );
-
-                // Remove deleted dataset from fetched datasets
-                removeUiDataset(dataset);
-            })
-            .catch((error: AxiosError) => {
-                notifyIfErrors(
-                    ActionStatus.Error,
-                    getErrorMessages(error),
-                    notify,
-                    t("message.delete-error", {
-                        entity: t("label.dataset"),
-                    })
-                );
-            });
-    };
-
-    const removeUiDataset = (dataset: Dataset): void => {
-        if (!dataset) {
-            return;
-        }
-
-        setUiDatasets(
-            (uiDatasets) =>
+    const handleDatasetDelete = (uiDatasetsToDelete: UiDataset[]): void => {
+        promptDeleteConfirmation(
+            uiDatasetsToDelete,
+            () => {
                 uiDatasets &&
-                uiDatasets.filter((uiDataset) => uiDataset.id !== dataset.id)
+                    makeDeleteRequest(
+                        uiDatasetsToDelete,
+                        deleteDataset,
+                        t,
+                        notify,
+                        t("label.dataset"),
+                        t("label.datasets")
+                    ).then((deleted) => {
+                        setUiDatasets(() => {
+                            return [...uiDatasets].filter((candidate) => {
+                                return (
+                                    deleted.findIndex(
+                                        (d) => d.id === candidate.id
+                                    ) === -1
+                                );
+                            });
+                        });
+                    });
+            },
+            t,
+            showDialog,
+            t("label.datasets")
         );
     };
 

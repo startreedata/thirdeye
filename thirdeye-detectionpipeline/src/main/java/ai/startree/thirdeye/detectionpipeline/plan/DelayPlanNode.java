@@ -13,9 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline.plan;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.operator.DelayOperator;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 
 public class DelayPlanNode extends DetectionPipelinePlanNode {
 
@@ -27,7 +26,7 @@ public class DelayPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     DelayOperator operator = new DelayOperator();
-    operator.init(new OperatorContext()
+    operator.init(createOperatorContext()
         .setDetectionInterval(this.detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean));

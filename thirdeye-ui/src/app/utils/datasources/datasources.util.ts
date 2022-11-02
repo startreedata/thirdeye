@@ -13,10 +13,12 @@
  */
 import i18n from "i18next";
 import { cloneDeep, isEmpty, omit } from "lodash";
+import { Dataset } from "../../rest/dto/dataset.interfaces";
 import {
     Datasource,
     DatasourceProperties,
 } from "../../rest/dto/datasource.interfaces";
+import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
@@ -126,4 +128,66 @@ const getUiDatasourceInternal = (datasource: Datasource): UiDatasource => {
     uiDatasource.type = datasource.type || noDataMarker;
 
     return uiDatasource;
+};
+
+export interface DatasetInfo {
+    dataset: Dataset;
+    metrics: Metric[];
+    dimensions: string[];
+    datasource: string;
+}
+
+export interface DatasourceInfo {
+    name: string;
+    tables: DatasetInfo[];
+}
+
+export const buildPinotDatasourcesTree = (
+    datasources: Datasource[],
+    datasets: Dataset[],
+    metrics: Metric[]
+): DatasourceInfo[] => {
+    const datasetToInfo: {
+        [key: string]: DatasetInfo;
+    } = {};
+
+    datasets
+        .filter((dataset) => dataset.active)
+        .forEach((d) => {
+            datasetToInfo[d.name] = {
+                datasource: d.dataSource.name,
+                dataset: d,
+                metrics: [],
+                dimensions: d.dimensions,
+            };
+        });
+
+    metrics.forEach((metric) => {
+        const datasetInfo = datasetToInfo[metric.dataset.name];
+
+        if (datasetInfo) {
+            datasetInfo.metrics.push(metric);
+        }
+    });
+
+    const datasourceToInfo: {
+        [key: string]: DatasourceInfo;
+    } = {};
+
+    datasources.forEach((ds) => {
+        datasourceToInfo[ds.name] = {
+            name: ds.name,
+            tables: [],
+        };
+    });
+
+    Object.values(datasetToInfo).forEach((tableInfo) => {
+        const bucket = datasourceToInfo[tableInfo.dataset.dataSource.name];
+
+        if (bucket && tableInfo.metrics.length > 0) {
+            bucket.tables.push(tableInfo);
+        }
+    });
+
+    return Object.values(datasourceToInfo);
 };

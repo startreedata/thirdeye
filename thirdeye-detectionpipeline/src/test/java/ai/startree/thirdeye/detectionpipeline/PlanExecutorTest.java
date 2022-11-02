@@ -36,7 +36,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.collect.ImmutableMap;
@@ -60,14 +59,19 @@ public class PlanExecutorTest {
   @BeforeMethod
   public void setUp() {
     final DetectionRegistry detectionRegistry = mock(DetectionRegistry.class);
+    final DataSourceCache dataSourceCache = mock(DataSourceCache.class);
+    final PostProcessorRegistry postProcessorRegistry = mock(PostProcessorRegistry.class);
+    final EventManager eventManager = mock(EventManager.class);
+    final DatasetConfigManager datasetConfigManager = mock(DatasetConfigManager.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
-        mock(DataSourceCache.class),
+    );
+    planExecutor = new PlanExecutor(planNodeFactory,
+        dataSourceCache,
         detectionRegistry,
-        mock(PostProcessorRegistry.class),
-        mock(EventManager.class),
-        mock(DatasetConfigManager.class),
-        mock(MinMaxTimeLoader.class));
-    planExecutor = new PlanExecutor(planNodeFactory);
+        postProcessorRegistry,
+        eventManager,
+        datasetConfigManager,
+        new DetectionPipelineConfiguration());
     enumerator = mock(Enumerator.class);
 
     when(detectionRegistry.buildEnumerator("default")).thenReturn(enumerator);
@@ -153,8 +157,9 @@ public class PlanExecutorTest {
         0L,
         System.currentTimeMillis(),
         DateTimeZone.UTC);
-    final PlanNodeContext runTimeContext = new PlanNodeContext().setDetectionInterval(
-        detectionInterval);
+    final PlanNodeContext runTimeContext = new PlanNodeContext()
+        .setApplicationContext(planExecutor.applicationContext)
+        .setDetectionInterval(detectionInterval);
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,
         runTimeContext);
     PlanExecutor.executePlanNode(

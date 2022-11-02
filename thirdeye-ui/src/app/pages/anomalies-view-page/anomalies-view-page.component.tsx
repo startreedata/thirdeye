@@ -16,7 +16,6 @@ import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { generateNameForEnumerationItem } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.util";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -49,10 +48,10 @@ import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
-    getEvaluationDatasetForAnomaly,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
+import { generateNameForEnumerationItem } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
     isValidNumberId,
@@ -123,47 +122,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             return;
         }
 
-        /**
-         * If anomaly is part of an enumeration item and its fetch
-         * request has not been completed, skip
-         */
-        if (anomaly.enumerationItem) {
-            if (getEnumerationItemRequest === ActionStatus.Working) {
-                return;
-            }
-
-            if (!enumerationItem) {
-                notify(
-                    NotificationTypeV1.Error,
-                    t(
-                        "message.experienced-issue-fetching-enumeration-item-required-for-charting"
-                    )
-                );
-
-                return;
-            }
-        }
-
-        // At this point enumerationItem should be defined
-        const detectionEvalForAnomaly = getEvaluationDatasetForAnomaly(
-            anomaly,
-            extractDetectionEvaluation(evaluation),
-            enumerationItem
-        );
-
-        if (!detectionEvalForAnomaly) {
-            notify(
-                NotificationTypeV1.Error,
-                t("message.could-not-find-matching-chart-data-for-anomaly")
-            );
-
-            return;
-        }
+        const detectionEvalForAnomaly =
+            extractDetectionEvaluation(evaluation)[0];
 
         // Only filter for the current anomaly
         detectionEvalForAnomaly.anomalies = [anomaly];
         setDetectionEvaluation(detectionEvalForAnomaly);
-    }, [evaluation, anomaly, enumerationItem]);
+    }, [evaluation, anomaly]);
 
     useEffect(() => {
         // Fetched alert or time range changed, fetch alert evaluation
@@ -204,7 +169,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             return;
         }
         getEvaluation(
-            createAlertEvaluation(anomaly.alert.id, Number(start), Number(end))
+            createAlertEvaluation(anomaly.alert.id, Number(start), Number(end)),
+            undefined,
+            anomaly.enumerationItem
         );
     };
 

@@ -11,20 +11,35 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection.v2;
+package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.Interval;
 
 public class OperatorContext {
+
+  private PlanNodeContext planNodeContext;
   private Interval detectionInterval;
   private List<Predicate> predicates;
   private PlanNodeBean planNode;
   private Map<String, Object> properties;
   private Map<String, OperatorResult> inputsMap;
+  private EnumerationItemDTO enumerationItem;
+
+  public PlanNodeContext getPlanNodeContext() {
+    return planNodeContext;
+  }
+
+  public OperatorContext setPlanNodeContext(
+      final PlanNodeContext planNodeContext) {
+    this.planNodeContext = planNodeContext;
+    return this;
+  }
 
   public Interval getDetectionInterval() {
     return detectionInterval;
@@ -69,6 +84,16 @@ public class OperatorContext {
   public OperatorContext setPredicates(
       final List<Predicate> predicates) {
     this.predicates = predicates;
+    return this;
+  }
+
+  public EnumerationItemDTO getEnumerationItem() {
+    return enumerationItem;
+  }
+
+  public OperatorContext setEnumerationItem(
+      final EnumerationItemDTO enumerationItem) {
+    this.enumerationItem = enumerationItem;
     return this;
   }
 }

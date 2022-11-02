@@ -34,6 +34,7 @@ import {
     extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { getAlertsAlertViewPath } from "../../../utils/routes/routes.util";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { Pluralize } from "../../pluralize/pluralize.component";
 import { generateChartOptionsForMetricsReport } from "../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
@@ -55,8 +56,11 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
         threshold: 1,
     });
     const { t } = useTranslation();
-    const { getEvaluation, status: evaluationRequestStatus } =
-        useGetEvaluation();
+    const {
+        getEvaluation,
+        status: evaluationRequestStatus,
+        errorMessages: getEvaluationErrors,
+    } = useGetEvaluation();
     const [chartOptions, setChartOptions] =
         useState<TimeSeriesChartProps | null>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -166,14 +170,30 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
                 <TableCell>{anomalyAlert.metric}</TableCell>
                 <TableCell>{anomalyAlert.dataset}</TableCell>
                 <TableCell>
-                    {evaluationRequestStatus === ActionStatus.Working && (
-                        <SkeletonV1 animation="pulse" />
-                    )}
-                    {chartOptions && (
-                        <Box minWidth={500}>
-                            <TimeSeriesChart height={100} {...chartOptions} />
-                        </Box>
-                    )}
+                    <LoadingErrorStateSwitch
+                        errorState={
+                            getEvaluationErrors &&
+                            getEvaluationErrors.length > 0 && (
+                                <Typography color="error" variant="caption">
+                                    {getEvaluationErrors[0]}
+                                </Typography>
+                            )
+                        }
+                        isError={evaluationRequestStatus === ActionStatus.Error}
+                        isLoading={
+                            evaluationRequestStatus === ActionStatus.Working
+                        }
+                        loadingState={<SkeletonV1 animation="pulse" />}
+                    >
+                        {chartOptions && (
+                            <Box minWidth={500}>
+                                <TimeSeriesChart
+                                    height={100}
+                                    {...chartOptions}
+                                />
+                            </Box>
+                        )}
+                    </LoadingErrorStateSwitch>
                 </TableCell>
             </TableRow>
             {isOpen && (

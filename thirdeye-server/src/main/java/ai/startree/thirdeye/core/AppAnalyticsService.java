@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Suppliers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -46,6 +48,13 @@ public class AppAnalyticsService {
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
   private final MergedAnomalyResultManager anomalyManager;
+
+  public Supplier<ConfusionMatrix> confusionMatrixSupplier =
+      Suppliers.memoizeWithExpiration(this::computeConfusionMatrixForAnomalies, 5, TimeUnit.MINUTES)::get;
+  public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
+      Suppliers.memoizeWithExpiration(this::getAnomalyFeedbacks, 5, TimeUnit.MINUTES)::get;
+  public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
+      Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics, 5, TimeUnit.MINUTES)::get;
 
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
@@ -65,19 +74,19 @@ public class AppAnalyticsService {
     metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
       @Override
       protected Double loadValue() {
-        return computeConfusionMatrixForAnomalies().getPrecision();
+        return confusionMatrixSupplier.get().getPrecision();
       }
     });
     metricRegistry.register("anomalyResponseRate", new CachedGauge<Double>(1, TimeUnit.HOURS) {
       @Override
       protected Double loadValue() {
-        return computeConfusionMatrixForAnomalies().getResponseRate();
+        return confusionMatrixSupplier.get().getResponseRate();
       }
     });
   }
 
   public Integer uniqueMonitoredMetricsCount() {
-    return getUniqueMonitoredMetrics().size();
+    return uniqueMonitoredMetricsSupplier.get().size();
   }
 
   private Set<MonitoredMetricWrapper> getUniqueMonitoredMetrics() {
@@ -108,7 +117,7 @@ public class AppAnalyticsService {
   public ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final ConfusionMatrix matrix = new ConfusionMatrix();
     matrix.addUnclassified((int) anomalyManager.countParentAnomaliesWithoutFeedback());
-    final List<AnomalyFeedback> feedbacks = getAnomalyFeedbacks();
+    final List<AnomalyFeedback> feedbacks = anomalyFeedbacksSupplier.get();
     for (final AnomalyFeedback feedback : feedbacks) {
       final AnomalyFeedbackType type = feedback.getFeedbackType();
       switch (type) {
@@ -137,7 +146,7 @@ public class AppAnalyticsService {
   }
 
   public AnomalyStatsApi computeAnomalyStats() {
-    List<AnomalyFeedback> feedbacks = getAnomalyFeedbacks();
+    List<AnomalyFeedback> feedbacks = anomalyFeedbacksSupplier.get();
     Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
     for(AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
       feedbackStats.put(type, 0L);

@@ -87,7 +87,7 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
     }
 
     this.datasets = dataframes;
-    this.translator = new DAOTranslator(context.getMetricConfigManager());
+    this.translator = new DAOTranslator(null);
     this.name = MapUtils.getString(properties, "name", CSVThirdEyeDataSource.class.getSimpleName());
   }
 

@@ -16,18 +16,16 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.DataFetcherOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
 
@@ -42,10 +40,8 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    this.dataSourceCache = (DataSourceCache) planNodeContext.getProperties()
-        .get(Constants.DATA_SOURCE_CACHE_REF_KEY);
-    this.datasetDao = (DatasetConfigManager) Objects.requireNonNull(planNodeContext.getProperties()
-        .get(Constants.DATASET_DAO_REF_KEY));
+    this.dataSourceCache = planNodeContext.getApplicationContext().getDataSourceCache();
+    this.datasetDao = planNodeContext.getApplicationContext().getDatasetConfigManager();
     this.predicates = planNodeContext.getPredicates();
   }
 
@@ -62,13 +58,13 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
-    dataFetcherOperator.init(new OperatorContext()
+    dataFetcherOperator.init(createOperatorContext()
         .setDetectionInterval(detectionInterval)
         .setPredicates(predicates)
         .setPlanNode(planNodeBean)
         .setProperties(ImmutableMap.of(
-            Constants.DATA_SOURCE_CACHE_REF_KEY, dataSourceCache,
-            Constants.DATASET_DAO_REF_KEY, datasetDao))
+            Constants.K_DATA_SOURCE_CACHE, dataSourceCache,
+            Constants.K_DATASET_MANAGER, datasetDao))
     );
     return dataFetcherOperator;
   }

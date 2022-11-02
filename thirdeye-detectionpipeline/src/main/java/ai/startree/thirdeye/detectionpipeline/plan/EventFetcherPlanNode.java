@@ -16,13 +16,12 @@ package ai.startree.thirdeye.detectionpipeline.plan;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EventFetcherOperator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
@@ -34,8 +33,7 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    this.eventManager = (EventManager) planNodeContext.getProperties()
-        .get(Constants.EVENT_MANAGER_REF_KEY);
+    this.eventManager = planNodeContext.getApplicationContext().getEventManager();
     checkArgument(eventManager != null,
         "Internal issue. No EventManager passed to " + EVENT_FETCHER_TYPE);
   }
@@ -53,9 +51,10 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public Operator buildOperator() throws Exception {
     final EventFetcherOperator eventFetcherOperator = new EventFetcherOperator();
-    eventFetcherOperator.init(new OperatorContext().setDetectionInterval(detectionInterval)
+    eventFetcherOperator.init(createOperatorContext()
+        .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.EVENT_MANAGER_REF_KEY, eventManager)));
+        .setProperties(ImmutableMap.of(Constants.K_EVENT_MANAGER, eventManager)));
     return eventFetcherOperator;
   }
 }

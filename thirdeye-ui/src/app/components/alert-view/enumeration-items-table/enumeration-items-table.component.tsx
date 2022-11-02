@@ -27,13 +27,13 @@ import { sortBy } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DataGridSortOrderV1 } from "../../../platform/components";
-import { Pluralize } from "../../pluralize/pluralize.component";
-import { EnumerationItemRow } from "./enumeration-item-row/enumeration-item-row.component";
-import { EnumerationItemsTableProps } from "./enumeration-items-table.interfaces";
 import {
     filterEvaluations,
     generateNameForDetectionResult,
-} from "./enumeration-items-table.util";
+} from "../../../utils/enumeration-items/enumeration-items.util";
+import { Pluralize } from "../../pluralize/pluralize.component";
+import { EnumerationItemRow } from "./enumeration-item-row/enumeration-item-row.component";
+import { EnumerationItemsTableProps } from "./enumeration-items-table.interfaces";
 
 export const EnumerationItemsTable: FunctionComponent<
     EnumerationItemsTableProps

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import java.util.List;
 import java.util.Map;
@@ -21,24 +22,26 @@ import org.joda.time.Interval;
 
 public class PlanNodeContext {
 
+  private ApplicationContext applicationContext;
   private String name;
   private Map<String, PlanNode> pipelinePlanNodes;
   private PlanNodeBean planNodeBean;
   private Interval detectionInterval;
   private List<Predicate> predicates;
-  private Map<String, Object> properties;
+  private EnumerationItemDTO enumerationItem;
 
-  public static PlanNodeContext copy(final PlanNodeContext toCopy) {
-    // shallow copy
-    final PlanNodeContext copy = new PlanNodeContext();
-    copy.name = toCopy.name;
-    copy.pipelinePlanNodes = toCopy.pipelinePlanNodes;
-    copy.planNodeBean = toCopy.planNodeBean;
-    copy.detectionInterval = toCopy.detectionInterval;
-    copy.predicates = toCopy.predicates;
-    copy.properties = toCopy.properties;
+  public static PlanNodeContext copy(final PlanNodeContext src) {
+    return PlanNodeContextMapper.INSTANCE.clone(src);  // shallow copy
+  }
 
-    return copy;
+  public ApplicationContext getApplicationContext() {
+    return applicationContext;
+  }
+
+  public PlanNodeContext setApplicationContext(
+      final ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+    return this;
   }
 
   public String getName() {
@@ -77,15 +80,6 @@ public class PlanNodeContext {
     return this;
   }
 
-  public Map<String, Object> getProperties() {
-    return properties;
-  }
-
-  public PlanNodeContext setProperties(final Map<String, Object> properties) {
-    this.properties = properties;
-    return this;
-  }
-
   public List<Predicate> getPredicates() {
     return predicates;
   }
@@ -95,13 +89,13 @@ public class PlanNodeContext {
     return this;
   }
 
-  @Override
-  public PlanNodeContext clone() {
-    // shallow clone
-    try {
-      return (PlanNodeContext) super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new AssertionError();  // Can't happen
-    }
+  public EnumerationItemDTO getEnumerationItem() {
+    return enumerationItem;
+  }
+
+  public PlanNodeContext setEnumerationItem(
+      final EnumerationItemDTO enumerationItem) {
+    this.enumerationItem = enumerationItem;
+    return this;
   }
 }

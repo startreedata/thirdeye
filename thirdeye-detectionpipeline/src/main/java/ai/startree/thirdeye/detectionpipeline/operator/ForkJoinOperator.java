@@ -14,15 +14,16 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
+import ai.startree.thirdeye.detectionpipeline.Operator;
+import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.v2.Operator;
-import ai.startree.thirdeye.spi.detection.v2.OperatorContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   public static final String K_COMBINER = "combiner";
   private static final int PARALLELISM = 5;
 
+  private OperatorContext operatorContext;
   private PlanNode enumerator;
   private PlanNode root;
   private PlanNode combiner;
@@ -40,6 +42,8 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
+    this.operatorContext = context;
+
     final Map<String, Object> properties = context.getProperties();
     enumerator = (PlanNode) properties.get("enumerator");
     root = (PlanNode) properties.get("root");
@@ -62,10 +66,12 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     final List<EnumerationItemDTO> enumerationItems = enumeratorResult.getResults();
 
     /* Execute in parallel */
+    final ApplicationContext applicationContext = requireNonNull(operatorContext.getPlanNodeContext()
+        .getApplicationContext(), "application context is null");
+
     final ForkJoinParallelExecutor parallelExecutor = new ForkJoinParallelExecutor(
-        new ForkJoinParallelExecutorConfiguration()
-            .setParallelism(PARALLELISM)
-            .setTimeout(Duration.ofHours(1)));
+        applicationContext.getConfiguration().getForkjoin(),
+        applicationContext.getSubTaskExecutor());
     final var allResults = parallelExecutor.execute(root, enumerationItems);
 
     /* Combine results */

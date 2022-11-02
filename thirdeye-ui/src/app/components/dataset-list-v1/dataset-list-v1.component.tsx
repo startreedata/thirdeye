@@ -29,45 +29,31 @@ import {
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { DatasetListV1Props } from "./dataset-list-v1.interfaces";
 
-export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
-    props: DatasetListV1Props
-) => {
+export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
+    datasets,
+    onDelete,
+}) => {
     const { t } = useTranslation();
     const [selectedDataset, setSelectedDataset] =
         useState<DataGridSelectionModelV1<UiDataset>>();
     const navigate = useNavigate();
 
     const handleDatasetDelete = (): void => {
-        if (!selectedDataset) {
+        if (!selectedDataset || !selectedDataset.rowKeyValueMap) {
             return;
         }
 
-        const selectedSubScriptingGroupId = selectedDataset
-            .rowKeyValues[0] as number;
-        const uiDataset = getUiDataset(selectedSubScriptingGroupId);
-        if (!uiDataset) {
-            return;
-        }
-
-        props.onDelete && props.onDelete(uiDataset);
-    };
-
-    const getUiDataset = (id: number): UiDataset | null => {
-        if (!props.datasets) {
-            return null;
-        }
-
-        return props.datasets.find((dataset) => dataset.id === id) || null;
+        onDelete &&
+            onDelete(Array.from(selectedDataset.rowKeyValueMap.values()));
     };
 
     const handleDatasetEdit = (): void => {
         if (!selectedDataset) {
             return;
         }
-        const selectedSubScriptionGroupId = selectedDataset
-            .rowKeyValues[0] as number;
+        const selectedDatasetId = selectedDataset.rowKeyValues[0] as number;
 
-        navigate(getDatasetsUpdatePath(selectedSubScriptionGroupId));
+        navigate(getDatasetsUpdatePath(selectedDatasetId));
     };
 
     const isActionButtonDisable = !(
@@ -134,7 +120,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
                 <DataGridV1<UiDataset>
                     hideBorder
                     columns={datasetColumns}
-                    data={props.datasets as UiDataset[]}
+                    data={datasets as UiDataset[]}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {
@@ -154,7 +140,11 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = (
 
                             <Grid>
                                 <Button
-                                    disabled={isActionButtonDisable}
+                                    disabled={
+                                        !selectedDataset ||
+                                        selectedDataset.rowKeyValues.length ===
+                                            0
+                                    }
                                     variant="contained"
                                     onClick={handleDatasetDelete}
                                 >

@@ -380,3 +380,25 @@ Content-Type: application/json
 
 ###
 
+
+
+
+POST http://localhost:8080/api/alerts/evaluate
+Accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "id": 248777
+  },
+  "evaluationContext": {
+    "enumerationItem": {
+      "params": {
+        "max": 900000,
+        "min": 300000
+      }
+    }
+  },
+  "start": 1612310400000,
+  "end": 1627603200000
+}

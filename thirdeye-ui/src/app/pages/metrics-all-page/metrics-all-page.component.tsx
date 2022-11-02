@@ -20,17 +20,18 @@ import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indi
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getAllMetrics } from "../../rest/metrics/metrics.rest";
+import {
+    makeDeleteRequest,
+    promptDeleteConfirmation,
+} from "../../utils/bulk-delete/bulk-delete.util";
 import { getUiMetrics } from "../../utils/metrics/metrics.util";
 
 export const MetricsAllPage: FunctionComponent = () => {
@@ -63,39 +64,33 @@ export const MetricsAllPage: FunctionComponent = () => {
             });
     };
 
-    const handleMetricDelete = (uiMetric: UiMetric): void => {
-        showDialog({
-            type: DialogType.ALERT,
-            contents: t("message.delete-confirmation", {
-                name: uiMetric.name,
-            }),
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => handleMetricDeleteOk(uiMetric),
-        });
-    };
-
-    const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
-        deleteMetric(uiMetric.id).then((metric) => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.delete-success", { entity: t("label.metric") })
-            );
-
-            // Remove deleted metric from fetched metrics
-            removeUiMetric(metric);
-        });
-    };
-
-    const removeUiMetric = (metric: Metric): void => {
-        if (!metric) {
-            return;
-        }
-
-        setUiMetrics(
-            (uiMetrics) =>
+    const handleMetricDelete = (uiMetricsToDelete: UiMetric[]): void => {
+        promptDeleteConfirmation(
+            uiMetricsToDelete,
+            () => {
                 uiMetrics &&
-                uiMetrics.filter((uiMetric) => uiMetric.id !== metric.id)
+                    makeDeleteRequest(
+                        uiMetricsToDelete,
+                        deleteMetric,
+                        t,
+                        notify,
+                        t("label.metric"),
+                        t("label.metrics")
+                    ).then((deleted) => {
+                        setUiMetrics(() => {
+                            return [...uiMetrics].filter((candidate) => {
+                                return (
+                                    deleted.findIndex(
+                                        (d) => d.id === candidate.id
+                                    ) === -1
+                                );
+                            });
+                        });
+                    });
+            },
+            t,
+            showDialog,
+            t("label.metrics")
         );
     };
 

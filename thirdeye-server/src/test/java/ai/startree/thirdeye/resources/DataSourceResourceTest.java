@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
@@ -40,7 +41,9 @@ public class DataSourceResourceTest {
   void setup() {
     dataSource = mock(ThirdEyeDataSource.class);
     dataSourceCache = mock(DataSourceCache.class);
-    dataSourceResource = new DataSourceResource(mock(DataSourceManager.class), dataSourceCache);
+    dataSourceResource = new DataSourceResource(mock(DataSourceManager.class),
+        dataSourceCache,
+        mock(DataSourceOnboarder.class));
   }
 
   @Test

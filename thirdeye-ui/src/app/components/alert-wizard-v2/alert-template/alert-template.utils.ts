@@ -99,7 +99,7 @@ export function createNewStartingAlert(): EditableAlert {
         description: "",
         cron: DEFAULT_CRON,
         template: {
-            name: "startree-holt-winters",
+            name: "startree-mean-variance",
         },
         templateProperties: {
             dataSource: "sample_datasource",

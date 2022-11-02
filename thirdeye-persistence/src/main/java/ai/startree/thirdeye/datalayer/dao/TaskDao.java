@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +61,10 @@ public class TaskDao {
     TaskEntity entity = TaskEntityMapper.INSTANCE.toTaskEntity(dto);
     final String jsonVal = toJsonString(dto);
     entity.setJsonVal(jsonVal);
+    final Timestamp currentTime = new java.sql.Timestamp(System.currentTimeMillis());
+    entity.setCreateTime(currentTime);
+    entity.setUpdateTime(currentTime);
+    entity.setVersion(dto.getVersion() == 0 ? 1 : dto.getVersion());
     return entity;
   }
 

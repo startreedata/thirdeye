@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * The task runner to run onboarding task after a new detection is set up
  */
 @Singleton
-// todo cyril does the same as DetectionTaskRunner once AnomalyMerging is moved. To be removed
+// todo cyril does the same as DetectionTaskRunner once AnomalyMerging is moved to anomalyDetector node. To be removed
 public class OnboardingTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(OnboardingTaskRunner.class);

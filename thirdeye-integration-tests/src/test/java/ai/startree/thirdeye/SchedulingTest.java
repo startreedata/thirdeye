@@ -65,6 +65,7 @@ public class SchedulingTest {
   private static final AlertApi ALERT_API;
 
   private static final TimeProvider CLOCK = TimeProvider.instance();
+  private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
   // alert can be created at any time in the day
   private static final long MARCH_24_2020_15H33 = 1585063980_000L;
   // = MARCH_24_2020_15H33 - delay P3D and floor granularity P1D (config in alert json)
@@ -161,7 +162,7 @@ public class SchedulingTest {
 
     // check that lastTimestamp just after creation is 0
     long alertLastTimestamp = getAlertLastTimestamp();
-    assertThat(alertLastTimestamp).isEqualTo(0);
+    assertThat(alertLastTimestamp).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
   }
 
   @Test(dependsOnMethods = "testCreateAlertLastTimestamp", timeOut = 60000L)

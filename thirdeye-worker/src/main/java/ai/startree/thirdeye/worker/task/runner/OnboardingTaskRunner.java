@@ -19,8 +19,8 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.OnboardingTaskInfo;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
@@ -39,10 +39,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The task runner to run onboarding task after a new detection is set up
- * It will replay the detection pipeline and the re-tune the pipeline.
- * Because for some pipeline component, tuning is depend on replay result
  */
 @Singleton
+// todo cyril does the same as DetectionTaskRunner once AnomalyMerging is moved. To be removed
 public class OnboardingTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(OnboardingTaskRunner.class);
@@ -66,7 +65,7 @@ public class OnboardingTaskRunner implements TaskRunner {
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
       throws Exception {
-    final OnboardingTaskInfo info = (OnboardingTaskInfo) taskInfo;
+    final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
     LOG.info("Start onboarding task for id {} between {} and {}",
         info.getConfigId(),
         new DateTime(info.getStart(), DateTimeZone.UTC),

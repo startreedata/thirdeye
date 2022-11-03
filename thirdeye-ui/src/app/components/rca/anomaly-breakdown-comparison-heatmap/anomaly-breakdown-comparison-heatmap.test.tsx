@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { AnomalyBreakdownComparisonHeatmap } from "./anomaly-breakdown-comparison-heatmap.component";
 
@@ -98,44 +98,6 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         });
 
         await Promise.all(containersForTreemaps);
-    });
-
-    it("should show filter pill when tile is clicked and removed when clicked on", async () => {
-        expect.assertions(4);
-
-        render(
-            <AnomalyBreakdownComparisonHeatmap
-                anomalyId={451751}
-                chartTimeSeriesFilterSet={[]}
-                comparisonOffset={mockComparisonOffset}
-                shouldTruncateText={false}
-                onAddFilterSetClick={() => null}
-            />
-        );
-
-        const chromeTile = await screen.findByText("chrome: ", {
-            exact: false,
-        });
-        fireEvent.click(chromeTile);
-
-        const chromePill = await screen.findByText(/browser=chrome/);
-
-        expect(mockSearchParamsSet).toHaveBeenLastCalledWith(
-            "heatmapFilters",
-            "browser=chrome"
-        );
-
-        // Check chromePill so typescript does not complain
-        if (!chromePill || !chromePill.parentElement) {
-            return;
-        }
-
-        expect(chromePill).toBeInTheDocument();
-
-        fireEvent.click(chromePill.parentElement.children[1]);
-
-        expect(chromePill).not.toBeInTheDocument();
-        expect(mockSearchParamsDelete).toHaveBeenCalledWith("heatmapFilters");
     });
 
     it("should call notify indicating error if data requests errors", async () => {

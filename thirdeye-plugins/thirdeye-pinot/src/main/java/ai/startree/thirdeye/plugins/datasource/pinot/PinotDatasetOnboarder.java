@@ -219,4 +219,8 @@ public class PinotDatasetOnboarder {
     datasetConfigDTO.setMetrics(metrics);
     return datasetConfigDTO;
   }
+
+  public void close() {
+    pinotControllerRestClient.close();
+  }
 }

@@ -142,6 +142,16 @@ public class PinotControllerRestClientSupplier {
     }
   }
 
+  public void close() {
+    if (pinotControllerClient != null) {
+      try {
+        pinotControllerClient.close();
+      } catch (IOException e) {
+        LOG.error("Exception closing pinotControllerClient", e);
+      }
+    }
+  }
+
   /**
    * This class accepts (i.e., ignores) all SSL certificate.
    */

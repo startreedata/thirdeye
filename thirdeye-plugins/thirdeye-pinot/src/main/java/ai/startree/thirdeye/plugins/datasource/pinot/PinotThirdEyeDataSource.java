@@ -30,9 +30,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.Weigher;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -52,38 +52,41 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private final String name;
   private final SqlExpressionBuilder sqlExpressionBuilder;
   private final SqlLanguage sqlLanguage;
-  private final PinotDatasetOnboarder pinotDatasetOnboarder;
-  private final LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> pinotResponseCache;
-  private final PinotConnectionManager pinotConnectionManager;
+  private final PinotDatasetOnboarder datasetOnboarder;
+  private final LoadingCache<PinotQuery, ThirdEyeResultSetGroup> queryCache;
+  private final PinotConnectionManager connectionManager;
+
+  /* Use case: Log Query Cache stats few min */
+  private long queryCacheTs = 0;
 
   @Inject
   public PinotThirdEyeDataSource(
       final ThirdEyeDataSourceContext context,
       final SqlExpressionBuilder sqlExpressionBuilder,
       final PinotSqlLanguage sqlLanguage,
-      final PinotDatasetOnboarder pinotDatasetOnboarder,
-      final PinotConnectionManager pinotConnectionManager,
-      final PinotResponseCacheLoader pinotResponseCacheLoader) {
+      final PinotDatasetOnboarder datasetOnboarder,
+      final PinotConnectionManager connectionManager,
+      final PinotQueryExecutor queryExecutor) {
     this.sqlExpressionBuilder = sqlExpressionBuilder;
     this.sqlLanguage = sqlLanguage;
-    this.pinotDatasetOnboarder = pinotDatasetOnboarder;
+    this.datasetOnboarder = datasetOnboarder;
 
-    this.name = context.getDataSourceDTO().getName();
-    this.pinotConnectionManager = pinotConnectionManager;
+    name = context.getDataSourceDTO().getName();
+    this.connectionManager = connectionManager;
 
     /* Uses LoadingCache to cache queries */
-    pinotResponseCache = buildResponseCache(pinotResponseCacheLoader);
+    queryCache = requireNonNull(buildQueryCache(queryExecutor),
+        String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
   }
 
-
-  public static LoadingCache<RelationalQuery, ThirdEyeResultSetGroup> buildResponseCache(
-      CacheLoader cacheLoader) {
+  public static LoadingCache<PinotQuery, ThirdEyeResultSetGroup> buildQueryCache(
+      final CacheLoader<PinotQuery, ThirdEyeResultSetGroup> cacheLoader) {
     Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
 
     // ResultSetGroup Cache. The size of this cache is limited by the total number of buckets in all ResultSetGroup.
     // We estimate that 1 bucket (including overhead) consumes 1KB and this cache is allowed to use up to 50% of max
     // heap space.
-    long maxBucketNumber = getApproximateMaxBucketNumber(
+    final long maxBucketNumber = getApproximateMaxBucketNumber(
         Constants.DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE);
     LOG.debug("Max bucket number for {}'s cache is set to {}", cacheLoader,
         maxBucketNumber);
@@ -91,27 +94,30 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     return CacheBuilder.newBuilder()
         .expireAfterWrite(15, TimeUnit.MINUTES)
         .maximumWeight(maxBucketNumber)
-        .weigher(
-            (Weigher<RelationalQuery, ThirdEyeResultSetGroup>) (relationalQuery, resultSetGroup) -> {
-              int resultSetCount = resultSetGroup.size();
-              int weight = 0;
-              for (int idx = 0; idx < resultSetCount; ++idx) {
-                ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
-                weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
-                    .getRowCount());
-              }
-              return weight;
-            })
+        .weigher(PinotThirdEyeDataSource::cacheWeigher)
+        .recordStats()
         .build(cacheLoader);
   }
 
-  private static long getApproximateMaxBucketNumber(int percentage) {
+  private static int cacheWeigher(final RelationalQuery relationalQuery,
+      final ThirdEyeResultSetGroup resultSetGroup) {
+    final int resultSetCount = resultSetGroup.size();
+    int weight = 0;
+    for (int idx = 0; idx < resultSetCount; ++idx) {
+      final ThirdEyeResultSet resultSet = resultSetGroup.get(idx);
+      weight += ((resultSet.getColumnCount() + resultSet.getGroupKeyLength()) * resultSet
+          .getRowCount());
+    }
+    return weight;
+  }
+
+  private static long getApproximateMaxBucketNumber(final int percentage) {
     long jvmMaxMemoryInBytes = Runtime.getRuntime().maxMemory();
     if (jvmMaxMemoryInBytes == Long.MAX_VALUE) { // Check upper bound
       jvmMaxMemoryInBytes = Constants.DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
           * FileUtils.ONE_MB; // MB to Bytes
     } else { // Check lower bound
-      long lowerBoundInBytes = Constants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
+      final long lowerBoundInBytes = Constants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
           * FileUtils.ONE_MB; // MB to Bytes
       if (jvmMaxMemoryInBytes < lowerBoundInBytes) {
         jvmMaxMemoryInBytes = lowerBoundInBytes;
@@ -139,13 +145,19 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    *     Pinot.
    */
   public ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException {
-    requireNonNull(pinotResponseCache,
-        String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
-
     try {
-      return pinotResponseCache.get(pinotQuery);
+      final ThirdEyeResultSetGroup thirdEyeResultSetGroup = queryCache.get(pinotQuery);
+      final long current = System.currentTimeMillis();
+
+      /* Log query stats with min interval of x minutes */
+      if (current - queryCacheTs > Duration.ofMinutes(5).toMillis()) {
+        LOG.info("queryCache.stats: {}", queryCache.stats());
+        queryCacheTs = current;
+      }
+      return thirdEyeResultSetGroup;
     } catch (final ExecutionException e) {
       LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
+      LOG.error("queryCache.stats: {}", queryCache.stats());
       throw e;
     }
   }
@@ -173,7 +185,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public boolean validate() {
     try {
       // Table name required to execute query against pinot broker.
-      final ImmutableList<String> allTables = pinotDatasetOnboarder.getAllTables();
+      final ImmutableList<String> allTables = datasetOnboarder.getAllTables();
       if (allTables.isEmpty()) {
         /* Can't proceed if there are no tables but a successful response is returned as positive */
         return true;
@@ -185,7 +197,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       final PinotQuery pinotQuery = new PinotQuery(query, table, true);
 
       /* Disable caching for validate queries */
-      pinotResponseCache.refresh(pinotQuery);
+      queryCache.refresh(pinotQuery);
       final ThirdEyeResultSetGroup result = executeSQL(pinotQuery);
       return result.get(0).getRowCount() == 1;
     } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
@@ -197,7 +209,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public List<DatasetConfigDTO> onboardAll() {
     try {
-      return pinotDatasetOnboarder.onboardAll(name);
+      return datasetOnboarder.onboardAll(name);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
@@ -206,7 +218,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public DatasetConfigDTO onboardDataset(final String datasetName) {
     try {
-      return pinotDatasetOnboarder.onboardTable(datasetName, name);
+      return datasetOnboarder.onboardTable(datasetName, name);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
@@ -214,9 +226,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void close() {
-    if (pinotConnectionManager != null) {
-      pinotConnectionManager.close();
-    }
+    connectionManager.close();
+    datasetOnboarder.close();
   }
 
   @Override

@@ -36,16 +36,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
+public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotResponseCacheLoader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotQueryExecutor.class);
 
   private static final String SQL_QUERY_FORMAT = "sql";
   private static final String PQL_QUERY_FORMAT = "pql";
   private final PinotConnectionManager pinotConnectionManager;
 
   @Inject
-  public PinotResponseCacheLoader(final PinotConnectionManager pinotConnectionManager) {
+  public PinotQueryExecutor(final PinotConnectionManager pinotConnectionManager) {
     this.pinotConnectionManager = pinotConnectionManager;
   }
 

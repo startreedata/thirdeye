@@ -16,7 +16,6 @@ package ai.startree.thirdeye.util;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -36,23 +35,6 @@ public class StringTemplateUtilsTest {
         new HashMap<>(Map.of("k", "${k1}")),
         values);
     assertThat(map1).isEqualTo(Map.of("k", "v1"));
-  }
-
-  @Test
-  public void testStringReplacementWithBackSlash() throws IOException, ClassNotFoundException {
-    final Map<String, Object> values = Map.of("k1", "v1", "k2", "v2");
-    final Map<String, String> map1 = StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of("k\\testBackslash", "\\withBackSlashes\\${k1}")),
-        values);
-    assertThat(map1).isEqualTo(Map.of("k\\testBackslash", "\\withBackSlashes\\v1"));
-  }
-
-  @Test
-  public void testFailAtMissingValue() {
-    final Map<String, Object> values = Map.of("k2", "v2");
-    assertThatThrownBy(() -> StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of("k", "${k1}")),
-        values)).isInstanceOf(ThirdEyeException.class);
   }
 
   @Test

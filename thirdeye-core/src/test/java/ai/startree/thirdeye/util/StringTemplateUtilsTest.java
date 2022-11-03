@@ -19,6 +19,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import groovy.lang.MissingPropertyException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,14 @@ public class StringTemplateUtilsTest {
         new HashMap<>(Map.of("k", "${k1}")),
         values);
     assertThat(map1).isEqualTo(Map.of("k", "v1"));
+  }
+
+  @Test
+  public void testFailAtMissingValue() {
+    final Map<String, Object> values = Map.of("k2", "v2");
+    assertThatThrownBy(() -> StringTemplateUtils.applyContext(
+        new HashMap<>(Map.of("k", "${k1}")),
+        values)).isInstanceOf(MissingPropertyException.class);
   }
 
   @Test

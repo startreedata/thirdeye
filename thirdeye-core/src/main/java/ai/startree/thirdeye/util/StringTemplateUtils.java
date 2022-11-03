@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -29,7 +30,8 @@ import java.util.TimeZone;
 
 public class StringTemplateUtils {
 
-  private static final SimpleTemplateEngine GROOVY_TEMPLATE_ENGINE = new SimpleTemplateEngine();
+  private static final GroovyShell GROOVY_SHELL = new GroovyShell();
+  private static final SimpleTemplateEngine GROOVY_TEMPLATE_ENGINE = new SimpleTemplateEngine(GROOVY_SHELL);
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   static {
@@ -41,7 +43,9 @@ public class StringTemplateUtils {
       throws IOException, ClassNotFoundException {
     final Map<String, Object> contextMap = getDefaultContextMap();
     contextMap.putAll(newContext);
-    return GROOVY_TEMPLATE_ENGINE.createTemplate(template).make(contextMap).toString();
+    final String rendered = GROOVY_TEMPLATE_ENGINE.createTemplate(template).make(contextMap).toString();
+    GROOVY_SHELL.resetLoadedClasses();
+    return rendered;
   }
 
   /**

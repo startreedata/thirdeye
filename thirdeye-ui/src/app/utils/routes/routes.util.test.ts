@@ -230,13 +230,13 @@ describe("Routes Util", () => {
 
     it("generateDateRangeMonthsFromNow should return expected values", () => {
         const range = generateDateRangeMonthsFromNow(
-            3,
+            1,
             // Thursday, May 26, 2022 12:00:00 PM (GMT)
             DateTime.fromMillis(1653566400000),
             "day"
         );
 
         // about 115 days
-        expect(range[1] - range[0]).toEqual(9932399999);
+        expect(range[1] - range[0]).toEqual(4838399999);
     });
 });

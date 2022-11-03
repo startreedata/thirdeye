@@ -1,19 +1,20 @@
-# Workflow to triage ThirdEye UI pull requests, validate title and assign labels
-name: thirdeye-ui-pr-workflow
+# Workflow to triage UI pull requests, validate title and assign labels
+name: ui-pr-workflow
 
 on:
     pull_request:
-        paths: thirdeye-ui/**
         types:
             - opened
             - reopened
             - edited
             - synchronize
+        paths:
+            - thirdeye-ui
 
 jobs:
     pr-title:
-        # Job to validate ThirdEye UI PR title
-        name: thirdeye-ui-pr-title
+        # Job to validate PR title
+        name: pr-title
         runs-on: ubuntu-latest
         steps:
             - name: Validate title
@@ -30,20 +31,20 @@ jobs:
                   scopes: |
                       ui
                   requireScope: true
-                  subjectPattern: ([A-Z]+\-[0-9]+( {1}))*(?![A-Z]).+[^.]$
+                  subjectPattern: ^(([A-Z]+\-[0-9]+( {1}))+|\[auto\] )(?![A-Z, ]).+[^.…]$
                   subjectPatternError: |
-                      Please make sure the subject "{subject}" in pull request title follows pull request naming standards (see repository contributing guidelines).
+                      Please make sure the subject "{subject}" in pull request title follows pull request naming standards (see UI contributing guidelines).
                   validateSingleCommit: true
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     pr-labels:
-        # Job to assign ThirdEye UI PR labels
-        name: thirdeye-ui-pr-labels
+        # Job to assign PR labels
+        name: pr-labels
         runs-on: ubuntu-latest
         steps:
             - name: Assign labels
               uses: actions/labeler@v2
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
-                  configuration-path: .github/pr-labels.yaml
+                  configuration-path: .github/ui-pr-labels.yaml
                   sync-labels: true

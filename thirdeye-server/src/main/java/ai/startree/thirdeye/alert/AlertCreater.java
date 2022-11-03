@@ -59,10 +59,17 @@ public class AlertCreater {
 
     final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
 
+    return saveAndOnboard(dto);
+  }
+
+  public AlertDTO saveAndOnboard(final AlertDTO dto) {
+    if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
+      dto.setLastTimestamp(minimumLastTimestamp(dto));
+    }
     final Long id = alertManager.save(dto);
     dto.setId(id);
+    createOnboardingTask(dto, dto.getLastTimestamp(), System.currentTimeMillis());
 
-    createOnboardingTask(dto);
     return dto;
   }
 
@@ -71,18 +78,7 @@ public class AlertCreater {
         ERR_DUPLICATE_NAME);
   }
 
-  public void createOnboardingTask(final AlertDTO dto) {
-    long end = System.currentTimeMillis();
-    long start = dto.getLastTimestamp();
-    // If no value is present, set the default lookback
-    if (start <= 0) {
-      start = getDefaultStart(dto);
-    }
-
-    createOnboardingTask(dto, start, end);
-  }
-
-  private long getDefaultStart(final AlertDTO dto) {
+  private long minimumLastTimestamp(final AlertDTO dto) {
     try {
       final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
       final Long datasetStartTime = insights.getDatasetStartTime();

@@ -259,11 +259,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
     /* Reset the last timestamp after deleting all anomalies */
     dto.setLastTimestamp(0);
-    dtoManager.save(dto);
 
-    /* Create a task to rerun all historical anomalies */
-    alertCreater.createOnboardingTask(dto);
-
-    return respondOk(toApi(dto));
+    return respondOk(toApi(alertCreater.saveAndOnboard(dto)));
   }
 }

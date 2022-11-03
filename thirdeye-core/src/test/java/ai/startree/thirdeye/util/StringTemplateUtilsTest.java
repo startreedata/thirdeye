@@ -47,6 +47,13 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
+  public void testRecursiveVariables() throws IOException, ClassNotFoundException {
+    final Map<String, Object> values = Map.of("v1", "${v1}");
+    final Map<String, String> map1 = StringTemplateUtils.applyContext(new HashMap<>(Map.of("k", "${v1}")), values);
+    assertThat(map1).isEqualTo(Map.of("k", "${v1}"));
+  }
+
+  @Test
   public void testTemplatableFieldReplacement() throws IOException, ClassNotFoundException {
     // check that the replacement is done correctly with Templatable<T>, for different Ts
     final String datasetKey = "datasetDto";

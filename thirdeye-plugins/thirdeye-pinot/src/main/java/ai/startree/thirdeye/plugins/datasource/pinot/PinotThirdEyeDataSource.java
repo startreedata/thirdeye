@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.Constants;
@@ -54,6 +55,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private final SqlLanguage sqlLanguage;
   private final PinotDatasetOnboarder datasetOnboarder;
   private final LoadingCache<PinotQuery, ThirdEyeResultSetGroup> queryCache;
+  private final PinotThirdEyeDataSourceConfig config;
   private final PinotConnectionManager connectionManager;
 
   /* Use case: Log Query Cache stats few min */
@@ -66,7 +68,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       final PinotSqlLanguage sqlLanguage,
       final PinotDatasetOnboarder datasetOnboarder,
       final PinotConnectionManager connectionManager,
-      final PinotQueryExecutor queryExecutor) {
+      final PinotQueryExecutor queryExecutor,
+      final PinotThirdEyeDataSourceConfig config) {
     this.sqlExpressionBuilder = sqlExpressionBuilder;
     this.sqlLanguage = sqlLanguage;
     this.datasetOnboarder = datasetOnboarder;
@@ -77,6 +80,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     /* Uses LoadingCache to cache queries */
     queryCache = requireNonNull(buildQueryCache(queryExecutor),
         String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
+    this.config = config;
   }
 
   public static LoadingCache<PinotQuery, ThirdEyeResultSetGroup> buildQueryCache(
@@ -117,8 +121,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       jvmMaxMemoryInBytes = Constants.DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
           * FileUtils.ONE_MB; // MB to Bytes
     } else { // Check lower bound
-      final long lowerBoundInBytes = Constants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
-          * FileUtils.ONE_MB; // MB to Bytes
+      final long lowerBoundInBytes =
+          Constants.DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB
+              * FileUtils.ONE_MB; // MB to Bytes
       if (jvmMaxMemoryInBytes < lowerBoundInBytes) {
         jvmMaxMemoryInBytes = lowerBoundInBytes;
       }
@@ -184,26 +189,49 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public boolean validate() {
     try {
-      // Table name required to execute query against pinot broker.
-      final ImmutableList<String> allTables = datasetOnboarder.getAllTables();
-      if (allTables.isEmpty()) {
-        /* Can't proceed if there are no tables but a successful response is returned as positive */
-        return true;
-      }
-
-      final String table = allTables.get(0);
-      final String query = String.format("select 1 from %s", table);
-
-      final PinotQuery pinotQuery = new PinotQuery(query, table, true);
-
-      /* Disable caching for validate queries */
-      queryCache.refresh(pinotQuery);
-      final ThirdEyeResultSetGroup result = executeSQL(pinotQuery);
-      return result.get(0).getRowCount() == 1;
+      return validate0();
     } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);
     }
     return false;
+  }
+
+  private boolean validate0() throws IOException, ExecutionException {
+    final PinotHealthCheckConfiguration healthCheck = config.getHealthCheck();
+    if (healthCheck == null || !healthCheck.isEnabled()) {
+      return true;
+    }
+
+    String query = optional(healthCheck.getQuery())
+        .filter(sql -> !sql.isBlank())
+        .orElse(null);
+
+    if (query == null) {
+      query = healthCheckQuery();
+    }
+    if (query == null) {
+      /* No tables. partially validated with REST. can't validate with query. return true */
+      return true;
+    }
+
+    final PinotQuery pinotQuery = new PinotQuery(query, null, true);
+
+    /* Disable caching for validate queries */
+    queryCache.refresh(pinotQuery);
+    final ThirdEyeResultSetGroup result = executeSQL(pinotQuery);
+    return result.size() > 0 && result.get(0).getRowCount() > 0;
+  }
+
+  private String healthCheckQuery() throws IOException {
+    // Table name required to execute query against pinot broker.
+    final ImmutableList<String> allTables = datasetOnboarder.getAllTables();
+    if (allTables.isEmpty()) {
+      /* Can't proceed if there are no tables but a successful response is returned as positive */
+      return null;
+    }
+
+    final String table = allTables.get(0);
+    return String.format("SELECT 1 FROM %s LIMIT 1", table);
   }
 
   @Override

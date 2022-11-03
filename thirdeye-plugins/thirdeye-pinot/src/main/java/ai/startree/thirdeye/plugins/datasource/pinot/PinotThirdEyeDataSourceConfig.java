@@ -22,6 +22,7 @@ import java.util.Objects;
 public class PinotThirdEyeDataSourceConfig {
 
   private PinotOauthConfiguration oauth;
+  private PinotHealthCheckConfiguration healthCheck = new PinotHealthCheckConfiguration();
   private String zookeeperUrl;
   private String controllerHost;
   private int controllerPort;
@@ -43,6 +44,16 @@ public class PinotThirdEyeDataSourceConfig {
   public PinotThirdEyeDataSourceConfig setOauth(
       final PinotOauthConfiguration oauth) {
     this.oauth = oauth;
+    return this;
+  }
+
+  public PinotHealthCheckConfiguration getHealthCheck() {
+    return healthCheck;
+  }
+
+  public PinotThirdEyeDataSourceConfig setHealthCheck(
+      final PinotHealthCheckConfiguration healthCheck) {
+    this.healthCheck = healthCheck;
     return this;
   }
 

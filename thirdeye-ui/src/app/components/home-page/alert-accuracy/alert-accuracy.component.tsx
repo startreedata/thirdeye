@@ -55,6 +55,7 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
                     <Grid item>{t("label.accuracy")}</Grid>
                     <Grid item>
                         <TooltipV1
+                            delay={0}
                             placement="top"
                             title={t("message.anomaly-precision-tooltip")}
                         >
@@ -68,9 +69,9 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
             <Grid item>
                 <LoadingErrorStateSwitch
                     errorState={
-                        <NoDataIndicator
-                            text={t("message.experienced-issues-fetching-data")}
-                        />
+                        <NoDataIndicator>
+                            {t("message.experienced-issues-fetching-data")}
+                        </NoDataIndicator>
                     }
                     isError={getAppAnalyticsStatus === ActionStatus.Error}
                     isLoading={getAppAnalyticsStatus === ActionStatus.Working}

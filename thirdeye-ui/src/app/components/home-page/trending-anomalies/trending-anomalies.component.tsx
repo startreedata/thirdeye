@@ -161,9 +161,9 @@ export const TrendingAnomalies: FunctionComponent = () => {
                     justifyContent="center"
                 >
                     <Box>
-                        <NoDataIndicator
-                            text={t("message.experienced-issues-fetching-data")}
-                        />
+                        <NoDataIndicator>
+                            {t("message.experienced-issues-fetching-data")}
+                        </NoDataIndicator>
                     </Box>
                 </Box>
             }

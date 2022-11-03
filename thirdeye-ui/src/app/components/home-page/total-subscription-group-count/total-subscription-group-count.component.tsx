@@ -45,9 +45,9 @@ export const TotalSubscriptionGroupCount: FunctionComponent<
             <Grid item>
                 <LoadingErrorStateSwitch
                     errorState={
-                        <NoDataIndicator
-                            text={t("message.experienced-issues-fetching-data")}
-                        />
+                        <NoDataIndicator>
+                            {t("message.experienced-issues-fetching-data")}
+                        </NoDataIndicator>
                     }
                     isError={getSubscriptionGroupsStatus === ActionStatus.Error}
                     isLoading={

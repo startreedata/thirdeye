@@ -51,9 +51,9 @@ export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
             <Grid item>
                 <LoadingErrorStateSwitch
                     errorState={
-                        <NoDataIndicator
-                            text={t("message.experienced-issues-fetching-data")}
-                        />
+                        <NoDataIndicator>
+                            {t("message.experienced-issues-fetching-data")}
+                        </NoDataIndicator>
                     }
                     isError={getAlertsStatus === ActionStatus.Error}
                     isLoading={getAlertsStatus === ActionStatus.Working}

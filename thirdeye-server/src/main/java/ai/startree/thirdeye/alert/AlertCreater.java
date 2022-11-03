@@ -25,13 +25,12 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.OnboardingTaskInfo;
+import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,26 +104,12 @@ public class AlertCreater {
     }
   }
 
-  public void createOnboardingTask(final AlertDTO dto, final long start, final long end) {
-    createOnboardingTask(dto, start, end, 0, 0);
-  }
-
-  private void createOnboardingTask(final AlertDTO alertDTO, long start, long end,
-      long tuningWindowStart, long tuningWindowEnd) {
-    OnboardingTaskInfo info = new OnboardingTaskInfo();
+  public void createOnboardingTask(final AlertDTO alertDTO, final long start, final long end) {
+    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo();
     info.setConfigId(alertDTO.getId());
-    if (tuningWindowStart == 0L && tuningWindowEnd == 0L) {
-      // default tuning window 28 days
-      tuningWindowEnd = System.currentTimeMillis();
-      tuningWindowStart = tuningWindowEnd - TimeUnit.DAYS.toMillis(28);
-    }
 
     checkArgument(start <= end);
-    checkArgument(tuningWindowStart <= tuningWindowEnd);
-
-    info.setTuningWindowStart(tuningWindowStart)
-        .setTuningWindowEnd(tuningWindowEnd)
-        .setStart(start)
+    info.setStart(start)
         .setEnd(end);
 
     try {
@@ -135,7 +120,7 @@ public class AlertCreater {
           taskDTO);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",
-          OnboardingTaskInfo.class.getSimpleName(),
+          DetectionPipelineTaskInfo.class.getSimpleName(),
           info), e);
     }
   }

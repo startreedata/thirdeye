@@ -16,11 +16,13 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
 import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertDTO extends AbstractDTO {
 
   String name;
@@ -28,7 +30,6 @@ public class AlertDTO extends AbstractDTO {
   boolean active;
   String cron;
   long lastTimestamp;
-  long lastTuningTimestamp;
   boolean isDataAvailabilitySchedule;
   long taskTriggerFallBackTimeInSec;
   List<String> owners;
@@ -90,14 +91,6 @@ public class AlertDTO extends AbstractDTO {
 
   public void setLastTimestamp(long lastTimestamp) {
     this.lastTimestamp = lastTimestamp;
-  }
-
-  public long getLastTuningTimestamp() {
-    return lastTuningTimestamp;
-  }
-
-  public void setLastTuningTimestamp(long lastTuningTimestamp) {
-    this.lastTuningTimestamp = lastTuningTimestamp;
   }
 
   public boolean isActive() {

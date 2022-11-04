@@ -23,7 +23,7 @@ jobs:
                       ui:
                           - thirdeye-ui/**
             - name: Validate title
-              if: steps.filter.outputs.ui == "true"
+              if: ${{ steps.filter.outputs.ui == "true" }}
               uses: amannn/action-semantic-pull-request@v3.4.0
               with:
                   types: |

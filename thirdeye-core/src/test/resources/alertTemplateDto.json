@@ -1,0 +1,168 @@
+{
+  "version": 0,
+  "nodes": [
+    {
+      "name": "enumerator",
+      "type": "Enumerator",
+      "params": {
+        "items": {
+          "value": [
+            {
+              "params": {
+                "max": 800000,
+                "min": 300000
+              }
+            },
+            {
+              "params": {
+                "max": 900000,
+                "min": 300000
+              }
+            },
+            {
+              "params": {
+                "max": 900000,
+                "min": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "combiner",
+      "type": "Combiner"
+    },
+    {
+      "name": "root",
+      "type": "ForkJoin",
+      "params": {
+        "root": {
+          "value": "anomalyDetector"
+        },
+        "enumerator": {
+          "value": "enumerator"
+        },
+        "combiner": {
+          "value": "combiner"
+        }
+      }
+    },
+    {
+      "name": "anomalyDetector",
+      "type": "AnomalyDetector",
+      "params": {
+        "component.min": {
+          "value": "${min}"
+        },
+        "component.metric": {
+          "value": "met"
+        },
+        "component.monitoringGranularity": {
+          "value": "P1D"
+        },
+        "component.max": {
+          "value": "${max}"
+        },
+        "anomaly.dataset": {
+          "value": "pageviews"
+        },
+        "component.timestamp": {
+          "value": "ts"
+        },
+        "anomaly.metric": {
+          "value": "views"
+        },
+        "anomaly.source": {
+          "value": "pageviews-explore/anomalyDetector"
+        },
+        "type": {
+          "value": "THRESHOLD"
+        }
+      },
+      "inputs": [
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "currentDataFetcher",
+          "sourceProperty": "currentData"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "currentDataFetcher",
+      "type": "DataFetcher",
+      "params": {
+        "component.query": {
+          "value": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(\"${aggregationColumn}\") as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        },
+        "component.dataSource": {
+          "value": "pinotQuickStartLocal"
+        }
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "outputKey": "currentData",
+          "outputName": "currentData"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "datasource": {
+      "version": 0,
+      "name": "${dataSource}",
+      "properties": {},
+      "metaList": []
+    },
+    "dataset": {
+      "version": 0,
+      "dataset": "${dataset}",
+      "completenessDelay": "${completenessDelay}",
+      "rcaExcludedDimensions": {
+        "value": []
+      },
+      "additive": true,
+      "dimensionsHaveNoPreAggregation": [],
+      "preAggregatedKeyword": "all",
+      "realtime": false,
+      "lastRefreshTime": 0,
+      "lastRefreshEventTime": 0,
+      "properties": {}
+    },
+    "metric": {
+      "version": 0,
+      "name": "${aggregationColumn}",
+      "defaultAggFunction": "${rcaAggregationFunction}",
+      "inverseMetric": false,
+      "dimensionAsMetric": false,
+      "where": "${queryFilters}"
+    },
+    "granularity": "${monitoringGranularity}",
+    "timezone": "${timezone}",
+    "mergeMaxGap": "${mergeMaxGap}",
+    "mergeMaxDuration": "${mergeMaxDuration}"
+  },
+  "defaultProperties": {
+    "aggregationColumn": "views",
+    "completenessDelay": "P0D",
+    "monitoringGranularity": "P1D",
+    "max": "${max}",
+    "timezone": "UTC",
+    "queryFilters": "",
+    "aggregationFunction": "sum",
+    "mergeMaxDuration": "",
+    "rcaExcludedDimensions": [],
+    "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+    "timeColumn": "date",
+    "min": "${min}",
+    "rcaAggregationFunction": "",
+    "queryLimit": "100000000",
+    "startTime": 1,
+    "endTime": 2,
+    "dataSource": "pinotQuickStartLocal",
+    "dataset": "pageviews",
+    "mergeMaxGap": ""
+  }
+}

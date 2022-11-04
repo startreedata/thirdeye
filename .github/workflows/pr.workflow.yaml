@@ -1,9 +1,8 @@
-# Workflow to triage ThirdEye UI pull requests, validate title and assign labels
-name: thirdeye-ui-pr-workflow
+# Workflow to triage pull requests, validate title and assign labels
+name: pr-workflow
 
 on:
     pull_request:
-        paths: thirdeye-ui/**
         types:
             - opened
             - reopened
@@ -12,11 +11,19 @@ on:
 
 jobs:
     pr-title:
-        # Job to validate ThirdEye UI PR title
-        name: thirdeye-ui-pr-title
+        # Job to validate PR title
+        name: pr-title
         runs-on: ubuntu-latest
         steps:
+            - id: filter
+              name: Filter
+              uses: dorny/paths-filter@v2
+              with:
+                  filters: |
+                      ui:
+                          - thirdeye-ui/**
             - name: Validate title
+              if: steps.filter.outputs.ui == 'true'
               uses: amannn/action-semantic-pull-request@v3.4.0
               with:
                   types: |
@@ -30,15 +37,15 @@ jobs:
                   scopes: |
                       ui
                   requireScope: true
-                  subjectPattern: ([A-Z]+\-[0-9]+( {1}))*(?![A-Z]).+[^.]$
+                  subjectPattern: ^(([A-Z]+\-[0-9]+( {1}))+|\[auto\] )(?![A-Z, ]).+[^.…]$
                   subjectPatternError: |
-                      Please make sure the subject "{subject}" in pull request title follows pull request naming standards (see repository contributing guidelines).
+                      Please make sure the subject "{subject}" in pull request title follows pull request naming standards (see UI contributing guidelines).
                   validateSingleCommit: true
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     pr-labels:
-        # Job to assign ThirdEye UI PR labels
-        name: thirdeye-ui-pr-labels
+        # Job to assign PR labels
+        name: pr-labels
         runs-on: ubuntu-latest
         steps:
             - name: Assign labels

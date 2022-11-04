@@ -1,9 +1,19 @@
+# Husky
+.husky/
+
+# VSCode
+.vscode/
+
 # Dependencies
+node/
 node_modules/
 
 # Production
 build/
 dist/
+
+# TypeScript
+tsbuildinfo/
 
 # Maven
 .mvn/
@@ -13,14 +23,13 @@ target/
 docker/
 Dockerfile
 
-# TypeScript
-tsbuildinfo/
-
 # Jest
 src/test/unit/coverage/
 
 # Cypress
 src/test/e2e/downloads/
+src/test/e2e/screenshots/
+src/test/e2e/videos/
 
 # webpack
 webpack/

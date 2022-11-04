@@ -1,5 +1,5 @@
-# Workflow to triage UI pull requests, validate title and assign labels
-name: ui-pr-workflow
+# Workflow to triage pull requests, validate title and assign labels
+name: pr-workflow
 
 on:
     pull_request:
@@ -8,8 +8,6 @@ on:
             - reopened
             - edited
             - synchronize
-        paths:
-            - thirdeye-ui
 
 jobs:
     pr-title:
@@ -17,7 +15,15 @@ jobs:
         name: pr-title
         runs-on: ubuntu-latest
         steps:
+            - id: filter
+              name: Filter
+              uses: dorny/paths-filter@v2
+              with:
+                  filters: |
+                      ui:
+                          - thirdeye-ui/**
             - name: Validate title
+              if: steps.filter.outputs.ui == "true"
               uses: amannn/action-semantic-pull-request@v3.4.0
               with:
                   types: |

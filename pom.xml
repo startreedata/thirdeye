@@ -409,12 +409,10 @@
               <exclude>LICENSE*</exclude>
               <exclude>NOTICE*</exclude>
 
-              <exclude>**/node_modules/**</exclude>
-              <exclude>**/dist/**</exclude>
-              <exclude>**/webpack/**</exclude>
+              <!-- UI project files -->
+              <exclude>thirdeye-ui/**</exclude>
+
               <exclude>src/main/resources/db/migration/mysql/**</exclude>
-              <exclude>**/build/**</exclude>
-              <exclude>**/verify-version-replacement.js</exclude>
 
               <!-- files from Eclipse -->
               <exclude>**/maven-eclipse.xml</exclude>

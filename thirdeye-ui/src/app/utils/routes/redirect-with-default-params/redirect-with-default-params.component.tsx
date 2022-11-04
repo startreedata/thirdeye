@@ -1,16 +1,14 @@
-/**
- * Copyright 2022 StarTree Inc
- *
- * Licensed under the StarTree Community License (the "License"); you may not use
- * this file except in compliance with the License. You may obtain a copy of the
- * License at http://www.startree.ai/legal/startree-community-license
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
- * either express or implied.
- * See the License for the specific language governing permissions and limitations under
- * the License.
- */
+// Copyright 2022 StarTree Inc
+
+// Licensed under the StarTree Community License (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.startree.ai/legal/startree-community-license
+
+// Unless required by applicable law or agreed to in writing, software distributed under the
+// License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+// either express or implied.
+// See the License for the specific language governing permissions and limitations under
+// the License.
 import React, { FunctionComponent, useEffect } from "react";
 import {
     resolvePath,
@@ -39,63 +37,63 @@ import { RedirectWithDefaultParamsProps } from "./redirect-with-default-params.i
  *                                                        determine the default time range
  * search string if it exists
  */
-export const RedirectWithDefaultParams: FunctionComponent<
-    RedirectWithDefaultParamsProps
-> = ({
-    to,
-    replace = true,
-    children,
-    useStoredLastUsedParamsPathKey,
-    pathKeyOverride,
-    customDurationGenerator,
-}) => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const { getLastUsedForPath } = useLastUsedSearchParams();
-    const { timeRangeDuration } = useTimeRange();
-    let searchString: string | undefined;
+export const RedirectWithDefaultParams: FunctionComponent<RedirectWithDefaultParamsProps> =
+    ({
+        to,
+        replace = true,
+        children,
+        useStoredLastUsedParamsPathKey,
+        pathKeyOverride,
+        customDurationGenerator,
+    }) => {
+        const location = useLocation();
+        const navigate = useNavigate();
+        const [searchParams] = useSearchParams();
+        const { getLastUsedForPath } = useLastUsedSearchParams();
+        const { timeRangeDuration } = useTimeRange();
+        let searchString: string | undefined;
 
-    if (useStoredLastUsedParamsPathKey) {
-        const pathKey =
-            pathKeyOverride || resolvePath(to, location.pathname).pathname;
-        searchString = getLastUsedForPath(pathKey);
-    }
-
-    if (!searchString) {
-        if (customDurationGenerator) {
-            const [customTimeStart, customTimeEnd] = customDurationGenerator();
-            searchParams.set(
-                TimeRangeQueryStringKey.TIME_RANGE,
-                TimeRange.CUSTOM
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.START_TIME,
-                customTimeStart.toString()
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.END_TIME,
-                customTimeEnd.toString()
-            );
-        } else {
-            searchParams.set(
-                TimeRangeQueryStringKey.TIME_RANGE,
-                timeRangeDuration.timeRange
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.START_TIME,
-                timeRangeDuration.startTime.toString()
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.END_TIME,
-                timeRangeDuration.endTime.toString()
-            );
+        if (useStoredLastUsedParamsPathKey) {
+            const pathKey =
+                pathKeyOverride || resolvePath(to, location.pathname).pathname;
+            searchString = getLastUsedForPath(pathKey);
         }
-        searchString = searchParams.toString();
-    }
-    useEffect(() => {
-        navigate(`${to}?${searchString}`, { replace });
-    });
 
-    return <>{children}</>;
-};
+        if (!searchString) {
+            if (customDurationGenerator) {
+                const [customTimeStart, customTimeEnd] =
+                    customDurationGenerator();
+                searchParams.set(
+                    TimeRangeQueryStringKey.TIME_RANGE,
+                    TimeRange.CUSTOM
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.START_TIME,
+                    customTimeStart.toString()
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.END_TIME,
+                    customTimeEnd.toString()
+                );
+            } else {
+                searchParams.set(
+                    TimeRangeQueryStringKey.TIME_RANGE,
+                    timeRangeDuration.timeRange
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.START_TIME,
+                    timeRangeDuration.startTime.toString()
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.END_TIME,
+                    timeRangeDuration.endTime.toString()
+                );
+            }
+            searchString = searchParams.toString();
+        }
+        useEffect(() => {
+            navigate(`${to}?${searchString}`, { replace });
+        });
+
+        return <>{children}</>;
+    };

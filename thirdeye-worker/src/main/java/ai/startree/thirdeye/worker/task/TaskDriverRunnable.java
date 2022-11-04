@@ -57,6 +57,9 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskExceptionCounter;
   private final Counter taskSuccessCounter;
   private final Counter taskCounter;
+  private final Counter taskFetchHitCounter;
+  private final Counter taskFetchMissCounter;
+  private final Counter workerIdleTimeInSeconds;
   private final Timer taskRunningTimer;
   private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
 
@@ -74,6 +77,9 @@ public class TaskDriverRunnable implements Runnable {
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
+    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
+    taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
+    taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
   }
 
   public void run() {
@@ -187,10 +193,14 @@ public class TaskDriverRunnable implements Runnable {
       if (tasksFound) {
         final TaskDTO taskDTO = acquireTask(anomalyTasks);
         if (taskDTO != null) {
+          taskFetchHitCounter.inc();
           return taskDTO;
         }
       }
+      taskFetchMissCounter.inc();
+      final long idleStart = System.currentTimeMillis();
       sleep(!tasksFound);
+      workerIdleTimeInSeconds.inc((System.currentTimeMillis() - idleStart) / 1000);
     }
     return null;
   }

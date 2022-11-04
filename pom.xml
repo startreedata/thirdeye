@@ -411,6 +411,8 @@
 
               <!-- UI project files -->
               <exclude>**/thirdeye-ui/**</exclude>
+              
+              <exclude>src/main/resources/db/migration/mysql/**</exclude>
 
               <!-- files from Eclipse -->
               <exclude>**/maven-eclipse.xml</exclude>

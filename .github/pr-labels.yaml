@@ -1,7 +1,7 @@
 # Label when configuration files in UI project root change
 thirdeye-ui config:
-    - ".github/workflows/ui-pr.workflow.yaml"
-    - ".github/ui-pr-labels.yaml"
+    - ".github/workflows/pr.workflow.yaml"
+    - ".github/pr-labels.yaml"
     - "thirdeye-ui/*"
     - "thirdeye-ui/.*"
     - "thirdeye-ui/.husky/**/*"

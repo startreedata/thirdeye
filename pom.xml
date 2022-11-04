@@ -411,11 +411,11 @@
 
               <!-- UI project files -->
               <exclude>**/thirdeye-ui</exclude>
-              <exclude>thirdeye-ui/.prettierrc.yaml</exclude>
-              <exclude>thirdeye-ui/.eslintrc.yaml</exclude>
-              <exclude>thirdeye-ui/.lintstagedrc.yaml</exclude>
-              <exclude>thirdeye-ui/scripts/verify-version-replacement.js</exclude>
-              <exclude>thirdeye-ui/.stylelintrc.yaml</exclude>
+              <exclude>**/thirdeye-ui/.prettierrc.yaml</exclude>
+              <exclude>**/thirdeye-ui/.eslintrc.yaml</exclude>
+              <exclude>**/thirdeye-ui/.lintstagedrc.yaml</exclude>
+              <exclude>**/thirdeye-ui/scripts/verify-version-replacement.js</exclude>
+              <exclude>**/thirdeye-ui/.stylelintrc.yaml</exclude>
 
               <exclude>src/main/resources/db/migration/mysql/**</exclude>
 

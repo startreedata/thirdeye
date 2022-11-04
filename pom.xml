@@ -411,7 +411,7 @@
 
               <!-- UI project files -->
               <exclude>**/thirdeye-ui/**</exclude>
-              <exclude>**/thirdeye-ui/**/*</exclude>
+              <exclude>**/thirdeye-ui/*.*</exclude>
 
               <exclude>src/main/resources/db/migration/mysql/**</exclude>
 

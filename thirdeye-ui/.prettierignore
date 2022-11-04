@@ -1,28 +1,24 @@
+# Husky (Prettier has trouble parsing files without extension)
+.husky/pre-commit
+
 # Dependencies
+node/
 node_modules/
 
 # Production
 build/
 dist/
 
+# TypeScript
+tsbuildinfo/
+
 # Maven
 .mvn/
 target/
 
-# Docker (Prettier has trouble parsing docker files)
+# Docker (Prettier has trouble parsing Docker files)
 docker/
 Dockerfile
-
-# TypeScript
-tsbuildinfo/
-
-# Jest
-src/test/unit/coverage/
-
-# Cypress
-src/test/e2e/downloads/
-src/test/e2e/screenshots/
-src/test/e2e/videos/
 
 # Assets
 *.svg
@@ -41,12 +37,23 @@ src/test/e2e/videos/
 .npmrc
 .nvmrc
 
+# Jest
+src/test/unit/coverage/
+
+# Cypress
+src/test/e2e/downloads/
+src/test/e2e/screenshots/
+src/test/e2e/videos/
+
+# Semantic Release
+CHANGELOG.md
+
 # webpack
 webpack/
 
-# macOS
+# OS
+Thumbs.db
 .DS_Store
-
-pom.xml
-
-scripts/verify-version-replacement.js
+._*
+.Spotlight-V100
+.Trashes

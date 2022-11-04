@@ -1,16 +1,16 @@
 # Dependencies
-node
+node/
 node_modules/
 
 # Production
 build/
 dist/
 
-# Maven
-target/
-
 # TypeScript
 tsbuildinfo/
+
+# Maven
+target/
 
 # Jest
 src/test/unit/coverage/
@@ -20,8 +20,15 @@ src/test/e2e/downloads/
 src/test/e2e/screenshots/
 src/test/e2e/videos/
 
+# Semantic Release
+CHANGELOG.md
+
 # webpack
 webpack/
 
-# macOS
+# OS
+Thumbs.db
 .DS_Store
+._*
+.Spotlight-V100
+.Trashes

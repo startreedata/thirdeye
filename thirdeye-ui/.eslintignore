@@ -1,9 +1,19 @@
+# Husky
+.husky/
+
+# VSCode
+.vscode/
+
 # Dependencies
+node/
 node_modules/
 
 # Production
 build/
 dist/
+
+# TypeScript
+tsbuildinfo/
 
 # Maven
 .mvn/
@@ -13,9 +23,6 @@ target/
 docker/
 Dockerfile
 
-# TypeScript
-tsbuildinfo/
-
 # Jest (ESLint rules don't agree with how these configs are written)
 jest.config.js
 src/test/unit/coverage/
@@ -23,9 +30,13 @@ src/test/unit/mocks/
 
 # Cypress
 src/test/e2e/downloads/
+src/test/e2e/screenshots/
+src/test/e2e/support/
+src/test/e2e/videos/
+
+# Semantic Release (ESLint rules don't agree with how these configs are written)
+release.config.js
 
 # webpack (ESLint rules don't agree with how these configs are written)
 webpack.config.*.js
 webpack/
-
-scripts/verify-version-replacement.js

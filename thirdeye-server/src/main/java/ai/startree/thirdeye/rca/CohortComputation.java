@@ -344,12 +344,23 @@ public class CohortComputation {
           "metric not found. id: " + metric.getId());
     }
     final String name = metric.getName();
-    ensureExists(name, "metric id or name must be provided.");
-    final MetricConfigDTO dto = ensureExists(metricConfigManager.findByMetricName(name)
-        .stream()
-        .findFirst()
-        .orElse(null), "metric not found: name: " + name);
-    return dto;
+    if (name != null) {
+      final List<MetricConfigDTO> byMetricName = metricConfigManager.findByMetricName(name);
+      ensure(byMetricName.size() <= 1, String.format("Found %d metrics with the same name. "
+          + "Please use id or define the metric manually", byMetricName.size()));
+      ensure(byMetricName.size() == 1, "Metric not found. name: " + name);
+      return byMetricName.get(0);
+    }
+
+    ensureExists(metric.getDataset(), "dataset is a required field");
+    ensureExists(metric.getDataset().getName(), "dataset.name is a required field");
+    ensureExists(metric.getAggregationColumn(), "aggregationColumn is a required field");
+    ensureExists(metric.getAggregationFunction(), "aggregationFunction is a required field");
+
+    return new MetricConfigDTO()
+        .setDataset(metric.getDataset().getName())
+        .setAggregationColumn(metric.getAggregationColumn())
+        .setDefaultAggFunction(metric.getAggregationFunction());
   }
 
   private EnumerationItemApi toEnumerationItem(final DimensionFilterContributionApi api,

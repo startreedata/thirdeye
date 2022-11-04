@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.util;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TEMPLATE_MISSING_PROPERTY;
+import static ai.startree.thirdeye.util.StringSubstitutorHelper.escapeRecursiveVariables;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -31,6 +32,7 @@ import java.util.TimeZone;
 import org.apache.commons.text.StringSubstitutor;
 
 public class StringTemplateUtils {
+
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   static {
@@ -39,12 +41,14 @@ public class StringTemplateUtils {
 
   public static String renderTemplate(final String template, final Map<String, Object> newContext) {
     final Map<String, Object> contextMap = getDefaultContextMap();
-    contextMap.putAll(newContext);
+    contextMap.putAll(escapeRecursiveVariables(newContext));
+
     final StringSubstitutor sub = new StringSubstitutor(contextMap)
+        .setEnableSubstitutionInVariables(true)
         .setEnableUndefinedVariableException(true);
     try {
       return sub.replace(template);
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       throw new ThirdEyeException(ERR_TEMPLATE_MISSING_PROPERTY, e);
     }
   }
@@ -68,7 +72,8 @@ public class StringTemplateUtils {
       final Map<String, Object> valuesMap)
       throws IOException, ClassNotFoundException {
 
-    final Module module = new SimpleModule().addSerializer(Templatable.class, new TemplateEngineTemplatableSerializer(valuesMap));
+    final Module module = new SimpleModule().addSerializer(Templatable.class,
+        new TemplateEngineTemplatableSerializer(valuesMap));
     final ObjectMapper objectMapper = new ObjectMapper().registerModule(module);
 
     final String jsonString = objectMapper.writeValueAsString(template);

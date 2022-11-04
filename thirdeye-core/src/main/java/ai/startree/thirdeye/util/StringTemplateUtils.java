@@ -13,11 +13,14 @@
  */
 package ai.startree.thirdeye.util;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TEMPLATE_MISSING_PROPERTY;
+import static ai.startree.thirdeye.util.StringSubstitutorHelper.escapeRecursiveVariables;
+
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import groovy.text.SimpleTemplateEngine;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -26,22 +29,28 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.commons.text.StringSubstitutor;
 
 public class StringTemplateUtils {
 
-  private static final SimpleTemplateEngine GROOVY_TEMPLATE_ENGINE = new SimpleTemplateEngine();
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   static {
     DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    GROOVY_TEMPLATE_ENGINE.setEscapeBackslash(true);
   }
 
-  public static String renderTemplate(final String template, final Map<String, Object> newContext)
-      throws IOException, ClassNotFoundException {
+  public static String renderTemplate(final String template, final Map<String, Object> newContext) {
     final Map<String, Object> contextMap = getDefaultContextMap();
-    contextMap.putAll(newContext);
-    return GROOVY_TEMPLATE_ENGINE.createTemplate(template).make(contextMap).toString();
+    contextMap.putAll(escapeRecursiveVariables(newContext));
+
+    final StringSubstitutor sub = new StringSubstitutor(contextMap)
+        .setEnableSubstitutionInVariables(true)
+        .setEnableUndefinedVariableException(true);
+    try {
+      return sub.replace(template);
+    } catch (final IllegalArgumentException e) {
+      throw new ThirdEyeException(ERR_TEMPLATE_MISSING_PROPERTY, e);
+    }
   }
 
   /**
@@ -63,7 +72,8 @@ public class StringTemplateUtils {
       final Map<String, Object> valuesMap)
       throws IOException, ClassNotFoundException {
 
-    final Module module = new SimpleModule().addSerializer(Templatable.class, new TemplateEngineTemplatableSerializer(valuesMap));
+    final Module module = new SimpleModule().addSerializer(Templatable.class,
+        new TemplateEngineTemplatableSerializer(valuesMap));
     final ObjectMapper objectMapper = new ObjectMapper().registerModule(module);
 
     final String jsonString = objectMapper.writeValueAsString(template);

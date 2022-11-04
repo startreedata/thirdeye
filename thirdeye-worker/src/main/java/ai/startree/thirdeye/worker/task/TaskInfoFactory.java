@@ -20,7 +20,6 @@ import static ai.startree.thirdeye.spi.task.TaskType.ONBOARDING;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
-import ai.startree.thirdeye.spi.datalayer.dto.OnboardingTaskInfo;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,7 +41,7 @@ public class TaskInfoFactory {
       ImmutableMap.<TaskType, Class<? extends TaskInfo>>builder()
           .put(DETECTION, DetectionPipelineTaskInfo.class)
           .put(NOTIFICATION, DetectionAlertTaskInfo.class)
-          .put(ONBOARDING, OnboardingTaskInfo.class)
+          .put(ONBOARDING, DetectionPipelineTaskInfo.class)
           .put(MONITOR, MonitorTaskInfo.class)
           .build();
 

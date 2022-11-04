@@ -23,10 +23,10 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest;
-import ai.startree.thirdeye.datasource.calcite.CalciteRequest.Builder;
 import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
 import ai.startree.thirdeye.datasource.calcite.QueryProjection;
+import ai.startree.thirdeye.datasource.calcite.SelectQuery;
+import ai.startree.thirdeye.datasource.calcite.SelectQueryTranslator;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
@@ -176,10 +176,6 @@ public class CohortComputation {
 
   /**
    * remove only from dataset dimensions. Do not filter dimensions manually fed into request
-   *
-   * @param dims
-   * @param where
-   * @return
    */
   private List<String> removeWhereDimensions(final List<String> dims, final SqlNode where) {
     if (where == null) {
@@ -227,7 +223,7 @@ public class CohortComputation {
 
   private Double computeAggregate(final CohortComputationContext c) throws Exception {
     final DatasetConfigDTO dataset = c.getDataset();
-    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
+    final SelectQuery builder = new SelectQuery(dataset.getDataset())
         .select(selectable(c.getMetric()))
         .whereTimeFilter(c.getInterval(),
             dataset.getTimeColumn(),
@@ -237,7 +233,7 @@ public class CohortComputation {
     optional(c.getWhere())
         .ifPresent(builder::where);
 
-    final CalciteRequest r = builder.build();
+    final SelectQueryTranslator r = builder.build();
     final DataFrame df = runQuery(r, c.getDataSource());
     return df.get(COL_AGGREGATE).getDouble(0);
   }
@@ -316,7 +312,7 @@ public class CohortComputation {
       final List<String> subDimensions,
       final CohortComputationContext c) throws Exception {
     final DatasetConfigDTO dataset = c.getDataset();
-    final Builder builder = CalciteRequest.newBuilder(dataset.getDataset())
+    final SelectQuery builder = new SelectQuery(dataset.getDataset())
         .whereTimeFilter(c.getInterval(),
             dataset.getTimeColumn(),
             dataset.getTimeFormat(),
@@ -333,7 +329,7 @@ public class CohortComputation {
     subDimensionsIdentifiers.forEach(builder::groupBy);
 
     final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
-    final CalciteRequest query = builder
+    final SelectQueryTranslator query = builder
         .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
         .limit(c.getLimit())
         .orderBy(identifierDescOf(COL_AGGREGATE))
@@ -389,8 +385,10 @@ public class CohortComputation {
     return " AND " + combinedPredicates.toSqlString(sqlDialect);
   }
 
-  public DataFrame runQuery(final CalciteRequest calciteRequest, final ThirdEyeDataSource ds) {
-    final String sql = calciteRequest.getSql(ds.getSqlLanguage(), ds.getSqlExpressionBuilder());
+  public DataFrame runQuery(final SelectQueryTranslator selectQueryTranslator,
+      final ThirdEyeDataSource ds) {
+    final String sql = selectQueryTranslator.getSql(ds.getSqlLanguage(),
+        ds.getSqlExpressionBuilder());
 
     final DataSourceRequest request = new DataSourceRequest(null, sql, Map.of());
     try {

@@ -42,9 +42,9 @@ export const AnomaliesReportedCount: FunctionComponent<
             <Grid item>
                 <LoadingErrorStateSwitch
                     errorState={
-                        <NoDataIndicator
-                            text={t("message.experienced-issues-fetching-data")}
-                        />
+                        <NoDataIndicator>
+                            {t("message.experienced-issues-fetching-data")}
+                        </NoDataIndicator>
                     }
                     isError={getAppAnalyticsStatus === ActionStatus.Error}
                     isLoading={getAppAnalyticsStatus === ActionStatus.Working}

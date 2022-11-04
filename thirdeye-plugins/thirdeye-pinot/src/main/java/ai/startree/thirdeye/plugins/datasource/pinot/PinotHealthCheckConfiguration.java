@@ -11,28 +11,29 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.dto;
 
-public class OnboardingTaskInfo extends DetectionPipelineTaskInfo {
+package ai.startree.thirdeye.plugins.datasource.pinot;
 
-  private long tuningWindowStart;
-  private long tuningWindowEnd;
+public class PinotHealthCheckConfiguration {
 
-  public long getTuningWindowStart() {
-    return tuningWindowStart;
+  private boolean enabled = true;
+  private String query;
+
+  public boolean isEnabled() {
+    return enabled;
   }
 
-  public OnboardingTaskInfo setTuningWindowStart(final long tuningWindowStart) {
-    this.tuningWindowStart = tuningWindowStart;
+  public PinotHealthCheckConfiguration setEnabled(final boolean enabled) {
+    this.enabled = enabled;
     return this;
   }
 
-  public long getTuningWindowEnd() {
-    return tuningWindowEnd;
+  public String getQuery() {
+    return query;
   }
 
-  public OnboardingTaskInfo setTuningWindowEnd(final long tuningWindowEnd) {
-    this.tuningWindowEnd = tuningWindowEnd;
+  public PinotHealthCheckConfiguration setQuery(final String query) {
+    this.query = query;
     return this;
   }
 }

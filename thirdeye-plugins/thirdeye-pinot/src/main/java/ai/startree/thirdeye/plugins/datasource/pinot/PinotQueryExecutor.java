@@ -20,9 +20,11 @@ import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetMetaData;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
+import ai.startree.thirdeye.spi.util.Pair;
 import com.google.common.cache.CacheLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.pinot.client.Connection;
@@ -34,16 +36,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
+public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotResponseCacheLoader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotQueryExecutor.class);
 
   private static final String SQL_QUERY_FORMAT = "sql";
   private static final String PQL_QUERY_FORMAT = "pql";
   private final PinotConnectionManager pinotConnectionManager;
 
   @Inject
-  public PinotResponseCacheLoader(final PinotConnectionManager pinotConnectionManager) {
+  public PinotQueryExecutor(final PinotConnectionManager pinotConnectionManager) {
     this.pinotConnectionManager = pinotConnectionManager;
   }
 
@@ -53,15 +55,16 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
    * @param resultSetGroup a {@link ResultSetGroup} from Pinot.
    * @return a converted {@link ThirdEyeResultSetGroup}.
    */
-  private static ThirdEyeResultSetGroup toThirdEyeResultSetGroup(ResultSetGroup resultSetGroup) {
-    List<ResultSet> resultSets = new ArrayList<>();
+  private static ThirdEyeResultSetGroup toThirdEyeResultSetGroup(
+      final ResultSetGroup resultSetGroup) {
+    final List<ResultSet> resultSets = new ArrayList<>();
     for (int i = 0; i < resultSetGroup.getResultSetCount(); i++) {
       resultSets.add(resultSetGroup.getResultSet(i));
     }
     // Convert Pinot's ResultSet to ThirdEyeResultSet
-    List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
-    for (ResultSet resultSet : resultSets) {
-      ThirdEyeResultSet thirdEyeResultSet = fromPinotResultSet(resultSet);
+    final List<ThirdEyeResultSet> thirdEyeResultSets = new ArrayList<>();
+    for (final ResultSet resultSet : resultSets) {
+      final ThirdEyeResultSet thirdEyeResultSet = fromPinotResultSet(resultSet);
       thirdEyeResultSets.add(thirdEyeResultSet);
     }
 
@@ -81,7 +84,7 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
                 "\"" + resultSet.getColumnName(i) + "\" column returned by Pinot is of type FLOAT");
           }
           return columnType;
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
           // Pinot client doesn't provide type for pql, so default to DOUBLE type for metric column.
           return new ColumnType(ColumnDataType.DOUBLE);
         }
@@ -97,21 +100,21 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
    * @param resultSet A result set from Pinot.
    * @return an unified {@link ThirdEyeDataFrameResultSet}.
    */
-  private static ThirdEyeDataFrameResultSet fromPinotResultSet(ResultSet resultSet) {
+  private static ThirdEyeDataFrameResultSet fromPinotResultSet(final ResultSet resultSet) {
     // Build the meta data of this result set
-    List<String> groupKeyColumnNames = new ArrayList<>();
-    List<ColumnType> groupKeyColumnTypes = new ArrayList<>();
+    final List<String> groupKeyColumnNames = new ArrayList<>();
+    final List<ColumnType> groupKeyColumnTypes = new ArrayList<>();
     int groupByColumnCount = 0;
     try {
       groupByColumnCount = resultSet.getGroupKeyLength();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Only happens when result set is GroupByResultSet type and contains empty result.
       // In this case, we have to use brutal force to count the number of group by columns.
       while (true) {
         try {
           resultSet.getGroupKeyColumnName(groupByColumnCount);
           ++groupByColumnCount;
-        } catch (Exception breakSignal) {
+        } catch (final Exception breakSignal) {
           break;
         }
       }
@@ -122,39 +125,39 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
       // Default to String type for all groupKeys
       groupKeyColumnTypes.add(new ColumnType(ColumnDataType.STRING));
     }
-    List<String> metricColumnNames = new ArrayList<>();
-    List<ColumnType> metricColumnTypes = new ArrayList<>();
+    final List<String> metricColumnNames = new ArrayList<>();
+    final List<ColumnType> metricColumnTypes = new ArrayList<>();
     for (int columnIdx = 0; columnIdx < resultSet.getColumnCount(); columnIdx++) {
-      String columnName = resultSet.getColumnName(columnIdx);
+      final String columnName = resultSet.getColumnName(columnIdx);
       metricColumnNames.add(columnName);
       metricColumnTypes.add(getColumnTypeFromPinotResultSet(resultSet, columnName));
     }
-    ThirdEyeResultSetMetaData thirdEyeResultSetMetaData =
+    final ThirdEyeResultSetMetaData thirdEyeResultSetMetaData =
         new ThirdEyeResultSetMetaData(groupKeyColumnNames,
             metricColumnNames,
             groupKeyColumnTypes,
             metricColumnTypes);
 
     // Build the DataFrame
-    List<String> columnNameWithDataType = new ArrayList<>();
+    final List<String> columnNameWithDataType = new ArrayList<>();
     //   Always cast dimension values to STRING type
-    for (String groupColumnName : thirdEyeResultSetMetaData.getGroupKeyColumnNames()) {
+    for (final String groupColumnName : thirdEyeResultSetMetaData.getGroupKeyColumnNames()) {
       columnNameWithDataType.add(groupColumnName + ":STRING");
     }
     columnNameWithDataType.addAll(thirdEyeResultSetMetaData.getMetricColumnNames());
-    DataFrame.Builder dfBuilder = DataFrame.builder(columnNameWithDataType);
-    int rowCount = resultSet.getRowCount();
-    int metricColumnCount = resultSet.getColumnCount();
-    int totalColumnCount = groupByColumnCount + metricColumnCount;
+    final DataFrame.Builder dfBuilder = DataFrame.builder(columnNameWithDataType);
+    final int rowCount = resultSet.getRowCount();
+    final int metricColumnCount = resultSet.getColumnCount();
+    final int totalColumnCount = groupByColumnCount + metricColumnCount;
     // Dump the values in ResultSet to the DataFrame
     for (int rowIdx = 0; rowIdx < rowCount; rowIdx++) {
-      String[] columnsOfTheRow = new String[totalColumnCount];
+      final String[] columnsOfTheRow = new String[totalColumnCount];
       // GroupBy column value(i.e., dimension values)
       for (int groupByColumnIdx = 0; groupByColumnIdx < groupByColumnCount; groupByColumnIdx++) {
         String valueString = null;
         try {
           valueString = resultSet.getGroupKeyString(rowIdx, groupByColumnIdx);
-        } catch (Exception e) {
+        } catch (final Exception e) {
           // Do nothing and subsequently insert a null value to the current series.
         }
         columnsOfTheRow[groupByColumnIdx] = valueString;
@@ -164,16 +167,32 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
         String valueString = null;
         try {
           valueString = resultSet.getString(rowIdx, metricColumnIdx);
-        } catch (Exception e) {
+        } catch (final Exception e) {
           // Do nothing and subsequently insert a null value to the current series.
         }
         columnsOfTheRow[metricColumnIdx + groupByColumnCount] = valueString;
       }
       dfBuilder.append(columnsOfTheRow);
     }
-    DataFrame dataFrame = dfBuilder.build();
+    final DataFrame dataFrame = dfBuilder.build();
     // Build ThirdEye's result set
     return new ThirdEyeDataFrameResultSet(thirdEyeResultSetMetaData, dataFrame);
+  }
+
+  private static List<Pair<Integer, Integer>> rowColCounts(final ResultSetGroup resultSetGroup) {
+    final int resultSetCount = resultSetGroup.getResultSetCount();
+    final List<Pair<Integer, Integer>> rowColCounts = new ArrayList<>(resultSetCount);
+    for (int i = 0; i < resultSetCount; ++i) {
+      final ResultSet resultSet = resultSetGroup.getResultSet(i);
+      rowColCounts.add(Pair.pair(resultSet.getRowCount(), resultSet.getColumnCount()));
+    }
+    return rowColCounts;
+  }
+
+  private static String toString(final List<Pair<Integer, Integer>> pairs) {
+    return pairs.stream()
+        .map(p -> String.format("(%d, %d)", p.getFirst(), p.getSecond()))
+        .collect(Collectors.joining(", "));
   }
 
   @Override
@@ -191,8 +210,10 @@ public class PinotResponseCacheLoader extends CacheLoader<PinotQuery, ThirdEyeRe
       final long end = System.currentTimeMillis();
       final long duration = end - start;
       if (duration > 1000) {
-        LOG.info("Query:{}  took:{}ms",
-            pinotQuery.getQuery().replace('\n', ' '), duration);
+        LOG.info("Query:{} time:{}ms result stats(rows, cols): {}",
+            pinotQuery.getQuery().replace('\n', ' '),
+            duration,
+            toString(rowColCounts(resultSetGroup)));
       }
 
       return toThirdEyeResultSetGroup(resultSetGroup);

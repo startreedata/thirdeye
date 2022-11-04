@@ -202,4 +202,8 @@ public class PinotControllerRestClient {
     final JsonNode timeColumnNode = tableConfigJson.get("segmentsConfig").get("timeColumnName");
     return (timeColumnNode != null && !timeColumnNode.isNull()) ? timeColumnNode.asText() : null;
   }
+
+  public void close() {
+    pinotControllerRestClientSupplier.close();
+  }
 }

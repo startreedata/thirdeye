@@ -134,6 +134,15 @@ public class CohortComputation {
     return Double.parseDouble(df.format(v));
   }
 
+  private static QueryPredicate thresholdPredicate(final Double threshold,
+      final boolean roundOffThreshold) {
+    final String pattern = roundOffThreshold ? "#" : "#.##";
+    final String value = new DecimalFormat(pattern).format(threshold);
+    final Predicate predicate = Predicate.GE(COL_AGGREGATE, value);
+
+    return QueryPredicate.of(predicate, DimensionType.NUMERIC);
+  }
+
   private CohortComputationContext buildContext(final CohortComputationApi request) {
     final Interval currentInterval = new Interval(
         request.getStart(),
@@ -162,6 +171,9 @@ public class CohortComputation {
     optional(request.getWhere())
         .map(where -> parseWhere(where, dataSource))
         .ifPresent(context::setWhere);
+
+    optional(request.getRoundOffThreshold())
+        .ifPresent(context::setRoundOffThreshold);
 
     final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
         .orElse(optional(dataset.getDimensions())
@@ -269,6 +281,10 @@ public class CohortComputation {
         .setMaxDepth(context.getMaxDepth())
         .setDimensions(context.getAllDimensions());
 
+    if (context.isRoundOffThreshold()) {
+      output.setRoundOffThreshold(true);
+    }
+
     if (request.isGenerateEnumerationItems()) {
       final String key = optional(request.getEnumerationItemParamKey())
           .orElse(K_QUERY_FILTERS_DEFAULT);
@@ -328,9 +344,8 @@ public class CohortComputation {
     builder.select(selectable(c.getMetric()));
     subDimensionsIdentifiers.forEach(builder::groupBy);
 
-    final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
     final SelectQueryTranslator query = builder
-        .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
+        .having(thresholdPredicate(c.getThreshold(), c.isRoundOffThreshold()))
         .limit(c.getLimit())
         .orderBy(identifierDescOf(COL_AGGREGATE))
         .build();

@@ -34,6 +34,7 @@ public class CohortComputationContext {
   private SqlNode where;
 
   private Double threshold;
+  private boolean roundOffThreshold = false;
   private Double aggregate;
 
   public MetricConfigDTO getMetric() {
@@ -123,6 +124,15 @@ public class CohortComputationContext {
 
   public CohortComputationContext setWhere(final SqlNode where) {
     this.where = where;
+    return this;
+  }
+
+  public boolean isRoundOffThreshold() {
+    return roundOffThreshold;
+  }
+
+  public CohortComputationContext setRoundOffThreshold(final boolean roundOffThreshold) {
+    this.roundOffThreshold = roundOffThreshold;
     return this;
   }
 }

@@ -25,6 +25,7 @@ public class CohortComputationApi implements ThirdEyeApi {
   private Double aggregate;
   private Double threshold;
   private Double percentage;
+  private Boolean RoundOffThreshold;
   private boolean generateEnumerationItems;
   private String enumerationItemParamKey;
   private List<String> dimensions;
@@ -106,6 +107,15 @@ public class CohortComputationApi implements ThirdEyeApi {
 
   public CohortComputationApi setPercentage(final Double percentage) {
     this.percentage = percentage;
+    return this;
+  }
+
+  public Boolean getRoundOffThreshold() {
+    return RoundOffThreshold;
+  }
+
+  public CohortComputationApi setRoundOffThreshold(final Boolean roundOffThreshold) {
+    RoundOffThreshold = roundOffThreshold;
     return this;
   }
 

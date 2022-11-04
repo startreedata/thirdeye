@@ -20,14 +20,21 @@ import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 
 public class StringTemplateUtilsTest {
+
+  private static String templateVariableOf(String key) {
+    return "${" + key + "}";
+  }
 
   @Test
   public void testStringReplacement() throws IOException, ClassNotFoundException {
@@ -189,8 +196,39 @@ public class StringTemplateUtilsTest {
     assertThat(output.templatableNested.value().templatableDto.templatedValue()).isNull();
   }
 
-  private static String templateVariableOf(String key) {
-    return "${" + key + "}";
+  @Test
+  public void testTemplateRenderingWithRecursiveVariablesForApacheCommons() throws IOException {
+    final String alertTemplateDtoString = IOUtils.resourceToString("/alertTemplateDto.json",
+        StandardCharsets.UTF_8);
+
+    final String alertTemplateDtoRenderedString = IOUtils.resourceToString(
+        "/alertTemplateDtoRendered.json",
+        StandardCharsets.UTF_8);
+
+    final String s = StringTemplateUtils.renderTemplate(alertTemplateDtoString,
+        ImmutableMap.<String, Object>builder()
+            .put("aggregationColumn", "views")
+            .put("completenessDelay", "P0D")
+            .put("monitoringGranularity", "P1D")
+            .put("max", "${max}")
+            .put("timezone", "UTC")
+            .put("queryFilters", "")
+            .put("aggregationFunction", "sum")
+            .put("mergeMaxDuration", "")
+            .put("rcaExcludedDimensions", List.of())
+            .put("timeColumnFormat", "1,DAYS,SIMPLE_DATE_FORMAT,yyyyMMdd")
+            .put("timeColumn", "date")
+            .put("min", "${min}")
+            .put("rcaAggregationFunction", "")
+            .put("queryLimit", "100000000")
+            .put("startTime", 1)
+            .put("endTime", 2)
+            .put("dataSource", "pinotQuickStartLocal")
+            .put("dataset", "pageviews")
+            .put("mergeMaxGap", "")
+            .build());
+
+    assertThat(s).isEqualTo(alertTemplateDtoRenderedString);
   }
 
   private static class ObjectWithTemplatableFields {

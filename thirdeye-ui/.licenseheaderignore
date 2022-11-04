@@ -1,0 +1,47 @@
+# Dependencies
+node/
+node_modules/
+
+# Production
+build/
+dist/
+
+# TypeScript
+tsbuildinfo/
+
+# Maven
+target/
+
+# Docker
+docker/
+
+# Assets
+*.svg
+*.png
+*.ico
+*.ttf
+
+# Miscellaneous
+*.json
+*.txt
+
+# RC files
+.npmrc
+.nvmrc
+
+# Docs, READMEs
+*.md
+
+# Jest
+src/test/unit/coverage/
+
+# Cypress
+src/test/e2e/downloads/
+src/test/e2e/screenshots/
+src/test/e2e/videos/
+
+# Semantic Release
+CHANGELOG.md
+
+# webpack
+webpack/

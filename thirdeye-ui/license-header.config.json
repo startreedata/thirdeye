@@ -1,0 +1,22 @@
+{
+    "ignoreFile": ".licenseheaderignore",
+    "license": "LICENSE",
+    "trailingWhitespace": "TRIM",
+    "regexIdentifier": "##",
+    "licenseFormats": {
+        "dockerignore|eslintignore|gitignore|licenseheaderignore|prettierignore|stylelintignore|yml|yaml": {
+            "eachLine": {
+                "prepend": "# "
+            }
+        },
+        "html|xml": {
+            "prepend": "<!--",
+            "append": "-->"
+        },
+        "ts|tsx|js|jsx|css|scss": {
+            "eachLine": {
+                "prepend": "// "
+            }
+        }
+    }
+}

@@ -68,6 +68,7 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
             flex: 1.5,
             sortable: true,
             customCellRenderer: renderLink,
+            // eslint-disable-next-line react/display-name
             customCellTooltipRenderer: () => (
                 <span>{t("label.view-investigation")}</span>
             ),

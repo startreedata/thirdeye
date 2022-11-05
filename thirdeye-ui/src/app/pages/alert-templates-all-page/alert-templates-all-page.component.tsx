@@ -114,9 +114,9 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
 
             <PageContentsGridV1 fullHeight>
                 <LoadingErrorStateSwitch
-                    isError={alertTemplatesRequestStatus == ActionStatus.Error}
+                    isError={alertTemplatesRequestStatus === ActionStatus.Error}
                     isLoading={
-                        alertTemplatesRequestStatus == ActionStatus.Working
+                        alertTemplatesRequestStatus === ActionStatus.Working
                     }
                 >
                     <EmptyStateSwitch

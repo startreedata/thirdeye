@@ -115,8 +115,8 @@ export const DatasourcesAllPage: FunctionComponent = () => {
             <ConfigurationPageHeader selectedIndex={0} />
             <PageContentsGridV1 fullHeight>
                 <LoadingErrorStateSwitch
-                    isError={status == ActionStatus.Error}
-                    isLoading={status == ActionStatus.Working}
+                    isError={status === ActionStatus.Error}
+                    isLoading={status === ActionStatus.Working}
                 >
                     <EmptyStateSwitch
                         emptyState={

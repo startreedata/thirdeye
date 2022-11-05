@@ -21,7 +21,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
     colorScale,
 }) => {
     const handleOnClick = (seriesData: Series): void => {
-        const idx = series.findIndex((s) => s == seriesData);
+        const idx = series.findIndex((s) => s === seriesData);
         onSeriesClick && onSeriesClick(idx);
     };
 

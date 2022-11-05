@@ -1,3 +1,17 @@
+/*
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { Button, Grid, Link } from "@material-ui/core";
 import React, {
     FunctionComponent,
@@ -21,146 +35,152 @@ import {
 } from "../../utils/routes/routes.util";
 import { AlertTemplateListV1Props } from "./alert-template-list-v1.interfaces";
 
-export const AlertTemplateListV1: FunctionComponent<
-    AlertTemplateListV1Props
-> = ({ alertTemplates, onDelete }) => {
-    const [selectedAlertTemplate, setSelectedAlertTemplate] =
-        useState<DataGridSelectionModelV1<AlertTemplate>>();
-    const [alertTemplatesData, setAlertTemplatesData] = useState<
-        AlertTemplate[] | null
-    >(null);
-    const navigate = useNavigate();
+export const AlertTemplateListV1: FunctionComponent<AlertTemplateListV1Props> =
+    ({ alertTemplates, onDelete }) => {
+        const [selectedAlertTemplate, setSelectedAlertTemplate] =
+            useState<DataGridSelectionModelV1<AlertTemplate>>();
+        const [alertTemplatesData, setAlertTemplatesData] = useState<
+            AlertTemplate[] | null
+        >(null);
+        const navigate = useNavigate();
 
-    const { t } = useTranslation();
+        const { t } = useTranslation();
 
-    const generateDataWithChildren = (
-        data: AlertTemplate[]
-    ): AlertTemplate[] => {
-        return data?.map((alertTemplate, index) => ({
-            ...alertTemplate,
-            children: [
-                {
-                    id: index,
-                    expandPanelContents: (
-                        <JSONEditorV1<AlertTemplate>
-                            disableValidation
-                            readOnly
-                            value={alertTemplate}
-                        />
-                    ),
-                },
-            ],
-        }));
-    };
+        const generateDataWithChildren = (
+            data: AlertTemplate[]
+        ): AlertTemplate[] => {
+            return data?.map((alertTemplate, index) => ({
+                ...alertTemplate,
+                children: [
+                    {
+                        id: index,
+                        expandPanelContents: (
+                            <JSONEditorV1<AlertTemplate>
+                                disableValidation
+                                readOnly
+                                value={alertTemplate}
+                            />
+                        ),
+                    },
+                ],
+            }));
+        };
 
-    useEffect(() => {
-        if (!alertTemplates) {
-            return;
-        }
+        useEffect(() => {
+            if (!alertTemplates) {
+                return;
+            }
 
-        setAlertTemplatesData(generateDataWithChildren(alertTemplates));
-    }, [alertTemplates]);
+            setAlertTemplatesData(generateDataWithChildren(alertTemplates));
+        }, [alertTemplates]);
 
-    const renderLink = (
-        cellValue: Record<string, unknown>,
-        data: AlertTemplate
-    ): ReactElement => {
-        if (cellValue) {
-            return (
-                <Link href={getAlertTemplatesViewPath(data.id)}>
-                    {cellValue}
-                </Link>
-            );
-        } else {
-            return <span />;
-        }
-    };
+        const renderLink = (
+            cellValue: Record<string, unknown>,
+            data: AlertTemplate
+        ): ReactElement => {
+            if (cellValue) {
+                return (
+                    <Link href={getAlertTemplatesViewPath(data.id)}>
+                        {cellValue}
+                    </Link>
+                );
+            } else {
+                return <span />;
+            }
+        };
 
-    const isActionButtonDisable = !(
-        selectedAlertTemplate && selectedAlertTemplate.rowKeyValues.length === 1
-    );
+        const isActionButtonDisable = !(
+            selectedAlertTemplate &&
+            selectedAlertTemplate.rowKeyValues.length === 1
+        );
 
-    const handleAlertTemplateDelete = (): void => {
-        if (!selectedAlertTemplate || !selectedAlertTemplate.rowKeyValueMap) {
-            return;
-        }
-        onDelete &&
-            onDelete(Array.from(selectedAlertTemplate.rowKeyValueMap.values()));
-    };
+        const handleAlertTemplateDelete = (): void => {
+            if (
+                !selectedAlertTemplate ||
+                !selectedAlertTemplate.rowKeyValueMap
+            ) {
+                return;
+            }
+            onDelete &&
+                onDelete(
+                    Array.from(selectedAlertTemplate.rowKeyValueMap.values())
+                );
+        };
 
-    const handleAlertEdit = (): void => {
-        if (!selectedAlertTemplate) {
-            return;
-        }
-        const selectedAlertId = selectedAlertTemplate.rowKeyValues[0] as number;
+        const handleAlertEdit = (): void => {
+            if (!selectedAlertTemplate) {
+                return;
+            }
+            const selectedAlertId = selectedAlertTemplate
+                .rowKeyValues[0] as number;
 
-        navigate(getAlertTemplatesUpdatePath(selectedAlertId));
-    };
+            navigate(getAlertTemplatesUpdatePath(selectedAlertId));
+        };
 
-    const alertGroupColumns = [
-        {
-            key: "name",
-            dataKey: "name",
-            header: t("label.name"),
-            minWidth: 0,
-            flex: 1,
-            sortable: true,
-            customCellRenderer: renderLink,
-        },
-        {
-            key: "description",
-            dataKey: "description",
-            header: t("label.description"),
-            minWidth: 0,
-            flex: 2,
-        },
-    ];
+        const alertGroupColumns = [
+            {
+                key: "name",
+                dataKey: "name",
+                header: t("label.name"),
+                minWidth: 0,
+                flex: 1,
+                sortable: true,
+                customCellRenderer: renderLink,
+            },
+            {
+                key: "description",
+                dataKey: "description",
+                header: t("label.description"),
+                minWidth: 0,
+                flex: 2,
+            },
+        ];
 
-    return (
-        <Grid item xs={12}>
-            <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<AlertTemplate>
-                    hideBorder
-                    columns={alertGroupColumns}
-                    data={alertTemplatesData as AlertTemplate[]}
-                    expandColumnKey="name"
-                    rowKey="id"
-                    scroll={DataGridScrollV1.Body}
-                    searchPlaceholder={t("label.search-entity", {
-                        entity: t("label.alert-templates"),
-                    })}
-                    toolbarComponent={
-                        <Grid container alignItems="center" spacing={2}>
-                            {/* Edit */}
-                            <Grid item>
-                                <Button
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertEdit}
-                                >
-                                    {t("label.edit")}
-                                </Button>
+        return (
+            <Grid item xs={12}>
+                <PageContentsCardV1 disablePadding fullHeight>
+                    <DataGridV1<AlertTemplate>
+                        hideBorder
+                        columns={alertGroupColumns}
+                        data={alertTemplatesData as AlertTemplate[]}
+                        expandColumnKey="name"
+                        rowKey="id"
+                        scroll={DataGridScrollV1.Body}
+                        searchPlaceholder={t("label.search-entity", {
+                            entity: t("label.alert-templates"),
+                        })}
+                        toolbarComponent={
+                            <Grid container alignItems="center" spacing={2}>
+                                {/* Edit */}
+                                <Grid item>
+                                    <Button
+                                        disabled={isActionButtonDisable}
+                                        variant="contained"
+                                        onClick={handleAlertEdit}
+                                    >
+                                        {t("label.edit")}
+                                    </Button>
+                                </Grid>
+
+                                {/* Delete */}
+                                <Grid>
+                                    <Button
+                                        disabled={
+                                            !selectedAlertTemplate ||
+                                            selectedAlertTemplate.rowKeyValues
+                                                .length === 0
+                                        }
+                                        variant="contained"
+                                        onClick={handleAlertTemplateDelete}
+                                    >
+                                        {t("label.delete")}
+                                    </Button>
+                                </Grid>
                             </Grid>
-
-                            {/* Delete */}
-                            <Grid>
-                                <Button
-                                    disabled={
-                                        !selectedAlertTemplate ||
-                                        selectedAlertTemplate.rowKeyValues
-                                            .length === 0
-                                    }
-                                    variant="contained"
-                                    onClick={handleAlertTemplateDelete}
-                                >
-                                    {t("label.delete")}
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    }
-                    onSelectionChange={setSelectedAlertTemplate}
-                />
-            </PageContentsCardV1>
-        </Grid>
-    );
-};
+                        }
+                        onSelectionChange={setSelectedAlertTemplate}
+                    />
+                </PageContentsCardV1>
+            </Grid>
+        );
+    };

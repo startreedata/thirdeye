@@ -409,14 +409,6 @@
               <exclude>LICENSE*</exclude>
               <exclude>NOTICE*</exclude>
 
-              <!-- UI project files -->
-              <exclude>thirdeye-ui/**</exclude>
-              <exclude>**/.prettierrc.yaml</exclude>
-              <exclude>**/.eslintrc.yaml</exclude>
-              <exclude>**/.lintstagedrc.yaml</exclude>
-              <exclude>**/verify-version-replacement.js</exclude>
-              <exclude>**/.stylelintrc.yaml</exclude>
-
               <exclude>src/main/resources/db/migration/mysql/**</exclude>
 
               <!-- files from Eclipse -->

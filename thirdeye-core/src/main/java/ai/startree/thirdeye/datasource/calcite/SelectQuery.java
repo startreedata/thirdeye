@@ -62,6 +62,7 @@ public class SelectQuery {
   final List<SqlNode> sqlNodeGroupByProjections = new ArrayList<>();
 
   final List<QueryPredicate> havingPredicates = new ArrayList<>();
+  final List<SqlNode> havingSqlNodePredicates = new ArrayList<>();
 
   final List<QueryProjection> orderByProjections = new ArrayList<>();
   final List<String> freeTextOrderByProjections = new ArrayList<>();
@@ -237,6 +238,11 @@ public class SelectQuery {
 
   public SelectQuery having(final QueryPredicate predicate) {
     havingPredicates.add(requireNonNull(predicate));
+    return this;
+  }
+
+  public SelectQuery having(final SqlNode sqlNode) {
+    havingSqlNodePredicates.add(requireNonNull(sqlNode));
     return this;
   }
 

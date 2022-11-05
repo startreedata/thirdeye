@@ -140,3 +140,23 @@ Content-Type: application/json
   "end": "1623283200000"
 }
 
+###
+
+POST http://localhost:8080/api/rca/metrics/cohorts
+accept: application/json
+Content-Type: application/json
+
+{
+  "metric": {
+    "aggregationColumn": "views",
+    "aggregationFunction": "SUM",
+    "dataset": {
+      "name": "pageviews"
+    }
+  },
+  "percentage": 10,
+  "having": "COUNT(*) > 1000000",
+  "start": "1623110400000",
+  "end": "1623283200000"
+}
+

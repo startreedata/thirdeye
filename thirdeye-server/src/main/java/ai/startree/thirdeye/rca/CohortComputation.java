@@ -172,6 +172,10 @@ public class CohortComputation {
         .map(where -> parseWhere(where, dataSource))
         .ifPresent(context::setWhere);
 
+    optional(request.getHaving())
+        .map(having -> parseHaving(having, dataSource))
+        .ifPresent(context::setHaving);
+
     optional(request.getRoundOffThreshold())
         .ifPresent(context::setRoundOffThreshold);
 
@@ -233,6 +237,17 @@ public class CohortComputation {
     }
   }
 
+  private SqlNode parseHaving(final String having, final ThirdEyeDataSource dataSource) {
+    final ThirdEyeSqlParserConfig teSqlParserConfig = dataSource.getSqlLanguage()
+        .getSqlParserConfig();
+    final SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(teSqlParserConfig);
+    try {
+      return SqlParser.create(having, sqlParserConfig).parseExpression();
+    } catch (final SqlParseException e) {
+      throw badRequest(ThirdEyeStatus.ERR_UNKNOWN, "Failed to parse having clause: " + having);
+    }
+  }
+
   private Double computeAggregate(final CohortComputationContext c) throws Exception {
     final DatasetConfigDTO dataset = c.getDataset();
     final SelectQuery builder = new SelectQuery(dataset.getDataset())
@@ -279,7 +294,9 @@ public class CohortComputation {
         .setResults(results)
         .setLimit(context.getLimit())
         .setMaxDepth(context.getMaxDepth())
-        .setDimensions(context.getAllDimensions());
+        .setDimensions(context.getAllDimensions())
+        .setWhere(request.getWhere())
+        .setHaving(request.getHaving());
 
     if (context.isRoundOffThreshold()) {
       output.setRoundOffThreshold(true);
@@ -343,6 +360,9 @@ public class CohortComputation {
     subDimensionsIdentifiers.forEach(builder::select);
     builder.select(selectable(c.getMetric()));
     subDimensionsIdentifiers.forEach(builder::groupBy);
+
+    optional(c.getHaving())
+        .ifPresent(builder::having);
 
     final SelectQueryTranslator query = builder
         .having(thresholdPredicate(c.getThreshold(), c.isRoundOffThreshold()))

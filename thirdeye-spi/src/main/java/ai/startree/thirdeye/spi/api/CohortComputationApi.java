@@ -25,12 +25,14 @@ public class CohortComputationApi implements ThirdEyeApi {
   private Double aggregate;
   private Double threshold;
   private Double percentage;
+  private Boolean RoundOffThreshold;
   private boolean generateEnumerationItems;
   private String enumerationItemParamKey;
   private List<String> dimensions;
   private Integer limit;
   private Integer maxDepth;
   private String where;
+  private String having;
 
   /* Output Fields */
   private Integer resultSize;
@@ -109,6 +111,15 @@ public class CohortComputationApi implements ThirdEyeApi {
     return this;
   }
 
+  public Boolean getRoundOffThreshold() {
+    return RoundOffThreshold;
+  }
+
+  public CohortComputationApi setRoundOffThreshold(final Boolean roundOffThreshold) {
+    RoundOffThreshold = roundOffThreshold;
+    return this;
+  }
+
   public boolean isGenerateEnumerationItems() {
     return generateEnumerationItems;
   }
@@ -180,6 +191,15 @@ public class CohortComputationApi implements ThirdEyeApi {
 
   public CohortComputationApi setWhere(final String where) {
     this.where = where;
+    return this;
+  }
+
+  public String getHaving() {
+    return having;
+  }
+
+  public CohortComputationApi setHaving(final String having) {
+    this.having = having;
     return this;
   }
 }

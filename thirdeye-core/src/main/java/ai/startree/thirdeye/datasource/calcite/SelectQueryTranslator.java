@@ -90,6 +90,7 @@ public class SelectQueryTranslator {
 
   // WHERE clause
   final private List<QueryPredicate> havingPredicates;
+  final private List<SqlNode> havingSqlNodePredicates;
 
   // ORDER BY clause
   final private List<QueryProjection> orderByProjections;
@@ -132,6 +133,7 @@ public class SelectQueryTranslator {
     sqlNodeGroupByProjections = List.copyOf(selectQuery.sqlNodeGroupByProjections);
 
     havingPredicates = List.copyOf(selectQuery.havingPredicates);
+    havingSqlNodePredicates = List.copyOf(selectQuery.havingSqlNodePredicates);
 
     orderByProjections = List.copyOf(selectQuery.orderByProjections);
     freeTextOrderByProjections = List.copyOf(selectQuery.freeTextOrderByProjections);
@@ -222,8 +224,9 @@ public class SelectQueryTranslator {
   }
 
   private SqlNode having() {
-    final List<SqlNode> predicates = new ArrayList<>();
+    final List<SqlNode> predicates = new ArrayList<>(havingSqlNodePredicates);
     havingPredicates.stream().map(QueryPredicate::toSqlNode).forEach(predicates::add);
+
     return combinePredicates(predicates);
   }
 

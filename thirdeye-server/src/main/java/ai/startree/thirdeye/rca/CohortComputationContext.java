@@ -32,8 +32,10 @@ public class CohortComputationContext {
   private int limit = 100;
   private int maxDepth = 10;
   private SqlNode where;
+  private SqlNode having;
 
   private Double threshold;
+  private boolean roundOffThreshold = false;
   private Double aggregate;
 
   public MetricConfigDTO getMetric() {
@@ -123,6 +125,24 @@ public class CohortComputationContext {
 
   public CohortComputationContext setWhere(final SqlNode where) {
     this.where = where;
+    return this;
+  }
+
+  public SqlNode getHaving() {
+    return having;
+  }
+
+  public CohortComputationContext setHaving(final SqlNode having) {
+    this.having = having;
+    return this;
+  }
+
+  public boolean isRoundOffThreshold() {
+    return roundOffThreshold;
+  }
+
+  public CohortComputationContext setRoundOffThreshold(final boolean roundOffThreshold) {
+    this.roundOffThreshold = roundOffThreshold;
     return this;
   }
 }

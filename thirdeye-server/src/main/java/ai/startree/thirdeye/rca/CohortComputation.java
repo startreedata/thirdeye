@@ -134,6 +134,15 @@ public class CohortComputation {
     return Double.parseDouble(df.format(v));
   }
 
+  private static QueryPredicate thresholdPredicate(final Double threshold,
+      final boolean roundOffThreshold) {
+    final String pattern = roundOffThreshold ? "#" : "#.##";
+    final String value = new DecimalFormat(pattern).format(threshold);
+    final Predicate predicate = Predicate.GE(COL_AGGREGATE, value);
+
+    return QueryPredicate.of(predicate, DimensionType.NUMERIC);
+  }
+
   private CohortComputationContext buildContext(final CohortComputationApi request) {
     final Interval currentInterval = new Interval(
         request.getStart(),
@@ -162,6 +171,13 @@ public class CohortComputation {
     optional(request.getWhere())
         .map(where -> parseWhere(where, dataSource))
         .ifPresent(context::setWhere);
+
+    optional(request.getHaving())
+        .map(having -> parseHaving(having, dataSource))
+        .ifPresent(context::setHaving);
+
+    optional(request.getRoundOffThreshold())
+        .ifPresent(context::setRoundOffThreshold);
 
     final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
         .orElse(optional(dataset.getDimensions())
@@ -221,6 +237,17 @@ public class CohortComputation {
     }
   }
 
+  private SqlNode parseHaving(final String having, final ThirdEyeDataSource dataSource) {
+    final ThirdEyeSqlParserConfig teSqlParserConfig = dataSource.getSqlLanguage()
+        .getSqlParserConfig();
+    final SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(teSqlParserConfig);
+    try {
+      return SqlParser.create(having, sqlParserConfig).parseExpression();
+    } catch (final SqlParseException e) {
+      throw badRequest(ThirdEyeStatus.ERR_UNKNOWN, "Failed to parse having clause: " + having);
+    }
+  }
+
   private Double computeAggregate(final CohortComputationContext c) throws Exception {
     final DatasetConfigDTO dataset = c.getDataset();
     final SelectQuery builder = new SelectQuery(dataset.getDataset())
@@ -267,7 +294,13 @@ public class CohortComputation {
         .setResults(results)
         .setLimit(context.getLimit())
         .setMaxDepth(context.getMaxDepth())
-        .setDimensions(context.getAllDimensions());
+        .setDimensions(context.getAllDimensions())
+        .setWhere(request.getWhere())
+        .setHaving(request.getHaving());
+
+    if (context.isRoundOffThreshold()) {
+      output.setRoundOffThreshold(true);
+    }
 
     if (request.isGenerateEnumerationItems()) {
       final String key = optional(request.getEnumerationItemParamKey())
@@ -328,9 +361,11 @@ public class CohortComputation {
     builder.select(selectable(c.getMetric()));
     subDimensionsIdentifiers.forEach(builder::groupBy);
 
-    final Predicate predicate = Predicate.GE(COL_AGGREGATE, String.valueOf(c.getThreshold()));
+    optional(c.getHaving())
+        .ifPresent(builder::having);
+
     final SelectQueryTranslator query = builder
-        .having(QueryPredicate.of(predicate, DimensionType.NUMERIC))
+        .having(thresholdPredicate(c.getThreshold(), c.isRoundOffThreshold()))
         .limit(c.getLimit())
         .orderBy(identifierDescOf(COL_AGGREGATE))
         .build();
@@ -344,12 +379,23 @@ public class CohortComputation {
           "metric not found. id: " + metric.getId());
     }
     final String name = metric.getName();
-    ensureExists(name, "metric id or name must be provided.");
-    final MetricConfigDTO dto = ensureExists(metricConfigManager.findByMetricName(name)
-        .stream()
-        .findFirst()
-        .orElse(null), "metric not found: name: " + name);
-    return dto;
+    if (name != null) {
+      final List<MetricConfigDTO> byMetricName = metricConfigManager.findByMetricName(name);
+      ensure(byMetricName.size() <= 1, String.format("Found %d metrics with the same name. "
+          + "Please use id or define the metric manually", byMetricName.size()));
+      ensure(byMetricName.size() == 1, "Metric not found. name: " + name);
+      return byMetricName.get(0);
+    }
+
+    ensureExists(metric.getDataset(), "dataset is a required field");
+    ensureExists(metric.getDataset().getName(), "dataset.name is a required field");
+    ensureExists(metric.getAggregationColumn(), "aggregationColumn is a required field");
+    ensureExists(metric.getAggregationFunction(), "aggregationFunction is a required field");
+
+    return new MetricConfigDTO()
+        .setDataset(metric.getDataset().getName())
+        .setAggregationColumn(metric.getAggregationColumn())
+        .setDefaultAggFunction(metric.getAggregationFunction());
   }
 
   private EnumerationItemApi toEnumerationItem(final DimensionFilterContributionApi api,

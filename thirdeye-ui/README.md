@@ -23,6 +23,8 @@ This is the UI project for StarTree ThirdEye.
     -   [`test-coverage`](#test-coverage)
     -   [`test-e2e`](#test-e2e)
     -   [`test-e2e-gui`](#test-e2e-gui)
+    -   [`license-header-check`](#license-header-check)
+    -   [`license-header-fix`](#license-header-fix)
     -   [`eslint-check`](#eslint-check)
     -   [`eslint-fix`](#eslint-fix)
     -   [`stylelint-check`](#stylelint-check)
@@ -203,6 +205,22 @@ Following command line arguments are expected
     -   `password`: password to authenticate with
     -   `clientSecret`: client secret to authenticate with
 
+### `license-header-check`
+
+Run [License Header Checker](https://github.com/georgegillams/license-header-check) across the project except for files and directories listed in project root [**.licenseheaderignore**](./.licenseheaderignore) and check for missing copyright header
+
+```console
+$ npm run license-header-check
+```
+
+### `license-header-fix`
+
+Run [License Header Checker](https://github.com/georgegillams/license-header-check) across the project except for files and directories listed in project root [**.licenseheaderignore**](./.licenseheaderignore) and insert appropriate copyright header
+
+```console
+$ npm run license-header-fix
+```
+
 ### `eslint-check`
 
 Run [ESLint](https://eslint.org) across the project except for files and directories listed in project root [**.eslintignore**](./.eslintignore) and check for issues
@@ -253,7 +271,7 @@ $ npm run prettier-fix
 
 ### `lint-check`
 
-Run [`eslint-check`](#eslint-check), [`stylelint-check`](#stylelint-check) and [`prettier-check`](#prettier-check) scripts
+Run [`license-header-check`](#license-header-check), [`eslint-check`](#eslint-check), [`stylelint-check`](#stylelint-check) and [`prettier-check`](#prettier-check) scripts
 
 ```console
 $ npm run lint-check
@@ -261,7 +279,7 @@ $ npm run lint-check
 
 ### `lint-fix`
 
-Run [`eslint-fix`](#eslint-fix), [`stylelint-fix`](#stylelint-fix) and [`prettier-fix`](#prettier-fix) scripts
+Run [`license-header-fix`](#license-header-fix), [`eslint-fix`](#eslint-fix), [`stylelint-fix`](#stylelint-fix) and [`prettier-fix`](#prettier-fix) scripts
 
 ```console
 $ npm run lint-fix

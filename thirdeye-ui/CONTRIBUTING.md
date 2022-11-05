@@ -7,6 +7,7 @@
 The following is a set of guidelines for contributing to the ThirdEye UI project. While some of the guidelines are simple conventions, others are enforced standards.
 
 -   [Coding conventions and standards](#coding-conventions-and-standards)
+    -   [License Header Checker](#license-header-checker)
     -   [ESLint](#eslint)
     -   [stylelint](#stylelint)
     -   [Prettier](#prettier)
@@ -16,6 +17,12 @@ The following is a set of guidelines for contributing to the ThirdEye UI project
 ## Coding conventions and standards
 
 Most of the coding standards are enforced with linters.
+
+### [License Header Checker](https://github.com/georgegillams/license-header-check)
+
+Configuration listed in project root [**.license-header.config.json**](./license-header.config.json)
+
+> :bulb:<br />When committing new files, a known issue with this plugin results in copyright header being inserted in files that may not have been staged to be committed.
 
 ### [ESLint](https://eslint.org)
 

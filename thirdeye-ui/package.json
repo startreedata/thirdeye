@@ -40,7 +40,7 @@
         "test-e2e": "node_modules/.bin/cypress run --headless --config-file cypress.config.json",
         "test-e2e-gui": "node_modules/.bin/cypress open --config-file cypress.config.json",
         "license-header-check": "license-check-and-add check --config-file license-header.config.json",
-        "license-header-fix": "license-check-and-add add --config-file license-header.config.json --regex-replacements date +%Y",
+        "license-header-fix": "license-check-and-add add --config-file license-header.config.json --regex-replacements $(date +%Y)",
         "eslint-check": "eslint '**/*.{ts,tsx,js,json}' --no-error-on-unmatched-pattern",
         "eslint-fix": "eslint '**/*.{ts,tsx,js,json}' --no-error-on-unmatched-pattern --fix",
         "stylelint-check": "stylelint '**/*.{css,scss}' --allow-empty-input",

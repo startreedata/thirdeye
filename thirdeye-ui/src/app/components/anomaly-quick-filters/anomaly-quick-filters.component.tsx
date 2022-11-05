@@ -1,3 +1,16 @@
+/**
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 import { useMediaQuery, useTheme } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,197 +50,192 @@ function initializeSelected(
     return null;
 }
 
-export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
-    ({ showTimeSelectorOnly }) => {
-        const {
-            timeRangeDuration,
-            recentCustomTimeRangeDurations,
-            setTimeRangeDuration,
-        } = useTimeRange();
-        const theme = useTheme();
-        const { t } = useTranslation();
-        const classes = useAnomalyQuickFilterStyles();
-        const [searchParams, setSearchParams] = useSearchParams();
-        const [selectedAlert, setSelectedAlert] = useState(
+export const AnomalyQuickFilters: FunctionComponent<
+    AnomalyQuickFiltersProps
+> = ({ showTimeSelectorOnly }) => {
+    const {
+        timeRangeDuration,
+        recentCustomTimeRangeDurations,
+        setTimeRangeDuration,
+    } = useTimeRange();
+    const theme = useTheme();
+    const { t } = useTranslation();
+    const classes = useAnomalyQuickFilterStyles();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [selectedAlert, setSelectedAlert] = useState(
+        initializeSelected(searchParams, AnomalyFilterQueryStringKey.ALERT)
+    );
+    const [selectedDataset, setSelectedDataset] = useState(
+        initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+    );
+    const [selectedMetric, setSelectedMetric] = useState(
+        initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+    );
+
+    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
+    const handleChange = (
+        filter: FilterOption | null,
+        queryParamKey: string,
+        setFunc: (option: FilterOption | null) => void
+    ): void => {
+        if (filter) {
+            searchParams.set(queryParamKey, filter.id.toString());
+            setFunc(filter);
+        } else {
+            searchParams.delete(queryParamKey);
+            setFunc(null);
+        }
+
+        setSearchParams(searchParams);
+    };
+
+    useEffect(() => {
+        setSelectedAlert(
             initializeSelected(searchParams, AnomalyFilterQueryStringKey.ALERT)
         );
-        const [selectedDataset, setSelectedDataset] = useState(
+        setSelectedDataset(
+            initializeSelected(
+                searchParams,
+                AnomalyFilterQueryStringKey.DATASET
+            )
+        );
+        setSelectedMetric(
             initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
         );
-        const [selectedMetric, setSelectedMetric] = useState(
-            initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+    }, [searchParams]);
+
+    const onHandleTimeRangeChange = (
+        timeRangeDuration: TimeRangeDuration
+    ): void => {
+        setTimeRangeDuration(timeRangeDuration);
+        searchParams.set(
+            TimeRangeQueryStringKey.TIME_RANGE,
+            timeRangeDuration.timeRange
         );
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            timeRangeDuration.startTime.toString()
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.END_TIME,
+            timeRangeDuration.endTime.toString()
+        );
+        setSearchParams(searchParams);
+    };
 
-        const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
-
-        const handleChange = (
-            filter: FilterOption | null,
-            queryParamKey: string,
-            setFunc: (option: FilterOption | null) => void
-        ): void => {
-            if (filter) {
-                searchParams.set(queryParamKey, filter.id.toString());
-                setFunc(filter);
-            } else {
-                searchParams.delete(queryParamKey);
-                setFunc(null);
-            }
-
-            setSearchParams(searchParams);
-        };
-
-        useEffect(() => {
-            setSelectedAlert(
-                initializeSelected(
-                    searchParams,
-                    AnomalyFilterQueryStringKey.ALERT
-                )
-            );
-            setSelectedDataset(
-                initializeSelected(
-                    searchParams,
-                    AnomalyFilterQueryStringKey.DATASET
-                )
-            );
-            setSelectedMetric(
-                initializeSelected(
-                    searchParams,
-                    AnomalyFilterQueryStringKey.METRIC
-                )
-            );
-        }, [searchParams]);
-
-        const onHandleTimeRangeChange = (
-            timeRangeDuration: TimeRangeDuration
-        ): void => {
-            setTimeRangeDuration(timeRangeDuration);
-            searchParams.set(
-                TimeRangeQueryStringKey.TIME_RANGE,
-                timeRangeDuration.timeRange
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.START_TIME,
-                timeRangeDuration.startTime.toString()
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.END_TIME,
-                timeRangeDuration.endTime.toString()
-            );
-            setSearchParams(searchParams);
-        };
-
-        const onHandleRefresh = (): void => {
-            onHandleTimeRangeChange(
-                getTimeRangeDuration(timeRangeDuration.timeRange)
-            );
-        };
-
-        // Return uniq metric as filter options
-        const getUniqMetrics = async (): Promise<Metric[]> => {
-            const metrics = await getAllMetrics();
-
-            return metrics.reduce(
-                (acc, metric) =>
-                    acc.find((m) => m.name === metric.name)
-                        ? acc
-                        : [...acc, metric],
-                [] as Metric[]
-            );
-        };
-
-        return (
-            <div className={classes.root}>
-                <div className={classes.filterGroup}>
-                    {!showTimeSelectorOnly && (
-                        <>
-                            <div className={classes.dataGridToolbarSearch}>
-                                <FilterOptionsAutoComplete<Metric>
-                                    fetchOptions={getUniqMetrics}
-                                    formatOptionFromServer={(rawOption) => {
-                                        return {
-                                            id: rawOption.name,
-                                            label: rawOption.name,
-                                        };
-                                    }}
-                                    label={t("label.metric")}
-                                    name={t("label.metric")}
-                                    selected={selectedMetric}
-                                    onSelectionChange={(selected) =>
-                                        handleChange(
-                                            selected,
-                                            AnomalyFilterQueryStringKey.METRIC,
-                                            setSelectedMetric
-                                        )
-                                    }
-                                />
-                            </div>
-                            <div className={classes.dataGridToolbarSearch}>
-                                <FilterOptionsAutoComplete<Dataset>
-                                    fetchOptions={getAllDatasets}
-                                    formatOptionFromServer={(rawOption) => {
-                                        return {
-                                            id: rawOption.name,
-                                            label: rawOption.name,
-                                        };
-                                    }}
-                                    label={t("label.dataset")}
-                                    name={t("label.dataset")}
-                                    selected={selectedDataset}
-                                    onSelectionChange={(selected) =>
-                                        handleChange(
-                                            selected,
-                                            AnomalyFilterQueryStringKey.DATASET,
-                                            setSelectedDataset
-                                        )
-                                    }
-                                />
-                            </div>
-                            <div className={classes.dataGridToolbarSearch}>
-                                <FilterOptionsAutoComplete<Alert>
-                                    fetchOptions={getAllAlerts}
-                                    formatOptionFromServer={(rawOption) => {
-                                        return {
-                                            id: rawOption.id,
-                                            label: rawOption.name,
-                                        };
-                                    }}
-                                    formatSelectedAfterOptionsFetch={(
-                                        selected: FilterOption,
-                                        options: FilterOption[]
-                                    ) => {
-                                        const selectedId = Number(selected.id);
-                                        const matching = options.find(
-                                            (item) => item.id === selectedId
-                                        );
-
-                                        return matching || selected;
-                                    }}
-                                    label={t("label.alert")}
-                                    name={t("label.alert")}
-                                    selected={selectedAlert}
-                                    onSelectionChange={(selected) =>
-                                        handleChange(
-                                            selected,
-                                            AnomalyFilterQueryStringKey.ALERT,
-                                            setSelectedAlert
-                                        )
-                                    }
-                                />
-                            </div>
-                        </>
-                    )}
-                </div>
-                <div>
-                    <TimeRangeSelector
-                        hideTimeRange={!screenWidthSmUp}
-                        recentCustomTimeRangeDurations={
-                            recentCustomTimeRangeDurations
-                        }
-                        timeRangeDuration={timeRangeDuration}
-                        onChange={onHandleTimeRangeChange}
-                        onRefresh={onHandleRefresh}
-                    />
-                </div>
-            </div>
+    const onHandleRefresh = (): void => {
+        onHandleTimeRangeChange(
+            getTimeRangeDuration(timeRangeDuration.timeRange)
         );
     };
+
+    // Return uniq metric as filter options
+    const getUniqMetrics = async (): Promise<Metric[]> => {
+        const metrics = await getAllMetrics();
+
+        return metrics.reduce(
+            (acc, metric) =>
+                acc.find((m) => m.name === metric.name)
+                    ? acc
+                    : [...acc, metric],
+            [] as Metric[]
+        );
+    };
+
+    return (
+        <div className={classes.root}>
+            <div className={classes.filterGroup}>
+                {!showTimeSelectorOnly && (
+                    <>
+                        <div className={classes.dataGridToolbarSearch}>
+                            <FilterOptionsAutoComplete<Metric>
+                                fetchOptions={getUniqMetrics}
+                                formatOptionFromServer={(rawOption) => {
+                                    return {
+                                        id: rawOption.name,
+                                        label: rawOption.name,
+                                    };
+                                }}
+                                label={t("label.metric")}
+                                name={t("label.metric")}
+                                selected={selectedMetric}
+                                onSelectionChange={(selected) =>
+                                    handleChange(
+                                        selected,
+                                        AnomalyFilterQueryStringKey.METRIC,
+                                        setSelectedMetric
+                                    )
+                                }
+                            />
+                        </div>
+                        <div className={classes.dataGridToolbarSearch}>
+                            <FilterOptionsAutoComplete<Dataset>
+                                fetchOptions={getAllDatasets}
+                                formatOptionFromServer={(rawOption) => {
+                                    return {
+                                        id: rawOption.name,
+                                        label: rawOption.name,
+                                    };
+                                }}
+                                label={t("label.dataset")}
+                                name={t("label.dataset")}
+                                selected={selectedDataset}
+                                onSelectionChange={(selected) =>
+                                    handleChange(
+                                        selected,
+                                        AnomalyFilterQueryStringKey.DATASET,
+                                        setSelectedDataset
+                                    )
+                                }
+                            />
+                        </div>
+                        <div className={classes.dataGridToolbarSearch}>
+                            <FilterOptionsAutoComplete<Alert>
+                                fetchOptions={getAllAlerts}
+                                formatOptionFromServer={(rawOption) => {
+                                    return {
+                                        id: rawOption.id,
+                                        label: rawOption.name,
+                                    };
+                                }}
+                                formatSelectedAfterOptionsFetch={(
+                                    selected: FilterOption,
+                                    options: FilterOption[]
+                                ) => {
+                                    const selectedId = Number(selected.id);
+                                    const matching = options.find(
+                                        (item) => item.id === selectedId
+                                    );
+
+                                    return matching || selected;
+                                }}
+                                label={t("label.alert")}
+                                name={t("label.alert")}
+                                selected={selectedAlert}
+                                onSelectionChange={(selected) =>
+                                    handleChange(
+                                        selected,
+                                        AnomalyFilterQueryStringKey.ALERT,
+                                        setSelectedAlert
+                                    )
+                                }
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
+            <div>
+                <TimeRangeSelector
+                    hideTimeRange={!screenWidthSmUp}
+                    recentCustomTimeRangeDurations={
+                        recentCustomTimeRangeDurations
+                    }
+                    timeRangeDuration={timeRangeDuration}
+                    onChange={onHandleTimeRangeChange}
+                    onRefresh={onHandleRefresh}
+                />
+            </div>
+        </div>
+    );
+};

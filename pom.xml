@@ -403,10 +403,6 @@
               <exclude>**/mem.script</exclude>
               <exclude>**/mem.properties</exclude>
               <exclude>**/m2/**</exclude>
-              <exclude>**/build/**</exclude>
-              <exclude>**/dist/**</exclude>
-              <exclude>**/webpack/**</exclude>
-              <exclude>**/.husky/_/**</exclude>
 
               <!-- Top level files -->
               <exclude>HEADER</exclude>

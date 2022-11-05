@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -8,6 +8,7 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -24,42 +25,41 @@ import {
 import { PageHeader } from "../page-header/page-header.component";
 import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";
 
-export const ConfigurationPageHeader: FunctionComponent<
-    ConfigurationPageHeaderProps
-> = ({ selectedIndex }) => {
-    const { t } = useTranslation();
+export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderProps> =
+    ({ selectedIndex }) => {
+        const { t } = useTranslation();
 
-    return (
-        <PageHeader
-            showCreateButton
-            subNavigation={[
-                {
-                    link: getDatasourcesPath(),
-                    label: t("label.datasources"),
-                },
-                {
-                    link: getDatasetsPath(),
-                    label: t("label.datasets"),
-                },
-                {
-                    link: getMetricsPath(),
-                    label: t("label.metrics"),
-                },
-                {
-                    link: getAlertTemplatesPath(),
-                    label: t("label.alert-templates"),
-                },
-                {
-                    link: getSubscriptionGroupsPath(),
-                    label: t("label.subscription-groups"),
-                },
-                {
-                    link: getEventsAllPath(),
-                    label: t("label.events"),
-                },
-            ]}
-            subNavigationSelected={selectedIndex}
-            title={t("label.configuration")}
-        />
-    );
-};
+        return (
+            <PageHeader
+                showCreateButton
+                subNavigation={[
+                    {
+                        link: getDatasourcesPath(),
+                        label: t("label.datasources"),
+                    },
+                    {
+                        link: getDatasetsPath(),
+                        label: t("label.datasets"),
+                    },
+                    {
+                        link: getMetricsPath(),
+                        label: t("label.metrics"),
+                    },
+                    {
+                        link: getAlertTemplatesPath(),
+                        label: t("label.alert-templates"),
+                    },
+                    {
+                        link: getSubscriptionGroupsPath(),
+                        label: t("label.subscription-groups"),
+                    },
+                    {
+                        link: getEventsAllPath(),
+                        label: t("label.events"),
+                    },
+                ]}
+                subNavigationSelected={selectedIndex}
+                title={t("label.configuration")}
+            />
+        );
+    };

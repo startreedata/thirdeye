@@ -9,10 +9,11 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
+/* eslint-disable */
 const fs = require("fs");
 const path = require("path");
 const childProcess = require("child_process");
@@ -21,9 +22,7 @@ const THIRDEYE_UI_JS_FILE_PATTERN = /thirdeye-ui\.\w*\.js/;
 const VERSION_STRING_TEMPLATE = "0.0.0-development-thirdeye-ui";
 
 function checkIfTemplateVersionStringExists(thirdEyeUiFile) {
-    const fileContents = fs.readFileSync(
-        thirdEyeUiFile
-    );
+    const fileContents = fs.readFileSync(thirdEyeUiFile);
 
     return fileContents.includes(VERSION_STRING_TEMPLATE);
 }
@@ -34,9 +33,7 @@ function replaceWithLatestTaggedVersion(thirdEyeUiFile) {
         .toString()
         .replace("\n", "");
 
-    let fileContents = fs
-        .readFileSync(thirdEyeUiFile)
-        .toString();
+    let fileContents = fs.readFileSync(thirdEyeUiFile).toString();
 
     fileContents = fileContents.replace(
         VERSION_STRING_TEMPLATE,
@@ -47,7 +44,9 @@ function replaceWithLatestTaggedVersion(thirdEyeUiFile) {
 }
 
 const distFiles = fs.readdirSync(path.resolve("dist"));
-const thirdEyeUiFile = distFiles.find((name) => THIRDEYE_UI_JS_FILE_PATTERN.test(name));
+const thirdEyeUiFile = distFiles.find((name) =>
+    THIRDEYE_UI_JS_FILE_PATTERN.test(name)
+);
 
 if (!thirdEyeUiFile) {
     console.log(

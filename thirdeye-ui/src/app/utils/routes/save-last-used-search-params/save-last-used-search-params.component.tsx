@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -8,6 +8,7 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -22,17 +23,16 @@ import { SaveLastUsedSearchParamsProps } from "./save-last-used-search-params.in
  *
  * @param pathKeyOverride - Use this value as the key if provided
  */
-export const SaveLastUsedSearchParams: FunctionComponent<
-    SaveLastUsedSearchParamsProps
-> = ({ pathKeyOverride, children }) => {
-    const location = useLocation();
-    const { setLastUsedForPath } = useLastUsedSearchParams();
-    const [searchParams] = useSearchParams();
-    const pathKey = pathKeyOverride || location.pathname;
+export const SaveLastUsedSearchParams: FunctionComponent<SaveLastUsedSearchParamsProps> =
+    ({ pathKeyOverride, children }) => {
+        const location = useLocation();
+        const { setLastUsedForPath } = useLastUsedSearchParams();
+        const [searchParams] = useSearchParams();
+        const pathKey = pathKeyOverride || location.pathname;
 
-    useEffect(() => {
-        setLastUsedForPath(pathKey, searchParams.toString());
-    }, [searchParams]);
+        useEffect(() => {
+            setLastUsedForPath(pathKey, searchParams.toString());
+        }, [searchParams]);
 
-    return <>{children}</>;
-};
+        return <>{children}</>;
+    };

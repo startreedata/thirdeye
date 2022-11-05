@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -8,6 +8,7 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -35,209 +36,224 @@ import { Pluralize } from "../../pluralize/pluralize.component";
 import { EnumerationItemRow } from "./enumeration-item-row/enumeration-item-row.component";
 import { EnumerationItemsTableProps } from "./enumeration-items-table.interfaces";
 
-export const EnumerationItemsTable: FunctionComponent<
-    EnumerationItemsTableProps
-> = ({
-    detectionEvaluations,
-    expanded,
-    onExpandedChange,
-    alertId,
-    initialSearchTerm,
-    onSearchTermChange,
-    sortOrder,
-    onSortOrderChange,
-}) => {
-    const [filteredDetectionEvaluations, setFilteredDetectionEvaluations] =
-        useState(filterEvaluations(detectionEvaluations, initialSearchTerm));
-    const [sortedDetectionEvaluations, setSortedDetectionEvaluations] =
-        useState(filterEvaluations(detectionEvaluations, initialSearchTerm));
-    const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-    const { t } = useTranslation();
+export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps> =
+    ({
+        detectionEvaluations,
+        expanded,
+        onExpandedChange,
+        alertId,
+        initialSearchTerm,
+        onSearchTermChange,
+        sortOrder,
+        onSortOrderChange,
+    }) => {
+        const [filteredDetectionEvaluations, setFilteredDetectionEvaluations] =
+            useState(
+                filterEvaluations(detectionEvaluations, initialSearchTerm)
+            );
+        const [sortedDetectionEvaluations, setSortedDetectionEvaluations] =
+            useState(
+                filterEvaluations(detectionEvaluations, initialSearchTerm)
+            );
+        const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+        const { t } = useTranslation();
 
-    const handleSearchClick = (term: string): void => {
-        onSearchTermChange(term);
-        if (term === "") {
-            setFilteredDetectionEvaluations(detectionEvaluations);
+        const handleSearchClick = (term: string): void => {
+            onSearchTermChange(term);
+            if (term === "") {
+                setFilteredDetectionEvaluations(detectionEvaluations);
 
-            return;
-        }
+                return;
+            }
 
-        setFilteredDetectionEvaluations(
-            filterEvaluations(detectionEvaluations, searchTerm)
-        );
-    };
+            setFilteredDetectionEvaluations(
+                filterEvaluations(detectionEvaluations, searchTerm)
+            );
+        };
 
-    const handleIsOpenChange = (isOpen: boolean, name: string): void => {
-        let copied = [...expanded];
+        const handleIsOpenChange = (isOpen: boolean, name: string): void => {
+            let copied = [...expanded];
 
-        if (isOpen) {
-            copied.push(name);
-        } else {
-            copied = copied.filter((c) => c !== name);
-        }
+            if (isOpen) {
+                copied.push(name);
+            } else {
+                copied = copied.filter((c) => c !== name);
+            }
 
-        onExpandedChange(copied);
-    };
+            onExpandedChange(copied);
+        };
 
-    useEffect(() => {
-        let copied = sortBy([...filteredDetectionEvaluations], "lastAnomalyTs");
+        useEffect(() => {
+            let copied = sortBy(
+                [...filteredDetectionEvaluations],
+                "lastAnomalyTs"
+            );
 
-        if (sortOrder === DataGridSortOrderV1.DESC) {
-            copied = copied.reverse();
-        }
+            if (sortOrder === DataGridSortOrderV1.DESC) {
+                copied = copied.reverse();
+            }
 
-        setSortedDetectionEvaluations(copied);
-    }, [sortOrder, filteredDetectionEvaluations]);
+            setSortedDetectionEvaluations(copied);
+        }, [sortOrder, filteredDetectionEvaluations]);
 
-    return (
-        <Card variant="outlined">
-            {detectionEvaluations.length > 1 && (
-                <CardContent>
-                    <Grid container>
-                        <Grid item xs={12}>
-                            <Box paddingBottom={1}>
-                                <Typography variant="h5">
-                                    {t("label.alert")}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t(
-                                        "message.list-of-all-dimensions-related-to-alert"
-                                    )}
-                                </Typography>
-                            </Box>
-                        </Grid>
-                        <Grid container item xs={12}>
-                            <Grid item sm={2} xs={12}>
-                                Search dimensions
+        return (
+            <Card variant="outlined">
+                {detectionEvaluations.length > 1 && (
+                    <CardContent>
+                        <Grid container>
+                            <Grid item xs={12}>
+                                <Box paddingBottom={1}>
+                                    <Typography variant="h5">
+                                        {t("label.alert")}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {t(
+                                            "message.list-of-all-dimensions-related-to-alert"
+                                        )}
+                                    </Typography>
+                                </Box>
                             </Grid>
-                            <Grid item sm={10} xs={12}>
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        handleSearchClick(searchTerm);
-                                    }}
-                                >
-                                    <Grid container>
-                                        <Grid item sm={9} xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                value={searchTerm}
-                                                onChange={(e) =>
-                                                    setSearchTerm(
-                                                        e.target.value
-                                                    )
-                                                }
-                                            />
-                                        </Grid>
-                                        <Grid
-                                            container
-                                            item
-                                            sm={3}
-                                            spacing={1}
-                                            xs={12}
-                                        >
-                                            <Grid item>
-                                                <Button type="submit">
-                                                    {t("label.search")}
-                                                </Button>
+                            <Grid container item xs={12}>
+                                <Grid item sm={2} xs={12}>
+                                    Search dimensions
+                                </Grid>
+                                <Grid item sm={10} xs={12}>
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            handleSearchClick(searchTerm);
+                                        }}
+                                    >
+                                        <Grid container>
+                                            <Grid item sm={9} xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    value={searchTerm}
+                                                    onChange={(e) =>
+                                                        setSearchTerm(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                />
                                             </Grid>
-
-                                            {filteredDetectionEvaluations.length !==
-                                                detectionEvaluations.length && (
+                                            <Grid
+                                                container
+                                                item
+                                                sm={3}
+                                                spacing={1}
+                                                xs={12}
+                                            >
                                                 <Grid item>
-                                                    <Button
-                                                        onClick={() => {
-                                                            setSearchTerm("");
-                                                            onSearchTermChange(
-                                                                ""
-                                                            );
-                                                            handleSearchClick(
-                                                                ""
-                                                            );
-                                                        }}
-                                                    >
-                                                        {t("label.reset")}
+                                                    <Button type="submit">
+                                                        {t("label.search")}
                                                     </Button>
                                                 </Grid>
-                                            )}
+
+                                                {filteredDetectionEvaluations.length !==
+                                                    detectionEvaluations.length && (
+                                                    <Grid item>
+                                                        <Button
+                                                            onClick={() => {
+                                                                setSearchTerm(
+                                                                    ""
+                                                                );
+                                                                onSearchTermChange(
+                                                                    ""
+                                                                );
+                                                                handleSearchClick(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                        >
+                                                            {t("label.reset")}
+                                                        </Button>
+                                                    </Grid>
+                                                )}
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </form>
+                                    </form>
+                                </Grid>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Box paddingTop={1}>
+                                    <Divider />
+                                </Box>
                             </Grid>
                         </Grid>
+                    </CardContent>
+                )}
 
-                        <Grid item xs={12}>
-                            <Box paddingTop={1}>
-                                <Divider />
-                            </Box>
+                <CardContent>
+                    <Grid container justifyContent="space-between">
+                        <Grid item>
+                            <Pluralize
+                                count={filteredDetectionEvaluations.length}
+                                plural="items"
+                                singular="item"
+                            />
+                        </Grid>
+                        <Grid item>
+                            {filteredDetectionEvaluations.length > 1 && (
+                                <Button
+                                    color="primary"
+                                    variant="text"
+                                    onClick={() =>
+                                        onSortOrderChange(
+                                            sortOrder ===
+                                                DataGridSortOrderV1.DESC
+                                                ? DataGridSortOrderV1.ASC
+                                                : DataGridSortOrderV1.DESC
+                                        )
+                                    }
+                                >
+                                    {sortOrder === DataGridSortOrderV1.DESC && (
+                                        <Grid container alignItems="center">
+                                            <Grid item>
+                                                <ArrowDownwardIcon />
+                                            </Grid>
+                                            <Grid item>
+                                                {t("label.latest-one-first")}
+                                            </Grid>
+                                        </Grid>
+                                    )}
+                                    {sortOrder === DataGridSortOrderV1.ASC && (
+                                        <Grid container alignItems="center">
+                                            <Grid item>
+                                                <ArrowUpwardIcon />
+                                            </Grid>
+                                            <Grid item>
+                                                {t("label.latest-one-last")}
+                                            </Grid>
+                                        </Grid>
+                                    )}
+                                </Button>
+                            )}
                         </Grid>
                     </Grid>
-                </CardContent>
-            )}
-
-            <CardContent>
-                <Grid container justifyContent="space-between">
-                    <Grid item>
-                        <Pluralize
-                            count={filteredDetectionEvaluations.length}
-                            plural="items"
-                            singular="item"
-                        />
-                    </Grid>
-                    <Grid item>
-                        {filteredDetectionEvaluations.length > 1 && (
-                            <Button
-                                color="primary"
-                                variant="text"
-                                onClick={() =>
-                                    onSortOrderChange(
-                                        sortOrder === DataGridSortOrderV1.DESC
-                                            ? DataGridSortOrderV1.ASC
-                                            : DataGridSortOrderV1.DESC
-                                    )
-                                }
-                            >
-                                {sortOrder === DataGridSortOrderV1.DESC && (
-                                    <Grid container alignItems="center">
-                                        <Grid item>
-                                            <ArrowDownwardIcon />
-                                        </Grid>
-                                        <Grid item>
-                                            {t("label.latest-one-first")}
-                                        </Grid>
-                                    </Grid>
-                                )}
-                                {sortOrder === DataGridSortOrderV1.ASC && (
-                                    <Grid container alignItems="center">
-                                        <Grid item>
-                                            <ArrowUpwardIcon />
-                                        </Grid>
-                                        <Grid item>
-                                            {t("label.latest-one-last")}
-                                        </Grid>
-                                    </Grid>
-                                )}
-                            </Button>
+                    <Grid container>
+                        {sortedDetectionEvaluations.map(
+                            (detectionEvaluation) => {
+                                return (
+                                    <EnumerationItemRow
+                                        alertId={alertId}
+                                        anomalies={
+                                            detectionEvaluation.anomalies
+                                        }
+                                        detectionEvaluation={
+                                            detectionEvaluation
+                                        }
+                                        expanded={expanded}
+                                        key={generateNameForDetectionResult(
+                                            detectionEvaluation
+                                        )}
+                                        onExpandChange={handleIsOpenChange}
+                                    />
+                                );
+                            }
                         )}
                     </Grid>
-                </Grid>
-                <Grid container>
-                    {sortedDetectionEvaluations.map((detectionEvaluation) => {
-                        return (
-                            <EnumerationItemRow
-                                alertId={alertId}
-                                anomalies={detectionEvaluation.anomalies}
-                                detectionEvaluation={detectionEvaluation}
-                                expanded={expanded}
-                                key={generateNameForDetectionResult(
-                                    detectionEvaluation
-                                )}
-                                onExpandChange={handleIsOpenChange}
-                            />
-                        );
-                    })}
-                </Grid>
-            </CardContent>
-        </Card>
-    );
-};
+                </CardContent>
+            </Card>
+        );
+    };

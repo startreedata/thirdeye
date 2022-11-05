@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -8,6 +8,7 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -17,44 +18,44 @@ import React, { FunctionComponent } from "react";
 import { PageNotFoundIndicatorV1Props } from "./page-not-found-indicator-v1.inerfaces";
 import { usePageNotFoundIndicatorV1Styles } from "./page-not-found-indicator-v1.styles";
 
-export const PageNotFoundIndicatorV1: FunctionComponent<
-    PageNotFoundIndicatorV1Props
-> = ({ headerText, messageText, className, ...otherProps }) => {
-    const pageNotFoundIndicatorV1Classes = usePageNotFoundIndicatorV1Styles();
+export const PageNotFoundIndicatorV1: FunctionComponent<PageNotFoundIndicatorV1Props> =
+    ({ headerText, messageText, className, ...otherProps }) => {
+        const pageNotFoundIndicatorV1Classes =
+            usePageNotFoundIndicatorV1Styles();
 
-    return (
-        <div
-            {...otherProps}
-            className={classNames(
-                pageNotFoundIndicatorV1Classes.pageNotFoundIndicator,
-                className,
-                "page-not-found-indicator-v1"
-            )}
-        >
+        return (
             <div
-                className={
-                    pageNotFoundIndicatorV1Classes.pageNotFoundIndicatorContents
-                }
+                {...otherProps}
+                className={classNames(
+                    pageNotFoundIndicatorV1Classes.pageNotFoundIndicator,
+                    className,
+                    "page-not-found-indicator-v1"
+                )}
             >
-                <Typography
-                    className={classNames(
-                        pageNotFoundIndicatorV1Classes.pageNotFoundIndicatorHeader,
-                        "page-not-found-indicator-v1-header"
-                    )}
-                    color="textSecondary"
-                    variant="h2"
+                <div
+                    className={
+                        pageNotFoundIndicatorV1Classes.pageNotFoundIndicatorContents
+                    }
                 >
-                    {headerText}
-                </Typography>
+                    <Typography
+                        className={classNames(
+                            pageNotFoundIndicatorV1Classes.pageNotFoundIndicatorHeader,
+                            "page-not-found-indicator-v1-header"
+                        )}
+                        color="textSecondary"
+                        variant="h2"
+                    >
+                        {headerText}
+                    </Typography>
 
-                <Typography
-                    className="page-not-found-indicator-v1-message"
-                    color="textSecondary"
-                    variant="h4"
-                >
-                    {messageText}
-                </Typography>
+                    <Typography
+                        className="page-not-found-indicator-v1-message"
+                        color="textSecondary"
+                        variant="h4"
+                    >
+                        {messageText}
+                    </Typography>
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    };

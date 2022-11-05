@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -8,6 +8,7 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
@@ -26,64 +27,69 @@ import {
 } from "./enumeration-item-merger.interfaces";
 import { mergeContent } from "./enumeration-item-merger.util";
 
-export const EnumerationItemMerger: FunctionComponent<
-    EnumerationItemMergerProps
-> = ({ anomalies, detectionEvaluations, children }) => {
-    const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
-    const { enumerationItems, getEnumerationItems, status, errorMessages } =
-        useGetEnumerationItems();
-    const [mergedContent, setMergedContent] =
-        useState<DetectionEvaluationForRender[]>();
+export const EnumerationItemMerger: FunctionComponent<EnumerationItemMergerProps> =
+    ({ anomalies, detectionEvaluations, children }) => {
+        const { t } = useTranslation();
+        const { notify } = useNotificationProviderV1();
+        const { enumerationItems, getEnumerationItems, status, errorMessages } =
+            useGetEnumerationItems();
+        const [mergedContent, setMergedContent] =
+            useState<DetectionEvaluationForRender[]>();
 
-    useEffect(() => {
-        setMergedContent(undefined);
-        const enumerationItemIds = new Set<number>();
+        useEffect(() => {
+            setMergedContent(undefined);
+            const enumerationItemIds = new Set<number>();
 
-        anomalies.forEach((anomaly) => {
-            if (anomaly.enumerationItem) {
-                enumerationItemIds.add(anomaly.enumerationItem.id);
+            anomalies.forEach((anomaly) => {
+                if (anomaly.enumerationItem) {
+                    enumerationItemIds.add(anomaly.enumerationItem.id);
+                }
+            });
+
+            if (enumerationItemIds.size > 0) {
+                getEnumerationItems({ ids: Array.from(enumerationItemIds) });
+            } else {
+                setMergedContent(
+                    mergeContent(anomalies, detectionEvaluations, [])
+                );
             }
-        });
+        }, [anomalies]);
 
-        if (enumerationItemIds.size > 0) {
-            getEnumerationItems({ ids: Array.from(enumerationItemIds) });
-        } else {
-            setMergedContent(mergeContent(anomalies, detectionEvaluations, []));
-        }
-    }, [anomalies]);
+        useEffect(() => {
+            if (enumerationItems) {
+                setMergedContent(
+                    mergeContent(
+                        anomalies,
+                        detectionEvaluations,
+                        enumerationItems
+                    )
+                );
+            }
+        }, [enumerationItems]);
 
-    useEffect(() => {
-        if (enumerationItems) {
-            setMergedContent(
-                mergeContent(anomalies, detectionEvaluations, enumerationItems)
+        useEffect(() => {
+            notifyIfErrors(
+                status,
+                errorMessages,
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t("label.alert"),
+                })
+            );
+        }, [status]);
+
+        if (mergedContent === undefined) {
+            return (
+                <Card variant="outlined">
+                    <CardContent>
+                        <SkeletonV1 />
+                        <SkeletonV1 />
+                        <SkeletonV1 />
+                        <SkeletonV1 />
+                    </CardContent>
+                </Card>
             );
         }
-    }, [enumerationItems]);
 
-    useEffect(() => {
-        notifyIfErrors(
-            status,
-            errorMessages,
-            notify,
-            t("message.error-while-fetching", {
-                entity: t("label.alert"),
-            })
-        );
-    }, [status]);
-
-    if (mergedContent === undefined) {
-        return (
-            <Card variant="outlined">
-                <CardContent>
-                    <SkeletonV1 />
-                    <SkeletonV1 />
-                    <SkeletonV1 />
-                    <SkeletonV1 />
-                </CardContent>
-            </Card>
-        );
-    }
-
-    return children(mergedContent);
-};
+        return children(mergedContent);
+    };

@@ -1,0 +1,55 @@
+# Husky (file without extension)
+".husky/pre-commit"
+
+# Dependencies
+/node
+/node_modules
+
+# Production
+/build
+/dist
+
+# TypeScript
+/tsbuildinfo
+
+# Maven
+/target
+
+# Docker
+/docker
+
+# Assets
+*.svg
+*.png
+*.ico
+*.ttf
+
+# Ignore files (Prettier has trouble parsing files without extension)
+".dockerignore"
+".eslintignore"
+".gitignore"
+".licenseheaderignore"
+".prettierignore"
+".stylelintignore"
+
+# RC files
+".npmrc"
+".nvmrc"
+
+# Jest
+/src/test/unit/coverage
+
+# Cypress
+/src/test/e2e/downloads
+/src/test/e2e/screenshots
+/src/test/e2e/videos
+
+# webpack
+/webpack
+
+# Miscellaneous
+*.json
+*.txt
+
+# Docs, READMEs
+*.md

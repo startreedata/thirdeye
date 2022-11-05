@@ -13,7 +13,6 @@ dist/
 tsbuildinfo/
 
 # Maven
-.mvn/
 target/
 
 # Docker (Prettier has trouble parsing Docker files)
@@ -30,12 +29,16 @@ Dockerfile
 .dockerignore
 .eslintignore
 .gitignore
+.licenseheaderignore
 .prettierignore
 .stylelintignore
 
 # RC files (Prettier has trouble parsing files without extension)
 .npmrc
 .nvmrc
+
+# License text (Prettier has trouble parsing files without extension)
+LICENSE
 
 # Jest
 src/test/unit/coverage/

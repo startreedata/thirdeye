@@ -20,7 +20,7 @@ Most of the coding standards are enforced with linters.
 
 ### [License Header Checker](https://github.com/georgegillams/license-header-check)
 
-Configuration listed in project root [**.license-header.config.json**](./license-header.config.json)
+Configuration listed in project root [**.licenseheaderrc.json**](./.licenseheaderrc.json)
 
 > :bulb:<br />When committing new files, a known issue with this plugin results in copyright header being inserted in files that may not have been staged to be committed.
 

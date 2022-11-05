@@ -13,5 +13,14 @@
 # the License.
 #
 ---
-# Fix lint issues
-"*": npm run lint-fix
+# Insert license header
+"*": npm run license-header-fix
+
+# Run ESLint
+"*.{ts,tsx,js,json}": eslint --fix
+
+# Run stylelint
+"*.{css,scss}": stylelint --fix
+
+# Run Prettier
+"**": prettier --write

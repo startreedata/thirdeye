@@ -46,6 +46,7 @@ module.exports = {
     setupFilesAfterEnv: ["@testing-library/jest-dom/extend-expect"],
     clearMocks: true,
     moduleNameMapper: {
+        "\\.ttf$": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock font imports
         "\\.svg$": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock SVG imports
         "\\.(css|scss)$": "identity-obj-proxy", // Mock style imports
         "^d3-(.*)$": `d3-$1/dist/d3-$1`, // for D3 bisect function

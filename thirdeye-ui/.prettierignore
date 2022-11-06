@@ -12,6 +12,12 @@ dist/
 # TypeScript
 tsbuildinfo/
 
+# Go
+*.go
+
+# Shell script (Prettier requires additional plugin for shell script)
+*.sh
+
 # Maven
 target/
 

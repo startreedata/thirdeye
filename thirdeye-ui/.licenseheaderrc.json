@@ -4,7 +4,7 @@
     "trailingWhitespace": "TRIM",
     "regexIdentifier": "##",
     "licenseFormats": {
-        "yml|yaml|^Dockerfile": {
+        "sh|yml|yaml|^Dockerfile": {
             "prepend": "#",
             "eachLine": {
                 "prepend": "# "
@@ -18,7 +18,7 @@
             },
             "append": "-->"
         },
-        "ts|tsx|js|jsx|css|scss": {
+        "ts|tsx|js|jsx|css|scss|go": {
             "prepend": "/*",
             "eachLine": {
                 "prepend": " * "

@@ -1,4 +1,8 @@
-# Husky (file without extension)
+# GitHub
+".github"
+
+# Husky
+".husky/_"
 ".husky/pre-commit"
 
 # Dependencies
@@ -24,7 +28,7 @@
 *.ico
 *.ttf
 
-# Ignore files (Prettier has trouble parsing files without extension)
+# Ignore files
 ".dockerignore"
 ".eslintignore"
 ".gitignore"
@@ -53,3 +57,10 @@
 
 # Docs, READMEs
 *.md
+
+# OS
+Thumbs.db
+".DS_Store"
+"._*"
+".Spotlight-V100"
+".Trashes"

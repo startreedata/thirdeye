@@ -16,6 +16,7 @@ const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const { RetryChunkLoadPlugin } = require("webpack-retry-chunk-load-plugin");
 const WebpackBar = require("webpackbar");
 const BundleAnalyzerPlugin =
     require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
@@ -43,14 +44,21 @@ module.exports = {
             // .ts and .tsx files to be handled by ts-loader
             {
                 test: /\.(ts|tsx)$/,
-                loader: "ts-loader",
+                exclude: /node_modules/, // Just the source code
+                use: [
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            configFile: "tsconfig.json",
+                            transpileOnly: false,
+                        },
+                    },
+                ],
             },
             // .css and .scss files to be handled by sass-loader
             {
                 test: /\.(css|scss)$/,
                 use: ["style-loader", "css-loader", "sass-loader"],
-                // No exclude, may need to handle files outside the source code
-                // (from node_modules)
             },
             // .svg files to be handled by @svgr/webpack
             {
@@ -110,10 +118,15 @@ module.exports = {
                 },
             ],
         }),
+        // Configure multiple attempts to load chunks
+        new RetryChunkLoadPlugin({
+            retryDelay: 500,
+            maxRetries: 3,
+        }),
         // Build progress bar
         new WebpackBar({
             name: "@startree-ui/thirdeye-ui [prod]",
-            color: "#15C39B",
+            color: "#E37475",
         }),
         // Bundle analyzer
         new BundleAnalyzerPlugin({

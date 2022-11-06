@@ -1,11 +1,13 @@
 {
-    "baseUrl": "http://localhost:7004",
-    "nodeVersion": "system",
-    "downloadsFolder": "src/test/e2e/downloads",
-    "fixturesFolder": "src/test/e2e/mocks",
     "integrationFolder": "src/test/e2e/user-flows",
-    "pluginsFile": false,
+    "fixturesFolder": "src/test/e2e/mocks",
+    "downloadsFolder": "src/test/e2e/downloads",
     "screenshotsFolder": "src/test/e2e/screenshots",
-    "supportFile": false,
-    "videosFolder": "src/test/e2e/videos"
+    "videosFolder": "src/test/e2e/videos",
+    "pluginsFile": false,
+    "supportFile": "src/test/e2e/support/index.js",
+    "chromeWebSecurity": false,
+    "env": {
+        "clientId": ""
+    }
 }

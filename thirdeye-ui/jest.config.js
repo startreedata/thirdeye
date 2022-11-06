@@ -16,33 +16,39 @@ module.exports = {
     // Project name
     displayName: "@startree-ui/thirdeye-ui",
 
+    globals: {
+        // TypeScript
+        "ts-jest": {
+            tsconfig: "tsconfig.json",
+        },
+    },
+
     // Working directory
     roots: ["<rootDir>/src/app"],
 
     // Test files
-    testMatch: ["<rootDir>/src/app/**/*.test.{ts,tsx}"], // All test files in subdirectories under src/app
+    testMatch: ["<rootDir>/src/app/**/*.test.(ts|tsx)"], // All files under src/app
 
     // Test coverage
     coverageDirectory: "<rootDir>/src/test/unit/coverage",
     collectCoverageFrom: [
-        "<rootDir>/src/app/**/*.{ts,tsx}", // All files in subdirectories under src/app
-        "!<rootDir>/src/app/*", // Exclude files directly under src/app
-        "!<rootDir>/src/app/**/index.{ts,tsx}", // Exclude index files
+        "<rootDir>/src/app/**/*.(ts|tsx)", // All files under src/app
+        "!<rootDir>/src/app/**/index.(ts|tsx)", // Exclude index files
         "!<rootDir>/src/app/locale/**", // Exclude locale files
-        "!<rootDir>/src/app/utils/material-ui/**", // Exclude Material-UI theme files
-        "!<rootDir>/src/app/rest/dto/**", // Exclude backend DTOs
+        "!<rootDir>/src/app/rest/dto/**", // Exclude REST DTOs
     ],
 
     // TypeScript
     preset: "ts-jest",
 
     // Test Environment
-    testEnvironment: "jest-environment-jsdom",
+    testEnvironment: "jsdom",
     setupFilesAfterEnv: ["@testing-library/jest-dom/extend-expect"],
     clearMocks: true,
     moduleNameMapper: {
-        "\\.(svg|ttf)": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock SVG imports
+        "\\.ttf$": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock font imports
+        "\\.svg$": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock SVG imports
         "\\.(css|scss)$": "identity-obj-proxy", // Mock style imports
-        "^d3-(.*)$": `d3-$1/dist/d3-$1`, // bisect function has been having issues
+        "^d3-(.*)$": `d3-$1/dist/d3-$1`, // for D3 bisect function
     },
 };

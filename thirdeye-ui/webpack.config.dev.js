@@ -17,6 +17,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const { RetryChunkLoadPlugin } = require("webpack-retry-chunk-load-plugin");
 const WebpackBar = require("webpackbar");
 
 const outputPath = path.join(__dirname, "dist");
@@ -42,17 +43,21 @@ module.exports = {
             // .ts and .tsx files to be handled by ts-loader
             {
                 test: /\.(ts|tsx)$/,
-                loader: "ts-loader",
-                options: {
-                    transpileOnly: true, // Speed up compilation in development mode
-                },
+                exclude: /node_modules/, // Just the source code,
+                use: [
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            configFile: "tsconfig.json",
+                            transpileOnly: true,
+                        },
+                    },
+                ],
             },
             // .css and .scss files to be handled by sass-loader
             {
                 test: /\.(css|scss)$/,
                 use: ["style-loader", "css-loader", "sass-loader"],
-                // No exclude, may need to handle files outside the source code
-                // (from node_modules)
             },
             // .svg files to be handled by @svgr/webpack
             {
@@ -88,7 +93,11 @@ module.exports = {
         }),
         // In development mode, fork TypeScript checking to run in another thread and not block main
         // transpilation
-        new ForkTsCheckerWebpackPlugin(),
+        new ForkTsCheckerWebpackPlugin({
+            typescript: {
+                configFile: "tsconfig.json",
+            },
+        }),
         // Generate index.html from template
         new HtmlWebpackPlugin({
             template: path.join(__dirname, "src/public/index.html"),
@@ -114,10 +123,15 @@ module.exports = {
                 },
             ],
         }),
+        // Configure multiple attempts to load chunks
+        new RetryChunkLoadPlugin({
+            retryDelay: 500,
+            maxRetries: 3,
+        }),
         // Build progress bar
         new WebpackBar({
             name: "@startree-ui/thirdeye-ui [dev]",
-            color: "#54BAC9",
+            color: "#68B6F4",
         }),
     ],
 
@@ -126,6 +140,7 @@ module.exports = {
         static: {
             directory: outputPath,
         },
+        compress: true,
         port: 7004,
         // Route all requests to index.html so that app gets to handle all copy pasted deep links
         historyApiFallback: {
@@ -140,6 +155,10 @@ module.exports = {
                 changeOrigin: true,
             },
         ],
+        // Disable webpack browser window overlay
+        client: {
+            overlay: false,
+        },
     },
 
     // Source map

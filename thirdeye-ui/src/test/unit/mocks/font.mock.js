@@ -12,21 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { InitOptions } from "i18next";
-import enUS from "../../locale/languages/en-us.json";
-
-export const getInitOptions = (): InitOptions => {
-    return {
-        supportedLngs: ["en-US"],
-        resources: {
-            "en-US": { translation: enUS },
-        },
-        fallbackLng: ["en-US"],
-        interpolation: {
-            escapeValue: false, // XSS safety provided by React
-        },
-        missingKeyHandler: (_lngs, _ns, key) =>
-            console.error(`i18next: key not found "${key}"`),
-        saveMissing: true, // Required for missing key handler
-    };
+// Font file import mock
+module.exports = {
+    ReactComponent: "ttf-mock",
 };

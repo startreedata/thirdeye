@@ -64,7 +64,7 @@ export const RecommendedDocumentation: FunctionComponent<RecommendedDocumentatio
                     <Grid item sm={3} xs={12}>
                         <PageContentsCardV1 fullHeight>
                             <Link
-                                href={t("link.getting-started")}
+                                href={t("url.getting-started")}
                                 target="_blank"
                             >
                                 <Grid
@@ -92,7 +92,7 @@ export const RecommendedDocumentation: FunctionComponent<RecommendedDocumentatio
                     <Grid item sm={3} xs={12}>
                         <PageContentsCardV1 fullHeight>
                             <Link
-                                href={t("link.create-an-alert")}
+                                href={t("url.create-an-alert")}
                                 target="_blank"
                             >
                                 <Grid
@@ -123,7 +123,7 @@ export const RecommendedDocumentation: FunctionComponent<RecommendedDocumentatio
                     <Grid item sm={3} xs={12}>
                         <PageContentsCardV1 fullHeight>
                             <Link
-                                href={t("link.how-to-use-te-video")}
+                                href={t("url.how-to-use-te-video")}
                                 target="_blank"
                             >
                                 <Grid
@@ -154,7 +154,7 @@ export const RecommendedDocumentation: FunctionComponent<RecommendedDocumentatio
                     <Grid item sm={3} xs={12}>
                         <PageContentsCardV1 fullHeight>
                             <Link
-                                href={t("link.how-to-use-te-video")}
+                                href={t("url.how-to-use-te-video")}
                                 target="_blank"
                             >
                                 <Grid

@@ -12,21 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { InitOptions } from "i18next";
-import enUS from "../../locale/languages/en-us.json";
+import numbro from "numbro";
+import { enUS } from "../../locale/numbers/en-us";
 
-export const getInitOptions = (): InitOptions => {
-    return {
-        supportedLngs: ["en-US"],
-        resources: {
-            "en-US": { translation: enUS },
-        },
-        fallbackLng: ["en-US"],
-        interpolation: {
-            escapeValue: false, // XSS safety provided by React
-        },
-        missingKeyHandler: (_lngs, _ns, key) =>
-            console.error(`i18next: key not found "${key}"`),
-        saveMissing: true, // Required for missing key handler
-    };
+export const registerLanguages = (): void => {
+    numbro.registerLanguage(enUS);
 };

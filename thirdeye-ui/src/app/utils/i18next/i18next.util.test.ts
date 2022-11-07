@@ -25,7 +25,14 @@ describe("i18next Util", () => {
         const initOptions = getInitOptions();
         // Also invoke the missing key handler
         initOptions.missingKeyHandler &&
-            initOptions.missingKeyHandler([""], "ns", "testKey", "");
+            initOptions.missingKeyHandler(
+                [""],
+                "ns",
+                "testKey",
+                "",
+                false,
+                null
+            );
 
         expect(initOptions.supportedLngs).toEqual(["en-US"]);
         expect(
@@ -36,7 +43,7 @@ describe("i18next Util", () => {
             initOptions.interpolation && initOptions.interpolation.escapeValue
         ).toBeFalsy();
         expect(console.error).toHaveBeenCalledWith(
-            `i18next: key not found "testKey"`
+            'i18next: key not found "testKey"'
         );
         expect(initOptions.saveMissing).toBeTruthy();
     });

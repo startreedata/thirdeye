@@ -18,10 +18,14 @@ import { Settings } from "luxon";
 import numbro from "numbro";
 import { initReactI18next } from "react-i18next";
 import { getInitOptions } from "../i18next/i18next.util";
+import { registerLanguages } from "../numbro/numbro.util";
 
 export const initLocale = (): void => {
+    // Initialize numbro (number)
+    registerLanguages();
+
     // Initialize i18next (language)
-    i18n.use(LanguageDetector) // Detects system language
+    i18n.use(LanguageDetector) // Detect system language
         .use(initReactI18next)
         .init(getInitOptions(), () => {
             // Force numbro (number) and Luxon (date/time) to use the same language

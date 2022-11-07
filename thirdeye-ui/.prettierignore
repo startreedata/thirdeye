@@ -1,3 +1,6 @@
+# GitHub (Prettier has trouble parsing files without extension)
+CODEOWNERS
+
 # Husky (Prettier has trouble parsing files without extension)
 .husky/pre-commit
 

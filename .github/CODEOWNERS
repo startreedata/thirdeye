@@ -1,4 +1,4 @@
-# Allow unrestricted access ot thirdeye-ci bot
+# Allow thirdeye-ci bot to update pom.xml without restrictions
 /thirdeye-ui/pom.xml
 
 # For any change in the UI project configuration

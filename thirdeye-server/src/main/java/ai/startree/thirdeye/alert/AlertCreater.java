@@ -81,8 +81,7 @@ public class AlertCreater {
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
       dto.setLastTimestamp(minimumLastTimestamp(dto));
     }
-    final Long id = alertManager.save(dto);
-    dto.setId(id);
+    alertManager.save(dto);
     return dto;
   }
 

@@ -120,6 +120,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     anomalyMerger.mergeAndSave(alert, result.getAnomalies());
 
     // re-notify the anomalies if any
+    // note cyril - dead code - renotify is always false
     for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {

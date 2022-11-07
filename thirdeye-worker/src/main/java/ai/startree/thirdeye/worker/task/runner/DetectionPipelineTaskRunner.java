@@ -117,8 +117,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final AlertDTO alert, final OperatorResult result) {
-    // todo setAnomalyResultSource ANOMALY_REPLAY if task is an onboarding task
-
     anomalyMerger.mergeAndSave(alert, result.getAnomalies());
 
     // re-notify the anomalies if any

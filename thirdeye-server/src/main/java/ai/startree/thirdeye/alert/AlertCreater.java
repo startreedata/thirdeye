@@ -45,8 +45,8 @@ public class AlertCreater {
   private final long minimumOnboardingStartTime;
 
   @Inject
-  public AlertCreater(final AlertManager alertManager,
-      final TaskManager taskManager, final AlertInsightsProvider alertInsightsProvider,
+  public AlertCreater(final AlertManager alertManager, final TaskManager taskManager,
+      final AlertInsightsProvider alertInsightsProvider,
       final TimeConfiguration timeConfiguration) {
     this.alertManager = alertManager;
     this.taskManager = taskManager;
@@ -56,20 +56,33 @@ public class AlertCreater {
 
   public AlertDTO create(AlertApi api) {
     ensureCreationIsPossible(api);
-
     final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
+    final AlertDTO savedAlert = saveAlert(dto);
 
-    return saveAndOnboard(dto);
+    createOnboardingTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+
+    return dto;
   }
 
-  public AlertDTO saveAndOnboard(final AlertDTO dto) {
+  /**
+   * soft reset - does not delete related entities
+   */
+  public AlertDTO reset(AlertDTO dto) {
+    // reset lastTimestamp
+    dto.setLastTimestamp(0);
+    final AlertDTO savedAlert = saveAlert(dto);
+
+    createOnboardingTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+
+    return dto;
+  }
+
+  private AlertDTO saveAlert(final AlertDTO dto) {
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
       dto.setLastTimestamp(minimumLastTimestamp(dto));
     }
     final Long id = alertManager.save(dto);
     dto.setId(id);
-    createOnboardingTask(dto, dto.getLastTimestamp(), System.currentTimeMillis());
-
     return dto;
   }
 
@@ -100,16 +113,17 @@ public class AlertCreater {
     }
   }
 
-  public void createOnboardingTask(final AlertDTO alertDTO, final long start, final long end) {
+  public void createOnboardingTask(final Long alertId, final long start, final long end) {
+    checkArgument(alertId != null && alertId >= 0);
     final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo();
-    info.setConfigId(alertDTO.getId());
+    info.setConfigId(alertId);
 
     checkArgument(start <= end);
     info.setStart(start)
         .setEnd(end);
 
     try {
-      TaskDTO taskDTO = taskManager.createTaskDto(alertDTO.getId(), info, TaskType.ONBOARDING);
+      TaskDTO taskDTO = taskManager.createTaskDto(alertId, info, TaskType.ONBOARDING);
       LOG.info("Created {} task {} with settings {}",
           TaskType.ONBOARDING,
           taskDTO.getId(),

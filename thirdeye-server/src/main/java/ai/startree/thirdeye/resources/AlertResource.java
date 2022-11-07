@@ -179,12 +179,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("end") final Long endTime
   ) {
     ensureExists(startTime, "start");
+    ensureExists(get(id));
 
-    final AlertDTO dto = get(id);
-    alertCreater.createOnboardingTask(dto,
-        startTime,
-        safeEndTime(endTime)
-    );
+    alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
 
     return Response.ok().build();
   }
@@ -257,9 +254,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
     alertDeleter.deleteAssociatedAnomalies(dto.getId());
 
-    /* Reset the last timestamp after deleting all anomalies */
-    dto.setLastTimestamp(0);
-
-    return respondOk(toApi(alertCreater.saveAndOnboard(dto)));
+    return respondOk(toApi(alertCreater.reset(dto)));
   }
 }

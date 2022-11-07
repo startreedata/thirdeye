@@ -21,4 +21,8 @@ export const useNotificationDisplayV1Styles = makeStyles({
     notificationActionHidden: {
         display: "none",
     },
+    snackBarContainer: {
+        maxWidth: "90vw",
+        overflowWrap: "break-word",
+    },
 });

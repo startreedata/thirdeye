@@ -72,6 +72,8 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                                 action: notification.nonDismissible
                                     ? notificationDisplayV1Classes.notificationActionHidden
                                     : notificationDisplayV1Classes.notificationActionVisible,
+                                message:
+                                    notificationDisplayV1Classes.snackBarContainer,
                             }}
                             severity={notification.type}
                             onClose={handleClose}

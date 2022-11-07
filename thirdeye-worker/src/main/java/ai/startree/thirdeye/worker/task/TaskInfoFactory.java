@@ -16,7 +16,6 @@ package ai.startree.thirdeye.worker.task;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.spi.task.TaskType.MONITOR;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
-import static ai.startree.thirdeye.spi.task.TaskType.ONBOARDING;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
@@ -41,7 +40,6 @@ public class TaskInfoFactory {
       ImmutableMap.<TaskType, Class<? extends TaskInfo>>builder()
           .put(DETECTION, DetectionPipelineTaskInfo.class)
           .put(NOTIFICATION, DetectionAlertTaskInfo.class)
-          .put(ONBOARDING, DetectionPipelineTaskInfo.class)
           .put(MONITOR, MonitorTaskInfo.class)
           .build();
 

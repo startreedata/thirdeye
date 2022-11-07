@@ -114,17 +114,14 @@ public class AlertCreater {
 
   public void createOnboardingTask(final Long alertId, final long start, final long end) {
     checkArgument(alertId != null && alertId >= 0);
-    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo();
-    info.setConfigId(alertId);
-
     checkArgument(start <= end);
-    info.setStart(start)
-        .setEnd(end);
+    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, start,
+        end);
 
     try {
-      TaskDTO taskDTO = taskManager.createTaskDto(alertId, info, TaskType.ONBOARDING);
+      final TaskDTO taskDTO = taskManager.createTaskDto(alertId, info, TaskType.DETECTION);
       LOG.info("Created {} task {} with settings {}",
-          TaskType.ONBOARDING,
+          TaskType.DETECTION,
           taskDTO.getId(),
           taskDTO);
     } catch (JsonProcessingException e) {

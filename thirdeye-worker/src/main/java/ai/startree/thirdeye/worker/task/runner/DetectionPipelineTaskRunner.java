@@ -84,9 +84,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
           String.format("Could not resolve config id %d", info.getConfigId()));
 
-      Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(alert,
-          info.getStart(),
-          info.getEnd());
+      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(alert,
+          info.getStart(), info.getEnd());
 
       final OperatorResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
@@ -121,6 +120,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     anomalyMerger.mergeAndSave(alert, result.getAnomalies());
 
     // re-notify the anomalies if any
+    // note cyril - dead code - renotify is always false
     for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {

@@ -179,12 +179,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("end") final Long endTime
   ) {
     ensureExists(startTime, "start");
+    ensureExists(get(id));
 
-    final AlertDTO dto = get(id);
-    alertCreater.createOnboardingTask(dto,
-        startTime,
-        safeEndTime(endTime)
-    );
+    alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
 
     return Response.ok().build();
   }
@@ -228,6 +225,23 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 
+  @ApiOperation(value = "Delete associated anomalies and rerun detection till present")
+  @POST
+  @Path("{id}/reset")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response reset(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("id") final Long id) {
+    final AlertDTO dto = get(id);
+    LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
+
+    alertDeleter.deleteAssociatedAnomalies(dto.getId());
+    final AlertDTO resetAlert = alertCreater.reset(dto);
+
+    return respondOk(toApi(resetAlert));
+  }
+
   private long safeEndTime(final @Nullable Long endTime) {
     if (endTime == null) {
       return System.currentTimeMillis();
@@ -242,28 +256,5 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       return currentMaximumPossibleEndTime;
     }
     return endTime;
-  }
-
-  @ApiOperation(value = "Delete associated anomalies and rerun detection till present")
-  @POST
-  @Path("{id}/reset")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response reset(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id) {
-    final AlertDTO dto = get(id);
-    LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
-
-    alertDeleter.deleteAssociatedAnomalies(dto.getId());
-
-    /* Reset the last timestamp after deleting all anomalies */
-    dto.setLastTimestamp(0);
-    dtoManager.save(dto);
-
-    /* Create a task to rerun all historical anomalies */
-    alertCreater.createOnboardingTask(dto);
-
-    return respondOk(toApi(dto));
   }
 }

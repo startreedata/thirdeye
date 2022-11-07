@@ -39,7 +39,6 @@ public class TaskRunnerFactory {
 
   public TaskRunner get(TaskType taskType) {
     switch (taskType) {
-      case ONBOARDING:
       case DETECTION:
         return detectionPipelineTaskRunner;
       case NOTIFICATION:

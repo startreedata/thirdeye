@@ -119,9 +119,9 @@ public class AlertCreater {
         end);
 
     try {
-      TaskDTO taskDTO = taskManager.createTaskDto(alertId, info, TaskType.ONBOARDING);
+      final TaskDTO taskDTO = taskManager.createTaskDto(alertId, info, TaskType.DETECTION);
       LOG.info("Created {} task {} with settings {}",
-          TaskType.ONBOARDING,
+          TaskType.DETECTION,
           taskDTO.getId(),
           taskDTO);
     } catch (JsonProcessingException e) {

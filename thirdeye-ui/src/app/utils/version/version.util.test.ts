@@ -12,21 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { InitOptions } from "i18next";
-import enUS from "../../locale/languages/en-us.json";
+import { getThirdEyeUiVersion } from "./version.util";
 
-export const getInitOptions = (): InitOptions => {
-    return {
-        supportedLngs: ["en-US"],
-        resources: {
-            "en-US": { translation: enUS },
-        },
-        fallbackLng: ["en-US"],
-        interpolation: {
-            escapeValue: false, // XSS safety provided by React
-        },
-        missingKeyHandler: (_lngs, _ns, key) =>
-            console.error(`i18next: key not found "${key}"`),
-        saveMissing: true, // Required for missing key handler
-    };
-};
+describe("Version Util", () => {
+    it("getThirdEyeUiVersion should return appropriate version number placeholder", () => {
+        expect(getThirdEyeUiVersion()).toEqual("0.0.0-development-thirdeye-ui");
+    });
+});

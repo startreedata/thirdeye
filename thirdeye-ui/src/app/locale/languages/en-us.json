@@ -306,12 +306,6 @@
         "yes-leave-page": "Yes, leave page",
         "yesterday": "Yesterday"
     },
-    "link": {
-        "create-an-alert": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/create-your-first-alert",
-        "getting-started": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/",
-        "how-to-investigate-anomaly": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/perform-root-cause-analysis",
-        "how-to-use-te-video": "https://drive.google.com/file/d/1vsiWz_GHH9E8S8ivsDrwr-B1YA_aSVBj/view"
-    },
     "message": {
         "add-emails-example": "Add multiple emails separated by comma. e.g. email1@domain.com, email2@domain.com.",
         "alert-is-active": "Alert is active",
@@ -432,5 +426,12 @@
         "visualization-render-error": "Error rendering visualization",
         "you-can-use-our": "You can use our sample configurations as reference to build your own: ",
         "your-changes-wont-save": "Your changes won’t be saved."
+    },
+    "server": {},
+    "url": {
+        "create-an-alert": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/create-your-first-alert",
+        "getting-started": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/",
+        "how-to-investigate-anomaly": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/perform-root-cause-analysis",
+        "how-to-use-te-video": "https://drive.google.com/file/d/1vsiWz_GHH9E8S8ivsDrwr-B1YA_aSVBj/view"
     }
 }

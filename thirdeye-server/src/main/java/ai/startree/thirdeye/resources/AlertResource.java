@@ -225,6 +225,23 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 
+  @ApiOperation(value = "Delete associated anomalies and rerun detection till present")
+  @POST
+  @Path("{id}/reset")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response reset(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("id") final Long id) {
+    final AlertDTO dto = get(id);
+    LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
+
+    alertDeleter.deleteAssociatedAnomalies(dto.getId());
+    final AlertDTO resetAlert = alertCreater.reset(dto);
+
+    return respondOk(toApi(resetAlert));
+  }
+
   private long safeEndTime(final @Nullable Long endTime) {
     if (endTime == null) {
       return System.currentTimeMillis();
@@ -239,21 +256,5 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       return currentMaximumPossibleEndTime;
     }
     return endTime;
-  }
-
-  @ApiOperation(value = "Delete associated anomalies and rerun detection till present")
-  @POST
-  @Path("{id}/reset")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response reset(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id) {
-    final AlertDTO dto = get(id);
-    LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
-
-    alertDeleter.deleteAssociatedAnomalies(dto.getId());
-
-    return respondOk(toApi(alertCreater.reset(dto)));
   }
 }

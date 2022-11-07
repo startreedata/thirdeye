@@ -84,9 +84,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
           String.format("Could not resolve config id %d", info.getConfigId()));
 
-      Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(alert,
-          info.getStart(),
-          info.getEnd());
+      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(alert,
+          info.getStart(), info.getEnd());
 
       final OperatorResult result = detectionPipelineRunner.run(alert, detectionInterval);
 
@@ -118,6 +117,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final AlertDTO alert, final OperatorResult result) {
+    // todo setAnomalyResultSource ANOMALY_REPLAY if task is an onboarding task
+
     anomalyMerger.mergeAndSave(alert, result.getAnomalies());
 
     // re-notify the anomalies if any

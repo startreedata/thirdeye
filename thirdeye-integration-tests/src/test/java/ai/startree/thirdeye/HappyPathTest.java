@@ -123,6 +123,13 @@ public class HappyPathTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
+  @Test(dependsOnMethods = "testCreatePinotDataSource")
+  public void testPinotDataSourceHealth() {
+    Response response = request(
+        "api/data-sources/validate?name=" + pinotDataSourceApi.getName()).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+  }
+
   @Test(dependsOnMethods = "testPing")
   public void testCreateDefaultTemplates() {
     MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();

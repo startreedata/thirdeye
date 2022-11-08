@@ -26,6 +26,8 @@ import java.util.List;
 import org.apache.pinot.testcontainer.AddTable;
 import org.apache.pinot.testcontainer.ImportData;
 import org.apache.pinot.testcontainer.PinotContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Integration tests that need Pinot can use this shared instance.
@@ -34,12 +36,14 @@ public class PinotDataSourceManager {
 
   public static final String PINOT_DATA_SOURCE_NAME = "PinotContainer";
   public static final String PINOT_DATASET_NAME = "pageviews";
+  public static final String PINOT_DATA_SOURCE_TYPE = "pinot";
+
+  private static final Logger LOG = LoggerFactory.getLogger(PinotDataSourceManager.class);
+
   private static final String INGESTION_JOB_SPEC_FILENAME = "batch-job-spec.yml";
   private static final String SCHEMA_FILENAME = "schema.json";
   private static final String TABLE_CONFIG_FILENAME = "table-config.json";
   private static final String DATA_FILENAME = "data.csv";
-  public static final String PINOT_DATA_SOURCE_TYPE = "pinot";
-
   private static PinotContainer instance;
 
   private PinotDataSourceManager() {
@@ -85,7 +89,28 @@ public class PinotDataSourceManager {
   }
 
   public static synchronized DataSourceApi getPinotDataSourceApi() {
-    return getPinotDataSourceApi(getInstance());
+    final String property = System.getProperty("thirdeye.test.useLocalPinotInstance");
+    if (property != null) {
+      LOG.warn("Using local pinot instance for testing!");
+      return localPinotDataSourceApi();
+    }
+    /* Create the pinot instance if required */
+    final PinotContainer instance = getInstance();
+
+    return getPinotDataSourceApi(instance);
+  }
+
+  private static DataSourceApi localPinotDataSourceApi() {
+    return new DataSourceApi().setName(PINOT_DATA_SOURCE_NAME)
+        .setType(PINOT_DATA_SOURCE_TYPE)
+        .setProperties(ImmutableMap.<String, Object>builder()
+            .put("zookeeperUrl", "localhost:2123")
+            .put("clusterName", "QuickStartCluster")
+            .put("controllerConnectionScheme", "http")
+            .put("controllerHost", "localhost")
+            .put("controllerPort", "9000")
+            .build()
+        );
   }
 
   private static synchronized DataSourceApi getPinotDataSourceApi(PinotContainer pinotContainer) {

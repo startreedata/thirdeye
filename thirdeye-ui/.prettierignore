@@ -23,6 +23,7 @@ tsbuildinfo/
 
 # Maven
 target/
+pom.xml
 
 # Docker (Prettier has trouble parsing Docker files)
 docker/

@@ -396,6 +396,7 @@
               <exclude>**/*.ser</exclude>
               <exclude>**/*.v1</exclude>
               <exclude>**/*.v2</exclude>
+              <exclude>**/helm/**/charts/**</exclude>
 
               <!-- Auto-generated files -->
               <exclude>target/**</exclude>
@@ -417,6 +418,9 @@
 
               <!-- files from IntelliJ -->
               <exclude>.idea/**</exclude>
+
+              <!-- tmp directories -->
+              <exclude>**/tmp/**</exclude>
             </excludes>
             <mapping>
               <ts>JAVADOC_STYLE</ts>

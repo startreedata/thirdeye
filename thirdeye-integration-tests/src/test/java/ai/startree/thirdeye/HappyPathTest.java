@@ -238,6 +238,24 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
+  public void testAnomalyCount() {
+    // without filters
+    Response response = request("api/anomalies/count").get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    Integer anomalyCount = response.readEntity(Integer.class);
+    assertThat(anomalyCount).isEqualTo(4);
+
+    // there are only 2 anomalies that have startTime greater than or equal this value
+    long startTime = 1585353600000L;
+
+    // with filters
+    response = request("api/anomalies/count?startTime=[gte]" + startTime).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    anomalyCount = response.readEntity(Integer.class);
+    assertThat(anomalyCount).isEqualTo(2);
+  }
+
+  @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testGetHeatmap() {
     Response response = request("api/rca/metrics/heatmap?id=" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);

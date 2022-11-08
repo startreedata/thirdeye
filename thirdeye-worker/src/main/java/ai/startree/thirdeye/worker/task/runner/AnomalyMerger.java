@@ -102,7 +102,7 @@ public class AnomalyMerger {
     this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
-  public static MergedAnomalyResultDTO copyAnomalyInfo(final MergedAnomalyResultDTO from,
+  private static MergedAnomalyResultDTO copyAnomalyInfo(final MergedAnomalyResultDTO from,
       final MergedAnomalyResultDTO to) {
     to.setStartTime(from.getStartTime());
     to.setEndTime(from.getEndTime());
@@ -206,9 +206,9 @@ public class AnomalyMerger {
     return mergedTimeSeriesSnapshot;
   }
 
-  public void mergeAndSave(final AlertDTO alert, final List<MergedAnomalyResultDTO> anomalies) {
+  public List<MergedAnomalyResultDTO> merge(final AlertDTO alert, final List<MergedAnomalyResultDTO> anomalies) {
     if (anomalies.isEmpty()) {
-      return;
+      return List.of();
     }
     final AlertTemplateDTO templateWithProperties;
     try {
@@ -250,12 +250,7 @@ public class AnomalyMerger {
     final List<MergedAnomalyResultDTO> allMergedAnomalies = new ArrayList<>(mergedAnomalies);
     allMergedAnomalies.addAll(mergedAnomaliesWithEnumerationItem);
 
-    for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : allMergedAnomalies) {
-      final Long id = mergedAnomalyResultManager.save(mergedAnomalyResultDTO);
-      if (id == null) {
-        LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
-      }
-    }
+    return allMergedAnomalies;
   }
 
   private Map<Long, List<MergedAnomalyResultDTO>> groupByEnumerationItem(

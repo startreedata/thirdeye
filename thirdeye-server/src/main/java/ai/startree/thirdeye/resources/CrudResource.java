@@ -318,4 +318,18 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     dtoManager.findAll().forEach(this::deleteDto);
     return Response.ok().build();
   }
+
+  @GET
+  @Path("/count")
+  @Timed
+  public Response countWithPredicate(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Context UriInfo uriInfo
+  ) {
+    final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
+    final Long count = queryParameters.size() > 0
+        ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters).getPredicate())
+        : dtoManager.count();
+    return Response.ok(count).build();
+  }
 }

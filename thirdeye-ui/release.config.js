@@ -122,7 +122,7 @@ module.exports = {
         [
             "semantic-release-slack-bot",
             {
-                slackWebhook: process.env.SLACK_NOTIFICATION_WEBHOOK,
+                slackWebhook: process.env.SLACK_PUBLISH_WEBHOOK,
                 notifyOnSuccess: true,
                 notifyOnFail: false, // CI pipeline will notify upon failure
                 onSuccessTemplate: {

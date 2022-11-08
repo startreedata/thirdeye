@@ -17,8 +17,8 @@ import static ai.startree.thirdeye.DropwizardTestUtils.alertEvaluationApi;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
-import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
-import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
+import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -45,7 +45,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -70,11 +69,10 @@ public class HappyPathTest {
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 
   private static final AlertApi MAIN_ALERT_API;
+  private static final long EVALUATE_END_TIME = 1596326400000L;
   private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
   private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
-
-  public static final long EVALUATE_END_TIME = 1596326400000L;
 
   static {
     try {
@@ -84,7 +82,7 @@ public class HappyPathTest {
     }
   }
 
-  private PinotContainer pinotContainer;
+  private DataSourceApi pinotDataSourceApi;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -94,7 +92,7 @@ public class HappyPathTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    pinotContainer = PinotContainerManager.getInstance();
+    pinotDataSourceApi = PinotDataSourceManager.getPinotDataSourceApi();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
@@ -120,15 +118,8 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testCreatePinotDataSource() {
-    DataSourceApi dataSourceApi = new DataSourceApi().setName(PINOT_DATA_SOURCE_NAME)
-        .setType("pinot")
-        .setProperties(
-            Map.of("zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(), "brokerUrl",
-                pinotContainer.getPinotBrokerUrl().replace("http://", ""), "clusterName",
-                "QuickStartCluster", "controllerConnectionScheme", "http", "controllerHost",
-                "localhost", "controllerPort", pinotContainer.getControllerPort()));
 
-    Response response = request("api/data-sources").post(Entity.json(List.of(dataSourceApi)));
+    Response response = request("api/data-sources").post(Entity.json(List.of(pinotDataSourceApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 

@@ -15,6 +15,8 @@ package ai.startree.thirdeye;
 
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.api.DataSourceApi;
+import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -28,7 +30,7 @@ import org.apache.pinot.testcontainer.PinotContainer;
 /**
  * Integration tests that need Pinot can use this shared instance.
  */
-public class PinotContainerManager {
+public class PinotDataSourceManager {
 
   public static final String PINOT_DATA_SOURCE_NAME = "PinotContainer";
   public static final String PINOT_DATASET_NAME = "pageviews";
@@ -36,13 +38,14 @@ public class PinotContainerManager {
   private static final String SCHEMA_FILENAME = "schema.json";
   private static final String TABLE_CONFIG_FILENAME = "table-config.json";
   private static final String DATA_FILENAME = "data.csv";
+  public static final String PINOT_DATA_SOURCE_TYPE = "pinot";
 
   private static PinotContainer instance;
 
-  private PinotContainerManager() {
+  private PinotDataSourceManager() {
   }
 
-  public synchronized static PinotContainer getInstance() {
+  private synchronized static PinotContainer getInstance() {
     if (instance == null) {
       instance = createPinotContainer();
       try {
@@ -57,7 +60,7 @@ public class PinotContainerManager {
   }
 
   private static PinotContainer createPinotContainer() {
-    final URL datasetsBaseResource = PinotContainerManager.class.getResource("/datasets");
+    final URL datasetsBaseResource = PinotDataSourceManager.class.getResource("/datasets");
     requireNonNull(datasetsBaseResource);
 
     final String datasetsBasePath = datasetsBaseResource.getFile();
@@ -79,5 +82,23 @@ public class PinotContainerManager {
       importDataList.add(new ImportData(batchJobSpecFile, dataFile));
     }
     return new PinotContainer(addTableList, importDataList);
+  }
+
+  public static synchronized DataSourceApi getPinotDataSourceApi() {
+    return getPinotDataSourceApi(getInstance());
+  }
+
+  private static synchronized DataSourceApi getPinotDataSourceApi(PinotContainer pinotContainer) {
+    return new DataSourceApi().setName(PINOT_DATA_SOURCE_NAME)
+        .setType(PINOT_DATA_SOURCE_TYPE)
+        .setProperties(ImmutableMap.<String, Object>builder()
+            .put("zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort())
+            .put("brokerUrl", pinotContainer.getPinotBrokerUrl().replace("http://", ""))
+            .put("clusterName", "QuickStartCluster")
+            .put("controllerConnectionScheme", "http")
+            .put("controllerHost", "localhost")
+            .put("controllerPort", pinotContainer.getControllerPort())
+            .build()
+        );
   }
 }

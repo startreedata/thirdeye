@@ -19,7 +19,7 @@
   <parent>
     <groupId>ai.startree.thirdeye</groupId>
     <artifactId>thirdeye</artifactId>
-    <version>1.100.0-SNAPSHOT</version>
+    <version>1.100.0</version>
   </parent>
   <artifactId>thirdeye-detectionpipeline</artifactId>
 

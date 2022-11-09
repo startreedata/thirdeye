@@ -78,7 +78,7 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
                 {/* Cohort detector path */}
                 <Route
                     element={<CohortDetectorPage />}
-                    path={`${AppRouteRelative.COHORT_DETECTOR}`}
+                    path={`${AppRouteRelative.COHORT_RECOMMENDER}`}
                 />
 
                 {/* Login path */}

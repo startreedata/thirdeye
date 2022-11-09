@@ -23,7 +23,7 @@ const PLACEHOLDER_ROUTE_ID = ":id";
 
 export const AppRouteRelative = {
     ADMIN: "admin",
-    COHORT_DETECTOR: "cohort-detector",
+    COHORT_DETECTOR: "cohort-recommender",
     HOME: "home",
     LOGIN: "login",
     LOGOUT: "logout",

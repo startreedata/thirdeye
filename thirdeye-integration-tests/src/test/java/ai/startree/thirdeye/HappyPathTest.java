@@ -17,8 +17,8 @@ import static ai.startree.thirdeye.DropwizardTestUtils.alertEvaluationApi;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
-import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
-import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
+import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
@@ -36,6 +37,7 @@ import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
@@ -46,7 +48,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -71,21 +72,20 @@ public class HappyPathTest {
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 
   private static final AlertApi MAIN_ALERT_API;
+  private static final long EVALUATE_END_TIME = 1596326400000L;
   private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
   private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
 
-  public static final long EVALUATE_END_TIME = 1596326400000L;
-
   static {
     try {
       MAIN_ALERT_API = loadAlertApi("/happypath/payloads/" + "alert.json");
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
     }
   }
 
-  private PinotContainer pinotContainer;
+  private DataSourceApi pinotDataSourceApi;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -95,7 +95,7 @@ public class HappyPathTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    pinotContainer = PinotContainerManager.getInstance();
+    pinotDataSourceApi = PinotDataSourceManager.getPinotDataSourceApi();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
@@ -115,57 +115,59 @@ public class HappyPathTest {
 
   @Test()
   public void testPing() {
-    Response response = request("internal/ping").get();
+    final Response response = request("internal/ping").get();
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testPing")
   public void testCreatePinotDataSource() {
-    DataSourceApi dataSourceApi = new DataSourceApi().setName(PINOT_DATA_SOURCE_NAME)
-        .setType("pinot")
-        .setProperties(
-            Map.of("zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(), "brokerUrl",
-                pinotContainer.getPinotBrokerUrl().replace("http://", ""), "clusterName",
-                "QuickStartCluster", "controllerConnectionScheme", "http", "controllerHost",
-                "localhost", "controllerPort", pinotContainer.getControllerPort()));
 
-    Response response = request("api/data-sources").post(Entity.json(List.of(dataSourceApi)));
+    final Response response = request("api/data-sources").post(Entity.json(List.of(
+        pinotDataSourceApi)));
+    assertThat(response.getStatus()).isEqualTo(200);
+  }
+
+  @Test(dependsOnMethods = "testCreatePinotDataSource", timeOut = 5000)
+  public void testPinotDataSourceHealth() {
+    final Response response = request(
+        "api/data-sources/validate?name=" + pinotDataSourceApi.getName()).get();
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testPing")
   public void testCreateDefaultTemplates() {
-    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     formData.add("updateExisting", "true");
-    Response response = request("/api/alert-templates/load-defaults").post(Entity.form(formData));
+    final Response response = request("/api/alert-templates/load-defaults").post(Entity.form(
+        formData));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
-  @Test(dependsOnMethods = "testCreatePinotDataSource")
+  @Test(dependsOnMethods = "testPinotDataSourceHealth")
   public void testCreateDataset() {
-    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
     formData.add("datasetName", PINOT_DATASET_NAME);
 
-    Response response = request("api/data-sources/onboard-dataset/").post(Entity.form(formData));
+    final Response response = request("api/data-sources/onboard-dataset/").post(Entity.form(formData));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
-  @Test(dependsOnMethods = "testCreateDataset")
+  @Test(dependsOnMethods = "testCreateDataset", timeOut = 5000)
   public void testEvaluateAlert() {
-    AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(MAIN_ALERT_API,
+    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(MAIN_ALERT_API,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
-    Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
+    final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testEvaluateAlert")
   public void testCreateAlert() {
-    Response response = request("api/alerts").post(Entity.json(List.of(MAIN_ALERT_API)));
+    final Response response = request("api/alerts").post(Entity.json(List.of(MAIN_ALERT_API)));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    List<Map<String, Object>> alerts = response.readEntity(List.class);
+    final List<Map<String, Object>> alerts = response.readEntity(List.class);
     alertId = ((Number) alerts.get(0).get("id")).longValue();
   }
 
@@ -185,7 +187,7 @@ public class HappyPathTest {
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
-    Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
+    final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
@@ -193,7 +195,7 @@ public class HappyPathTest {
   public void testAlertInsights() {
     final Response response = request("api/alerts/" + alertId + "/insights").get();
     assertThat(response.getStatus()).isEqualTo(200);
-    AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
+    final AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
     assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(
         "P1D");
     assertThat(insights.getDefaultStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY);
@@ -204,13 +206,13 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testCreateAlert")
   public void testCreateSubscription() {
-    SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi().setName(
+    final SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi().setName(
             "testSubscription")
         .setCron("")
         .setNotificationSchemes(new NotificationSchemesApi().setEmail(
             new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
         .setAlerts(List.of(new AlertApi().setId(alertId)));
-    Response response = request("api/subscription-groups").post(
+    final Response response = request("api/subscription-groups").post(
         Entity.json(List.of(subscriptionGroupApi)));
     assertThat(response.getStatus()).isEqualTo(200);
   }
@@ -223,7 +225,7 @@ public class HappyPathTest {
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
       Thread.sleep(1000);
-      Response response = request("api/anomalies").get();
+      final Response response = request("api/anomalies").get();
       assertThat(response.getStatus()).isEqualTo(200);
       anomalies = response.readEntity(List.class);
     }
@@ -234,8 +236,34 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testGetAnomalies")
   public void testGetSingleAnomaly() {
     // test get a single anomaly
-    Response response = request("api/anomalies/" + anomalyId).get();
+    final Response response = request("api/anomalies/" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
+  }
+
+  @Test(dependsOnMethods = "testGetAnomalies")
+  public void testAnomalyFeedback() {
+    final Response responseBeforeFeedback = request("api/anomalies/" + anomalyId).get();
+    assertThat(responseBeforeFeedback.getStatus()).isEqualTo(200);
+    final AnomalyApi anomalyApiBefore = responseBeforeFeedback.readEntity(AnomalyApi.class);
+    assertThat(anomalyApiBefore.getFeedback()).isNull();
+
+    final AnomalyFeedbackApi feedback = new AnomalyFeedbackApi()
+        .setType(AnomalyFeedbackType.ANOMALY)
+        .setComment("Valid anomaly");
+    final Response response = request(String.format("api/anomalies/%d/feedback", anomalyId))
+        .post(Entity.json(feedback));
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    // test get a single anomaly
+    final Response responseAfterFeedback = request("api/anomalies/" + anomalyId).get();
+    final AnomalyApi anomalyApi = responseAfterFeedback.readEntity(AnomalyApi.class);
+
+    assertThat(responseAfterFeedback.getStatus()).isEqualTo(200);
+    final AnomalyFeedbackApi actual = anomalyApi.getFeedback();
+    assertThat(actual).isNotNull();
+    assertThat(actual.getId()).isNotNull();
+    assertThat(actual.getType()).isEqualTo(feedback.getType());
+    assertThat(actual.getComment()).isEqualTo(feedback.getComment());
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
@@ -258,18 +286,18 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testGetHeatmap() {
-    Response response = request("api/rca/metrics/heatmap?id=" + anomalyId).get();
+    final Response response = request("api/rca/metrics/heatmap?id=" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    HeatMapResponseApi heatmap = response.readEntity(HeatMapResponseApi.class);
+    final HeatMapResponseApi heatmap = response.readEntity(HeatMapResponseApi.class);
     assertThat(heatmap.getBaseline().getBreakdown().size()).isGreaterThan(0);
     assertThat(heatmap.getCurrent().getBreakdown().size()).isGreaterThan(0);
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testGetTopContributors() {
-    Response response = request("api/rca/dim-analysis?id=" + anomalyId).get();
+    final Response response = request("api/rca/dim-analysis?id=" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(
+    final DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(
         DimensionAnalysisResultApi.class);
     assertThat(dimensionAnalysisResultApi.getResponseRows().size()).isGreaterThan(0);
   }

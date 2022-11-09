@@ -16,8 +16,8 @@ package ai.startree.thirdeye;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
-import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATASET_NAME;
-import static ai.startree.thirdeye.PinotContainerManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
+import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.aspect.TimeProvider;
@@ -37,7 +37,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import org.apache.pinot.testcontainer.PinotContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -87,18 +86,18 @@ public class SchedulingTest {
     }
   }
 
-  private PinotContainer pinotContainer;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
   private long alertId;
+  private DataSourceApi pinotDataSourceApi;
 
   @BeforeClass
   public void beforeClass() throws Exception {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
 
-    pinotContainer = PinotContainerManager.getInstance();
+    pinotDataSourceApi = PinotDataSourceManager.getPinotDataSourceApi();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();
@@ -122,19 +121,8 @@ public class SchedulingTest {
     assertThat(response.getStatus()).isEqualTo(200);
 
     // create datasource
-    DataSourceApi dataSourceApi = new DataSourceApi()
-        .setName(PINOT_DATA_SOURCE_NAME)
-        .setType("pinot")
-        .setProperties(Map.of(
-            "zookeeperUrl", "localhost:" + pinotContainer.getZookeeperPort(),
-            "brokerUrl", pinotContainer.getPinotBrokerUrl().replace("http://", ""),
-            "clusterName", "QuickStartCluster",
-            "controllerConnectionScheme", "http",
-            "controllerHost", "localhost",
-            "controllerPort", pinotContainer.getControllerPort())
-        );
     response = request("api/data-sources")
-        .post(Entity.json(List.of(dataSourceApi)));
+        .post(Entity.json(List.of(pinotDataSourceApi)));
     assertThat(response.getStatus()).isEqualTo(200);
 
     // create dataset

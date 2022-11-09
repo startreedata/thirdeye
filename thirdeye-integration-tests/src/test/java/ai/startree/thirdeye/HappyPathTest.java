@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
@@ -242,7 +243,7 @@ public class HappyPathTest {
     // without filters
     Response response = request("api/anomalies/count").get();
     assertThat(response.getStatus()).isEqualTo(200);
-    Integer anomalyCount = response.readEntity(Integer.class);
+    Long anomalyCount = response.readEntity(CountApi.class).getCount();
     assertThat(anomalyCount).isEqualTo(4);
 
     // there are only 2 anomalies that have startTime greater than or equal this value
@@ -251,7 +252,7 @@ public class HappyPathTest {
     // with filters
     response = request("api/anomalies/count?startTime=[gte]" + startTime).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    anomalyCount = response.readEntity(Integer.class);
+    anomalyCount = response.readEntity(CountApi.class).getCount();
     assertThat(anomalyCount).isEqualTo(2);
   }
 

@@ -30,6 +30,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -327,9 +328,17 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @Context UriInfo uriInfo
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
-    final Long count = queryParameters.size() > 0
-        ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters).getPredicate())
-        : dtoManager.count();
-    return Response.ok(count).build();
+    final CountApi api = new CountApi();
+    try {
+      final Long count = queryParameters.size() > 0
+          ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters)
+          .getPredicate())
+          : dtoManager.count();
+      api.setCount(count);
+    } catch (Exception e) {
+      api.setMessage(e.getMessage());
+      log.error(e.getMessage(), e);
+    }
+    return Response.ok(api).build();
   }
 }

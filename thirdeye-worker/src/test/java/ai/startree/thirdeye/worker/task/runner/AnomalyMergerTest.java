@@ -22,8 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -124,7 +122,7 @@ public class AnomalyMergerTest {
 
   @Test
   public void testEmptyMergeAndSave() {
-    anomalyMerger.mergeAndSave(newAlert(), emptyList());
+    assertThat(anomalyMerger.merge(newAlert(), emptyList())).isEqualTo(List.of());
   }
 
   @Test
@@ -135,22 +133,24 @@ public class AnomalyMergerTest {
         any())).thenAnswer(i -> emptyList());
 
     final MergedAnomalyResultDTO newAnomaly = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
-    anomalyMerger.mergeAndSave(newAlert(), singletonList(newAnomaly));
-    verify(mergedAnomalyResultManager).save(newAnomaly);
+    final List<MergedAnomalyResultDTO> output = anomalyMerger.merge(newAlert(),
+        singletonList(newAnomaly));
+    assertThat(output).isEqualTo(List.of(newAnomaly));
   }
 
   @Test
   public void testSingleAnomalyWithMergeAndSave() {
+    final MergedAnomalyResultDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H);
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        any())).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H)));
+        any())).thenAnswer(i -> singletonList(existingAnomaly));
 
-    anomalyMerger.mergeAndSave(newAlert(),
+    final List<MergedAnomalyResultDTO> output = anomalyMerger.merge(newAlert(),
         List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H),
             newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10))));
-    verify(mergedAnomalyResultManager, times(1)).save(any());
+    assertThat(output).isEqualTo(List.of(existingAnomaly));
   }
 
   @Test
@@ -498,43 +498,46 @@ public class AnomalyMergerTest {
   @Test
   public void testSingleAnomalyWithMergeAndSaveWithEnumerationItem() {
     final EnumerationItemDTO ei1 = newEnumerationItemRef(1L);
+    final MergedAnomalyResultDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setEnumerationItem(ei1);
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        eq(1L))).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H).setEnumerationItem(ei1)));
+        eq(1L))).thenAnswer(i -> singletonList(existingAnomaly));
 
-    anomalyMerger.mergeAndSave(newAlert(),
+    final List<MergedAnomalyResultDTO> output = anomalyMerger.merge(newAlert(),
         List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H,
                 plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1)));
-    verify(mergedAnomalyResultManager, times(1)).save(any());
+    assertThat(output).isEqualTo(List.of(existingAnomaly));
   }
 
   @Test
   public void testAnomaliesWithMergeAndSaveWith2EnumerationItems() {
     final EnumerationItemDTO ei1 = newEnumerationItemRef(1L);
     final EnumerationItemDTO ei2 = newEnumerationItemRef(2L);
+    final MergedAnomalyResultDTO enum1ExistingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setEnumerationItem(ei1);
+    final MergedAnomalyResultDTO enum2ExistingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H).setEnumerationItem(ei2);
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        eq(1L))).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H).setEnumerationItem(ei1)));
+        eq(1L))).thenAnswer(i -> singletonList(enum1ExistingAnomaly));
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(),
         anyLong(),
-        eq(2L))).thenAnswer(i -> singletonList(existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H).setEnumerationItem(ei2)));
+        eq(2L))).thenAnswer(i -> singletonList(enum2ExistingAnomaly));
 
-    anomalyMerger.mergeAndSave(newAlert(),
+    final List<MergedAnomalyResultDTO> output1 = anomalyMerger.merge(newAlert(),
         List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H,
                 plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1)));
-    verify(mergedAnomalyResultManager, times(1)).save(any());
+    assertThat(output1).isEqualTo(List.of(enum1ExistingAnomaly));
 
-    anomalyMerger.mergeAndSave(newAlert(),
+    final List<MergedAnomalyResultDTO> output2 = anomalyMerger.merge(newAlert(),
         List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1),
             newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei2),
@@ -542,6 +545,6 @@ public class AnomalyMergerTest {
                 plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei2)));
 
     // expecting 2 more invocations
-    verify(mergedAnomalyResultManager, times(3)).save(any());
+    assertThat(output2).isEqualTo(List.of(enum1ExistingAnomaly, enum2ExistingAnomaly));
   }
 }

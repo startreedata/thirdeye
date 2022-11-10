@@ -36,10 +36,12 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { TaskStatus, TaskType } from "../../../rest/dto/taks.interface";
 import { useGetTasks } from "../../../rest/tasks/tasks.actions";
 import { getTimeRangeDuration } from "../../../utils/time-range/time-range.util";
+import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { useTimeRange } from "../../time-range/time-range-provider/time-range-provider.component";
 import {
+    TimeRange,
     TimeRangeDuration,
     TimeRangeQueryStringKey,
 } from "../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -62,6 +64,12 @@ export const RecentFailures: FunctionComponent = () => {
         [searchParams]
     );
 
+    const {
+        timeRangeDuration,
+        recentCustomTimeRangeDurations,
+        setTimeRangeDuration,
+    } = useTimeRange();
+
     const fetchTasks = (): void => {
         getTasks({
             status: [TaskStatus.TIMEOUT, TaskStatus.FAILED],
@@ -75,6 +83,41 @@ export const RecentFailures: FunctionComponent = () => {
         fetchTasks();
     }, [startTime, endTime]);
 
+    const onHandleTimeRangeChange = (
+        timeRangeDurationProp: TimeRangeDuration
+    ): void => {
+        setTimeRangeDuration(timeRangeDurationProp);
+        searchParams.set(
+            TimeRangeQueryStringKey.TIME_RANGE,
+            timeRangeDurationProp.timeRange
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            timeRangeDurationProp.startTime.toString()
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.END_TIME,
+            timeRangeDurationProp.endTime.toString()
+        );
+        setSearchParams(searchParams);
+    };
+
+    useEffect(() => {
+        // Apply the default filter of LAST_7_DAYS if no prior filter is specified
+        if (!startTime && !endTime) {
+            const endRange = Date.now();
+            const startRange = endRange - WEEK_IN_MILLISECONDS;
+
+            const timeRangeDurationProp: TimeRangeDuration = {
+                startTime: startRange,
+                endTime: endRange,
+                timeRange: TimeRange.LAST_7_DAYS,
+            };
+
+            onHandleTimeRangeChange(timeRangeDurationProp);
+        }
+    }, []);
+
     const tasksToDisplay = useMemo(() => {
         if (!tasks) {
             return [];
@@ -84,31 +127,6 @@ export const RecentFailures: FunctionComponent = () => {
 
         return sortedTasks.slice(0, 10);
     }, [tasks]);
-
-    const {
-        timeRangeDuration,
-        recentCustomTimeRangeDurations,
-        setTimeRangeDuration,
-    } = useTimeRange();
-
-    const onHandleTimeRangeChange = (
-        timeRangeDuration: TimeRangeDuration
-    ): void => {
-        setTimeRangeDuration(timeRangeDuration);
-        searchParams.set(
-            TimeRangeQueryStringKey.TIME_RANGE,
-            timeRangeDuration.timeRange
-        );
-        searchParams.set(
-            TimeRangeQueryStringKey.START_TIME,
-            timeRangeDuration.startTime.toString()
-        );
-        searchParams.set(
-            TimeRangeQueryStringKey.END_TIME,
-            timeRangeDuration.endTime.toString()
-        );
-        setSearchParams(searchParams);
-    };
 
     const onHandleRefresh = (): void => {
         onHandleTimeRangeChange(

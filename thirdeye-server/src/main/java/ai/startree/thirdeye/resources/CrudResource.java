@@ -329,16 +329,10 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final CountApi api = new CountApi();
-    try {
-      final Long count = queryParameters.size() > 0
-          ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters)
-          .getPredicate())
-          : dtoManager.count();
-      api.setCount(count);
-    } catch (Exception e) {
-      api.setMessage(e.getMessage());
-      log.error(e.getMessage(), e);
-    }
+    final Long count = queryParameters.size() > 0
+      ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters).getPredicate())
+      : dtoManager.count();
+    api.setCount(count);
     return Response.ok(api).build();
   }
 }

@@ -12,32 +12,68 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Table, Typography } from "@material-ui/core";
+import {
+    Box,
+    Grid,
+    Table,
+    Toolbar,
+    Typography,
+    useMediaQuery,
+    useTheme,
+} from "@material-ui/core";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import classNames from "classnames";
 import { sortBy } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
+import { useDataGridV1Styles } from "../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.styles";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { TaskStatus, TaskType } from "../../../rest/dto/taks.interface";
 import { useGetTasks } from "../../../rest/tasks/tasks.actions";
+import { getTimeRangeDuration } from "../../../utils/time-range/time-range.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { useTimeRange } from "../../time-range/time-range-provider/time-range-provider.component";
+import {
+    TimeRangeDuration,
+    TimeRangeQueryStringKey,
+} from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeRangeSelector } from "../../time-range/time-range-selector/time-range-selector/time-range-selector.component";
 import { TaskRow } from "./task-row/task-row.component";
 
 export const RecentFailures: FunctionComponent = () => {
+    const theme = useTheme();
+    const dataGridV1Classes = useDataGridV1Styles();
     const { t } = useTranslation();
     const { tasks, getTasks, status } = useGetTasks();
+    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    useEffect(() => {
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
+
+    const fetchTasks = (): void => {
         getTasks({
             status: [TaskStatus.TIMEOUT, TaskStatus.FAILED],
             type: [TaskType.DETECTION],
+            startTime: Number(startTime),
+            endTime: Number(endTime),
         });
-    }, []);
+    };
+
+    useEffect(() => {
+        fetchTasks();
+    }, [startTime, endTime]);
 
     const tasksToDisplay = useMemo(() => {
         if (!tasks) {
@@ -48,6 +84,37 @@ export const RecentFailures: FunctionComponent = () => {
 
         return sortedTasks.slice(0, 10);
     }, [tasks]);
+
+    const {
+        timeRangeDuration,
+        recentCustomTimeRangeDurations,
+        setTimeRangeDuration,
+    } = useTimeRange();
+
+    const onHandleTimeRangeChange = (
+        timeRangeDuration: TimeRangeDuration
+    ): void => {
+        setTimeRangeDuration(timeRangeDuration);
+        searchParams.set(
+            TimeRangeQueryStringKey.TIME_RANGE,
+            timeRangeDuration.timeRange
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            timeRangeDuration.startTime.toString()
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.END_TIME,
+            timeRangeDuration.endTime.toString()
+        );
+        setSearchParams(searchParams);
+    };
+
+    const onHandleRefresh = (): void => {
+        onHandleTimeRangeChange(
+            getTimeRangeDuration(timeRangeDuration.timeRange)
+        );
+    };
 
     return (
         <>
@@ -98,6 +165,26 @@ export const RecentFailures: FunctionComponent = () => {
                         </>
                     }
                 >
+                    <Toolbar
+                        className={classNames(
+                            dataGridV1Classes.dataGridToolbar,
+                            "data-grid-v1-toolbar"
+                        )}
+                        classes={{
+                            gutters: dataGridV1Classes.dataGridToolbarGutters,
+                        }}
+                        variant="dense"
+                    >
+                        <TimeRangeSelector
+                            hideTimeRange={!screenWidthSmUp}
+                            recentCustomTimeRangeDurations={
+                                recentCustomTimeRangeDurations
+                            }
+                            timeRangeDuration={timeRangeDuration}
+                            onChange={onHandleTimeRangeChange}
+                            onRefresh={onHandleRefresh}
+                        />
+                    </Toolbar>
                     <Table>
                         <TableHead>
                             <TableRow>

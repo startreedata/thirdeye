@@ -47,7 +47,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.HashMap;
@@ -210,16 +209,12 @@ public abstract class ApiBeanMapper {
     return AnomalyMapper.INSTANCE.toDto(api);
   }
 
-  public static AnomalyFeedbackApi toApi(final AnomalyFeedback feedbackDto) {
-    return new AnomalyFeedbackApi()
-        .setComment(feedbackDto.getComment())
-        .setType(feedbackDto.getFeedbackType());
+  public static AnomalyFeedbackApi toApi(final AnomalyFeedbackDTO dto) {
+    return AnomalyFeedbackMapper.INSTANCE.toApi(dto);
   }
 
   public static AnomalyFeedbackDTO toAnomalyFeedbackDTO(AnomalyFeedbackApi api) {
-    return new AnomalyFeedbackDTO()
-        .setFeedbackType(api.getType())
-        .setComment(api.getComment());
+    return AnomalyFeedbackMapper.INSTANCE.toDto(api);
   }
 
   public static AlertTemplateDTO toAlertTemplateDto(final AlertTemplateApi api) {

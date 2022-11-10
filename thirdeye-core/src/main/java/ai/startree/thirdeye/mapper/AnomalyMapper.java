@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -33,7 +34,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {AnomalyFeedbackMapper.class, AnomalyLabelMapper.class, MetricMapper.class, EnumerationItemMapper.class})
+@Mapper(uses = {AnomalyFeedbackMapper.class, AnomalyLabelMapper.class, MetricMapper.class,
+    EnumerationItemMapper.class})
 public interface AnomalyMapper {
 
   AnomalyMapper INSTANCE = Mappers.getMapper(AnomalyMapper.class);
@@ -90,7 +92,9 @@ public interface AnomalyMapper {
             .setMetric(metricApi)
             .setDataset(datasetApi)
         )
-        .setEnumerationItem(EnumerationItemMapper.INSTANCE.toApi(dto.getEnumerationItem()));
+        .setEnumerationItem(EnumerationItemMapper.INSTANCE.toApi(dto.getEnumerationItem()))
+        .setFeedback(toAnomalyFeedbackApi(dto));
+
     if (dto.getMetricUrn() != null) {
       anomalyApi
           .setMetric(toMetricApi(dto.getMetricUrn())
@@ -106,10 +110,6 @@ public interface AnomalyMapper {
           .collect(Collectors.toList()));
     }
 
-    optional(dto.getAnomalyFeedbackId())
-        .map(anomalyFeedbackId -> new AnomalyFeedbackApi().setId(anomalyFeedbackId))
-        .ifPresent(anomalyApi::setFeedback);
-
     anomalyApi.setAlert(new AlertApi()
             .setId(dto.getDetectionConfigId())
         )
@@ -118,5 +118,14 @@ public interface AnomalyMapper {
             .map(AnomalyMapper::toDetectionAlertNodeApi)
             .orElse(null));
     return anomalyApi;
+  }
+
+  private static AnomalyFeedbackApi toAnomalyFeedbackApi(final MergedAnomalyResultDTO dto) {
+    if (dto.getFeedback() != null) {
+      return ApiBeanMapper.toApi((AnomalyFeedbackDTO) dto.getFeedback());
+    } else if (dto.getAnomalyFeedbackId() != null) {
+      return new AnomalyFeedbackApi().setId(dto.getAnomalyFeedbackId());
+    }
+    return null;
   }
 }

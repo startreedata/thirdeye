@@ -16,6 +16,7 @@ package ai.startree.thirdeye.mapper;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -23,7 +24,9 @@ public interface AnomalyFeedbackMapper {
 
   AnomalyFeedbackMapper INSTANCE = Mappers.getMapper(AnomalyFeedbackMapper.class);
 
+  @Mapping(source = "type", target = "feedbackType")
   AnomalyFeedbackDTO toDto(AnomalyFeedbackApi api);
 
+  @Mapping(source = "feedbackType", target = "type")
   AnomalyFeedbackApi toApi(AnomalyFeedbackDTO dto);
 }

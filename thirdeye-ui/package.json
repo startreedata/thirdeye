@@ -49,7 +49,7 @@
         "prettier-fix": "prettier . --write",
         "lint-check": "npm run license-header-check && npm run eslint-check && npm run stylelint-check && npm run prettier-check",
         "lint-fix": "npm run license-header-fix && npm run eslint-fix && npm run stylelint-fix && npm run prettier-fix",
-        "release": "semantic-release && sh scripts/release-version-placeholder-replacement.sh -p thirdeye-ui -a dist"
+        "release": "semantic-release"
     },
     "dependencies": {
         "@date-io/luxon": "^1.3.13",

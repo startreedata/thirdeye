@@ -30,6 +30,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -317,5 +318,21 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response deleteAll(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     dtoManager.findAll().forEach(this::deleteDto);
     return Response.ok().build();
+  }
+
+  @GET
+  @Path("/count")
+  @Timed
+  public Response countWithPredicate(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Context UriInfo uriInfo
+  ) {
+    final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
+    final CountApi api = new CountApi();
+    final Long count = queryParameters.size() > 0
+      ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters).getPredicate())
+      : dtoManager.count();
+    api.setCount(count);
+    return Response.ok(api).build();
   }
 }

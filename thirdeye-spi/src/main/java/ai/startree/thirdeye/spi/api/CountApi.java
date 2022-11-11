@@ -11,14 +11,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.task;
+package ai.startree.thirdeye.spi.api;
 
-public enum TaskType {
-  DETECTION,                 // tasks to detect anomalies
-  NOTIFICATION,              // tasks to notify/send alerts to customers regarding anomalies
+public class CountApi {
+  private Long count;
 
-  // TODO spyne migrate existing tasks and remove this
-  ONBOARDING,                // tasks to onboard a new alert.
+  public Long getCount() {
+    return count;
+  }
 
-  MONITOR                    // tasks to clean up expired/invalid execution history
+  public CountApi setCount(final Long count) {
+    this.count = count;
+    return this;
+  }
 }

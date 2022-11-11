@@ -12,48 +12,29 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Grid,
-    Table,
-    Toolbar,
-    Typography,
-    useMediaQuery,
-    useTheme,
-} from "@material-ui/core";
+import { Box, Grid, Table, Typography } from "@material-ui/core";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import classNames from "classnames";
 import { sortBy } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { useDataGridV1Styles } from "../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.styles";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { TaskStatus, TaskType } from "../../../rest/dto/taks.interface";
 import { useGetTasks } from "../../../rest/tasks/tasks.actions";
-import { getTimeRangeDuration } from "../../../utils/time-range/time-range.util";
 import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { useTimeRange } from "../../time-range/time-range-provider/time-range-provider.component";
-import {
-    TimeRange,
-    TimeRangeDuration,
-    TimeRangeQueryStringKey,
-} from "../../time-range/time-range-provider/time-range-provider.interfaces";
-import { TimeRangeSelector } from "../../time-range/time-range-selector/time-range-selector/time-range-selector.component";
+import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeRangeSelectorButton } from "../../time-range/v2/time-range-selector-button/time-range-selector-button.component";
 import { TaskRow } from "./task-row/task-row.component";
 
 export const RecentFailures: FunctionComponent = () => {
-    const theme = useTheme();
-    const dataGridV1Classes = useDataGridV1Styles();
     const { t } = useTranslation();
     const { tasks, getTasks, status } = useGetTasks();
-    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("sm"));
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [startTime, endTime] = useMemo(
@@ -64,11 +45,8 @@ export const RecentFailures: FunctionComponent = () => {
         [searchParams]
     );
 
-    const {
-        timeRangeDuration,
-        recentCustomTimeRangeDurations,
-        setTimeRangeDuration,
-    } = useTimeRange();
+    const [selectedStart, setSelectedStart] = useState<number>(startTime);
+    const [selectedEnd, setSelectedEnd] = useState<number>(endTime);
 
     const fetchTasks = (): void => {
         getTasks({
@@ -84,37 +62,28 @@ export const RecentFailures: FunctionComponent = () => {
     }, [startTime, endTime]);
 
     const onHandleTimeRangeChange = (
-        timeRangeDurationProp: TimeRangeDuration
+        startProp: number,
+        endProp: number
     ): void => {
-        setTimeRangeDuration(timeRangeDurationProp);
-        searchParams.set(
-            TimeRangeQueryStringKey.TIME_RANGE,
-            timeRangeDurationProp.timeRange
-        );
+        setSelectedStart(startProp);
+        setSelectedEnd(endProp);
+
         searchParams.set(
             TimeRangeQueryStringKey.START_TIME,
-            timeRangeDurationProp.startTime.toString()
+            startProp.toString()
         );
-        searchParams.set(
-            TimeRangeQueryStringKey.END_TIME,
-            timeRangeDurationProp.endTime.toString()
-        );
+        searchParams.set(TimeRangeQueryStringKey.END_TIME, endProp.toString());
         setSearchParams(searchParams);
     };
 
     useEffect(() => {
-        // Apply the default filter of LAST_7_DAYS if no prior filter is specified
-        if (!startTime && !endTime) {
+        // Apply the default filter of the last 7 days if no
+        // prior filter is specified or if the filters are invalid
+        if (!startTime || !endTime || startTime > endTime) {
             const endRange = Date.now();
             const startRange = endRange - WEEK_IN_MILLISECONDS;
 
-            const timeRangeDurationProp: TimeRangeDuration = {
-                startTime: startRange,
-                endTime: endRange,
-                timeRange: TimeRange.LAST_7_DAYS,
-            };
-
-            onHandleTimeRangeChange(timeRangeDurationProp);
+            onHandleTimeRangeChange(startRange, endRange);
         }
     }, []);
 
@@ -127,12 +96,6 @@ export const RecentFailures: FunctionComponent = () => {
 
         return sortedTasks.slice(0, 10);
     }, [tasks]);
-
-    const onHandleRefresh = (): void => {
-        onHandleTimeRangeChange(
-            getTimeRangeDuration(timeRangeDuration.timeRange)
-        );
-    };
 
     return (
         <>
@@ -150,6 +113,30 @@ export const RecentFailures: FunctionComponent = () => {
                             {t("label.latest-errors-in-your-alerts")}
                         </LoadingErrorStateSwitch>
                     </Typography>
+                </Grid>
+                <Grid item>
+                    <LoadingErrorStateSwitch
+                        isError={false}
+                        isLoading={status === ActionStatus.Working}
+                        loadingState={
+                            <SkeletonV1
+                                animation="pulse"
+                                height={40}
+                                width={425}
+                            />
+                        }
+                    >
+                        <TimeRangeSelectorButton
+                            end={selectedEnd}
+                            placeholder={t(
+                                "message.click-to-select-date-range"
+                            )}
+                            start={selectedStart}
+                            onChange={(start, end) => {
+                                onHandleTimeRangeChange(start, end);
+                            }}
+                        />
+                    </LoadingErrorStateSwitch>
                 </Grid>
             </Grid>
             <Box paddingTop={2} />
@@ -183,26 +170,6 @@ export const RecentFailures: FunctionComponent = () => {
                         </>
                     }
                 >
-                    <Toolbar
-                        className={classNames(
-                            dataGridV1Classes.dataGridToolbar,
-                            "data-grid-v1-toolbar"
-                        )}
-                        classes={{
-                            gutters: dataGridV1Classes.dataGridToolbarGutters,
-                        }}
-                        variant="dense"
-                    >
-                        <TimeRangeSelector
-                            hideTimeRange={!screenWidthSmUp}
-                            recentCustomTimeRangeDurations={
-                                recentCustomTimeRangeDurations
-                            }
-                            timeRangeDuration={timeRangeDuration}
-                            onChange={onHandleTimeRangeChange}
-                            onRefresh={onHandleRefresh}
-                        />
-                    </Toolbar>
                     <Table>
                         <TableHead>
                             <TableRow>

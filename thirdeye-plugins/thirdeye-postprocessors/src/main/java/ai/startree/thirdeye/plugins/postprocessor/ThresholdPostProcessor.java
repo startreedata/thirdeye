@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import static ai.startree.thirdeye.plugins.postprocessor.LabelUtils.addLabel;
+import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_METRIC;

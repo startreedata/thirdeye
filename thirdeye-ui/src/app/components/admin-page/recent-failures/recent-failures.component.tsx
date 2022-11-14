@@ -115,28 +115,14 @@ export const RecentFailures: FunctionComponent = () => {
                     </Typography>
                 </Grid>
                 <Grid item>
-                    <LoadingErrorStateSwitch
-                        isError={false}
-                        isLoading={status === ActionStatus.Working}
-                        loadingState={
-                            <SkeletonV1
-                                animation="pulse"
-                                height={40}
-                                width={425}
-                            />
-                        }
-                    >
-                        <TimeRangeSelectorButton
-                            end={selectedEnd}
-                            placeholder={t(
-                                "message.click-to-select-date-range"
-                            )}
-                            start={selectedStart}
-                            onChange={(start, end) => {
-                                onHandleTimeRangeChange(start, end);
-                            }}
-                        />
-                    </LoadingErrorStateSwitch>
+                    <TimeRangeSelectorButton
+                        end={selectedEnd}
+                        placeholder={t("message.click-to-select-date-range")}
+                        start={selectedStart}
+                        onChange={(start, end) => {
+                            onHandleTimeRangeChange(start, end);
+                        }}
+                    />
                 </Grid>
             </Grid>
             <Box paddingTop={2} />

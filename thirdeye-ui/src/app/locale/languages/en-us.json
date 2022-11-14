@@ -293,6 +293,7 @@
         "view-configuration-docs": "View configuration documentation",
         "view-details": "View Details",
         "view-investigation": "View Investigation",
+        "view-recent-entities": "View recent {{entity}}",
         "views": "Views",
         "webhook": "Webhook",
         "webhook-url": "Webhook URL",

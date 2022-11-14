@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_METRIC;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 import static ai.startree.thirdeye.spi.detection.AnomalyDetector.KEY_CURRENT;
+import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 

@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Grid, Link, Typography } from "@material-ui/core";
+import classNames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -24,7 +25,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { AnomaliesReportedCountProps } from "./anomalies-reported-count.interfaces";
 
 export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountProps> =
-    ({ appAnalytics, getAppAnalyticsStatus }) => {
+    ({ appAnalytics, getAppAnalyticsStatus, classes }) => {
         const { t } = useTranslation();
 
         return (
@@ -42,7 +43,9 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                 <Grid item>
                     <LoadingErrorStateSwitch
                         errorState={
-                            <NoDataIndicator>
+                            <NoDataIndicator
+                                className={classNames(classes?.noDataIndicator)}
+                            >
                                 {t("message.experienced-issues-fetching-data")}
                             </NoDataIndicator>
                         }
@@ -51,7 +54,10 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                             getAppAnalyticsStatus === ActionStatus.Working
                         }
                         loadingState={
-                            <Box width={100}>
+                            <Box
+                                className={classNames(classes?.noDataIndicator)}
+                                width={100}
+                            >
                                 <Typography variant="h2">
                                     <SkeletonV1 animation="pulse" />
                                 </Typography>

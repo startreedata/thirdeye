@@ -18,4 +18,7 @@ import { AppAnalytics } from "../../../rest/dto/app-analytics.interfaces";
 export interface AlertAccuracyProps {
     appAnalytics: AppAnalytics | null;
     getAppAnalyticsStatus: ActionStatus;
+    classes?: {
+        noDataIndicator?: string;
+    };
 }

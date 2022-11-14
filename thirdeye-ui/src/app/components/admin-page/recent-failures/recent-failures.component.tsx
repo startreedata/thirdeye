@@ -18,7 +18,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { sortBy } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
@@ -37,16 +37,28 @@ export const RecentFailures: FunctionComponent = () => {
     const { tasks, getTasks, status } = useGetTasks();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const [startTime, endTime] = useMemo(
-        () => [
-            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
-            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
-        ],
-        [searchParams]
-    );
+    const [startTime, endTime] = useMemo(() => {
+        // Apply the default filter of the last 7 days if no
+        // prior filter is specified or if the filters are invalid
+        let returnStartTime = Number(
+            searchParams.get(TimeRangeQueryStringKey.START_TIME)
+        );
 
-    const [selectedStart, setSelectedStart] = useState<number>(startTime);
-    const [selectedEnd, setSelectedEnd] = useState<number>(endTime);
+        let returnEndTime = Number(
+            searchParams.get(TimeRangeQueryStringKey.END_TIME)
+        );
+
+        if (
+            !returnStartTime ||
+            !returnEndTime ||
+            returnStartTime > returnEndTime
+        ) {
+            returnEndTime = Date.now();
+            returnStartTime = returnEndTime - WEEK_IN_MILLISECONDS;
+        }
+
+        return [returnStartTime, returnEndTime];
+    }, [searchParams]);
 
     const fetchTasks = (): void => {
         getTasks({
@@ -65,9 +77,6 @@ export const RecentFailures: FunctionComponent = () => {
         startProp: number,
         endProp: number
     ): void => {
-        setSelectedStart(startProp);
-        setSelectedEnd(endProp);
-
         searchParams.set(
             TimeRangeQueryStringKey.START_TIME,
             startProp.toString()
@@ -75,17 +84,6 @@ export const RecentFailures: FunctionComponent = () => {
         searchParams.set(TimeRangeQueryStringKey.END_TIME, endProp.toString());
         setSearchParams(searchParams);
     };
-
-    useEffect(() => {
-        // Apply the default filter of the last 7 days if no
-        // prior filter is specified or if the filters are invalid
-        if (!startTime || !endTime || startTime > endTime) {
-            const endRange = Date.now();
-            const startRange = endRange - WEEK_IN_MILLISECONDS;
-
-            onHandleTimeRangeChange(startRange, endRange);
-        }
-    }, []);
 
     const tasksToDisplay = useMemo(() => {
         if (!tasks) {
@@ -116,9 +114,9 @@ export const RecentFailures: FunctionComponent = () => {
                 </Grid>
                 <Grid item>
                     <TimeRangeSelectorButton
-                        end={selectedEnd}
+                        end={endTime}
                         placeholder={t("message.click-to-select-date-range")}
-                        start={selectedStart}
+                        start={startTime}
                         onChange={(start, end) => {
                             onHandleTimeRangeChange(start, end);
                         }}

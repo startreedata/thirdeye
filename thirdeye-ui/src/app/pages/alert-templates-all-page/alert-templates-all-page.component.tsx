@@ -31,6 +31,7 @@ import {
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import {
+    createDefaultAlertTemplates,
     deleteAlertTemplate,
     updateAlertTemplate,
 } from "../../rest/alert-templates/alert-templates.rest";
@@ -40,7 +41,6 @@ import {
     promptDeleteConfirmation,
 } from "../../utils/bulk-delete/bulk-delete.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { getAlertTemplatesCreatePath } from "../../utils/routes/routes.util";
 
 export const AlertTemplatesAllPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
@@ -122,6 +122,18 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
         );
     }, [alertTemplatesRequestStatus, errorMessages]);
 
+    const handleCreateDefaultAlertTemplates = (): void => {
+        createDefaultAlertTemplates().then((defaultTemplates) => {
+            setAlertTemplate(defaultTemplates);
+            notify(
+                NotificationTypeV1.Success,
+                t("message.create-success", {
+                    entity: t("label.alert-templates"),
+                })
+            );
+        });
+    };
+
     return (
         <PageV1>
             <ConfigurationPageHeader selectedIndex={3} />
@@ -155,13 +167,11 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
                                             >
                                                 <Button
                                                     color="primary"
-                                                    href={getAlertTemplatesCreatePath()}
+                                                    onClick={
+                                                        handleCreateDefaultAlertTemplates
+                                                    }
                                                 >
-                                                    {t("label.create-entity", {
-                                                        entity: t(
-                                                            "label.alert-template"
-                                                        ),
-                                                    })}
+                                                    {t("label.load-defaults")}
                                                 </Button>
                                             </Box>
                                         </NoDataIndicator>

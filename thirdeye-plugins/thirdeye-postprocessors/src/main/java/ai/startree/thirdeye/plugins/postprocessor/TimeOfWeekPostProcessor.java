@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import static ai.startree.thirdeye.plugins.postprocessor.LabelUtils.addLabel;
+import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 

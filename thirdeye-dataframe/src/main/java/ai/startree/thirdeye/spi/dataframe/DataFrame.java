@@ -2184,7 +2184,7 @@ public class DataFrame {
 
   @Override
   public String toString() {
-    List<String> names = this.getSeriesNames();
+    List<String> names = new ArrayList<>(this.getSeriesNames());
     for (int i = 0; i < this.indexNames.size(); i++) {
       names.remove(this.indexNames.get(i));
       names.add(i, this.indexNames.get(i));

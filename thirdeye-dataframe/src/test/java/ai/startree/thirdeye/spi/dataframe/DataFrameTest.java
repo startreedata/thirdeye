@@ -4147,8 +4147,9 @@ public class DataFrameTest {
 
   @Test
   public void testDropSeries() {
-    Assert.assertEquals(this.df.dropSeries("long", "boolean").getSeriesNames(),
-        List.of("double", "string", "object", "index"));
+    final List<String> seriesNames = this.df.dropSeries("long", "boolean").getSeriesNames();
+    Assert.assertEquals(seriesNames,
+        List.of("index", "double", "string", "object"));
   }
 
   /* **************************************************************************

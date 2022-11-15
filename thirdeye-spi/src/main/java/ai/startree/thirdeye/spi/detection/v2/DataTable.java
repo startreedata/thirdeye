@@ -16,12 +16,9 @@ package ai.startree.thirdeye.spi.detection.v2;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import java.util.Map;
 
-// todo cyril simplify interface - most of the methods are not used
 public interface DataTable extends OperatorResult {
 
   DataFrame getDataFrame();
-
-  Object getObject(int rowIdx, int colIdx);
 
   Map<String, String> getProperties();
 

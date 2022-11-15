@@ -19,12 +19,14 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactoryContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 
@@ -50,10 +52,9 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
   public void execute() throws Exception {
     final Map<String, DataTable> timeSeriesMap = DetectionUtils.getDataTableMap(inputMap);
     for (String inputKey : timeSeriesMap.keySet()) {
-      final DataTable dataTable = timeSeriesMap.get(inputKey);
-      for (int rowIdx = 0; rowIdx < dataTable.getDataFrame().size(); rowIdx++) {
-        eventTrigger.trigger(dataTable.getDataFrame().getSeriesNames(),
-            getRow(dataTable, rowIdx));
+      final DataFrame df = timeSeriesMap.get(inputKey).getDataFrame();
+      for (int rowIdx = 0; rowIdx < df.size(); rowIdx++) {
+        eventTrigger.trigger(df.getSeriesNames(), getRow(df, rowIdx));
       }
     }
     eventTrigger.close();
@@ -74,11 +75,11 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
         .setProperties(componentSpec));
   }
 
-  static Object[] getRow(final DataTable dataTable, final int rowIdx) {
-    int columnCount = dataTable.getDataFrame().getSeriesCount();
-    Object[] row = new Object[columnCount];
-    for (int colIdx = 0; colIdx < columnCount; colIdx++) {
-      row[colIdx] = dataTable.getObject(rowIdx, colIdx);
+  static Object[] getRow(final DataFrame df, final int rowIdx) {
+    final List<String> seriesNames = df.getSeriesNames();
+    final Object[] row = new Object[seriesNames.size()];
+    for (int colIdx = 0; colIdx < seriesNames.size(); colIdx++) {
+      row[colIdx] = df.getObject(seriesNames.get(colIdx),rowIdx);
     }
     return row;
   }

@@ -233,16 +233,15 @@ public class TimeIndexFillerTest {
     final DataFrame outputDf = output.getDataFrame();
     assertThat(outputDf.size()).isEqualTo(7);
     // (met,OCTOBER_19_MILLIS) should be null
-    Object october19Value = output.getObject(1, 1);
+    Object october19Value = outputDf.getObject("met", 1);
     assertThat(october19Value).isNull();
     // (met,OCTOBER_23_MILLIS) should be filled with a zero
-    Object october23Value = output.getObject(5, 1);
+    Object october23Value = outputDf.getObject("met", 5);
     assertThat(october23Value).isInstanceOf(Double.class);
     assertThat((double) october23Value).isEqualTo(ZERO_FILLER);
     // other days should have value METRIC_VALUE
-    final DataTable finalOutput = output;
     Stream.of(0, 2, 3, 4, 6).forEach(rowIdx -> {
-      Object value = finalOutput.getObject(rowIdx, 1);
+      Object value = outputDf.getObject("met", rowIdx);
       assertThat(value).isInstanceOf(Double.class);
       assertThat((double) value).isEqualTo(METRIC_VALUE);
     });

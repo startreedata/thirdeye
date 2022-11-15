@@ -92,7 +92,7 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
 
     // Insert all rows into the table
     for (int rowIdx = 0; rowIdx < df.size(); rowIdx++) {
-      final String insertionStatement = getRowInsertionStatement(tableName, rowIdx, dataTable);
+      final String insertionStatement = getRowInsertionStatement(tableName, rowIdx, df);
       try {
         c.prepareCall(insertionStatement).execute();
       } catch (final SQLException e) {
@@ -124,11 +124,12 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
 
   private String getRowInsertionStatement(final String tableName,
       final int rowIdx,
-      final DataTable dataTable) {
+      final DataFrame dataFrame) {
     final StringBuilder sb = new StringBuilder(
         "INSERT INTO " + tableName + " VALUES (");
-    for (int colIdx = 0; colIdx < dataTable.getDataFrame().getSeriesCount(); colIdx++) {
-      final Object value = dataTable.getObject(rowIdx, colIdx);
+    final List<String> seriesNames = dataFrame.getSeriesNames();
+    for (int colIdx = 0; colIdx < seriesNames.size(); colIdx++) {
+      final Object value = dataFrame.getObject(seriesNames.get(colIdx), rowIdx);
 
       // If string, then wrap with quotes
       final String quoteWith = value instanceof String ? "'" : "";
@@ -137,7 +138,7 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
           .append(value)
           .append(quoteWith);
 
-      if (colIdx < dataTable.getDataFrame().getSeriesCount() - 1) {
+      if (colIdx < seriesNames.size() - 1) {
         sb.append(", ");
       }
     }

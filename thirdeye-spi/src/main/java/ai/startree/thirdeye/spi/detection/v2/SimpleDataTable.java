@@ -111,11 +111,6 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return BooleanSeries.NULL;
   }
 
-  @Override
-  public Object getObject(final int rowIdx, final int colIdx) {
-    return (dataCache.get(rowIdx))[colIdx];
-  }
-
   public String getString(final int rowIdx, final int colIdx) {
     final Object o = dataCache.get(rowIdx)[colIdx];
     if (o !=null) {

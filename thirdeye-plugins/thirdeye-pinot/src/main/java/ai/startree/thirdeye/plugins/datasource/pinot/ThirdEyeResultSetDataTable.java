@@ -57,7 +57,6 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     return dataFrame;
   }
 
-  @Override
   public Object getObject(final int rowIdx, final int colIdx) {
     if (colIdx < groupKeyLength) {
       return thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx);

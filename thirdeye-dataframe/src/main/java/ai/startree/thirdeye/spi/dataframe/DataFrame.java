@@ -16,6 +16,10 @@ package ai.startree.thirdeye.spi.dataframe;
 import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
 import java.io.IOException;
 import java.io.Reader;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -569,6 +574,88 @@ public class DataFrame {
       if (!d.hasIndex()) {
         throw new IllegalArgumentException("DataFrames must have a valid index");
       }
+    }
+  }
+
+  // FIXME cyril cannot go in prod without testing the behavior with nulls for every SeriesType
+  public static DataFrame fromResultSet(final ResultSet resultSet) throws SQLException {
+    final List<String> columns = new ArrayList<>();
+    final List<SeriesType> columnTypes = new ArrayList<>();
+    final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+    final int columnCount = resultSetMetaData.getColumnCount();
+
+    for (int i = 0; i < columnCount; i++) {
+      columns.add(resultSetMetaData.getColumnLabel(i + 1).toLowerCase(Locale.ENGLISH));
+      columnTypes.add(jdbcTypeToSeriesType(resultSetMetaData.getColumnType(i + 1)));
+    }
+    final DataFrame.Builder builder = DataFrame.builder(columns);
+    while (resultSet.next()) {
+      final Object[] rowData = new Object[columnCount];
+      for (int i = 0; i < columnCount; i++) {
+        final SeriesType columnType = columnTypes.get(i);
+        switch (columnType) {
+          case DOUBLE:
+            rowData[i] = resultSet.getDouble(i + 1);
+            continue;
+          case LONG:
+            rowData[i] = resultSet.getLong(i + 1);
+            continue;
+          case STRING:
+            rowData[i] = resultSet.getString(i + 1);
+            continue;
+          case BOOLEAN:
+            rowData[i] = resultSet.getBoolean(i + 1);
+            continue;
+          case OBJECT:
+            rowData[i] = resultSet.getObject(i + 1);
+            continue;
+          default:
+            throw new RuntimeException("Unrecognized data type - " + columnTypes.get(i + 1));
+        }
+      }
+      builder.append(rowData);
+    }
+    return builder.build();
+  }
+
+  private static SeriesType jdbcTypeToSeriesType(final int columnType) {
+    switch (columnType) {
+      case Types.INTEGER:
+      case Types.SMALLINT:
+      case Types.BIGINT:
+        return SeriesType.LONG;
+      case Types.DECIMAL:
+      case Types.DOUBLE:
+      case Types.FLOAT:
+      case Types.NUMERIC:
+      case Types.REAL:
+        return SeriesType.DOUBLE;
+      case Types.CHAR:
+      case Types.VARCHAR:
+      case Types.CLOB:
+      case Types.LONGVARCHAR:
+        return SeriesType.STRING;
+      case Types.BIT:
+      case Types.BOOLEAN:
+        return SeriesType.BOOLEAN;
+      case Types.DATE:
+      case Types.TIME:
+      case Types.TIMESTAMP:
+      case Types.ARRAY:
+      case Types.BINARY:
+      case Types.DATALINK:
+      case Types.BLOB:
+      case Types.DISTINCT:
+      case Types.JAVA_OBJECT:
+      case Types.NULL:
+      case Types.OTHER:
+      case Types.REF:
+      case Types.STRUCT:
+      case Types.VARBINARY:
+      case Types.LONGVARBINARY:
+        return SeriesType.OBJECT;
+      default:
+        throw new UnsupportedOperationException("Unknown JDBC data type - " + columnType);
     }
   }
 

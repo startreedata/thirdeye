@@ -13,7 +13,11 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
+import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
+import ai.startree.thirdeye.spi.dataframe.LongSeries;
+import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +61,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
           df.addSeries(columns.get(colIdx).toLowerCase(), getDoublesForColumn(colIdx));
           break;
         case BOOLEAN:
-          df.addSeries(columns.get(colIdx).toLowerCase(), getBooleansForColumn(colIdx));
+          df.addSeries(columns.get(colIdx).toLowerCase(), getBooleanBytesForColumn(colIdx));
           break;
         case DATE:
         case STRING:
@@ -72,12 +76,12 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return df;
   }
 
-  private boolean[] getBooleansForColumn(final int colIdx) {
-    boolean[] booleans = new boolean[dataCache.size()];
+  private byte[] getBooleanBytesForColumn(final int colIdx) {
+    byte[] bytes = new byte[dataCache.size()];
     for (int rowId = 0; rowId < dataCache.size(); rowId++) {
-      booleans[rowId] = getBoolean(rowId, colIdx);
+      bytes[rowId] = getBoolean(rowId, colIdx);
     }
-    return booleans;
+    return bytes;
   }
 
   private String[] getStringsForColumn(final int colIdx) {
@@ -104,8 +108,12 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return longs;
   }
 
-  public boolean getBoolean(final int rowIdx, final int colIdx) {
-    return Boolean.parseBoolean((dataCache.get(rowIdx))[colIdx].toString());
+  public byte getBoolean(final int rowIdx, final int colIdx) {
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o != null) {
+      return BooleanSeries.valueOf(Boolean.parseBoolean(o.toString()));
+    }
+    return BooleanSeries.NULL;
   }
 
   @Override
@@ -114,15 +122,27 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   }
 
   public String getString(final int rowIdx, final int colIdx) {
-    return (dataCache.get(rowIdx))[colIdx].toString();
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o !=null) {
+      return o.toString();
+    }
+    return StringSeries.NULL;
   }
 
   public long getLong(final int rowIdx, final int colIdx) {
-    return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString()).longValue();
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o != null) {
+      return Double.valueOf(o.toString()).longValue();
+    }
+    return LongSeries.NULL;
   }
 
   public double getDouble(final int rowIdx, final int colIdx) {
-    return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString());
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o != null) {
+      return Double.parseDouble(o.toString());
+    }
+    return DoubleSeries.NULL;
   }
 
   public static DataTable fromDataFrame(final DataFrame dataFrame) {

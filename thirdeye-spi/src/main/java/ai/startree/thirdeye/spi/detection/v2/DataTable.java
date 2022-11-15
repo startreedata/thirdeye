@@ -14,13 +14,10 @@
 package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import java.util.List;
 import java.util.Map;
 
 // todo cyril simplify interface - most of the methods are not used
 public interface DataTable extends OperatorResult {
-
-  List<ColumnType> getColumnTypes();
 
   DataFrame getDataFrame();
 

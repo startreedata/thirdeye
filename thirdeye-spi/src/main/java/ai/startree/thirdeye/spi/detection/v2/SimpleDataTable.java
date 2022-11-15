@@ -36,11 +36,6 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   }
 
   @Override
-  public List<ColumnType> getColumnTypes() {
-    return columnTypes;
-  }
-
-  @Override
   public DataFrame getDataFrame() {
     if (dataFrame == null) {
       dataFrame = generateDataFrame();

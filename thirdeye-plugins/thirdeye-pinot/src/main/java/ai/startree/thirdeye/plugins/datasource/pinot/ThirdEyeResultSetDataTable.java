@@ -50,11 +50,6 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     }
   }
 
-  @Override
-  public List<ColumnType> getColumnTypes() {
-    return this.columnTypes;
-  }
-
   public DataFrame getDataFrame() {
     if (dataFrame == null) {
       dataFrame = generateDataFrame();

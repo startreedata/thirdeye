@@ -13,7 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator.sql;
 
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
 import java.sql.Connection;
@@ -85,11 +86,12 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
     // Drop the table in case.
     destroyTable(c, tableName);
 
+    final DataFrame df = dataTable.getDataFrame();
     // Create the table.
-    createTable(c, tableName, dataTable);
+    createTable(c, tableName, df);
 
     // Insert all rows into the table
-    for (int rowIdx = 0; rowIdx < dataTable.getDataFrame().size(); rowIdx++) {
+    for (int rowIdx = 0; rowIdx < df.size(); rowIdx++) {
       final String insertionStatement = getRowInsertionStatement(tableName, rowIdx, dataTable);
       try {
         c.prepareCall(insertionStatement).execute();
@@ -103,11 +105,11 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
     }
   }
 
-  private void createTable(final Connection c, final String tableName, final DataTable dataTable)
+  private void createTable(final Connection c, final String tableName, final DataFrame dataFrame)
       throws SQLException {
     final String tableCreationStatement = getTableCreationStatement(tableName,
-        dataTable.getDataFrame().getSeriesNames(),
-        dataTable.getColumnTypes());
+        dataFrame.getSeriesNames(),
+        dataFrame.getSeriesTypes());
     try {
       c.prepareCall(tableCreationStatement).execute();
       LOG.debug("Trying to create table with sql: {}", tableCreationStatement);
@@ -144,10 +146,10 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
   }
 
   private String getTableCreationStatement(final String tableName, final List<String> columns,
-      final List<ColumnType> columnTypes) {
+      final List<SeriesType> seriesTypes) {
     String tableCreationStatement = "CREATE TABLE " + tableName + " (";
     for (int i = 0; i < columns.size(); i++) {
-      tableCreationStatement += columns.get(i) + " " + getColumnType(columnTypes.get(i));
+      tableCreationStatement += columns.get(i) + " " + getColumnType(seriesTypes.get(i));
       if (i < columns.size() - 1) {
         tableCreationStatement += ", ";
       }
@@ -156,20 +158,20 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
     return tableCreationStatement;
   }
 
-  private String getColumnType(final ColumnType columnType) {
-    switch (columnType.getType()) {
-      case INT:
+  private String getColumnType(final SeriesType seriesType) {
+    switch (seriesType) {
       case LONG:
         return "BIGINT";
-      case FLOAT:
       case DOUBLE:
         return "DOUBLE";
       case STRING:
         return "VARCHAR(128)";
-      case BYTES:
+      case BOOLEAN:
+        return "BOOLEAN";
       case OBJECT:
         return "VARBINARY(128)";
+      default:
+        throw new IllegalArgumentException("Unknown type " + seriesType.name());
     }
-    return columnType.getType().toString();
   }
 }

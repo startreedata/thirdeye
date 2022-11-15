@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.ws.rs.BadRequestException;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +102,7 @@ public class AppAnalyticsService {
     try {
       // Interval does not have significance in this case, just a placeholder.
       return renderer.renderAlert(alertDTO, new Interval(1L, 2L)).getMetadata();
-    } catch (final IOException | ClassNotFoundException e) {
+    } catch (final IOException | ClassNotFoundException | BadRequestException e) {
       log.warn(String.format("Trouble while rendering alert, %s. id : %d", alertDTO.getName(), alertDTO.getId()), e);
       return null;
     }

@@ -45,7 +45,9 @@ export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
                 </Box>
                 <Box>
                     <Link component={RouterLink} to={getAlertsAllPath()}>
-                        {t("label.view-all-alerts")}
+                        {t("label.view-all-entities", {
+                            entity: t("label.alerts"),
+                        })}
                     </Link>
                 </Box>
             </Grid>

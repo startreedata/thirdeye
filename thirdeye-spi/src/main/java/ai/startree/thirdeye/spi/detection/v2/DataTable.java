@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// todo cyril simplify interface - most of the methods are not used
 public interface DataTable extends OperatorResult {
 
   static Object[] getRow(final DataTable dataTable, final int rowIdx) {
@@ -48,14 +49,6 @@ public interface DataTable extends OperatorResult {
   DataFrame getDataFrame();
 
   Object getObject(int rowIdx, int colIdx);
-
-  boolean getBoolean(int rowIdx, int colIdx);
-
-  String getString(int rowIdx, int colIdx);
-
-  long getLong(int rowIdx, int colIdx);
-
-  double getDouble(int rowIdx, int colIdx);
 
   Map<String, String> getProperties();
 

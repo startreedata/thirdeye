@@ -70,9 +70,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
 
   @Override
   public List<AlertDTO> findAllActive() {
-    final List<AlertDTO> detectionConfigs = findAll();
-    return detectionConfigs.stream().filter(AlertDTO::isActive)
-        .collect(Collectors.toList());
+    return findByPredicate(Predicate.EQ("active", true));
   }
 
   public Long countActive() {

@@ -50,14 +50,6 @@ public interface DataTable extends OperatorResult {
 
   Object getObject(int rowIdx, int colIdx);
 
-  boolean getBoolean(int rowIdx, int colIdx);
-
-  String getString(int rowIdx, int colIdx);
-
-  long getLong(int rowIdx, int colIdx);
-
-  double getDouble(int rowIdx, int colIdx);
-
   Map<String, String> getProperties();
 
   void addProperties(Map<String, String> metadata);

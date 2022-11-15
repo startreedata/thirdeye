@@ -111,7 +111,6 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return longs;
   }
 
-  @Override
   public boolean getBoolean(final int rowIdx, final int colIdx) {
     return Boolean.parseBoolean((dataCache.get(rowIdx))[colIdx].toString());
   }
@@ -121,17 +120,14 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return (dataCache.get(rowIdx))[colIdx];
   }
 
-  @Override
   public String getString(final int rowIdx, final int colIdx) {
     return (dataCache.get(rowIdx))[colIdx].toString();
   }
 
-  @Override
   public long getLong(final int rowIdx, final int colIdx) {
     return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString()).longValue();
   }
 
-  @Override
   public double getDouble(final int rowIdx, final int colIdx) {
     return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString());
   }

@@ -19,9 +19,6 @@ import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.List;
 
-/**
- * Absolute change rule detection
- */
 public class ConsoleOutputTrigger implements EventTrigger<ConsoleOutputTriggerSpec> {
 
   private ConsoleOutputTriggerSpec spec;

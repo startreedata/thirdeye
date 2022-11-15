@@ -178,13 +178,5 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     public DataTable build() {
       return new SimpleDataTable(columns, columnTypes, this.dataCache);
     }
-
-    public List<ColumnType> getColumnTypes() {
-      return columnTypes;
-    }
-
-    public List<String> getColumns() {
-      return columns;
-    }
   }
 }

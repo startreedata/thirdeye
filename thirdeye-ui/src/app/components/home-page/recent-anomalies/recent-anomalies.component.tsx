@@ -61,8 +61,10 @@ export const RecentAnomalies: FunctionComponent = () => {
                             isLoading={status === ActionStatus.Working}
                             loadingState={<SkeletonV1 animation="pulse" />}
                         >
-                            {anomaliesToDisplay.length} latest anomalies
-                            detected in your alerts
+                            {anomaliesToDisplay.length
+                                ? `${anomaliesToDisplay.length} latest `
+                                : "No recent "}
+                            anomalies detected in your alerts
                         </LoadingErrorStateSwitch>
                     </Typography>
                 </Grid>
@@ -108,21 +110,21 @@ export const RecentAnomalies: FunctionComponent = () => {
                         </>
                     }
                 >
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Anomaly ID</TableCell>
-                                <TableCell>Alert Name</TableCell>
-                                <TableCell>Metric</TableCell>
-                                <TableCell>Started</TableCell>
-                                <TableCell>Ended</TableCell>
-                                <TableCell>Deviation</TableCell>
-                                <TableCell />
-                                <TableCell />
-                            </TableRow>
-                        </TableHead>
-                        {anomaliesToDisplay.length > 0 &&
-                            anomaliesToDisplay.map((anomaly) => {
+                    {anomaliesToDisplay.length > 0 ? (
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Anomaly ID</TableCell>
+                                    <TableCell>Alert Name</TableCell>
+                                    <TableCell>Metric</TableCell>
+                                    <TableCell>Started</TableCell>
+                                    <TableCell>Ended</TableCell>
+                                    <TableCell>Deviation</TableCell>
+                                    <TableCell />
+                                    <TableCell />
+                                </TableRow>
+                            </TableHead>
+                            {anomaliesToDisplay.map((anomaly) => {
                                 return (
                                     <AnomalyRow
                                         anomaly={anomaly}
@@ -130,7 +132,21 @@ export const RecentAnomalies: FunctionComponent = () => {
                                     />
                                 );
                             })}
-                    </Table>
+                        </Table>
+                    ) : (
+                        <Box
+                            alignItems="center"
+                            justifyContent="center"
+                            mb={8}
+                            mt={8}
+                            textAlign="center"
+                            width="100%"
+                        >
+                            <NoDataIndicator>
+                                No recent anomalies found in the last 6 months.
+                            </NoDataIndicator>
+                        </Box>
+                    )}
                 </LoadingErrorStateSwitch>
             </PageContentsCardV1>
         </>

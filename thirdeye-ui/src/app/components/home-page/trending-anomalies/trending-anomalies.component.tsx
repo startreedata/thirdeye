@@ -15,6 +15,7 @@
 import { Box, Link, Typography } from "@material-ui/core";
 import { Orientation } from "@visx/axis";
 import { scaleLinear } from "d3-scale";
+import { capitalize } from "lodash";
 import { DateTime } from "luxon";
 import React, {
     FunctionComponent,
@@ -152,6 +153,11 @@ export const TrendingAnomalies: FunctionComponent = () => {
         );
     }, []);
 
+    const isTimeSeriesEmpty =
+        status === ActionStatus.Done && timeseriesOptions?.series
+            ? timeseriesOptions.series.length === 0
+            : false;
+
     return (
         <LoadingErrorStateSwitch
             errorState={
@@ -182,27 +188,48 @@ export const TrendingAnomalies: FunctionComponent = () => {
         >
             {timeseriesOptions && (
                 <>
-                    <Box position="relative">
-                        <Box position="absolute" zIndex={500}>
+                    {isTimeSeriesEmpty ? (
+                        <Box
+                            alignItems="center"
+                            display="flex"
+                            justifyContent="center"
+                            minHeight={195}
+                            position="relative"
+                        >
                             <Typography variant="h6">
-                                {t("label.daily-anomalies")}
+                                {capitalize(
+                                    t("message.no-recent-entity", {
+                                        entity: t("label.anomalies"),
+                                        timePeriod: t("label.last-6-months"),
+                                    })
+                                )}
                             </Typography>
-                            {currentChartZoom && (
-                                <Link
-                                    component={RouterLink}
-                                    to={
-                                        getAnomaliesAllRangePath() +
-                                        allAnomaliesLinkSearchParams.toString()
-                                    }
-                                >
-                                    {t("label.view-anomalies-for-zoom-range")}
-                                </Link>
-                            )}
                         </Box>
-                        <Box height={195}>
-                            <TimeSeriesChart {...timeseriesOptions} />
+                    ) : (
+                        <Box position="relative">
+                            <Box position="absolute" zIndex={500}>
+                                <Typography variant="h6">
+                                    {t("label.daily-anomalies")}
+                                </Typography>
+                                {currentChartZoom && (
+                                    <Link
+                                        component={RouterLink}
+                                        to={
+                                            getAnomaliesAllRangePath() +
+                                            allAnomaliesLinkSearchParams.toString()
+                                        }
+                                    >
+                                        {t(
+                                            "label.view-anomalies-for-zoom-range"
+                                        )}
+                                    </Link>
+                                )}
+                            </Box>
+                            <Box height={195}>
+                                <TimeSeriesChart {...timeseriesOptions} />
+                            </Box>
                         </Box>
-                    </Box>
+                    )}
                 </>
             )}
         </LoadingErrorStateSwitch>

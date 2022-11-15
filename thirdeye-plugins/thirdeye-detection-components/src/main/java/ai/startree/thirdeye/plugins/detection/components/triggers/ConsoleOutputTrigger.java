@@ -15,13 +15,10 @@ package ai.startree.thirdeye.plugins.detection.components.triggers;
 
 import ai.startree.thirdeye.spi.detection.EventTrigger;
 import ai.startree.thirdeye.spi.detection.EventTriggerException;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
-import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Absolute change rule detection
- */
 public class ConsoleOutputTrigger implements EventTrigger<ConsoleOutputTriggerSpec> {
 
   private ConsoleOutputTriggerSpec spec;
@@ -32,11 +29,19 @@ public class ConsoleOutputTrigger implements EventTrigger<ConsoleOutputTriggerSp
   }
 
   @Override
-  public void trigger(final List<String> columnNames, final List<ColumnType> columnTypes, final Object[] event) throws EventTriggerException {
-    System.out.println(String.format(spec.getFormat(), DataTable.getRecord(columnNames, event)));
+  public void trigger(final List<String> columnNames, final Object[] event) throws EventTriggerException {
+    System.out.println(String.format(spec.getFormat(), getRecord(columnNames, event)));
   }
 
   @Override
   public void close() {
+  }
+
+  private static Map<String, Object> getRecord(final List<String> columnNames, final Object[] event) {
+    Map<String, Object> record = new HashMap<>();
+    for (int i = 0; i < columnNames.size(); i++) {
+      record.put(columnNames.get(i), event[i]);
+    }
+    return record;
   }
 }

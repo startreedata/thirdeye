@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// todo cyril simplify interface - most of the methods are not used
 public interface DataTable extends OperatorResult {
 
   static Object[] getRow(final DataTable dataTable, final int rowIdx) {

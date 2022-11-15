@@ -16,6 +16,7 @@ import axios from "axios";
 import { AlertTemplate } from "../dto/alert-template.interfaces";
 import {
     createAlertTemplate,
+    createDefaultAlertTemplates,
     deleteAlertTemplate,
     getAlertTemplate,
     getAlertTemplates,
@@ -87,6 +88,29 @@ describe("Alert Templates REST", () => {
         ).rejects.toThrow("testError");
     });
 
+    it("createDefaultAlertTemplates should invoke axios.post with appropriate input and return appropriate alert", async () => {
+        jest.spyOn(axios, "post").mockResolvedValue({
+            data: [mockDefaultAlertTemplatesResponse],
+        });
+
+        await expect((await createDefaultAlertTemplates())[0]).toEqual(
+            mockDefaultAlertTemplatesResponse
+        );
+
+        expect(axios.post).toHaveBeenCalledWith(
+            "/api/alert-templates/load-defaults",
+            "updateExisting=false"
+        );
+    });
+
+    it("createDefaultAlertTemplates should throw encountered error", async () => {
+        jest.spyOn(axios, "post").mockRejectedValue(mockError);
+
+        await expect(createDefaultAlertTemplates()).rejects.toThrow(
+            "testError"
+        );
+    });
+
     it("updateAlertTemplate should invoke axios.put with appropriate input and return appropriate alert", async () => {
         jest.spyOn(axios, "put").mockResolvedValue({
             data: [mockAlertTemplateResponse],
@@ -135,5 +159,173 @@ const mockAlertTemplateRequest = {
 const mockAlertTemplateResponse = {
     name: "testNameAlertResponse",
 };
+
+const mockDefaultAlertTemplatesResponse = [
+    {
+        id: 13371,
+        name: "startree-percentage-rule",
+        description:
+            "Percentage rule template. Aggregation function with 1 operand: SUM, MAX,etc...",
+        nodes: [
+            {
+                name: "root",
+                type: "PostProcessor",
+                params: {
+                    type: "THRESHOLD",
+                    "component.min": "${thresholdFilterMin}",
+                    "component.ignore": "${thresholdIgnore}",
+                    "component.max": "${thresholdFilterMax}",
+                },
+                inputs: [{ sourcePlanNode: "timeOfWeekProcessor" }],
+                outputs: [],
+            },
+            {
+                name: "timeOfWeekProcessor",
+                type: "PostProcessor",
+                params: {
+                    "component.hoursOfDay": "${hoursOfDay}",
+                    type: "TIME_OF_WEEK",
+                    "component.dayHoursOfWeek": "${dayHoursOfWeek}",
+                    "component.daysOfWeek": "${daysOfWeek}",
+                    "component.ignore": "${timeOfWeekIgnore}",
+                },
+                inputs: [{ sourcePlanNode: "coldStartProcessor" }],
+                outputs: [],
+            },
+            {
+                name: "coldStartProcessor",
+                type: "PostProcessor",
+                params: {
+                    "component.tableName": "${dataset}",
+                    type: "COLD_START",
+                    "component.ignore": "${coldStartIgnore}",
+                    "component.coldStartPeriod": "${baselineOffset}",
+                },
+                inputs: [{ sourcePlanNode: "anomalyDetector" }],
+                outputs: [],
+            },
+            {
+                name: "anomalyDetector",
+                type: "AnomalyDetector",
+                params: {
+                    "component.percentageChange": "${percentageChange}",
+                    "component.monitoringGranularity":
+                        "${monitoringGranularity}",
+                    "component.metric": "met",
+                    "anomaly.dataset": "${dataset}",
+                    "component.timestamp": "ts",
+                    "anomaly.metric": "${aggregationColumn}",
+                    "anomaly.source": "percentage-change-template/root",
+                    type: "PERCENTAGE_CHANGE",
+                    "component.pattern": "${pattern}",
+                },
+                inputs: [
+                    {
+                        targetProperty: "baseline",
+                        sourcePlanNode: "baselineMissingDataManager",
+                        sourceProperty: "baselineOutput",
+                    },
+                    {
+                        targetProperty: "current",
+                        sourcePlanNode: "currentMissingDataManager",
+                        sourceProperty: "currentOutput",
+                    },
+                ],
+                outputs: [],
+            },
+            {
+                name: "baselineMissingDataManager",
+                type: "TimeIndexFiller",
+                params: { "component.timestamp": "ts" },
+                inputs: [
+                    {
+                        sourcePlanNode: "baselineDataFetcher",
+                        sourceProperty: "baselineOutput",
+                    },
+                ],
+                outputs: [{ outputName: "baselineOutput" }],
+            },
+            {
+                name: "baselineDataFetcher",
+                type: "DataFetcher",
+                params: {
+                    "component.tableName": "${dataset}",
+                    "component.dataSource": "${dataSource}",
+                    "component.query":
+                        "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}" +
+                        "(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${baselineOffset}'" +
+                        ", '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}",
+                },
+                inputs: [],
+                outputs: [{ outputKey: "pinot", outputName: "baselineOutput" }],
+            },
+            {
+                name: "currentMissingDataManager",
+                type: "TimeIndexFiller",
+                params: { "component.timestamp": "ts" },
+                inputs: [
+                    {
+                        sourcePlanNode: "currentDataFetcher",
+                        sourceProperty: "currentOutput",
+                    },
+                ],
+                outputs: [{ outputName: "currentOutput" }],
+            },
+            {
+                name: "currentDataFetcher",
+                type: "DataFetcher",
+                params: {
+                    "component.tableName": "${dataset}",
+                    "component.dataSource": "${dataSource}",
+                    "component.query":
+                        "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}" +
+                        "(${aggregationColumn}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}",
+                },
+                inputs: [],
+                outputs: [{ outputKey: "pinot", outputName: "currentOutput" }],
+            },
+        ],
+        metadata: {
+            datasource: { name: "${dataSource}" },
+            dataset: {
+                name: "${dataset}",
+                dimensions: "${rcaIncludedDimensions}",
+                completenessDelay: "${completenessDelay}",
+                rcaExcludedDimensions: "${rcaExcludedDimensions}",
+            },
+            metric: {
+                name: "${aggregationColumn}",
+                aggregationFunction: "${rcaAggregationFunction}",
+                where: "${queryFilters}",
+            },
+            granularity: "${monitoringGranularity}",
+            timezone: "${timezone}",
+            mergeMaxGap: "${mergeMaxGap}",
+            mergeMaxDuration: "${mergeMaxDuration}",
+        },
+        defaultProperties: {
+            timezone: "UTC",
+            timeColumn: "AUTO",
+            timeColumnFormat: "",
+            pattern: "UP_OR_DOWN",
+            completenessDelay: "P0D",
+            mergeMaxGap: "",
+            mergeMaxDuration: "",
+            rcaAggregationFunction: "",
+            queryFilters: "",
+            rcaIncludedDimensions: [],
+            rcaExcludedDimensions: [],
+            coldStartIgnore: "true",
+            timeOfWeekIgnore: "true",
+            daysOfWeek: [],
+            hoursOfDay: [],
+            dayHoursOfWeek: {},
+            thresholdIgnore: "true",
+            thresholdFilterMin: "-1",
+            thresholdFilterMax: "-1",
+            queryLimit: "100000000",
+        },
+    },
+];
 
 const mockError = new Error("testError");

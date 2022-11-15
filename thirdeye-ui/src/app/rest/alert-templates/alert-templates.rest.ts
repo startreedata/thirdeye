@@ -19,6 +19,7 @@ import {
 } from "../dto/alert-template.interfaces";
 
 const BASE_URL_ALERTS = "/api/alert-templates";
+const LOAD_DEFAULTS_ROUTE = "load-defaults";
 
 export const getAlertTemplate = async (id: number): Promise<AlertTemplate> => {
     const response = await axios.get(`${BASE_URL_ALERTS}/${id}`);
@@ -38,6 +39,17 @@ export const createAlertTemplate = async (
     const response = await axios.post(BASE_URL_ALERTS, [alertTemplate]);
 
     return response.data[0];
+};
+
+export const createDefaultAlertTemplates = async (
+    updateExisting = false
+): Promise<AlertTemplate[]> => {
+    const response = await axios.post(
+        `${BASE_URL_ALERTS}/${LOAD_DEFAULTS_ROUTE}`,
+        `updateExisting=${updateExisting}` // This API accepts formData instead of json
+    );
+
+    return response.data;
 };
 
 export const updateAlertTemplate = async (

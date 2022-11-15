@@ -25,7 +25,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { AnomaliesReportedCountProps } from "./anomalies-reported-count.interfaces";
 
 export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountProps> =
-    ({ appAnalytics, getAppAnalyticsStatus, classes }) => {
+    ({ appAnalytics, getAppAnalyticsStatus, classes = {} }) => {
         const { t } = useTranslation();
 
         return (

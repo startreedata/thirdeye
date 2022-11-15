@@ -24,7 +24,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   private final List<Object[]> dataCache = new ArrayList<>();
   private DataFrame dataFrame;
 
-  public SimpleDataTable(final List<String> columns, final List<ColumnType> columnTypes,
+  private SimpleDataTable(final List<String> columns, final List<ColumnType> columnTypes,
       final List<Object[]> dataCache) {
     this.columns = columns;
     this.columnTypes = columnTypes;

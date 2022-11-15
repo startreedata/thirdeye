@@ -1170,8 +1170,6 @@ public class DataFrame {
 
   /**
    * Returns the number of series contained in the DataFrame.
-   *
-   * @return series names
    */
   public int getSeriesCount() {
     return this.series.size();

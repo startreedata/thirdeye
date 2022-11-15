@@ -88,32 +88,32 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   }
 
   private boolean[] getBooleansForColumn(final int colIdx) {
-    boolean[] booleans = new boolean[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+    boolean[] booleans = new boolean[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
       booleans[rowId] = getBoolean(rowId, colIdx);
     }
     return booleans;
   }
 
   private String[] getStringsForColumn(final int colIdx) {
-    String[] strings = new String[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+    String[] strings = new String[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
       strings[rowId] = getString(rowId, colIdx);
     }
     return strings;
   }
 
   private double[] getDoublesForColumn(final int colIdx) {
-    double[] doubles = new double[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+    double[] doubles = new double[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
       doubles[rowId] = getDouble(rowId, colIdx);
     }
     return doubles;
   }
 
   private long[] getLongsForColumn(final int colIdx) {
-    long[] longs = new long[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+    long[] longs = new long[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
       longs[rowId] = getLong(rowId, colIdx);
     }
     return longs;

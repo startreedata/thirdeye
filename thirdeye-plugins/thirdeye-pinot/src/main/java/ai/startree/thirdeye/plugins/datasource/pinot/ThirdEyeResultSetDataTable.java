@@ -105,7 +105,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     // todo cyril- at build() time this creates object series then uses inferType() to cast to correct types
     //  does not look efficient but I could not identify a hotspot in method profiling - so refactoring was not prioritized
     DataFrame.Builder dfBuilder = DataFrame.builder(columns);
-    for (int rowIdx = 0; rowIdx < getRowCount(); rowIdx++) {
+    for (int rowIdx = 0; rowIdx < thirdEyeResultSet.getRowCount(); rowIdx++) {
       Object[] row = new Object[getColumnCount()];
       for (int columnIdx = 0; columnIdx < getColumnCount(); columnIdx++) {
         Object value = null;

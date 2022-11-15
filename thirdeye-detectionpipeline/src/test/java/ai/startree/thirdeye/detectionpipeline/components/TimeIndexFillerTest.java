@@ -230,7 +230,8 @@ public class TimeIndexFillerTest {
     } catch (Exception e) {
       fail("Index filling failed: " + e);
     }
-    assertThat(output.getRowCount()).isEqualTo(7);
+    final DataFrame outputDf = output.getDataFrame();
+    assertThat(outputDf.size()).isEqualTo(7);
     // (met,OCTOBER_19_MILLIS) should be null
     Object october19Value = output.getObject(1, 1);
     assertThat(october19Value).isNull();

@@ -89,7 +89,7 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
     createTable(c, tableName, dataTable);
 
     // Insert all rows into the table
-    for (int rowIdx = 0; rowIdx < dataTable.getRowCount(); rowIdx++) {
+    for (int rowIdx = 0; rowIdx < dataTable.getDataFrame().size(); rowIdx++) {
       final String insertionStatement = getRowInsertionStatement(tableName, rowIdx, dataTable);
       try {
         c.prepareCall(insertionStatement).execute();

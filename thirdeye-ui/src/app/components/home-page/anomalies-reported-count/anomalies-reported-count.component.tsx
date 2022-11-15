@@ -33,7 +33,7 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                     <Box>{t("label.anomalies-reported")}</Box>
                     <Box>
                         <Link component={RouterLink} to={getAnomaliesAllPath()}>
-                            {t("label.view-all-entities", {
+                            {t("label.view-recent-entities", {
                                 entity: t("label.anomalies"),
                             })}
                         </Link>

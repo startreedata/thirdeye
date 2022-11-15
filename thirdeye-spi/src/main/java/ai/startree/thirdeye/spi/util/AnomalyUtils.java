@@ -17,6 +17,8 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnomalyUtils {
 
@@ -24,5 +26,13 @@ public class AnomalyUtils {
     return optional(parent.getAnomalyLabels())
         .map(labels -> labels.stream().anyMatch(AnomalyLabelDTO::isIgnore))
         .orElse(false);
+  }
+
+  public static void addLabel(final MergedAnomalyResultDTO anomalyResultDTO,
+      final AnomalyLabelDTO newLabel) {
+    final List<AnomalyLabelDTO> labels = optional(anomalyResultDTO.getAnomalyLabels()).orElse(
+        new ArrayList<>());
+    labels.add(newLabel);
+    anomalyResultDTO.setAnomalyLabels(labels);
   }
 }

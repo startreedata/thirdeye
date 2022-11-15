@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi.dataframe;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -200,6 +201,35 @@ public class DataFrameTest {
     df.addSeries("ab", VALUES_DOUBLE);
     df.addSeries("_a", VALUES_DOUBLE);
     df.addSeries("a1", VALUES_DOUBLE);
+  }
+
+  @Test
+  public void testSeriesCount() {
+    assertThat(df.getSeriesCount()).isEqualTo(6);
+    df.addSeries("otherBoolean", VALUES_BOOLEAN);
+    assertThat(df.getSeriesCount()).isEqualTo(7);
+    df.dropSeries(List.of("otherBoolean"));
+    assertThat(df.getSeriesCount()).isEqualTo(6);
+    df.dropSeries(List.of("double", "long"));
+    assertThat(df.getSeriesCount()).isEqualTo(4);
+  }
+
+  @Test
+  public void testSeriesTypes() {
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.LONG, SeriesType.DOUBLE, SeriesType.LONG, SeriesType.STRING,
+            SeriesType.BOOLEAN, SeriesType.OBJECT));
+    df.addSeries("otherBoolean", VALUES_BOOLEAN);
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.LONG, SeriesType.DOUBLE, SeriesType.LONG, SeriesType.STRING,
+            SeriesType.BOOLEAN, SeriesType.OBJECT, SeriesType.BOOLEAN));
+    df.dropSeries(List.of("object"));
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.LONG, SeriesType.DOUBLE, SeriesType.LONG, SeriesType.STRING,
+            SeriesType.BOOLEAN, SeriesType.BOOLEAN));
+    df.dropSeries(List.of("index", "string"));
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.DOUBLE, SeriesType.LONG, SeriesType.BOOLEAN, SeriesType.BOOLEAN));
   }
 
   @Test

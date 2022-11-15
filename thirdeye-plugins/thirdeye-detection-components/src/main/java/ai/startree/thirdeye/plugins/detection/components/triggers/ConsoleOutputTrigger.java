@@ -15,7 +15,6 @@ package ai.startree.thirdeye.plugins.detection.components.triggers;
 
 import ai.startree.thirdeye.spi.detection.EventTrigger;
 import ai.startree.thirdeye.spi.detection.EventTriggerException;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class ConsoleOutputTrigger implements EventTrigger<ConsoleOutputTriggerSp
   }
 
   @Override
-  public void trigger(final List<String> columnNames, final List<ColumnType> columnTypes, final Object[] event) throws EventTriggerException {
+  public void trigger(final List<String> columnNames, final Object[] event) throws EventTriggerException {
     System.out.println(String.format(spec.getFormat(), getRecord(columnNames, event)));
   }
 

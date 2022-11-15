@@ -53,7 +53,6 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
       final DataTable dataTable = timeSeriesMap.get(inputKey);
       for (int rowIdx = 0; rowIdx < dataTable.getDataFrame().size(); rowIdx++) {
         eventTrigger.trigger(dataTable.getDataFrame().getSeriesNames(),
-            dataTable.getColumnTypes(),
             getRow(dataTable, rowIdx));
       }
     }

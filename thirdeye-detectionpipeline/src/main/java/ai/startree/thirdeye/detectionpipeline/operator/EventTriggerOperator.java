@@ -52,7 +52,7 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
     for (String inputKey : timeSeriesMap.keySet()) {
       final DataTable dataTable = timeSeriesMap.get(inputKey);
       for (int rowIdx = 0; rowIdx < dataTable.getDataFrame().size(); rowIdx++) {
-        eventTrigger.trigger(dataTable.getColumns(),
+        eventTrigger.trigger(dataTable.getDataFrame().getSeriesNames(),
             dataTable.getColumnTypes(),
             getRow(dataTable, rowIdx));
       }
@@ -76,7 +76,7 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
   }
 
   static Object[] getRow(final DataTable dataTable, final int rowIdx) {
-    int columnCount = dataTable.getColumnCount();
+    int columnCount = dataTable.getDataFrame().getSeriesCount();
     Object[] row = new Object[columnCount];
     for (int colIdx = 0; colIdx < columnCount; colIdx++) {
       row[colIdx] = dataTable.getObject(rowIdx, colIdx);

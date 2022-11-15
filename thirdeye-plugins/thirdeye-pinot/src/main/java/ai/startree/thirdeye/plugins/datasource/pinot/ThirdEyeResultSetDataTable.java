@@ -51,21 +51,6 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
   }
 
   @Override
-  public List<String> getColumns() {
-    return this.columns;
-  }
-
-  @Override
-  public int getRowCount() {
-    return this.thirdEyeResultSet.getRowCount();
-  }
-
-  @Override
-  public int getColumnCount() {
-    return this.columns.size();
-  }
-
-  @Override
   public List<ColumnType> getColumnTypes() {
     return this.columnTypes;
   }
@@ -106,8 +91,8 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     //  does not look efficient but I could not identify a hotspot in method profiling - so refactoring was not prioritized
     DataFrame.Builder dfBuilder = DataFrame.builder(columns);
     for (int rowIdx = 0; rowIdx < thirdEyeResultSet.getRowCount(); rowIdx++) {
-      Object[] row = new Object[getColumnCount()];
-      for (int columnIdx = 0; columnIdx < getColumnCount(); columnIdx++) {
+      Object[] row = new Object[columns.size()];
+      for (int columnIdx = 0; columnIdx < columns.size(); columnIdx++) {
         Object value = null;
         try {
           value = getObject(rowIdx, columnIdx);

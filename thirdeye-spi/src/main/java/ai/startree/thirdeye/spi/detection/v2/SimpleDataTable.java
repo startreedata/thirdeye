@@ -32,21 +32,6 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   }
 
   @Override
-  public int getRowCount() {
-    return dataCache.size();
-  }
-
-  @Override
-  public int getColumnCount() {
-    return columns.size();
-  }
-
-  @Override
-  public List<String> getColumns() {
-    return columns;
-  }
-
-  @Override
   public List<ColumnType> getColumnTypes() {
     return columnTypes;
   }
@@ -61,7 +46,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
 
   private DataFrame generateDataFrame() {
     final DataFrame df = new DataFrame();
-    for (int colIdx = 0; colIdx < getColumnCount(); colIdx++) {
+    for (int colIdx = 0; colIdx < columns.size(); colIdx++) {
       switch (columnTypes.get(colIdx).getType()) {
         case INT:
         case LONG:
@@ -141,7 +126,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   }
 
   public static DataTable fromDataFrame(final DataFrame dataFrame) {
-    final List<String> columns = new ArrayList<>(dataFrame.getSeriesNames());
+    final List<String> columns = dataFrame.getSeriesNames();
     final List<ColumnType> columnTypes = new ArrayList<>();
     for (String key : columns) {
       columnTypes.add(ColumnType.seriesTypeToColumnType(dataFrame.getSeries().get(key).type()));

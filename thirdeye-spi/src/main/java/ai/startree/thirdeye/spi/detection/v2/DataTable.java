@@ -20,10 +20,6 @@ import java.util.Map;
 // todo cyril simplify interface - most of the methods are not used
 public interface DataTable extends OperatorResult {
 
-  int getColumnCount();
-
-  List<String> getColumns();
-
   List<ColumnType> getColumnTypes();
 
   DataFrame getDataFrame();

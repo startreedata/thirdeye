@@ -106,7 +106,7 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
   private void createTable(final Connection c, final String tableName, final DataTable dataTable)
       throws SQLException {
     final String tableCreationStatement = getTableCreationStatement(tableName,
-        dataTable.getColumns(),
+        dataTable.getDataFrame().getSeriesNames(),
         dataTable.getColumnTypes());
     try {
       c.prepareCall(tableCreationStatement).execute();
@@ -125,7 +125,7 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
       final DataTable dataTable) {
     final StringBuilder sb = new StringBuilder(
         "INSERT INTO " + tableName + " VALUES (");
-    for (int colIdx = 0; colIdx < dataTable.getColumnCount(); colIdx++) {
+    for (int colIdx = 0; colIdx < dataTable.getDataFrame().getSeriesCount(); colIdx++) {
       final Object value = dataTable.getObject(rowIdx, colIdx);
 
       // If string, then wrap with quotes
@@ -135,7 +135,7 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
           .append(value)
           .append(quoteWith);
 
-      if (colIdx < dataTable.getColumnCount() - 1) {
+      if (colIdx < dataTable.getDataFrame().getSeriesCount() - 1) {
         sb.append(", ");
       }
     }

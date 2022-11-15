@@ -1158,8 +1158,17 @@ public class DataFrame {
    *
    * @return series names
    */
-  public Set<String> getSeriesNames() {
-    return Collections.unmodifiableSet(this.series.keySet());
+  public List<String> getSeriesNames() {
+    return List.copyOf(this.series.keySet());
+  }
+
+  /**
+   * Returns the number of series contained in the DataFrame.
+   *
+   * @return series names
+   */
+  public int getSeriesCount() {
+    return this.series.size();
   }
 
   /**
@@ -1730,7 +1739,7 @@ public class DataFrame {
    * @return DataFrame copy without null rows
    */
   public DataFrame dropNull() {
-    return this.dropNull(new ArrayList<>(this.getSeriesNames()));
+    return this.dropNull(this.getSeriesNames());
   }
 
   /**
@@ -2175,7 +2184,7 @@ public class DataFrame {
 
   @Override
   public String toString() {
-    List<String> names = new ArrayList<>(this.getSeriesNames());
+    List<String> names = this.getSeriesNames();
     for (int i = 0; i < this.indexNames.size(); i++) {
       names.remove(this.indexNames.get(i));
       names.add(i, this.indexNames.get(i));

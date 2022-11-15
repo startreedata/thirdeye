@@ -22,6 +22,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   private final List<String> columns;
   private final List<ColumnType> columnTypes;
   private final List<Object[]> dataCache = new ArrayList<>();
+  private DataFrame dataFrame;
 
   public SimpleDataTable(final List<String> columns, final List<ColumnType> columnTypes,
       final List<Object[]> dataCache) {
@@ -52,6 +53,13 @@ public class SimpleDataTable extends AbstractDataTableImpl {
 
   @Override
   public DataFrame getDataFrame() {
+    if (dataFrame == null) {
+      dataFrame = generateDataFrame();
+    }
+    return dataFrame;
+  }
+
+  private DataFrame generateDataFrame() {
     final DataFrame df = new DataFrame();
     for (int colIdx = 0; colIdx < getColumnCount(); colIdx++) {
       switch (columnTypes.get(colIdx).getType()) {
@@ -111,7 +119,6 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return longs;
   }
 
-  @Override
   public boolean getBoolean(final int rowIdx, final int colIdx) {
     return Boolean.parseBoolean((dataCache.get(rowIdx))[colIdx].toString());
   }
@@ -121,17 +128,14 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return (dataCache.get(rowIdx))[colIdx];
   }
 
-  @Override
   public String getString(final int rowIdx, final int colIdx) {
     return (dataCache.get(rowIdx))[colIdx].toString();
   }
 
-  @Override
   public long getLong(final int rowIdx, final int colIdx) {
     return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString()).longValue();
   }
 
-  @Override
   public double getDouble(final int rowIdx, final int colIdx) {
     return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString());
   }

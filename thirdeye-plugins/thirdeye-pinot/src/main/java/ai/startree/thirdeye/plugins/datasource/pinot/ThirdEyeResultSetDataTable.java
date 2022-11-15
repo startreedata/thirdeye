@@ -70,38 +70,6 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     return this.columnTypes;
   }
 
-  @Override
-  public String getString(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx);
-    }
-    return thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength);
-  }
-
-  @Override
-  public boolean getBoolean(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return Boolean.parseBoolean(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
-    }
-    return Boolean.parseBoolean(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
-  }
-
-  @Override
-  public long getLong(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return Long.parseLong(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
-    }
-    return Long.parseLong(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
-  }
-
-  @Override
-  public double getDouble(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return Double.parseDouble(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
-    }
-    return Double.parseDouble(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
-  }
-
   public DataFrame getDataFrame() {
     if (dataFrame == null) {
       dataFrame = generateDataFrame();

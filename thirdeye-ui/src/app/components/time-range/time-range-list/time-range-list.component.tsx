@@ -61,7 +61,9 @@ export const TimeRangeList: FunctionComponent<TimeRangeListProps> = ({
             {!isEmpty(recentCustomTimeRangeDurations) && (
                 <ListSubheader disableSticky>
                     <ListItemText
-                        primary={t("label.recent-custom")}
+                        primary={t("label.recent-entity", {
+                            entity: t("label.custom"),
+                        })}
                         primaryTypographyProps={{
                             variant: "overline",
                             noWrap: true,

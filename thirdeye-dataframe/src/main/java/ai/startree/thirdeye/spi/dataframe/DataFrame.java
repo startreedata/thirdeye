@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.dataframe;
 
+import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -1158,8 +1160,19 @@ public class DataFrame {
    *
    * @return series names
    */
-  public Set<String> getSeriesNames() {
-    return Collections.unmodifiableSet(this.series.keySet());
+  public List<String> getSeriesNames() {
+    return List.copyOf(this.series.keySet());
+  }
+
+  public List<SeriesType> getSeriesTypes() {
+    return this.series.values().stream().map(Series::type).collect(Collectors.toList());
+  }
+
+  /**
+   * Returns the number of series contained in the DataFrame.
+   */
+  public int getSeriesCount() {
+    return this.series.size();
   }
 
   /**
@@ -1730,7 +1743,7 @@ public class DataFrame {
    * @return DataFrame copy without null rows
    */
   public DataFrame dropNull() {
-    return this.dropNull(new ArrayList<>(this.getSeriesNames()));
+    return this.dropNull(this.getSeriesNames());
   }
 
   /**

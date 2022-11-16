@@ -16,7 +16,6 @@ package ai.startree.thirdeye.calcite.dataframe;
 import static org.apache.calcite.linq4j.Nullness.castNonNull;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.calcite.linq4j.Enumerator;
@@ -45,7 +44,7 @@ public class DataFrameEnumerator implements Enumerator<Object[]> {
     this.filterValues = filterValues == null ? null
         : ImmutableNullableList.copyOf(filterValues);
     this.dataFrame = dataFrame;
-    this.columnNames = new ArrayList<>(dataFrame.getSeriesNames());
+    this.columnNames = dataFrame.getSeriesNames();
   }
 
   @Override

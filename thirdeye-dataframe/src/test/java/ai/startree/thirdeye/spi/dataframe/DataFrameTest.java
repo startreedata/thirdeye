@@ -15,11 +15,11 @@ package ai.startree.thirdeye.spi.dataframe;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -204,6 +204,35 @@ public class DataFrameTest {
   }
 
   @Test
+  public void testSeriesCount() {
+    assertThat(df.getSeriesCount()).isEqualTo(6);
+    df.addSeries("otherBoolean", VALUES_BOOLEAN);
+    assertThat(df.getSeriesCount()).isEqualTo(7);
+    df.dropSeries(List.of("otherBoolean"));
+    assertThat(df.getSeriesCount()).isEqualTo(6);
+    df.dropSeries(List.of("double", "long"));
+    assertThat(df.getSeriesCount()).isEqualTo(4);
+  }
+
+  @Test
+  public void testSeriesTypes() {
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.LONG, SeriesType.DOUBLE, SeriesType.LONG, SeriesType.STRING,
+            SeriesType.BOOLEAN, SeriesType.OBJECT));
+    df.addSeries("otherBoolean", VALUES_BOOLEAN);
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.LONG, SeriesType.DOUBLE, SeriesType.LONG, SeriesType.STRING,
+            SeriesType.BOOLEAN, SeriesType.OBJECT, SeriesType.BOOLEAN));
+    df.dropSeries(List.of("object"));
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.LONG, SeriesType.DOUBLE, SeriesType.LONG, SeriesType.STRING,
+            SeriesType.BOOLEAN, SeriesType.BOOLEAN));
+    df.dropSeries(List.of("index", "string"));
+    assertThat(df.getSeriesTypes()).isEqualTo(
+        List.of(SeriesType.DOUBLE, SeriesType.LONG, SeriesType.BOOLEAN, SeriesType.BOOLEAN));
+  }
+
+  @Test
   public void testChainedEqualsSeparate() {
     DataFrame dfChained = new DataFrame()
         .addSeries("test", 1, 2, 3)
@@ -244,7 +273,7 @@ public class DataFrameTest {
     Assert.assertTrue(dfEmpty.getSeriesNames().isEmpty());
 
     DataFrame dfIndexRange = new DataFrame(0);
-    Assert.assertEquals(dfIndexRange.getSeriesNames(), Collections.singleton("index"));
+    Assert.assertEquals(dfIndexRange.getSeriesNames(), List.of("index"));
   }
 
   @Test
@@ -1811,8 +1840,8 @@ public class DataFrameTest {
 
     DataFrame ddf = mdf.dropNullColumns();
     Assert.assertEquals(ddf.size(), 3);
-    Assert.assertEquals(new HashSet<>(ddf.getSeriesNames()),
-        new HashSet<>(Arrays.asList("double", "long", "string", "boolean", "object")));
+    Assert.assertEquals(ddf.getSeriesNames(),
+        List.of("double", "long", "string", "boolean", "object"));
   }
 
   @Test
@@ -3896,7 +3925,7 @@ public class DataFrameTest {
 
     DataFrame res = base.append(other, another);
 
-    Assert.assertEquals(res.getSeriesNames(), new HashSet<>(Arrays.asList("A", "B")));
+    Assert.assertEquals(res.getSeriesNames(), List.of("A", "B"));
     Assert.assertEquals(res.get("A").type(), Series.SeriesType.LONG);
     Assert.assertEquals(res.get("B").type(), Series.SeriesType.STRING);
 
@@ -4142,14 +4171,15 @@ public class DataFrameTest {
 
     DataFrame dfOut = df.dropAllNullColumns();
 
-    Assert.assertEquals(df.getSeriesNames(), new HashSet<>(Arrays.asList("a", "b", "c", "d")));
-    Assert.assertEquals(dfOut.getSeriesNames(), new HashSet<>(Arrays.asList("a", "c", "d")));
+    Assert.assertEquals(df.getSeriesNames(), List.of("a", "b", "c", "d"));
+    Assert.assertEquals(dfOut.getSeriesNames(), List.of("a", "c", "d"));
   }
 
   @Test
   public void testDropSeries() {
-    Assert.assertEquals(this.df.dropSeries("long", "boolean").getSeriesNames(),
-        new HashSet<>(Arrays.asList("double", "string", "object", "index")));
+    final List<String> seriesNames = this.df.dropSeries("long", "boolean").getSeriesNames();
+    Assert.assertEquals(seriesNames,
+        List.of("index", "double", "string", "object"));
   }
 
   /* **************************************************************************
@@ -4164,7 +4194,7 @@ public class DataFrameTest {
   @Test
   public void testRetainSeries() {
     Assert.assertEquals(this.df.retainSeries("long", "boolean").getSeriesNames(),
-        new HashSet<>(Arrays.asList("long", "boolean")));
+        List.of("long", "boolean"));
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)

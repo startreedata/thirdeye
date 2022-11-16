@@ -40,7 +40,8 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     if (dataFrame == null) {
       dataFrame = generateDataFrame();
     }
-    return dataFrame;
+    // copy because users directly update the result of this method
+    return dataFrame.copy();
   }
 
   private DataFrame generateDataFrame() {

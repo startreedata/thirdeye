@@ -12,11 +12,35 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, Suspense } from "react";
+import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
+
+const CreateAlertPage = lazy(() =>
+    import(
+        /* webpackChunkName: "create-alert-page" */ "../../pages/welcome-page/create-alert/create-alert-page.component"
+    ).then((module) => ({ default: module.CreateAlertPage }))
+);
+
+const SelectTypePage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-type-page" */ "../../pages/welcome-page/create-alert/select-type/select-type-page.component"
+    ).then((module) => ({ default: module.SelectTypePage }))
+);
+
+const SetupMonitoringPage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-monitoring-page" */ "../../pages/welcome-page/create-alert/setup-monitoring/setup-monitoring-page.component"
+    ).then((module) => ({ default: module.SetupMonitoringPage }))
+);
+
+const SetupDetailsPage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-details-page" */ "../../pages/welcome-page/create-alert/setup-details/setup-details-page.component"
+    ).then((module) => ({ default: module.SetupDetailsPage }))
+);
 
 // * Just setting up the routing, this will be removed by the next commit
 const DummyPage: FunctionComponent = () => {
@@ -88,7 +112,7 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                 {/* Welcome create alert path */}
                 <Route
-                    element={<Outlet />}
+                    element={<CreateAlertPage />}
                     path={`${AppRouteRelative.WELCOME_CREATE_ALERT}/*`}
                 >
                     {/* Welcome create alert index path */}
@@ -107,15 +131,23 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                     {/* Welcome create alert select type path */}
                     <Route
-                        element={<DummyPage />}
+                        element={<SelectTypePage />}
                         path={AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}
                     />
 
                     {/* Welcome create alert setup monitoring path */}
                     <Route
-                        element={<DummyPage />}
+                        element={<SetupMonitoringPage />}
                         path={
                             AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
+                        }
+                    />
+
+                    {/* Welcome create alert setup details path */}
+                    <Route
+                        element={<SetupDetailsPage />}
+                        path={
+                            AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS
                         }
                     />
                 </Route>

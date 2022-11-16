@@ -127,8 +127,8 @@ export const RecentAnomalies: FunctionComponent = () => {
                             <Box
                                 alignItems="center"
                                 justifyContent="center"
-                                mb={8}
-                                mt={8}
+                                pb={8}
+                                pt={8}
                                 textAlign="center"
                                 width="100%"
                             >

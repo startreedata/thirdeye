@@ -19,10 +19,15 @@ import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -4180,6 +4185,125 @@ public class DataFrameTest {
     final List<String> seriesNames = this.df.dropSeries("long", "boolean").getSeriesNames();
     Assert.assertEquals(seriesNames,
         List.of("index", "double", "string", "object"));
+  }
+
+  @Test
+  public void testFromResultSet() throws SQLException {
+    final List<DateTime> objects = listOf(new DateTime(0), null, new DateTime(2));
+    final List<Long> longs = listOf(null, 1L, 2L);
+    final List<Double> doubles = listOf(0.1D, 1.1D, null);
+    final List<String> strings = listOf("0val", "1val", null);
+    final List<Boolean> booleans = listOf(null, false, true);
+    final AbstractTestResultSet set = new AbstractTestResultSet() {
+      boolean wasNull;
+      int cursor = -1;
+
+      @Override
+      public boolean next() throws SQLException {
+        return cursor++ < 2;
+      }
+
+      @Override
+      public boolean wasNull() throws SQLException {
+        return wasNull;
+      }
+
+      @Override
+      public Object getObject(final int columnIndex) throws SQLException {
+        assertThat(columnIndex).isEqualTo(1);
+        final Object val = objects.get(cursor);
+        if (val == null) {
+          wasNull = true;
+          return val;
+        }
+        wasNull = false;
+        return val;
+      }
+
+      @Override
+      public long getLong(final int columnIndex) throws SQLException {
+        assertThat(columnIndex).isEqualTo(2);
+        final Long val = longs.get(cursor);
+        if (val == null) {
+          wasNull = true;
+          return 0;
+        }
+        wasNull = false;
+        return val;
+      }
+
+      @Override
+      public double getDouble(final int columnIndex) throws SQLException {
+        assertThat(columnIndex).isEqualTo(3);
+        final Double val = doubles.get(cursor);
+        if (val == null) {
+          wasNull = true;
+          return 0;
+        }
+        wasNull = false;
+        return val;
+      }
+
+      @Override
+      public String getString(final int columnIndex) throws SQLException {
+        assertThat(columnIndex).isEqualTo(4);
+        final String val = strings.get(cursor);
+        if (val == null) {
+          wasNull = true;
+          return val;
+        }
+        wasNull = false;
+        return val;
+      }
+
+      @Override
+      public boolean getBoolean(final int columnIndex) throws SQLException {
+        assertThat(columnIndex).isEqualTo(5);
+        final Boolean val = booleans.get(cursor);
+        if (val == null) {
+          wasNull = true;
+          return false;
+        }
+        wasNull = false;
+        return val;
+      }
+
+      @Override
+      public ResultSetMetaData getMetaData() throws SQLException {
+        return new AbstractTestResultSetMetaData() {
+          @Override
+          public int getColumnCount() throws SQLException {
+            return 5;
+          }
+
+          @Override
+          public String getColumnLabel(final int column) throws SQLException {
+            return List.of("OBJECTS", "LONGS", "DOUBLES","STRINGS", "BOOLEANS").get(column-1);
+          }
+
+          @Override
+          public int getColumnType(final int column) throws SQLException {
+            return List.of(Types.DATE, Types.INTEGER, Types.DOUBLE, Types.VARCHAR, Types.BOOLEAN).get(column-1);
+          }
+        };
+      }
+    };
+    final DataFrame output = DataFrame.fromResultSet(set);
+    final DataFrame expected = new DataFrame()
+        .addSeries("objects", ObjectSeries.buildFrom(objects.toArray()))
+        .addSeries("longs", LongSeries.NULL,1,2)
+        .addSeries("doubles", 0.1, 1.1, DoubleSeries.NULL)
+        .addSeries("strings", "0val", "1val", null)
+        .addSeries("booleans", BooleanSeries.buildFrom(BooleanSeries.NULL, BooleanSeries.FALSE, BooleanSeries.TRUE));
+    assertThat(output).isEqualTo(expected);
+  }
+
+  private static <T> List<T> listOf(@Nullable T e1, @Nullable T e2, @Nullable T e3) {
+    final List<T> l = new ArrayList<>();
+    l.add(e1);
+    l.add(e2);
+    l.add(e3);
+    return l;
   }
 
   /* **************************************************************************

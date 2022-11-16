@@ -577,7 +577,6 @@ public class DataFrame {
     }
   }
 
-  // FIXME cyril cannot go in prod without testing the behavior with nulls for every SeriesType
   public static DataFrame fromResultSet(final ResultSet resultSet) throws SQLException {
     final List<String> columns = new ArrayList<>();
     final List<SeriesType> columnTypes = new ArrayList<>();
@@ -596,21 +595,24 @@ public class DataFrame {
         switch (columnType) {
           case DOUBLE:
             rowData[i] = resultSet.getDouble(i + 1);
-            continue;
+            break;
           case LONG:
             rowData[i] = resultSet.getLong(i + 1);
-            continue;
+            break;
           case STRING:
             rowData[i] = resultSet.getString(i + 1);
-            continue;
+            break;
           case BOOLEAN:
             rowData[i] = resultSet.getBoolean(i + 1);
-            continue;
+            break;
           case OBJECT:
             rowData[i] = resultSet.getObject(i + 1);
-            continue;
+            break;
           default:
             throw new RuntimeException("Unrecognized data type - " + columnTypes.get(i + 1));
+        }
+        if (resultSet.wasNull()) {
+          rowData[i] = null;
         }
       }
       builder.append(rowData);

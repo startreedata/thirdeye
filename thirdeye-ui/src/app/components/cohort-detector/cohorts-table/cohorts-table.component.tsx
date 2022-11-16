@@ -51,7 +51,7 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
 
         // Showing more than 100 breaks the table and this feature is not used
         // enough to illicit enabling pagination
-        return sorted.slice(0, 99).map((result: CohortResult) => {
+        return sorted.slice(0, 100).map((result: CohortResult) => {
             const copied: CohortTableRowData = { ...result, name: "" };
 
             const values: string[] = [];

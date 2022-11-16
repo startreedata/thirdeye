@@ -24,8 +24,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
 
   @Override
   public DataFrame getDataFrame() {
-    // copy because users directly update the result of this method
-    return dataFrame.copy();
+    return dataFrame;
   }
 
   /**does not perform a copy*/

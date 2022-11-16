@@ -20,24 +20,70 @@ import TableRow from "@material-ui/core/TableRow";
 import { sortBy } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { TaskStatus, TaskType } from "../../../rest/dto/taks.interface";
 import { useGetTasks } from "../../../rest/tasks/tasks.actions";
+import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeRangeSelectorButton } from "../../time-range/v2/time-range-selector-button/time-range-selector-button.component";
 import { TaskRow } from "./task-row/task-row.component";
 
 export const RecentFailures: FunctionComponent = () => {
     const { t } = useTranslation();
     const { tasks, getTasks, status } = useGetTasks();
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    useEffect(() => {
+    const [startTime, endTime] = useMemo(() => {
+        // Apply the default filter of the last 7 days if no
+        // prior filter is specified or if the filters are invalid
+        let returnStartTime = Number(
+            searchParams.get(TimeRangeQueryStringKey.START_TIME)
+        );
+
+        let returnEndTime = Number(
+            searchParams.get(TimeRangeQueryStringKey.END_TIME)
+        );
+
+        if (
+            !returnStartTime ||
+            !returnEndTime ||
+            returnStartTime > returnEndTime
+        ) {
+            returnEndTime = Date.now();
+            returnStartTime = returnEndTime - WEEK_IN_MILLISECONDS;
+        }
+
+        return [returnStartTime, returnEndTime];
+    }, [searchParams]);
+
+    const fetchTasks = (): void => {
         getTasks({
             status: [TaskStatus.TIMEOUT, TaskStatus.FAILED],
             type: [TaskType.DETECTION],
+            startTime: Number(startTime),
+            endTime: Number(endTime),
         });
-    }, []);
+    };
+
+    useEffect(() => {
+        fetchTasks();
+    }, [startTime, endTime]);
+
+    const onHandleTimeRangeChange = (
+        startProp: number,
+        endProp: number
+    ): void => {
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            startProp.toString()
+        );
+        searchParams.set(TimeRangeQueryStringKey.END_TIME, endProp.toString());
+        setSearchParams(searchParams);
+    };
 
     const tasksToDisplay = useMemo(() => {
         if (!tasks) {
@@ -65,6 +111,16 @@ export const RecentFailures: FunctionComponent = () => {
                             {t("label.latest-errors-in-your-alerts")}
                         </LoadingErrorStateSwitch>
                     </Typography>
+                </Grid>
+                <Grid item>
+                    <TimeRangeSelectorButton
+                        end={endTime}
+                        placeholder={t("message.click-to-select-date-range")}
+                        start={startTime}
+                        onChange={(start, end) => {
+                            onHandleTimeRangeChange(start, end);
+                        }}
+                    />
                 </Grid>
             </Grid>
             <Box paddingTop={2} />

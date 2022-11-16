@@ -13,7 +13,11 @@
  */
 package ai.startree.thirdeye.spi.detection.v2;
 
+import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
+import ai.startree.thirdeye.spi.dataframe.LongSeries;
+import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +26,9 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   private final List<String> columns;
   private final List<ColumnType> columnTypes;
   private final List<Object[]> dataCache = new ArrayList<>();
+  private DataFrame dataFrame;
 
-  public SimpleDataTable(final List<String> columns, final List<ColumnType> columnTypes,
+  private SimpleDataTable(final List<String> columns, final List<ColumnType> columnTypes,
       final List<Object[]> dataCache) {
     this.columns = columns;
     this.columnTypes = columnTypes;
@@ -31,29 +36,16 @@ public class SimpleDataTable extends AbstractDataTableImpl {
   }
 
   @Override
-  public int getRowCount() {
-    return dataCache.size();
-  }
-
-  @Override
-  public int getColumnCount() {
-    return columns.size();
-  }
-
-  @Override
-  public List<String> getColumns() {
-    return columns;
-  }
-
-  @Override
-  public List<ColumnType> getColumnTypes() {
-    return columnTypes;
-  }
-
-  @Override
   public DataFrame getDataFrame() {
+    if (dataFrame == null) {
+      dataFrame = generateDataFrame();
+    }
+    return dataFrame;
+  }
+
+  private DataFrame generateDataFrame() {
     final DataFrame df = new DataFrame();
-    for (int colIdx = 0; colIdx < getColumnCount(); colIdx++) {
+    for (int colIdx = 0; colIdx < columns.size(); colIdx++) {
       switch (columnTypes.get(colIdx).getType()) {
         case INT:
         case LONG:
@@ -64,7 +56,7 @@ public class SimpleDataTable extends AbstractDataTableImpl {
           df.addSeries(columns.get(colIdx).toLowerCase(), getDoublesForColumn(colIdx));
           break;
         case BOOLEAN:
-          df.addSeries(columns.get(colIdx).toLowerCase(), getBooleansForColumn(colIdx));
+          df.addSeries(columns.get(colIdx).toLowerCase(), getBooleanBytesForColumn(colIdx));
           break;
         case DATE:
         case STRING:
@@ -79,65 +71,72 @@ public class SimpleDataTable extends AbstractDataTableImpl {
     return df;
   }
 
-  private boolean[] getBooleansForColumn(final int colIdx) {
-    boolean[] booleans = new boolean[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
-      booleans[rowId] = getBoolean(rowId, colIdx);
+  private byte[] getBooleanBytesForColumn(final int colIdx) {
+    byte[] bytes = new byte[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
+      bytes[rowId] = getBoolean(rowId, colIdx);
     }
-    return booleans;
+    return bytes;
   }
 
   private String[] getStringsForColumn(final int colIdx) {
-    String[] strings = new String[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+    String[] strings = new String[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
       strings[rowId] = getString(rowId, colIdx);
     }
     return strings;
   }
 
   private double[] getDoublesForColumn(final int colIdx) {
-    double[] doubles = new double[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+    double[] doubles = new double[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
       doubles[rowId] = getDouble(rowId, colIdx);
     }
     return doubles;
   }
 
   private long[] getLongsForColumn(final int colIdx) {
-    long[] longs = new long[getRowCount()];
-    for (int rowId = 0; rowId < getRowCount(); rowId++) {
+    long[] longs = new long[dataCache.size()];
+    for (int rowId = 0; rowId < dataCache.size(); rowId++) {
       longs[rowId] = getLong(rowId, colIdx);
     }
     return longs;
   }
 
-  @Override
-  public boolean getBoolean(final int rowIdx, final int colIdx) {
-    return Boolean.parseBoolean((dataCache.get(rowIdx))[colIdx].toString());
+  public byte getBoolean(final int rowIdx, final int colIdx) {
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o != null) {
+      return BooleanSeries.valueOf(Boolean.parseBoolean(o.toString()));
+    }
+    return BooleanSeries.NULL;
   }
 
-  @Override
-  public Object getObject(final int rowIdx, final int colIdx) {
-    return (dataCache.get(rowIdx))[colIdx];
-  }
-
-  @Override
   public String getString(final int rowIdx, final int colIdx) {
-    return (dataCache.get(rowIdx))[colIdx].toString();
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o !=null) {
+      return o.toString();
+    }
+    return StringSeries.NULL;
   }
 
-  @Override
   public long getLong(final int rowIdx, final int colIdx) {
-    return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString()).longValue();
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o != null) {
+      return Double.valueOf(o.toString()).longValue();
+    }
+    return LongSeries.NULL;
   }
 
-  @Override
   public double getDouble(final int rowIdx, final int colIdx) {
-    return Double.valueOf((dataCache.get(rowIdx))[colIdx].toString());
+    final Object o = dataCache.get(rowIdx)[colIdx];
+    if (o != null) {
+      return Double.parseDouble(o.toString());
+    }
+    return DoubleSeries.NULL;
   }
 
   public static DataTable fromDataFrame(final DataFrame dataFrame) {
-    final List<String> columns = new ArrayList<>(dataFrame.getSeriesNames());
+    final List<String> columns = dataFrame.getSeriesNames();
     final List<ColumnType> columnTypes = new ArrayList<>();
     for (String key : columns) {
       columnTypes.add(ColumnType.seriesTypeToColumnType(dataFrame.getSeries().get(key).type()));
@@ -173,14 +172,6 @@ public class SimpleDataTable extends AbstractDataTableImpl {
 
     public DataTable build() {
       return new SimpleDataTable(columns, columnTypes, this.dataCache);
-    }
-
-    public List<ColumnType> getColumnTypes() {
-      return columnTypes;
-    }
-
-    public List<String> getColumns() {
-      return columns;
     }
   }
 }

@@ -22,6 +22,7 @@ import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
+import ai.startree.thirdeye.datalayer.entity.SubEntityType;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -214,8 +215,6 @@ public class GenericPojoDao {
       if (CollectionUtils.isNotEmpty(entities)) {
         for (final GenericJsonEntity entity : entities) {
           final E e = getBean(entity, beanClass);
-          e.setId(entity.getId());
-          e.setUpdateTime(entity.getUpdateTime());
           ret.add(e);
         }
       }
@@ -226,9 +225,14 @@ public class GenericPojoDao {
     }
   }
 
-  private <E> E getBean(final GenericJsonEntity entity, final Class<E> beanClass)
+  private <E extends AbstractDTO> E getBean(final GenericJsonEntity entity, final Class<E> beanClass)
       throws JsonProcessingException {
-    return OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+    E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+    e.setId(entity.getId());
+    e.setVersion(entity.getVersion());
+    e.setCreateTime(entity.getCreateTime());
+    e.setUpdateTime(entity.getUpdateTime());
+    return e;
   }
 
   public <E extends AbstractDTO> List<E> list(final Class<E> beanClass, final long limit,
@@ -245,8 +249,6 @@ public class GenericPojoDao {
       if (entities != null) {
         for (final GenericJsonEntity entity : entities) {
           final E e = getBean(entity, beanClass);
-          e.setId(entity.getId());
-          e.setUpdateTime(entity.getUpdateTime());
           result.add(e);
         }
       }
@@ -296,12 +298,7 @@ public class GenericPojoDao {
       if (!type.equals(genericJsonEntity.getType())) {
         return null;
       }
-      final E e = getBean(genericJsonEntity, pojoClass);
-      e.setId(genericJsonEntity.getId());
-      e.setVersion(genericJsonEntity.getVersion());
-      e.setCreateTime(genericJsonEntity.getCreateTime());
-      e.setUpdateTime(genericJsonEntity.getUpdateTime());
-      return e;
+      return getBean(genericJsonEntity, pojoClass);
     } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return null;
@@ -313,15 +310,14 @@ public class GenericPojoDao {
       final GenericJsonEntity genericJsonEntity = transactionService.executeTransaction(
           (connection) -> databaseService.find(id, GenericJsonEntity.class, connection),
           null);
-      Object e = null;
       if (genericJsonEntity != null) {
-        e = getBean(genericJsonEntity, Object.class);
+        return getBean(genericJsonEntity, SubEntities.BEAN_TYPE_MAP.asMultimap().inverse().get(
+            SubEntityType.valueOf(genericJsonEntity.getType())).asList().get(0));
       }
-      return e;
     } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
-      return null;
     }
+    return null;
   }
 
   public <E extends AbstractDTO> List<E> get(final List<Long> idList, final Class<E> pojoClass) {
@@ -337,9 +333,6 @@ public class GenericPojoDao {
       if (CollectionUtils.isNotEmpty(genericJsonEntities)) {
         for (final GenericJsonEntity genericJsonEntity : genericJsonEntities) {
           final E e = getBean(genericJsonEntity, pojoClass);
-          e.setId(genericJsonEntity.getId());
-          e.setVersion(genericJsonEntity.getVersion());
-          e.setUpdateTime(genericJsonEntity.getUpdateTime());
           result.add(e);
         }
       }

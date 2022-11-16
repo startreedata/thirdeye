@@ -87,6 +87,14 @@ export const AppRouteRelative = {
     EVENTS_CREATE: "create",
     EVENTS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
     EVENTS_ALL_RANGE: "range",
+    WELCOME: "welcome",
+    WELCOME_LANDING: "landing",
+    WELCOME_ONBOARD_DATASOURCE: "onboard-datasource",
+    WELCOME_ONBOARD_DATASOURCE_DATASOURCE: "datasource",
+    WELCOME_ONBOARD_DATASOURCE_DATASETS: "datasets",
+    WELCOME_CREATE_ALERT: "create-alert",
+    WELCOME_CREATE_ALERT_SELECT_TYPE: "select-type",
+    WELCOME_CREATE_ALERT_SETUP_MONITORING: "setup-monitoring",
 };
 
 export const AppRoute = {
@@ -163,6 +171,22 @@ export const AppRoute = {
     EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
     EVENTS_ALL_RANGE: `/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}/${AppRouteRelative.EVENTS_ALL_RANGE}`,
     EVENTS: `/${AppRouteRelative.EVENTS}`,
+    WELCOME: `/${AppRouteRelative.WELCOME}`,
+    WELCOME_LANDING: `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_LANDING}`,
+    WELCOME_ONBOARD_DATASOURCE: `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE}`,
+    WELCOME_ONBOARD_DATASOURCE_DATASOURCE:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE}` +
+        `/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE}`,
+    WELCOME_ONBOARD_DATASOURCE_DATASETS:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE}` +
+        `/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS}`,
+    WELCOME_CREATE_ALERT: `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}`,
+    WELCOME_CREATE_ALERT_SELECT_TYPE:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}` +
+        `/${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`,
+    WELCOME_CREATE_ALERT_SETUP_MONITORING:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}` +
+        `/${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`,
 } as const;
 
 export const getBasePath = (): string => {

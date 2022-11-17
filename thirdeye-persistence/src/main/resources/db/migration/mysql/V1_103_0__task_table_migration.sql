@@ -44,4 +44,4 @@ INSERT INTO task_entity
   from task_index
   left join generic_json_entity
   on task_index.base_id = generic_json_entity.id
-  where task_index.status = "FAILED" AND task_index.create_time > (NOW() - INTERVAL 30 day) ;
+  where task_index.status = "FAILED" AND task_index.create_time > (NOW() - INTERVAL 7 day) ;

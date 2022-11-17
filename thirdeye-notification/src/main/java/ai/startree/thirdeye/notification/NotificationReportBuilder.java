@@ -16,6 +16,7 @@ package ai.startree.thirdeye.notification;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getDateString;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getFeedbackValue;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getTimezoneString;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -23,12 +24,16 @@ import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
+import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
@@ -39,6 +44,8 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -57,16 +64,20 @@ public class NotificationReportBuilder {
   private final AlertManager alertManager;
   private final UiConfiguration uiConfiguration;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final EnumerationItemManager enumerationItemManager;
 
   private final DateTimeZone dateTimeZone;
 
   @Inject
   public NotificationReportBuilder(final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final UiConfiguration uiConfiguration, final TimeConfiguration timeConfiguration) {
+      final UiConfiguration uiConfiguration,
+      final EnumerationItemManager enumerationItemManager,
+      final TimeConfiguration timeConfiguration) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
     this.uiConfiguration = uiConfiguration;
+    this.enumerationItemManager = enumerationItemManager;
 
     dateTimeZone = timeConfiguration.getTimezone();
   }
@@ -125,51 +136,61 @@ public class NotificationReportBuilder {
   }
 
   public List<AnomalyReportApi> buildAnomalyReports(
-      final Collection<? extends AnomalyResult> anomalies) {
+      final Set<MergedAnomalyResultDTO> anomalies) {
     requireNonNull(anomalies, "anomalies is null");
     checkArgument(anomalies.size() > 0, "anomalies is empty");
 
-    final List<AnomalyResult> sortedAnomalyResults = new ArrayList<>(anomalies);
+    final List<MergedAnomalyResultDTO> sortedAnomalyResults = new ArrayList<>(anomalies);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
-    final List<AnomalyReportApi> anomalyReportApis = new ArrayList<>();
-    for (final AnomalyResult anomalyResult : sortedAnomalyResults) {
-      if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
-        LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
-            anomalyResult);
-        continue;
-      }
-      final MergedAnomalyResultDTO anomaly = (MergedAnomalyResultDTO) anomalyResult;
-      final AnomalyFeedback feedback = anomaly.getFeedback();
-      final String feedbackVal = getFeedbackValue(feedback);
+    return sortedAnomalyResults.stream()
+        .map(this::toAnomalyReportApi)
+        .collect(Collectors.toList());
+  }
 
-      String alertName = "Alerts";
-      String alertDescription = "";
+  private AnomalyReportApi toAnomalyReportApi(final MergedAnomalyResultDTO anomaly) {
+    return new AnomalyReportApi()
+        .setAnomaly(toAnomalyApi(anomaly))
+        .setData(toAnomalyReportDataApi(anomaly))
+        .setUrl(getDashboardUrl(anomaly.getId()));
+  }
 
-      if (anomaly.getDetectionConfigId() != null) {
-        final AlertDTO alert = alertManager.findById(anomaly.getDetectionConfigId());
-        Preconditions.checkNotNull(alert,
-            String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
-        alertName = alert.getName();
-        alertDescription = alert.getDescription() == null ? "" : alert.getDescription();
-      }
+  private AnomalyReportDataApi toAnomalyReportDataApi(final MergedAnomalyResultDTO anomaly) {
+    final AnomalyFeedback feedback = anomaly.getFeedback();
+    final String feedbackVal = getFeedbackValue(feedback);
 
-      final AnomalyReportDataApi anomalyReportData = AnomalyReportHelper.buildAnomalyReportEntity(
-          anomaly,
-          feedbackVal,
-          alertName,
-          alertDescription,
-          dateTimeZone,
-          uiConfiguration.getExternalUrl());
+    String alertName = "Alerts";
+    String alertDescription = "";
 
-      anomalyReportApis.add(new AnomalyReportApi()
-          .setAnomaly(ApiBeanMapper.toApi(anomaly))
-          .setData(anomalyReportData)
-          .setUrl(getDashboardUrl(anomaly.getId()))
-      );
+    if (anomaly.getDetectionConfigId() != null) {
+      final AlertDTO alert = alertManager.findById(anomaly.getDetectionConfigId());
+      Preconditions.checkNotNull(alert,
+          String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
+      alertName = alert.getName();
+      alertDescription = alert.getDescription() == null ? "" : alert.getDescription();
     }
 
-    return anomalyReportApis;
+    return AnomalyReportHelper.buildAnomalyReportEntity(
+        anomaly,
+        feedbackVal,
+        alertName,
+        alertDescription,
+        dateTimeZone,
+        uiConfiguration.getExternalUrl());
+  }
+
+  private AnomalyApi toAnomalyApi(final MergedAnomalyResultDTO anomaly) {
+    final AnomalyApi anomalyApi = ApiBeanMapper.toApi(anomaly);
+
+    optional(anomaly.getEnumerationItem())
+        .map(EnumerationItemDTO::getId)
+        .map(enumerationItemManager::findById)
+        .ifPresent(dto -> anomalyApi.setEnumerationItem(new EnumerationItemApi()
+            .setId(dto.getId())
+            .setName(dto.getName())
+        ));
+
+    return anomalyApi;
   }
 
   private String getDashboardUrl(final Long id) {

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { isInteger, toNumber } from "lodash";
+import { isInteger, isNumber, toNumber } from "lodash";
 import { useSearchParams } from "react-router-dom";
 import { AnomalyFilterOption } from "../../components/rca/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
@@ -178,7 +178,11 @@ export const isValidNumberId = (param: string): boolean => {
 export const concatKeyValueWithEqual = (
     filterOption: AnomalyFilterOption
 ): string => {
-    return `${filterOption.key}=${filterOption.value}`;
+    if (isNumber(filterOption.value)) {
+        return `${filterOption.key}=${filterOption.value}`;
+    }
+
+    return `${filterOption.key}='${filterOption.value}'`;
 };
 
 /**

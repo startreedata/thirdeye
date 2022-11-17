@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -53,18 +54,21 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final DetectionPipelineRunner detectionPipelineRunner;
   private final AnomalyMerger anomalyMerger;
   private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
+  private final MergedAnomalyResultManager anomalyDao;
 
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
       final MetricRegistry metricRegistry, final DetectionPipelineRunner detectionPipelineRunner,
       final AnomalyMerger anomalyMerger,
-      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator) {
+      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
+      final MergedAnomalyResultManager anomalyDao) {
     this.alertManager = alertManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.detectionPipelineRunner = detectionPipelineRunner;
     this.anomalyMerger = anomalyMerger;
     this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
+    this.anomalyDao = anomalyDao;
 
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
@@ -117,7 +121,14 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final AlertDTO alert, final OperatorResult result) {
-    anomalyMerger.mergeAndSave(alert, result.getAnomalies());
+    final List<MergedAnomalyResultDTO> mergedAnomalies =  anomalyMerger.merge(alert, result.getAnomalies());
+
+    for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
+      final Long id = anomalyDao.save(mergedAnomalyResultDTO);
+      if (id == null) {
+        LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
+      }
+    }
 
     // re-notify the anomalies if any
     // note cyril - dead code - renotify is always false

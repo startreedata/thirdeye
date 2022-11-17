@@ -50,58 +50,6 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     }
   }
 
-  @Override
-  public List<String> getColumns() {
-    return this.columns;
-  }
-
-  @Override
-  public int getRowCount() {
-    return this.thirdEyeResultSet.getRowCount();
-  }
-
-  @Override
-  public int getColumnCount() {
-    return this.columns.size();
-  }
-
-  @Override
-  public List<ColumnType> getColumnTypes() {
-    return this.columnTypes;
-  }
-
-  @Override
-  public String getString(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx);
-    }
-    return thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength);
-  }
-
-  @Override
-  public boolean getBoolean(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return Boolean.parseBoolean(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
-    }
-    return Boolean.parseBoolean(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
-  }
-
-  @Override
-  public long getLong(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return Long.parseLong(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
-    }
-    return Long.parseLong(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
-  }
-
-  @Override
-  public double getDouble(int rowIdx, int colIdx) {
-    if (colIdx < groupKeyLength) {
-      return Double.parseDouble(thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx));
-    }
-    return Double.parseDouble(thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength));
-  }
-
   public DataFrame getDataFrame() {
     if (dataFrame == null) {
       dataFrame = generateDataFrame();
@@ -109,7 +57,6 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     return dataFrame;
   }
 
-  @Override
   public Object getObject(final int rowIdx, final int colIdx) {
     if (colIdx < groupKeyLength) {
       return thirdEyeResultSet.getGroupKeyColumnValue(rowIdx, colIdx);
@@ -137,9 +84,9 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     // todo cyril- at build() time this creates object series then uses inferType() to cast to correct types
     //  does not look efficient but I could not identify a hotspot in method profiling - so refactoring was not prioritized
     DataFrame.Builder dfBuilder = DataFrame.builder(columns);
-    for (int rowIdx = 0; rowIdx < getRowCount(); rowIdx++) {
-      Object[] row = new Object[getColumnCount()];
-      for (int columnIdx = 0; columnIdx < getColumnCount(); columnIdx++) {
+    for (int rowIdx = 0; rowIdx < thirdEyeResultSet.getRowCount(); rowIdx++) {
+      Object[] row = new Object[columns.size()];
+      for (int columnIdx = 0; columnIdx < columns.size(); columnIdx++) {
         Object value = null;
         try {
           value = getObject(rowIdx, columnIdx);

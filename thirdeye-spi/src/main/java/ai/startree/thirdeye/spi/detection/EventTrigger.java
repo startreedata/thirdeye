@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import java.util.List;
 
 public interface EventTrigger<T extends AbstractSpec> extends BaseComponent<T> {
@@ -26,7 +25,7 @@ public interface EventTrigger<T extends AbstractSpec> extends BaseComponent<T> {
   /**
    * Trigger with one event
    */
-  void trigger(List<String> columnNames, List<ColumnType> columnTypes, Object[] event) throws EventTriggerException;
+  void trigger(List<String> columnNames, Object[] event) throws EventTriggerException;
 
   /**
    * Close the Trigger

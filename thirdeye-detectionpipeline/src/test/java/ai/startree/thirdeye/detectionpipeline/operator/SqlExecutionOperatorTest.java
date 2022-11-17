@@ -17,12 +17,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
+import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import com.google.common.collect.ImmutableList;
@@ -78,15 +78,15 @@ public class SqlExecutionOperatorTest {
     final OperatorContext context = new OperatorContext().setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
         .setInputsMap(ImmutableMap.of("baseline_data",
-            new SimpleDataTable(ImmutableList.of("ts", "met"),
-                ImmutableList.of(new ColumnType(ColumnDataType.LONG),
-                    new ColumnType(ColumnDataType.DOUBLE)),
-                ImmutableList.of(new Object[]{123L, 0.123})),
+            SimpleDataTable.fromDataFrame(new DataFrame()
+                .addSeries("ts", LongSeries.buildFrom(123L))
+                .addSeries("met", DoubleSeries.buildFrom(0.123))
+            ),
             "current_data",
-            new SimpleDataTable(ImmutableList.of("ts", "met"),
-                ImmutableList.of(new ColumnType(ColumnDataType.LONG),
-                    new ColumnType(ColumnDataType.DOUBLE)),
-                ImmutableList.of(new Object[]{456L, 0.456}))))
+            SimpleDataTable.fromDataFrame(new DataFrame()
+                .addSeries("ts", LongSeries.buildFrom(456L))
+                .addSeries("met", DoubleSeries.buildFrom(0.456))
+            )))
         .setProperties(properties);
     sqlExecutionOperator.init(context);
     assertThat(sqlExecutionOperator.getDetectionInterval()).isEqualTo(detectionInterval);

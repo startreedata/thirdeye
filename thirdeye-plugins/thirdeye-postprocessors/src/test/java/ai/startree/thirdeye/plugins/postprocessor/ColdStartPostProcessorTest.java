@@ -20,15 +20,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
+import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -167,8 +167,8 @@ public class ColdStartPostProcessorTest {
     spec.setColdStartPeriod("P28D").setIgnore(true);
     final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor();
     postProcessor.init(spec);
-    final OperatorResult res1 = new SimpleDataTableBuilder(List.of("col1"),
-        List.of(new ColumnType(ColumnDataType.FLOAT))).build();
+    final OperatorResult res1 = SimpleDataTable.fromDataFrame(
+        new DataFrame().addSeries("col1", DoubleSeries.empty()));
     final Map<String, OperatorResult> resultMap = Map.of(RES_1_KEY, res1);
     postProcessor.postProcess(UTC_DETECTION_INTERVAL, resultMap);
     // not failing is ok for test

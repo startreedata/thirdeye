@@ -13,10 +13,9 @@
  */
 package ai.startree.thirdeye.calcite.dataframe;
 
-
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.util.ThirdEyeUtils;
+import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -72,7 +71,8 @@ public class DataFrameSchemaTest {
             + "where str_column='PLACED' "
             + "AND long_column=1567631719000 "
             + "AND double_column=1.1 ");
-    final DataTable dataTableFromResultSet = ThirdEyeUtils.getDataTableFromResultSet(resultSet);
+    final DataTable dataTableFromResultSet = SimpleDataTable.fromDataFrame(
+        DataFrame.fromResultSet(resultSet));
     final DataFrame outputDf = dataTableFromResultSet.getDataFrame();
 
     final DataFrame expectedDf = new DataFrame();
@@ -98,7 +98,8 @@ public class DataFrameSchemaTest {
     final DataFrameSchema schema = new DataFrameSchema(dataframes);
     final Connection connection = getConnection(schema, properties);
     final Statement statement = connection.createStatement();
-    statement.executeQuery("select owner, str_column, boolean_column, long_column, double_column from types_table join owner_table on str_column = status");
+    statement.executeQuery(
+        "select owner, str_column, boolean_column, long_column, double_column from types_table join owner_table on str_column = status");
 
     // query success is enough
     assert true;
@@ -113,15 +114,17 @@ public class DataFrameSchemaTest {
     final DataFrameSchema schema = new DataFrameSchema(dataframes);
     // add custom dialect bigquery functions
     properties.setProperty("fun", "bigquery");
-    final  Connection connection = getConnection(schema, properties);
+    final Connection connection = getConnection(schema, properties);
     final Statement statement = connection.createStatement();
-    statement.executeQuery("select TIMESTAMP_MILLIS(long_column), UNIX_MILLIS(TIMESTAMP_MILLIS(long_column)) from types_table");
+    statement.executeQuery(
+        "select TIMESTAMP_MILLIS(long_column), UNIX_MILLIS(TIMESTAMP_MILLIS(long_column)) from types_table");
 
     // query success is enough
     assert true;
   }
 
-  private Connection getConnection(final DataFrameSchema schema, final Properties properties) throws SQLException {
+  private Connection getConnection(final DataFrameSchema schema, final Properties properties)
+      throws SQLException {
     final Connection connection = DriverManager.getConnection(CALCITE_JDBC_URL, properties);
     final CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
     final SchemaPlus rootSchema = calciteConnection.getRootSchema();

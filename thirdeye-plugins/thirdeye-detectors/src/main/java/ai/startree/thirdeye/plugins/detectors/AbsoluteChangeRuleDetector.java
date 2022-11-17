@@ -75,7 +75,7 @@ public class AbsoluteChangeRuleDetector implements
     final DataTable baseline = requireNonNull(dataTableMap.get(KEY_BASELINE), "baseline is null");
     final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
     final DataFrame baselineDf = baseline.getDataFrame();
-    final DataFrame currentDf = current.getDataFrame();
+    final DataFrame currentDf = current.getDataFrame().copy();
 
     currentDf
         .renameSeries(spec.getTimestamp(), COL_TIME)

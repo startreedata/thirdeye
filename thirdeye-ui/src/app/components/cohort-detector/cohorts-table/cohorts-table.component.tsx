@@ -14,10 +14,12 @@
  */
 import { Box, Card, Grid, Typography } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
+import { sortBy } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
     DataGridScrollV1,
+    DataGridSortOrderV1,
     DataGridV1,
     PageContentsCardV1,
     SkeletonV1,
@@ -33,6 +35,7 @@ import {
 } from "./cohorts-table.interfaces";
 
 const NAME_JOIN_KEY = " AND ";
+const PERCENTAGE = "percentage";
 
 export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
     getCohortsRequestStatus,
@@ -43,8 +46,12 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
         if (!cohortsData) {
             return [];
         }
+        const sorted = sortBy(cohortsData.results, PERCENTAGE);
+        sorted.reverse();
 
-        return cohortsData.results.map((result: CohortResult) => {
+        // Showing more than 100 breaks the table and this feature is not used
+        // enough to illicit enabling pagination
+        return sorted.slice(0, 100).map((result: CohortResult) => {
             const copied: CohortTableRowData = { ...result, name: "" };
 
             const values: string[] = [];
@@ -77,7 +84,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
             key: "name",
             dataKey: "name",
             header: t("label.name"),
-            sortable: true,
             minWidth: 100,
             flex: 1,
         },
@@ -92,7 +98,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
         {
             key: "percentage",
             dataKey: "percentage",
-            sortable: true,
             header: t("label.total-impact"),
             minWidth: 100,
             flex: 1,
@@ -104,11 +109,26 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
         <PageContentsCardV1>
             <Grid container>
                 <Grid item xs={12}>
-                    <Box marginBottom={2}>
-                        <Typography variant="h5">
-                            {t("label.cohorts")}
-                        </Typography>
-                    </Box>
+                    <Grid
+                        container
+                        alignItems="center"
+                        justifyContent="space-between"
+                    >
+                        <Grid item>
+                            <Typography variant="h5">
+                                {t("label.cohorts")}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            {cohortsData &&
+                                tableRows.length !==
+                                    cohortsData.results.length && (
+                                    <Typography variant="caption">
+                                        {t("message.showing-top-100")}
+                                    </Typography>
+                                )}
+                        </Grid>
+                    </Grid>
                 </Grid>
                 <Grid item xs={12}>
                     <LoadingErrorStateSwitch
@@ -139,11 +159,17 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
 
                         {cohortsData && tableRows.length > 0 && (
                             <DataGridV1<CohortTableRowData>
+                                disableMultiSelection
                                 disableSearch
+                                disableSelection
                                 hideBorder
                                 hideToolbar
                                 columns={columns}
                                 data={tableRows}
+                                initialSortState={{
+                                    key: PERCENTAGE,
+                                    order: DataGridSortOrderV1.DESC,
+                                }}
                                 rowKey="name"
                                 scroll={DataGridScrollV1.Body}
                             />

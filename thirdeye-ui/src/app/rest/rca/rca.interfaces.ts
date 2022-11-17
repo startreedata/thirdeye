@@ -13,6 +13,8 @@
  * the License.
  */
 import { ActionHook } from "../actions.interfaces";
+import { Dataset } from "../dto/dataset.interfaces";
+import { Metric, MetricAggFunction } from "../dto/metric.interfaces";
 import {
     AnomalyBreakdown,
     AnomalyBreakdownRequest,
@@ -62,19 +64,24 @@ export interface GetCohorts extends ActionHook {
 export interface GetCohortParams {
     start: number;
     end: number;
-    metricId: number;
+    metric: Metric;
     dimensions?: string[];
     query?: string;
     threshold?: number;
     percentage?: number;
     resultSize?: number;
+    aggregationFunction: MetricAggFunction;
+    dataset: Dataset;
 }
 
 export interface CohortRequestParams {
     start: number;
     end: number;
     metric: {
-        id: number;
+        datatype: string;
+        dataset: Dataset;
+        aggregationColumn: string;
+        aggregationFunction: MetricAggFunction;
     };
     dimensions?: string[];
     where?: string;

@@ -28,6 +28,7 @@ import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
+import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import {
     buildPinotDatasourcesTree,
@@ -68,12 +69,13 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
         generateDateRangeMonthsFromNow(3)[1]
     );
     const [selectedPercentageFilter, setSelectedPercentageFilter] =
-        useState(50);
-    const [selectedResultSize, setSelectedResultSize] = useState(25);
+        useState(25);
     const [selectedTable, setSelectedTable] = useState<DatasetInfo | null>(
         null
     );
     const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+    const [selectedAggregationFunction, setSelectedAggregationFunction] =
+        useState<MetricAggFunction>(MetricAggFunction.SUM);
     const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
     const [queryValue, setQueryValue] = useState<string>("");
 
@@ -122,13 +124,15 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
         }
 
         onSearchButtonClick({
-            metricId: matchingMetricInfo.id,
+            metric: matchingMetricInfo,
             start: selectedStart,
             end: selectedEnd,
             dimensions: selectedDimensions,
             query: queryValue,
-            resultSize: selectedResultSize,
             percentage: selectedPercentageFilter,
+            aggregationFunction: selectedAggregationFunction,
+            dataset: selectedTable.dataset,
+            resultSize: 99, // Max out at 99
         });
     };
 
@@ -211,11 +215,15 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 }}
                                 value={selectedTable}
                                 onChange={(_, selectedTableInfo) => {
-                                    setSelectedMetric(null);
-                                    setSelectedDimensions([]);
+                                    if (!selectedTableInfo) {
+                                        return;
+                                    }
 
-                                    selectedTableInfo &&
-                                        setSelectedTable(selectedTableInfo);
+                                    setSelectedMetric(null);
+                                    setSelectedDimensions(
+                                        selectedTableInfo.dimensions
+                                    );
+                                    setSelectedTable(selectedTableInfo);
                                 }}
                             />
                         }
@@ -269,7 +277,48 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                     />
 
                     <InputSection
-                        helperLabel={`(${t("label.optional")})`}
+                        inputComponent={
+                            <Autocomplete
+                                disableClearable
+                                fullWidth
+                                options={[
+                                    MetricAggFunction.SUM,
+                                    MetricAggFunction.AVG,
+                                    MetricAggFunction.COUNT,
+                                    MetricAggFunction.MIN,
+                                    MetricAggFunction.MAX,
+                                ]}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            // Override class name so the size of input is smaller
+                                            className:
+                                                classes.autoCompleteInput,
+                                        }}
+                                        placeholder={t(
+                                            "message.select-aggregation-function"
+                                        )}
+                                        variant="outlined"
+                                    />
+                                )}
+                                value={selectedAggregationFunction}
+                                onChange={(_, aggregationFunction) => {
+                                    aggregationFunction &&
+                                        setSelectedAggregationFunction(
+                                            aggregationFunction as MetricAggFunction
+                                        );
+                                }}
+                            />
+                        }
+                        label={`${t("label.aggregation-function")}`}
+                    />
+
+                    <InputSection
+                        helperLabel={t(
+                            "message.empty-selection-means-all-is-selected"
+                        )}
                         inputComponent={
                             <Autocomplete
                                 fullWidth
@@ -291,9 +340,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                         {...params}
                                         InputProps={{
                                             ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
                                         }}
                                         placeholder={
                                             !selectedTable
@@ -386,27 +432,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                             </>
                         }
                         label={`${t("label.cohort-size-filter")}`}
-                    />
-
-                    <InputSection
-                        helperLabel={t(
-                            "message.return-this-many-results-at-most"
-                        )}
-                        inputComponent={
-                            <>
-                                <TextField
-                                    fullWidth
-                                    type="number"
-                                    value={selectedResultSize}
-                                    onChange={(e) => {
-                                        setSelectedResultSize(
-                                            Number(e.currentTarget.value)
-                                        );
-                                    }}
-                                />
-                            </>
-                        }
-                        label={`${t("label.result-size")}`}
                     />
 
                     <InputSection

@@ -297,7 +297,7 @@ describe("Params Util", () => {
                     value: "1",
                 },
             ])
-        ).toEqual("a=1,c=2=4,z=1,z=2,z=3");
+        ).toEqual("a='1',c='2=4',z='1',z='2',z='3'");
     });
 
     it("serializeKeyValuePair should return empty string when empty array is passed", () => {

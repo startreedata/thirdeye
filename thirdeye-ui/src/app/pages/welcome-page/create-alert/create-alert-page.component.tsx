@@ -13,7 +13,13 @@
  * the License.
  */
 import { Button, Grid, Typography } from "@material-ui/core";
-import { default as React, FunctionComponent, useMemo, useState } from "react";
+import {
+    default as React,
+    FunctionComponent,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
@@ -73,6 +79,10 @@ export const CreateAlertPage: FunctionComponent = () => {
 
         return activeStepDefinition.subPath;
     }, [pathname]);
+
+    useEffect(() => {
+        console.log(alert);
+    }, [alert]);
 
     return (
         <PageV1>

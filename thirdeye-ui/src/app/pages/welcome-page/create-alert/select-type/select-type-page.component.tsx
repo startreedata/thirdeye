@@ -12,15 +12,62 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Grid, Typography } from "@material-ui/core";
 import { default as React, FunctionComponent } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { AlgorithmSelection } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
+import { SampleAlertSelection } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
+import { PageContentsGridV1 } from "../../../../platform/components";
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
+import { AppRouteRelative } from "../../../../utils/routes/routes.util";
 
 export const SelectTypePage: FunctionComponent = () => {
-    const { alert, handleAlertPropertyChange } = useOutletContext<{
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+
+    const { handleAlertPropertyChange } = useOutletContext<{
         alert: EditableAlert;
         handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
     }>();
 
-    return <>SelectTypePage</>;
+    const handleAlgorithmSelection = (
+        isDimensionExploration: boolean
+    ): void => {
+        if (isDimensionExploration) {
+            navigate(
+                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+            );
+        }
+
+        navigate(
+            `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+        );
+    };
+
+    return (
+        <PageContentsGridV1>
+            <Grid item xs={12}>
+                <Typography variant="h5">
+                    {t("message.select-alert-type")}
+                </Typography>
+                <Typography variant="body1">
+                    {t(
+                        "message.this-is-the-detector-algorithm-that-will-rule-alert"
+                    )}
+                </Typography>
+            </Grid>
+            <Grid item xs={12}>
+                <SampleAlertSelection
+                    onSampleAlertSelect={handleAlertPropertyChange}
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <AlgorithmSelection
+                    onAlertPropertyChange={handleAlertPropertyChange}
+                    onSelectionComplete={handleAlgorithmSelection}
+                />
+            </Grid>
+        </PageContentsGridV1>
+    );
 };

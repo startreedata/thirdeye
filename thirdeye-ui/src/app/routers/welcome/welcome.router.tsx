@@ -24,6 +24,18 @@ const WelcomeLandingPage = lazy(() =>
     ).then((module) => ({ default: module.WelcomeLandingPage }))
 );
 
+const WelcomeOnboardDatasourceWizard = lazy(() =>
+    import(
+        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-onboard-datasource-wizard/welcome-onboard-datasource-wizard.component"
+    ).then((module) => ({ default: module.WelcomeOnboardDatasourceWizard }))
+);
+
+const WelcomeSelectDatasource = lazy(() =>
+    import(
+        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.component"
+    ).then((module) => ({ default: module.WelcomeSelectDatasource }))
+);
+
 // * Just setting up the routing, this will be removed by the next commit
 const DummyPage: FunctionComponent = () => {
     return (
@@ -58,7 +70,7 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                 {/* Welcome onboard-datasource path */}
                 <Route
-                    element={<Outlet />}
+                    element={<WelcomeOnboardDatasourceWizard />}
                     path={`${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE}/*`}
                 >
                     {/* Welcome onboard-datasource index path */}
@@ -77,7 +89,7 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                     {/* Welcome onboard-datasource datasource path */}
                     <Route
-                        element={<DummyPage />}
+                        element={<WelcomeSelectDatasource />}
                         path={
                             AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
                         }

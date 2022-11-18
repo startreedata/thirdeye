@@ -12,11 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, Suspense } from "react";
+import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
+
+const WelcomeLandingPage = lazy(() =>
+    import(
+        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-landing-page/welcome-landing-page.component"
+    ).then((module) => ({ default: module.WelcomeLandingPage }))
+);
 
 // * Just setting up the routing, this will be removed by the next commit
 const DummyPage: FunctionComponent = () => {
@@ -46,7 +52,7 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                 {/* Welcome landing path */}
                 <Route
-                    element={<DummyPage />}
+                    element={<WelcomeLandingPage />}
                     path={AppRouteRelative.WELCOME_LANDING}
                 />
 

@@ -87,7 +87,7 @@ public class EventPostProcessor implements AnomalyPostProcessor<EventPostProcess
       postProcessResult(operatorResult, eventsSearchTree);
     }
 
-    return null;
+    return resultMap;
   }
 
   private void postProcessResult(final OperatorResult operatorResult,

@@ -45,7 +45,7 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
 
     params = optional(planNodeBean.getParams()).map(TemplatableMap::valueMap).orElse(emptyMap());
-    enumerationItem = planNodeContext.getEnumerationItem();
+    enumerationItem = planNodeContext.getDetectionPipelineContext().getEnumerationItem();
   }
 
   @Override

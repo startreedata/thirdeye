@@ -84,7 +84,8 @@ public class PlanExecutorTest {
     final String nodeName = "root";
     node.init(new PlanNodeContext()
         .setName(nodeName)
-        .setDetectionInterval(new Interval(0L, 0L, DateTimeZone.UTC))
+        .setDetectionPipelineContext(new DetectionPipelineContext()
+            .setDetectionInterval(new Interval(0L, 0L, DateTimeZone.UTC)))
         .setPlanNodeBean(new PlanNodeBean()
             .setInputs(Collections.emptyList())
             .setParams(TemplatableMap.ofValue(EchoOperator.DEFAULT_INPUT_KEY, echoInput))

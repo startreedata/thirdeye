@@ -18,8 +18,8 @@ import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationEx
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
-import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -87,7 +87,7 @@ public class AlertEvaluator {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
           detectionInterval);
 
-      final PlanNodeContext runtimeContext = new PlanNodeContext()
+      final DetectionPipelineContext runtimeContext = new DetectionPipelineContext()
           .setDetectionInterval(detectionInterval);
 
       // inject custom evaluation context

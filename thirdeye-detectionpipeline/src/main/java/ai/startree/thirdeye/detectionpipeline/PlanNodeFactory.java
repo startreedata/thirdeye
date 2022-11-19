@@ -92,13 +92,17 @@ public class PlanNodeFactory {
   }
 
   public PlanNode build(final PlanNodeBean planNodeBean,
-      final PlanNodeContext runTimeContext,
+      final DetectionPipelineContext detectionPipelineContext,
       final Map<String, PlanNode> pipelinePlanNodes) {
-    final PlanNodeContext context = PlanNodeContext.copy(runTimeContext)
+    final PlanNodeContext context = new PlanNodeContext()
+        .setDetectionPipelineContext(detectionPipelineContext)
+        .setDetectionInterval(detectionPipelineContext.getDetectionInterval())
+        .setPredicates(detectionPipelineContext.getPredicates())
+        .setEnumerationItem(detectionPipelineContext.getEnumerationItem())
         .setName(planNodeBean.getName())
         .setPlanNodeBean(planNodeBean)
         .setPipelinePlanNodes(pipelinePlanNodes)
-        .setEnumerationItem(runTimeContext.getEnumerationItem());
+        .setEnumerationItem(detectionPipelineContext.getEnumerationItem());
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");
     final Class<? extends PlanNode> planNodeClass = requireNonNull(planNodeTypeToClassMap.get(type),

@@ -22,7 +22,7 @@ import org.joda.time.Interval;
 
 public class PlanNodeContext {
 
-  private ApplicationContext applicationContext;
+  private DetectionPipelineContext detectionPipelineContext;
   private String name;
   private Map<String, PlanNode> pipelinePlanNodes;
   private PlanNodeBean planNodeBean;
@@ -34,14 +34,18 @@ public class PlanNodeContext {
     return PlanNodeContextMapper.INSTANCE.clone(src);  // shallow copy
   }
 
-  public ApplicationContext getApplicationContext() {
-    return applicationContext;
+  public DetectionPipelineContext getDetectionPipelineContext() {
+    return detectionPipelineContext;
   }
 
-  public PlanNodeContext setApplicationContext(
-      final ApplicationContext applicationContext) {
-    this.applicationContext = applicationContext;
+  public PlanNodeContext setDetectionPipelineContext(
+      final DetectionPipelineContext detectionPipelineContext) {
+    this.detectionPipelineContext = detectionPipelineContext;
     return this;
+  }
+
+  public ApplicationContext getApplicationContext() {
+    return detectionPipelineContext.getApplicationContext();
   }
 
   public String getName() {

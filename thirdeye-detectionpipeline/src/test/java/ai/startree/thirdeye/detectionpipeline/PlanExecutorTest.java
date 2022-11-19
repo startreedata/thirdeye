@@ -16,7 +16,6 @@ package ai.startree.thirdeye.detectionpipeline;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_COMBINER;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ENUMERATOR;
 import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ROOT;
-import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -44,7 +43,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -84,7 +82,8 @@ public class PlanExecutorTest {
     final String nodeName = "root";
     node.init(new PlanNodeContext()
         .setName(nodeName)
-        .setDetectionInterval(new Interval(0L, 0L, DateTimeZone.UTC))
+        .setDetectionPipelineContext(new DetectionPipelineContext()
+            .setDetectionInterval(new Interval(0L, 0L, DateTimeZone.UTC)))
         .setPlanNodeBean(new PlanNodeBean()
             .setInputs(Collections.emptyList())
             .setParams(TemplatableMap.ofValue(EchoOperator.DEFAULT_INPUT_KEY, echoInput))
@@ -157,7 +156,7 @@ public class PlanExecutorTest {
         0L,
         System.currentTimeMillis(),
         DateTimeZone.UTC);
-    final PlanNodeContext runTimeContext = new PlanNodeContext()
+    final DetectionPipelineContext runTimeContext = new DetectionPipelineContext()
         .setApplicationContext(planExecutor.applicationContext)
         .setDetectionInterval(detectionInterval);
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,
@@ -181,12 +180,5 @@ public class PlanExecutorTest {
     assertThat(outputMap).isNotNull();
 
     assertThat(outputMap.values().size()).isEqualTo(3);
-
-    final Set<String> strings = outputMap.values().stream()
-        .map(r -> (EchoResult) r)
-        .map(EchoResult::text)
-        .collect(toSet());
-
-    assertThat(strings).isEqualTo(Set.of("1", "2", "3"));
   }
 }

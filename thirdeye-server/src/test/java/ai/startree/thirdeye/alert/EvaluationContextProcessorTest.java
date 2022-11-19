@@ -17,7 +17,7 @@ package ai.startree.thirdeye.alert;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
@@ -57,7 +57,7 @@ public class EvaluationContextProcessorTest {
     final List<String> filters = List.of("browser=chrome");
     final EvaluationContextApi apiContext = new EvaluationContextApi().setFilters(filters);
 
-    final PlanNodeContext res = new PlanNodeContext();
+    final DetectionPipelineContext res = new DetectionPipelineContext();
     new EvaluationContextProcessor(mock(EnumerationItemManager.class))
         .addPredicates(res, apiContext);
 

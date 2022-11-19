@@ -15,8 +15,11 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.detectionpipeline.PlanExecutor.executePlanNode;
+import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
 import ai.startree.thirdeye.detectionpipeline.ContextKey;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.ForkJoinConfiguration;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
@@ -36,11 +39,16 @@ import java.util.stream.Collectors;
 public class ForkJoinParallelExecutor {
 
   private final ForkJoinConfiguration config;
+  private final DetectionPipelineContext detectionPipelineContext;
   private final ExecutorService subTaskExecutor;
 
-  public ForkJoinParallelExecutor(final ForkJoinConfiguration config, final ExecutorService subTaskExecutor) {
-    this.subTaskExecutor = subTaskExecutor;
-    this.config = config;
+  public ForkJoinParallelExecutor(final DetectionPipelineContext detectionPipelineContext) {
+    this.detectionPipelineContext = detectionPipelineContext;
+
+    final ApplicationContext applicationContext = requireNonNull(detectionPipelineContext
+        .getApplicationContext(), "application context is null");
+    this.config = applicationContext.getConfiguration().getForkjoin();
+    this.subTaskExecutor = applicationContext.getSubTaskExecutor();
   }
 
   public List<ForkJoinResultItem> execute(final PlanNode root,
@@ -72,8 +80,9 @@ public class ForkJoinParallelExecutor {
         executePlanNode(clonedPipelinePlanNodes, rootClone, context);
 
         /* Return the output */
-        return new ForkJoinResultItem(enumerationItem,
-            PlanExecutor.getOutput(context, rootClone.getName()));
+        final Map<String, OperatorResult> outputs = PlanExecutor.getOutput(context,
+            rootClone.getName());
+        return new ForkJoinResultItem(enumerationItem, outputs, detectionPipelineContext);
       }));
     }
     return callables;

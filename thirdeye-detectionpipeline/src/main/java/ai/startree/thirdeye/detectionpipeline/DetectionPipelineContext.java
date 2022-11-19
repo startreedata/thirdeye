@@ -25,6 +25,7 @@ public class DetectionPipelineContext {
   private Interval detectionInterval;
   private List<Predicate> predicates;
   private EnumerationItemDTO enumerationItem;
+  private boolean preserveOutputDataFrames = false;
 
   public ApplicationContext getApplicationContext() {
     return applicationContext;
@@ -61,6 +62,16 @@ public class DetectionPipelineContext {
   public DetectionPipelineContext setEnumerationItem(
       final EnumerationItemDTO enumerationItem) {
     this.enumerationItem = enumerationItem;
+    return this;
+  }
+
+  public boolean isPreserveOutputDataFrames() {
+    return preserveOutputDataFrames;
+  }
+
+  public DetectionPipelineContext setPreserveOutputDataFrames(
+      final boolean preserveOutputDataFrames) {
+    this.preserveOutputDataFrames = preserveOutputDataFrames;
     return this;
   }
 }

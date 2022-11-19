@@ -87,11 +87,12 @@ public class AlertEvaluator {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
           detectionInterval);
 
-      final DetectionPipelineContext runtimeContext = new DetectionPipelineContext()
+      final DetectionPipelineContext context = new DetectionPipelineContext()
+          .setPreserveOutputDataFrames(true)
           .setDetectionInterval(detectionInterval);
 
       // inject custom evaluation context
-      evaluationContextProcessor.process(runtimeContext,
+      evaluationContextProcessor.process(context,
           request.getEvaluationContext(),
           templateWithProperties);
 
@@ -104,7 +105,7 @@ public class AlertEvaluator {
 
       final Map<String, OperatorResult> result = executorService
           .submit(() -> planExecutor.runPipelineAndGetRootOutputs(templateWithProperties.getNodes(),
-              runtimeContext))
+              context))
           .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
       final Map<String, OperatorResult> processed = new DetectionPipelineOutputPostProcessor()

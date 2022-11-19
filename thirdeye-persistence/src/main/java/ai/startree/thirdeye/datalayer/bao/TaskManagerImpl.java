@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -50,9 +50,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements TaskManager {
+public class TaskManagerImpl implements TaskManager {
 
   private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private final TaskDao dao;
 
   private static final String FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC =
       " WHERE status = :status order by startTime asc limit ";
@@ -72,10 +73,9 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
   private final MetricRegistry metricRegistry;
 
   @Inject
-  public TaskManagerImpl(final GenericPojoDao genericPojoDao,
+  public TaskManagerImpl(final TaskDao dao,
       final MetricRegistry metricRegistry) {
-    super(TaskDTO.class, genericPojoDao);
-
+    this.dao = dao;
     orphanTasksCount = metricRegistry.meter("orphanTasksCount");
     this.metricRegistry = metricRegistry;
     registerMetrics();
@@ -102,7 +102,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
       update(entity);
       return entity.getId();
     }
-    final Long id = genericPojoDao.put(entity);
+    final Long id = dao.put(entity);
     entity.setId(id);
     return id;
   }
@@ -123,7 +123,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
     final String queryClause = (asc)
         ? FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC + fetchSize
         : FIND_BY_NAME_ORDER_BY_CREATE_TIME_DESC + fetchSize;
-    return genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskDTO.class);
+    return dao.executeParameterizedSQL(queryClause, parameterMap);
   }
 
   @Override
@@ -134,7 +134,7 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
     final String queryClause = (asc)
         ? FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC + fetchSize
         : FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC + fetchSize;
-    return genericPojoDao.executeParameterizedSQL(queryClause, parameterMap, TaskDTO.class);
+    return dao.executeParameterizedSQL(queryClause, parameterMap);
   }
 
   @Override
@@ -304,5 +304,95 @@ public class TaskManagerImpl extends AbstractManagerImpl<TaskDTO> implements Tas
             return countByStatus(status);
           }
         });
+  }
+
+  @Override
+  public int update(final TaskDTO entity, final Predicate predicate) {
+    return dao.update(entity, predicate);
+  }
+
+  @Override
+  public int update(final TaskDTO entity) {
+    return dao.update(entity);
+  }
+
+  // Test is located at TestAlertConfigManager.testBatchUpdate()
+  @Override
+  public int update(final List<TaskDTO> entities) {
+    return dao.update(entities);
+  }
+
+  @Override
+  public TaskDTO findById(final Long id) {
+    return dao.get(id);
+  }
+
+  @Override
+  public List<TaskDTO> findByIds(final List<Long> ids) {
+    return dao.get(ids);
+  }
+
+  @Override
+  public List<TaskDTO> findByName(final String name) {
+    return findByPredicate(Predicate.EQ("name", name));
+  }
+
+  @Override
+  public int delete(final TaskDTO entity) {
+    return dao.delete(entity.getId());
+  }
+
+  @Override
+  public int deleteById(final Long id) {
+    return dao.delete(id);
+  }
+
+  @Override
+  public int deleteByIds(final List<Long> ids) {
+    return dao.delete(ids);
+  }
+
+  @Override
+  public int deleteByPredicate(final Predicate predicate) {
+    return dao.deleteByPredicate(predicate);
+  }
+
+  @Override
+  @Transactional
+  public int deleteRecordsOlderThanDays(final int days) {
+    final DateTime expireDate = new DateTime(DateTimeZone.UTC).minusDays(days);
+    final Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
+    final Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
+    return deleteByPredicate(timestampPredicate);
+  }
+
+  @Override
+  public List<TaskDTO> findAll() {
+    return dao.getAll();
+  }
+
+  @Override
+  public List<TaskDTO> findByParams(final Map<String, Object> filters) {
+    return dao.get(filters);
+  }
+
+  @Override
+  public List<TaskDTO> findByPredicate(final Predicate predicate) {
+    return dao.get(predicate);
+  }
+
+  @Override
+  public List<TaskDTO> filter(final DaoFilter daoFilter) {
+    return dao.filter(daoFilter);
+  }
+
+  @Override
+  public long count() {
+    return dao.count();
+  }
+
+  @Override
+  public long count(final Predicate predicate) {
+    return dao.count(predicate);
   }
 }

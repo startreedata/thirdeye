@@ -12,33 +12,49 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Datasource } from "../../rest/dto/datasource.interfaces";
 import type {
-    Datasource,
-    DatasourceGroups,
+    DatasourceOption,
+    DatasourceOptionGroups,
 } from "./welcome-onboard-datasource-select-datasource.interfaces";
 
-export const getDatasources = (): Readonly<Datasource[]> => {
+export const STARTREE_CLOUD = "startree-cloud";
+export const OTHER_SOURCES = "other-sources";
+export const ADD_NEW_DATASOURCE = "add-new-datasource";
+
+export const getDatasources = (
+    datasources: Datasource[] = []
+): Readonly<DatasourceOption[]> => {
     return [
-        {
-            label: "BYOC_production_ENV",
-            value: "BYOC_production_ENV",
-            sourceType: "startree-cloud",
-        },
-        {
-            label: "sales_Pinot_Table",
-            value: "sales_Pinot_Table",
-            sourceType: "startree-cloud",
-        },
+        ...((datasources || []).map((d) => ({
+            label: d.name,
+            value: d.id,
+            sourceType: STARTREE_CLOUD,
+        })) as DatasourceOption[]),
+
+        // TODO: Remove
+        // {
+        //     label: "BYOC_production_ENV",
+        //     value: "BYOC_production_ENV",
+        //     sourceType: "startree-cloud",
+        // },
+        // {
+        //     label: "sales_Pinot_Table",
+        //     value: "sales_Pinot_Table",
+        //     sourceType: "startree-cloud",
+        // },
         {
             label: "Add new Pinot datasource",
-            value: "add-new-datasource",
-            sourceType: "other-sources",
+            value: ADD_NEW_DATASOURCE,
+            sourceType: OTHER_SOURCES,
         },
     ] as const;
 };
 
-export const getDatasourceGroups = (): DatasourceGroups[] => {
-    const DATASOURCES = getDatasources();
+export const getDatasourceGroups = (
+    datasources: Datasource[] = []
+): DatasourceOptionGroups[] => {
+    const DATASOURCES = getDatasources(datasources || []);
 
     return [
         {

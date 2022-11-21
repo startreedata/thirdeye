@@ -15,22 +15,26 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import type { Datasource } from "../../rest/dto/datasource.interfaces";
+import type { ADD_NEW_DATASOURCE } from "./welcome-onboard-datasource-select-datasource.utils";
 
 // TODO: Remove if not needed
-// export interface Datasource {
-//     label: string;
-//     value: string;
-//     // TODO: Review
-//     sourceType: "startree-cloud" | "other-sources";
-// }
+export interface DatasourceOption {
+    label: string;
+    value: number | string;
+    // TODO: Review
+    sourceType: "startree-cloud" | "other-sources";
+}
 
-// export interface DatasourceGroups {
-//     key: string;
-//     title: string;
-//     options: Datasource[];
-// }
+export interface DatasourceOptionGroups {
+    key: string;
+    title: string;
+    options: DatasourceOption[];
+}
 
+export type SelectedDatasource = number | typeof ADD_NEW_DATASOURCE | null;
 export interface WelcomeSelectDatasourceOutletContext {
     editedDatasource: Datasource;
     setEditedDatasource: Dispatch<SetStateAction<Datasource>>;
+    selectedDatasource: SelectedDatasource;
+    setSelectedDatasource: Dispatch<SetStateAction<SelectedDatasource>>;
 }

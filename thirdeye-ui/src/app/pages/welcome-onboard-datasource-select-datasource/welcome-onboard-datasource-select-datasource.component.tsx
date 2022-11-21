@@ -13,55 +13,92 @@
  * the License.
  */
 
-import { Box, Typography } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import {
+    Box,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    Radio,
+    RadioGroup,
+    Typography,
+} from "@material-ui/core";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
-import { JSONEditorV1, PageContentsCardV1 } from "../../platform/components";
-import { Datasource } from "../../rest/dto/datasource.interfaces";
-import type { WelcomeSelectDatasourceOutletContext } from "./welcome-onboard-datasource-select-datasource.interfaces";
-// import { getDatasourceGroups } from "./welcome-onboard-datasource-select-datasource.utils";
+import {
+    JSONEditorV1,
+    PageContentsCardV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
+import { useGetDatasources } from "../../rest/datasources/datasources.actions";
+import type { Datasource } from "../../rest/dto/datasource.interfaces";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
+import type {
+    DatasourceOptionGroups,
+    SelectedDatasource,
+    WelcomeSelectDatasourceOutletContext,
+} from "./welcome-onboard-datasource-select-datasource.interfaces";
+import {
+    ADD_NEW_DATASOURCE,
+    getDatasourceGroups,
+} from "./welcome-onboard-datasource-select-datasource.utils";
 
 export const WelcomeSelectDatasource: FunctionComponent = () => {
-    const { editedDatasource, setEditedDatasource } =
-        useOutletContext<WelcomeSelectDatasourceOutletContext>();
+    const {
+        editedDatasource,
+        setEditedDatasource,
+        selectedDatasource,
+        setSelectedDatasource,
+    } = useOutletContext<WelcomeSelectDatasourceOutletContext>();
 
     const handleDatasourceChange = (value: string): void => {
         setEditedDatasource(JSON.parse(value));
     };
+    const { notify } = useNotificationProviderV1();
+    const { t } = useTranslation();
 
-    // * TODO: Remove if not needed
-    // const [value, setValue] = useState("female");
+    const handleRadioChange = (
+        _e: React.ChangeEvent<HTMLInputElement>,
+        value: string
+    ): void => {
+        setSelectedDatasource(value as SelectedDatasource);
+    };
 
-    // const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    //     setValue(event.target.value);
-    // };
+    const { datasources, getDatasources, status, errorMessages } =
+        useGetDatasources();
 
-    // const datasourceGroups = useMemo(() => getDatasourceGroups(), []);
+    const datasourceGroups = useMemo<DatasourceOptionGroups[]>(
+        () => getDatasourceGroups(datasources || []),
+        [datasources]
+    );
 
-    // const { datasources, getDatasources, status, errorMessages } =
-    //     useGetDatasources();
+    useEffect(() => {
+        getDatasources();
+    }, []);
 
-    // console.log(datasources);
-    // useEffect(() => {
-    //     getDatasources();
-    // }, []);
-
-    // useEffect(() => {
-    //     console.log(datasources);
-    // }, [datasources]);
+    useEffect(() => {
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.datasources"),
+            })
+        );
+    }, [status]);
 
     return (
         <PageContentsCardV1>
             <Box px={2} py={2}>
                 <Typography variant="h5">Select datasource</Typography>
                 <Typography variant="body2">
-                    You can always add, remove or chance datasources in the
+                    You can always add, remove or change datasources in the
                     configuration section.
                 </Typography>
             </Box>
             {/* // TODO: Remove if not needed */}
 
-            {/* {datasourceGroups.map((datasourceGroup) => (
+            {datasourceGroups.map((datasourceGroup) => (
                 <Box key={datasourceGroup.key} px={2} py={1}>
                     <FormControl component="fieldset">
                         <FormLabel color="secondary" component="legend">
@@ -70,27 +107,29 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                         <RadioGroup
                             aria-label="Select Datasource"
                             name="select-datasource"
-                            value={value}
-                            onChange={handleChange}
+                            value={selectedDatasource}
+                            onChange={handleRadioChange}
                         >
                             {datasourceGroup.options.map((datasourceOption) => (
                                 <FormControlLabel
                                     control={<Radio />}
                                     key={datasourceOption.value}
                                     label={datasourceOption.label}
-                                    value={datasourceOption.value}
+                                    value={datasourceOption.value.toString()}
                                 />
                             ))}
                         </RadioGroup>
                     </FormControl>
                 </Box>
-            ))} */}
+            ))}
 
-            <JSONEditorV1<Datasource>
-                hideValidationSuccessIcon
-                value={editedDatasource}
-                onChange={handleDatasourceChange}
-            />
+            {selectedDatasource === ADD_NEW_DATASOURCE ? (
+                <JSONEditorV1<Datasource>
+                    hideValidationSuccessIcon
+                    value={editedDatasource}
+                    onChange={handleDatasourceChange}
+                />
+            ) : null}
         </PageContentsCardV1>
     );
 };

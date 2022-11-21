@@ -12,14 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TimeRangeDuration } from "../time-range-provider/time-range-provider.interfaces";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 
-export interface TimeRangeButtonProps {
-    timeRangeDuration: TimeRangeDuration;
-    recentCustomTimeRangeDurations?: TimeRangeDuration[];
-    onChange?: (timeRangeDuration: TimeRangeDuration) => void;
-    maxDate?: number;
-    minDate?: number;
-    btnGroupColor?: "secondary" | "inherit" | "primary" | "default";
-    hideQuickExtend?: boolean;
+export interface ThresholdSetupProps {
+    alert: EditableAlert;
+    onAlertPropertyChange: (
+        contents: Partial<EditableAlert>,
+        isTotalReplace?: boolean
+    ) => void;
 }

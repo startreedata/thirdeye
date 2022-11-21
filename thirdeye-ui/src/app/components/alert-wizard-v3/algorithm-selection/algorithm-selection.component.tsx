@@ -37,9 +37,11 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
         isDimensionExploration: boolean
     ): void => {
         onAlertPropertyChange({
-            alertTemplates: isDimensionExploration
-                ? algorithmOption.alertTemplateForMultidimension
-                : algorithmOption.alertTemplate,
+            template: {
+                name: isDimensionExploration
+                    ? algorithmOption.alertTemplateForMultidimension
+                    : algorithmOption.alertTemplate,
+            },
         });
         onSelectionComplete(isDimensionExploration);
     };

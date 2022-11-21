@@ -81,7 +81,7 @@ export const WelcomeRouter: FunctionComponent = () => {
                             <Navigate
                                 replace
                                 to={
-                                    AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
+                                    AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
                                 }
                             />
                         }

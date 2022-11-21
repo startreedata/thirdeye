@@ -499,6 +499,14 @@ export const getRootCauseAnalysisForAnomalyInvestigatePath = (
     return path;
 };
 
+export const getDataConfigurationCreatePath = (): string => {
+    return AppRoute.WELCOME_ONBOARD_DATASOURCE;
+};
+
+export const getDataConfigurationCreateDatasetsPath = (): string => {
+    return AppRoute.WELCOME_ONBOARD_DATASOURCE_DATASETS;
+};
+
 export const getLoginPath = (): string => {
     return AppRoute.LOGIN;
 };

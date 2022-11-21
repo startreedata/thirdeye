@@ -31,7 +31,7 @@ package ai.startree.thirdeye.datastructures;
  *
  ******************************************************************************/
 
-// note cyril - duplicated from internal library
+// note cyril - duplicated from internal library move to dedicated module if there are other similar classes
 
 import java.util.HashMap;
 import java.util.HashSet;

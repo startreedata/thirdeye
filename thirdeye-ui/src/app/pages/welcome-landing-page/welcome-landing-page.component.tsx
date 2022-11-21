@@ -15,11 +15,15 @@
 
 import { Box, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useNavigate } from "react-router-dom";
 import { WelcomeStepCard } from "../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
 import { PageContentsCardV1, PageV1 } from "../../platform/components";
 import { DimensionV1 } from "../../platform/utils";
+import { getDataConfigurationCreatePath } from "../../utils/routes/routes.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
+    const navigate = useNavigate();
+
     return (
         <PageV1>
             <Box display="flex" flexDirection="column" p={7} width="100%">
@@ -87,9 +91,13 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                 ctaText="Configure data"
                                 subtitle="Connect to StarTree cloud data or add your own Pinot datasource"
                                 title="Review and configure data"
+                                onClickCta={() => {
+                                    navigate(getDataConfigurationCreatePath());
+                                }}
                             />
                             <WelcomeStepCard
                                 disabled
+                                // TODO: Add condition for keeping this disabled
                                 ctaText="Create alert"
                                 subtitle="Explore StarTree ThirdEye in one click"
                                 title="Create my first alert"

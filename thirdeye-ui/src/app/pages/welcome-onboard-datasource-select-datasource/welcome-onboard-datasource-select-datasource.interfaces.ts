@@ -13,15 +13,24 @@
  * the License.
  */
 
-export interface Datasource {
-    label: string;
-    value: string;
-    // TODO: Review
-    sourceType: "startree-cloud" | "other-sources";
-}
+import type { Dispatch, SetStateAction } from "react";
+import type { Datasource } from "../../rest/dto/datasource.interfaces";
 
-export interface DatasourceGroups {
-    key: string;
-    title: string;
-    options: Datasource[];
+// TODO: Remove if not needed
+// export interface Datasource {
+//     label: string;
+//     value: string;
+//     // TODO: Review
+//     sourceType: "startree-cloud" | "other-sources";
+// }
+
+// export interface DatasourceGroups {
+//     key: string;
+//     title: string;
+//     options: Datasource[];
+// }
+
+export interface WelcomeSelectDatasourceOutletContext {
+    editedDatasource: Datasource;
+    setEditedDatasource: Dispatch<SetStateAction<Datasource>>;
 }

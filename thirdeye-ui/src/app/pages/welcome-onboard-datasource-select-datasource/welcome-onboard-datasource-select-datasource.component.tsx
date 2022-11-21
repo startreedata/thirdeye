@@ -13,27 +13,42 @@
  * the License.
  */
 
-import {
-    Box,
-    FormControl,
-    FormControlLabel,
-    FormLabel,
-    Radio,
-    RadioGroup,
-    Typography,
-} from "@material-ui/core";
-import React, { FunctionComponent, useMemo, useState } from "react";
-import { PageContentsCardV1 } from "../../platform/components";
-import { getDatasourceGroups } from "./welcome-onboard-datasource-select-datasource.utils";
+import { Box, Typography } from "@material-ui/core";
+import React, { FunctionComponent } from "react";
+import { useOutletContext } from "react-router-dom";
+import { JSONEditorV1, PageContentsCardV1 } from "../../platform/components";
+import { Datasource } from "../../rest/dto/datasource.interfaces";
+import type { WelcomeSelectDatasourceOutletContext } from "./welcome-onboard-datasource-select-datasource.interfaces";
+// import { getDatasourceGroups } from "./welcome-onboard-datasource-select-datasource.utils";
 
 export const WelcomeSelectDatasource: FunctionComponent = () => {
-    const [value, setValue] = useState("female");
+    const { editedDatasource, setEditedDatasource } =
+        useOutletContext<WelcomeSelectDatasourceOutletContext>();
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-        setValue(event.target.value);
+    const handleDatasourceChange = (value: string): void => {
+        setEditedDatasource(JSON.parse(value));
     };
 
-    const datasourceGroups = useMemo(() => getDatasourceGroups(), []);
+    // * TODO: Remove if not needed
+    // const [value, setValue] = useState("female");
+
+    // const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    //     setValue(event.target.value);
+    // };
+
+    // const datasourceGroups = useMemo(() => getDatasourceGroups(), []);
+
+    // const { datasources, getDatasources, status, errorMessages } =
+    //     useGetDatasources();
+
+    // console.log(datasources);
+    // useEffect(() => {
+    //     getDatasources();
+    // }, []);
+
+    // useEffect(() => {
+    //     console.log(datasources);
+    // }, [datasources]);
 
     return (
         <PageContentsCardV1>
@@ -44,7 +59,9 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                     configuration section.
                 </Typography>
             </Box>
-            {datasourceGroups.map((datasourceGroup) => (
+            {/* // TODO: Remove if not needed */}
+
+            {/* {datasourceGroups.map((datasourceGroup) => (
                 <Box key={datasourceGroup.key} px={2} py={1}>
                     <FormControl component="fieldset">
                         <FormLabel color="secondary" component="legend">
@@ -67,7 +84,13 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                         </RadioGroup>
                     </FormControl>
                 </Box>
-            ))}
+            ))} */}
+
+            <JSONEditorV1<Datasource>
+                hideValidationSuccessIcon
+                value={editedDatasource}
+                onChange={handleDatasourceChange}
+            />
         </PageContentsCardV1>
     );
 };

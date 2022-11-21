@@ -14,16 +14,24 @@
  */
 
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useMemo } from "react";
+import type { AxiosError } from "axios";
+import { isEmpty } from "lodash";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
+    NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     StepperV1,
+    useNotificationProviderV1,
 } from "../../platform/components";
+import { createDatasource } from "../../rest/datasources/datasources.rest";
+import type { Datasource } from "../../rest/dto/datasource.interfaces";
+import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const STEPS = [
@@ -40,6 +48,11 @@ const STEPS = [
 export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
+    const { notify } = useNotificationProviderV1();
+
+    const [editedDatasource, setEditedDatasource] = useState<Datasource>(
+        createDefaultDatasource()
+    );
 
     const activeStep = useMemo(() => {
         const activeStepDefinition = STEPS.find((candidate) =>
@@ -52,6 +65,40 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
 
         return activeStepDefinition.subPath;
     }, [pathname]);
+
+    const handleNextClick = (): void => {
+        createDatasource(editedDatasource)
+            .then((datasource: Datasource): void => {
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.create-success", {
+                        entity: t("label.datasource"),
+                    })
+                );
+                console.log("datasource", datasource);
+
+                // TODO: Navigate to next page
+            })
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                isEmpty(errMessages)
+                    ? notify(
+                          NotificationTypeV1.Error,
+                          t("message.create-error", {
+                              entity: t("label.datasource"),
+                          })
+                      )
+                    : errMessages.map((err) =>
+                          notify(NotificationTypeV1.Error, err)
+                      );
+            });
+    };
+
+    const outletContext = {
+        editedDatasource,
+        setEditedDatasource,
+    };
 
     return (
         <PageV1>
@@ -87,7 +134,7 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                     </PageContentsCardV1>
                 </Grid>
                 <Grid item xs={12}>
-                    <Outlet context={{}} />
+                    <Outlet context={outletContext} />
                 </Grid>
             </PageContentsGridV1>
 
@@ -98,7 +145,9 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                             <Button color="secondary">{t("label.back")}</Button>
                         </Grid>
                         <Grid item>
-                            <Button color="primary">{t("label.next")}</Button>
+                            <Button color="primary" onClick={handleNextClick}>
+                                {t("label.next")}
+                            </Button>
                         </Grid>
                     </Grid>
                 </PageContentsCardV1>

@@ -13,8 +13,17 @@
  */
 package ai.startree.thirdeye.core;
 
+import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY;
+import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_EXPECTED;
+import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_NEW_TREND;
+import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NOT_ANOMALY;
+import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NO_FEEDBACK;
+
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
+import ai.startree.thirdeye.spi.api.cube.AnomalyStatsWrapperApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -25,6 +34,9 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Suppliers;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -33,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -50,10 +63,12 @@ public class AppAnalyticsService {
   private final AlertTemplateRenderer renderer;
   private final MergedAnomalyResultManager anomalyManager;
 
-  public Supplier<ConfusionMatrix> confusionMatrixSupplier =
-      Suppliers.memoizeWithExpiration(this::computeConfusionMatrixForAnomalies, 5, TimeUnit.MINUTES)::get;
+  public LoadingCache<Set<Long>, ConfusionMatrix> confusionMatrixSupplier =
+      CacheBuilder.newBuilder()
+          .expireAfterWrite(5, TimeUnit.MINUTES)
+          .build(CacheLoader.from(this::computeConfusionMatrixForAnomalies));
   public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
-      Suppliers.memoizeWithExpiration(this::getAnomalyFeedbacks, 5, TimeUnit.MINUTES)::get;
+      Suppliers.memoizeWithExpiration(this::getAllAnomalyFeedbacks, 5, TimeUnit.MINUTES)::get;
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
       Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics, 5, TimeUnit.MINUTES)::get;
 
@@ -75,13 +90,21 @@ public class AppAnalyticsService {
     metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
       @Override
       protected Double loadValue() {
-        return confusionMatrixSupplier.get().getPrecision();
+        try {
+          return confusionMatrixSupplier.get(Set.of()).getPrecision();
+        } catch (final ExecutionException e) {
+          return null;
+        }
       }
     });
     metricRegistry.register("anomalyResponseRate", new CachedGauge<Double>(1, TimeUnit.HOURS) {
       @Override
       protected Double loadValue() {
-        return confusionMatrixSupplier.get().getResponseRate();
+        try {
+          return confusionMatrixSupplier.get(Set.of()).getResponseRate();
+        } catch (final ExecutionException e) {
+          return null;
+        }
       }
     });
   }
@@ -117,49 +140,69 @@ public class AppAnalyticsService {
 
   public ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final ConfusionMatrix matrix = new ConfusionMatrix();
-    matrix.addUnclassified((int) anomalyManager.countParentAnomaliesWithoutFeedback());
-    final List<AnomalyFeedback> feedbacks = anomalyFeedbacksSupplier.get();
-    for (final AnomalyFeedback feedback : feedbacks) {
-      final AnomalyFeedbackType type = feedback.getFeedbackType();
-      switch (type) {
-        case NO_FEEDBACK:
-          matrix.incUnclassified();
-          break;
-        case NOT_ANOMALY:
-          matrix.incFalsePositive();
-          break;
-        case ANOMALY:
-        case ANOMALY_EXPECTED:
-        case ANOMALY_NEW_TREND:
-          matrix.incTruePositive();
-          break;
-        default:
-          log.error("Unsupported feedback type: {}", type);
-      }
-    }
+    // filter to get anomalies without feedback
+    final DaoFilter filter = new DaoFilter().setPredicate( Predicate.AND(
+        Predicate.EQ("anomalyFeedbackId", 0L)));
+    matrix.addUnclassified((int) anomalyManager.countParentAnomalies(filter));
+    final Map<AnomalyFeedbackType, Long> typeMap = aggregateFeedbackTypes(anomalyFeedbacksSupplier.get());
+    matrix.addUnclassified(Math.toIntExact(typeMap.get(NO_FEEDBACK)));
+    matrix.addFalsePositive(Math.toIntExact(typeMap.get(NOT_ANOMALY)));
+    matrix.addTruePositive(Math.toIntExact(typeMap.get(ANOMALY))
+        + Math.toIntExact(typeMap.get(ANOMALY_EXPECTED))
+        + Math.toIntExact(typeMap.get(ANOMALY_NEW_TREND)));
     return matrix;
   }
 
-  private List<AnomalyFeedback> getAnomalyFeedbacks() {
-    return anomalyManager.findParentAnomaliesWithFeedback().stream()
+  private List<AnomalyFeedback> getAllAnomalyFeedbacks() {
+    return getAnomalyFeedbacks(null);
+  }
+
+  private List<AnomalyFeedback> getAnomalyFeedbacks(final DaoFilter filter) {
+    return anomalyManager.findParentAnomaliesWithFeedback(filter).stream()
         .map(MergedAnomalyResultDTO::getFeedback)
         .collect(Collectors.toList());
   }
 
-  public AnomalyStatsApi computeAnomalyStats() {
-    List<AnomalyFeedback> feedbacks = anomalyFeedbacksSupplier.get();
-    Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
-    for(AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
+  public AnomalyStatsWrapperApi computeAnomalyStats(final Set<Long> alertIds) {
+    // compute overall stats
+    final List<AnomalyFeedback> allFeedbacks = anomalyFeedbacksSupplier.get();
+    final AnomalyStatsWrapperApi stats = new AnomalyStatsWrapperApi()
+        .setTotalCount(anomalyManager.countParentAnomalies(null))
+        .setCountWithFeedback((long) allFeedbacks.size())
+        .setFeedbackStats(aggregateFeedbackTypes(allFeedbacks));
+
+    // compute per alert stats
+    if (alertIds != null && !alertIds.isEmpty()) {
+      stats.setStatsByAlerts(computeAnomalyStatsByAlerts(alertIds));
+    }
+    return stats;
+  }
+
+  private Map<Long, AnomalyStatsApi> computeAnomalyStatsByAlerts(final Set<Long> alertIds) {
+    final Map<Long, AnomalyStatsApi> byAlerts = new HashMap<>();
+    for (final Long id : alertIds) {
+      final DaoFilter filter = new DaoFilter().setPredicate(
+          Predicate.EQ("detectionConfigId", id));
+      final List<AnomalyFeedback> feedbacks = getAnomalyFeedbacks(filter);
+      final AnomalyStatsApi stat = new AnomalyStatsApi()
+          .setTotalCount(anomalyManager.countParentAnomalies(filter))
+          .setCountWithFeedback((long) feedbacks.size())
+          .setFeedbackStats(aggregateFeedbackTypes(feedbacks));
+      byAlerts.put(id, stat);
+    }
+    return byAlerts;
+  }
+
+  private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(final List<AnomalyFeedback> feedbacks) {
+    final Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
+    for(final AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
       feedbackStats.put(type, 0L);
     }
     feedbacks.forEach(feedback -> {
-      AnomalyFeedbackType type = feedback.getFeedbackType();
-      long count = feedbackStats.get(type);
+      final AnomalyFeedbackType type = feedback.getFeedbackType();
+      final long count = feedbackStats.get(type);
       feedbackStats.put(type, count+1);
     });
-    return new AnomalyStatsApi()
-        .setTotalCount(anomalyManager.countParentAnomalies())
-        .setCountWithFeedback((long) feedbacks.size())
-        .setFeedbackStats(feedbackStats);
+    return feedbackStats;
   }
 }

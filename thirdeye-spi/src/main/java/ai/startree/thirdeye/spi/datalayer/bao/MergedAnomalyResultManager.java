@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.bao;
 
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.List;
 
@@ -46,9 +47,7 @@ public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomal
   List<MergedAnomalyResultDTO> convertMergedAnomalyBean2DTO(
       List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList);
 
-  long countParentAnomalies();
+  long countParentAnomalies(DaoFilter filter);
 
-  long countParentAnomaliesWithoutFeedback();
-
-  List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback();
+  List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback(DaoFilter filter);
 }

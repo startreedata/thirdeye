@@ -26,14 +26,20 @@ const WelcomeLandingPage = lazy(() =>
 
 const WelcomeOnboardDatasourceWizard = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-onboard-datasource-wizard/welcome-onboard-datasource-wizard.component"
+        /* webpackChunkName: "welcome-onboard-datasource" */ "../../pages/welcome-onboard-datasource-wizard/welcome-onboard-datasource-wizard.component"
     ).then((module) => ({ default: module.WelcomeOnboardDatasourceWizard }))
 );
 
 const WelcomeSelectDatasource = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.component"
+        /* webpackChunkName: "welcome-select-datasource" */ "../../pages/welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.component"
     ).then((module) => ({ default: module.WelcomeSelectDatasource }))
+);
+
+const WelcomeSelectDatasets = lazy(() =>
+    import(
+        /* webpackChunkName: "welcome-select-datasets" */ "../../pages/welcome-onboard-datasource-select-datasets/welcome-onboard-datasource-select-datasets.component"
+    ).then((module) => ({ default: module.WelcomeSelectDatasets }))
 );
 
 // * Just setting up the routing, this will be removed by the next commit
@@ -97,10 +103,22 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                     {/* Welcome onboard-datasource datasets path */}
                     <Route
-                        element={<DummyPage />}
+                        element={<WelcomeSelectDatasets />}
                         path={
                             AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
                         }
+                    />
+
+                    <Route
+                        element={
+                            <Navigate
+                                replace
+                                to={
+                                    AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
+                                }
+                            />
+                        }
+                        path="*"
                     />
                 </Route>
 

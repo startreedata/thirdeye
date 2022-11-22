@@ -91,7 +91,7 @@ export const AppRouteRelative = {
     WELCOME_LANDING: "landing",
     WELCOME_ONBOARD_DATASOURCE: "onboard-datasource",
     WELCOME_ONBOARD_DATASOURCE_DATASOURCE: "datasource",
-    WELCOME_ONBOARD_DATASOURCE_DATASETS: "datasets",
+    WELCOME_ONBOARD_DATASOURCE_DATASETS: `${PLACEHOLDER_ROUTE_ID}/datasets`,
     WELCOME_CREATE_ALERT: "create-alert",
     WELCOME_CREATE_ALERT_SELECT_TYPE: "select-type",
     WELCOME_CREATE_ALERT_SETUP_MONITORING: "setup-monitoring",
@@ -503,8 +503,13 @@ export const getDataConfigurationCreatePath = (): string => {
     return AppRoute.WELCOME_ONBOARD_DATASOURCE;
 };
 
-export const getDataConfigurationCreateDatasetsPath = (): string => {
-    return AppRoute.WELCOME_ONBOARD_DATASOURCE_DATASETS;
+export const getDataConfigurationCreateDatasetsPath = (
+    datasetId: number
+): string => {
+    let path: string = AppRoute.WELCOME_ONBOARD_DATASOURCE_DATASETS;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${datasetId}`);
+
+    return path;
 };
 
 export const getLoginPath = (): string => {

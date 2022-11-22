@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.spi.api;
 
-import ai.startree.thirdeye.spi.api.cube.AnomalyStatsWrapperApi;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -22,7 +21,7 @@ public class AppAnalyticsApi implements ThirdEyeApi {
 
   private String version;
   private Integer nMonitoredMetrics;
-  private AnomalyStatsWrapperApi anomalyStats;
+  private AnomalyStatsApi anomalyStats;
 
   public String getVersion() {
     return version;
@@ -42,11 +41,11 @@ public class AppAnalyticsApi implements ThirdEyeApi {
     return this;
   }
 
-  public AnomalyStatsWrapperApi getAnomalyStats() {
+  public AnomalyStatsApi getAnomalyStats() {
     return anomalyStats;
   }
 
-  public AppAnalyticsApi setAnomalyStats(final AnomalyStatsWrapperApi anomalyStats) {
+  public AppAnalyticsApi setAnomalyStats(final AnomalyStatsApi anomalyStats) {
     this.anomalyStats = anomalyStats;
     return this;
   }

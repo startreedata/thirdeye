@@ -6,6 +6,27 @@
       "name": "root",
       "type": "PostProcessor",
       "params": {
+        "type": "EVENTS",
+        "component.ignore": "${eventFilterIgnore}",
+        "component.beforeHolidayMargin": "${eventFilterBeforeHolidayMargin}",
+        "component.afterHolidayMargin": "${eventFilterAfterHolidayMargin}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "guardrailThresholdProcessor"
+        },
+        {
+          "targetProperty": "current_events",
+          "sourcePlanNode": "eventsDataFetcher",
+          "sourceProperty": "events"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "guardrailThresholdProcessor",
+      "type": "PostProcessor",
+      "params": {
         "type": "THRESHOLD",
         "component.ignore": "${guardrailMetricIgnore}",
         "component.min": "${guardrailMetricMin}",
@@ -80,6 +101,21 @@
         }
       ],
       "outputs": []
+    },
+    {
+      "name": "eventsDataFetcher",
+      "type": "EventFetcher",
+      "params": {
+        "component.sqlFilter": "${eventFilterSqlFilter}",
+        "component.eventTypes": "${eventFilterTypes}",
+        "component.lookaround": "${eventFilterLookaround}"
+      },
+      "outputs": [
+        {
+          "outputKey": "events",
+          "outputName": "events"
+        }
+      ]
     },
     {
       "name": "missingDataPointsFiller",
@@ -157,6 +193,12 @@
     "guardrailMetricMin": "-1",
     "guardrailMetricMax": "-1",
     "guardrailMetric": "COUNT(*)",
+    "eventFilterSqlFilter": "",
+    "eventFilterLookaround": "P2D",
+    "eventFilterTypes": [],
+    "eventFilterIgnore": false,
+    "eventFilterBeforeHolidayMargin": "P0D",
+    "eventFilterAfterHolidayMargin": "P0D",
     "queryLimit": "100000000"
   }
 }

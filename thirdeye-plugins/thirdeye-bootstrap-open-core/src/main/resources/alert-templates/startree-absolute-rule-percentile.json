@@ -6,6 +6,27 @@
       "name": "root",
       "type": "PostProcessor",
       "params": {
+        "type": "EVENTS",
+        "component.ignore": "${eventFilterIgnore}",
+        "component.beforeHolidayMargin": "${eventFilterBeforeHolidayMargin}",
+        "component.afterHolidayMargin": "${eventFilterAfterHolidayMargin}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "thresholdProcessor"
+        },
+        {
+          "targetProperty": "current_events",
+          "sourcePlanNode": "eventsDataFetcher",
+          "sourceProperty": "events"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "thresholdProcessor",
+      "type": "PostProcessor",
+      "params": {
         "type": "THRESHOLD",
         "component.ignore": "${thresholdIgnore}",
         "component.min": "${thresholdFilterMin}",
@@ -114,6 +135,21 @@
       ]
     },
     {
+      "name": "eventsDataFetcher",
+      "type": "EventFetcher",
+      "params": {
+        "component.sqlFilter": "${eventFilterSqlFilter}",
+        "component.eventTypes": "${eventFilterTypes}",
+        "component.lookaround": "${eventFilterLookaround}"
+      },
+      "outputs": [
+        {
+          "outputKey": "events",
+          "outputName": "events"
+        }
+      ]
+    },
+    {
       "name": "currentMissingDataManager",
       "type": "TimeIndexFiller",
       "params": {
@@ -188,6 +224,12 @@
     "thresholdIgnore": "true",
     "thresholdFilterMin": "-1",
     "thresholdFilterMax": "-1",
+    "eventFilterSqlFilter": "",
+    "eventFilterLookaround": "P2D",
+    "eventFilterTypes": [],
+    "eventFilterIgnore": false,
+    "eventFilterBeforeHolidayMargin": "P0D",
+    "eventFilterAfterHolidayMargin": "P0D",
     "queryLimit": "100000000"
   }
 }

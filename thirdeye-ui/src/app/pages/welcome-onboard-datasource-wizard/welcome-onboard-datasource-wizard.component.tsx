@@ -66,6 +66,10 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
     const [selectedDatasource, setSelectedDatasource] =
         useState<SelectedDatasource>(null);
 
+    const [selectedDatasets, setSelectedDatasets] = useState<
+        Record<number, boolean>
+    >({});
+
     const activeStep = useMemo(() => {
         // Tries to extract the last part of the url for
         // Uses the whole url if nothing comes up
@@ -75,7 +79,7 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
             pathname.split("/").filter(Boolean).pop() || pathname;
 
         const activeStepDefinition = STEPS.find((candidate) =>
-            urlPath.includes(candidate.subPath)
+            candidate.subPath.includes(urlPath)
         );
 
         if (!activeStepDefinition) {
@@ -86,7 +90,8 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
     }, [pathname]);
 
     const goToDatasetPage = useCallback(
-        () => navigate(getDataConfigurationCreateDatasetsPath()),
+        (datasourceId: number) =>
+            navigate(getDataConfigurationCreateDatasetsPath(datasourceId)),
         []
     );
 
@@ -140,15 +145,18 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                     return;
                 }
                 if (selectedDatasourceProp === "add-new-datasource") {
-                    const newDatasetId = await handleCreateNewDatasource(
+                    const created = await handleCreateNewDatasource(
                         editedDatasourceProp
                     );
 
-                    if (!newDatasetId) {
+                    if (!created) {
                         return;
                     }
+                    goToDatasetPage(created);
+
+                    return;
                 }
-                goToDatasetPage();
+                goToDatasetPage(selectedDatasourceProp);
 
                 return;
             }
@@ -173,6 +181,8 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
         ...(activeStep ===
             AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS && {
             selectedDatasource,
+            selectedDatasets,
+            setSelectedDatasets,
         }),
     };
 

@@ -33,7 +33,7 @@ public class AlertTemplateDTO extends AbstractDTO {
   @JsonIgnore
   private RcaMetadataDTO rca;
   private AlertMetadataDTO metadata;
-  @Deprecated
+  @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
   private List<TemplatePropertyMetadata> propertiesMetadata;
 

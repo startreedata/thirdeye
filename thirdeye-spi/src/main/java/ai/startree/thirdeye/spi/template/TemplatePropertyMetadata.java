@@ -22,7 +22,14 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class TemplatePropertyMetadata {
 
+  /**
+   * Exact name in the template
+   */
   private String name;
+  /**
+   * Markdown description.
+   */
+  private String description;
   private Object defaultValue;
   /**
    * Used to set a defaultValue to null. (defaultValue=null is interpreted as no defaultValue).
@@ -118,6 +125,15 @@ public class TemplatePropertyMetadata {
 
   public TemplatePropertyMetadata setJsonType(final JsonType jsonType) {
     this.jsonType = jsonType;
+    return this;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public TemplatePropertyMetadata setDescription(final String description) {
+    this.description = description;
     return this;
   }
 

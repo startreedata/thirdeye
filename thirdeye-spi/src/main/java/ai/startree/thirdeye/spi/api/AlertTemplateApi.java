@@ -32,7 +32,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   @Deprecated // use AlertMetadataApi
   private RcaMetadataApi rca;
   private AlertMetadataApi metadata;
-  @Deprecated
+  @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
   private List<TemplatePropertyMetadata> propertiesMetadata;
 

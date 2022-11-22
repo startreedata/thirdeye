@@ -172,9 +172,21 @@
     "mergeMaxDuration": "${mergeMaxDuration}",
     "granularity": "${monitoringGranularity}"
   },
+  "propertiesMetadata": [
+    {
+      "name": "timezone",
+      "description": "Timezone used to group by time.",
+      "defaultValue": "UTC",
+      "jsonType": "STRING"
+    },
+    {
+      "name": "timeColumn",
+      "description": "TimeColumn to use to group by time. If set to AUTO (the default value), the Pinot primary time column is used.",
+      "defaultValue": "AUTO",
+      "jsonType": "STRING"
+    }
+  ],
   "defaultProperties": {
-    "timezone": "UTC",
-    "timeColumn": "AUTO",
     "timeColumnFormat": "",
     "completenessDelay": "P0D",
     "mergeMaxGap": "",

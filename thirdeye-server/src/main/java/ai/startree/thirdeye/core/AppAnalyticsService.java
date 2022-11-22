@@ -81,7 +81,7 @@ public class AppAnalyticsService {
     metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
       @Override
       protected Double loadValue() {
-          return computeConfusionMatrixForAnomalies(null).getPrecision();
+        return computeConfusionMatrixForAnomalies(null).getPrecision();
       }
     });
     metricRegistry.register("anomalyResponseRate", new CachedGauge<Double>(1, TimeUnit.HOURS) {
@@ -151,7 +151,6 @@ public class AppAnalyticsService {
   }
 
   public AnomalyStatsApi computeAnomalyStats(final DaoFilter filter) {
-    // compute overall stats
     final List<AnomalyFeedback> allFeedbacks = filter == null
         ? anomalyFeedbacksSupplier.get()
         : getAnomalyFeedbacks(filter);

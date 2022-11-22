@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.template.TemplatePropertyMetadata;
 import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
 
@@ -116,7 +118,8 @@ public class AlertTemplateRenderer {
     templateWithAlertProperties.setName(null);
     final AlertDTO alertWithEnumProperties = new AlertDTO().setTemplate(templateWithAlertProperties)
         .setTemplateProperties(enumerationItemDTO.getParams());
-    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties, detectionInterval);
+    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties,
+        detectionInterval);
     templateWithEnumProperties.setId(templateId);
     templateWithEnumProperties.setName(templateName);
     return templateWithEnumProperties;
@@ -154,7 +157,15 @@ public class AlertTemplateRenderer {
       final Map<String, Object> templateProperties,
       final Interval detectionInterval,
       final String alertName) throws IOException, ClassNotFoundException {
-    final Map<String, Object> properties = optional(template.getDefaultProperties()).orElse(new HashMap<>());
+    final Map<String, Object> properties = new HashMap<>();
+    // legacy properties can be removed once all users have migrated their template to the new propertiesMetadata
+    final Map<String, Object> legacyDefaultProperties = optional(
+        template.getDefaultProperties()).orElse(new HashMap<>());
+    properties.putAll(legacyDefaultProperties);
+    final Map<String, Object> defaultProperties = defaultProperties(
+        template.getPropertiesMetadata());
+    properties.putAll(defaultProperties);
+
     if (templateProperties != null) {
       properties.putAll(templateProperties);
     }
@@ -171,5 +182,22 @@ public class AlertTemplateRenderer {
     }
 
     return StringTemplateUtils.applyContext(template, properties);
+  }
+
+  private @NonNull Map<String, Object> defaultProperties(
+      final @Nullable List<TemplatePropertyMetadata> propertiesMetadata) {
+    final HashMap<String, Object> res = new HashMap<>();
+    if (propertiesMetadata == null) {
+      return res;
+    }
+    for (final TemplatePropertyMetadata p : propertiesMetadata) {
+      if (p.isDefaultIsNull()) {
+        res.put(p.getName(), null);
+      } else if (p.getDefaultValue() != null) {
+        res.put(p.getName(), p.getDefaultValue());
+      }
+    }
+
+    return res;
   }
 }

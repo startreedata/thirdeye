@@ -25,11 +25,13 @@ import {
 import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     JSONEditorV1,
     PageContentsCardV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDatasources } from "../../rest/datasources/datasources.actions";
 import type { Datasource } from "../../rest/dto/datasource.interfaces";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
@@ -96,32 +98,38 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                     configuration section.
                 </Typography>
             </Box>
-            {/* // TODO: Remove if not needed */}
 
-            {datasourceGroups.map((datasourceGroup) => (
-                <Box key={datasourceGroup.key} px={2} py={1}>
-                    <FormControl component="fieldset">
-                        <FormLabel color="secondary" component="legend">
-                            {datasourceGroup.title}
-                        </FormLabel>
-                        <RadioGroup
-                            aria-label="Select Datasource"
-                            name="select-datasource"
-                            value={selectedDatasource}
-                            onChange={handleRadioChange}
-                        >
-                            {datasourceGroup.options.map((datasourceOption) => (
-                                <FormControlLabel
-                                    control={<Radio />}
-                                    key={datasourceOption.value}
-                                    label={datasourceOption.label}
-                                    value={datasourceOption.value.toString()}
-                                />
-                            ))}
-                        </RadioGroup>
-                    </FormControl>
-                </Box>
-            ))}
+            <LoadingErrorStateSwitch
+                isError={status === ActionStatus.Error}
+                isLoading={status === ActionStatus.Working}
+            >
+                {datasourceGroups.map((datasourceGroup) => (
+                    <Box key={datasourceGroup.key} px={2} py={1}>
+                        <FormControl component="fieldset">
+                            <FormLabel color="secondary" component="legend">
+                                {datasourceGroup.title}
+                            </FormLabel>
+                            <RadioGroup
+                                aria-label="Select Datasource"
+                                name="select-datasource"
+                                value={selectedDatasource}
+                                onChange={handleRadioChange}
+                            >
+                                {datasourceGroup.options.map(
+                                    (datasourceOption) => (
+                                        <FormControlLabel
+                                            control={<Radio />}
+                                            key={datasourceOption.value}
+                                            label={datasourceOption.label}
+                                            value={datasourceOption.value.toString()}
+                                        />
+                                    )
+                                )}
+                            </RadioGroup>
+                        </FormControl>
+                    </Box>
+                ))}
+            </LoadingErrorStateSwitch>
 
             {selectedDatasource === ADD_NEW_DATASOURCE ? (
                 <JSONEditorV1<Datasource>

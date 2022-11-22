@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import ai.startree.thirdeye.spi.template.TemplatePropertyMetadata;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,9 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   @Deprecated // use AlertMetadataApi
   private RcaMetadataApi rca;
   private AlertMetadataApi metadata;
+  @Deprecated
   private Map<String, @Nullable Object> defaultProperties;
+  private List<TemplatePropertyMetadata> propertiesMetadata;
 
   public Long getId() {
     return id;
@@ -126,13 +129,25 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
     return this;
   }
 
+  @Deprecated
   public Map<String, Object> getDefaultProperties() {
     return defaultProperties;
   }
 
+  @Deprecated
   public AlertTemplateApi setDefaultProperties(
       final Map<String, Object> defaultProperties) {
     this.defaultProperties = defaultProperties;
+    return this;
+  }
+
+  public List<TemplatePropertyMetadata> getPropertiesMetadata() {
+    return propertiesMetadata;
+  }
+
+  public AlertTemplateApi setPropertiesMetadata(
+      final List<TemplatePropertyMetadata> propertiesMetadata) {
+    this.propertiesMetadata = propertiesMetadata;
     return this;
   }
 }

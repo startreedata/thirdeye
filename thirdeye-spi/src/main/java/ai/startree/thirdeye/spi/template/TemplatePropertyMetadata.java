@@ -14,9 +14,12 @@
 package ai.startree.thirdeye.spi.template;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_NULL)
 public class TemplatePropertyMetadata {
 
   private String name;
@@ -32,6 +35,8 @@ public class TemplatePropertyMetadata {
 
   /**
    * Helps the UI build input fields.
+   * If minValue is set and maxValue is null, this means there is no maxValue (in effect
+   * Double.MAX_VALUE or Integer.MAX_VALUE) and vice versa.
    */
   private Number minValue;
   private Number maxValue;

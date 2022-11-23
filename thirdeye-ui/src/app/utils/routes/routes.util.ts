@@ -95,7 +95,7 @@ export const AppRouteRelative = {
     WELCOME_CREATE_ALERT: "create-alert",
     WELCOME_CREATE_ALERT_SELECT_TYPE: "select-type",
     WELCOME_CREATE_ALERT_SETUP_MONITORING: "setup-monitoring",
-};
+} as const;
 
 export const AppRoute = {
     BASE: "/",
@@ -504,12 +504,16 @@ export const getDataConfigurationCreatePath = (): string => {
 };
 
 export const getDataConfigurationCreateDatasetsPath = (
-    datasetId: number
+    datasourceName: string
 ): string => {
     let path: string = AppRoute.WELCOME_ONBOARD_DATASOURCE_DATASETS;
-    path = path.replace(PLACEHOLDER_ROUTE_ID, `${datasetId}`);
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${datasourceName}`);
 
     return path;
+};
+
+export const getWelcomeLandingPath = (): string => {
+    return AppRoute.WELCOME_LANDING;
 };
 
 export const getLoginPath = (): string => {

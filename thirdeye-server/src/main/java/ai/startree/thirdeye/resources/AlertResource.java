@@ -25,12 +25,15 @@ import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.UserApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -77,6 +80,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertCreater alertCreater;
   private final AlertDeleter alertDeleter;
   private final AlertEvaluator alertEvaluator;
+  private final AppAnalyticsService analyticsService;
   private final AlertInsightsProvider alertInsightsProvider;
 
   @Inject
@@ -85,11 +89,13 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertCreater alertCreater,
       final AlertDeleter alertDeleter,
       final AlertEvaluator alertEvaluator,
+      final AppAnalyticsService analyticsService,
       final AlertInsightsProvider alertInsightsProvider) {
     super(alertManager, ImmutableMap.of());
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertEvaluator = alertEvaluator;
+    this.analyticsService = analyticsService;
     this.alertInsightsProvider = alertInsightsProvider;
   }
 
@@ -256,5 +262,19 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       return currentMaximumPossibleEndTime;
     }
     return endTime;
+  }
+
+  @GET
+  @Timed
+  @Path("{id}/stats")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getAnalytics(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("id") final Long id
+  ) {
+    ensureExists(id);
+    final DaoFilter filter = new DaoFilter()
+        .setPredicate(Predicate.EQ("detectionConfigId", id));
+    return respondOk(analyticsService.computeAnomalyStats(filter));
   }
 }

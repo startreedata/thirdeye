@@ -35,10 +35,6 @@ public class TemplatePropertyMetadata {
    * Used to set a defaultValue to null. (defaultValue=null is interpreted as no defaultValue).
    */
   private boolean defaultIsNull = false;
-  /**
-   * If defaultValue is null and defaultIsNull is false, the UI can show this value as an example.
-   */
-  private Object exampleValue;
 
   /**
    * Helps the UI build input fields.
@@ -71,15 +67,6 @@ public class TemplatePropertyMetadata {
 
   public TemplatePropertyMetadata setDefaultValue(final Object defaultValue) {
     this.defaultValue = defaultValue;
-    return this;
-  }
-
-  public Object getExampleValue() {
-    return exampleValue;
-  }
-
-  public TemplatePropertyMetadata setExampleValue(final Object exampleValue) {
-    this.exampleValue = exampleValue;
     return this;
   }
 

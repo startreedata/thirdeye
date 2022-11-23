@@ -14,15 +14,36 @@
  */
 
 import { Box, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WelcomeStepCard } from "../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
 import { PageContentsCardV1, PageV1 } from "../../platform/components";
 import { DimensionV1 } from "../../platform/utils";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { getDataConfigurationCreatePath } from "../../utils/routes/routes.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
+    const [status, setStatus] = useState<
+        typeof ActionStatus[keyof typeof ActionStatus]
+    >(ActionStatus.Initial);
+    const [hasDatasets, setHasDatasets] = useState<boolean>(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setStatus(ActionStatus.Working);
+        getAllDatasets()
+            .then((datasets) => {
+                if (datasets && datasets.length > 0) {
+                    setHasDatasets(true);
+                }
+                setStatus(ActionStatus.Done);
+            })
+            .catch(() => {
+                setStatus(ActionStatus.Error);
+            });
+    }, []);
 
     return (
         <PageV1>
@@ -80,29 +101,36 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                             </Typography>
                         </Box>
 
-                        <Box
-                            display="flex"
-                            flexDirection="row"
-                            gridGap={24}
-                            justifyContent="center"
-                            py={2}
+                        <LoadingErrorStateSwitch
+                            isError={status === ActionStatus.Error}
+                            isLoading={status === ActionStatus.Working}
                         >
-                            <WelcomeStepCard
-                                ctaText="Configure data"
-                                subtitle="Connect to StarTree cloud data or add your own Pinot datasource"
-                                title="Review and configure data"
-                                onClickCta={() => {
-                                    navigate(getDataConfigurationCreatePath());
-                                }}
-                            />
-                            <WelcomeStepCard
-                                disabled
-                                // TODO: Add condition for keeping this disabled
-                                ctaText="Create alert"
-                                subtitle="Explore StarTree ThirdEye in one click"
-                                title="Create my first alert"
-                            />
-                        </Box>
+                            <Box
+                                display="flex"
+                                flexDirection="row"
+                                gridGap={24}
+                                justifyContent="center"
+                                py={2}
+                            >
+                                <WelcomeStepCard
+                                    ctaContent="Configure data"
+                                    isComplete={hasDatasets}
+                                    subtitle="Connect to StarTree cloud data or add your own Pinot datasource"
+                                    title="Review and configure data"
+                                    onClickCta={() => {
+                                        navigate(
+                                            getDataConfigurationCreatePath()
+                                        );
+                                    }}
+                                />
+                                <WelcomeStepCard
+                                    ctaContent="Create alert"
+                                    disabled={!hasDatasets}
+                                    subtitle="Explore StarTree ThirdEye in one click"
+                                    title="Create my first alert"
+                                />
+                            </Box>
+                        </LoadingErrorStateSwitch>
 
                         <Box clone pb={3} pt={2} textAlign="center">
                             <Typography color="secondary" variant="body2">

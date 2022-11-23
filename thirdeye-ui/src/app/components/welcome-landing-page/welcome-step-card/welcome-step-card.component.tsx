@@ -14,32 +14,34 @@
  */
 
 import { Box, Button, Typography } from "@material-ui/core";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import React, { FunctionComponent } from "react";
 import { DimensionV1 } from "../../../platform/utils";
 import type { WelcomeStepCardProps } from "./welcome-step-card.interfaces";
+import { useWelcomeStepCardStyles } from "./welcome-step.card.styles";
 
 export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
     title,
     subtitle,
-    ctaText,
+    ctaContent,
     disabled = false,
+    isComplete = false,
     onClickCta = () => null,
 }) => {
+    const styles = useWelcomeStepCardStyles({ disabled });
+
     return (
         <Box
             alignItems="center"
             border="1px solid"
             borderColor="secondary.light"
             borderRadius={DimensionV1.BorderRadiusDefault}
+            className={styles.box}
             display="flex"
             flexDirection="column"
             pb={2}
             pt={4}
             px={4}
-            style={{
-                // TODO: Move to styles
-                opacity: disabled ? 0.6 : 1,
-            }}
             textAlign="center"
             width={400}
         >
@@ -55,14 +57,21 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
                 <Typography variant="body2">{subtitle}</Typography>
             </Box>
             <Box clone width="80%">
-                <Button
-                    color={disabled ? "default" : "primary"}
-                    disabled={disabled}
-                    variant={disabled ? "outlined" : "contained"}
-                    onClick={onClickCta}
-                >
-                    {ctaText}
-                </Button>
+                {isComplete ? (
+                    <CheckCircleIcon
+                        className={styles.tickIcon}
+                        fontSize="large"
+                    />
+                ) : (
+                    <Button
+                        color={disabled ? "default" : "primary"}
+                        disabled={disabled}
+                        variant={disabled ? "outlined" : "contained"}
+                        onClick={onClickCta}
+                    >
+                        {ctaContent}
+                    </Button>
+                )}
             </Box>
         </Box>
     );

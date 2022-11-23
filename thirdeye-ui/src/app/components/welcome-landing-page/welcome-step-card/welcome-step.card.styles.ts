@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { makeStyles } from "@material-ui/core";
 
-export interface WelcomeStepCardProps {
-    title: string;
-    subtitle: string;
-    ctaContent: string | JSX.Element;
-    onClickCta?: () => void;
-    disabled?: boolean;
-    isComplete?: boolean;
-}
+export const useWelcomeStepCardStyles = makeStyles((theme) => ({
+    box: ({ disabled = false }: { disabled: boolean }) => ({
+        opacity: disabled ? 0.6 : 1,
+    }),
+    tickIcon: {
+        color: theme.palette.success.light,
+    },
+}));

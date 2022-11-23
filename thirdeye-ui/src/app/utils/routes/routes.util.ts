@@ -516,6 +516,10 @@ export const getWelcomeLandingPath = (): string => {
     return AppRoute.WELCOME_LANDING;
 };
 
+export const getWelcomeCreateAlert = (): string => {
+    return AppRoute.WELCOME_CREATE_ALERT;
+};
+
 export const getLoginPath = (): string => {
     return AppRoute.LOGIN;
 };

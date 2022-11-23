@@ -14,7 +14,9 @@
  */
 
 import { Box, Grid, Typography } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WelcomeStepCard } from "../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
@@ -22,7 +24,10 @@ import { PageContentsCardV1, PageV1 } from "../../platform/components";
 import { DimensionV1 } from "../../platform/utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
-import { getDataConfigurationCreatePath } from "../../utils/routes/routes.util";
+import {
+    getDataConfigurationCreatePath,
+    getWelcomeCreateAlert,
+} from "../../utils/routes/routes.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const [status, setStatus] = useState<
@@ -30,6 +35,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
     >(ActionStatus.Initial);
     const [hasDatasets, setHasDatasets] = useState<boolean>(false);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         setStatus(ActionStatus.Working);
@@ -44,6 +50,18 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                 setStatus(ActionStatus.Error);
             });
     }, []);
+
+    const getParsedMarkup = (plainText: string): JSX.Element => {
+        return plainText.split("**").reduce<JSX.Element>(
+            (sum, val, i) => (
+                <>
+                    {sum}
+                    {i % 2 === 0 ? val : <strong>{val}</strong>}
+                </>
+            ),
+            <></>
+        );
+    };
 
     return (
         <PageV1>
@@ -60,22 +78,22 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                             <Grid item xs={8}>
                                 <Box clone fontWeight="500" pt={2}>
                                     <Typography variant="body1">
-                                        Welcome to ThirdEye
+                                        {t("message.welcome-to-thirdeye")}
                                     </Typography>
                                 </Box>
                                 <Box py={2}>
                                     <Typography color="primary" variant="h4">
-                                        Let&apos;s create your first setup
+                                        {t(
+                                            "message.lets-create-your-first-setup"
+                                        )}
                                     </Typography>
                                 </Box>
                                 <Typography variant="body1">
-                                    By creating an <strong>Alert</strong>,
-                                    you&apos;ll be able to&nbsp;
-                                    <strong>Monitor your KPIs</strong> and&nbsp;
-                                    <strong>Anomalies</strong> will help you to
-                                    find&nbsp;
-                                    <strong>Outliers in the KPIs</strong>&nbsp;
-                                    and analyze the Root Cause Analysis.
+                                    {getParsedMarkup(
+                                        t(
+                                            "message.by-creating-an-alert-message"
+                                        )
+                                    )}
                                 </Typography>
                             </Grid>
                             <Grid item xs={4}>
@@ -97,7 +115,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                         </Grid>
                         <Box clone pb={2} pt={4} textAlign="center">
                             <Typography variant="h5">
-                                Complete the following steps
+                                {t("message.complete-the-following-steps")}
                             </Typography>
                         </Box>
 
@@ -113,10 +131,16 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                 py={2}
                             >
                                 <WelcomeStepCard
-                                    ctaContent="Configure data"
+                                    ctaContent={t("message.configure-entity", {
+                                        entity: t("label.data"),
+                                    })}
                                     isComplete={hasDatasets}
-                                    subtitle="Connect to StarTree cloud data or add your own Pinot datasource"
-                                    title="Review and configure data"
+                                    subtitle={t(
+                                        "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
+                                    )}
+                                    title={t(
+                                        "message.review-and-configure-data"
+                                    )}
                                     onClickCta={() => {
                                         navigate(
                                             getDataConfigurationCreatePath()
@@ -124,18 +148,30 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                     }}
                                 />
                                 <WelcomeStepCard
-                                    ctaContent="Create alert"
+                                    ctaContent={t("message.create-entity", {
+                                        entity: t("label.alert"),
+                                    })}
                                     disabled={!hasDatasets}
-                                    subtitle="Explore StarTree ThirdEye in one click"
-                                    title="Create my first alert"
+                                    subtitle={t(
+                                        "message.explore-startree-thirdeye-in-one-click"
+                                    )}
+                                    title={capitalize(
+                                        t("message.create-my-first-entity", {
+                                            entity: t("label.alert"),
+                                        })
+                                    )}
+                                    onClickCta={() => {
+                                        navigate(getWelcomeCreateAlert());
+                                    }}
                                 />
                             </Box>
                         </LoadingErrorStateSwitch>
 
                         <Box clone pb={3} pt={2} textAlign="center">
                             <Typography color="secondary" variant="body2">
-                                You can always change your setup in the
-                                configuration section.
+                                {t(
+                                    "message.you-can-always-change-your-setup-in-the-configuration-section"
+                                )}
                             </Typography>
                         </Box>
                     </Box>

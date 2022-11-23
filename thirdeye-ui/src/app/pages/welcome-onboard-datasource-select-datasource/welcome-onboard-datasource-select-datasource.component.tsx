@@ -22,6 +22,7 @@ import {
     RadioGroup,
     Typography,
 } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
@@ -70,7 +71,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
         useGetDatasources();
 
     const datasourceGroups = useMemo<DatasourceOptionGroups[]>(
-        () => getDatasourceGroups(datasources || []),
+        () => getDatasourceGroups(datasources || [], t),
         [datasources]
     );
 
@@ -92,10 +93,18 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     return (
         <PageContentsCardV1>
             <Box px={2} py={2}>
-                <Typography variant="h5">Select datasource</Typography>
+                <Typography variant="h5">
+                    {t("message.select-entity", {
+                        entity: t("label.datasource"),
+                    })}
+                </Typography>
                 <Typography variant="body2">
-                    You can always add, remove or change datasources in the
-                    configuration section.
+                    {capitalize(
+                        t(
+                            "message.you-can-always-add-remove-or-change-entity-in-the-configuration-section",
+                            { entity: t("label.datasource") }
+                        )
+                    )}
                 </Typography>
             </Box>
 
@@ -110,7 +119,9 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                                 {datasourceGroup.title}
                             </FormLabel>
                             <RadioGroup
-                                aria-label="Select Datasource"
+                                aria-label={t("message.select-entity", {
+                                    entity: t("label.datasource"),
+                                })}
                                 name="select-datasource"
                                 value={selectedDatasourceName}
                                 onChange={handleRadioChange}

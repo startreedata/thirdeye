@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import type { DefaultNamespace, UseTranslationResponse } from "react-i18next";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import type {
     DatasourceOption,
@@ -23,7 +24,8 @@ export const OTHER_SOURCES = "other-sources";
 export const ADD_NEW_DATASOURCE = "##__add-new-datasource__##";
 
 export const getDatasources = (
-    datasources: Datasource[] = []
+    datasources: Datasource[] = [],
+    t: UseTranslationResponse<DefaultNamespace>["t"]
 ): Readonly<DatasourceOption[]> => {
     return [
         ...((datasources || []).map((d) => ({
@@ -31,20 +33,8 @@ export const getDatasources = (
             value: d.name,
             sourceType: STARTREE_CLOUD,
         })) as DatasourceOption[]),
-
-        // TODO: Remove
-        // {
-        //     label: "BYOC_production_ENV",
-        //     value: "BYOC_production_ENV",
-        //     sourceType: "startree-cloud",
-        // },
-        // {
-        //     label: "sales_Pinot_Table",
-        //     value: "sales_Pinot_Table",
-        //     sourceType: "startree-cloud",
-        // },
         {
-            label: "Add new Pinot datasource",
+            label: t("message.add-new-pinot-datasource"),
             value: ADD_NEW_DATASOURCE,
             sourceType: OTHER_SOURCES,
         },
@@ -52,21 +42,22 @@ export const getDatasources = (
 };
 
 export const getDatasourceGroups = (
-    datasources: Datasource[] = []
+    datasources: Datasource[] = [],
+    t: UseTranslationResponse<DefaultNamespace>["t"]
 ): DatasourceOptionGroups[] => {
-    const DATASOURCES = getDatasources(datasources || []);
+    const DATASOURCES = getDatasources(datasources || [], t);
 
     return [
         {
             key: "cloud",
-            title: "StarTree Cloud sources",
+            title: t("message.startree-cloud-sources"),
             options: DATASOURCES.filter(
                 ({ sourceType }) => sourceType === "startree-cloud"
             ),
         },
         {
             key: "other",
-            title: "Other sources",
+            title: t("message.other-sources"),
             options: DATASOURCES.filter(
                 ({ sourceType }) => sourceType === "other-sources"
             ),

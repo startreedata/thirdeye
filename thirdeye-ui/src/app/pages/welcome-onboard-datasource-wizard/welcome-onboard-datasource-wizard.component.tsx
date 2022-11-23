@@ -316,8 +316,7 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                     <PageContentsCardV1>
                         <Box pb={0} pt={2} px={2}>
                             <Typography variant="h5">
-                                {/* {t("message.complete-the-following-steps")} */}
-                                Complete the following steps
+                                {t("message.complete-the-following-steps")}
                             </Typography>
                             <StepperV1
                                 activeStep={activeStep}

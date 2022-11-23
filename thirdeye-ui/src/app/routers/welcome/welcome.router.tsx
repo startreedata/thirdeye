@@ -42,16 +42,6 @@ const WelcomeSelectDatasets = lazy(() =>
     ).then((module) => ({ default: module.WelcomeSelectDatasets }))
 );
 
-// * Just setting up the routing, this will be removed by the next commit
-const DummyPage: FunctionComponent = () => {
-    return (
-        <div>
-            I am sample page serving the url{" "}
-            <kbd>{window.location.pathname}</kbd>
-        </div>
-    );
-};
-
 export const WelcomeRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
@@ -143,13 +133,13 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                     {/* Welcome create alert select type path */}
                     <Route
-                        element={<DummyPage />}
+                        // TODO: Add element prop
                         path={AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}
                     />
 
                     {/* Welcome create alert setup monitoring path */}
                     <Route
-                        element={<DummyPage />}
+                        // TODO: Add element prop
                         path={
                             AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
                         }

@@ -17,11 +17,9 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Datasource } from "../../rest/dto/datasource.interfaces";
 import type { ADD_NEW_DATASOURCE } from "./welcome-onboard-datasource-select-datasource.utils";
 
-// TODO: Remove if not needed
 export interface DatasourceOption {
     label: string;
     value: string;
-    // TODO: Review
     sourceType: "startree-cloud" | "other-sources";
 }
 

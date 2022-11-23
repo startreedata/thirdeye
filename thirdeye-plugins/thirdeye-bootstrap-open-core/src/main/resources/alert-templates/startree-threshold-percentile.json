@@ -172,7 +172,7 @@
     "mergeMaxDuration": "${mergeMaxDuration}",
     "granularity": "${monitoringGranularity}"
   },
-  "propertiesMetadata": [
+  "properties": [
     {
       "name": "timezone",
       "description": "Timezone used to group by time.",

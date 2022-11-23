@@ -35,7 +35,7 @@ public class AlertTemplateDTO extends AbstractDTO {
   private AlertMetadataDTO metadata;
   @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
-  private List<TemplatePropertyMetadata> propertiesMetadata;
+  private List<TemplatePropertyMetadata> properties;
 
   public String getName() {
     return name;
@@ -135,13 +135,13 @@ public class AlertTemplateDTO extends AbstractDTO {
     return this;
   }
 
-  public List<TemplatePropertyMetadata> getPropertiesMetadata() {
-    return propertiesMetadata;
+  public List<TemplatePropertyMetadata> getProperties() {
+    return properties;
   }
 
-  public AlertTemplateDTO setPropertiesMetadata(
-      final List<TemplatePropertyMetadata> propertiesMetadata) {
-    this.propertiesMetadata = propertiesMetadata;
+  public AlertTemplateDTO setProperties(
+      final List<TemplatePropertyMetadata> properties) {
+    this.properties = properties;
     return this;
   }
 }

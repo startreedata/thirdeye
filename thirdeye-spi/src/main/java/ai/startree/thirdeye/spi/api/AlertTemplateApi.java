@@ -34,7 +34,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   private AlertMetadataApi metadata;
   @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
-  private List<TemplatePropertyMetadata> propertiesMetadata;
+  private List<TemplatePropertyMetadata> properties;
 
   public Long getId() {
     return id;
@@ -141,13 +141,13 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
     return this;
   }
 
-  public List<TemplatePropertyMetadata> getPropertiesMetadata() {
-    return propertiesMetadata;
+  public List<TemplatePropertyMetadata> getProperties() {
+    return properties;
   }
 
-  public AlertTemplateApi setPropertiesMetadata(
-      final List<TemplatePropertyMetadata> propertiesMetadata) {
-    this.propertiesMetadata = propertiesMetadata;
+  public AlertTemplateApi setProperties(
+      final List<TemplatePropertyMetadata> properties) {
+    this.properties = properties;
     return this;
   }
 }

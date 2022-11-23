@@ -162,8 +162,7 @@ public class AlertTemplateRenderer {
     final Map<String, Object> legacyDefaultProperties = optional(
         template.getDefaultProperties()).orElse(new HashMap<>());
     properties.putAll(legacyDefaultProperties);
-    final Map<String, Object> defaultProperties = defaultProperties(
-        template.getPropertiesMetadata());
+    final Map<String, Object> defaultProperties = defaultProperties(template.getProperties());
     properties.putAll(defaultProperties);
 
     if (templateProperties != null) {

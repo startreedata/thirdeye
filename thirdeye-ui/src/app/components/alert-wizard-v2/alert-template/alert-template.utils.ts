@@ -107,7 +107,7 @@ export function createNewStartingAlert(): EditableAlert {
             dataset: "sample_dataset",
             timeColumn: "report_date",
             timeColumnFormat: "EPOCH",
-            aggregationFunction: "sum",
+            aggregationFunction: "SUM",
             seasonalityPeriod: "P7D",
             lookback: "P90D",
             monitoringGranularity: "P1D",

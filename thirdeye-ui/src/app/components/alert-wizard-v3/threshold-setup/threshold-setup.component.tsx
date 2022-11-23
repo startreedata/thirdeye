@@ -15,8 +15,8 @@
 import {
     Box,
     Button,
+    Divider,
     Grid,
-    Slider,
     TextField,
     Typography,
 } from "@material-ui/core";
@@ -49,12 +49,17 @@ import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.st
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { PreviewChart } from "../preview-chart/preview-chart.component";
+import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
-import { generateTemplateProperties } from "./threshold-setup.utils";
+import {
+    generateTemplateProperties,
+    resetSelectedMetrics,
+} from "./threshold-setup.utils";
 
 export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,
     alert,
+    algorithmOptionConfig,
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
@@ -112,6 +117,13 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
         );
 
         setDatasetsInfo(datasetInfo);
+        resetSelectedMetrics(
+            datasetInfo,
+            alert,
+            setSelectedTable,
+            setSelectedMetric,
+            setSelectedAggregationFunction
+        );
 
         setIsPinotInfraLoading(false);
     }, [metrics, datasets, datasources]);
@@ -138,32 +150,14 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     const handleAdvancedEditorOk = (configToReplace: EditableAlert): void => {
         onAlertPropertyChange(configToReplace, true);
 
-        const newlySelectedDataset = datasetsInfo?.find((candidate) => {
-            return (
-                candidate.dataset.name ===
-                    configToReplace.templateProperties?.dataset &&
-                candidate.dataset.dataSource.name ===
-                    configToReplace.templateProperties?.dataSource
+        datasetsInfo &&
+            resetSelectedMetrics(
+                datasetsInfo,
+                configToReplace,
+                setSelectedTable,
+                setSelectedMetric,
+                setSelectedAggregationFunction
             );
-        });
-
-        setSelectedTable(newlySelectedDataset || null);
-
-        if (newlySelectedDataset) {
-            setSelectedMetric(
-                (configToReplace.templateProperties
-                    ?.aggregationColumn as string) || null
-            );
-        } else {
-            setSelectedMetric(null);
-        }
-
-        if (configToReplace.templateProperties?.aggregationFunction) {
-            setSelectedAggregationFunction(
-                configToReplace.templateProperties
-                    ?.aggregationFunction as MetricAggFunction
-            );
-        }
     };
 
     const handleAdvancedEditorBtnClick = useCallback((): void => {
@@ -234,7 +228,11 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                         >
                             <Grid item>
                                 <Typography variant="h5">
-                                    {t("label.threshold-setup")}
+                                    {algorithmOptionConfig &&
+                                        t("label.entity-setup", {
+                                            entity: algorithmOptionConfig
+                                                .algorithmOption.title,
+                                        })}
                                 </Typography>
                                 <Typography variant="body2">
                                     {t("message.threshold-setup-description")}
@@ -404,29 +402,38 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                         label={`${t("label.aggregation-function")}`}
                     />
 
-                    <InputSection
-                        inputComponent={
-                            <Slider
-                                defaultValue={50}
-                                marks={[
-                                    {
-                                        value: 0,
-                                        label: "Low",
-                                    },
-                                    {
-                                        value: 50,
-                                        label: "Medium",
-                                    },
-                                    {
-                                        value: 100,
-                                        label: "High",
-                                    },
-                                ]}
-                                step={1}
-                            />
-                        }
-                        label={t("label.anomaly-sensitivity")}
-                    />
+                    {algorithmOptionConfig &&
+                        algorithmOptionConfig.algorithmOption
+                            .inputFieldConfigs && (
+                            <Grid item xs={12}>
+                                <Box marginBottom={1} padding={1}>
+                                    <Divider />
+                                </Box>
+                            </Grid>
+                        )}
+                    {algorithmOptionConfig &&
+                        algorithmOptionConfig.algorithmOption
+                            .inputFieldConfigs &&
+                        algorithmOptionConfig.algorithmOption.inputFieldConfigs.map(
+                            (config) => {
+                                return (
+                                    <InputSection
+                                        helperLabel={config.description}
+                                        inputComponent={
+                                            <SpecificPropertiesRenderer
+                                                alert={alert}
+                                                inputFieldConfig={config}
+                                                onAlertPropertyChange={
+                                                    onAlertPropertyChange
+                                                }
+                                            />
+                                        }
+                                        key={config.templatePropertyName}
+                                        label={config.label}
+                                    />
+                                );
+                            }
+                        )}
                 </Grid>
             </LoadingErrorStateSwitch>
         </PageContentsCardV1>

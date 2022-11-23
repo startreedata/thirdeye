@@ -17,6 +17,7 @@ import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlgorithmSelection } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
+import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { SampleAlertSelection } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
 import { PageContentsGridV1 } from "../../../../platform/components";
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
@@ -26,10 +27,15 @@ export const SelectTypePage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const { handleAlertPropertyChange } = useOutletContext<{
-        alert: EditableAlert;
-        handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
-    }>();
+    const { handleAlertPropertyChange, simpleOptions, advancedOptions } =
+        useOutletContext<{
+            alert: EditableAlert;
+            handleAlertPropertyChange: (
+                contents: Partial<EditableAlert>
+            ) => void;
+            simpleOptions: AvailableAlgorithmOption[];
+            advancedOptions: AvailableAlgorithmOption[];
+        }>();
 
     const handleAlgorithmSelection = (
         isDimensionExploration: boolean
@@ -64,6 +70,8 @@ export const SelectTypePage: FunctionComponent = () => {
             </Grid>
             <Grid item xs={12}>
                 <AlgorithmSelection
+                    advancedOptions={advancedOptions}
+                    simpleOptions={simpleOptions}
                     onAlertPropertyChange={handleAlertPropertyChange}
                     onSelectionComplete={handleAlgorithmSelection}
                 />

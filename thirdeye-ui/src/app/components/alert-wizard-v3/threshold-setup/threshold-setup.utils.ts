@@ -25,8 +25,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
+import { Dispatch, SetStateAction } from "react";
+import {
+    EditableAlert,
+    TemplatePropertiesObject,
+} from "../../../rest/dto/alert.interfaces";
 import { Dataset } from "../../../rest/dto/dataset.interfaces";
+import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
+import { DatasetInfo } from "../../../utils/datasources/datasources.util";
 
 export function generateTemplateProperties(
     metric: string,
@@ -47,4 +53,39 @@ export function generateTemplateProperties(
     }
 
     return templateProperties;
+}
+
+export function resetSelectedMetrics(
+    datasetsInfo: DatasetInfo[],
+    alertConfiguration: EditableAlert,
+    setSelectedTable: Dispatch<SetStateAction<DatasetInfo | null>>,
+    setSelectedMetric: Dispatch<SetStateAction<string | null>>,
+    setSelectedAggregationFunction: Dispatch<SetStateAction<MetricAggFunction>>
+): void {
+    const newlySelectedDataset = datasetsInfo.find((candidate) => {
+        return (
+            candidate.dataset.name ===
+                alertConfiguration.templateProperties?.dataset &&
+            candidate.dataset.dataSource.name ===
+                alertConfiguration.templateProperties?.dataSource
+        );
+    });
+
+    setSelectedTable(newlySelectedDataset || null);
+
+    if (newlySelectedDataset) {
+        setSelectedMetric(
+            (alertConfiguration.templateProperties
+                ?.aggregationColumn as string) || null
+        );
+    } else {
+        setSelectedMetric(null);
+    }
+
+    if (alertConfiguration.templateProperties?.aggregationFunction) {
+        setSelectedAggregationFunction(
+            alertConfiguration.templateProperties
+                .aggregationFunction as MetricAggFunction
+        );
+    }
 }

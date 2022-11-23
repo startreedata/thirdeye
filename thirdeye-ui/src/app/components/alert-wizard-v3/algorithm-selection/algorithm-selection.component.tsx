@@ -13,7 +13,7 @@
  * the License.
  */
 import { Button, CardActions, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { AlgorithmOptionCard } from "./algorithm-option-card/algorithm-option-card.component";
@@ -21,16 +21,14 @@ import {
     AlgorithmOption,
     AlgorithmSelectionProps,
 } from "./algorithm-selection.interfaces";
-import { generateOptions } from "./algorithm-selection.utils";
 
 export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
     onAlertPropertyChange,
     onSelectionComplete,
+    simpleOptions,
+    advancedOptions,
 }) => {
     const { t } = useTranslation();
-    const [simpleOptions, advancedOptions] = useMemo(() => {
-        return generateOptions(t);
-    }, []);
 
     const handleAlgorithmClick = (
         algorithmOption: AlgorithmOption,
@@ -72,11 +70,13 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                             return (
                                 <Grid
                                     item
-                                    key={option.alertTemplate}
+                                    key={option.algorithmOption.alertTemplate}
                                     sm={3}
                                     xs={12}
                                 >
-                                    <AlgorithmOptionCard option={option}>
+                                    <AlgorithmOptionCard
+                                        option={option.algorithmOption}
+                                    >
                                         <CardActions>
                                             <Grid
                                                 container
@@ -86,10 +86,13 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                                                 <Grid item md sm={12} xs={12}>
                                                     <Button
                                                         fullWidth
+                                                        disabled={
+                                                            !option.hasAlertTemplate
+                                                        }
                                                         size="small"
                                                         onClick={() =>
                                                             handleAlgorithmClick(
-                                                                option,
+                                                                option.algorithmOption,
                                                                 false
                                                             )
                                                         }
@@ -100,10 +103,13 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                                                 <Grid item md sm={12} xs={12}>
                                                     <Button
                                                         fullWidth
+                                                        disabled={
+                                                            !option.hasMultidimension
+                                                        }
                                                         size="small"
                                                         onClick={() =>
                                                             handleAlgorithmClick(
-                                                                option,
+                                                                option.algorithmOption,
                                                                 true
                                                             )
                                                         }
@@ -139,11 +145,13 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                             return (
                                 <Grid
                                     item
-                                    key={option.alertTemplate}
+                                    key={option.algorithmOption.alertTemplate}
                                     sm={3}
                                     xs={12}
                                 >
-                                    <AlgorithmOptionCard option={option}>
+                                    <AlgorithmOptionCard
+                                        option={option.algorithmOption}
+                                    >
                                         <CardActions>
                                             <Grid
                                                 container
@@ -153,10 +161,13 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                                                 <Grid item md sm={12} xs={12}>
                                                     <Button
                                                         fullWidth
+                                                        disabled={
+                                                            !option.hasAlertTemplate
+                                                        }
                                                         size="small"
                                                         onClick={() =>
                                                             handleAlgorithmClick(
-                                                                option,
+                                                                option.algorithmOption,
                                                                 false
                                                             )
                                                         }
@@ -167,10 +178,13 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                                                 <Grid item md sm={12} xs={12}>
                                                     <Button
                                                         fullWidth
+                                                        disabled={
+                                                            !option.hasMultidimension
+                                                        }
                                                         size="small"
                                                         onClick={() =>
                                                             handleAlgorithmClick(
-                                                                option,
+                                                                option.algorithmOption,
                                                                 true
                                                             )
                                                         }

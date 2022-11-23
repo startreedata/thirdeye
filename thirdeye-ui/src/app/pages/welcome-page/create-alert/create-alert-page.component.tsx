@@ -23,13 +23,17 @@ import {
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
 import { PageHeader } from "../../../components/page-header/page-header.component";
+import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     StepperV1,
 } from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { handleAlertPropertyChangeGenerator } from "../../../utils/anomalies/anomalies.util";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
@@ -52,6 +56,24 @@ const STEPS = [
 export const CreateAlertPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
+
+    const {
+        alertTemplates,
+        getAlertTemplates,
+        status: alertTemplatesRequestStatus,
+    } = useGetAlertTemplates();
+
+    // Ensure to filter for what is available on the server
+    const [simpleOptions, advancedOptions] = useMemo(() => {
+        if (!alertTemplates) {
+            return [[], []];
+        }
+        const availableTemplateNames = alertTemplates.map(
+            (alertTemplate) => alertTemplate.name
+        );
+
+        return generateAvailableAlgorithmOptions(t, availableTemplateNames);
+    }, [alertTemplates]);
 
     const [alert, setAlert] = useState<EditableAlert>(() =>
         createNewStartingAlert()
@@ -79,6 +101,21 @@ export const CreateAlertPage: FunctionComponent = () => {
 
         return activeStepDefinition.subPath;
     }, [pathname]);
+
+    const selectedAlgorithmOption = useMemo(() => {
+        return [...simpleOptions, ...advancedOptions].find(
+            (c) =>
+                c.algorithmOption.alertTemplate === alert.template?.name ||
+                c.algorithmOption.alertTemplateForPercentile ===
+                    alert.template?.name ||
+                c.algorithmOption.alertTemplateForMultidimension ===
+                    alert.template?.name
+        );
+    }, [alert, simpleOptions, advancedOptions]);
+
+    useEffect(() => {
+        getAlertTemplates();
+    }, []);
 
     useEffect(() => {
         console.log(alert);
@@ -115,7 +152,20 @@ export const CreateAlertPage: FunctionComponent = () => {
                 </Grid>
             </PageContentsGridV1>
 
-            <Outlet context={{ alert, handleAlertPropertyChange }} />
+            <LoadingErrorStateSwitch
+                isError={false}
+                isLoading={alertTemplatesRequestStatus === ActionStatus.Working}
+            >
+                <Outlet
+                    context={{
+                        alert,
+                        handleAlertPropertyChange,
+                        simpleOptions,
+                        advancedOptions,
+                        selectedAlgorithmOption,
+                    }}
+                />
+            </LoadingErrorStateSwitch>
         </PageV1>
     );
 };

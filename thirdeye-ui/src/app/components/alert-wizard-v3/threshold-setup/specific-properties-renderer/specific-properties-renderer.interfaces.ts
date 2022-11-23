@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
-import { AvailableAlgorithmOption } from "../algorithm-selection/algorithm-selection.interfaces";
+import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
+import { AlgorithmOptionInputFieldConfig } from "../../algorithm-selection/algorithm-selection.interfaces";
 
-export interface ThresholdSetupProps {
+export interface SpecificPropertiesRendererProps {
+    inputFieldConfig: AlgorithmOptionInputFieldConfig;
     alert: EditableAlert;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean
     ) => void;
-    algorithmOptionConfig: AvailableAlgorithmOption | undefined;
 }

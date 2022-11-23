@@ -17,6 +17,24 @@ import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 export interface AlgorithmSelectionProps {
     onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
     onSelectionComplete: (isDimensionExploration: boolean) => void;
+    simpleOptions: AvailableAlgorithmOption[];
+    advancedOptions: AvailableAlgorithmOption[];
+}
+
+export interface AlgorithmOptionInputFieldConfig {
+    label: string;
+    description: string;
+    templatePropertyName: string;
+    type: string;
+    min?: number;
+    max?: number;
+}
+
+export interface SliderAlgorithmOptionInputFieldConfig
+    extends AlgorithmOptionInputFieldConfig {
+    type: "slider";
+    min: number;
+    max: number;
 }
 
 export interface AlgorithmOption {
@@ -25,4 +43,15 @@ export interface AlgorithmOption {
     alertTemplate: string;
     alertTemplateForMultidimension: string;
     alertTemplateForPercentile: string;
+    inputFieldConfigs?: (
+        | AlgorithmOptionInputFieldConfig
+        | SliderAlgorithmOptionInputFieldConfig
+    )[];
+}
+
+export interface AvailableAlgorithmOption {
+    algorithmOption: AlgorithmOption;
+    hasAlertTemplate: boolean;
+    hasPercentile: boolean;
+    hasMultidimension: boolean;
 }

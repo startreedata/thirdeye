@@ -20,6 +20,7 @@ import {
     useNavigate,
     useOutletContext,
 } from "react-router-dom";
+import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { ThresholdSetup } from "../../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
 import {
     PageContentsCardV1,
@@ -32,13 +33,15 @@ export const SetupMonitoringPage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const { alert, handleAlertPropertyChange } = useOutletContext<{
-        alert: EditableAlert;
-        handleAlertPropertyChange: (
-            contents: Partial<EditableAlert>,
-            isTotalChange?: boolean
-        ) => void;
-    }>();
+    const { alert, handleAlertPropertyChange, selectedAlgorithmOption } =
+        useOutletContext<{
+            alert: EditableAlert;
+            handleAlertPropertyChange: (
+                contents: Partial<EditableAlert>,
+                isTotalChange?: boolean
+            ) => void;
+            selectedAlgorithmOption: AvailableAlgorithmOption;
+        }>();
 
     useEffect(() => {
         // On initial render, ensure there is already an alert template selected
@@ -61,6 +64,7 @@ export const SetupMonitoringPage: FunctionComponent = () => {
                 <Grid item xs={12}>
                     <ThresholdSetup
                         alert={alert}
+                        algorithmOptionConfig={selectedAlgorithmOption}
                         onAlertPropertyChange={handleAlertPropertyChange}
                     />
                 </Grid>

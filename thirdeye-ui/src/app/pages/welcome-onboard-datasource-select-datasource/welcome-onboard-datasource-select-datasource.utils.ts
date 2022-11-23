@@ -20,7 +20,7 @@ import type {
 
 export const STARTREE_CLOUD = "startree-cloud";
 export const OTHER_SOURCES = "other-sources";
-export const ADD_NEW_DATASOURCE = "add-new-datasource";
+export const ADD_NEW_DATASOURCE = "##__add-new-datasource__##";
 
 export const getDatasources = (
     datasources: Datasource[] = []
@@ -28,7 +28,7 @@ export const getDatasources = (
     return [
         ...((datasources || []).map((d) => ({
             label: d.name,
-            value: d.id,
+            value: d.name,
             sourceType: STARTREE_CLOUD,
         })) as DatasourceOption[]),
 

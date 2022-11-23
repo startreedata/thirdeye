@@ -31,7 +31,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useParams } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     PageContentsCardV1,
@@ -39,7 +39,7 @@ import {
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDatasets } from "../../rest/datasets/datasets.actions";
-import { getDatasource } from "../../rest/datasources/datasources.rest";
+import { getDatasourceByName } from "../../rest/datasources/datasources.rest";
 import type { Datasource } from "../../rest/dto/datasource.interfaces";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import type {
@@ -85,10 +85,7 @@ const SelectDataset: FunctionComponent<SelectDatasetProps> = ({
 };
 
 export const WelcomeSelectDatasets: FunctionComponent = () => {
-    const queryParams: { id?: string } = useParams();
-    const selectedDatasource = Number(queryParams.id);
-
-    const { selectedDatasets, setSelectedDatasets } =
+    const { selectedDatasourceName, selectedDatasets, setSelectedDatasets } =
         useOutletContext<WelcomeSelectDatasetOutletContext>();
 
     const [datasource, setDatasource] = useState<Datasource | null>(null);
@@ -132,9 +129,9 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     );
 
     useEffect(() => {
-        if (selectedDatasource) {
+        if (selectedDatasourceName) {
             setDatasourceStatus(ActionStatus.Working);
-            getDatasource(Number(selectedDatasource))
+            getDatasourceByName(selectedDatasourceName)
                 .then((datasourceProp: Datasource) => {
                     setDatasource(datasourceProp);
                     setDatasourceStatus(ActionStatus.Done);
@@ -162,7 +159,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
             setSelectedDatasets(
                 Object.assign(
                     {},
-                    ...datasetsProp?.map(({ id }) => ({ [id]: false }))
+                    ...datasetsProp?.map(({ name }) => ({ [name]: false }))
                 )
             );
         });
@@ -219,12 +216,12 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                 {datasets?.map((dataset) => (
                                     <SelectDataset
                                         checked={
-                                            !!selectedDatasets?.[dataset.id]
+                                            !!selectedDatasets?.[dataset.name]
                                         }
                                         key={dataset.id}
                                         labelPrimaryText={dataset.name}
                                         labelSecondaryText={`${dataset.dimensions.length} dimensions`}
-                                        name={`${dataset.id}`}
+                                        name={dataset.name}
                                         onChange={handleToggleCheckbox}
                                     />
                                 ))}

@@ -24,8 +24,8 @@ export interface DatasetOption {
 }
 
 export interface WelcomeSelectDatasetOutletContext {
-    selectedDatasource: number;
-    selectedDatasets: Dataset[];
+    selectedDatasourceName: string;
+    selectedDatasets: Record<string, boolean>;
     setSelectedDatasets: Dispatch<SetStateAction<Dataset[]>>;
 }
 

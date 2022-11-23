@@ -19,11 +19,12 @@ import { isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
+    useEffect,
     useMemo,
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
@@ -33,6 +34,7 @@ import {
     StepperV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { createDatasource } from "../../rest/datasources/datasources.rest";
 import type { Datasource } from "../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
@@ -40,8 +42,10 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     AppRouteRelative,
     getDataConfigurationCreateDatasetsPath,
+    getWelcomeLandingPath,
 } from "../../utils/routes/routes.util";
-import { SelectedDatasource } from "../welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.interfaces";
+import type { SelectedDatasource } from "../welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.interfaces";
+import { ADD_NEW_DATASOURCE } from "../welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.utils";
 
 const STEPS = [
     {
@@ -63,12 +67,15 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
     const [editedDatasource, setEditedDatasource] = useState<Datasource>(
         createDefaultDatasource()
     );
-    const [selectedDatasource, setSelectedDatasource] =
+    const [selectedDatasourceName, setSelectedDatasourceName] =
         useState<SelectedDatasource>(null);
 
     const [selectedDatasets, setSelectedDatasets] = useState<
-        Record<number, boolean>
+        Record<string, boolean>
     >({});
+
+    const queryParams: { id?: string } = useParams();
+    const queryDatasourceName = queryParams.id;
 
     const activeStep = useMemo(() => {
         // Tries to extract the last part of the url for
@@ -82,23 +89,45 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
             candidate.subPath.includes(urlPath)
         );
 
+        // Fallback
         if (!activeStepDefinition) {
-            return "";
+            return STEPS[0].subPath;
         }
 
         return activeStepDefinition.subPath;
     }, [pathname]);
 
+    useEffect(() => {
+        if (
+            activeStep ===
+            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
+        ) {
+            setSelectedDatasourceName(null);
+        }
+        if (
+            activeStep === AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
+        ) {
+            if (queryDatasourceName) {
+                setSelectedDatasourceName(queryDatasourceName);
+            }
+        }
+    }, [activeStep, queryDatasourceName]);
+
     const goToDatasetPage = useCallback(
-        (datasourceId: number) =>
-            navigate(getDataConfigurationCreateDatasetsPath(datasourceId)),
+        (datasourceName: string) =>
+            navigate(getDataConfigurationCreateDatasetsPath(datasourceName)),
+        []
+    );
+
+    const goToLandingPage = useCallback(
+        () => navigate(getWelcomeLandingPath()),
         []
     );
 
     const handleCreateNewDatasource = useCallback(
         (editedDatasourceProp: Datasource) =>
             createDatasource(editedDatasourceProp)
-                .then((datasource: Datasource): number => {
+                .then((datasource: Datasource): string => {
                     notify(
                         NotificationTypeV1.Success,
                         t("message.create-success", {
@@ -106,9 +135,9 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                         })
                     );
 
-                    setSelectedDatasource(datasource.id);
+                    setSelectedDatasourceName(datasource.name);
 
-                    return datasource.id;
+                    return datasource.name;
                 })
                 .catch((error: AxiosError): void => {
                     const errMessages = getErrorMessages(error);
@@ -127,47 +156,112 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
         []
     );
 
+    const handleOnboardDatasets = useCallback(
+        (datasetsName: string[], datasourceName: string) =>
+            Promise.all(
+                datasetsName.map((datasetName) =>
+                    onBoardDataset(datasetName, datasourceName)
+                        .then(() => {
+                            notify(
+                                NotificationTypeV1.Success,
+                                t("message.onboard-success", {
+                                    entity: t("label.dataset"),
+                                })
+                            );
+                            // Redirect to welcome landing
+                            navigate(getWelcomeLandingPath());
+
+                            return Promise.resolve();
+                        })
+                        .catch((error: AxiosError) => {
+                            const errMessages = getErrorMessages(error);
+
+                            isEmpty(errMessages)
+                                ? notify(
+                                      NotificationTypeV1.Error,
+                                      t("message.onboard-error", {
+                                          entity: t("label.dataset"),
+                                      })
+                                  )
+                                : errMessages.map((err) =>
+                                      notify(NotificationTypeV1.Error, err)
+                                  );
+
+                            return Promise.reject();
+                        })
+                )
+            ),
+        []
+    );
+
     const handleNextClick = useCallback(
-        async (
-            selectedDatasourceProp: SelectedDatasource,
-            editedDatasourceProp: Datasource
-        ) => {
+        (activeStepProp: typeof activeStep) => {
             if (
-                activeStep ===
+                activeStepProp ===
                 AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
             ) {
-                if (selectedDatasourceProp === null) {
-                    notify(
-                        NotificationTypeV1.Error,
-                        "Please select a valid dataset or create a new one"
-                    );
+                return ({
+                    selectedDatasourceNameProp = null,
+                    editedDatasourceProp,
+                }: {
+                    selectedDatasourceNameProp: SelectedDatasource;
+                    editedDatasourceProp: Datasource;
+                }) => {
+                    if (selectedDatasourceNameProp === null) {
+                        notify(
+                            NotificationTypeV1.Error,
+                            "Please select a valid dataset or create a new one"
+                        );
 
-                    return;
-                }
-                if (selectedDatasourceProp === "add-new-datasource") {
-                    const created = await handleCreateNewDatasource(
-                        editedDatasourceProp
-                    );
-
-                    if (!created) {
                         return;
                     }
-                    goToDatasetPage(created);
+                    if (selectedDatasourceNameProp === ADD_NEW_DATASOURCE) {
+                        return handleCreateNewDatasource(
+                            editedDatasourceProp
+                        ).then((created) => {
+                            if (!created) {
+                                return;
+                            }
+
+                            goToDatasetPage(created);
+                        });
+                    }
+                    goToDatasetPage(selectedDatasourceNameProp);
 
                     return;
-                }
-                goToDatasetPage(selectedDatasourceProp);
-
-                return;
+                };
             }
+
             if (
-                activeStep ===
+                activeStepProp ===
                 AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
             ) {
-                // TODO: Add
+                return ({
+                    datasetsNameProp = [],
+                    selectedDatasourceNameProp,
+                }: {
+                    datasetsNameProp: string[];
+                    selectedDatasourceNameProp: SelectedDatasource;
+                }) => {
+                    if (selectedDatasourceNameProp) {
+                        handleOnboardDatasets(
+                            datasetsNameProp,
+                            selectedDatasourceNameProp
+                        ).then(() => {
+                            goToLandingPage();
+                        });
+                    }
+
+                    return;
+                };
             }
+
+            // To handle unexpected cases and
+            // maintain function return type consistency
+            return () => Promise.reject();
         },
-        [activeStep]
+
+        []
     );
 
     const outletContext = {
@@ -175,28 +269,39 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
             AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE && {
             editedDatasource,
             setEditedDatasource,
-            selectedDatasource,
-            setSelectedDatasource,
+            selectedDatasourceName,
+            setSelectedDatasourceName,
         }),
         ...(activeStep ===
             AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS && {
-            selectedDatasource,
+            selectedDatasourceName,
             selectedDatasets,
             setSelectedDatasets,
         }),
     };
 
-    const getNextButtonLabel = (activeStepProp: typeof activeStep): string =>
-        ({
-            [AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE]:
-                t("label.next"),
-            [AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS]: t(
-                "label.onboard-entity",
-                {
-                    entity: t("datasets"),
-                }
-            ),
-        }[activeStepProp]);
+    const getNextButtonLabel = useCallback(
+        (activeStepProp: typeof activeStep): string =>
+            ({
+                [AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE]:
+                    t("label.next"),
+                [AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS]: t(
+                    "label.onboard-entity",
+                    {
+                        entity: t("datasets"),
+                    }
+                ),
+            }[activeStepProp]),
+        []
+    );
+
+    const handleNextProps = {
+        selectedDatasourceNameProp: selectedDatasourceName,
+        editedDatasourceProp: editedDatasource,
+        datasetsNameProp: Object.entries(selectedDatasets)
+            .filter(([, v]: [string, boolean]) => v)
+            .map(([k]: [string, boolean]) => k),
+    };
 
     return (
         <PageV1>
@@ -246,10 +351,7 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                             <Button
                                 color="primary"
                                 onClick={() =>
-                                    handleNextClick(
-                                        selectedDatasource,
-                                        editedDatasource
-                                    )
+                                    handleNextClick(activeStep)(handleNextProps)
                                 }
                             >
                                 {getNextButtonLabel(activeStep)}

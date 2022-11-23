@@ -49,8 +49,8 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     const {
         editedDatasource,
         setEditedDatasource,
-        selectedDatasource,
-        setSelectedDatasource,
+        selectedDatasourceName,
+        setSelectedDatasourceName,
     } = useOutletContext<WelcomeSelectDatasourceOutletContext>();
 
     const handleDatasourceChange = (value: string): void => {
@@ -63,7 +63,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
         _e: React.ChangeEvent<HTMLInputElement>,
         value: string
     ): void => {
-        setSelectedDatasource(value as SelectedDatasource);
+        setSelectedDatasourceName(value as SelectedDatasource);
     };
 
     const { datasources, getDatasources, status, errorMessages } =
@@ -112,7 +112,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                             <RadioGroup
                                 aria-label="Select Datasource"
                                 name="select-datasource"
-                                value={selectedDatasource}
+                                value={selectedDatasourceName}
                                 onChange={handleRadioChange}
                             >
                                 {datasourceGroup.options.map(
@@ -131,7 +131,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                 ))}
             </LoadingErrorStateSwitch>
 
-            {selectedDatasource === ADD_NEW_DATASOURCE ? (
+            {selectedDatasourceName === ADD_NEW_DATASOURCE ? (
                 <JSONEditorV1<Datasource>
                     hideValidationSuccessIcon
                     value={editedDatasource}

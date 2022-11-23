@@ -45,12 +45,12 @@ public class TemplatePropertyMetadata {
    * If minValue is set and maxValue is null, this means there is no maxValue (in effect
    * Double.MAX_VALUE or Integer.MAX_VALUE) and vice versa.
    */
-  private Number minValue;
-  private Number maxValue;
+  private Number min;
+  private Number max;
   /**
    * Should not be combined with min/maxValue
    */
-  private List<Object> allowedValues;
+  private List<Object> options;
   /**
    * Helps the UI build input fields.
    */
@@ -92,30 +92,30 @@ public class TemplatePropertyMetadata {
     return this;
   }
 
-  public Number getMinValue() {
-    return minValue;
+  public Number getMin() {
+    return min;
   }
 
-  public TemplatePropertyMetadata setMinValue(final Number minValue) {
-    this.minValue = minValue;
+  public TemplatePropertyMetadata setMin(final Number min) {
+    this.min = min;
     return this;
   }
 
-  public Number getMaxValue() {
-    return maxValue;
+  public Number getMax() {
+    return max;
   }
 
-  public TemplatePropertyMetadata setMaxValue(final Number maxValue) {
-    this.maxValue = maxValue;
+  public TemplatePropertyMetadata setMax(final Number max) {
+    this.max = max;
     return this;
   }
 
-  public List<Object> getAllowedValues() {
-    return allowedValues;
+  public List<Object> getOptions() {
+    return options;
   }
 
-  public TemplatePropertyMetadata setAllowedValues(final List<Object> allowedValues) {
-    this.allowedValues = allowedValues;
+  public TemplatePropertyMetadata setOptions(final List<Object> options) {
+    this.options = options;
     return this;
   }
 

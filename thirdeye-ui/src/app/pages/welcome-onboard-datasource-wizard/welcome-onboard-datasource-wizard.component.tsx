@@ -42,6 +42,7 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     AppRouteRelative,
     getDataConfigurationCreateDatasetsPath,
+    getDataConfigurationCreatePath,
     getWelcomeLandingPath,
 } from "../../utils/routes/routes.util";
 import type { SelectedDatasource } from "../welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.interfaces";
@@ -264,6 +265,21 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
         []
     );
 
+    const handleBackClick = useCallback((activeStepProp: typeof activeStep) => {
+        if (
+            activeStepProp ===
+            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
+        ) {
+            navigate(-1);
+        }
+        if (
+            activeStepProp ===
+            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
+        ) {
+            navigate(getDataConfigurationCreatePath());
+        }
+    }, []);
+
     const outletContext = {
         ...(activeStep ===
             AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE && {
@@ -344,7 +360,12 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                 <PageContentsCardV1>
                     <Grid container justifyContent="flex-end">
                         <Grid item>
-                            <Button color="secondary">{t("label.back")}</Button>
+                            <Button
+                                color="secondary"
+                                onClick={() => handleBackClick(activeStep)}
+                            >
+                                {t("label.back")}
+                            </Button>
                         </Grid>
                         <Grid item>
                             <Button

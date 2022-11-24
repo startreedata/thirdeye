@@ -15,7 +15,7 @@
 
 import { Box, Grid, Typography } from "@material-ui/core";
 import { capitalize } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -23,32 +23,22 @@ import { WelcomeStepCard } from "../../components/welcome-landing-page/welcome-s
 import { PageContentsCardV1, PageV1 } from "../../platform/components";
 import { DimensionV1 } from "../../platform/utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { getAllDatasets } from "../../rest/datasets/datasets.rest";
+import { useGetDatasets } from "../../rest/datasets/datasets.actions";
 import {
     getDataConfigurationCreatePath,
     getWelcomeCreateAlert,
 } from "../../utils/routes/routes.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
-    const [status, setStatus] = useState<
-        typeof ActionStatus[keyof typeof ActionStatus]
-    >(ActionStatus.Initial);
-    const [hasDatasets, setHasDatasets] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
 
+    const { status, datasets, getDatasets } = useGetDatasets();
+
+    const hasDatasets = !!(datasets && datasets.length > 0);
+
     useEffect(() => {
-        setStatus(ActionStatus.Working);
-        getAllDatasets()
-            .then((datasets) => {
-                if (datasets && datasets.length > 0) {
-                    setHasDatasets(true);
-                }
-                setStatus(ActionStatus.Done);
-            })
-            .catch(() => {
-                setStatus(ActionStatus.Error);
-            });
+        getDatasets();
     }, []);
 
     const getParsedMarkup = (plainText: string): JSX.Element => {

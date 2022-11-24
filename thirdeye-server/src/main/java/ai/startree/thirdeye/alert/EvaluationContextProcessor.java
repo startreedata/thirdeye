@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
-import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -42,7 +42,7 @@ public class EvaluationContextProcessor {
     this.enumerationItemManager = enumerationItemManager;
   }
 
-  public void process(final PlanNodeContext context,
+  public void process(final DetectionPipelineContext context,
       final EvaluationContextApi evaluationContext,
       final AlertTemplateDTO templateWithProperties) {
     if (evaluationContext == null) {
@@ -53,7 +53,7 @@ public class EvaluationContextProcessor {
     addEnumerationItem(context, evaluationContext, templateWithProperties);
   }
 
-  void addEnumerationItem(final PlanNodeContext context,
+  void addEnumerationItem(final DetectionPipelineContext context,
       final EvaluationContextApi evaluationContext,
       final AlertTemplateDTO templateWithProperties) {
     if (templateWithProperties != null) {
@@ -82,7 +82,7 @@ public class EvaluationContextProcessor {
   }
 
   @VisibleForTesting
-  void addPredicates(final PlanNodeContext context,
+  void addPredicates(final DetectionPipelineContext context,
       final EvaluationContextApi evaluationContext) {
     optional(evaluationContext.getFilters())
         .map(Predicate::parseAndCombinePredicates)

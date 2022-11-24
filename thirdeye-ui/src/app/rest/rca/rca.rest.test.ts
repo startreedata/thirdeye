@@ -13,6 +13,8 @@
  * the License.
  */
 import axios from "axios";
+import { Dataset } from "../dto/dataset.interfaces";
+import { Metric, MetricAggFunction } from "../dto/metric.interfaces";
 import { Investigation } from "../dto/rca.interfaces";
 import {
     createInvestigation,
@@ -152,14 +154,25 @@ describe("RCA REST", () => {
 
         await expect(
             getCohorts({
-                metricId: 123,
+                metric: mockMetric as Metric,
+                dataset: {
+                    name: "mockDataset",
+                } as Dataset,
+                aggregationFunction: MetricAggFunction.AVG,
                 start: 100,
                 end: 200,
             })
         ).resolves.toEqual(mockCohortResponse);
 
         expect(axios.post).toHaveBeenCalledWith("/api/rca/metrics/cohorts", {
-            metric: { id: 123 },
+            metric: {
+                datatype: mockMetric.datatype,
+                dataset: {
+                    name: "mockDataset",
+                },
+                aggregationColumn: mockMetric.name,
+                aggregationFunction: "AVG",
+            },
             start: 100,
             end: 200,
         });
@@ -170,7 +183,11 @@ describe("RCA REST", () => {
 
         await expect(
             getCohorts({
-                metricId: 123,
+                metric: mockMetric as Metric,
+                dataset: {
+                    name: "mockDataset",
+                } as Dataset,
+                aggregationFunction: MetricAggFunction.AVG,
                 start: 100,
                 end: 200,
             })
@@ -235,4 +252,11 @@ const mockCohortResponse = {
             percentage: 35.05,
         },
     ],
+};
+
+const mockMetric = {
+    id: 123,
+    name: "mockMetric",
+    aggregationColumn: "mockMetric",
+    datatype: "INT",
 };

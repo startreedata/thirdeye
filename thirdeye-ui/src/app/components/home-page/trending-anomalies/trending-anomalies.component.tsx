@@ -198,10 +198,15 @@ export const TrendingAnomalies: FunctionComponent = () => {
                         >
                             <Typography variant="h6">
                                 {capitalize(
-                                    t("message.no-recent-entity", {
-                                        entity: t("label.anomalies"),
-                                        timePeriod: t("label.last-6-months"),
-                                    })
+                                    t(
+                                        "message.there-have-been-no-recent-entity-in-the-timePeriod",
+                                        {
+                                            entity: t("label.anomalies"),
+                                            timePeriod: t(
+                                                "label.last-6-months"
+                                            ),
+                                        }
+                                    )
                                 )}
                             </Typography>
                         </Box>

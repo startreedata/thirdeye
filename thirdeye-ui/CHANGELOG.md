@@ -1,3 +1,27 @@
+## [1.72.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.71.0...thirdeye-ui-1.72.0) (2022-11-19)
+
+
+### Features
+
+* [TE-1052](https://cortexdata.atlassian.net/browse/TE-1052) cohort recommender enhancements ([56a94d23b](https://github.com/startreedata/thirdeye/commit/56a94d23b1640a2f3f78bb3ee37a281d589225fe))
+
+
+### Bug Fixes
+
+* [TE-1061](https://cortexdata.atlassian.net/browse/TE-1061) showing a message for 0 anomalies on home page ([d0e4e8264](https://github.com/startreedata/thirdeye/commit/d0e4e8264b4cd77bd0daa90956cb408e37df5674))
+
+## [1.71.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.70.0...thirdeye-ui-1.71.0) (2022-11-16)
+
+
+### Features
+
+* [TE-1002](https://cortexdata.atlassian.net/browse/TE-1002) added date filter in admin page and set the default filter to last 7 days ([948e90fc5](https://github.com/startreedata/thirdeye/commit/948e90fc55c7a51d2385c22273c25c2cec298df2))
+
+
+### Bug Fixes
+
+* [TE-1059](https://cortexdata.atlassian.net/browse/TE-1059) renamed labels and replaced a fixed label with a generic label ([8158ca92b](https://github.com/startreedata/thirdeye/commit/8158ca92b9fb4fa46ab23407a86a5758119930d3))
+
 ## [1.70.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.69.6...thirdeye-ui-1.70.0) (2022-11-14)
 
 

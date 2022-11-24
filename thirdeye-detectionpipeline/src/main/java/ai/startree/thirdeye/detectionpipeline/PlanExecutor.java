@@ -139,7 +139,7 @@ public class PlanExecutor implements AutoCloseable {
    */
   public Map<String, OperatorResult> runPipelineAndGetRootOutputs(
       final List<PlanNodeBean> planNodeBeans,
-      final PlanNodeContext runTimeContext)
+      final DetectionPipelineContext runTimeContext)
       throws Exception {
     final Map<ContextKey, OperatorResult> context = runPipeline(planNodeBeans, runTimeContext);
 
@@ -156,15 +156,15 @@ public class PlanExecutor implements AutoCloseable {
    */
   public Map<ContextKey, OperatorResult> runPipeline(
       final List<PlanNodeBean> planNodeBeans,
-      final PlanNodeContext runTimeContext) throws Exception {
+      final DetectionPipelineContext context) throws Exception {
 
     /* Set Application Context */
-    runTimeContext.setApplicationContext(applicationContext);
+    context.setApplicationContext(applicationContext);
 
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(
         planNodeBeans,
-        runTimeContext);
+        context);
 
     /* The context stores all the outputs from all the nodes */
     final Map<ContextKey, OperatorResult> resultMap = new HashMap<>();
@@ -178,12 +178,12 @@ public class PlanExecutor implements AutoCloseable {
 
   @VisibleForTesting
   Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
-      final PlanNodeContext runTimeContext) {
+      final DetectionPipelineContext context) {
     final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
     for (final PlanNodeBean planNodeBean : planNodeBeans) {
       final PlanNode planNode = planNodeFactory.build(
           planNodeBean,
-          runTimeContext,
+          context,
           pipelinePlanNodes
       );
 

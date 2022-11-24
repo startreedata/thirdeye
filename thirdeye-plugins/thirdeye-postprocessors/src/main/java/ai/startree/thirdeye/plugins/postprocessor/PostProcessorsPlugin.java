@@ -26,7 +26,8 @@ public class PostProcessorsPlugin implements Plugin {
     return List.of(
         new GenericPostProcessorFactory<>(ColdStartPostProcessor.NAME, ColdStartPostProcessor.class),
         new GenericPostProcessorFactory<>(TimeOfWeekPostProcessor.NAME, TimeOfWeekPostProcessor.class),
-        new GenericPostProcessorFactory<>(ThresholdPostProcessor.NAME, ThresholdPostProcessor.class)
+        new GenericPostProcessorFactory<>(ThresholdPostProcessor.NAME, ThresholdPostProcessor.class),
+        new GenericPostProcessorFactory<>(EventPostProcessor.NAME, EventPostProcessor.class)
     );
   }
 }

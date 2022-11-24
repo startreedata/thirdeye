@@ -18,6 +18,9 @@ import java.util.Map;
 
 public interface DataTable extends OperatorResult {
 
+  /**
+   * Does not return a protective copy.
+   */
   DataFrame getDataFrame();
 
   Map<String, String> getProperties();

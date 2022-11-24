@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
@@ -76,7 +77,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     metricRegistry.register("parentAnomalyCount", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
-        return countParentAnomalies();
+        return countParentAnomalies(null);
       }
     });
   }
@@ -376,24 +377,24 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public long countParentAnomalies() {
-    return count(Predicate.EQ("child", false));
+  public long countParentAnomalies(final DaoFilter filter) {
+    Predicate predicate = Predicate.EQ("child", false);
+    if(filter != null && filter.getPredicate() != null) {
+      predicate = Predicate.AND(predicate, filter.getPredicate());
+    }
+    return count(predicate);
   }
 
   @Override
-  public long countParentAnomaliesWithoutFeedback() {
-    return count(Predicate.AND(
-        Predicate.EQ("anomalyFeedbackId", 0L),
-        Predicate.EQ("child", false)
-    ));
-  }
-
-  @Override
-  public List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback() {
-    return findByPredicate(Predicate.AND(
+  public List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback(final DaoFilter filters) {
+    Predicate predicate = Predicate.AND(
         Predicate.NEQ("anomalyFeedbackId", 0),
         Predicate.EQ("child", false)
-    )).stream()
+    );
+    if (filters != null && filters.getPredicate() != null) {
+      predicate = Predicate.AND(predicate, filters.getPredicate());
+    }
+    return findByPredicate(predicate).stream()
         .map(anomaly -> decorate(anomaly, new HashSet<>()))
         .collect(Collectors.toList());
   }

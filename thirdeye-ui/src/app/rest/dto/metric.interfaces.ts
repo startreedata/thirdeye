@@ -33,6 +33,7 @@ export interface Metric {
     created: number;
     updated: number;
     derived: boolean;
+    datatype: string;
     derivedMetricExpression: string;
     aggregationColumn: string;
     aggregationFunction: MetricAggFunction;
@@ -51,6 +52,7 @@ export enum MetricAggFunction {
     COUNT = "COUNT",
     COUNT_DISTINCT = "COUNT_DISTINCT",
     MAX = "MAX",
+    MIN = "MIN",
     PCT50 = "PCT50",
     PCT90 = "PCT90",
     PCT95 = "PCT95",

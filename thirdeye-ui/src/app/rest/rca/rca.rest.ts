@@ -134,18 +134,23 @@ export const updateInvestigation = async (
 export const getCohorts = async ({
     start,
     end,
-    metricId,
+    metric,
     dimensions,
     query,
     threshold,
     percentage,
     resultSize,
+    aggregationFunction,
+    dataset,
 }: GetCohortParams): Promise<CohortDetectionResponse> => {
     const requestPayload: CohortRequestParams = {
         start,
         end,
         metric: {
-            id: metricId,
+            datatype: metric.datatype,
+            dataset,
+            aggregationColumn: metric.name,
+            aggregationFunction,
         },
     };
 

@@ -25,7 +25,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { AnomaliesPendingFeedbackCountProps } from "./anomlies-pending-feedback-count.interfaces";
 
 export const AnomaliesPendingFeedbackCount: FunctionComponent<AnomaliesPendingFeedbackCountProps> =
-    ({ appAnalytics, getAppAnalyticsStatus, classes = {} }) => {
+    ({ appAnalytics, getAppAnalyticsStatus, classes }) => {
         const { t } = useTranslation();
 
         return (

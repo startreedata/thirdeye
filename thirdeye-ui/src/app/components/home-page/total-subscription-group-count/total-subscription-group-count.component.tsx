@@ -25,7 +25,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { TotalSubscriptionGroupCountProps } from "./total-subscription-group-count.interfaces";
 
 export const TotalSubscriptionGroupCount: FunctionComponent<TotalSubscriptionGroupCountProps> =
-    ({ subscriptionGroups, getSubscriptionGroupsStatus, classes = {} }) => {
+    ({ subscriptionGroups, getSubscriptionGroupsStatus, classes }) => {
         const { t } = useTranslation();
 
         return (

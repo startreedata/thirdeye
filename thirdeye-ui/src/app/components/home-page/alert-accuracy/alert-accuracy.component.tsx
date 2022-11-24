@@ -26,7 +26,7 @@ import { AlertAccuracyProps } from "./alert-accuracy.interfaces";
 export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
     appAnalytics,
     getAppAnalyticsStatus,
-    classes = {},
+    classes,
 }) => {
     const { t } = useTranslation();
 

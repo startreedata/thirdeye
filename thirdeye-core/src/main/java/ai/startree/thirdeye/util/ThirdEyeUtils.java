@@ -20,13 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.spi.detection.v2.ColumnType;
-import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable.SimpleDataTableBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -147,57 +141,6 @@ public abstract class ThirdEyeUtils {
       metricUrns.addAll(extractMetricUrnsFromProperties(nestedProperty));
     }
     return metricUrns;
-  }
-
-  public static DataTable getDataTableFromResultSet(final ResultSet resultSet) throws SQLException {
-    final List<String> columns = new ArrayList<>();
-    final List<ColumnType> columnTypes = new ArrayList<>();
-    final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-    final int columnCount = resultSetMetaData.getColumnCount();
-    for (int i = 0; i < columnCount; i++) {
-      columns.add(resultSetMetaData.getColumnLabel(i + 1));
-      columnTypes.add(ColumnType.jdbcTypeToColumnType(resultSetMetaData.getColumnType(i + 1)));
-    }
-    final SimpleDataTableBuilder simpleDataTableBuilder = new SimpleDataTableBuilder(columns,
-        columnTypes);
-    while (resultSet.next()) {
-      final Object[] rowData = simpleDataTableBuilder.newRow();
-      for (int i = 0; i < columnCount; i++) {
-        final ColumnType columnType = columnTypes.get(i);
-        if (columnType.isArray()) {
-          rowData[i] = resultSet.getArray(i + 1);
-          continue;
-        }
-        switch (columnType.getType()) {
-          case INT:
-            rowData[i] = resultSet.getInt(i + 1);
-            continue;
-          case LONG:
-            rowData[i] = resultSet.getLong(i + 1);
-            continue;
-          case FLOAT:
-          case DOUBLE:
-            rowData[i] = resultSet.getDouble(i + 1);
-            continue;
-          case STRING:
-            rowData[i] = resultSet.getString(i + 1);
-            continue;
-          case DATE:
-            // todo cyril datetime is parsed as date - precision loss - use timestamp instead?
-            rowData[i] = resultSet.getDate(i + 1);
-            continue;
-          case BOOLEAN:
-            rowData[i] = resultSet.getBoolean(i + 1);
-            continue;
-          case BYTES:
-            rowData[i] = resultSet.getBytes(i + 1);
-            continue;
-          default:
-            throw new RuntimeException("Unrecognized data type - " + columnTypes.get(i + 1));
-        }
-      }
-    }
-    return simpleDataTableBuilder.build();
   }
 
   /**

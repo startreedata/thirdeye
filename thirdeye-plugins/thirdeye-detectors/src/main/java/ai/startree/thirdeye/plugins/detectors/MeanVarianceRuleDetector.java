@@ -144,7 +144,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       final Map<String, DataTable> dataTableMap
   ) throws DetectorException {
     final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
-    final DataFrame currentDf = current.getDataFrame();
+    final DataFrame currentDf = current.getDataFrame().copy();
     currentDf
         .renameSeries(spec.getTimestamp(), COL_TIME)
         .renameSeries(spec.getMetric(), COL_VALUE)

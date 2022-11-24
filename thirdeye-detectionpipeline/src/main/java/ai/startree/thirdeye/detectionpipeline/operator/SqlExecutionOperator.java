@@ -18,10 +18,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.sql.DataTableToSqlAdapterFactory;
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
-import ai.startree.thirdeye.util.ThirdEyeUtils;
+import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -123,7 +124,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
   private DataTable runQuery(final String query, final Connection connection) throws SQLException {
     final Statement stmt = connection.createStatement();
     final ResultSet resultSet = stmt.executeQuery(query);
-    return ThirdEyeUtils.getDataTableFromResultSet(resultSet);
+    return SimpleDataTable.fromDataFrame(DataFrame.fromResultSet(resultSet));
   }
 
   @Override

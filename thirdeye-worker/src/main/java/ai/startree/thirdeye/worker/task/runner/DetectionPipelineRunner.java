@@ -19,8 +19,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
-import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -30,7 +30,6 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.joda.time.Interval;
@@ -129,10 +128,11 @@ public class DetectionPipelineRunner {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
         detectionInterval);
 
-    final PlanNodeContext runTimeContext = new PlanNodeContext().setDetectionInterval(detectionInterval);
-    final Map<String, OperatorResult> detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(
+    final DetectionPipelineContext context = new DetectionPipelineContext()
+        .setDetectionInterval(detectionInterval);
+    final var detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(
         templateWithProperties.getNodes(),
-        runTimeContext);
+        context);
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     return detectionPipelineResultMap.values().iterator().next();

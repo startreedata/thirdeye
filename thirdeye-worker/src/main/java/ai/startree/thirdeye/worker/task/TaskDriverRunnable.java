@@ -61,6 +61,7 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskFetchMissCounter;
   private final Counter workerIdleTimeInSeconds;
   private final Timer taskRunningTimer;
+  private final Timer taskWaitingTimer;
   private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
 
   public TaskDriverRunnable(final TaskContext taskContext) {
@@ -80,6 +81,7 @@ public class TaskDriverRunnable implements Runnable {
     workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
     taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
     taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
+    taskWaitingTimer = metricRegistry.timer("taskWaitingTimer");
   }
 
   public void run() {
@@ -218,6 +220,9 @@ public class TaskDriverRunnable implements Runnable {
               ALLOWED_OLD_TASK_STATUS,
               taskDTO.getVersion());
           if (success) {
+            taskWaitingTimer.update(
+                System.currentTimeMillis() - taskDTO.getCreateTime().getTime(),
+                TimeUnit.MILLISECONDS);
             return taskDTO;
           }
         }

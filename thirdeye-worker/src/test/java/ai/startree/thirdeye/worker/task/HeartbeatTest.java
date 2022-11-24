@@ -153,7 +153,10 @@ public class HeartbeatTest {
         .setTaskType(TaskType.DETECTION)
         .setTaskInfo(requireNonNull(toJson(new DetectionPipelineTaskInfo())));
 
-    task.setId(TASK_ID);
+    final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    task.setId(TASK_ID)
+        .setCreateTime(timestamp)
+        .setUpdateTime(timestamp);
     return task;
   }
 }

@@ -174,7 +174,9 @@ export const RecentFailures: FunctionComponent = () => {
                             {tasksToDisplay.length === 0 && (
                                 <TableRow>
                                     <TableCell align="center" colSpan={10}>
-                                        {t("message.no-recent-failures")}
+                                        {t("message.no-recent-entity", {
+                                            entity: t("label.failures"),
+                                        })}
                                     </TableCell>
                                 </TableRow>
                             )}

@@ -28,7 +28,6 @@ import React, {
     useCallback,
     useEffect,
     useMemo,
-    useState,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
@@ -39,8 +38,7 @@ import {
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDatasets } from "../../rest/datasets/datasets.actions";
-import { getDatasourceByName } from "../../rest/datasources/datasources.rest";
-import type { Datasource } from "../../rest/dto/datasource.interfaces";
+import { useGetDatasource } from "../../rest/datasources/datasources.actions";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import type {
     SelectDatasetProps,
@@ -88,11 +86,6 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     const { selectedDatasourceName, selectedDatasets, setSelectedDatasets } =
         useOutletContext<WelcomeSelectDatasetOutletContext>();
 
-    const [datasource, setDatasource] = useState<Datasource | null>(null);
-    const [datasourceStatus, setDatasourceStatus] = useState<ActionStatus>(
-        ActionStatus.Initial
-    );
-
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
 
@@ -128,19 +121,15 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         []
     );
 
+    const {
+        datasource,
+        getDatasource,
+        status: datasourceStatus,
+    } = useGetDatasource("name");
+
     useEffect(() => {
         if (selectedDatasourceName) {
-            setDatasourceStatus(ActionStatus.Working);
-            getDatasourceByName(selectedDatasourceName)
-                .then((datasourceProp: Datasource) => {
-                    setDatasource(datasourceProp);
-                    setDatasourceStatus(ActionStatus.Done);
-                })
-                .catch(() => {
-                    setDatasourceStatus(ActionStatus.Error);
-                });
-        } else {
-            setDatasourceStatus(ActionStatus.Error);
+            getDatasource(selectedDatasourceName);
         }
     }, []);
 

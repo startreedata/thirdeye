@@ -34,3 +34,8 @@ export interface GetDatasources extends ActionHook {
     datasources: Datasource[] | null;
     getDatasources: () => Promise<Datasource[] | undefined>;
 }
+
+export interface GetDatasource extends ActionHook {
+    datasource: Datasource | null;
+    getDatasource: (id: string | number) => Promise<Datasource | undefined>;
+}

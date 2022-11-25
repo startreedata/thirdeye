@@ -16,7 +16,7 @@
 import { Box, Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1 } from "../../platform/components";
+import { PageContentsCardV1 } from "../../../platform/components";
 import { WizardBottomBarProps } from "./wizard-bottom-bar.interfaces";
 
 export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({

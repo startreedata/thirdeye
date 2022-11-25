@@ -35,7 +35,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar.component";
+import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     JSONEditorV1,
     NotificationTypeV1,

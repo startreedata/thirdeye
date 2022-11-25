@@ -13,7 +13,13 @@
  * the License.
  */
 
-export interface DatasetOption {
-    label: string;
-    value: number | string;
+import type { CheckboxProps } from "@material-ui/core";
+
+export interface SelectDatasetProps {
+    checked: boolean;
+    indeterminate?: boolean;
+    onChange: CheckboxProps["onChange"];
+    labelPrimaryText: string;
+    labelSecondaryText?: string;
+    name: string;
 }

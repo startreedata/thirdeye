@@ -13,17 +13,7 @@
  * the License.
  */
 
-import {
-    Box,
-    Checkbox,
-    Divider,
-    FormControl,
-    FormControlLabel,
-    FormGroup,
-    FormHelperText,
-    Grid,
-    Typography,
-} from "@material-ui/core";
+import { Box, Divider, FormGroup, Grid, Typography } from "@material-ui/core";
 import type { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, {
@@ -36,7 +26,8 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar.component";
+import { SelectDatasetOption } from "../../components/welcome-onboard-datasource/select-dataset-option/select-dataset-option.component";
+import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
@@ -50,44 +41,7 @@ import { useGetDatasource } from "../../rest/datasources/datasources.actions";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getWelcomeLandingPath } from "../../utils/routes/routes.util";
-import type { SelectDatasetProps } from "./welcome-onboard-datasource-select-datasets.interfaces";
 import { SELECT_ALL } from "./welcome-onboard-datasource-select-datasets.utils";
-
-const SelectDataset: FunctionComponent<SelectDatasetProps> = ({
-    checked,
-    indeterminate,
-    onChange,
-    labelPrimaryText,
-    labelSecondaryText,
-    name,
-}) => {
-    return (
-        <FormControl component="fieldset" margin="dense">
-            <FormControlLabel
-                control={
-                    <Checkbox
-                        checked={checked}
-                        {...(indeterminate && { indeterminate })}
-                        color="primary"
-                        inputProps={{ "aria-label": name }}
-                        name={name}
-                        onChange={onChange}
-                    />
-                }
-                label={
-                    <>
-                        {labelPrimaryText}
-                        {labelSecondaryText ? (
-                            <FormHelperText>
-                                {labelSecondaryText}
-                            </FormHelperText>
-                        ) : null}
-                    </>
-                }
-            />
-        </FormControl>
-    );
-};
 
 export const WelcomeSelectDatasets: FunctionComponent = () => {
     const [selectedDatasets, setSelectedDatasets] = useState<
@@ -278,13 +232,13 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                         mt={2}
                                     >
                                         <FormGroup>
-                                            <SelectDataset
+                                            <SelectDatasetOption
                                                 {...selectAllProps}
                                             />
                                             <Divider />
 
                                             {datasets?.map((dataset) => (
-                                                <SelectDataset
+                                                <SelectDatasetOption
                                                     checked={
                                                         !!selectedDatasets?.[
                                                             dataset.name

@@ -13,18 +13,9 @@
  * the License.
  */
 
-import type { CheckboxProps } from "@material-ui/core";
-
-export interface DatasetOption {
-    label: string;
-    value: number | string;
-}
-
-export interface SelectDatasetProps {
-    checked: boolean;
-    indeterminate?: boolean;
-    onChange: CheckboxProps["onChange"];
-    labelPrimaryText: string;
-    labelSecondaryText?: string;
-    name: string;
+export interface WizardBottomBarProps {
+    handleBackClick: () => void;
+    handleNextClick: () => void;
+    nextButtonLabel?: string;
+    backButtonLabel?: string;
 }

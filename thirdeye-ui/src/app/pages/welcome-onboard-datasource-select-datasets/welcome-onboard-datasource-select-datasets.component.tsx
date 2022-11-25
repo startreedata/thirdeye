@@ -21,29 +21,36 @@ import {
     FormControlLabel,
     FormGroup,
     FormHelperText,
+    Grid,
     Typography,
 } from "@material-ui/core";
+import type { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
     useEffect,
     useMemo,
+    useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar.component";
 import {
+    NotificationTypeV1,
     PageContentsCardV1,
+    PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDatasets } from "../../rest/datasets/datasets.actions";
+import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { useGetDatasource } from "../../rest/datasources/datasources.actions";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import type {
-    SelectDatasetProps,
-    WelcomeSelectDatasetOutletContext,
-} from "./welcome-onboard-datasource-select-datasets.interfaces";
+import { getErrorMessages } from "../../utils/rest/rest.util";
+import { getWelcomeLandingPath } from "../../utils/routes/routes.util";
+import type { SelectDatasetProps } from "./welcome-onboard-datasource-select-datasets.interfaces";
 import { SELECT_ALL } from "./welcome-onboard-datasource-select-datasets.utils";
 
 const SelectDataset: FunctionComponent<SelectDatasetProps> = ({
@@ -83,11 +90,16 @@ const SelectDataset: FunctionComponent<SelectDatasetProps> = ({
 };
 
 export const WelcomeSelectDatasets: FunctionComponent = () => {
-    const { selectedDatasourceName, selectedDatasets, setSelectedDatasets } =
-        useOutletContext<WelcomeSelectDatasetOutletContext>();
+    const [selectedDatasets, setSelectedDatasets] = useState<
+        Record<string, boolean>
+    >({});
+
+    const queryParams: { id?: string } = useParams();
+    const selectedDatasourceName = queryParams.id;
 
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const handleToggleCheckbox = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -179,46 +191,131 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         [areSomeChecked, areAllChecked]
     );
 
-    return (
-        <LoadingErrorStateSwitch
-            isError={datasourceStatus === ActionStatus.Error}
-            isLoading={datasourceStatus === ActionStatus.Working}
-        >
-            <PageContentsCardV1>
-                <Box px={2} py={2}>
-                    <Typography variant="h5">
-                        Onboard datasets for {datasource?.name}
-                    </Typography>
-                    <Typography variant="body2">
-                        Select the datasets you want to include in your
-                        configuration
-                    </Typography>
-                    <LoadingErrorStateSwitch
-                        isError={datasetsStatus === ActionStatus.Error}
-                        isLoading={datasetsStatus === ActionStatus.Working}
-                    >
-                        <Box alignItems="flexStart" display="flex" mt={2}>
-                            <FormGroup>
-                                <SelectDataset {...selectAllProps} />
-                                <Divider />
+    const handleOnboardDatasets = useCallback(
+        (datasetsName: string[], datasourceName: string) =>
+            Promise.all(
+                datasetsName.map((datasetName) =>
+                    onBoardDataset(datasetName, datasourceName)
+                        .then(() => {
+                            notify(
+                                NotificationTypeV1.Success,
+                                t("message.onboard-success", {
+                                    entity: t("label.dataset"),
+                                })
+                            );
+                            // Redirect to welcome landing
+                            navigate(getWelcomeLandingPath());
 
-                                {datasets?.map((dataset) => (
-                                    <SelectDataset
-                                        checked={
-                                            !!selectedDatasets?.[dataset.name]
-                                        }
-                                        key={dataset.id}
-                                        labelPrimaryText={dataset.name}
-                                        labelSecondaryText={`${dataset.dimensions.length} dimensions`}
-                                        name={dataset.name}
-                                        onChange={handleToggleCheckbox}
-                                    />
-                                ))}
-                            </FormGroup>
-                        </Box>
+                            return Promise.resolve();
+                        })
+                        .catch((error: AxiosError) => {
+                            const errMessages = getErrorMessages(error);
+
+                            isEmpty(errMessages)
+                                ? notify(
+                                      NotificationTypeV1.Error,
+                                      t("message.onboard-error", {
+                                          entity: t("label.dataset"),
+                                      })
+                                  )
+                                : errMessages.map((err) =>
+                                      notify(NotificationTypeV1.Error, err)
+                                  );
+
+                            return Promise.reject();
+                        })
+                )
+            ),
+        []
+    );
+
+    const handleNext = useCallback(() => {
+        if (!selectedDatasourceName) {
+            return;
+        }
+
+        const datasetsName = Object.entries(selectedDatasets)
+            .filter(([, v]: [string, boolean]) => v)
+            .map(([k]: [string, boolean]) => k);
+
+        handleOnboardDatasets(datasetsName, selectedDatasourceName).then(() => {
+            navigate(getWelcomeLandingPath());
+        });
+    }, [selectedDatasets, selectedDatasourceName]);
+
+    const handleBack = useCallback(() => {
+        navigate(-1);
+    }, []);
+
+    return (
+        <>
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <LoadingErrorStateSwitch
+                        isError={datasourceStatus === ActionStatus.Error}
+                        isLoading={datasourceStatus === ActionStatus.Working}
+                    >
+                        <PageContentsCardV1>
+                            <Box px={2} py={2}>
+                                <Typography variant="h5">
+                                    Onboard datasets for {datasource?.name}
+                                </Typography>
+                                <Typography variant="body2">
+                                    Select the datasets you want to include in
+                                    your configuration
+                                </Typography>
+                                <LoadingErrorStateSwitch
+                                    isError={
+                                        datasetsStatus === ActionStatus.Error
+                                    }
+                                    isLoading={
+                                        datasetsStatus === ActionStatus.Working
+                                    }
+                                >
+                                    <Box
+                                        alignItems="flexStart"
+                                        display="flex"
+                                        mt={2}
+                                    >
+                                        <FormGroup>
+                                            <SelectDataset
+                                                {...selectAllProps}
+                                            />
+                                            <Divider />
+
+                                            {datasets?.map((dataset) => (
+                                                <SelectDataset
+                                                    checked={
+                                                        !!selectedDatasets?.[
+                                                            dataset.name
+                                                        ]
+                                                    }
+                                                    key={dataset.name}
+                                                    labelPrimaryText={
+                                                        dataset.name
+                                                    }
+                                                    labelSecondaryText={`${dataset.dimensions.length} dimensions`}
+                                                    name={dataset.name}
+                                                    onChange={
+                                                        handleToggleCheckbox
+                                                    }
+                                                />
+                                            ))}
+                                        </FormGroup>
+                                    </Box>
+                                </LoadingErrorStateSwitch>
+                            </Box>
+                        </PageContentsCardV1>
                     </LoadingErrorStateSwitch>
-                </Box>
-            </PageContentsCardV1>
-        </LoadingErrorStateSwitch>
+                </Grid>
+            </PageContentsGridV1>
+            <WizardBottomBar
+                handleBackClick={handleBack}
+                handleNextClick={handleNext}
+                nextButtonLabel={t("label.onboard-entity", {
+                    entity: t("label.datasets"),
+                })}
+            />
+        </>
     );
 };

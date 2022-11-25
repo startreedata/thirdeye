@@ -14,39 +14,17 @@
  */
 
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import type { AxiosError } from "axios";
-import { isEmpty } from "lodash";
-import React, {
-    FunctionComponent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
-    NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     StepperV1,
-    useNotificationProviderV1,
 } from "../../platform/components";
-import { onBoardDataset } from "../../rest/datasets/datasets.rest";
-import { createDatasource } from "../../rest/datasources/datasources.rest";
-import type { Datasource } from "../../rest/dto/datasource.interfaces";
-import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
-import {
-    AppRouteRelative,
-    getDataConfigurationCreateDatasetsPath,
-    getDataConfigurationCreatePath,
-    getWelcomeLandingPath,
-} from "../../utils/routes/routes.util";
-import type { SelectedDatasource } from "../welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.interfaces";
-import { ADD_NEW_DATASOURCE } from "../welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.utils";
+import { AppRouteRelative } from "../../utils/routes/routes.util";
 
 const STEPS = [
     {
@@ -62,21 +40,6 @@ const STEPS = [
 export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
-    const { notify } = useNotificationProviderV1();
-    const navigate = useNavigate();
-
-    const [editedDatasource, setEditedDatasource] = useState<Datasource>(
-        createDefaultDatasource()
-    );
-    const [selectedDatasourceName, setSelectedDatasourceName] =
-        useState<SelectedDatasource>(null);
-
-    const [selectedDatasets, setSelectedDatasets] = useState<
-        Record<string, boolean>
-    >({});
-
-    const queryParams: { id?: string } = useParams();
-    const queryDatasourceName = queryParams.id;
 
     const activeStep = useMemo(() => {
         // Tries to extract the last part of the url for
@@ -98,225 +61,12 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
         return activeStepDefinition.subPath;
     }, [pathname]);
 
-    useEffect(() => {
-        if (
-            activeStep ===
-            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
-        ) {
-            setSelectedDatasourceName(null);
-        }
-        if (
-            activeStep === AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
-        ) {
-            if (queryDatasourceName) {
-                setSelectedDatasourceName(queryDatasourceName);
-            }
-        }
-    }, [activeStep, queryDatasourceName]);
+    const getStepLabel = (step: string): string => {
+        const stepDefinition = STEPS.find(
+            (candidate) => candidate.subPath === step
+        );
 
-    const goToDatasetPage = useCallback(
-        (datasourceName: string) =>
-            navigate(getDataConfigurationCreateDatasetsPath(datasourceName)),
-        []
-    );
-
-    const goToLandingPage = useCallback(
-        () => navigate(getWelcomeLandingPath()),
-        []
-    );
-
-    const handleCreateNewDatasource = useCallback(
-        (editedDatasourceProp: Datasource) =>
-            createDatasource(editedDatasourceProp)
-                .then((datasource: Datasource): string => {
-                    notify(
-                        NotificationTypeV1.Success,
-                        t("message.create-success", {
-                            entity: t("label.datasource"),
-                        })
-                    );
-
-                    setSelectedDatasourceName(datasource.name);
-
-                    return datasource.name;
-                })
-                .catch((error: AxiosError): void => {
-                    const errMessages = getErrorMessages(error);
-
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.create-error", {
-                                  entity: t("label.datasource"),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
-                }),
-        []
-    );
-
-    const handleOnboardDatasets = useCallback(
-        (datasetsName: string[], datasourceName: string) =>
-            Promise.all(
-                datasetsName.map((datasetName) =>
-                    onBoardDataset(datasetName, datasourceName)
-                        .then(() => {
-                            notify(
-                                NotificationTypeV1.Success,
-                                t("message.onboard-success", {
-                                    entity: t("label.dataset"),
-                                })
-                            );
-                            // Redirect to welcome landing
-                            navigate(getWelcomeLandingPath());
-
-                            return Promise.resolve();
-                        })
-                        .catch((error: AxiosError) => {
-                            const errMessages = getErrorMessages(error);
-
-                            isEmpty(errMessages)
-                                ? notify(
-                                      NotificationTypeV1.Error,
-                                      t("message.onboard-error", {
-                                          entity: t("label.dataset"),
-                                      })
-                                  )
-                                : errMessages.map((err) =>
-                                      notify(NotificationTypeV1.Error, err)
-                                  );
-
-                            return Promise.reject();
-                        })
-                )
-            ),
-        []
-    );
-
-    const handleNextClick = useCallback(
-        (activeStepProp: typeof activeStep) => {
-            if (
-                activeStepProp ===
-                AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
-            ) {
-                return ({
-                    selectedDatasourceNameProp = null,
-                    editedDatasourceProp,
-                }: {
-                    selectedDatasourceNameProp: SelectedDatasource;
-                    editedDatasourceProp: Datasource;
-                }) => {
-                    if (selectedDatasourceNameProp === null) {
-                        notify(
-                            NotificationTypeV1.Error,
-                            "Please select a valid dataset or create a new one"
-                        );
-
-                        return;
-                    }
-                    if (selectedDatasourceNameProp === ADD_NEW_DATASOURCE) {
-                        return handleCreateNewDatasource(
-                            editedDatasourceProp
-                        ).then((created) => {
-                            if (!created) {
-                                return;
-                            }
-
-                            goToDatasetPage(created);
-                        });
-                    }
-                    goToDatasetPage(selectedDatasourceNameProp);
-
-                    return;
-                };
-            }
-
-            if (
-                activeStepProp ===
-                AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
-            ) {
-                return ({
-                    datasetsNameProp = [],
-                    selectedDatasourceNameProp,
-                }: {
-                    datasetsNameProp: string[];
-                    selectedDatasourceNameProp: SelectedDatasource;
-                }) => {
-                    if (selectedDatasourceNameProp) {
-                        handleOnboardDatasets(
-                            datasetsNameProp,
-                            selectedDatasourceNameProp
-                        ).then(() => {
-                            goToLandingPage();
-                        });
-                    }
-
-                    return;
-                };
-            }
-
-            // To handle unexpected cases and
-            // maintain function return type consistency
-            return () => Promise.reject();
-        },
-
-        []
-    );
-
-    const handleBackClick = useCallback((activeStepProp: typeof activeStep) => {
-        if (
-            activeStepProp ===
-            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE
-        ) {
-            navigate(-1);
-        }
-        if (
-            activeStepProp ===
-            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS
-        ) {
-            navigate(getDataConfigurationCreatePath());
-        }
-    }, []);
-
-    const outletContext = {
-        ...(activeStep ===
-            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE && {
-            editedDatasource,
-            setEditedDatasource,
-            selectedDatasourceName,
-            setSelectedDatasourceName,
-        }),
-        ...(activeStep ===
-            AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS && {
-            selectedDatasourceName,
-            selectedDatasets,
-            setSelectedDatasets,
-        }),
-    };
-
-    const getNextButtonLabel = useCallback(
-        (activeStepProp: typeof activeStep): string =>
-            ({
-                [AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE]:
-                    t("label.next"),
-                [AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS]: t(
-                    "label.onboard-entity",
-                    {
-                        entity: t("datasets"),
-                    }
-                ),
-            }[activeStepProp]),
-        []
-    );
-
-    const handleNextProps = {
-        selectedDatasourceNameProp: selectedDatasourceName,
-        editedDatasourceProp: editedDatasource,
-        datasetsNameProp: Object.entries(selectedDatasets)
-            .filter(([, v]: [string, boolean]) => v)
-            .map(([k]: [string, boolean]) => k),
+        return t(`message.${stepDefinition?.translationLabel}`);
     };
 
     return (
@@ -336,50 +86,14 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
                             </Typography>
                             <StepperV1
                                 activeStep={activeStep}
-                                stepLabelFn={(step: string): string => {
-                                    const stepDefinition = STEPS.find(
-                                        (candidate) =>
-                                            candidate.subPath === step
-                                    );
-
-                                    return t(
-                                        `message.${stepDefinition?.translationLabel}`
-                                    );
-                                }}
+                                stepLabelFn={getStepLabel}
                                 steps={STEPS.map((item) => item.subPath)}
                             />
                         </Box>
                     </PageContentsCardV1>
                 </Grid>
-                <Grid item xs={12}>
-                    <Outlet context={outletContext} />
-                </Grid>
             </PageContentsGridV1>
-
-            <Box marginTop="auto" width="100%">
-                <PageContentsCardV1>
-                    <Grid container justifyContent="flex-end">
-                        <Grid item>
-                            <Button
-                                color="secondary"
-                                onClick={() => handleBackClick(activeStep)}
-                            >
-                                {t("label.back")}
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                color="primary"
-                                onClick={() =>
-                                    handleNextClick(activeStep)(handleNextProps)
-                                }
-                            >
-                                {getNextButtonLabel(activeStep)}
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </PageContentsCardV1>
-            </Box>
+            <Outlet />
         </PageV1>
     );
 };

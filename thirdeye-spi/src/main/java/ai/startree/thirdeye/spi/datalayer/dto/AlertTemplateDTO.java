@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.template.TemplatePropertyMetadata;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,9 @@ public class AlertTemplateDTO extends AbstractDTO {
   @JsonIgnore
   private RcaMetadataDTO rca;
   private AlertMetadataDTO metadata;
+  @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
+  private List<TemplatePropertyMetadata> properties;
 
   public String getName() {
     return name;
@@ -120,13 +123,25 @@ public class AlertTemplateDTO extends AbstractDTO {
     return this;
   }
 
+  @Deprecated
   public Map<String, Object> getDefaultProperties() {
     return defaultProperties;
   }
 
+  @Deprecated
   public AlertTemplateDTO setDefaultProperties(
       final Map<String, Object> defaultProperties) {
     this.defaultProperties = defaultProperties;
+    return this;
+  }
+
+  public List<TemplatePropertyMetadata> getProperties() {
+    return properties;
+  }
+
+  public AlertTemplateDTO setProperties(
+      final List<TemplatePropertyMetadata> properties) {
+    this.properties = properties;
     return this;
   }
 }

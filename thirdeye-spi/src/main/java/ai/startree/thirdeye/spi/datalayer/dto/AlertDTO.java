@@ -53,6 +53,7 @@ public class AlertDTO extends AbstractDTO {
     this.owners = owners;
   }
 
+  @Override
   public String getName() {
     return name;
   }

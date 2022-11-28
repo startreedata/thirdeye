@@ -29,6 +29,7 @@ public class EnumerationItemDTO extends AbstractDTO {
   private Map<String, Object> params;
   private List<AlertDTO> alerts;
 
+  @Override
   public String getName() {
     return name;
   }

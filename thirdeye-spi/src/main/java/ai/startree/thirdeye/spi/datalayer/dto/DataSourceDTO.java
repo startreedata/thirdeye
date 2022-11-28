@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.authorization.EntityType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ public class DataSourceDTO extends AbstractDTO {
   private Map<String, Object> properties = new HashMap<>();
   private List<DataSourceMetaBean> metaList = new ArrayList<>();
 
+  @Override
   public String getName() {
     return name;
   }

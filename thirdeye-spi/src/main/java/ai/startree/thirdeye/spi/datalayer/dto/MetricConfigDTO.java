@@ -60,6 +60,7 @@ public class MetricConfigDTO extends AbstractDTO {
     this.datasetConfig = datasetConfig;
   }
 
+  @Override
   public String getName() {
     return name;
   }

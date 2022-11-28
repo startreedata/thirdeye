@@ -52,6 +52,7 @@ public class SubscriptionGroupDTO extends AbstractDTO {
     return this;
   }
 
+  @Override
   public String getName() {
     return name;
   }

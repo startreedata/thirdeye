@@ -32,6 +32,9 @@ import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.authorization.AccessControlBuilder;
+import ai.startree.thirdeye.spi.authorization.AccessType;
+import ai.startree.thirdeye.spi.authorization.EntityType;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -40,6 +43,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiParam;
+import java.net.http.HttpHeaders;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -57,6 +61,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
@@ -190,12 +195,34 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     dtoManager.delete(dto);
   }
 
+  protected boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
+    return hasAccess(
+        dto.getName(),
+        dto.getNamespace(),
+        dto.getEntityType(),
+        accessType,
+        httpHeaders
+    );
+  }
+
+  protected boolean hasAccess(String name, String namespace, EntityType entityType,
+      AccessType accessType, HttpHeaders httpHeaders) {
+    return AccessControlBuilder.build().hasAccess(
+        name,
+        namespace,
+        entityType,
+        accessType,
+        httpHeaders
+    );
+  }
+
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAll(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @Context UriInfo uriInfo
+      @Context UriInfo uriInfo,
+      @Context HttpHeaders httpHeaders
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final List<DtoT> results = queryParameters.size() > 0
@@ -203,7 +230,9 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
         : dtoManager.findAll();
 
     final RequestCache cache = createRequestCache();
-    return respondOk(results.stream().map(dto -> toApi(dto, cache)));
+    return respondOk(results.stream()
+        .filter(dto -> hasAccess(dto, AccessType.READ, httpHeaders))
+        .map(dto -> toApi(dto, cache)));
   }
 
   @GET
@@ -212,9 +241,16 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id) {
+      @PathParam("id") Long id,
+      @Context HttpHeaders httpHeaders
+  ) {
+    final DtoT dto = get(id);
+    if (!hasAccess(dto, AccessType.READ, httpHeaders)) {
+      return Response.status(Status.FORBIDDEN).build();
+    }
+
     final RequestCache cache = createRequestCache();
-    return respondOk(toApi(get(id), cache));
+    return respondOk(toApi(dto, cache));
   }
 
   @GET
@@ -223,7 +259,9 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("name") String name) {
+      @PathParam("name") String name,
+      @Context HttpHeaders httpHeaders
+  ) {
     final RequestCache cache = createRequestCache();
     ensureExists(name, ERR_MISSING_NAME);
 
@@ -237,6 +275,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
     }
     DtoT dtoT = byName.iterator().next();
+
+    if (!hasAccess(dtoT, AccessType.READ, httpHeaders)) {
+      return Response.status(Status.FORBIDDEN).build();
+    }
+
     return respondOk(toApi(dtoT, cache));
   }
 
@@ -298,9 +341,15 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id) {
+      @PathParam("id") Long id,
+      @Context HttpHeaders httpHeaders
+  ) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
+      if (!hasAccess(dto, AccessType.DELETE, httpHeaders)) {
+        return Response.status(Status.FORBIDDEN).build();
+      }
+
       deleteDto(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
 
@@ -315,8 +364,14 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Path("/all")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteAll(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
-    dtoManager.findAll().forEach(this::deleteDto);
+  public Response deleteAll(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Context HttpHeaders httpHeaders
+  ) {
+    dtoManager.findAll()
+        .stream()
+        .filter(dto -> hasAccess(dto, AccessType.DELETE, httpHeaders))
+        .forEach(this::deleteDto);
     return Response.ok().build();
   }
 
@@ -330,8 +385,9 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final CountApi api = new CountApi();
     final Long count = queryParameters.size() > 0
-      ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters).getPredicate())
-      : dtoManager.count();
+        ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters)
+        .getPredicate())
+        : dtoManager.count();
     api.setCount(count);
     return Response.ok(api).build();
   }

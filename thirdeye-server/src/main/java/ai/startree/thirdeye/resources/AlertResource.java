@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.UserApi;
+import ai.startree.thirdeye.spi.authorization.AccessType;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -55,9 +56,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
@@ -148,10 +151,16 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   @Deprecated(forRemoval = true)
-  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id) {
+  public Response getInsights(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("id") final Long id,
+      @Context java.net.http.HttpHeaders httpHeaders
+  ) {
     final AlertDTO dto = get(id);
     final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
+    if (!hasAccess(dto, AccessType.READ, httpHeaders)) {
+      return Response.status(Status.FORBIDDEN).build();
+    }
 
     return Response.ok(insights).build();
   }
@@ -160,8 +169,10 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      final AlertInsightsRequestApi request) {
+  public Response getInsights(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      final AlertInsightsRequestApi request
+  ) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
 

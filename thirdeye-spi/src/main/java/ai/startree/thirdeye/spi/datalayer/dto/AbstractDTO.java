@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.authorization.AccessControllable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.Serializable;
@@ -22,7 +23,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 @JsonInclude(Include.NON_NULL)
-public abstract class AbstractDTO implements Serializable {
+public abstract class AbstractDTO implements Serializable, AccessControllable {
 
   private Long id;
   private int version;
@@ -33,6 +34,11 @@ public abstract class AbstractDTO implements Serializable {
 
   public Long getId() {
     return id;
+  }
+
+  @Override
+  public String getName() {
+    return id.toString();
   }
 
   public AbstractDTO setId(final Long id) {

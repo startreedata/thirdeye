@@ -25,6 +25,7 @@ public class RootcauseTemplateDTO extends AbstractDTO {
   long metricId;
   List<Map<String, Object>> modules;
 
+  @Override
   public String getName() {
     return name;
   }

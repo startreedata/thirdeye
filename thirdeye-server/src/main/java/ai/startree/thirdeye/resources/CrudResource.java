@@ -199,9 +199,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   public boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
     return accessController.hasAccess(
-        dto.getName(),
-        dto.getNamespace(),
-        dto.getEntityType(),
+        dto.toAccessControlIdentifiers(),
         accessType,
         httpHeaders
     );

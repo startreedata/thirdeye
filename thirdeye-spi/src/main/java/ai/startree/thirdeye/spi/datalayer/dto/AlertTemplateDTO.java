@@ -37,7 +37,6 @@ public class AlertTemplateDTO extends AbstractDTO {
   private Map<String, @Nullable Object> defaultProperties;
   private List<TemplatePropertyMetadata> properties;
 
-  @Override
   public String getName() {
     return name;
   }

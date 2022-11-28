@@ -13,16 +13,17 @@
  */
 package ai.startree.thirdeye.spi.authorization;
 
-import java.net.http.HttpHeaders;
+public class AccessControlIdentifiers {
 
-public class AlwaysAllow implements AccessController {
+  static public final String DefaultNamespace = "default";
 
-  @Override
-  public boolean hasAccess(
-      final AccessControlIdentifiers identifiers,
-      final AccessType accessType,
-      final HttpHeaders httpHeaders
-  ) {
-    return true;
+  public final String name;
+  public final String namespace;
+  public final EntityType entityType;
+
+  public AccessControlIdentifiers(String name, String namespace, EntityType entityType) {
+    this.name = name;
+    this.namespace = namespace;
+    this.entityType = entityType;
   }
 }

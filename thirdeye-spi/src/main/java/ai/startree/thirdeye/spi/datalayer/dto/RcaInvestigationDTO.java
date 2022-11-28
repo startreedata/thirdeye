@@ -37,7 +37,6 @@ public class RcaInvestigationDTO extends AbstractDTO {
   private Long analysisRangeStart;
   private Long analysisRangeEnd;
 
-  @Override
   public String getName() {
     return name;
   }

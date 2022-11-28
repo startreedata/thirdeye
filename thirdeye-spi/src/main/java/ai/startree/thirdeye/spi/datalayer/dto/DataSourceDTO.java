@@ -30,7 +30,6 @@ public class DataSourceDTO extends AbstractDTO {
   private Map<String, Object> properties = new HashMap<>();
   private List<DataSourceMetaBean> metaList = new ArrayList<>();
 
-  @Override
   public String getName() {
     return name;
   }

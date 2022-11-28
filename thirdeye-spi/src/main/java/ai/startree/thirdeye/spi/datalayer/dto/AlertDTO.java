@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.authorization.AccessControlIdentifiers;
 import ai.startree.thirdeye.spi.authorization.EntityType;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
 import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
@@ -54,14 +55,8 @@ public class AlertDTO extends AbstractDTO {
     this.owners = owners;
   }
 
-  @Override
   public String getName() {
     return name;
-  }
-
-  @Override
-  public EntityType getEntityType() {
-    return EntityType.Alert;
   }
 
   public void setName(String name) {
@@ -158,6 +153,15 @@ public class AlertDTO extends AbstractDTO {
 
   public void setComponents(Map<String, BaseComponent> components) {
     this.components = components;
+  }
+
+  @Override
+  public AccessControlIdentifiers toAccessControlIdentifiers() {
+    return new AccessControlIdentifiers(
+        getName(),
+        AccessControlIdentifiers.DefaultNamespace,
+        EntityType.Alert
+    );
   }
 
   //fixme make sure equals and hashCode implems are correct

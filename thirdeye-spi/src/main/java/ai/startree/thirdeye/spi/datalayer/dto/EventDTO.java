@@ -37,7 +37,6 @@ public class EventDTO extends AbstractDTO {
    */
   Map<String, List<String>> targetDimensionMap;
 
-  @Override
   public String getName() {
     return name;
   }

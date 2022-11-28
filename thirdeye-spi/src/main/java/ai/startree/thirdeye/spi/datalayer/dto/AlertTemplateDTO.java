@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
-import ai.startree.thirdeye.spi.authorization.EntityType;
 import ai.startree.thirdeye.spi.template.TemplatePropertyMetadata;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
@@ -37,11 +36,6 @@ public class AlertTemplateDTO extends AbstractDTO {
   @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
   private List<TemplatePropertyMetadata> properties;
-
-  @Override
-  public EntityType getEntityType() {
-    return EntityType.AlertTemplate;
-  }
 
   @Override
   public String getName() {

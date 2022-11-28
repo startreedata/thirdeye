@@ -157,11 +157,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @Context java.net.http.HttpHeaders httpHeaders
   ) {
     final AlertDTO dto = get(id);
-    final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
     if (!hasAccess(dto, AccessType.READ, httpHeaders)) {
       return Response.status(Status.FORBIDDEN).build();
     }
 
+    final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
     return Response.ok(insights).build();
   }
 
@@ -169,10 +169,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getInsights(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      final AlertInsightsRequestApi request
-  ) {
+  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
 
@@ -187,13 +185,17 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
-      @FormParam("end") final Long endTime
+      @FormParam("end") final Long endTime,
+      @Context java.net.http.HttpHeaders httpHeaders
   ) {
+    final AlertDTO dto = get(id);
+    ensureExists(dto);
     ensureExists(startTime, "start");
-    ensureExists(get(id));
+    if (!hasAccess(dto, AccessType.UPDATE, httpHeaders)) {
+      return Response.status(Status.FORBIDDEN).build();
+    }
 
     alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
-
     return Response.ok().build();
   }
 
@@ -243,8 +245,14 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id) {
+      @PathParam("id") final Long id,
+      @Context java.net.http.HttpHeaders httpHeaders
+  ) {
     final AlertDTO dto = get(id);
+    if (!hasAccess(dto, AccessType.READ, httpHeaders)) {
+      return Response.status(Status.FORBIDDEN).build();
+    }
+
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     alertDeleter.deleteAssociatedAnomalies(dto.getId());

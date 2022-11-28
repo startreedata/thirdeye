@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.authorization.EntityType;
 import ai.startree.thirdeye.spi.detection.BaseComponent;
 import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -56,6 +57,11 @@ public class AlertDTO extends AbstractDTO {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public EntityType getEntityType() {
+    return EntityType.Alert;
   }
 
   public void setName(String name) {

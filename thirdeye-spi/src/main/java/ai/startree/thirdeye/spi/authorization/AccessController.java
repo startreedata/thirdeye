@@ -2,7 +2,7 @@ package ai.startree.thirdeye.spi.authorization;
 
 import java.net.http.HttpHeaders;
 
-public interface AccessControl {
+public interface AccessController {
 
   boolean hasAccess(
       String name,

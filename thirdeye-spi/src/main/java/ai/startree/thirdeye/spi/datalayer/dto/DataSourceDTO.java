@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
-import ai.startree.thirdeye.spi.authorization.EntityType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -32,9 +32,9 @@ import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.authorization.AccessController;
 import ai.startree.thirdeye.spi.authorization.AccessControlBuilder;
 import ai.startree.thirdeye.spi.authorization.AccessType;
-import ai.startree.thirdeye.spi.authorization.EntityType;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -70,6 +70,8 @@ import org.slf4j.LoggerFactory;
 public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT extends AbstractDTO> {
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
+
+  private static final AccessController accessController = AccessControlBuilder.build();
 
   protected final AbstractManager<DtoT> dtoManager;
   protected final ImmutableMap<String, String> apiToIndexMap;
@@ -195,22 +197,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     dtoManager.delete(dto);
   }
 
-  protected boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
-    return hasAccess(
+  public boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
+    return accessController.hasAccess(
         dto.getName(),
         dto.getNamespace(),
         dto.getEntityType(),
-        accessType,
-        httpHeaders
-    );
-  }
-
-  protected boolean hasAccess(String name, String namespace, EntityType entityType,
-      AccessType accessType, HttpHeaders httpHeaders) {
-    return AccessControlBuilder.build().hasAccess(
-        name,
-        namespace,
-        entityType,
         accessType,
         httpHeaders
     );
@@ -346,7 +337,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   ) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
-      if (!hasAccess(dto, AccessType.DELETE, httpHeaders)) {
+      if (!hasAccess(dto, AccessType.UPDATE, httpHeaders)) {
         return Response.status(Status.FORBIDDEN).build();
       }
 
@@ -370,7 +361,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   ) {
     dtoManager.findAll()
         .stream()
-        .filter(dto -> hasAccess(dto, AccessType.DELETE, httpHeaders))
+        .filter(dto -> hasAccess(dto, AccessType.UPDATE, httpHeaders))
         .forEach(this::deleteDto);
     return Response.ok().build();
   }

@@ -327,7 +327,7 @@
         "authentication-disabled": "Authentication has been disabled.",
         "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
         "basic-information-about-group": "Basic information about the group",
-        "by-creating-an-alert-message": "By creating an **Alert**, you'll be able to **Monitor your KPIs** and **Anomalies** will help you to find **Outliers in the KPIs** and analyze the Root Cause Analysis.",
+        "by-creating-an-alert-message": "By creating an <strong>Alert</strong>, you'll be able to <strong>Monitor your KPIs</strong> and <strong>Anomalies</strong> will help you to find <strong>Outliers in the KPIs</strong> and analyze the Root Cause Analysis.",
         "change-confirmation-to": "Are you sure you want to change to {{value}}?",
         "change-cron-warning": "Using simple mode will cause the current cron string to change since it is more advanced",
         "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",

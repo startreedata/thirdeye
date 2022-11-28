@@ -16,7 +16,7 @@
 import { Box, Grid, Typography } from "@material-ui/core";
 import { capitalize } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WelcomeStepCard } from "../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
@@ -40,18 +40,6 @@ export const WelcomeLandingPage: FunctionComponent = () => {
     useEffect(() => {
         getDatasets();
     }, []);
-
-    const getParsedMarkup = (plainText: string): JSX.Element => {
-        return plainText.split("**").reduce<JSX.Element>(
-            (sum, val, i) => (
-                <>
-                    {sum}
-                    {i % 2 === 0 ? val : <strong>{val}</strong>}
-                </>
-            ),
-            <></>
-        );
-    };
 
     return (
         <PageV1>
@@ -79,11 +67,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                     </Typography>
                                 </Box>
                                 <Typography variant="body1">
-                                    {getParsedMarkup(
-                                        t(
-                                            "message.by-creating-an-alert-message"
-                                        )
-                                    )}
+                                    <Trans i18nKey="message.by-creating-an-alert-message" />
                                 </Typography>
                             </Grid>
                             <Grid item xs={4}>

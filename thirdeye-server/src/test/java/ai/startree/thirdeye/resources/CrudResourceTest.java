@@ -18,18 +18,31 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.authorization.AccessType;
+import ai.startree.thirdeye.spi.authorization.EntityType;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet;
+import java.net.http.HttpHeaders;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -102,6 +115,116 @@ public class CrudResourceTest {
 
   private Timestamp getCurrentTime() {
     return new Timestamp(new Date().getTime());
+  }
+
+  @Test
+  public void testGetAll_withNoAccess() {
+    reset(manager);
+    UriInfo uriInfo = Mockito.mock(UriInfo.class);
+    Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
+    when(manager.findAll()).thenReturn(Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    ));
+
+    resource.accessController = (String name, String namespace, EntityType entityType,
+        AccessType accessType, HttpHeaders httpHeaders) -> false;
+
+    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
+      assertThat(resp.getStatus()).isEqualTo(200);
+
+      List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      assertThat(entities).isEmpty();
+    }
+  }
+
+  @Test
+  public void testGetAll_withPartialAccess() {
+    reset(manager);
+    UriInfo uriInfo = Mockito.mock(UriInfo.class);
+    Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
+    when(manager.findAll()).thenReturn(Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    ));
+
+    resource.accessController = (String name, String namespace, EntityType entityType,
+        AccessType accessType, HttpHeaders httpHeaders) -> "2".equals(name);
+
+    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
+      assertThat(resp.getStatus()).isEqualTo(200);
+
+      List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      assertThat(entities.size()).isEqualTo(1);
+      assertThat(entities.get(0).getId()).isEqualTo(2L);
+    }
+  }
+
+  @Test
+  public void testGet_withNoAccess() {
+    reset(manager);
+    when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
+
+    resource.accessController = (String name, String namespace, EntityType entityType,
+        AccessType accessType, HttpHeaders httpHeaders) -> false;
+
+    try (Response resp = resource.get(new ThirdEyePrincipal("nobody"), 1L, null)) {
+      assertThat(resp.getStatus()).isEqualTo(403);
+    }
+  }
+
+  @Test
+  public void testDelete_withNoAccess() {
+    reset(manager);
+    when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
+
+    resource.accessController = (String name, String namespace, EntityType entityType,
+        AccessType accessType, HttpHeaders httpHeaders) -> false;
+
+    try (Response resp = resource.delete(new ThirdEyePrincipal("nobody"), 1L, null)) {
+      assertThat(resp.getStatus()).isEqualTo(403);
+    }
+  }
+
+  @Test
+  public void testDeleteAll_withNoAccess() {
+    reset(manager);
+    when(manager.findAll()).thenReturn(Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    ));
+
+    resource.accessController = (String name, String namespace, EntityType entityType,
+        AccessType accessType, HttpHeaders httpHeaders) -> false;
+
+    try (Response resp = resource.deleteAll(new ThirdEyePrincipal("nobody"), null)) {
+      assertThat(resp.getStatus()).isEqualTo(200);
+      verify(manager, never()).delete(any());
+    }
+  }
+
+  @Test
+  public void testDeleteAll_withPartialAccess() {
+    reset(manager);
+    var dtos = Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    );
+    when(manager.findAll()).thenReturn(dtos);
+
+    resource.accessController = (String name, String namespace, EntityType entityType,
+        AccessType accessType, HttpHeaders httpHeaders) -> name.equals("2");
+
+    try (Response resp = resource.deleteAll(new ThirdEyePrincipal("nobody"), null)) {
+      assertThat(resp.getStatus()).isEqualTo(200);
+      verify(manager).delete(dtos.get(1));
+      verify(manager, never()).delete(dtos.get(0));
+      verify(manager, never()).delete(dtos.get(2));
+    }
   }
 }
 

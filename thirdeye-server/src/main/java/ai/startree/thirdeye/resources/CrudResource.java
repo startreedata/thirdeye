@@ -71,7 +71,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
-  private static final AccessController accessController = AccessControlBuilder.build();
+  public AccessController accessController = AccessControlBuilder.build();
 
   protected final AbstractManager<DtoT> dtoManager;
   protected final ImmutableMap<String, String> apiToIndexMap;

@@ -15,7 +15,7 @@
 
 import { Box, Divider, FormGroup, Grid, Typography } from "@material-ui/core";
 import type { AxiosError } from "axios";
-import { isEmpty } from "lodash";
+import { capitalize, isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -37,7 +37,7 @@ import {
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDatasets } from "../../rest/datasets/datasets.actions";
 import { onBoardDataset } from "../../rest/datasets/datasets.rest";
-import { useGetDatasource } from "../../rest/datasources/datasources.actions";
+import { useGetDatasourceByName } from "../../rest/datasources/datasources.actions";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getWelcomeLandingPath } from "../../utils/routes/routes.util";
@@ -89,13 +89,13 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
 
     const {
         datasource,
-        getDatasource,
+        getDatasourceByName,
         status: datasourceStatus,
-    } = useGetDatasource("name");
+    } = useGetDatasourceByName();
 
     useEffect(() => {
         if (selectedDatasourceName) {
-            getDatasource(selectedDatasourceName);
+            getDatasourceByName(selectedDatasourceName);
         }
     }, []);
 
@@ -126,10 +126,23 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
             errorMessages,
             notify,
             t("message.error-while-fetching", {
-                entity: t("label.datasources"),
+                entity: t("label.datasets"),
             })
         );
     }, [datasetsStatus]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            datasourceStatus,
+            errorMessages,
+            notify,
+            capitalize(
+                t("message.error-while-fetching", {
+                    entity: t("label.datasources"),
+                })
+            )
+        );
+    }, [datasourceStatus]);
 
     const areSomeChecked = Object.values(selectedDatasets).some((v) => v);
     const areAllChecked = !Object.values(selectedDatasets).some((v) => !v);

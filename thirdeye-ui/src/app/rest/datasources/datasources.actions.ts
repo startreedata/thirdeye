@@ -16,6 +16,7 @@ import { useHTTPAction } from "../create-rest-action";
 import { Datasource } from "../dto/datasource.interfaces";
 import {
     GetDatasource,
+    GetDatasourceByName,
     GetDatasources,
     GetDatasourceStatus,
     GetStatusResponse,
@@ -51,18 +52,27 @@ export const useGetDatasources = (): GetDatasources => {
     return { datasources: data, getDatasources, status, errorMessages };
 };
 
-// Two unique keys to fetch datasource by, name and id. Hook supports both.
-export const useGetDatasource = (keyType: "name" | "id"): GetDatasource => {
+export const useGetDatasource = (): GetDatasource => {
     const { data, makeRequest, status, errorMessages } =
-        useHTTPAction<Datasource>(
-            keyType === "name" ? getDatasourceByNameREST : getDatasourceREST
-        );
+        useHTTPAction<Datasource>(getDatasourceREST);
 
-    const getDatasource = (
-        id: string | number
-    ): Promise<Datasource | undefined> => {
+    const getDatasource = (id: number): Promise<Datasource | undefined> => {
         return makeRequest(id);
     };
 
     return { datasource: data, getDatasource, status, errorMessages };
+};
+
+// Datasource may also be fetched by name
+export const useGetDatasourceByName = (): GetDatasourceByName => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<Datasource>(getDatasourceByNameREST);
+
+    const getDatasourceByName = (
+        name: string
+    ): Promise<Datasource | undefined> => {
+        return makeRequest(name);
+    };
+
+    return { datasource: data, getDatasourceByName, status, errorMessages };
 };

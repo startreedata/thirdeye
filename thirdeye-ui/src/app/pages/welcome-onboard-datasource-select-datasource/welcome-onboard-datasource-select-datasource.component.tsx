@@ -24,7 +24,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { capitalize, isEmpty } from "lodash";
+import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -131,18 +131,14 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                     return datasource.name;
                 })
                 .catch((error: AxiosError): void => {
-                    const errMessages = getErrorMessages(error);
-
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.create-error", {
-                                  entity: t("label.datasource"),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
+                    notifyIfErrors(
+                        ActionStatus.Error,
+                        getErrorMessages(error),
+                        notify,
+                        t("message.create-error", {
+                            entity: t("label.datasource"),
+                        })
+                    );
                 }),
         []
     );

@@ -67,7 +67,7 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
                         color={disabled ? "default" : "primary"}
                         disabled={disabled}
                         variant={disabled ? "outlined" : "contained"}
-                        onClick={onClickCta}
+                        onClick={() => onClickCta && onClickCta()}
                     >
                         {ctaContent}
                     </Button>

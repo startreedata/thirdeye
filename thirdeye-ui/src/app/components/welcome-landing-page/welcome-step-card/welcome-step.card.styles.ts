@@ -1,5 +1,3 @@
-import type { StepperProps } from "@material-ui/core";
-
 /*
  * Copyright 2022 StarTree Inc
  *
@@ -14,11 +12,13 @@ import type { StepperProps } from "@material-ui/core";
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface StepperV1Props {
-    steps: string[];
-    activeStep: string;
-    stepLabelFn: (step: string) => string;
-    disabled?: boolean;
-    className?: string;
-    otherProps?: StepperProps;
-}
+import { makeStyles } from "@material-ui/core";
+
+export const useWelcomeStepCardStyles = makeStyles((theme) => ({
+    box: ({ disabled = false }: { disabled: boolean }) => ({
+        opacity: disabled ? 0.6 : 1,
+    }),
+    tickIcon: {
+        color: theme.palette.success.light,
+    },
+}));

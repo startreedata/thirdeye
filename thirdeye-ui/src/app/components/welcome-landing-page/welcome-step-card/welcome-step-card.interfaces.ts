@@ -1,5 +1,3 @@
-import type { StepperProps } from "@material-ui/core";
-
 /*
  * Copyright 2022 StarTree Inc
  *
@@ -14,11 +12,12 @@ import type { StepperProps } from "@material-ui/core";
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface StepperV1Props {
-    steps: string[];
-    activeStep: string;
-    stepLabelFn: (step: string) => string;
+
+export interface WelcomeStepCardProps {
+    title: string;
+    subtitle: string;
+    ctaContent: string | JSX.Element;
+    onClickCta?: () => void;
     disabled?: boolean;
-    className?: string;
-    otherProps?: StepperProps;
+    isComplete?: boolean;
 }

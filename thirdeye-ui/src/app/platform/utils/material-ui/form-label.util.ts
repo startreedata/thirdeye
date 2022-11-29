@@ -1,5 +1,3 @@
-import type { StepperProps } from "@material-ui/core";
-
 /*
  * Copyright 2022 StarTree Inc
  *
@@ -14,11 +12,11 @@ import type { StepperProps } from "@material-ui/core";
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface StepperV1Props {
-    steps: string[];
-    activeStep: string;
-    stepLabelFn: (step: string) => string;
-    disabled?: boolean;
-    className?: string;
-    otherProps?: StepperProps;
-}
+import { typographyOptionsV1 } from "./typography.util";
+
+// Material UI theme style overrides for FormControlLabel
+export const formLabelClassesV1 = {
+    root: {
+        ...typographyOptionsV1.body2,
+    },
+};

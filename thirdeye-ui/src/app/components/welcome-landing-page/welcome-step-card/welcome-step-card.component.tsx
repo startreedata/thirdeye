@@ -26,7 +26,7 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
     ctaContent,
     disabled = false,
     isComplete = false,
-    onClickCta = () => null,
+    onClickCta,
 }) => {
     const styles = useWelcomeStepCardStyles({ disabled });
 
@@ -67,7 +67,7 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
                         color={disabled ? "default" : "primary"}
                         disabled={disabled}
                         variant={disabled ? "outlined" : "contained"}
-                        onClick={onClickCta}
+                        onClick={() => onClickCta?.()}
                     >
                         {ctaContent}
                     </Button>

@@ -221,11 +221,15 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                         <PageContentsCardV1>
                             <Box px={2} py={2}>
                                 <Typography variant="h5">
-                                    Onboard datasets for {datasource?.name}
+                                    {t(
+                                        "message.onboard-datasource-onboard-datasets-for"
+                                    )}
+                                    {datasource?.name}
                                 </Typography>
                                 <Typography variant="body2">
-                                    Select the datasets you want to include in
-                                    your configuration
+                                    {t(
+                                        "message.select-the-datasets-you-want-to-include-in-your-configuration"
+                                    )}
                                 </Typography>
                                 <LoadingErrorStateSwitch
                                     isError={

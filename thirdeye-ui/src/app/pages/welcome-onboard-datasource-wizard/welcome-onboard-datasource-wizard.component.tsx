@@ -74,8 +74,10 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
             <PageHeader
                 transparentBackground
                 customActions={<Button>{t("label.help")}</Button>}
-                subtitle="Connect to StarTree cloud data or add your Pinot datasource"
-                title="Let's start setting up your data"
+                subtitle={t(
+                    "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
+                )}
+                title={t("message.lets-start-setting-up-your-data")}
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>

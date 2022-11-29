@@ -36,6 +36,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
     maxDate,
     minDate,
     btnGroupColor = "secondary",
+    hideQuickExtend,
 }: TimeRangeButtonProps) => {
     const { t } = useTranslation();
     const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
@@ -75,23 +76,28 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
     return (
         <>
             <ButtonGroup color={btnGroupColor} variant="outlined">
-                <Button
-                    color={btnGroupColor}
-                    disabled={!isDateStartExtendable}
-                    variant="outlined"
-                    onClick={() => handleWeekExtensionClick(Direction.BACK)}
-                >
-                    <TooltipV1
-                        placement="top"
-                        title={t("message.extend-entity-by-week", {
-                            entity: `${t("label.time-range")} ${t(
-                                "label.start"
-                            )}`,
-                        })}
+                {!hideQuickExtend && (
+                    <Button
+                        color={btnGroupColor}
+                        disabled={!isDateStartExtendable}
+                        variant="outlined"
+                        onClick={() => handleWeekExtensionClick(Direction.BACK)}
                     >
-                        <KeyboardArrowLeft style={{ fontSize: "0.9375rem" }} />
-                    </TooltipV1>
-                </Button>
+                        <TooltipV1
+                            placement="top"
+                            title={t("message.extend-entity-by-week", {
+                                entity: `${t("label.time-range")} ${t(
+                                    "label.start"
+                                )}`,
+                            })}
+                        >
+                            <KeyboardArrowLeft
+                                style={{ fontSize: "0.9375rem" }}
+                            />
+                        </TooltipV1>
+                    </Button>
+                )}
+
                 <Button
                     color={btnGroupColor}
                     startIcon={<CalendarTodayIcon />}
@@ -100,23 +106,29 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
                 >
                     {formatTimeRangeDuration(timeRangeDuration)}
                 </Button>
-                <Button
-                    color={btnGroupColor}
-                    disabled={!isDateEndExtendable}
-                    variant="outlined"
-                    onClick={() => handleWeekExtensionClick(Direction.FORWARD)}
-                >
-                    <TooltipV1
-                        placement="top"
-                        title={t("message.extend-entity-by-week", {
-                            entity: `${t("label.time-range")} ${t(
-                                "label.end"
-                            )}`,
-                        })}
+                {!hideQuickExtend && (
+                    <Button
+                        color={btnGroupColor}
+                        disabled={!isDateEndExtendable}
+                        variant="outlined"
+                        onClick={() =>
+                            handleWeekExtensionClick(Direction.FORWARD)
+                        }
                     >
-                        <KeyboardArrowRight style={{ fontSize: "0.9375rem" }} />
-                    </TooltipV1>
-                </Button>
+                        <TooltipV1
+                            placement="top"
+                            title={t("message.extend-entity-by-week", {
+                                entity: `${t("label.time-range")} ${t(
+                                    "label.end"
+                                )}`,
+                            })}
+                        >
+                            <KeyboardArrowRight
+                                style={{ fontSize: "0.9375rem" }}
+                            />
+                        </TooltipV1>
+                    </Button>
+                )}
             </ButtonGroup>
             {/* Time range selector */}
             <Popover

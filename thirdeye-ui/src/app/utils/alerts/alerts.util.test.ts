@@ -29,6 +29,7 @@ import {
     createEmptyUiAlertSubscriptionGroup,
     extractDetectionEvaluation,
     filterAlerts,
+    generateGenericNameForAlert,
     getUiAlert,
     getUiAlerts,
     omitNonUpdatableData,
@@ -200,6 +201,25 @@ describe("Alerts Util", () => {
         expect(extractDetectionEvaluation(mockAlertEvaluation)).toEqual(
             mockDetectionEvaluations
         );
+    });
+
+    it("generateGenericNameForAlert should return expected results given the inputs", () => {
+        expect(
+            generateGenericNameForAlert("hello-world", "SUM", "spaced out name")
+        ).toEqual("hello-world_SUM_spaced-out-name");
+        expect(
+            generateGenericNameForAlert(
+                "hello-world",
+                undefined,
+                "spaced out name"
+            )
+        ).toEqual("hello-world_spaced-out-name");
+        expect(
+            generateGenericNameForAlert("hello-world", "SUM", undefined)
+        ).toEqual("hello-world_SUM");
+        expect(
+            generateGenericNameForAlert("hello-world", undefined, undefined)
+        ).toEqual("hello-world");
     });
 });
 

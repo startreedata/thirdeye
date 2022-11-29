@@ -21,4 +21,5 @@ export interface TimeRangeButtonProps {
     maxDate?: number;
     minDate?: number;
     btnGroupColor?: "secondary" | "inherit" | "primary" | "default";
+    hideQuickExtend?: boolean;
 }

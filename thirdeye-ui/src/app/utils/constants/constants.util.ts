@@ -20,3 +20,7 @@ export const PROMISES: { REJECTED: "rejected"; FULFILLED: "fulfilled" } =
 
 export const THIRDEYE_DOC_LINK =
     "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye";
+
+export const QUERY_PARAM_KEYS: { [key: string]: string } = {
+    SHOW_FIRST_ALERT_SUCCESS: "showFirstAlertSuccess",
+};

@@ -22,7 +22,11 @@ import {
 } from "../../../rest/dto/subscription-group.interfaces";
 import { Email } from "./email/email.component";
 import { GroupsEditorProps } from "./groups-editor.interfaces";
-import { availableSpecTypes, specTypeToUIConfig } from "./groups-editor.utils";
+import {
+    availableSpecTypes,
+    generateEmptyEmailSendGridConfiguration,
+    specTypeToUIConfig,
+} from "./groups-editor.utils";
 
 export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
     subscriptionGroup,
@@ -52,16 +56,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                 setCurrentSpecs((specs) => {
                     return [
                         ...specs,
-                        {
-                            type: SpecType.EmailSendgrid,
-                            params: {
-                                apiKey: "${SENDGRID_API_KEY}",
-                                emailRecipients: {
-                                    from: "thirdeye-alerts@startree.ai",
-                                    to: [],
-                                },
-                            },
-                        },
+                        generateEmptyEmailSendGridConfiguration(),
                     ];
                 });
 

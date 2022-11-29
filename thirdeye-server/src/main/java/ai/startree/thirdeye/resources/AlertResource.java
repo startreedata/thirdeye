@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
+import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
@@ -58,9 +59,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
@@ -270,11 +274,19 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAnalytics(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id
+      @PathParam("id") final Long id,
+      @Context UriInfo uriInfo
   ) {
     ensureExists(id);
-    final DaoFilter filter = new DaoFilter()
-        .setPredicate(Predicate.EQ("detectionConfigId", id));
+    final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
+    final Predicate alertPredicate = Predicate.EQ("detectionConfigId", id);
+    final DaoFilter filter;
+    if (queryParameters.isEmpty()) {
+      filter = new DaoFilter().setPredicate(alertPredicate);
+    } else {
+      filter = new DaoFilterBuilder(AnomalyResource.API_TO_INDEX_FILTER_MAP).buildFilter(queryParameters);
+      filter.setPredicate(Predicate.AND(filter.getPredicate(), alertPredicate));
+    }
     return respondOk(analyticsService.computeAnomalyStats(filter));
   }
 }

@@ -32,7 +32,7 @@ import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.spi.authorization.AccessController;
+import ai.startree.thirdeye.spi.authorization.AccessControl;
 import ai.startree.thirdeye.spi.authorization.AccessControlBuilder;
 import ai.startree.thirdeye.spi.authorization.AccessType;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -71,7 +71,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
-  public AccessController accessController = AccessControlBuilder.build();
+  public AccessControl accessControl = AccessControlBuilder.build();
 
   protected final AbstractManager<DtoT> dtoManager;
   protected final ImmutableMap<String, String> apiToIndexMap;
@@ -198,7 +198,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   }
 
   public boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
-    return accessController.hasAccess(
+    return accessControl.hasAccess(
         dto.toAccessControlIdentifiers(),
         accessType,
         httpHeaders

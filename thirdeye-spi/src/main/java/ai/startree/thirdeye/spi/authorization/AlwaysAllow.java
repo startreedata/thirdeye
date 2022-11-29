@@ -15,7 +15,7 @@ package ai.startree.thirdeye.spi.authorization;
 
 import java.net.http.HttpHeaders;
 
-public class AlwaysAllow implements AccessController {
+public class AlwaysAllow implements AccessControl {
 
   @Override
   public boolean hasAccess(

@@ -29,7 +29,6 @@ import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.authorization.AccessControlIdentifiers;
 import ai.startree.thirdeye.spi.authorization.AccessType;
-import ai.startree.thirdeye.spi.authorization.EntityType;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -43,7 +42,6 @@ import java.util.stream.Stream;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -121,15 +119,15 @@ public class CrudResourceTest {
   @Test
   public void testGetAll_withNoAccess() {
     reset(manager);
-    UriInfo uriInfo = Mockito.mock(UriInfo.class);
-    Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
+    UriInfo uriInfo = mock(UriInfo.class);
+    when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
     when(manager.findAll()).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessController = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
@@ -143,15 +141,15 @@ public class CrudResourceTest {
   @Test
   public void testGetAll_withPartialAccess() {
     reset(manager);
-    UriInfo uriInfo = Mockito.mock(UriInfo.class);
-    Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
+    UriInfo uriInfo = mock(UriInfo.class);
+    when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
     when(manager.findAll()).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessController = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> identifiers.name.equals("2");
 
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
@@ -168,7 +166,7 @@ public class CrudResourceTest {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
 
-    resource.accessController = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     try (Response resp = resource.get(new ThirdEyePrincipal("nobody"), 1L, null)) {
@@ -181,7 +179,7 @@ public class CrudResourceTest {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
 
-    resource.accessController = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     try (Response resp = resource.delete(new ThirdEyePrincipal("nobody"), 1L, null)) {
@@ -198,7 +196,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessController = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     try (Response resp = resource.deleteAll(new ThirdEyePrincipal("nobody"), null)) {
@@ -217,7 +215,7 @@ public class CrudResourceTest {
     );
     when(manager.findAll()).thenReturn(dtos);
 
-    resource.accessController = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> identifiers.name.equals("2");
 
     try (Response resp = resource.deleteAll(new ThirdEyePrincipal("nobody"), null)) {

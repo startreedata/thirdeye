@@ -15,7 +15,7 @@ package ai.startree.thirdeye.spi.authorization;
 
 import java.net.http.HttpHeaders;
 
-public interface AccessController {
+public interface AccessControl {
 
   boolean hasAccess(
       AccessControlIdentifiers identifiers,

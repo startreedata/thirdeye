@@ -15,7 +15,7 @@
 
 import { Box, Divider, FormGroup, Grid, Typography } from "@material-ui/core";
 import type { AxiosError } from "axios";
-import { capitalize, isEmpty } from "lodash";
+import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -176,18 +176,14 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                             return Promise.resolve();
                         })
                         .catch((error: AxiosError) => {
-                            const errMessages = getErrorMessages(error);
-
-                            isEmpty(errMessages)
-                                ? notify(
-                                      NotificationTypeV1.Error,
-                                      t("message.onboard-error", {
-                                          entity: t("label.dataset"),
-                                      })
-                                  )
-                                : errMessages.map((err) =>
-                                      notify(NotificationTypeV1.Error, err)
-                                  );
+                            notifyIfErrors(
+                                ActionStatus.Error,
+                                getErrorMessages(error),
+                                notify,
+                                t("message.onboard-error", {
+                                    entity: t("label.dataset"),
+                                })
+                            );
 
                             return Promise.reject();
                         })

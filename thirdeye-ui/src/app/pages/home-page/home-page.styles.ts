@@ -12,13 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import { AppAnalytics } from "../../../rest/dto/app-analytics.interfaces";
+import { makeStyles } from "@material-ui/core";
 
-export interface AnomaliesReportedCountProps {
-    appAnalytics: AppAnalytics | null;
-    getAppAnalyticsStatus: ActionStatus;
-    classes?: {
-        noDataIndicator?: string;
-    };
-}
+export const useHomePageStyles = makeStyles(() => ({
+    noDataIndicator: {
+        height: 72.5,
+    },
+}));

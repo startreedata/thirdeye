@@ -14,6 +14,7 @@
  */
 import { Box, Grid, Typography } from "@material-ui/core";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+import classNames from "classnames";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { SkeletonV1, TooltipV1 } from "../../../platform/components";
@@ -25,6 +26,7 @@ import { AlertAccuracyProps } from "./alert-accuracy.interfaces";
 export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
     appAnalytics,
     getAppAnalyticsStatus,
+    classes,
 }) => {
     const { t } = useTranslation();
 
@@ -70,14 +72,19 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
             <Grid item>
                 <LoadingErrorStateSwitch
                     errorState={
-                        <NoDataIndicator>
+                        <NoDataIndicator
+                            className={classNames(classes?.noDataIndicator)}
+                        >
                             {t("message.experienced-issues-fetching-data")}
                         </NoDataIndicator>
                     }
                     isError={getAppAnalyticsStatus === ActionStatus.Error}
                     isLoading={getAppAnalyticsStatus === ActionStatus.Working}
                     loadingState={
-                        <Box width={100}>
+                        <Box
+                            className={classNames(classes?.noDataIndicator)}
+                            width={100}
+                        >
                             <Typography variant="h2">
                                 <SkeletonV1 animation="pulse" />
                             </Typography>

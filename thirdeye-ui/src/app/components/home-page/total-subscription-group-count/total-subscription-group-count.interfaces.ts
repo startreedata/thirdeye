@@ -18,4 +18,7 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
 export interface TotalSubscriptionGroupCountProps {
     subscriptionGroups: SubscriptionGroup[] | null;
     getSubscriptionGroupsStatus: ActionStatus;
+    classes?: {
+        noDataIndicator?: string;
+    };
 }

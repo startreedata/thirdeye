@@ -14,6 +14,7 @@
 
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Objects;
@@ -21,14 +22,14 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventContextDto {
 
-  private List<String> types;
+  private Templatable<List<String>> types;
   private String sqlFilter;
 
-  public List<String> getTypes() {
+  public Templatable<List<String>> getTypes() {
     return types;
   }
 
-  public EventContextDto setTypes(final List<String> types) {
+  public EventContextDto setTypes(final Templatable<List<String>> types) {
     this.types = types;
     return this;
   }

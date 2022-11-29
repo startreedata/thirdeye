@@ -185,6 +185,10 @@
       "aggregationFunction": "${rcaAggregationFunction}",
       "where": "${queryFilters}"
     },
+    "eventContext": {
+      "types": "${rcaEventTypes}",
+      "sqlFilter" : "${rcaEventSqlFilter}"
+    },
     "timezone": "${timezone}",
     "mergeMaxGap": "${mergeMaxGap}",
     "mergeMaxDuration": "${mergeMaxDuration}",
@@ -203,6 +207,8 @@
     "queryLimit": "100000000",
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
+    "rcaEventTypes": [],
+    "rcaEventSqlFilter": "",
     "coldStartIgnore": "true",
     "timeOfWeekIgnore": "true",
     "daysOfWeek": [],

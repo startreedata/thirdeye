@@ -55,17 +55,16 @@ public class PostProcessorRegistry {
     anomalyPostProcessorFactoryMap.put(f.name(), f);
   }
 
-  public AnomalyPostProcessor build(final String factoryName, final Map<String, Object> nodeParams,
-      final ApplicationContext context) {
+  public AnomalyPostProcessor build(final String factoryName,
+      final Map<String, Object> nodeParams) {
     checkArgument(anomalyPostProcessorFactoryMap.containsKey(factoryName),
         String.format("Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
             factoryName,
             anomalyPostProcessorFactoryMap.keySet()));
     final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
 
-    final PostProcessingContext postProcessingContext = new PostProcessingContext(
-        context.getDatasetConfigManager(),
-        context.getMinMaxTimeLoader());
+    final PostProcessingContext postProcessingContext = new PostProcessingContext(datasetDao,
+        minMaxTimeLoader);
     return anomalyPostProcessorFactoryMap.get(factoryName)
         .build(componentSpec, postProcessingContext);
   }

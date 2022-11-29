@@ -59,8 +59,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
         ERR_MISSING_CONFIGURATION_FIELD,
         "'type' in " + getOperatorName() + "params");
 
-    postProcessor = postProcessorRegistry.build(type, nodeParams,
-        context.getPlanNodeContext().getApplicationContext());
+    postProcessor = postProcessorRegistry.build(type, nodeParams);
   }
 
   @Override

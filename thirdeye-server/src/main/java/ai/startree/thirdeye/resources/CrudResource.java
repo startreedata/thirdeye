@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -198,11 +199,13 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   }
 
   public boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
-    return accessControl.hasAccess(
-        dto.toAccessControlIdentifiers(),
-        accessType,
-        httpHeaders
-    );
+    return accessControl.hasAccess(dto.toAccessControlIdentifiers(), accessType, httpHeaders);
+  }
+
+  void ensureHasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
+    if (!hasAccess(dto, accessType, httpHeaders)) {
+      throw new ForbiddenException(Response.status(Status.FORBIDDEN).build());
+    }
   }
 
   @GET
@@ -234,9 +237,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @Context HttpHeaders httpHeaders
   ) {
     final DtoT dto = get(id);
-    if (!hasAccess(dto, AccessType.READ, httpHeaders)) {
-      return Response.status(Status.FORBIDDEN).build();
-    }
+    ensureHasAccess(dto, AccessType.READ, httpHeaders);
 
     final RequestCache cache = createRequestCache();
     return respondOk(toApi(dto, cache));
@@ -264,11 +265,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
     }
     DtoT dtoT = byName.iterator().next();
-
-    if (!hasAccess(dtoT, AccessType.READ, httpHeaders)) {
-      return Response.status(Status.FORBIDDEN).build();
-    }
-
+    ensureHasAccess(dtoT, AccessType.READ, httpHeaders);
     return respondOk(toApi(dtoT, cache));
   }
 
@@ -335,9 +332,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   ) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
-      if (!hasAccess(dto, AccessType.UPDATE, httpHeaders)) {
-        return Response.status(Status.FORBIDDEN).build();
-      }
+      ensureHasAccess(dto, AccessType.UPDATE, httpHeaders);
 
       deleteDto(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
@@ -359,7 +354,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   ) {
     dtoManager.findAll()
         .stream()
-        .filter(dto -> hasAccess(dto, AccessType.UPDATE, httpHeaders))
+        .peek(dto -> ensureHasAccess(dto, AccessType.UPDATE, httpHeaders))
         .forEach(this::deleteDto);
     return Response.ok().build();
   }

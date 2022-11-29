@@ -18,9 +18,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -39,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -156,12 +155,12 @@ public class CrudResourceTest {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
-      assertThat(entities.size()).isEqualTo(1);
-      assertThat(entities.get(0).getId()).isEqualTo(2L);
+      assertThat(1).isEqualTo(entities.size());
+      assertThat(2L).isEqualTo(entities.get(0).getId());
     }
   }
 
-  @Test
+  @Test(expectedExceptions = ForbiddenException.class)
   public void testGet_withNoAccess() {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
@@ -169,12 +168,10 @@ public class CrudResourceTest {
     resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
-    try (Response resp = resource.get(new ThirdEyePrincipal("nobody"), 1L, null)) {
-      assertThat(resp.getStatus()).isEqualTo(403);
-    }
+    resource.get(new ThirdEyePrincipal("nobody"), 1L, null);
   }
 
-  @Test
+  @Test(expectedExceptions = ForbiddenException.class)
   public void testDelete_withNoAccess() {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
@@ -182,12 +179,10 @@ public class CrudResourceTest {
     resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
-    try (Response resp = resource.delete(new ThirdEyePrincipal("nobody"), 1L, null)) {
-      assertThat(resp.getStatus()).isEqualTo(403);
-    }
+    resource.delete(new ThirdEyePrincipal("nobody"), 1L, null);
   }
 
-  @Test
+  @Test(expectedExceptions = ForbiddenException.class)
   public void testDeleteAll_withNoAccess() {
     reset(manager);
     when(manager.findAll()).thenReturn(Arrays.asList(
@@ -199,13 +194,10 @@ public class CrudResourceTest {
     resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
-    try (Response resp = resource.deleteAll(new ThirdEyePrincipal("nobody"), null)) {
-      assertThat(resp.getStatus()).isEqualTo(200);
-      verify(manager, never()).delete(any());
-    }
+    resource.deleteAll(new ThirdEyePrincipal("nobody"), null);
   }
 
-  @Test
+  @Test(expectedExceptions = ForbiddenException.class)
   public void testDeleteAll_withPartialAccess() {
     reset(manager);
     var dtos = Arrays.asList(
@@ -218,12 +210,7 @@ public class CrudResourceTest {
     resource.accessControl = (AccessControlIdentifiers identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> identifiers.name.equals("2");
 
-    try (Response resp = resource.deleteAll(new ThirdEyePrincipal("nobody"), null)) {
-      assertThat(resp.getStatus()).isEqualTo(200);
-      verify(manager).delete(dtos.get(1));
-      verify(manager, never()).delete(dtos.get(0));
-      verify(manager, never()).delete(dtos.get(2));
-    }
+    resource.deleteAll(new ThirdEyePrincipal("nobody"), null);
   }
 }
 

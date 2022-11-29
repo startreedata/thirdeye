@@ -157,9 +157,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @Context java.net.http.HttpHeaders httpHeaders
   ) {
     final AlertDTO dto = get(id);
-    if (!hasAccess(dto, AccessType.READ, httpHeaders)) {
-      return Response.status(Status.FORBIDDEN).build();
-    }
+    ensureHasAccess(dto, AccessType.READ, httpHeaders);
 
     final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
     return Response.ok(insights).build();
@@ -191,9 +189,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertDTO dto = get(id);
     ensureExists(dto);
     ensureExists(startTime, "start");
-    if (!hasAccess(dto, AccessType.UPDATE, httpHeaders)) {
-      return Response.status(Status.FORBIDDEN).build();
-    }
+    ensureHasAccess(dto, AccessType.UPDATE, httpHeaders);
 
     alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
     return Response.ok().build();
@@ -249,9 +245,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @Context java.net.http.HttpHeaders httpHeaders
   ) {
     final AlertDTO dto = get(id);
-    if (!hasAccess(dto, AccessType.READ, httpHeaders)) {
-      return Response.status(Status.FORBIDDEN).build();
-    }
+    ensureHasAccess(dto, AccessType.UPDATE, httpHeaders);
 
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 

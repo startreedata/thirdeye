@@ -169,7 +169,11 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public List<String> getDatasets() throws Exception {
-    throw new UnsupportedOperationException();
+    try {
+      return datasetOnboarder.getAllTables();
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

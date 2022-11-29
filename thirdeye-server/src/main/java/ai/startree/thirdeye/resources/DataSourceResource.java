@@ -14,8 +14,10 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_FAILED;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
+import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -48,6 +50,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
@@ -182,5 +185,18 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, name, e.getMessage()));
     }
     return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, name, "Unknown error"));
+  }
+
+  @GET
+  @Path("{name}/available-datasets")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response listAllAvailableDatasets(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("name") String name) {
+    try {
+      return Response.ok(dataSourceCache.getDataSource(name).getDatasets()).build();
+    } catch (Exception e) {
+      throw serverError(ERR_UNKNOWN, e.getMessage());
+    }
   }
 }

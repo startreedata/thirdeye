@@ -18,4 +18,7 @@ import { AppAnalytics } from "../../../rest/dto/app-analytics.interfaces";
 export interface AnomaliesReportedCountProps {
     appAnalytics: AppAnalytics | null;
     getAppAnalyticsStatus: ActionStatus;
+    classes?: {
+        noDataIndicator?: string;
+    };
 }

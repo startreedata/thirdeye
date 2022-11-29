@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Grid, Link, Typography } from "@material-ui/core";
+import classNames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -24,7 +25,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { TotalSubscriptionGroupCountProps } from "./total-subscription-group-count.interfaces";
 
 export const TotalSubscriptionGroupCount: FunctionComponent<TotalSubscriptionGroupCountProps> =
-    ({ subscriptionGroups, getSubscriptionGroupsStatus }) => {
+    ({ subscriptionGroups, getSubscriptionGroupsStatus, classes }) => {
         const { t } = useTranslation();
 
         return (
@@ -45,7 +46,9 @@ export const TotalSubscriptionGroupCount: FunctionComponent<TotalSubscriptionGro
                 <Grid item>
                     <LoadingErrorStateSwitch
                         errorState={
-                            <NoDataIndicator>
+                            <NoDataIndicator
+                                className={classNames(classes?.noDataIndicator)}
+                            >
                                 {t("message.experienced-issues-fetching-data")}
                             </NoDataIndicator>
                         }
@@ -56,7 +59,10 @@ export const TotalSubscriptionGroupCount: FunctionComponent<TotalSubscriptionGro
                             getSubscriptionGroupsStatus === ActionStatus.Working
                         }
                         loadingState={
-                            <Box width={100}>
+                            <Box
+                                className={classNames(classes?.noDataIndicator)}
+                                width={100}
+                            >
                                 <Typography variant="h2">
                                     <SkeletonV1 animation="pulse" />
                                 </Typography>

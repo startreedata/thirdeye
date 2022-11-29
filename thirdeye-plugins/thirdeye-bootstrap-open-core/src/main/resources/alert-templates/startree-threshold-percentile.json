@@ -167,14 +167,30 @@
       "aggregationFunction": "${rcaAggregationFunction}",
       "where": "${queryFilters}"
     },
+    "eventContext": {
+      "types": "${rcaEventTypes}",
+      "sqlFilter" : "${rcaEventSqlFilter}"
+    },
     "timezone": "${timezone}",
     "mergeMaxGap": "${mergeMaxGap}",
     "mergeMaxDuration": "${mergeMaxDuration}",
     "granularity": "${monitoringGranularity}"
   },
+  "properties": [
+    {
+      "name": "timezone",
+      "description": "Timezone used to group by time.",
+      "defaultValue": "UTC",
+      "jsonType": "STRING"
+    },
+    {
+      "name": "timeColumn",
+      "description": "TimeColumn to use to group by time. If set to AUTO (the default value), the Pinot primary time column is used.",
+      "defaultValue": "AUTO",
+      "jsonType": "STRING"
+    }
+  ],
   "defaultProperties": {
-    "timezone": "UTC",
-    "timeColumn": "AUTO",
     "timeColumnFormat": "",
     "completenessDelay": "P0D",
     "mergeMaxGap": "",
@@ -183,6 +199,8 @@
     "queryFilters": "",
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
+    "rcaEventTypes": [],
+    "rcaEventSqlFilter": "",
     "coldStartIgnore": "true",
     "coldStartPeriod": "P0D",
     "timeOfWeekIgnore": "true",

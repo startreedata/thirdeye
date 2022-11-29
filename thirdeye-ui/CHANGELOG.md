@@ -1,3 +1,22 @@
+### [1.72.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.72.0...thirdeye-ui-1.72.1) (2022-11-28)
+
+
+### Bug Fixes
+
+* [TE-1055](https://cortexdata.atlassian.net/browse/TE-1055) assigned fixed height to boxes on home page ([8e78dedea](https://github.com/startreedata/thirdeye/commit/8e78dedea3808574f14a2fcbecfe70d22d0feeeb))
+
+## [1.72.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.71.0...thirdeye-ui-1.72.0) (2022-11-19)
+
+
+### Features
+
+* [TE-1052](https://cortexdata.atlassian.net/browse/TE-1052) cohort recommender enhancements ([56a94d23b](https://github.com/startreedata/thirdeye/commit/56a94d23b1640a2f3f78bb3ee37a281d589225fe))
+
+
+### Bug Fixes
+
+* [TE-1061](https://cortexdata.atlassian.net/browse/TE-1061) showing a message for 0 anomalies on home page ([d0e4e8264](https://github.com/startreedata/thirdeye/commit/d0e4e8264b4cd77bd0daa90956cb408e37df5674))
+
 ## [1.71.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.70.0...thirdeye-ui-1.71.0) (2022-11-16)
 
 

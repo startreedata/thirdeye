@@ -56,6 +56,12 @@ const RootCauseAnalysisRouter = lazy(() =>
     ).then((module) => ({ default: module.RootCauseAnalysisRouter }))
 );
 
+const WelcomeRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "welcome-router" */ "../welcome/welcome.router"
+    ).then((module) => ({ default: module.WelcomeRouter }))
+);
+
 export const AppRouter: FunctionComponent = () => {
     const { authDisabled, authenticated } = useAuthProviderV1();
 
@@ -85,6 +91,12 @@ export const AppRouter: FunctionComponent = () => {
                     <Route
                         element={<RootCauseAnalysisRouter />}
                         path={`${AppRoute.ROOT_CAUSE_ANALYSIS}/*`}
+                    />
+
+                    {/* Direct all welcome paths welcome router */}
+                    <Route
+                        element={<WelcomeRouter />}
+                        path={`${AppRoute.WELCOME}/*`}
                     />
 
                     {/* Direct all other paths to general authenticated router */}

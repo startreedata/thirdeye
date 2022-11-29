@@ -26,6 +26,14 @@ export const getDatasource = async (id: number): Promise<Datasource> => {
     return response.data;
 };
 
+export const getDatasourceByName = async (
+    name: string
+): Promise<Datasource> => {
+    const response = await axios.get(`${BASE_URL_DATASOURCES}/name/${name}`);
+
+    return response.data;
+};
+
 export const getAllDatasources = async (): Promise<Datasource[]> => {
     const response = await axios.get(BASE_URL_DATASOURCES);
 

@@ -41,6 +41,7 @@ import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.actio
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { useUserPreferences } from "../../utils/user-preferences/user-preferences";
 import { UserPreferencesKeys } from "../../utils/user-preferences/user-preferences.interfaces";
+import { useHomePageStyles } from "./home-page.styles";
 
 export const HomePage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -55,6 +56,7 @@ export const HomePage: FunctionComponent = () => {
     const [shouldHideDocumentation, setShouldHideDocumentation] = useState(
         getPreference(UserPreferencesKeys.SHOW_DOCUMENTATION_RESOURCES) ?? false
     );
+    const style = useHomePageStyles();
     const theme = useTheme();
     const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("md"));
 
@@ -107,6 +109,9 @@ export const HomePage: FunctionComponent = () => {
                             <PageContentsCardV1 fullHeight>
                                 <AlertAccuracy
                                     appAnalytics={appAnalytics}
+                                    classes={{
+                                        noDataIndicator: style.noDataIndicator,
+                                    }}
                                     getAppAnalyticsStatus={status}
                                 />
                             </PageContentsCardV1>
@@ -120,6 +125,9 @@ export const HomePage: FunctionComponent = () => {
                             <PageContentsCardV1 fullHeight>
                                 <AnomaliesReportedCount
                                     appAnalytics={appAnalytics}
+                                    classes={{
+                                        noDataIndicator: style.noDataIndicator,
+                                    }}
                                     getAppAnalyticsStatus={status}
                                 />
                             </PageContentsCardV1>
@@ -128,6 +136,9 @@ export const HomePage: FunctionComponent = () => {
                             <PageContentsCardV1 fullHeight>
                                 <AnomaliesPendingFeedbackCount
                                     appAnalytics={appAnalytics}
+                                    classes={{
+                                        noDataIndicator: style.noDataIndicator,
+                                    }}
                                     getAppAnalyticsStatus={status}
                                 />
                             </PageContentsCardV1>
@@ -135,6 +146,9 @@ export const HomePage: FunctionComponent = () => {
                         <Grid item>
                             <PageContentsCardV1 fullHeight>
                                 <TotalSubscriptionGroupCount
+                                    classes={{
+                                        noDataIndicator: style.noDataIndicator,
+                                    }}
                                     getSubscriptionGroupsStatus={
                                         getSubscriptionGroupsStatus
                                     }

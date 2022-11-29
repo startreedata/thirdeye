@@ -32,6 +32,7 @@ import {
     dialogContentClassesV1,
 } from "./dialog.util";
 import { formControlLabelClassesV1 } from "./form-control-label.util";
+import { formLabelClassesV1 } from "./form-label.util";
 import { gridPropsV1 } from "./grid.util";
 import { inputBaseClassesV1 } from "./input-base.util";
 import { linkClassesV1, linkPropsV1 } from "./link.util";
@@ -79,6 +80,7 @@ export const lightV1: Theme = createTheme({
         MuiDialogActions: dialogActionsClassesV1,
         MuiDialogContent: dialogContentClassesV1,
         MuiFormControlLabel: formControlLabelClassesV1,
+        MuiFormLabel: formLabelClassesV1,
         MuiInputBase: inputBaseClassesV1,
         MuiLink: linkClassesV1,
         MuiListItemText: listItemTextClassesV1,

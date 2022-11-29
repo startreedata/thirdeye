@@ -14,6 +14,7 @@
 
 package ai.startree.thirdeye.spi.api;
 
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
@@ -21,14 +22,14 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class EventContextApi {
 
-  private List<String> types;
+  private Templatable<List<String>> types;
   private String sqlFilter;
 
-  public List<String> getTypes() {
+  public Templatable<List<String>> getTypes() {
     return types;
   }
 
-  public EventContextApi setTypes(final List<String> types) {
+  public EventContextApi setTypes(final Templatable<List<String>> types) {
     this.types = types;
     return this;
   }

@@ -189,7 +189,7 @@ public class RcaInfoFetcher {
       final String eventSqlFilter = (String) properties.get("eventSqlFilter");
       if (eventTypes != null || eventSqlFilter != null) {
         return new EventContextDto()
-            .setTypes(eventTypes)
+            .setTypes(Templatable.of(eventTypes))
             .setSqlFilter(eventSqlFilter);
       }
     } catch (Exception ignored) {

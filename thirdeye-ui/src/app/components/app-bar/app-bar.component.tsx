@@ -116,18 +116,6 @@ export const AppBar: FunctionComponent = () => {
                         {t("label.configuration")}
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>
-
-                {/* Swagger */}
-                <NavBarLinkV1
-                    externalLink
-                    href={getSwaggerPath()}
-                    target="_blank"
-                >
-                    <NavBarLinkIconV1>
-                        <CodeIcon />
-                    </NavBarLinkIconV1>
-                    <NavBarLinkTextV1>{t("label.swagger")}</NavBarLinkTextV1>
-                </NavBarLinkV1>
             </NavBarPrimaryContainerV1>
             <NavBarSecondaryContainerV1>
                 {/* About */}
@@ -145,6 +133,18 @@ export const AppBar: FunctionComponent = () => {
                     <NavBarLinkTextV1>
                         {t("label.documentation")}
                     </NavBarLinkTextV1>
+                </NavBarLinkV1>
+
+                {/* Swagger */}
+                <NavBarLinkV1
+                    externalLink
+                    href={getSwaggerPath()}
+                    target="_blank"
+                >
+                    <NavBarLinkIconV1>
+                        <CodeIcon />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>{t("label.swagger")}</NavBarLinkTextV1>
                 </NavBarLinkV1>
 
                 {/* Support */}

@@ -12,6 +12,33 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
+export interface MetadataProperty {
+    name: string;
+    description: string;
+    defaultValue:
+        | string
+        | number
+        | string[] // Array
+        | number[] // Array
+        | Record<string, unknown> // Object
+        | boolean
+        | null;
+    defaultIsNull: boolean;
+
+    /**
+     * See spec https://json-schema.org/understanding-json-schema/reference/type.html
+     */
+    jsonType:
+        | "STRING"
+        | "NUMBER"
+        | "INTEGER"
+        | "OBJECT"
+        | "ARRAY"
+        | "BOOLEAN"
+        | "NULL";
+}
+
 export interface NewAlertTemplate {
     name: string;
     description: string;
@@ -37,6 +64,7 @@ export interface NewAlertTemplate {
     };
 
     defaultProperties?: { [index: string]: string };
+    properties?: MetadataProperty[];
 }
 
 export interface AlertTemplate extends NewAlertTemplate {

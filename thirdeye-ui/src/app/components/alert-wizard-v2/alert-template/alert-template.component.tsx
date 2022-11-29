@@ -21,7 +21,13 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import React, { MouseEvent, useEffect, useMemo, useState } from "react";
+import React, {
+    MouseEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
@@ -33,6 +39,7 @@ import { AlertTemplatePropertiesBuilder } from "./alert-template-properties-buil
 import { AlertTemplateProps } from "./alert-template.interfaces";
 import {
     findRequiredFields,
+    getDefaultProperties,
     hasRequiredPropertyValuesSet,
 } from "./alert-template.utils";
 import { PreviewChart } from "./preview-chart/preview-chart.component";
@@ -62,13 +69,17 @@ function AlertTemplate({
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
 
+    const defaultProperties = getDefaultProperties(
+        selectedAlertTemplate
+    ) as TemplatePropertiesObject;
+
     useEffect(() => {
         const isValid =
             !!selectedAlertTemplate &&
             hasRequiredPropertyValuesSet(
                 requiredFields,
                 alertTemplateProperties,
-                selectedAlertTemplate.defaultProperties || {}
+                defaultProperties
             );
 
         setIsRequiredPropertyValuesSet(isValid);
@@ -90,10 +101,7 @@ function AlertTemplate({
             Object.keys(newChanges).forEach((templatePropertyKey) => {
                 if (
                     selectedAlertTemplate &&
-                    selectedAlertTemplate.defaultProperties &&
-                    selectedAlertTemplate.defaultProperties[
-                        templatePropertyKey
-                    ] !== undefined
+                    defaultProperties[templatePropertyKey] !== undefined
                 ) {
                     if (newChanges[templatePropertyKey] === "") {
                         delete newTemplateProperties[templatePropertyKey];
@@ -132,34 +140,42 @@ function AlertTemplate({
         });
     };
 
-    const renderAlertTemplateSelectOption = (
-        option: AlertTemplateType
-    ): JSX.Element => {
-        if (option.id === -1) {
-            return (
-                <Link
-                    href={getAlertTemplatesCreatePath()}
-                    target="_blank"
-                    onClick={(e: MouseEvent<HTMLElement>) => {
-                        // The link to create a new alert template
-                        // should not able able to actually selected
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.open(getAlertTemplatesCreatePath(), "_blank");
-                    }}
-                >
-                    {t("label.create-new-template")}
-                </Link>
-            );
-        }
+    // Since this returns a JSX for render, wrapping this in a  useCallback
+    // can help with ui performance and prevent unnecessary re-renders
+    const renderAlertTemplateSelectOption = useCallback(
+        (option: AlertTemplateType): JSX.Element => {
+            if (option.id === -1) {
+                return (
+                    <Link
+                        href={getAlertTemplatesCreatePath()}
+                        target="_blank"
+                        onClick={(e: MouseEvent<HTMLElement>) => {
+                            // The link to create a new alert template
+                            // should not able able to actually selected
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.open(
+                                getAlertTemplatesCreatePath(),
+                                "_blank"
+                            );
+                        }}
+                    >
+                        {t("label.create-new-template")}
+                    </Link>
+                );
+            }
 
-        return (
-            <li>
-                <Typography variant="h6">{option.name}</Typography>
-                <Typography variant="caption">{option.description}</Typography>
-            </li>
-        );
-    };
+            return (
+                <li>
+                    <Typography variant="h6">{option.name}</Typography>
+                    <Typography variant="caption">
+                        {option.description}
+                    </Typography>
+                </li>
+            );
+        },
+        []
+    );
 
     return (
         <PageContentsCardV1>
@@ -222,9 +238,7 @@ function AlertTemplate({
                 {selectedAlertTemplate && (
                     <AlertTemplatePropertiesBuilder
                         alertTemplateId={selectedAlertTemplate.id}
-                        defaultTemplateProperties={
-                            selectedAlertTemplate.defaultProperties || {}
-                        }
+                        defaultTemplateProperties={defaultProperties}
                         requiredFields={requiredFields}
                         templateProperties={alertTemplateProperties}
                         onPropertyValueChange={handlePropertyValueChange}

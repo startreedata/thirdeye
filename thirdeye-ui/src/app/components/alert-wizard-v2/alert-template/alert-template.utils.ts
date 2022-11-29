@@ -119,7 +119,7 @@ export function createNewStartingAlert(): EditableAlert {
     };
 }
 
-type DefaultValue = MetadataProperty["defaultValue"];
+type DefaultValue = NonNullable<MetadataProperty["defaultValue"]>;
 
 export const getDefaultProperties = (
     alertTemplate: AlertTemplate | null
@@ -131,9 +131,11 @@ export const getDefaultProperties = (
     const oldDefaultProperties = alertTemplate.defaultProperties || {};
     const newDefaultProperties: Record<string, DefaultValue> = Object.assign(
         {},
-        ...(alertTemplate.properties || []).map(({ name, defaultValue }) => ({
-            [name]: defaultValue,
-        }))
+        ...(alertTemplate.properties || [])
+            .filter(({ defaultValue }) => !!defaultValue)
+            .map(({ name, defaultValue }) => ({
+                [name]: defaultValue,
+            }))
     );
 
     return { ...oldDefaultProperties, ...newDefaultProperties };

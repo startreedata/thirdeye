@@ -14,21 +14,29 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
-import static ai.startree.thirdeye.spi.Constants.K_POST_PROCESSOR_REGISTRY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
+import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -36,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.BeforeClass;
@@ -57,11 +66,11 @@ public class PostProcessorOperatorTest {
       1L,
       DateTimeZone.UTC);
 
-  private PostProcessorRegistry postProcessorRegistry;
+  private PlanNodeContext planNodeContext;
 
   @BeforeClass
   public void setUp() {
-    postProcessorRegistry = mock(PostProcessorRegistry.class);
+    final PostProcessorRegistry postProcessorRegistry = mock(PostProcessorRegistry.class);
     when(postProcessorRegistry.build(anyString(), anyMap())).thenAnswer(
         i -> {
           final Map<String, Object> nodeParams = i.getArgument(1);
@@ -69,6 +78,19 @@ public class PostProcessorOperatorTest {
           return new TestPostProcessor(componentSpec);
         }
     );
+
+    planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
+        new DetectionPipelineContext().setApplicationContext(
+            new ApplicationContext(
+                mock(DataSourceCache.class),
+                mock(DetectionRegistry.class),
+                postProcessorRegistry,
+                mock(EventManager.class),
+                mock(DatasetConfigManager.class),
+                mock(MinMaxTimeLoader.class),
+                mock(ExecutorService.class),
+                new DetectionPipelineConfiguration()
+        )));
   }
 
   @Test
@@ -86,8 +108,7 @@ public class PostProcessorOperatorTest {
         .setPlanNode(
             planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
-        .setProperties(Map.of(K_POST_PROCESSOR_REGISTRY,
-            postProcessorRegistry));
+        .setPlanNodeContext(planNodeContext);
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
     operator.execute();
@@ -117,7 +138,7 @@ public class PostProcessorOperatorTest {
         .setPlanNode(
             planNodeBean.setInputs(List.of(new InputBean().setSourcePlanNode("DetectorNode"))))
         .setInputsMap(inputsMap)
-        .setProperties(Map.of(K_POST_PROCESSOR_REGISTRY, postProcessorRegistry));
+        .setPlanNodeContext(planNodeContext);
     final PostProcessorOperator operator = new PostProcessorOperator();
     operator.init(context);
     operator.execute();
@@ -183,7 +204,8 @@ public class PostProcessorOperatorTest {
     private String labelName;
 
     public TestPostProcessor(final Map<String, Object> params) {
-      final TestPostProcessorSpec spec = new ObjectMapper().convertValue(params, TestPostProcessorSpec.class);
+      final TestPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+          TestPostProcessorSpec.class);
       this.labelName = spec.getLabelName();
     }
 

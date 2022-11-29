@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import java.util.concurrent.ExecutorService;
 
 public class ApplicationContext {
@@ -25,6 +26,7 @@ public class ApplicationContext {
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
+  private final MinMaxTimeLoader minMaxTimeLoader;
   private final ExecutorService subTaskExecutor;
   private final DetectionPipelineConfiguration configuration;
 
@@ -33,6 +35,7 @@ public class ApplicationContext {
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
       final DatasetConfigManager datasetConfigManager,
+      final MinMaxTimeLoader minMaxTimeLoader,
       final ExecutorService subTaskExecutor,
       final DetectionPipelineConfiguration detectionPipelineConfiguration) {
     this.dataSourceCache = dataSourceCache;
@@ -40,6 +43,7 @@ public class ApplicationContext {
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
+    this.minMaxTimeLoader = minMaxTimeLoader;
     this.subTaskExecutor = subTaskExecutor;
     configuration = detectionPipelineConfiguration;
   }
@@ -70,5 +74,9 @@ public class ApplicationContext {
 
   public DetectionPipelineConfiguration getConfiguration() {
     return configuration;
+  }
+
+  public MinMaxTimeLoader getMinMaxTimeLoader() {
+    return minMaxTimeLoader;
   }
 }

@@ -27,8 +27,11 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
+import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
+import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.HashSet;
 import java.util.List;
@@ -48,9 +51,9 @@ import org.joda.time.Interval;
  * - monitor metric1
  * - ignore if metric2 was out of threshold
  */
-public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPostProcessorSpec> {
+public class ThresholdPostProcessor implements AnomalyPostProcessor {
 
-  public static final String NAME = "THRESHOLD";
+  private static final String NAME = "THRESHOLD";
 
   private static final boolean DEFAULT_IGNORE = false;
   @VisibleForTesting
@@ -60,16 +63,15 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
   protected static final Double NOT_ACTIVATED_VALUE = -1.;
 
   // find better system for null values - min=max?
-  private Double min;
-  private Double max;
+  private final Double min;
+  private final Double max;
   private String timestampColum;
   private String valueColumn;
 
-  private boolean ignore;
-  private String labelName;
+  private final boolean ignore;
+  private final String labelName;
 
-  @Override
-  public void init(final ThresholdPostProcessorSpec spec) {
+  public ThresholdPostProcessor(final ThresholdPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
     this.min = optional(spec.getMin()).orElse(NOT_ACTIVATED_VALUE);
     this.max = optional(spec.getMax()).orElse(NOT_ACTIVATED_VALUE);
@@ -78,11 +80,6 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
 
     final String valueName = optional(spec.getValueName()).orElse(DEFAULT_VALUE_NAME);
     this.labelName = labelName(this.min, this.max, valueName);
-  }
-
-  @Override
-  public Class<ThresholdPostProcessorSpec> specClass() {
-    return ThresholdPostProcessorSpec.class;
   }
 
   @Override
@@ -177,5 +174,20 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor<ThresholdPos
     }
 
     return "";
+  }
+
+  public static class Factory implements AnomalyPostProcessorFactory {
+
+    @Override
+    public String name() {
+      return NAME;
+    }
+
+    @Override
+    public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
+      final ThresholdPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+          ThresholdPostProcessorSpec.class);
+      return new ThresholdPostProcessor(spec);
+    }
   }
 }

@@ -72,7 +72,7 @@ public class ColdStartPostProcessorTest {
 
   @BeforeMethod
   public void initSpec() {
-    spec = (ColdStartPostProcessorSpec) new ColdStartPostProcessorSpec().setTableName(TABLE_NAME)
+    spec = new ColdStartPostProcessorSpec().setTableName(TABLE_NAME)
         .setDatasetConfigManager(datasetDao)
         .setMinMaxTimeLoader(minMaxTimeLoader);
   }
@@ -80,8 +80,7 @@ public class ColdStartPostProcessorTest {
   @Test
   public void testPostProcess28DaysColdStart() throws Exception {
     spec.setColdStartPeriod("P28D").setIgnore(true);
-    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor();
-    postProcessor.init(spec);
+    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor(spec);
 
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(anomalyJan3Jan5(), anomalyFeb2Feb3()))
@@ -118,8 +117,7 @@ public class ColdStartPostProcessorTest {
   @Test
   public void testPostProcess28DaysColdStartIgnoreFalse() throws Exception {
     spec.setColdStartPeriod("P28D").setIgnore(false);
-    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor();
-    postProcessor.init(spec);
+    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor(spec);
 
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(anomalyJan3Jan5()))
@@ -138,8 +136,7 @@ public class ColdStartPostProcessorTest {
     // check existing labels are not overridden
     // fixme cyril just test LabelUtils$addLabels
     spec.setColdStartPeriod("P28D").setIgnore(true);
-    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor();
-    postProcessor.init(spec);
+    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor(spec);
 
     final List<AnomalyLabelDTO> anomalyLabels = new ArrayList<>();
     anomalyLabels.add(new AnomalyLabelDTO().setName("existingLabel"));
@@ -165,8 +162,7 @@ public class ColdStartPostProcessorTest {
   @Test
   public void testPostProcessWithOperatorResultThatThrowsErrorAtGetAnomalies() throws Exception {
     spec.setColdStartPeriod("P28D").setIgnore(true);
-    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor();
-    postProcessor.init(spec);
+    final ColdStartPostProcessor postProcessor = new ColdStartPostProcessor(spec);
     final OperatorResult res1 = SimpleDataTable.fromDataFrame(
         new DataFrame().addSeries("col1", DoubleSeries.empty()));
     final Map<String, OperatorResult> resultMap = Map.of(RES_1_KEY, res1);

@@ -28,8 +28,11 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
+import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
+import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,27 +42,21 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
-public class EventPostProcessor implements AnomalyPostProcessor<EventPostProcessorSpec> {
+public class EventPostProcessor implements AnomalyPostProcessor {
 
   private static final boolean DEFAULT_IGNORE = false;
   private static final Period DEFAULT_BEFORE_MARGIN = Period.ZERO;
   private static final Period DEFAULT_AFTER_MARGIN = Period.ZERO;
-  public static final String NAME = "EVENTS";
+  private static final String NAME = "EVENTS";
 
-  private boolean ignore;
-  private Period beforeMargin;
-  private Period afterMargin;
+  private final boolean ignore;
+  private final Period beforeMargin;
+  private final Period afterMargin;
 
-  @Override
-  public void init(final EventPostProcessorSpec spec) {
+  public EventPostProcessor(final EventPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
     this.beforeMargin = isoPeriod(spec.getBeforeHolidayMargin(), DEFAULT_BEFORE_MARGIN);
     this.afterMargin = isoPeriod(spec.getAfterHolidayMargin(), DEFAULT_AFTER_MARGIN);
-  }
-
-  @Override
-  public Class<EventPostProcessorSpec> specClass() {
-    return EventPostProcessorSpec.class;
   }
 
   @Override
@@ -138,5 +135,20 @@ public class EventPostProcessor implements AnomalyPostProcessor<EventPostProcess
     }
 
     return searchTree;
+  }
+
+  public static class Factory implements AnomalyPostProcessorFactory {
+
+    @Override
+    public String name() {
+      return NAME;
+    }
+
+    @Override
+    public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
+      final EventPostProcessorSpec spec = new ObjectMapper()
+          .convertValue(params, EventPostProcessorSpec.class);
+      return new EventPostProcessor(spec);
+    }
   }
 }

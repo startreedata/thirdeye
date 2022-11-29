@@ -29,10 +29,10 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
@@ -64,13 +64,9 @@ public class PostProcessorOperatorTest {
     postProcessorRegistry = mock(PostProcessorRegistry.class);
     when(postProcessorRegistry.build(anyString(), anyMap())).thenAnswer(
         i -> {
-          final TestPostProcessor r = new TestPostProcessor();
           final Map<String, Object> nodeParams = i.getArgument(1);
           final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
-          final TestPostProcessorSpec postProcessorSpec = AbstractSpec.fromProperties(componentSpec,
-              r.specClass());
-          r.init(postProcessorSpec);
-          return r;
+          return new TestPostProcessor(componentSpec);
         }
     );
   }
@@ -182,18 +178,13 @@ public class PostProcessorOperatorTest {
     }
   }
 
-  private static class TestPostProcessor implements AnomalyPostProcessor<TestPostProcessorSpec> {
+  private static class TestPostProcessor implements AnomalyPostProcessor {
 
     private String labelName;
 
-    @Override
-    public void init(final TestPostProcessorSpec spec) {
+    public TestPostProcessor(final Map<String, Object> params) {
+      final TestPostProcessorSpec spec = new ObjectMapper().convertValue(params, TestPostProcessorSpec.class);
       this.labelName = spec.getLabelName();
-    }
-
-    @Override
-    public Class<TestPostProcessorSpec> specClass() {
-      return TestPostProcessorSpec.class;
     }
 
     @Override

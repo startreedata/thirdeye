@@ -38,12 +38,11 @@ public class PostProcessorRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(PostProcessorRegistry.class);
 
   private final Map<String, AnomalyPostProcessorFactory> anomalyPostProcessorFactoryMap = new HashMap<>();
-  private final DatasetConfigManager datasetDao;
+  private final  DatasetConfigManager datasetDao;
   private final MinMaxTimeLoader minMaxTimeLoader;
 
   @Inject
-  public PostProcessorRegistry(final DatasetConfigManager datasetDao,
-      final MinMaxTimeLoader minMaxTimeLoader) {
+  public PostProcessorRegistry(final DatasetConfigManager datasetDao, final MinMaxTimeLoader minMaxTimeLoader) {
     this.datasetDao = datasetDao;
     this.minMaxTimeLoader = minMaxTimeLoader;
   }
@@ -55,8 +54,7 @@ public class PostProcessorRegistry {
     anomalyPostProcessorFactoryMap.put(f.name(), f);
   }
 
-  public AnomalyPostProcessor build(final String factoryName,
-      final Map<String, Object> nodeParams) {
+  public AnomalyPostProcessor build(final String factoryName, final Map<String, Object> nodeParams) {
     checkArgument(anomalyPostProcessorFactoryMap.containsKey(factoryName),
         String.format("Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
             factoryName,

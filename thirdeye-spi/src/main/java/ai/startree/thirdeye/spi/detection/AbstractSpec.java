@@ -17,6 +17,8 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_PARAMS_COMPONE
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serializable;
 import java.util.Map;
@@ -29,7 +31,7 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   // do not use timezone. Use the timezone from the detection interval. // todo remove this field - ensure it's removed from the UI first
   @Deprecated
@@ -52,8 +54,10 @@ public abstract class AbstractSpec implements Serializable {
   public static <T extends AbstractSpec> T fromProperties(Map<String, Object> properties,
       Class<T> specClass) {
     try {
-    return OBJECT_MAPPER.convertValue(properties, specClass);
-    } catch (IllegalArgumentException e) {
+      // transform in string and deserialize to parse Templatable fields correctly
+      final String propertiesString = TE_OBJECT_MAPPER.writeValueAsString(properties);
+      return TE_OBJECT_MAPPER.readValue(propertiesString, specClass);
+    } catch (JsonProcessingException e) {
       throw new ThirdEyeException(e, ERR_INVALID_PARAMS_COMPONENTS, properties, specClass);
     }
   }

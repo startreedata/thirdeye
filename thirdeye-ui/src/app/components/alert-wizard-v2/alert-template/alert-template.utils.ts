@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
+import type {
+    AlertTemplate,
+    MetadataProperty,
+} from "../../../rest/dto/alert-template.interfaces";
 import {
     EditableAlert,
     TemplatePropertiesObject,
@@ -115,3 +118,25 @@ export function createNewStartingAlert(): EditableAlert {
         },
     };
 }
+
+type DefaultValue = NonNullable<MetadataProperty["defaultValue"]>;
+
+export const getDefaultProperties = (
+    alertTemplate: AlertTemplate | null
+): Record<string, DefaultValue> => {
+    if (!alertTemplate) {
+        return {};
+    }
+
+    const oldDefaultProperties = alertTemplate.defaultProperties || {};
+    const newDefaultProperties: Record<string, DefaultValue> = Object.assign(
+        {},
+        ...(alertTemplate.properties || [])
+            .filter(({ defaultValue }) => typeof defaultValue !== "undefined")
+            .map(({ name, defaultValue }) => ({
+                [name]: defaultValue,
+            }))
+    );
+
+    return { ...oldDefaultProperties, ...newDefaultProperties };
+};

@@ -12,15 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export const PROMISES: { REJECTED: "rejected"; FULFILLED: "fulfilled" } =
-    Object.freeze({
-        REJECTED: "rejected",
-        FULFILLED: "fulfilled",
-    });
+import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
+import { AlgorithmOptionInputFieldConfig } from "../../algorithm-selection/algorithm-selection.interfaces";
 
-export const THIRDEYE_DOC_LINK =
-    "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye";
-
-export const QUERY_PARAM_KEYS: { [key: string]: string } = {
-    SHOW_FIRST_ALERT_SUCCESS: "showFirstAlertSuccess",
-};
+export interface SpecificPropertiesRendererProps {
+    inputFieldConfig: AlgorithmOptionInputFieldConfig;
+    alert: EditableAlert;
+    onAlertPropertyChange: (
+        contents: Partial<EditableAlert>,
+        isTotalReplace?: boolean
+    ) => void;
+}

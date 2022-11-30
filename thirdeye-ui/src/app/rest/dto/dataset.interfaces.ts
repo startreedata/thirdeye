@@ -18,16 +18,16 @@ export interface Dataset {
     id: number;
     name: string;
     active: boolean;
-    additive: boolean;
+    additive?: boolean;
     dimensions: string[];
     timeColumn: TimeColumn;
-    expectedDelay: Duration;
+    expectedDelay?: Duration;
     dataSource: Datasource;
 }
 
 export interface TimeColumn {
     name: string;
-    interval: Duration;
+    interval: number;
     format: string;
     timezone: string;
 }

@@ -13,7 +13,7 @@
  * the License.
  */
 import i18n from "i18next";
-import { cloneDeep, isEmpty, omit, sortBy } from "lodash";
+import { cloneDeep, isEmpty, kebabCase, omit, sortBy } from "lodash";
 import {
     Alert,
     AlertAnomalyDetectorNode,
@@ -380,4 +380,22 @@ export const extractDetectionEvaluation = (
     return Object.keys(evaluationDataPayload.detectionEvaluations).map(
         (k) => evaluationDataPayload.detectionEvaluations[k]
     );
+};
+
+export const generateGenericNameForAlert = (
+    metricName: string,
+    aggregationFunction?: string,
+    algorithmName?: string
+): string => {
+    let nameSoFar = metricName;
+
+    if (aggregationFunction) {
+        nameSoFar += `_${aggregationFunction}`;
+    }
+
+    if (algorithmName) {
+        nameSoFar += `_${kebabCase(algorithmName)}`;
+    }
+
+    return nameSoFar;
 };

@@ -75,3 +75,17 @@ export const specTypeToUIConfig: { [key: string]: SpecUIConfig } = {};
 availableSpecTypes.forEach((item) => {
     specTypeToUIConfig[item.id] = item;
 });
+
+export const generateEmptyEmailSendGridConfiguration =
+    (): SendgridEmailSpec => {
+        return {
+            type: SpecType.EmailSendgrid,
+            params: {
+                apiKey: "${SENDGRID_API_KEY}",
+                emailRecipients: {
+                    from: "thirdeye-alerts@startree.ai",
+                    to: [],
+                },
+            },
+        };
+    };

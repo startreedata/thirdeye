@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -48,7 +47,6 @@ public class PlanExecutor implements AutoCloseable {
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
-  private final MinMaxTimeLoader minMaxTimeLoader;
   private final DetectionPipelineConfiguration detectionPipelineConfiguration;
 
   private final ExecutorService subTaskExecutor;
@@ -63,7 +61,6 @@ public class PlanExecutor implements AutoCloseable {
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
       final DatasetConfigManager datasetConfigManager,
-      final MinMaxTimeLoader minMaxTimeLoader,
       final DetectionPipelineConfiguration detectionPipelineConfiguration) {
     this.planNodeFactory = planNodeFactory;
     this.dataSourceCache = dataSourceCache;
@@ -71,7 +68,6 @@ public class PlanExecutor implements AutoCloseable {
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
-    this.minMaxTimeLoader = minMaxTimeLoader;
     this.detectionPipelineConfiguration = detectionPipelineConfiguration;
 
     final int nThreads = detectionPipelineConfiguration.getForkjoin().getParallelism();
@@ -131,7 +127,6 @@ public class PlanExecutor implements AutoCloseable {
         postProcessorRegistry,
         eventManager,
         datasetConfigManager,
-        minMaxTimeLoader,
         subTaskExecutor,
         detectionPipelineConfiguration
     );

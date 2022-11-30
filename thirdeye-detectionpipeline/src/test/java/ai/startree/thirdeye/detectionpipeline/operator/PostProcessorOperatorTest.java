@@ -36,7 +36,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -87,7 +86,6 @@ public class PostProcessorOperatorTest {
                 postProcessorRegistry,
                 mock(EventManager.class),
                 mock(DatasetConfigManager.class),
-                mock(MinMaxTimeLoader.class),
                 mock(ExecutorService.class),
                 new DetectionPipelineConfiguration()
         )));

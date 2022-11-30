@@ -132,7 +132,7 @@ export const getDefaultProperties = (
     const newDefaultProperties: Record<string, DefaultValue> = Object.assign(
         {},
         ...(alertTemplate.properties || [])
-            .filter(({ defaultValue }) => !!defaultValue)
+            .filter(({ defaultValue }) => typeof defaultValue !== "undefined")
             .map(({ name, defaultValue }) => ({
                 [name]: defaultValue,
             }))

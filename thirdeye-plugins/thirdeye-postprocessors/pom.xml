@@ -26,6 +26,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-spi</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.auto.service</groupId>
       <artifactId>auto-service-annotations</artifactId>
     </dependency>

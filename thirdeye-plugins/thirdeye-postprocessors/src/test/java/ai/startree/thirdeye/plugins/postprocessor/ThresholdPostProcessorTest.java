@@ -95,8 +95,7 @@ public class ThresholdPostProcessorTest {
     spec.setValueName(metric1);
     spec.setIgnore(ignoreMode);
 
-    final ThresholdPostProcessor postProcessor = new ThresholdPostProcessor();
-    postProcessor.init(spec);
+    final ThresholdPostProcessor postProcessor = new ThresholdPostProcessor(spec);
 
     final List<MergedAnomalyResultDTO> anomalies = List.of(january1Anomaly,
         january2Anomaly,
@@ -185,8 +184,7 @@ public class ThresholdPostProcessorTest {
     spec.setTimestamp(timestampColumn);
     spec.setMetric(metricColum);
 
-    final ThresholdPostProcessor postProcessor = new ThresholdPostProcessor();
-    postProcessor.init(spec);
+    final ThresholdPostProcessor postProcessor = new ThresholdPostProcessor(spec);
 
     final List<MergedAnomalyResultDTO> anomalies = List.of(january1Anomaly,
         january2Anomaly,

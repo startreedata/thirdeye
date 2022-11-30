@@ -78,8 +78,7 @@ public class EventPostProcessorTest {
   @Test
   public void testPostProcessNoEventsInput() throws Exception {
     final EventPostProcessorSpec spec = new EventPostProcessorSpec();
-    final EventPostProcessor postProcessor = new EventPostProcessor();
-    postProcessor.init(spec);
+    final EventPostProcessor postProcessor = new EventPostProcessor(spec);
 
     final List<MergedAnomalyResultDTO> inputAnomalies = List.of(this.january1Anomaly,
         january2Anomaly, january4Anomaly);
@@ -99,8 +98,7 @@ public class EventPostProcessorTest {
   @Test
   public void testPostProcessNoEventsInDataFrame() throws Exception {
     final EventPostProcessorSpec spec = new EventPostProcessorSpec();
-    final EventPostProcessor postProcessor = new EventPostProcessor();
-    postProcessor.init(spec);
+    final EventPostProcessor postProcessor = new EventPostProcessor(spec);
     final List<MergedAnomalyResultDTO> inputAnomalies = List.of(this.january1Anomaly,
         january2Anomaly, january4Anomaly);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
@@ -158,8 +156,7 @@ public class EventPostProcessorTest {
       spec.setAfterHolidayMargin(lookAfter.toString());
     }
     spec.setIgnore(isIgnore);
-    final EventPostProcessor postProcessor = new EventPostProcessor();
-    postProcessor.init(spec);
+    final EventPostProcessor postProcessor = new EventPostProcessor(spec);
     final List<MergedAnomalyResultDTO> inputAnomalies = List.of(this.january1Anomaly,
         january2Anomaly, january4Anomaly);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()

@@ -21,10 +21,8 @@ import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperator;
 import ai.startree.thirdeye.detectionpipeline.operator.PostProcessorOperator;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
-import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
@@ -67,10 +65,7 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
     postProcessorOperator.init(createOperatorContext()
         .setDetectionInterval(this.detectionInterval)
         .setInputsMap(inputsMap)
-        .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.<String, Object>builder()
-            .put(Constants.K_POST_PROCESSOR_REGISTRY, postProcessorRegistry)
-            .build()));
+        .setPlanNode(planNodeBean));
 
     return postProcessorOperator;
   }

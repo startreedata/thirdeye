@@ -45,8 +45,7 @@ public class TimeOfWeekPostProcessorTest {
     spec.setDaysOfWeek(daysOfWeek);
     spec.setIgnore(true);
 
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    postProcessor.init(spec);
+    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor(spec);
 
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(sundayAnomaly(), mondayAnomaly()))
@@ -88,8 +87,7 @@ public class TimeOfWeekPostProcessorTest {
     final List<Integer> hourOfDay = List.of(1, 2, 3, 4);
     spec.setHoursOfDay(hourOfDay);
     spec.setIgnore(true);
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    postProcessor.init(spec);
+    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor(spec);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(saturdayHour2Anomaly(), saturdayHour5Anomaly()))
         .build();
@@ -111,8 +109,7 @@ public class TimeOfWeekPostProcessorTest {
     final Map<String, List<Integer>> dayHoursOfWeek = Map.of("SATURDAY", List.of(1, 2, 3, 4));
     spec.setDayHoursOfWeek(dayHoursOfWeek);
     spec.setIgnore(true);
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    postProcessor.init(spec);
+    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor(spec);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(saturdayHour2Anomaly(), saturdayHour5Anomaly()))
         .build();
@@ -134,8 +131,7 @@ public class TimeOfWeekPostProcessorTest {
     final List<Integer> hourOfDay = List.of(1, 2, 3, 4);
     spec.setHoursOfDay(hourOfDay);
     spec.setIgnore(false);
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    postProcessor.init(spec);
+    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor(spec);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(saturdayHour2Anomaly(), saturdayHour5Anomaly()))
         .build();
@@ -155,8 +151,7 @@ public class TimeOfWeekPostProcessorTest {
   public void testPostProcessEverythingEmpty() throws Exception {
     final TimeOfWeekPostProcessorSpec spec = new TimeOfWeekPostProcessorSpec();
     spec.setIgnore(true);
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    postProcessor.init(spec);
+    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor(spec);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(saturdayHour2Anomaly(), saturdayHour5Anomaly()))
         .build();
@@ -175,8 +170,7 @@ public class TimeOfWeekPostProcessorTest {
     final List<Integer> hourOfDay = List.of(2);
     spec.setHoursOfDay(hourOfDay);
     spec.setIgnore(true);
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    postProcessor.init(spec);
+    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor(spec);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(List.of(saturdayHour2InParisTimezone(), saturdayHour2Anomaly()))
         .build();
@@ -199,8 +193,7 @@ public class TimeOfWeekPostProcessorTest {
     // 24 is invalid
     final List<Integer> hourOfDay = List.of(1, 24);
     spec.setHoursOfDay(hourOfDay);
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    assertThatThrownBy(() -> postProcessor.init(spec)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new TimeOfWeekPostProcessor(spec)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -209,8 +202,7 @@ public class TimeOfWeekPostProcessorTest {
     // invalid day
     final List<String> dayOfWeek = List.of("INVALIDAY");
     spec.setDaysOfWeek(dayOfWeek);
-    final TimeOfWeekPostProcessor postProcessor = new TimeOfWeekPostProcessor();
-    assertThatThrownBy(() -> postProcessor.init(spec)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new TimeOfWeekPostProcessor(spec)).isInstanceOf(IllegalArgumentException.class);
   }
 
   private MergedAnomalyResultDTO saturdayHour2InParisTimezone() {

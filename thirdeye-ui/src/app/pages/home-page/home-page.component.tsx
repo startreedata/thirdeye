@@ -12,7 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, useMediaQuery, useTheme } from "@material-ui/core";
+import {
+    Box,
+    Grid,
+    Typography,
+    useMediaQuery,
+    useTheme,
+} from "@material-ui/core";
 import {
     default as React,
     FunctionComponent,
@@ -20,6 +26,8 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
+import { ReactComponent as SetupCompleteLogo } from "../../../assets/images/thirdeye-startree-setup-complete.svg";
 import { ActiveAlertsCount } from "../../components/home-page/active-alerts-count/active-alerts-count.component";
 import { AlertAccuracy } from "../../components/home-page/alert-accuracy/alert-accuracy.component";
 import { AnomaliesPendingFeedbackCount } from "../../components/home-page/anomalies-pending-feedback-count/anomalies-pending-feedback-count.component";
@@ -35,16 +43,24 @@ import {
     PageContentsGridV1,
     PageHeaderActionsV1,
     PageV1,
+    useDialogProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.action";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
+import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
 import { useUserPreferences } from "../../utils/user-preferences/user-preferences";
 import { UserPreferencesKeys } from "../../utils/user-preferences/user-preferences.interfaces";
 import { useHomePageStyles } from "./home-page.styles";
 
 export const HomePage: FunctionComponent = () => {
     const { t } = useTranslation();
+    const { showDialog } = useDialogProviderV1();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const theme = useTheme();
+    const style = useHomePageStyles();
+    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("md"));
     const { appAnalytics, getAppAnalytics, status } = useGetAppAnalytics();
     const {
         subscriptionGroups,
@@ -53,12 +69,10 @@ export const HomePage: FunctionComponent = () => {
     } = useGetSubscriptionGroups();
     const { alerts, getAlerts, status: getAlertsStatus } = useGetAlerts();
     const { setPreference, getPreference } = useUserPreferences();
+
     const [shouldHideDocumentation, setShouldHideDocumentation] = useState(
         getPreference(UserPreferencesKeys.SHOW_DOCUMENTATION_RESOURCES) ?? false
     );
-    const style = useHomePageStyles();
-    const theme = useTheme();
-    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("md"));
 
     useEffect(() => {
         getAppAnalytics();
@@ -70,6 +84,44 @@ export const HomePage: FunctionComponent = () => {
         setShouldHideDocumentation(true);
         setPreference(UserPreferencesKeys.SHOW_DOCUMENTATION_RESOURCES, true);
     };
+
+    useEffect(() => {
+        if (
+            searchParams.get(QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS) ===
+            "true"
+        ) {
+            showDialog({
+                type: DialogType.ALERT,
+                contents: (
+                    <Box textAlign="center">
+                        <Typography color="primary" variant="h5">
+                            {t("label.congratulation-!")}
+                        </Typography>
+                        <Box py={1}>
+                            <SetupCompleteLogo />
+                        </Box>
+                        <Typography color="primary" variant="h6">
+                            {t("message.the-setup-is-completed")}
+                        </Typography>
+                        <Typography color="textSecondary" variant="subtitle1">
+                            {t(
+                                "message.now-you-can-start-using-thirdeye-as-a-professional"
+                            )}
+                        </Typography>
+                    </Box>
+                ),
+                headerText: t("message.setup-finished-exclamation"),
+                okButtonText: t("label.close"),
+                hideCancelButton: true,
+                onOk: () => {
+                    searchParams.delete(
+                        QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS
+                    );
+                    setSearchParams(searchParams, { replace: true });
+                },
+            });
+        }
+    }, []);
 
     return (
         <PageV1>

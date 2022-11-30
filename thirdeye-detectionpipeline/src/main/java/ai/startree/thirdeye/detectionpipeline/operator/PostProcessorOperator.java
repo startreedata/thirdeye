@@ -65,8 +65,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
   @Override
   public void execute() throws Exception {
     // split combiner results - to hide CombinerResult from PostProcessor implementations
-    final Map<String, OperatorResult> inputWithCombinerResultsSplit = splitCombinerResults(
-        inputMap);
+    final Map<String, OperatorResult> inputWithCombinerResultsSplit = splitCombinerResults(inputMap);
 
     final Map<String, OperatorResult> outputsWithCombinerResultsSplit = postProcessor.postProcess(
         detectionInterval,
@@ -74,8 +73,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
     outputsWithCombinerResultsSplit.values().forEach(this::enrichAnomalyLabels);
 
     // merge back combiner results
-    final Map<String, OperatorResult> output = mergeCombinerResults(
-        outputsWithCombinerResultsSplit);
+    final Map<String, OperatorResult> output = mergeCombinerResults(outputsWithCombinerResultsSplit);
 
     resultMap.putAll(output);
   }

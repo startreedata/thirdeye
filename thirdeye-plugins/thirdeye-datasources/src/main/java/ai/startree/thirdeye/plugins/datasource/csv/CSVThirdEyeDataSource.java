@@ -27,11 +27,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
@@ -143,11 +141,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
         .addSeries("ts", new double[0])
         .addSeries("met", new long[0]);
     return SimpleDataTable.fromDataFrame(dataFrame);
-  }
-
-  @Override
-  public List<String> getDatasets() throws Exception {
-    return new ArrayList<>(datasets.keySet());
   }
 
   @Override

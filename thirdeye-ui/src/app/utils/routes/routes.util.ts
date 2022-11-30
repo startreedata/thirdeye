@@ -104,6 +104,7 @@ export const AppRoute = {
     COHORT_RECOMMENDER: `/${AppRouteRelative.COHORT_RECOMMENDER}`,
     LOGIN: "/login",
     LOGOUT: "/logout",
+    SWAGGER: `/swagger`,
     SETUP: `/${AppRouteRelative.SETUP}`,
     SETUP_DATASOURCE: `/${AppRouteRelative.SETUP}/${AppRouteRelative.SETUP_DATASOURCE}`,
     SETUP_DATASET: `/${AppRouteRelative.SETUP}/${AppRouteRelative.SETUP_DATASET}`,
@@ -301,6 +302,10 @@ export const getAnomaliesAnomalyViewPath = (id: number): string => {
 
 export const getConfigurationPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.CONFIGURATION);
+};
+
+export const getSwaggerPath = (): string => {
+    return `${AppRoute.SWAGGER}`;
 };
 
 export const getSubscriptionGroupsPath = (): string => {

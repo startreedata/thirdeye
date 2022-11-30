@@ -35,7 +35,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.collect.ImmutableMap;
@@ -62,7 +61,6 @@ public class PlanExecutorTest {
     final PostProcessorRegistry postProcessorRegistry = mock(PostProcessorRegistry.class);
     final EventManager eventManager = mock(EventManager.class);
     final DatasetConfigManager datasetConfigManager = mock(DatasetConfigManager.class);
-    final MinMaxTimeLoader minMaxTimeLoader = mock(MinMaxTimeLoader.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
     );
     planExecutor = new PlanExecutor(planNodeFactory,
@@ -71,7 +69,6 @@ public class PlanExecutorTest {
         postProcessorRegistry,
         eventManager,
         datasetConfigManager,
-        minMaxTimeLoader,
         new DetectionPipelineConfiguration());
     enumerator = mock(Enumerator.class);
 

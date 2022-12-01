@@ -19,7 +19,7 @@ public class AlwaysAllow implements AccessControl {
 
   @Override
   public boolean hasAccess(
-      final AccessControlIdentifiers identifiers,
+      final AccessControlIdentifier identifiers,
       final AccessType accessType,
       final HttpHeaders httpHeaders
   ) {

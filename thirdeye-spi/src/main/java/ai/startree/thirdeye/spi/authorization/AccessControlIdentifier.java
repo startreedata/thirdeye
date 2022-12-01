@@ -13,15 +13,15 @@
  */
 package ai.startree.thirdeye.spi.authorization;
 
-public class AccessControlIdentifiers {
+public class AccessControlIdentifier {
 
   static public final String DefaultNamespace = "default";
 
   public final String name;
   public final String namespace;
-  public final EntityType entityType;
+  public final String entityType;
 
-  public AccessControlIdentifiers(String name, String namespace, EntityType entityType) {
+  public AccessControlIdentifier(String name, String namespace, String entityType) {
     this.name = name;
     this.namespace = namespace;
     this.entityType = entityType;

@@ -27,6 +27,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.AccessControlUtil;
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -34,6 +35,7 @@ import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.authorization.AccessControl;
 import ai.startree.thirdeye.spi.authorization.AccessControlBuilder;
+import ai.startree.thirdeye.spi.authorization.AccessControlIdentifier;
 import ai.startree.thirdeye.spi.authorization.AccessType;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -199,7 +201,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   }
 
   public boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
-    return accessControl.hasAccess(dto.toAccessControlIdentifiers(), accessType, httpHeaders);
+    return accessControl.hasAccess(AccessControlUtil.idFromApi(toApi(dto)), accessType, httpHeaders);
   }
 
   void ensureHasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {

@@ -25,7 +25,7 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.spi.authorization.AccessControlIdentifiers;
+import ai.startree.thirdeye.spi.authorization.AccessControlIdentifier;
 import ai.startree.thirdeye.spi.authorization.AccessType;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
@@ -126,7 +126,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifier identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
@@ -148,7 +148,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifier identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> identifiers.name.equals("2");
 
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
@@ -165,7 +165,7 @@ public class CrudResourceTest {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
 
-    resource.accessControl = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifier identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     resource.get(new ThirdEyePrincipal("nobody"), 1L, null);
@@ -176,7 +176,7 @@ public class CrudResourceTest {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
 
-    resource.accessControl = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifier identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     resource.delete(new ThirdEyePrincipal("nobody"), 1L, null);
@@ -191,7 +191,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifier identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> false;
 
     resource.deleteAll(new ThirdEyePrincipal("nobody"), null);
@@ -207,7 +207,7 @@ public class CrudResourceTest {
     );
     when(manager.findAll()).thenReturn(dtos);
 
-    resource.accessControl = (AccessControlIdentifiers identifiers,
+    resource.accessControl = (AccessControlIdentifier identifiers,
         AccessType accessType, HttpHeaders httpHeaders) -> identifiers.name.equals("2");
 
     resource.deleteAll(new ThirdEyePrincipal("nobody"), null);

@@ -18,7 +18,7 @@ import java.net.http.HttpHeaders;
 public interface AccessControl {
 
   boolean hasAccess(
-      AccessControlIdentifiers identifiers,
+      AccessControlIdentifier identifier,
       AccessType accessType,
       HttpHeaders httpHeaders
   );

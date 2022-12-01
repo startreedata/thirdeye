@@ -52,7 +52,7 @@ import {
 import {
     AlertsAnomaliesParams,
     ENUMERATION_ITEM_QUERY_PARAM_KEY,
-    SHOW_FLAGGED_IGNORED_QUERY_PARAM_KEY,
+    SHOW_ALL_ANOMALIES_QUERY_PARAM_KEY,
 } from "./alerts-anomalies-page.interfaces";
 
 export const AlertsAnomaliesPage: FunctionComponent = () => {
@@ -85,14 +85,13 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                 Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
                 Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
                 searchParams.get(ENUMERATION_ITEM_QUERY_PARAM_KEY),
-                searchParams.get(SHOW_FLAGGED_IGNORED_QUERY_PARAM_KEY) ===
-                    "true",
+                searchParams.get(SHOW_ALL_ANOMALIES_QUERY_PARAM_KEY) === "true",
             ],
             [searchParams]
         );
 
     const setShowIgnored = (newState: boolean): void => {
-        searchParams.set(SHOW_FLAGGED_IGNORED_QUERY_PARAM_KEY, `${!!newState}`);
+        searchParams.set(SHOW_ALL_ANOMALIES_QUERY_PARAM_KEY, `${!!newState}`);
         setSearchParams(searchParams);
     };
 

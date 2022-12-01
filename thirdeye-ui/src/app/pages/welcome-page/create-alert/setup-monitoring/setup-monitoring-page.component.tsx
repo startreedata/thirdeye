@@ -77,7 +77,13 @@ export const SetupMonitoringPage: FunctionComponent = () => {
                             <Button
                                 color="secondary"
                                 component={RouterLink}
-                                to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`}
+                                to={
+                                    selectedAlgorithmOption.algorithmOption
+                                        .alertTemplateForMultidimension ===
+                                    alert.template?.name
+                                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
+                                        : `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
+                                }
                             >
                                 {t("label.back")}
                             </Button>

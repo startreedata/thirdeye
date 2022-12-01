@@ -232,6 +232,15 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                         t("label.entity-setup", {
                                             entity: algorithmOptionConfig
                                                 .algorithmOption.title,
+                                            multidimension:
+                                                algorithmOptionConfig
+                                                    .algorithmOption
+                                                    .alertTemplateForMultidimension ===
+                                                alert.template?.name
+                                                    ? `(${t(
+                                                          "label.multidimension"
+                                                      )})`
+                                                    : "",
                                         })}
                                 </Typography>
                                 <Typography variant="body2">
@@ -252,6 +261,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     <PreviewChart
                         alert={alert}
                         showLoadButton={!!selectedMetric}
+                        onAlertPropertyChange={onAlertPropertyChange}
                     />
 
                     <Grid item xs={12}>

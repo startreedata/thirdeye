@@ -385,7 +385,8 @@ export const extractDetectionEvaluation = (
 export const generateGenericNameForAlert = (
     metricName: string,
     aggregationFunction?: string,
-    algorithmName?: string
+    algorithmName?: string,
+    isMultidimension?: boolean
 ): string => {
     let nameSoFar = metricName;
 
@@ -395,6 +396,10 @@ export const generateGenericNameForAlert = (
 
     if (algorithmName) {
         nameSoFar += `_${kebabCase(algorithmName)}`;
+    }
+
+    if (isMultidimension) {
+        nameSoFar += `_dx`;
     }
 
     return nameSoFar;

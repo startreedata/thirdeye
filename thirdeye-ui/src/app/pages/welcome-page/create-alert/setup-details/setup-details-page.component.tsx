@@ -118,7 +118,11 @@ export const SetupDetailsPage: FunctionComponent = () => {
                                                     .aggregationFunction as string,
                                                 selectedAlgorithmOption
                                                     .algorithmOption
-                                                    .title as string
+                                                    .title as string,
+                                                selectedAlgorithmOption
+                                                    ?.algorithmOption
+                                                    .alertTemplateForMultidimension ===
+                                                    alert?.template?.name
                                             )
                                         }
                                         onChange={(e) =>

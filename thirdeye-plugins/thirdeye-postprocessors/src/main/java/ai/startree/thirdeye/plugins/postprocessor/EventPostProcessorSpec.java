@@ -18,31 +18,31 @@ import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 public class EventPostProcessorSpec extends PostProcessorSpec {
 
   /**
-   * A period added before the holiday that corresponds to a period that is also impacted
-   * by the holiday.
-   * Eg if spillover is P1D, if event happens on [Dec 24 0:00, Dec 25 0:00[
-   * with spillover the postProcessor will apply on [Dec 23 0:00 and Dec 25 0:00[
+   * A period added before the event that corresponds to a period that is also impacted
+   * by the event.
+   * Eg if beforeEventMargin is P1D, if event happens on [Dec 24 0:00, Dec 25 0:00[
+   * with beforeEventMargin the postProcessor will apply on [Dec 23 0:00 and Dec 25 0:00[
    **/
-  private String beforeHolidayMargin;
+  private String beforeEventMargin;
 
-  /**Same as above after the holiday.*/
-  private String afterHolidayMargin;
+  /**Same as above after the event.*/
+  private String afterEventMargin;
 
-  public String getBeforeHolidayMargin() {
-    return beforeHolidayMargin;
+  public String getBeforeEventMargin() {
+    return beforeEventMargin;
   }
 
-  public EventPostProcessorSpec setBeforeHolidayMargin(final String beforeHolidayMargin) {
-    this.beforeHolidayMargin = beforeHolidayMargin;
+  public EventPostProcessorSpec setBeforeEventMargin(final String beforeEventMargin) {
+    this.beforeEventMargin = beforeEventMargin;
     return this;
   }
 
-  public String getAfterHolidayMargin() {
-    return afterHolidayMargin;
+  public String getAfterEventMargin() {
+    return afterEventMargin;
   }
 
-  public EventPostProcessorSpec setAfterHolidayMargin(final String afterHolidayMargin) {
-    this.afterHolidayMargin = afterHolidayMargin;
+  public EventPostProcessorSpec setAfterEventMargin(final String afterEventMargin) {
+    this.afterEventMargin = afterEventMargin;
     return this;
   }
 }

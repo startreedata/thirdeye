@@ -40,7 +40,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
         <Card className={props.className} variant="outlined">
             <CardContent>
                 {props.uiAnomaly && (
-                    <Grid container spacing={4}>
+                    <Grid container justifyContent="space-between" spacing={4}>
                         {/* Start */}
                         <Grid item lg={2} sm={6} xs={12}>
                             <AnomalySummaryCardDetail

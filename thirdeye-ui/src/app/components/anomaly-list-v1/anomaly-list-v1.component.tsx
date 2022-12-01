@@ -24,19 +24,22 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    DataGridColumnV1,
     DataGridSelectionModelV1,
     DataGridSortOrderV1,
     DataGridV1,
 } from "../../platform/components";
+import { DataGridV1Props } from "../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.interfaces";
 import { linkRendererV1 } from "../../platform/utils";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import type { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsAlertPath,
     getAnomaliesAnomalyPath,
     getMetricsViewPath,
 } from "../../utils/routes/routes.util";
 import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filters.component";
-import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
+import type { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
+import { useAnomalyListV1Styles } from "./anomaly-list-v1.style";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     anomalies,
@@ -49,10 +52,22 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
         useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
     const theme = useTheme();
+    const styles = useAnomalyListV1Styles();
 
     const anomalyNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
+            const { isFlagged, isIgnored } = data;
+
+            return linkRendererV1(
+                [
+                    cellValue,
+                    isIgnored && "(Ignored)",
+                    !isIgnored && isFlagged && "(Flagged)",
+                ]
+                    .filter(Boolean)
+                    .join(" "),
+                getAnomaliesAnomalyPath(data.id)
+            );
         },
         []
     );
@@ -146,7 +161,21 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             onDelete(Array.from(selectedAnomaly.rowKeyValueMap.values()));
     };
 
-    const anomalyListColumns = useMemo(
+    const getRowClassName: NonNullable<
+        DataGridV1Props<UiAnomaly>["customRowClassName"]
+    > = ({ rowData }) => {
+        // If isIgnored is not a part of rowData, the UiAnomaly data has not been properly
+        //  initialised yet, so just return an empty className
+        if (!("isIgnored" in rowData)) {
+            return "";
+        }
+
+        const { isFlagged, isIgnored } = rowData;
+
+        return isFlagged || isIgnored ? styles.muted : "";
+    };
+
+    const anomalyListColumns = useMemo<DataGridColumnV1<UiAnomaly>[]>(
         () => [
             {
                 key: "name",
@@ -254,6 +283,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             disableSearch
             hideBorder
             columns={anomalyListColumns}
+            customRowClassName={getRowClassName}
             data={anomalies as UiAnomaly[]}
             initialSortState={{
                 key: "startTime",
@@ -262,15 +292,17 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             rowKey="id"
             searchFilterValue={searchFilterValue}
             toolbarComponent={
-                <Box display="flex">
-                    <Button
-                        data-testid="button-delete"
-                        disabled={isActionButtonDisable}
-                        variant="contained"
-                        onClick={handleAnomalyDelete}
-                    >
-                        {t("label.delete")}
-                    </Button>
+                <Box display="flex" gridGap={12}>
+                    <Box display="flex">
+                        <Button
+                            data-testid="button-delete"
+                            disabled={isActionButtonDisable}
+                            variant="contained"
+                            onClick={handleAnomalyDelete}
+                        >
+                            {t("label.delete")}
+                        </Button>
+                    </Box>
                     {toolbar}
                 </Box>
             }

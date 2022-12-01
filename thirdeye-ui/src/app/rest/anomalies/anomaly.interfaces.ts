@@ -33,4 +33,5 @@ export interface GetAnomaliesProps {
     dataset?: string;
     metric?: string;
     enumerationItemId?: number;
+    showAllAnomalies?: boolean;
 }

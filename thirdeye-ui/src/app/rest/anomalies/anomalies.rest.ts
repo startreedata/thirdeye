@@ -32,6 +32,7 @@ export const getAnomalies = async ({
     dataset,
     metric,
     enumerationItemId,
+    showAllAnomalies = false,
 }: GetAnomaliesProps = {}): Promise<Anomaly[]> => {
     const queryParams = new URLSearchParams([["isChild", "false"]]);
 
@@ -59,11 +60,13 @@ export const getAnomalies = async ({
         queryParams.set("enumerationItem.id", enumerationItemId.toString());
     }
 
-    const response = await axios.get(
+    const response = await axios.get<Anomaly[]>(
         `${BASE_URL_ANOMALIES}?${queryParams.toString()}`
     );
 
-    return filterOutIgnoredAnomalies(response.data);
+    return showAllAnomalies
+        ? response.data
+        : filterOutIgnoredAnomalies(response.data);
 };
 
 export const deleteAnomaly = async (id: number): Promise<Anomaly> => {

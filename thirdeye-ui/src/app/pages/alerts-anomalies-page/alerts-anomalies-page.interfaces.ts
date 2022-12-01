@@ -17,3 +17,4 @@ export type AlertsAnomaliesParams = {
 };
 
 export const ENUMERATION_ITEM_QUERY_PARAM_KEY = "enumerationItem";
+export const SHOW_FLAGGED_IGNORED_QUERY_PARAM_KEY = "showAllAnomalies";

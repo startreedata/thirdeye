@@ -81,6 +81,8 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         startTimeVal: -1,
         datasetName: noDataMarker,
         hasFeedback: false,
+        isFlagged: false,
+        isIgnored: false,
     };
 };
 
@@ -181,6 +183,18 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         ) {
             uiAnomaly.hasFeedback = true;
         }
+
+        if (anomaly.feedback.id) {
+            uiAnomaly.isFlagged = true;
+        }
+        // TODO: Replace with below when API is ready
+        // if (anomaly.feedback.type === AnomalyFeedbackType.NOT_ANOMALY) {
+        //     uiAnomaly.isFlagged = true;
+        // }
+    }
+
+    if (anomaly.anomalyLabels) {
+        uiAnomaly.isIgnored = isAnomalyIgnored(anomaly);
     }
 
     return uiAnomaly;
@@ -497,6 +511,17 @@ export const handleCreateAlertClickGenerator = (
     };
 };
 
+export const isAnomalyIgnored = (anomaly: Anomaly): boolean =>
+    !!(
+        anomaly?.anomalyLabels &&
+        anomaly?.anomalyLabels.some((label) => label.ignore)
+    );
+
+export const isAnomalyFlagged = (anomaly: Anomaly): boolean =>
+    !!anomaly?.feedback?.id;
+// TODO: Replace with below when API is ready
+// anomaly?.feedback?.type === AnomalyFeedbackType.NOT_ANOMALY;
+
 export const filterOutIgnoredAnomalies = (anomalies: Anomaly[]): Anomaly[] => {
     // Filter out anomalies that should be ignored if it has a label with ignore in it
     return anomalies.filter((anomaly: Anomaly) => {
@@ -509,5 +534,19 @@ export const filterOutIgnoredAnomalies = (anomalies: Anomaly[]): Anomaly[] => {
                 return label.ignore === false || label.ignore === undefined;
             })
         );
+    });
+};
+
+// Generic function to filter anomalies by filter functions
+export const filterAnomaliesByFunctions = (
+    anomalies: Anomaly[],
+    filters: ((a: Anomaly) => boolean)[] = []
+): Anomaly[] => {
+    if (filters.length === 0) {
+        return anomalies;
+    }
+
+    return anomalies.filter((anomaly) => {
+        return filters.every((f) => f(anomaly));
     });
 };

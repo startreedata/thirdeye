@@ -446,6 +446,7 @@
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
         "setup-properties-based-on-your-needs": "Setup properties based on your needs",
         "show-count-entity-for-time-range": "Show {{count}} {{entity}} for time range",
+        "show-flagged-ignored": "Show flagged/ignored",
         "showing-top-100": "Showing top 100",
         "startree-cloud-sources": "StarTree cloud sources",
         "subscription-group-name-required": "Subscription Group name is required",

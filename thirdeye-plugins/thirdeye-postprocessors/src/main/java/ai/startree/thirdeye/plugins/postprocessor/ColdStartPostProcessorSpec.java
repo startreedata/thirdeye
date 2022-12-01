@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 
 public class ColdStartPostProcessorSpec extends PostProcessorSpec {
@@ -24,6 +26,16 @@ public class ColdStartPostProcessorSpec extends PostProcessorSpec {
   private String coldStartPeriod;
 
   private String tableName;
+
+  /**
+   * Expected to be set by the factory
+   * */
+  private DatasetConfigManager datasetConfigManager;
+
+  /**
+   * Expected to be set by the factory
+   */
+  private MinMaxTimeLoader minMaxTimeLoader;
 
   public String getColdStartPeriod() {
     return coldStartPeriod;
@@ -40,6 +52,26 @@ public class ColdStartPostProcessorSpec extends PostProcessorSpec {
 
   public ColdStartPostProcessorSpec setTableName(final String tableName) {
     this.tableName = tableName;
+    return this;
+  }
+
+  public DatasetConfigManager getDatasetConfigManager() {
+    return datasetConfigManager;
+  }
+
+  public ColdStartPostProcessorSpec setDatasetConfigManager(
+      final DatasetConfigManager datasetConfigManager) {
+    this.datasetConfigManager = datasetConfigManager;
+    return this;
+  }
+
+  public MinMaxTimeLoader getMinMaxTimeLoader() {
+    return minMaxTimeLoader;
+  }
+
+  public ColdStartPostProcessorSpec setMinMaxTimeLoader(
+      final MinMaxTimeLoader minMaxTimeLoader) {
+    this.minMaxTimeLoader = minMaxTimeLoader;
     return this;
   }
 }

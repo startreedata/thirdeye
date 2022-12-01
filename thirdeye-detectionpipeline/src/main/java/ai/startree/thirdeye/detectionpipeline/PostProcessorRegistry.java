@@ -19,10 +19,9 @@ import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
-import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
+import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
@@ -55,21 +54,16 @@ public class PostProcessorRegistry {
     anomalyPostProcessorFactoryMap.put(f.name(), f);
   }
 
-  public AnomalyPostProcessor<PostProcessorSpec> build(final String factoryName, final Map<String, Object> nodeParams) {
+  public AnomalyPostProcessor build(final String factoryName, final Map<String, Object> nodeParams) {
     checkArgument(anomalyPostProcessorFactoryMap.containsKey(factoryName),
         String.format("Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
             factoryName,
             anomalyPostProcessorFactoryMap.keySet()));
-    final AnomalyPostProcessor<PostProcessorSpec> postProcessor = anomalyPostProcessorFactoryMap.get(
-        factoryName).build();
     final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
-    final PostProcessorSpec postProcessorSpec = AbstractSpec.fromProperties(componentSpec,
-        postProcessor.specClass());
-    postProcessorSpec.setDatasetConfigManager(datasetDao);
-    postProcessorSpec.setMinMaxTimeLoader(minMaxTimeLoader);
 
-    postProcessor.init(postProcessorSpec);
-
-    return postProcessor;
+    final PostProcessingContext postProcessingContext = new PostProcessingContext(datasetDao,
+        minMaxTimeLoader);
+    return anomalyPostProcessorFactoryMap.get(factoryName)
+        .build(componentSpec, postProcessingContext);
   }
 }

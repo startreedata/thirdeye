@@ -23,7 +23,10 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
+import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
+import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Map;
@@ -33,25 +36,23 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
-public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPostProcessorSpec> {
+public class ColdStartPostProcessor implements AnomalyPostProcessor {
 
-  public static final String NAME = "COLD_START";
-
+  private static final String NAME = "COLD_START";
   private static final boolean DEFAULT_IGNORE = false;
   private static final Period DEFAULT_COLD_START_PERIOD = Period.ZERO;
   private static final long TIMEOUT = 20_000;
 
-  private boolean ignore;
-  private Period coldStartPeriod;
-  private String tableName;
+  private final boolean ignore;
+  private final Period coldStartPeriod;
+  private final String tableName;
 
-  private MinMaxTimeLoader minMaxTimeLoader;
-  private DatasetConfigManager datasetDao;
+  private final MinMaxTimeLoader minMaxTimeLoader;
+  private final DatasetConfigManager datasetDao;
 
-  private String labelName;
+  private final String labelName;
 
-  @Override
-  public void init(final ColdStartPostProcessorSpec spec) {
+  public ColdStartPostProcessor(final ColdStartPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
     this.coldStartPeriod = isoPeriod(spec.getColdStartPeriod(), DEFAULT_COLD_START_PERIOD);
     this.tableName = Objects.requireNonNull(spec.getTableName());
@@ -65,11 +66,6 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
   @VisibleForTesting
   protected static String labelName(final Period coldStartPeriod) {
     return coldStartPeriod.toString() + " cold start";
-  }
-
-  @Override
-  public Class<ColdStartPostProcessorSpec> specClass() {
-    return ColdStartPostProcessorSpec.class;
   }
 
   @Override
@@ -108,6 +104,22 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor<ColdStartPos
         final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore).setName(labelName);
         addLabel(anomalyResultDTO, newLabel);
       }
+    }
+  }
+
+  public static class Factory implements AnomalyPostProcessorFactory {
+
+    @Override
+    public String name() {
+      return NAME;
+    }
+
+    @Override
+    public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
+      final ColdStartPostProcessorSpec spec = new ObjectMapper().convertValue(params, ColdStartPostProcessorSpec.class);
+      spec.setMinMaxTimeLoader(context.getMinMaxTimeLoader());
+      spec.setDatasetConfigManager(context.getDatasetConfigManager());
+      return new ColdStartPostProcessor(spec);
     }
   }
 }

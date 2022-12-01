@@ -91,7 +91,7 @@ export function DataGridV1<T>({
     onRowExpand,
     searchFilterValue,
     onSearchFilterValueChange,
-
+    customRowClassName,
     ...otherProps
 }: DataGridV1Props<T>): ReactElement {
     const dataGridV1Classes = useDataGridV1Styles();
@@ -954,7 +954,14 @@ export function DataGridV1<T>({
                         // renderers/handlers in columns are memoized via useCallback
                         ignoreFunctionInColumnCompare={false}
                         ref={handleTableRefDebounced}
-                        rowClassName={getRowClassName}
+                        rowClassName={(rowProp) =>
+                            classNames(
+                                getRowClassName,
+                                typeof customRowClassName === "string"
+                                    ? customRowClassName
+                                    : customRowClassName?.(rowProp)
+                            )
+                        }
                         rowKey={data ? rowKey : "id"}
                         rowRenderer={rowRendererDefault}
                         sortBy={sortState}

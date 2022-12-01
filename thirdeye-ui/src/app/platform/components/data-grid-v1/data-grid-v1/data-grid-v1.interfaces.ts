@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
+import type { CallOrReturn, ColumnShape } from "react-base-table";
 
 export interface DataGridV1Props<T> {
     columns: DataGridColumnV1<T>[];
@@ -41,6 +42,14 @@ export interface DataGridV1Props<T> {
         selectedCount: number
     ) => string; // Search and selection status text to render next to search input
     onRowExpand?: (expanded: boolean, data: T) => void;
+    customRowClassName?: CallOrReturn<
+        string,
+        {
+            columns: ColumnShape<T | { id: number }>[];
+            rowData: T | { id: number };
+            rowIndex: number;
+        }
+    >;
 }
 
 export interface DataGridColumnV1<T> {

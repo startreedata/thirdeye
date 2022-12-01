@@ -150,10 +150,10 @@ public class EventPostProcessorTest {
       throws Exception {
     final EventPostProcessorSpec spec = new EventPostProcessorSpec();
     if (lookBefore != null) {
-      spec.setBeforeHolidayMargin(lookBefore.toString());
+      spec.setBeforeEventMargin(lookBefore.toString());
     }
     if (lookAfter != null) {
-      spec.setAfterHolidayMargin(lookAfter.toString());
+      spec.setAfterEventMargin(lookAfter.toString());
     }
     spec.setIgnore(isIgnore);
     final EventPostProcessor postProcessor = new EventPostProcessor(spec);

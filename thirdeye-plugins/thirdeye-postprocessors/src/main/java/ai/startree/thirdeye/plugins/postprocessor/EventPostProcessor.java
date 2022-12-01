@@ -55,8 +55,8 @@ public class EventPostProcessor implements AnomalyPostProcessor {
 
   public EventPostProcessor(final EventPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
-    this.beforeMargin = isoPeriod(spec.getBeforeHolidayMargin(), DEFAULT_BEFORE_MARGIN);
-    this.afterMargin = isoPeriod(spec.getAfterHolidayMargin(), DEFAULT_AFTER_MARGIN);
+    this.beforeMargin = isoPeriod(spec.getBeforeEventMargin(), DEFAULT_BEFORE_MARGIN);
+    this.afterMargin = isoPeriod(spec.getAfterEventMargin(), DEFAULT_AFTER_MARGIN);
   }
 
   @Override

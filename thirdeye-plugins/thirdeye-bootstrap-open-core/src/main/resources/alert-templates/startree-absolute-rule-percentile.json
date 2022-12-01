@@ -8,8 +8,8 @@
       "params": {
         "type": "EVENTS",
         "component.ignore": "${eventFilterIgnore}",
-        "component.beforeHolidayMargin": "${eventFilterBeforeHolidayMargin}",
-        "component.afterHolidayMargin": "${eventFilterAfterHolidayMargin}"
+        "component.beforeEventMargin": "${eventFilterbeforeEventMargin}",
+        "component.afterEventMargin": "${eventFilterafterEventMargin}"
       },
       "inputs": [
         {
@@ -234,8 +234,8 @@
     "eventFilterLookaround": "P2D",
     "eventFilterTypes": [],
     "eventFilterIgnore": false,
-    "eventFilterBeforeHolidayMargin": "P0D",
-    "eventFilterAfterHolidayMargin": "P0D",
+    "eventFilterbeforeEventMargin": "P0D",
+    "eventFilterafterEventMargin": "P0D",
     "queryLimit": "100000000"
   }
 }

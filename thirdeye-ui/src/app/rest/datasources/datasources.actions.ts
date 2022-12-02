@@ -13,6 +13,7 @@
  * the License.
  */
 import { useHTTPAction } from "../create-rest-action";
+import { Dataset } from "../dto/dataset.interfaces";
 import { Datasource } from "../dto/datasource.interfaces";
 import {
     GetDatasource,
@@ -20,12 +21,14 @@ import {
     GetDatasources,
     GetDatasourceStatus,
     GetStatusResponse,
+    GetTablesForDatasourceByName,
 } from "./datasources.interfaces";
 import {
     getAllDatasources,
     getDatasource as getDatasourceREST,
     getDatasourceByName as getDatasourceByNameREST,
     getStatusForDatasource,
+    getTablesForDatasource,
 } from "./datasources.rest";
 
 export const useGetDatasourceStatus = (): GetDatasourceStatus => {
@@ -76,3 +79,23 @@ export const useGetDatasourceByName = (): GetDatasourceByName => {
 
     return { datasource: data, getDatasourceByName, status, errorMessages };
 };
+
+export const useGetTablesForDatasourceName =
+    (): GetTablesForDatasourceByName => {
+        const { data, makeRequest, status, errorMessages } = useHTTPAction<
+            Dataset[]
+        >(getTablesForDatasource);
+
+        const getTableForDatasourceName = (
+            name: string
+        ): Promise<Dataset[] | undefined> => {
+            return makeRequest(name);
+        };
+
+        return {
+            tables: data,
+            getTableForDatasourceName,
+            status,
+            errorMessages,
+        };
+    };

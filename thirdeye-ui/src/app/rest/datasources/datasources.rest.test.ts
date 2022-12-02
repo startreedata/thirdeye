@@ -23,6 +23,7 @@ import {
     getDatasource,
     getDatasourceByName,
     getStatusForDatasource,
+    getTablesForDatasource,
     onboardAllDatasets,
     updateDatasource,
     updateDatasources,
@@ -238,6 +239,28 @@ describe("Datasources REST", () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getStatusForDatasource("datasource-name")).rejects.toThrow(
+            "testError"
+        );
+    });
+
+    it("getTablesForDatasource should invoke axios.get with appropriate input and return appropriate status", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: mockStatusResponse,
+        });
+
+        await expect(
+            getTablesForDatasource("datasource-name")
+        ).resolves.toEqual(mockStatusResponse);
+
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/data-sources/name/datasource-name/datasets"
+        );
+    });
+
+    it("getTablesForDatasource should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(getTablesForDatasource("datasource-name")).rejects.toThrow(
             "testError"
         );
     });

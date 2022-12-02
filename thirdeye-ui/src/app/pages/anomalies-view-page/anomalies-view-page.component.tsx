@@ -238,6 +238,33 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             anomaly.enumerationItem &&
             getEnumerationItemRequest === ActionStatus.Error);
 
+    const getSubtitle = (): string | undefined => {
+        if (anomaly && anomaly.enumerationItem && enumerationItem) {
+            return generateNameForEnumerationItem(enumerationItem);
+        }
+
+        if (uiAnomaly?.isIgnored) {
+            return t(
+                "message.this-anomaly-was-ignored-due-to-the-system-sensibility"
+            );
+        }
+
+        if (uiAnomaly?.isFlagged) {
+            return t("message.this-anomaly-was-manually-flagged-by-a-user");
+        }
+
+        return undefined;
+    };
+
+    const getAnomalyName = ({
+        name,
+        isFlagged,
+        isIgnored,
+    }: UiAnomaly): string =>
+        [name, isIgnored && "(ignored)", !isIgnored && isFlagged && "(flagged)"]
+            .filter(Boolean)
+            .join(" ");
+
     return (
         <PageV1>
             <PageHeader
@@ -273,11 +300,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         </Button>
                     </PageHeaderActionsV1>
                 }
-                subtitle={
-                    anomaly && anomaly.enumerationItem && enumerationItem
-                        ? generateNameForEnumerationItem(enumerationItem)
-                        : undefined
-                }
+                subtitle={getSubtitle()}
             >
                 <PageHeaderTextV1>
                     {anomaly && uiAnomaly && (
@@ -290,7 +313,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             >
                                 {anomaly.alert.name}
                             </Link>
-                            : {uiAnomaly.name}
+                            : {getAnomalyName(uiAnomaly)}
                         </>
                     )}
                     <TooltipV1

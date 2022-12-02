@@ -61,8 +61,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             return linkRendererV1(
                 [
                     cellValue,
-                    isIgnored && "(Ignored)",
-                    !isIgnored && isFlagged && "(Flagged)",
+                    isIgnored && "(ignored)",
+                    !isIgnored && isFlagged && "(flagged)",
                 ]
                     .filter(Boolean)
                     .join(" "),

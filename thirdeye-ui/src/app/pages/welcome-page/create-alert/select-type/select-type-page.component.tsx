@@ -42,8 +42,10 @@ export const SelectTypePage: FunctionComponent = () => {
     ): void => {
         if (isDimensionExploration) {
             navigate(
-                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
             );
+
+            return;
         }
 
         navigate(

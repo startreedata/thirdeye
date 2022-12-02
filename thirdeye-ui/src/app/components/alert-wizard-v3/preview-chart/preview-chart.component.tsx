@@ -12,19 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-/**
- * Copyright 2022 StarTree Inc
- *
- * Licensed under the StarTree Community License (the "License"); you may not use
- * this file except in compliance with the License. You may obtain a copy of the
- * License at http://www.startree.ai/legal/startree-community-license
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
- * either express or implied.
- * See the License for the specific language governing permissions and limitations under
- * the License.
- */
 import { Box, Button, Grid } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
@@ -43,13 +30,13 @@ import { getAlertInsight } from "../../../rest/alerts/alerts.rest";
 import {
     AlertEvaluation,
     EditableAlert,
+    EnumerationItemConfig,
 } from "../../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
-import { generateNameForDetectionResult } from "../../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -57,13 +44,14 @@ import { generateChartOptionsForAlert } from "../../rca/anomaly-time-series-card
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
-import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+import { EnumerationItemsTable } from "./enumeration-items-table/enumeration-items-table.component";
 import { PreviewChartProps } from "./preview-chart.interfaces";
 import { usePreviewChartStyles } from "./preview-chart.styles";
 
 export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
     showLoadButton,
+    onAlertPropertyChange,
 }) => {
     const previewChartClasses = usePreviewChartStyles();
     const { t } = useTranslation();
@@ -76,12 +64,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         [searchParams]
     );
     const { notify } = useNotificationProviderV1();
-    const [timeSeriesOptions, setTimeSeriesOptions] =
-        useState<TimeSeriesChartProps>();
     const [detectionEvaluations, setDetectionEvaluations] =
         useState<DetectionEvaluation[]>();
-    const [selectedEvaluationToDisplay, setSelectedEvaluationToDisplay] =
-        useState<string>("");
     const [alertForCurrentEvaluation, setAlertForCurrentEvaluation] =
         useState<EditableAlert>();
 
@@ -111,25 +95,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             fetchedAlertEvaluation as AlertEvaluation
         );
 
-        if (evaluations.length === 1) {
-            setSelectedEvaluationToDisplay(
-                generateNameForDetectionResult(evaluations[0])
-            );
-        } else if (evaluations.length > 1) {
-            // Reset what's chosen if the current selected is not in the data
-            if (
-                evaluations.find(
-                    (evaluation) =>
-                        selectedEvaluationToDisplay ===
-                        generateNameForDetectionResult(evaluation)
-                ) === undefined
-            ) {
-                setSelectedEvaluationToDisplay(
-                    generateNameForDetectionResult(evaluations[0])
-                );
-            }
-        }
-
         setDetectionEvaluations(evaluations);
     };
 
@@ -144,30 +109,22 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         );
     }, [getEvaluationStatus]);
 
-    useEffect(() => {
-        if (detectionEvaluations) {
-            const detectionEvaluation = detectionEvaluations.find(
-                (evaluation) =>
-                    generateNameForDetectionResult(evaluation) ===
-                    selectedEvaluationToDisplay
-            );
-
-            if (!detectionEvaluation) {
-                return;
-            }
-
-            const timeseriesConfiguration = generateChartOptionsForAlert(
-                detectionEvaluation,
-                detectionEvaluation.anomalies,
-                t
-            );
-
-            timeseriesConfiguration.brush = false;
-            timeseriesConfiguration.zoom = true;
-
-            setTimeSeriesOptions(timeseriesConfiguration);
+    const firstTimeSeriesOptions = useMemo(() => {
+        if (!detectionEvaluations || detectionEvaluations.length === 0) {
+            return null;
         }
-    }, [detectionEvaluations, selectedEvaluationToDisplay]);
+
+        const timeseriesConfiguration = generateChartOptionsForAlert(
+            detectionEvaluations[0],
+            detectionEvaluations[0].anomalies,
+            t
+        );
+
+        timeseriesConfiguration.brush = false;
+        timeseriesConfiguration.zoom = true;
+
+        return timeseriesConfiguration;
+    }, detectionEvaluations);
 
     const handleAutoRangeClick = (): void => {
         getAlertInsight({ alert }).then(
@@ -193,6 +150,34 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         );
     };
 
+    const handleDeleteEnumerationItemClick = (
+        detectionEvaluation: DetectionEvaluation
+    ): void => {
+        const currentEnumerations: EnumerationItemConfig[] = alert
+            .templateProperties.enumerationItems as EnumerationItemConfig[];
+        onAlertPropertyChange({
+            templateProperties: {
+                ...alert.templateProperties,
+                enumerationItems: currentEnumerations.filter((c) => {
+                    return !isEqual(
+                        c.params,
+                        detectionEvaluation?.enumerationItem?.params
+                    );
+                }),
+            },
+        });
+
+        detectionEvaluations &&
+            setDetectionEvaluations(
+                detectionEvaluations.filter((c) => {
+                    return !isEqual(
+                        c.enumerationItem,
+                        detectionEvaluation?.enumerationItem
+                    );
+                })
+            );
+    };
+
     return (
         <>
             {getEvaluationStatus !== ActionStatus.Initial && (
@@ -208,7 +193,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                 disabled={!showLoadButton}
                                 variant="outlined"
                                 onClick={() => {
-                                    if (timeSeriesOptions) {
+                                    if (
+                                        (getEvaluationStatus as ActionStatus) !==
+                                        ActionStatus.Initial
+                                    ) {
                                         fetchAlertEvaluation(
                                             startTime,
                                             endTime
@@ -223,7 +211,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                             </Button>
                         </Grid>
                         {!isEqual(alertForCurrentEvaluation, alert) &&
-                            timeSeriesOptions && (
+                            (getEvaluationStatus as ActionStatus) !==
+                                ActionStatus.Initial &&
+                            getEvaluationStatus !== ActionStatus.Working && (
                                 <Grid item>
                                     <Alert
                                         severity="warning"
@@ -266,15 +256,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                             />
                         }
                     >
-                        {timeSeriesOptions && (
-                            <Box marginTop={1}>
-                                <TimeSeriesChart
-                                    height={300}
-                                    {...timeSeriesOptions}
-                                />
-                            </Box>
-                        )}
-
                         {!detectionEvaluations && (
                             <Box marginTop={1} position="relative">
                                 <Box
@@ -307,6 +288,30 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                 </Box>
                             </Box>
                         )}
+
+                        {detectionEvaluations?.length === 1 &&
+                            firstTimeSeriesOptions && (
+                                <Box marginTop={1}>
+                                    <TimeSeriesChart
+                                        height={300}
+                                        {...firstTimeSeriesOptions}
+                                    />
+                                </Box>
+                            )}
+
+                        {detectionEvaluations &&
+                            detectionEvaluations.length > 1 && (
+                                <Box marginTop={1}>
+                                    <EnumerationItemsTable
+                                        detectionEvaluations={
+                                            detectionEvaluations
+                                        }
+                                        onDeleteClick={
+                                            handleDeleteEnumerationItemClick
+                                        }
+                                    />
+                                </Box>
+                            )}
                     </LoadingErrorStateSwitch>
                 </Box>
             </Grid>

@@ -42,6 +42,12 @@ const SetupDetailsPage = lazy(() =>
     ).then((module) => ({ default: module.SetupDetailsPage }))
 );
 
+const SetupDimensionGroupsPage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-dimension-groups-page" */ "../../pages/welcome-page/create-alert/setup-dimension-groups/setup-dimension-groups-page.component"
+    ).then((module) => ({ default: module.SetupDimensionGroupsPage }))
+);
+
 const WelcomeLandingPage = lazy(() =>
     import(
         /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-landing-page/welcome-landing-page.component"
@@ -159,6 +165,14 @@ export const WelcomeRouter: FunctionComponent = () => {
                     <Route
                         element={<SelectTypePage />}
                         path={AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}
+                    />
+
+                    {/* Welcome create alert select dimension groups path */}
+                    <Route
+                        element={<SetupDimensionGroupsPage />}
+                        path={
+                            AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
+                        }
                     />
 
                     {/* Welcome create alert setup monitoring path */}

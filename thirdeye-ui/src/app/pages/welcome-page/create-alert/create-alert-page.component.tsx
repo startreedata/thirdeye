@@ -68,6 +68,11 @@ const STEPS = [
     },
 ];
 
+const MULTI_DIMENSION_SELECT_STEP = {
+    subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION,
+    translationLabel: "multidimension-setup",
+};
+
 export const CreateAlertPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
@@ -105,6 +110,23 @@ export const CreateAlertPage: FunctionComponent = () => {
         return generateAvailableAlgorithmOptions(t, availableTemplateNames);
     }, [alertTemplates]);
 
+    const stepsToDisplay = useMemo(() => {
+        const matchingDimensionExploration = [
+            ...simpleOptions,
+            ...advancedOptions,
+        ].find(
+            (c) =>
+                c.algorithmOption.alertTemplateForMultidimension ===
+                alert.template?.name
+        );
+
+        if (matchingDimensionExploration) {
+            return [STEPS[0], MULTI_DIMENSION_SELECT_STEP, ...STEPS.slice(1)];
+        }
+
+        return [...STEPS];
+    }, [alert]);
+
     const handleAlertPropertyChange = useMemo(() => {
         return handleAlertPropertyChangeGenerator(
             setAlert,
@@ -117,7 +139,7 @@ export const CreateAlertPage: FunctionComponent = () => {
     }, [setAlert]);
 
     const activeStep = useMemo(() => {
-        const activeStepDefinition = STEPS.find((candidate) =>
+        const activeStepDefinition = stepsToDisplay.find((candidate) =>
             pathname.includes(candidate.subPath)
         );
 
@@ -126,7 +148,7 @@ export const CreateAlertPage: FunctionComponent = () => {
         }
 
         return activeStepDefinition.subPath;
-    }, [pathname]);
+    }, [pathname, stepsToDisplay]);
 
     const selectedAlgorithmOption = useMemo(() => {
         return [...simpleOptions, ...advancedOptions].find(
@@ -156,7 +178,9 @@ export const CreateAlertPage: FunctionComponent = () => {
             alertWithName.name = generateGenericNameForAlert(
                 alert.templateProperties.aggregationColumn as string,
                 alert.templateProperties.aggregationFunction as string,
-                selectedAlgorithmOption?.algorithmOption.title as string
+                selectedAlgorithmOption?.algorithmOption.title as string,
+                selectedAlgorithmOption?.algorithmOption
+                    .alertTemplateForMultidimension === alert?.template?.name
             );
         }
 
@@ -220,7 +244,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                         <StepperV1
                             activeStep={activeStep}
                             stepLabelFn={(step: string): string => {
-                                const stepDefinition = STEPS.find(
+                                const stepDefinition = stepsToDisplay.find(
                                     (candidate) => candidate.subPath === step
                                 );
 
@@ -228,7 +252,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                                     `message.${stepDefinition?.translationLabel}`
                                 );
                             }}
-                            steps={STEPS.map((item) => item.subPath)}
+                            steps={stepsToDisplay.map((item) => item.subPath)}
                         />
                     </PageContentsCardV1>
                 </Grid>

@@ -110,7 +110,7 @@
                       <tr style="text-align:center; background-color: #F6F8FA; border-top: 2px solid #C7D1D8; border-bottom: 2px solid #C7D1D8;">
                         <th style="text-align:left; padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 20px;">Start / Duration</th>
                         <th style="padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 20px;">Type</th>
-                        <th style="padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 20px;">Dimensions</th>
+                        <th style="padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 20px;">Enumeration Item</th>
                         <th style="padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 20px;">Current</th>
                         <th style="padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 20px;">Predicted</th>
                       </tr>

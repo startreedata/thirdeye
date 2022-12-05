@@ -28,6 +28,11 @@ server {
         proxy_read_timeout 300;
     }
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri/ @index;
+    }
+    location @index {
+        try_files /index.html;
+        add_header Cache-Control no-cache;
+        expires 0;
     }
 }

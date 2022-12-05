@@ -99,9 +99,6 @@ public interface Constants {
   // disable minute level cache warm up
   long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
 
-  /* Detection Pipeline Context keys */
-  String K_DETECTION_REGISTRY = "$DetectionRegistry";
-
   enum JobStatus {
     SCHEDULED,
     COMPLETED,

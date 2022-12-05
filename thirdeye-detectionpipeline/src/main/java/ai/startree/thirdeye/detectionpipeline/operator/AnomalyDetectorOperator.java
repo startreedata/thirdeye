@@ -63,11 +63,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
-        .get(Constants.K_DETECTION_REGISTRY);
-    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
-    detector = createDetector(optional(planNode.getParams()).map(TemplatableMap::valueMap)
-        .orElse(null), detectionRegistry);
+    final DetectionRegistry detectionRegistry = requireNonNull(
+        context.getPlanNodeContext().getApplicationContext()
+            .getDetectionRegistry());
+    final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
+        .orElse(null);
+    detector = createDetector(params, detectionRegistry);
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(

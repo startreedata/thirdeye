@@ -40,10 +40,9 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    final DetectionRegistry detectionRegistry = context.getPlanNodeContext()
+    final DetectionRegistry detectionRegistry = requireNonNull(context.getPlanNodeContext()
         .getApplicationContext()
-        .getDetectionRegistry();
-    requireNonNull(detectionRegistry, "DetectionRegistry is not set");
+        .getDetectionRegistry());
 
     eventTrigger = createEventTrigger(
         optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null),

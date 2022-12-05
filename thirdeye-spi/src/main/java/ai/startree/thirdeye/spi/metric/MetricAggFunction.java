@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.spi.metric;
 
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum MetricAggFunction {
@@ -38,7 +38,7 @@ public enum MetricAggFunction {
     if (aggFunction == null) {
       return null;
     }
-    return valueOf(aggFunction.toUpperCase(Locale.ROOT));
+    return valueOf(aggFunction.toUpperCase(DEFAULT_LOCALE));
   }
 
   /**
@@ -50,7 +50,7 @@ public enum MetricAggFunction {
    * todo cyril clean this interface - the goal is to allow any number for percentile
    */
   public static Double parsePercentile(final String percentileString) {
-    final String lowerCase = requireNonNull(percentileString).toLowerCase(Locale.ENGLISH);
+    final String lowerCase = requireNonNull(percentileString).toLowerCase(DEFAULT_LOCALE);
     if (!lowerCase.startsWith("pct")) {
       return null;
     }

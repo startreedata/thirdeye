@@ -152,84 +152,29 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DoubleSeries currentSeries = df.getDoubles(Constants.COL_CURRENT);
     final DoubleSeries baselineSeries = df.getDoubles(Constants.COL_VALUE);
 
-    long lastStartMillis = -1;
-    AnomalyStatsAccumulator anomalyStatsAccumulator = new AnomalyStatsAccumulator();
-
     for (int i = 0; i < df.size(); i++) {
       if (!isAnomalySeries.isNull(i) && BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
-        // inside an anomaly range
-        if (lastStartMillis < 0) {
-          // start of an anomaly range
-          lastStartMillis = timeMillisSeries.get(i);
+        final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+        final long startTimeMillis = timeMillisSeries.get(i);
+        anomaly.setStartTime(startTimeMillis);
+        if (i < df.size() -1) {
+          anomaly.setEndTime(timeMillisSeries.get(i+1));
+        } else {
+          final DateTime endTime = new DateTime(startTimeMillis, detectionInterval.getChronology())
+              .plus(monitoringGranularity);
+          anomaly.setEndTime(endTime.getMillis());
         }
         if (!currentSeries.isNull(i)) {
-          anomalyStatsAccumulator.addCurrentValue(currentSeries.getDouble(i));
+          anomaly.setAvgCurrentVal(currentSeries.getDouble(i));
         }
         if (!baselineSeries.isNull(i)) {
-          anomalyStatsAccumulator.addBaselineValue(baselineSeries.getDouble(i));
+          anomaly.setAvgBaselineVal(baselineSeries.getDouble(i));
         }
-      } else if (lastStartMillis >= 0) {
-        // anomaly range opened - let's close the anomaly
-        long endMillis = timeMillisSeries.get(i);
-        anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endMillis));
-
-        // reset variables for next anomaly
-        anomalyStatsAccumulator.reset();
-        lastStartMillis = -1;
+        anomalies.add(anomaly);
       }
-    }
-
-    if (lastStartMillis >= 0) {
-      // last anomaly has not been closed - let's close it - compute end time of anomaly range
-      final long lastTimestamp = timeMillisSeries.getLong(timeMillisSeries.size() - 1);
-      // exact computation of end of period
-      DateTime endTime = new DateTime(lastTimestamp, detectionInterval.getChronology())
-          .plus(monitoringGranularity);
-      anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endTime.getMillis()));
     }
 
     return anomalies;
-  }
-
-  private static class AnomalyStatsAccumulator {
-
-    private double currentSum = 0;
-    private int currentCount = 0;
-    private double baselineSum = 0;
-    private int baselineCount = 0;
-
-    public AnomalyStatsAccumulator() {
-    }
-
-    public MergedAnomalyResultDTO buildAnomaly(long startMillis, long endMillis) {
-      final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
-      anomaly.setStartTime(startMillis);
-      anomaly.setEndTime(endMillis);
-      if (currentCount > 0) {
-        anomaly.setAvgCurrentVal(currentSum / currentCount);
-      }
-      if (baselineCount > 0) {
-        anomaly.setAvgBaselineVal(baselineSum / baselineCount);
-      }
-      return anomaly;
-    }
-
-    public void addCurrentValue(double currentValue) {
-      currentSum += currentValue;
-      ++currentCount;
-    }
-
-    public void addBaselineValue(double baselineValue) {
-      baselineSum += baselineValue;
-      ++baselineCount;
-    }
-
-    public void reset() {
-      currentSum = 0;
-      currentCount = 0;
-      baselineSum = 0;
-      baselineCount = 0;
-    }
   }
 
   /**

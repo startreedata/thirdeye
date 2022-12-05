@@ -101,7 +101,6 @@ public interface Constants {
 
   /* Detection Pipeline Context keys */
   String K_DETECTION_REGISTRY = "$DetectionRegistry";
-  String K_EVENT_MANAGER = "$EventManager";
 
   enum JobStatus {
     SCHEDULED,

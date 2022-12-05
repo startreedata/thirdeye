@@ -325,6 +325,13 @@ export const getSubscriptionGroupsViewPath = (id: number): string => {
     return path;
 };
 
+export const getAnomaliesViewPath = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_ANOMALY;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
 export const getSubscriptionGroupsCreatePath = (): string => {
     return AppRoute.SUBSCRIPTION_GROUPS_CREATE;
 };

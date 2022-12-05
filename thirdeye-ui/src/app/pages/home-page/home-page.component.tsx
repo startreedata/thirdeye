@@ -47,6 +47,7 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.action";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
@@ -62,6 +63,7 @@ export const HomePage: FunctionComponent = () => {
     const style = useHomePageStyles();
     const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("md"));
     const { appAnalytics, getAppAnalytics, status } = useGetAppAnalytics();
+    const { anomalies, getAnomalies } = useGetAnomalies();
     const {
         subscriptionGroups,
         getSubscriptionGroups,
@@ -78,6 +80,7 @@ export const HomePage: FunctionComponent = () => {
         getAppAnalytics();
         getSubscriptionGroups();
         getAlerts();
+        getAnomalies();
     }, []);
 
     const handleHideDocumentationClick = (): void => {
@@ -132,6 +135,7 @@ export const HomePage: FunctionComponent = () => {
                         <Box width={screenWidthSmUp ? 500 : "100%"}>
                             <EntitySearch
                                 alerts={alerts}
+                                anomalies={anomalies}
                                 subscriptionGroups={subscriptionGroups}
                             />
                         </Box>

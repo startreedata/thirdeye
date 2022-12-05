@@ -219,6 +219,7 @@ public class AnomalyMerger {
 
     final DateTimeZone dateTimeZone = getDateTimezone(templateWithProperties);
     final Period maxGap = getMaxGap(templateWithProperties);
+    final Period maxDuration = getMaxDuration(templateWithProperties);
     final long alertId = requireNonNull(alert.getId(),
         "Alert must be an existing alert for merging.");
 
@@ -226,9 +227,10 @@ public class AnomalyMerger {
     final List<MergedAnomalyResultDTO> anomaliesWithNoEnumerationItem = anomalies.stream()
         .filter(a -> a.getEnumerationItem() == null)
         .collect(Collectors.toList());
+
     final List<MergedAnomalyResultDTO> mergedAnomalies = mergeAnomalies(
         anomaliesWithNoEnumerationItem,
-        templateWithProperties,
+        maxDuration,
         dateTimeZone,
         maxGap,
         alertId,
@@ -240,7 +242,7 @@ public class AnomalyMerger {
         .stream()
         .flatMap(e -> mergeAnomalies(
             e.getValue(),
-            templateWithProperties,
+            maxDuration,
             dateTimeZone,
             maxGap,
             alertId,
@@ -270,7 +272,7 @@ public class AnomalyMerger {
 
   private List<MergedAnomalyResultDTO> mergeAnomalies(
       final List<MergedAnomalyResultDTO> anomalies,
-      final AlertTemplateDTO templateWithProperties,
+      final Period maxDurationMillis,
       final DateTimeZone dateTimeZone,
       final Period maxGap,
       final long alertId,
@@ -289,7 +291,6 @@ public class AnomalyMerger {
     final List<MergedAnomalyResultDTO> sortedRelevantAnomalies = combineAndSort(anomalies,
         existingAnomalies);
 
-    final Period maxDurationMillis = getMaxDuration(templateWithProperties);
     return merge(sortedRelevantAnomalies,
         maxGap,
         maxDurationMillis,

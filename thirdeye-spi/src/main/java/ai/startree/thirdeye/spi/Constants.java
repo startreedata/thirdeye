@@ -102,7 +102,6 @@ public interface Constants {
   /* Detection Pipeline Context keys */
   String K_DATA_SOURCE_CACHE = "$DataSourceCache";
   String K_DETECTION_REGISTRY = "$DetectionRegistry";
-  String K_POST_PROCESSOR_REGISTRY = "$PostProcessorRegistry";
   String K_EVENT_MANAGER = "$EventManager";
   String K_DATASET_MANAGER = "$DatasetManager";
 

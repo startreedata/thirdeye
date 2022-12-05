@@ -13,23 +13,10 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
-
 public class PostProcessorSpec extends AbstractSpec {
 
   // move to post processor spec
   private Boolean ignore;
-
-  /**
-   * Expected to be set during DataFetcherOperator init
-   * */
-  private DatasetConfigManager datasetConfigManager;
-
-  /**
-   * Expected to be set during DataFetcherOperator init.
-   */
-  private MinMaxTimeLoader minMaxTimeLoader;
 
   public Boolean getIgnore() {
     return ignore;
@@ -37,26 +24,6 @@ public class PostProcessorSpec extends AbstractSpec {
 
   public PostProcessorSpec setIgnore(final Boolean ignore) {
     this.ignore = ignore;
-    return this;
-  }
-
-  public DatasetConfigManager getDatasetConfigManager() {
-    return datasetConfigManager;
-  }
-
-  public PostProcessorSpec setDatasetConfigManager(
-      final DatasetConfigManager datasetConfigManager) {
-    this.datasetConfigManager = datasetConfigManager;
-    return this;
-  }
-
-  public MinMaxTimeLoader getMinMaxTimeLoader() {
-    return minMaxTimeLoader;
-  }
-
-  public PostProcessorSpec setMinMaxTimeLoader(
-      final MinMaxTimeLoader minMaxTimeLoader) {
-    this.minMaxTimeLoader = minMaxTimeLoader;
     return this;
   }
 }

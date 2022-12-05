@@ -28,7 +28,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.Weigher;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
@@ -127,11 +126,6 @@ public class SqlThirdEyeDataSource implements ThirdEyeDataSource {
       throw e;
     }
     return thirdEyeResultSetGroup;
-  }
-
-  @Override
-  public List<String> getDatasets() throws Exception {
-    throw new UnsupportedOperationException();
   }
 
   @Override

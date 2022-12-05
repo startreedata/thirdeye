@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TemplatePropertiesObject } from "../../../../rest/dto/alert.interfaces";
+import {
+    PropertyConfigValueTypes,
+    TemplatePropertiesObject,
+} from "../../../../rest/dto/alert.interfaces";
 
 export interface AlertTemplatePropertiesBuilderProps {
     alertTemplateId: number;
@@ -24,6 +27,6 @@ export interface AlertTemplatePropertiesBuilderProps {
 
 export interface PropertyRenderConfig {
     key: string;
-    value: string | string[] | boolean;
-    defaultValue: string | string[] | boolean;
+    value: PropertyConfigValueTypes;
+    defaultValue: PropertyConfigValueTypes;
 }

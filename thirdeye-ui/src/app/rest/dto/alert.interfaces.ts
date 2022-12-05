@@ -15,8 +15,14 @@
 import { DetectionEvaluation } from "./detection.interfaces";
 import { User } from "./user.interfaces";
 
+export type PropertyConfigValueTypes =
+    | string
+    | string[]
+    | boolean
+    | EnumerationItemConfig[];
+
 export interface TemplatePropertiesObject {
-    [index: string]: string | string[] | boolean;
+    [index: string]: PropertyConfigValueTypes;
 }
 
 export interface EditableAlert {
@@ -111,4 +117,11 @@ export interface AlertEvaluation {
     start: number;
     end: number;
     lastTimestamp: number;
+}
+
+export interface EnumerationItemConfig {
+    name?: string;
+    params: {
+        queryFilters: string;
+    };
 }

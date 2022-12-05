@@ -53,18 +53,13 @@ public class DataSourceWrapper implements ThirdEyeDataSource {
   }
 
   @Override
-  public List<String> getDatasets() throws Exception {
+  public List<DatasetConfigDTO> getDatasets() {
     return delegate.getDatasets();
   }
 
   @Override
-  public List<DatasetConfigDTO> onboardAll() {
-    return delegate.onboardAll();
-  }
-
-  @Override
-  public DatasetConfigDTO onboardDataset(final String datasetName) {
-    return delegate.onboardDataset(datasetName);
+  public DatasetConfigDTO getDataset(final String datasetName) {
+    return delegate.getDataset(datasetName);
   }
 
   @Override

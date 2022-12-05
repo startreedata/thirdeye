@@ -33,14 +33,12 @@ public interface ThirdEyeDataSource {
    */
   void init(ThirdEyeDataSourceContext context);
 
-  List<String> getDatasets() throws Exception;
-
   /**
    * Onboard all datasets available in the data source.
    *
    * @return ThirdEye dataset describing available dimensions and metrics.
    */
-  default List<DatasetConfigDTO> onboardAll() {
+  default List<DatasetConfigDTO> getDatasets() {
     throw new UnsupportedOperationException();
   }
 
@@ -50,7 +48,7 @@ public interface ThirdEyeDataSource {
    * @param datasetName name of the table
    * @return ThirdEye dataset describing available dimensions and metrics.
    */
-  default DatasetConfigDTO onboardDataset(String datasetName) {
+  default DatasetConfigDTO getDataset(String datasetName) {
     throw new UnsupportedOperationException();
   }
 

@@ -24,10 +24,10 @@ public class PostProcessorsPlugin implements Plugin {
   @Override
   public Iterable<AnomalyPostProcessorFactory> getAnomalyPostProcessorFactories() {
     return List.of(
-        new GenericPostProcessorFactory<>(ColdStartPostProcessor.NAME, ColdStartPostProcessor.class),
-        new GenericPostProcessorFactory<>(TimeOfWeekPostProcessor.NAME, TimeOfWeekPostProcessor.class),
-        new GenericPostProcessorFactory<>(ThresholdPostProcessor.NAME, ThresholdPostProcessor.class),
-        new GenericPostProcessorFactory<>(EventPostProcessor.NAME, EventPostProcessor.class)
+        new ColdStartPostProcessor.Factory(),
+        new TimeOfWeekPostProcessor.Factory(),
+        new ThresholdPostProcessor.Factory(),
+        new EventPostProcessor.Factory()
     );
   }
 }

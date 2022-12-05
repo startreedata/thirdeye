@@ -119,7 +119,6 @@ public class PinotControllerRestClient {
     Schema schema = null;
     final HttpGet schemaReq = new HttpGet(
         String.format(endpointTemplate, URLEncoder.encode(dataset, StandardCharsets.UTF_8)));
-    LOG.info("Retrieving schema: {}", schemaReq);
     final CloseableHttpResponse schemaRes = pinotControllerRestClientSupplier.get()
         .execute(pinotControllerHost, schemaReq);
     try {
@@ -154,7 +153,6 @@ public class PinotControllerRestClient {
     final HttpGet request = new HttpGet(String.format(PINOT_TABLES_ENDPOINT_TEMPLATE, dataset));
     final CloseableHttpResponse response = pinotControllerRestClientSupplier.get()
         .execute(pinotControllerHost, request);
-    LOG.debug("Retrieving dataset's custom config: {}", request);
 
     // Retrieve table config
     JsonNode tables = null;

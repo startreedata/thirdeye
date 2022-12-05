@@ -25,10 +25,12 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
@@ -48,6 +50,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
@@ -102,6 +105,20 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       final DataSourceDTO existing,
       final DataSourceDTO updated) {
     dataSourceCache.removeDataSource(existing.getName());
+  }
+
+  @Timed
+  @GET
+  @Path("/name/{name}/datasets")
+  public Response getDatasets(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("name") String name) {
+
+    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
+    final List<DatasetApi> datasets = dataSource.getDatasets().stream()
+        .map(ApiBeanMapper::toApi)
+        .collect(Collectors.toList());
+    return respondOk(datasets);
   }
 
   @POST

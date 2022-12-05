@@ -213,7 +213,7 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public List<DatasetConfigDTO> onboardAll() {
+  public List<DatasetConfigDTO> getDatasets() {
     return Collections.emptyList();
   }
 
@@ -440,12 +440,6 @@ public class MockThirdEyeDataSource implements ThirdEyeDataSource {
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     return this.delegate.fetchDataTable(request);
   }
-
-  @Override
-  public List<String> getDatasets() throws Exception {
-    return new ArrayList<>(this.datasets.keySet());
-  }
-
   @Override
   public void clear() throws Exception {
     // left blank

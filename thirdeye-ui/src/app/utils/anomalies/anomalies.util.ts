@@ -24,6 +24,7 @@ import {
     formatLargeNumberV1,
     formatPercentageV1,
 } from "../../platform/utils";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { createAlert } from "../../rest/alerts/alerts.rest";
 import {
     AlertTemplate,
@@ -442,13 +443,18 @@ export const handleCreateAlertClickGenerator = (
 ) => {
     return (
         alert: EditableAlert,
-        subscriptionGroups: SubscriptionGroup[]
+        subscriptionGroups: SubscriptionGroup[],
+        onAlertCreateStatusUpdate?: (status: ActionStatus) => void
     ): void => {
+        onAlertCreateStatusUpdate &&
+            onAlertCreateStatusUpdate(ActionStatus.Working);
         createAlert(alert)
             .then((alert) => {
                 if (isEmpty(subscriptionGroups)) {
                     // Call the onSuccess callback
                     onSuccess(alert);
+                    onAlertCreateStatusUpdate &&
+                        onAlertCreateStatusUpdate(ActionStatus.Done);
 
                     return;
                 }
@@ -478,9 +484,13 @@ export const handleCreateAlertClickGenerator = (
                     .finally((): void => {
                         // Call the onSuccess callback
                         onSuccess(alert);
+                        onAlertCreateStatusUpdate &&
+                            onAlertCreateStatusUpdate(ActionStatus.Done);
                     });
             })
             .catch((error: AxiosError) => {
+                onAlertCreateStatusUpdate &&
+                    onAlertCreateStatusUpdate(ActionStatus.Error);
                 const errMessages = getErrorMessages(error);
 
                 isEmpty(errMessages)

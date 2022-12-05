@@ -95,6 +95,8 @@ export const AppRouteRelative = {
     WELCOME_CREATE_ALERT: "create-alert",
     WELCOME_CREATE_ALERT_SELECT_TYPE: "select-type",
     WELCOME_CREATE_ALERT_SETUP_MONITORING: "setup-monitoring",
+    WELCOME_CREATE_ALERT_SETUP_DETAILS: "setup-details",
+    WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION: "setup-dimension-groups",
 } as const;
 
 export const AppRoute = {
@@ -104,6 +106,7 @@ export const AppRoute = {
     COHORT_RECOMMENDER: `/${AppRouteRelative.COHORT_RECOMMENDER}`,
     LOGIN: "/login",
     LOGOUT: "/logout",
+    SWAGGER: `/swagger`,
     SETUP: `/${AppRouteRelative.SETUP}`,
     SETUP_DATASOURCE: `/${AppRouteRelative.SETUP}/${AppRouteRelative.SETUP_DATASOURCE}`,
     SETUP_DATASET: `/${AppRouteRelative.SETUP}/${AppRouteRelative.SETUP_DATASET}`,
@@ -301,6 +304,10 @@ export const getAnomaliesAnomalyViewPath = (id: number): string => {
 
 export const getConfigurationPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.CONFIGURATION);
+};
+
+export const getSwaggerPath = (): string => {
+    return `${AppRoute.SWAGGER}`;
 };
 
 export const getSubscriptionGroupsPath = (): string => {

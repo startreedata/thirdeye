@@ -137,18 +137,15 @@ export const HomePage: FunctionComponent = () => {
                         </Box>
                     </PageHeaderActionsV1>
                 }
-                title={t("label.overview")}
+                subtitle={t(
+                    "message.alerts-monitor-your-kpis-and-anomalies-help-you-to-find-outliers-in-the-kpis"
+                )}
+                title={t("message.kpis-monitor-and-outliers")}
             />
             <PageContentsGridV1>
-                <Grid item sm={8} xs={12}>
+                <Grid item sm={12} xs={12}>
                     <Grid container alignItems="stretch">
-                        <Grid item sm={12} xs={12}>
-                            <PageContentsCardV1 fullHeight>
-                                <TrendingAnomalies />
-                            </PageContentsCardV1>
-                        </Grid>
-
-                        <Grid item sm={6} xs={12}>
+                        <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <ActiveAlertsCount
                                     alerts={alerts}
@@ -156,8 +153,7 @@ export const HomePage: FunctionComponent = () => {
                                 />
                             </PageContentsCardV1>
                         </Grid>
-
-                        <Grid item sm={6} xs={12}>
+                        <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <AlertAccuracy
                                     appAnalytics={appAnalytics}
@@ -166,6 +162,51 @@ export const HomePage: FunctionComponent = () => {
                                     }}
                                     getAppAnalyticsStatus={status}
                                 />
+                            </PageContentsCardV1>
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <PageContentsCardV1 fullHeight>
+                                <TotalSubscriptionGroupCount
+                                    classes={{
+                                        noDataIndicator: style.noDataIndicator,
+                                    }}
+                                    getSubscriptionGroupsStatus={
+                                        getSubscriptionGroupsStatus
+                                    }
+                                    subscriptionGroups={subscriptionGroups}
+                                />
+                            </PageContentsCardV1>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+                {!shouldHideDocumentation && (
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            <RecommendedDocumentation
+                                onHideDocumentationClick={
+                                    handleHideDocumentationClick
+                                }
+                            />
+                        </PageContentsCardV1>
+                    </Grid>
+                )}
+
+                <Grid item sm={12} xs={12}>
+                    <Typography variant="h5">
+                        {t("label.recent-entity", {
+                            entity: t("label.anomalies"),
+                        })}
+                    </Typography>
+
+                    {/* TODO: Anomalies range dropdown */}
+                </Grid>
+
+                <Grid item sm={8} xs={12}>
+                    <Grid container alignItems="stretch">
+                        <Grid item sm={12} xs={12}>
+                            <PageContentsCardV1 fullHeight>
+                                <TrendingAnomalies />
                             </PageContentsCardV1>
                         </Grid>
                     </Grid>
@@ -195,33 +236,8 @@ export const HomePage: FunctionComponent = () => {
                                 />
                             </PageContentsCardV1>
                         </Grid>
-                        <Grid item>
-                            <PageContentsCardV1 fullHeight>
-                                <TotalSubscriptionGroupCount
-                                    classes={{
-                                        noDataIndicator: style.noDataIndicator,
-                                    }}
-                                    getSubscriptionGroupsStatus={
-                                        getSubscriptionGroupsStatus
-                                    }
-                                    subscriptionGroups={subscriptionGroups}
-                                />
-                            </PageContentsCardV1>
-                        </Grid>
                     </Grid>
                 </Grid>
-
-                {!shouldHideDocumentation && (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <RecommendedDocumentation
-                                onHideDocumentationClick={
-                                    handleHideDocumentationClick
-                                }
-                            />
-                        </PageContentsCardV1>
-                    </Grid>
-                )}
 
                 <Grid item xs={12}>
                     <RecentAnomalies />

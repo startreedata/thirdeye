@@ -14,12 +14,13 @@
 package ai.startree.thirdeye.spi;
 
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
 
 public interface Constants {
-  // fixme add locale English
+  Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
   // fixme cyril prefer chronology to timezone
   DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
@@ -50,8 +51,6 @@ public interface Constants {
   int DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE = 25;
   int DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 100;
   int DEFAULT_UPPER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 8192;
-
-  String TIMESTAMP = "timestamp";
 
   // System property var to check for plugins. Default is "plugins"
   String SYS_PROP_THIRDEYE_PLUGINS_DIR = "thirdEyePluginsDir";

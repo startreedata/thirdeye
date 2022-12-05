@@ -100,10 +100,8 @@ public interface Constants {
   long DETECTION_TASK_MAX_LOOKBACK_WINDOW = TimeUnit.DAYS.toMillis(7);
 
   /* Detection Pipeline Context keys */
-  String K_DATA_SOURCE_CACHE = "$DataSourceCache";
   String K_DETECTION_REGISTRY = "$DetectionRegistry";
   String K_EVENT_MANAGER = "$EventManager";
-  String K_DATASET_MANAGER = "$DatasetManager";
 
   enum JobStatus {
     SCHEDULED,

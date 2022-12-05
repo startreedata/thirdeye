@@ -18,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
@@ -41,11 +40,14 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    final DetectionRegistry detectionRegistry = (DetectionRegistry) context.getProperties()
-        .get(Constants.K_DETECTION_REGISTRY);
+    final DetectionRegistry detectionRegistry = context.getPlanNodeContext()
+        .getApplicationContext()
+        .getDetectionRegistry();
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
 
-    eventTrigger = createEventTrigger(optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null), detectionRegistry);
+    eventTrigger = createEventTrigger(
+        optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null),
+        detectionRegistry);
   }
 
   @Override
@@ -79,7 +81,7 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
     final List<String> seriesNames = df.getSeriesNames();
     final Object[] row = new Object[seriesNames.size()];
     for (int colIdx = 0; colIdx < seriesNames.size(); colIdx++) {
-      row[colIdx] = df.getObject(seriesNames.get(colIdx),rowIdx);
+      row[colIdx] = df.getObject(seriesNames.get(colIdx), rowIdx);
     }
     return row;
   }

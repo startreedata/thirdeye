@@ -578,3 +578,23 @@ export const generateDateRangeMonthsFromNow = (
 
     return [xMonthsAgo.toMillis(), roundedNow.toMillis()];
 };
+
+/**
+ * Helper function to quickly generate a date range for any number of days from
+ * now. The month ago will start at the beginning of the days.
+ *
+ * @param daysAgo - Number of days to set the start of range
+ * @param nowOverride - Override now with this value
+ * @param roundNowTime - Round the end time
+ */
+export const generateDateRangeDaysFromNow = (
+    daysAgo: number,
+    nowOverride?: DateTime,
+    roundNowTime?: DurationUnit
+): [number, number] => {
+    const now = nowOverride || DateTime.local();
+    const roundedNow = now.endOf(roundNowTime || "hour");
+    const xDaysAgo = now.minus({ days: daysAgo }).startOf("days");
+
+    return [xDaysAgo.toMillis(), roundedNow.toMillis()];
+};

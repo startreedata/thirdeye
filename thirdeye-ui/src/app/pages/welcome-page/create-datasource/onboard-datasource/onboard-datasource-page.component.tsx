@@ -34,34 +34,34 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
+import { LoadingErrorStateSwitch } from "../../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     JSONEditorV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetDatasources } from "../../rest/datasources/datasources.actions";
-import { createDatasource } from "../../rest/datasources/datasources.rest";
-import type { Datasource } from "../../rest/dto/datasource.interfaces";
-import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
-import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
+} from "../../../../platform/components";
+import { ActionStatus } from "../../../../rest/actions.interfaces";
+import { useGetDatasources } from "../../../../rest/datasources/datasources.actions";
+import { createDatasource } from "../../../../rest/datasources/datasources.rest";
+import type { Datasource } from "../../../../rest/dto/datasource.interfaces";
+import { createDefaultDatasource } from "../../../../utils/datasources/datasources.util";
+import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
+import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import {
+    AppRoute,
     getDataConfigurationCreateDatasetsPath,
-    getDataConfigurationCreatePath,
-} from "../../utils/routes/routes.util";
+} from "../../../../utils/routes/routes.util";
 import type {
     DatasourceOptionGroups,
     SelectedDatasource,
-} from "./welcome-onboard-datasource-select-datasource.interfaces";
+} from "./onboard-datasource-page.interfaces";
 import {
     ADD_NEW_DATASOURCE,
     getDatasourceGroups,
-} from "./welcome-onboard-datasource-select-datasource.utils";
+} from "./onboard-datasource-page.utils";
 
 export const WelcomeSelectDatasource: FunctionComponent = () => {
     const navigate = useNavigate();
@@ -143,10 +143,6 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
         []
     );
 
-    const handleBack = useCallback(() => {
-        navigate(getDataConfigurationCreatePath());
-    }, []);
-
     const handleNext = useCallback((): void | Promise<void> => {
         if (selectedDatasourceName === null) {
             notify(
@@ -198,44 +194,56 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                             isLoading={status === ActionStatus.Working}
                         >
                             {datasourceGroups.map((datasourceGroup) => (
-                                <Box key={datasourceGroup.key} px={2} py={1}>
-                                    <FormControl component="fieldset">
-                                        <FormLabel
-                                            color="secondary"
-                                            component="legend"
+                                <>
+                                    {datasourceGroup.options.length > 0 && (
+                                        <Box
+                                            key={datasourceGroup.key}
+                                            px={2}
+                                            py={1}
                                         >
-                                            {datasourceGroup.title}
-                                        </FormLabel>
-                                        <RadioGroup
-                                            aria-label={t(
-                                                "message.select-entity",
-                                                {
-                                                    entity: t(
-                                                        "label.datasource"
-                                                    ),
-                                                }
-                                            )}
-                                            name="select-datasource"
-                                            value={selectedDatasourceName}
-                                            onChange={handleRadioChange}
-                                        >
-                                            {datasourceGroup.options.map(
-                                                (datasourceOption) => (
-                                                    <FormControlLabel
-                                                        control={<Radio />}
-                                                        key={
-                                                            datasourceOption.value
+                                            <FormControl component="fieldset">
+                                                <FormLabel
+                                                    color="secondary"
+                                                    component="legend"
+                                                >
+                                                    {datasourceGroup.title}
+                                                </FormLabel>
+                                                <RadioGroup
+                                                    aria-label={t(
+                                                        "message.select-entity",
+                                                        {
+                                                            entity: t(
+                                                                "label.datasource"
+                                                            ),
                                                         }
-                                                        label={
-                                                            datasourceOption.label
-                                                        }
-                                                        value={datasourceOption.value.toString()}
-                                                    />
-                                                )
-                                            )}
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Box>
+                                                    )}
+                                                    name="select-datasource"
+                                                    value={
+                                                        selectedDatasourceName
+                                                    }
+                                                    onChange={handleRadioChange}
+                                                >
+                                                    {datasourceGroup.options.map(
+                                                        (datasourceOption) => (
+                                                            <FormControlLabel
+                                                                control={
+                                                                    <Radio />
+                                                                }
+                                                                key={
+                                                                    datasourceOption.value
+                                                                }
+                                                                label={
+                                                                    datasourceOption.label
+                                                                }
+                                                                value={datasourceOption.value.toString()}
+                                                            />
+                                                        )
+                                                    )}
+                                                </RadioGroup>
+                                            </FormControl>
+                                        </Box>
+                                    )}
+                                </>
                             ))}
                         </LoadingErrorStateSwitch>
 
@@ -250,7 +258,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                 </Grid>
             </PageContentsGridV1>
             <WizardBottomBar
-                handleBackClick={handleBack}
+                backBtnLink={AppRoute.WELCOME}
                 handleNextClick={handleNext}
                 nextButtonLabel={t("label.next")}
             />

@@ -20,6 +20,7 @@ import {
 } from "../params/params.util";
 
 const PLACEHOLDER_ROUTE_ID = ":id";
+const PLACEHOLDER_ROUTE_NAME = ":name";
 
 export const AppRouteRelative = {
     ADMIN: "admin",
@@ -91,7 +92,7 @@ export const AppRouteRelative = {
     WELCOME_LANDING: "landing",
     WELCOME_ONBOARD_DATASOURCE: "onboard-datasource",
     WELCOME_ONBOARD_DATASOURCE_DATASOURCE: "datasource",
-    WELCOME_ONBOARD_DATASOURCE_DATASETS: `${PLACEHOLDER_ROUTE_ID}/datasets`,
+    WELCOME_ONBOARD_DATASOURCE_DATASETS: `${PLACEHOLDER_ROUTE_NAME}/datasets`,
     WELCOME_CREATE_ALERT: "create-alert",
     WELCOME_CREATE_ALERT_SELECT_TYPE: "select-type",
     WELCOME_CREATE_ALERT_SETUP_MONITORING: "setup-monitoring",
@@ -514,7 +515,7 @@ export const getDataConfigurationCreateDatasetsPath = (
     datasourceName: string
 ): string => {
     let path: string = AppRoute.WELCOME_ONBOARD_DATASOURCE_DATASETS;
-    path = path.replace(PLACEHOLDER_ROUTE_ID, `${datasourceName}`);
+    path = path.replace(PLACEHOLDER_ROUTE_NAME, `${datasourceName}`);
 
     return path;
 };

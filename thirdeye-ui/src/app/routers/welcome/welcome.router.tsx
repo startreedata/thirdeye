@@ -50,25 +50,25 @@ const SetupDimensionGroupsPage = lazy(() =>
 
 const WelcomeLandingPage = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-landing-page/welcome-landing-page.component"
+        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-page/landing/landing-page.component"
     ).then((module) => ({ default: module.WelcomeLandingPage }))
 );
 
 const WelcomeOnboardDatasourceWizard = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-onboard-datasource" */ "../../pages/welcome-onboard-datasource-wizard/welcome-onboard-datasource-wizard.component"
+        /* webpackChunkName: "welcome-onboard-datasource" */ "../../pages/welcome-page/create-datasource/create-datasource-page.component"
     ).then((module) => ({ default: module.WelcomeOnboardDatasourceWizard }))
 );
 
 const WelcomeSelectDatasource = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-select-datasource" */ "../../pages/welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.component"
+        /* webpackChunkName: "elect-datasource" */ "../../pages/welcome-page/create-datasource/onboard-datasource/onboard-datasource-page.component"
     ).then((module) => ({ default: module.WelcomeSelectDatasource }))
 );
 
 const WelcomeSelectDatasets = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-select-datasets" */ "../../pages/welcome-onboard-datasource-select-datasets/welcome-onboard-datasource-select-datasets.component"
+        /* webpackChunkName: "select-datasets" */ "../../pages/welcome-page/create-datasource/onboard-datasets/onboard-datasets-page.component"
     ).then((module) => ({ default: module.WelcomeSelectDatasets }))
 );
 

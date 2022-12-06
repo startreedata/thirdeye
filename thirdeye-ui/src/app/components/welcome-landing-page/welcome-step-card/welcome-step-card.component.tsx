@@ -13,9 +13,10 @@
  * the License.
  */
 
-import { Box, Button, Typography } from "@material-ui/core";
+import { Box, Button, Link, Typography } from "@material-ui/core";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import React, { FunctionComponent } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { DimensionV1 } from "../../../platform/utils";
 import type { WelcomeStepCardProps } from "./welcome-step-card.interfaces";
 import { useWelcomeStepCardStyles } from "./welcome-step.card.styles";
@@ -26,7 +27,7 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
     ctaContent,
     disabled = false,
     isComplete = false,
-    onClickCta,
+    link,
 }) => {
     const styles = useWelcomeStepCardStyles({ disabled });
 
@@ -46,12 +47,14 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
             width={400}
         >
             <Box clone fontWeight="bold">
-                <Typography
-                    color={disabled ? "initial" : "primary"}
-                    variant="subtitle1"
-                >
-                    {title}
-                </Typography>
+                <Link component={RouterLink} to={link}>
+                    <Typography
+                        color={disabled ? "initial" : "primary"}
+                        variant="subtitle1"
+                    >
+                        {title}
+                    </Typography>
+                </Link>
             </Box>
             <Box clone m="auto" py={2}>
                 <Typography variant="body2">{subtitle}</Typography>
@@ -65,9 +68,10 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
                 ) : (
                     <Button
                         color={disabled ? "default" : "primary"}
+                        component={RouterLink}
                         disabled={disabled}
+                        to={link}
                         variant={disabled ? "outlined" : "contained"}
-                        onClick={() => onClickCta?.()}
                     >
                         {ctaContent}
                     </Button>

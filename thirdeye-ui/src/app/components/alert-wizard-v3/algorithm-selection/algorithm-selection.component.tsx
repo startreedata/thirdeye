@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, CardActions, Grid, Typography } from "@material-ui/core";
+import { Box, Button, CardActions, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { AlgorithmOptionCard } from "./algorithm-option-card/algorithm-option-card.component";
 import {
     AlgorithmOption,
@@ -140,67 +141,92 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Grid container spacing={3}>
-                        {advancedOptions.map((option) => {
-                            return (
-                                <Grid
-                                    item
-                                    key={option.algorithmOption.alertTemplate}
-                                    sm={3}
-                                    xs={12}
-                                >
-                                    <AlgorithmOptionCard
-                                        option={option.algorithmOption}
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Box padding={3} textAlign="center">
+                                {t(
+                                    "message.advanced-options-are-only-available-in-the-enterprise"
+                                )}
+                            </Box>
+                        }
+                        isEmpty={advancedOptions.length === 0}
+                    >
+                        <Grid container spacing={3}>
+                            {advancedOptions.map((option) => {
+                                return (
+                                    <Grid
+                                        item
+                                        key={
+                                            option.algorithmOption.alertTemplate
+                                        }
+                                        sm={3}
+                                        xs={12}
                                     >
-                                        <CardActions>
-                                            <Grid
-                                                container
-                                                alignItems="center"
-                                                justifyContent="space-between"
-                                            >
-                                                <Grid item md sm={12} xs={12}>
-                                                    <Button
-                                                        fullWidth
-                                                        disabled={
-                                                            !option.hasAlertTemplate
-                                                        }
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleAlgorithmClick(
-                                                                option.algorithmOption,
-                                                                false
-                                                            )
-                                                        }
+                                        <AlgorithmOptionCard
+                                            option={option.algorithmOption}
+                                        >
+                                            <CardActions>
+                                                <Grid
+                                                    container
+                                                    alignItems="center"
+                                                    justifyContent="space-between"
+                                                >
+                                                    <Grid
+                                                        item
+                                                        md
+                                                        sm={12}
+                                                        xs={12}
                                                     >
-                                                        {t("label.basic-alert")}
-                                                    </Button>
-                                                </Grid>
-                                                <Grid item md sm={12} xs={12}>
-                                                    <Button
-                                                        fullWidth
-                                                        disabled={
-                                                            !option.hasMultidimension
-                                                        }
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleAlgorithmClick(
-                                                                option.algorithmOption,
-                                                                true
-                                                            )
-                                                        }
+                                                        <Button
+                                                            fullWidth
+                                                            disabled={
+                                                                !option.hasAlertTemplate
+                                                            }
+                                                            size="small"
+                                                            onClick={() =>
+                                                                handleAlgorithmClick(
+                                                                    option.algorithmOption,
+                                                                    false
+                                                                )
+                                                            }
+                                                        >
+                                                            {t(
+                                                                "label.basic-alert"
+                                                            )}
+                                                        </Button>
+                                                    </Grid>
+                                                    <Grid
+                                                        item
+                                                        md
+                                                        sm={12}
+                                                        xs={12}
                                                     >
-                                                        {t(
-                                                            "label.multi-dimensional-alert"
-                                                        )}
-                                                    </Button>
+                                                        <Button
+                                                            fullWidth
+                                                            disabled={
+                                                                !option.hasMultidimension
+                                                            }
+                                                            size="small"
+                                                            onClick={() =>
+                                                                handleAlgorithmClick(
+                                                                    option.algorithmOption,
+                                                                    true
+                                                                )
+                                                            }
+                                                        >
+                                                            {t(
+                                                                "label.multi-dimensional-alert"
+                                                            )}
+                                                        </Button>
+                                                    </Grid>
                                                 </Grid>
-                                            </Grid>
-                                        </CardActions>
-                                    </AlgorithmOptionCard>
-                                </Grid>
-                            );
-                        })}
-                    </Grid>
+                                            </CardActions>
+                                        </AlgorithmOptionCard>
+                                    </Grid>
+                                );
+                            })}
+                        </Grid>
+                    </EmptyStateSwitch>
                 </Grid>
             </Grid>
         </PageContentsCardV1>

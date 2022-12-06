@@ -34,7 +34,6 @@ import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -59,12 +58,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
@@ -275,18 +274,21 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   public Response getAnalytics(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
-      @Context UriInfo uriInfo
+      @QueryParam("enumerationItem.id") final String enumerationId,
+      @QueryParam("startTime") final String startTime,
+      @QueryParam("endTime") final String endTime
   ) {
     ensureExists(id);
-    final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
-    final Predicate alertPredicate = Predicate.EQ("detectionConfigId", id);
-    final DaoFilter filter;
-    if (queryParameters.isEmpty()) {
-      filter = new DaoFilter().setPredicate(alertPredicate);
-    } else {
-      filter = new DaoFilterBuilder(AnomalyResource.API_TO_INDEX_FILTER_MAP).buildFilter(queryParameters);
-      filter.setPredicate(Predicate.AND(filter.getPredicate(), alertPredicate));
-    }
+    final MultivaluedMap<String, String> queryParameters = new MultivaluedHashMap<>();
+    // required filter
+    queryParameters.put("alert.id", List.of(String.valueOf(id)));
+
+    // optional filters
+    optional(enumerationId).map(enumId -> queryParameters.put("enumerationItem.id", List.of(enumId)));
+    optional(startTime).map(start -> queryParameters.put("startTime", List.of(start)));
+    optional(endTime).map(end -> queryParameters.put("endTime", List.of(end)));
+
+    final DaoFilter filter = new DaoFilterBuilder(AnomalyResource.API_TO_INDEX_FILTER_MAP).buildFilter(queryParameters);
     return respondOk(analyticsService.computeAnomalyStats(filter));
   }
 }

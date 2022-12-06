@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.authorization;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import java.net.http.HttpHeaders;
 
 public interface AccessControl {
 

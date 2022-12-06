@@ -37,7 +37,7 @@ public class ThirdEyeBasicAuthenticator implements Authenticator<BasicCredential
         .setUsername(basicCredentials.getUsername())
         .setPassword(basicCredentials.getPassword());
     if (configuration.getUsers().contains(user)) {
-      return Optional.of(new ThirdEyePrincipal(basicCredentials.getUsername()));
+      return Optional.of(new ThirdEyePrincipal(basicCredentials.getUsername(), ""));
     }
     return Optional.empty();
   }

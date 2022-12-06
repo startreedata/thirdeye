@@ -20,9 +20,9 @@ public class ThirdEyePrincipal implements Principal {
   private final String name;
   public final String authToken;
 
-  public ThirdEyePrincipal(final String authToken, final String name) {
-    this.authToken = authToken;
+  public ThirdEyePrincipal(final String name, final String authToken) {
     this.name = name;
+    this.authToken = authToken;
   }
 
   @Override

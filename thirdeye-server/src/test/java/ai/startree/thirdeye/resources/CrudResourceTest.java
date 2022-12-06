@@ -130,7 +130,7 @@ public class CrudResourceTest {
     resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
         AccessType accessType) -> false;
 
-    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo)) {
+    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -152,7 +152,7 @@ public class CrudResourceTest {
     resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
         AccessType accessType) -> identifiers.name.equals("2");
 
-    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo)) {
+    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -169,7 +169,7 @@ public class CrudResourceTest {
     resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
         AccessType accessType) -> false;
 
-    resource.get(new ThirdEyePrincipal("nobody"), 1L);
+    resource.get(new ThirdEyePrincipal("nobody", ""), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -180,7 +180,7 @@ public class CrudResourceTest {
     resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
         AccessType accessType) -> false;
 
-    resource.delete(new ThirdEyePrincipal("nobody"), 1L);
+    resource.delete(new ThirdEyePrincipal("nobody", ""), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -195,7 +195,7 @@ public class CrudResourceTest {
     resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
         AccessType accessType) -> false;
 
-    resource.deleteAll(new ThirdEyePrincipal("nobody"));
+    resource.deleteAll(new ThirdEyePrincipal("nobody", ""));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -211,7 +211,7 @@ public class CrudResourceTest {
     resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
         AccessType accessType) -> identifiers.name.equals("2");
 
-    resource.deleteAll(new ThirdEyePrincipal("nobody"));
+    resource.deleteAll(new ThirdEyePrincipal("nobody", ""));
   }
 }
 

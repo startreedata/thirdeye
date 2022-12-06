@@ -15,6 +15,8 @@ package ai.startree.thirdeye.authorization;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 
 public class ResourceIdentifier {
 
@@ -30,10 +32,10 @@ public class ResourceIdentifier {
     this.entityType = entityType;
   }
 
-  static public ResourceIdentifier fromApi(ThirdEyeCrudApi<?> api) {
-    if (api instanceof AlertApi) {
+  static public ResourceIdentifier fromDto(AbstractDTO dto) {
+    if (dto instanceof AlertDTO) {
       return new ResourceIdentifier(
-          ((AlertApi) api).getName(),
+          ((AlertDTO) dto).getName(),
           // TODO: Add a namespace field for alerts.
           ResourceIdentifier.DefaultNamespace,
           "alert"
@@ -43,7 +45,7 @@ public class ResourceIdentifier {
     // TODO: Add remaining resources.
 
     return new ResourceIdentifier(
-        api.getId().toString(),
+        dto.getId().toString(),
         ResourceIdentifier.DefaultNamespace,
         "unspecified"
     );

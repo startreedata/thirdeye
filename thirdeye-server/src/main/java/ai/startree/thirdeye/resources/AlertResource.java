@@ -149,10 +149,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   @Deprecated(forRemoval = true)
-  public Response getInsights(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id
-  ) {
+  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     ensureHasAccess(principal, dto, AccessType.READ);
 
@@ -237,11 +235,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id
-  ) {
+      @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     ensureHasAccess(principal, dto, AccessType.UPDATE);
-
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     alertDeleter.deleteAssociatedAnomalies(dto.getId());

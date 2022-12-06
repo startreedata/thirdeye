@@ -199,7 +199,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   }
 
   public boolean hasAccess(ThirdEyePrincipal principal, DtoT dto, AccessType accessType) {
-    return accessControl.hasAccess(principal, ResourceIdentifier.fromApi(toApi(dto)), accessType);
+    return accessControl.hasAccess(principal, ResourceIdentifier.fromDto(dto), accessType);
   }
 
   void ensureHasAccess(ThirdEyePrincipal principal, DtoT dto, AccessType accessType) {
@@ -232,8 +232,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id
-  ) {
+      @PathParam("id") Long id) {
     final DtoT dto = get(id);
     ensureHasAccess(principal, dto, AccessType.READ);
 
@@ -247,8 +246,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("name") String name
-  ) {
+      @PathParam("name") String name) {
     final RequestCache cache = createRequestCache();
     ensureExists(name, ERR_MISSING_NAME);
 
@@ -324,8 +322,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id
-  ) {
+      @PathParam("id") Long id) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
       ensureHasAccess(principal, dto, AccessType.UPDATE);
@@ -344,9 +341,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Path("/all")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteAll(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal
-  ) {
+  public Response deleteAll(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     dtoManager.findAll()
         .stream()
         .peek(dto -> ensureHasAccess(principal, dto, AccessType.UPDATE))
@@ -364,9 +359,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final CountApi api = new CountApi();
     final Long count = queryParameters.size() > 0
-        ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters)
-        .getPredicate())
-        : dtoManager.count();
+      ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters).getPredicate())
+      : dtoManager.count();
     api.setCount(count);
     return Response.ok(api).build();
   }

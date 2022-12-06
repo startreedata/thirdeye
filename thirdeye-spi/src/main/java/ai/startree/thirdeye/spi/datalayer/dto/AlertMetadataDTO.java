@@ -28,12 +28,14 @@ public class AlertMetadataDTO {
   private String granularity;
   private String timezone;
   /**
-   * ISO-8601 format. Max gap between to anomalies for the anomalies to be merged.
+   * ISO-8601 format. Max gap between 2 anomalies for the anomalies to be merged.
    */
+  @Deprecated  //FIXME jackson ignore  before merge ?
   private String mergeMaxGap;
   /**
    * ISO-8601 format. Max duration of a merger of anomalies.
    */
+  @Deprecated  //FIXME jackson ignore  before merge ?
   private String mergeMaxDuration;
 
   private EventContextDto eventContext;
@@ -85,19 +87,23 @@ public class AlertMetadataDTO {
     return this;
   }
 
+  @Deprecated
   public String getMergeMaxGap() {
     return mergeMaxGap;
   }
 
+  @Deprecated
   public AlertMetadataDTO setMergeMaxGap(final String mergeMaxGap) {
     this.mergeMaxGap = mergeMaxGap;
     return this;
   }
 
+  @Deprecated
   public String getMergeMaxDuration() {
     return mergeMaxDuration;
   }
 
+  @Deprecated
   public AlertMetadataDTO setMergeMaxDuration(final String mergeMaxDuration) {
     this.mergeMaxDuration = mergeMaxDuration;
     return this;

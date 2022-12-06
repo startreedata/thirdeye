@@ -13,35 +13,14 @@
  */
 package ai.startree.thirdeye.auth;
 
-import com.nimbusds.jwt.JWTClaimsSet;
-import io.dropwizard.auth.basic.BasicCredentials;
 import java.security.Principal;
-import java.text.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ThirdEyePrincipal implements Principal {
 
-  private static final Logger log = LoggerFactory.getLogger(ThirdEyePrincipal.class);
-  public static final String NAME_CLAIM = "email";
-
-  private String name;
+  private final String name;
 
   public ThirdEyePrincipal(final String name) {
     this.name = name;
-  }
-
-  public ThirdEyePrincipal(final JWTClaimsSet claims) {
-    try {
-      this.name = claims.getStringClaim(NAME_CLAIM);
-    } catch (ParseException e) {
-      log.error("Could not get user name. email should be a String", e);
-      this.name = null;
-    }
-  }
-
-  public ThirdEyePrincipal(final BasicCredentials credentials) {
-    this.name = credentials.getUsername();
   }
 
   @Override

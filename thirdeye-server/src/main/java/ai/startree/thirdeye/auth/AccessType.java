@@ -11,15 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.authorization;
+package ai.startree.thirdeye.auth;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-
-public interface AccessControl {
-
-  boolean hasAccess(
-      ThirdEyePrincipal principal,
-      ResourceIdentifier identifier,
-      AccessType accessType
-  );
+public enum AccessType {
+  READ, UPDATE
 }

@@ -11,8 +11,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.authorization;
+package ai.startree.thirdeye.auth;
 
-public enum AccessType {
-  READ, UPDATE
+public class AccessControlBuilder {
+
+  public static AccessControl alwaysAllow = (
+      final ThirdEyePrincipal principal,
+      final ResourceIdentifier identifiers,
+      final AccessType accessType
+  ) -> true;
+
+  public static AccessControl build() {
+    return alwaysAllow;
+  }
 }

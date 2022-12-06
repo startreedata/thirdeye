@@ -11,10 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.authorization;
+package ai.startree.thirdeye.auth;
 
-import ai.startree.thirdeye.spi.api.AlertApi;
-import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 
@@ -36,13 +34,13 @@ public class ResourceIdentifier {
     if (dto instanceof AlertDTO) {
       return new ResourceIdentifier(
           ((AlertDTO) dto).getName(),
-          // TODO: Add a namespace field for alerts.
+          // TODO jackson: Add a namespace field for alerts.
           ResourceIdentifier.DefaultNamespace,
           "alert"
       );
     }
 
-    // TODO: Add remaining resources.
+    // TODO jackson: Add remaining resources.
 
     return new ResourceIdentifier(
         dto.getId().toString(),

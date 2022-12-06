@@ -11,18 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.authorization;
+package ai.startree.thirdeye.authorization;
 
-import java.net.http.HttpHeaders;
+public class AccessControlBuilder {
 
-public class AlwaysAllow implements AccessControl {
-
-  @Override
-  public boolean hasAccess(
-      final AccessControlIdentifier identifiers,
-      final AccessType accessType,
-      final HttpHeaders httpHeaders
-  ) {
-    return true;
+  public static AccessControl build() {
+    return new AlwaysAllow();
   }
 }

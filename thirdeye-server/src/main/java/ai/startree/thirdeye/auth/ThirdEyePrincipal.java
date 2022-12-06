@@ -26,22 +26,26 @@ public class ThirdEyePrincipal implements Principal {
   public static final String NAME_CLAIM = "email";
 
   private String name;
+  public final String authToken;
 
   public ThirdEyePrincipal(final String name) {
     this.name = name;
+    this.authToken = null;
   }
 
-  public ThirdEyePrincipal(final JWTClaimsSet claims) {
+  public ThirdEyePrincipal(final String authToken, final JWTClaimsSet claims) {
     try {
       this.name = claims.getStringClaim(NAME_CLAIM);
     } catch (ParseException e) {
       log.error("Could not get user name. email should be a String", e);
       this.name = null;
     }
+    this.authToken = authToken;
   }
 
   public ThirdEyePrincipal(final BasicCredentials credentials) {
     this.name = credentials.getUsername();
+    this.authToken = null;
   }
 
   @Override

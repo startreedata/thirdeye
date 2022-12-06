@@ -11,29 +11,40 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye;
+package ai.startree.thirdeye.authorization;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.spi.authorization.AccessControlIdentifier;
 
-public class AccessControlUtil {
+public class ResourceIdentifier {
 
-  public static AccessControlIdentifier idFromApi(ThirdEyeCrudApi<?> api) {
-    if (AlertApi.class.equals(api.getClass())) {
-      return new AccessControlIdentifier(
+  static public final String DefaultNamespace = "default";
+
+  public final String name;
+  public final String namespace;
+  public final String entityType;
+
+  public ResourceIdentifier(String name, String namespace, String entityType) {
+    this.name = name;
+    this.namespace = namespace;
+    this.entityType = entityType;
+  }
+
+  static public ResourceIdentifier fromApi(ThirdEyeCrudApi<?> api) {
+    if (api instanceof AlertApi) {
+      return new ResourceIdentifier(
           ((AlertApi) api).getName(),
           // TODO: Add a namespace field for alerts.
-          AccessControlIdentifier.DefaultNamespace,
+          ResourceIdentifier.DefaultNamespace,
           "alert"
       );
     }
 
     // TODO: Add remaining resources.
 
-    return new AccessControlIdentifier(
+    return new ResourceIdentifier(
         api.getId().toString(),
-        AccessControlIdentifier.DefaultNamespace,
+        ResourceIdentifier.DefaultNamespace,
         "unspecified"
     );
   }

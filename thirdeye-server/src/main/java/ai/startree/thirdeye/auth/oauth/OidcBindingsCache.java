@@ -39,6 +39,6 @@ public class OidcBindingsCache extends CacheLoader<String, ThirdEyePrincipal> {
       throws Exception {
     SignedJWT jwt = SignedJWT.parse(authToken);
     JWTClaimsSet claims = processor.process(jwt, context);
-    return new ThirdEyePrincipal(claims);
+    return new ThirdEyePrincipal(authToken, claims);
   }
 }

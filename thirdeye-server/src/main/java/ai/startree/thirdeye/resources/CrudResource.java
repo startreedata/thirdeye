@@ -27,16 +27,15 @@ import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.AccessControlUtil;
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.authorization.AccessControl;
+import ai.startree.thirdeye.authorization.AccessControlBuilder;
+import ai.startree.thirdeye.authorization.AccessType;
+import ai.startree.thirdeye.authorization.ResourceIdentifier;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.spi.authorization.AccessControl;
-import ai.startree.thirdeye.spi.authorization.AccessControlBuilder;
-import ai.startree.thirdeye.spi.authorization.AccessControlIdentifier;
-import ai.startree.thirdeye.spi.authorization.AccessType;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -45,7 +44,6 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiParam;
-import java.net.http.HttpHeaders;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -200,12 +198,12 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     dtoManager.delete(dto);
   }
 
-  public boolean hasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
-    return accessControl.hasAccess(AccessControlUtil.idFromApi(toApi(dto)), accessType, httpHeaders);
+  public boolean hasAccess(ThirdEyePrincipal principal, DtoT dto, AccessType accessType) {
+    return accessControl.hasAccess(principal, ResourceIdentifier.fromApi(toApi(dto)), accessType);
   }
 
-  void ensureHasAccess(DtoT dto, AccessType accessType, HttpHeaders httpHeaders) {
-    if (!hasAccess(dto, accessType, httpHeaders)) {
+  void ensureHasAccess(ThirdEyePrincipal principal, DtoT dto, AccessType accessType) {
+    if (!hasAccess(principal, dto, accessType)) {
       throw new ForbiddenException(Response.status(Status.FORBIDDEN).build());
     }
   }
@@ -215,8 +213,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAll(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @Context UriInfo uriInfo,
-      @Context HttpHeaders httpHeaders
+      @Context UriInfo uriInfo
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final List<DtoT> results = queryParameters.size() > 0
@@ -225,7 +222,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
     final RequestCache cache = createRequestCache();
     return respondOk(results.stream()
-        .filter(dto -> hasAccess(dto, AccessType.READ, httpHeaders))
+        .filter(dto -> hasAccess(principal, dto, AccessType.READ))
         .map(dto -> toApi(dto, cache)));
   }
 
@@ -235,11 +232,10 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id,
-      @Context HttpHeaders httpHeaders
+      @PathParam("id") Long id
   ) {
     final DtoT dto = get(id);
-    ensureHasAccess(dto, AccessType.READ, httpHeaders);
+    ensureHasAccess(principal, dto, AccessType.READ);
 
     final RequestCache cache = createRequestCache();
     return respondOk(toApi(dto, cache));
@@ -251,8 +247,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("name") String name,
-      @Context HttpHeaders httpHeaders
+      @PathParam("name") String name
   ) {
     final RequestCache cache = createRequestCache();
     ensureExists(name, ERR_MISSING_NAME);
@@ -267,7 +262,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
     }
     DtoT dtoT = byName.iterator().next();
-    ensureHasAccess(dtoT, AccessType.READ, httpHeaders);
+    ensureHasAccess(principal, dtoT, AccessType.READ);
     return respondOk(toApi(dtoT, cache));
   }
 
@@ -329,12 +324,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id,
-      @Context HttpHeaders httpHeaders
+      @PathParam("id") Long id
   ) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
-      ensureHasAccess(dto, AccessType.UPDATE, httpHeaders);
+      ensureHasAccess(principal, dto, AccessType.UPDATE);
 
       deleteDto(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
@@ -351,12 +345,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response deleteAll(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @Context HttpHeaders httpHeaders
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal
   ) {
     dtoManager.findAll()
         .stream()
-        .peek(dto -> ensureHasAccess(dto, AccessType.UPDATE, httpHeaders))
+        .peek(dto -> ensureHasAccess(principal, dto, AccessType.UPDATE))
         .forEach(this::deleteDto);
     return Response.ok().build();
   }

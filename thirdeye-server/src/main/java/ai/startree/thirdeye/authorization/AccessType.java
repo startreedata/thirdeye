@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.authorization;
+package ai.startree.thirdeye.authorization;
 
 public enum AccessType {
   READ, UPDATE

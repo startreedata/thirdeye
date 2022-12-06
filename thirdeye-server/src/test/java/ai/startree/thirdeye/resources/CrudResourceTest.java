@@ -25,12 +25,11 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.spi.authorization.AccessControlIdentifier;
-import ai.startree.thirdeye.spi.authorization.AccessType;
+import ai.startree.thirdeye.authorization.ResourceIdentifier;
+import ai.startree.thirdeye.authorization.AccessType;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet;
-import java.net.http.HttpHeaders;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
@@ -108,7 +107,7 @@ public class CrudResourceTest {
   }
 
   private ThirdEyePrincipal getPrincipal(String name) {
-    return new ThirdEyePrincipal(new JWTClaimsSet.Builder().claim(NAME_CLAIM, name).build());
+    return new ThirdEyePrincipal(null, new JWTClaimsSet.Builder().claim(NAME_CLAIM, name).build());
   }
 
   private Timestamp getCurrentTime() {
@@ -126,10 +125,10 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (AccessControlIdentifier identifiers,
-        AccessType accessType, HttpHeaders httpHeaders) -> false;
+    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
+        AccessType accessType) -> false;
 
-    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
+    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -148,10 +147,10 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (AccessControlIdentifier identifiers,
-        AccessType accessType, HttpHeaders httpHeaders) -> identifiers.name.equals("2");
+    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
+        AccessType accessType) -> identifiers.name.equals("2");
 
-    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo, null)) {
+    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody"), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -165,10 +164,10 @@ public class CrudResourceTest {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
 
-    resource.accessControl = (AccessControlIdentifier identifiers,
-        AccessType accessType, HttpHeaders httpHeaders) -> false;
+    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
+        AccessType accessType) -> false;
 
-    resource.get(new ThirdEyePrincipal("nobody"), 1L, null);
+    resource.get(new ThirdEyePrincipal("nobody"), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -176,10 +175,10 @@ public class CrudResourceTest {
     reset(manager);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
 
-    resource.accessControl = (AccessControlIdentifier identifiers,
-        AccessType accessType, HttpHeaders httpHeaders) -> false;
+    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
+        AccessType accessType) -> false;
 
-    resource.delete(new ThirdEyePrincipal("nobody"), 1L, null);
+    resource.delete(new ThirdEyePrincipal("nobody"), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -191,10 +190,10 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (AccessControlIdentifier identifiers,
-        AccessType accessType, HttpHeaders httpHeaders) -> false;
+    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
+        AccessType accessType) -> false;
 
-    resource.deleteAll(new ThirdEyePrincipal("nobody"), null);
+    resource.deleteAll(new ThirdEyePrincipal("nobody"));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -207,10 +206,10 @@ public class CrudResourceTest {
     );
     when(manager.findAll()).thenReturn(dtos);
 
-    resource.accessControl = (AccessControlIdentifier identifiers,
-        AccessType accessType, HttpHeaders httpHeaders) -> identifiers.name.equals("2");
+    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
+        AccessType accessType) -> identifiers.name.equals("2");
 
-    resource.deleteAll(new ThirdEyePrincipal("nobody"), null);
+    resource.deleteAll(new ThirdEyePrincipal("nobody"));
   }
 }
 

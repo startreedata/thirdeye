@@ -25,13 +25,13 @@ import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.authorization.AccessType;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.UserApi;
-import ai.startree.thirdeye.spi.authorization.AccessType;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -56,11 +56,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
@@ -153,11 +151,10 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Deprecated(forRemoval = true)
   public Response getInsights(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id,
-      @Context java.net.http.HttpHeaders httpHeaders
+      @PathParam("id") final Long id
   ) {
     final AlertDTO dto = get(id);
-    ensureHasAccess(dto, AccessType.READ, httpHeaders);
+    ensureHasAccess(principal, dto, AccessType.READ);
 
     final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
     return Response.ok(insights).build();
@@ -183,13 +180,12 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
-      @FormParam("end") final Long endTime,
-      @Context java.net.http.HttpHeaders httpHeaders
+      @FormParam("end") final Long endTime
   ) {
     final AlertDTO dto = get(id);
     ensureExists(dto);
     ensureExists(startTime, "start");
-    ensureHasAccess(dto, AccessType.UPDATE, httpHeaders);
+    ensureHasAccess(principal, dto, AccessType.UPDATE);
 
     alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
     return Response.ok().build();
@@ -241,11 +237,10 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") final Long id,
-      @Context java.net.http.HttpHeaders httpHeaders
+      @PathParam("id") final Long id
   ) {
     final AlertDTO dto = get(id);
-    ensureHasAccess(dto, AccessType.UPDATE, httpHeaders);
+    ensureHasAccess(principal, dto, AccessType.UPDATE);
 
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 

@@ -11,7 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye;
+package ai.startree.thirdeye.authorization;
 
-public class AccessControlUtilsTest {
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+
+public class AlwaysAllow implements AccessControl {
+
+  @Override
+  public boolean hasAccess(
+      final ThirdEyePrincipal principal,
+      final ResourceIdentifier identifiers,
+      final AccessType accessType
+  ) {
+    return true;
+  }
 }

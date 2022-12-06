@@ -13,9 +13,17 @@
  */
 package ai.startree.thirdeye.authorization;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+
 public class AccessControlBuilder {
 
+  public static AccessControl alwaysAllow = (
+      final ThirdEyePrincipal principal,
+      final ResourceIdentifier identifiers,
+      final AccessType accessType
+  ) -> true;
+
   public static AccessControl build() {
-    return new AlwaysAllow();
+    return alwaysAllow;
   }
 }

@@ -23,6 +23,7 @@ import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
@@ -88,6 +89,8 @@ public class AlertEvaluator {
           detectionInterval);
 
       final DetectionPipelineContext context = new DetectionPipelineContext()
+          .setAlertId(request.getAlert().getId())
+          .setUsage(DetectionPipelineUsage.EVALUATION)
           .setPreserveOutputDataFrames(true)
           .setDetectionInterval(detectionInterval);
 

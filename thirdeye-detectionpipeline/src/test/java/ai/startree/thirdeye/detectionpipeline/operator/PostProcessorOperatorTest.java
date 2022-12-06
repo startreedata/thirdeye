@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -70,7 +71,7 @@ public class PostProcessorOperatorTest {
   @BeforeClass
   public void setUp() {
     final PostProcessorRegistry postProcessorRegistry = mock(PostProcessorRegistry.class);
-    when(postProcessorRegistry.build(anyString(), anyMap())).thenAnswer(
+    when(postProcessorRegistry.build(anyString(), anyMap(), any())).thenAnswer(
         i -> {
           final Map<String, Object> nodeParams = i.getArgument(1);
           final Map<String, Object> componentSpec = getComponentSpec(nodeParams);

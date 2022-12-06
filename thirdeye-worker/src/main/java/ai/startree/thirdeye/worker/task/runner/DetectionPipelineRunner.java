@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -129,6 +130,8 @@ public class DetectionPipelineRunner {
         detectionInterval);
 
     final DetectionPipelineContext context = new DetectionPipelineContext()
+        .setAlertId(alert.getId())
+        .setUsage(DetectionPipelineUsage.DETECTION)
         .setDetectionInterval(detectionInterval);
     final var detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(
         templateWithProperties.getNodes(),

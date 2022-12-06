@@ -13,6 +13,7 @@
  * the License.
  */
 import { Description, ExitToApp, Home, LockOpen } from "@material-ui/icons";
+import CodeIcon from "@material-ui/icons/Code";
 import DashboardIcon from "@material-ui/icons/Dashboard";
 import ErrorIcon from "@material-ui/icons/Error";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
@@ -40,6 +41,7 @@ import {
     getConfigurationPath,
     getLoginPath,
     getLogoutPath,
+    getSwaggerPath,
 } from "../../utils/routes/routes.util";
 import { AboutDialogNavBarButton } from "../about-dialog-nav-bar-button/about-dialog-nav-bar-button.component";
 
@@ -131,6 +133,18 @@ export const AppBar: FunctionComponent = () => {
                     <NavBarLinkTextV1>
                         {t("label.documentation")}
                     </NavBarLinkTextV1>
+                </NavBarLinkV1>
+
+                {/* Swagger */}
+                <NavBarLinkV1
+                    externalLink
+                    href={getSwaggerPath()}
+                    target="_blank"
+                >
+                    <NavBarLinkIconV1>
+                        <CodeIcon />
+                    </NavBarLinkIconV1>
+                    <NavBarLinkTextV1>{t("label.swagger")}</NavBarLinkTextV1>
                 </NavBarLinkV1>
 
                 {/* Support */}

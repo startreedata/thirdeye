@@ -1,3 +1,5 @@
+import type { StepperProps } from "@material-ui/core";
+
 /*
  * Copyright 2022 StarTree Inc
  *
@@ -18,4 +20,5 @@ export interface StepperV1Props {
     stepLabelFn: (step: string) => string;
     disabled?: boolean;
     className?: string;
+    otherProps?: StepperProps;
 }

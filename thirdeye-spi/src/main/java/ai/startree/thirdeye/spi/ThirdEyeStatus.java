@@ -38,7 +38,7 @@ public enum ThirdEyeStatus {
   ERR_NOT_ENOUGH_DATA_FOR_RCA("Not enough data for RCA algorithm: %s"),
   ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),
   ERR_OBJECT_UNEXPECTED("Object should be null/empty! %s"),
-  ERR_OPERATION_UNSUPPORTED("Operation is not supported!"),
+  ERR_OPERATION_UNSUPPORTED("Operation not supported. %s"),
   ERR_TEMPLATE_MISSING_PROPERTY(
       "Failed to apply templateProperties to template. Missing property: %s"),
   ERR_TIMEOUT("Operation timed out!"),

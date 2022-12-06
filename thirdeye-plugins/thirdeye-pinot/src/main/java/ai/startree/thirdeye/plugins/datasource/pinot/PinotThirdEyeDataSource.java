@@ -168,11 +168,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public List<String> getDatasets() throws Exception {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     try {
       // Use pinot SQL.
@@ -235,7 +230,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public List<DatasetConfigDTO> onboardAll() {
+  public List<DatasetConfigDTO> getDatasets() {
     try {
       return datasetOnboarder.onboardAll(name);
     } catch (final IOException e) {
@@ -244,7 +239,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public DatasetConfigDTO onboardDataset(final String datasetName) {
+  public DatasetConfigDTO getDataset(final String datasetName) {
     try {
       return datasetOnboarder.onboardTable(datasetName, name);
     } catch (final IOException e) {

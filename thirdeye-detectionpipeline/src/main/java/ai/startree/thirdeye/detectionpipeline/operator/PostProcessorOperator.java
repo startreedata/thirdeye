@@ -16,16 +16,13 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
@@ -38,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PostProcessorOperator extends DetectionPipelineOperator {
 
-  private AnomalyPostProcessor<PostProcessorSpec> postProcessor;
+  private AnomalyPostProcessor postProcessor;
   private final HashMap<String, Set<String>> combinerKeyToResultsKeys = new HashMap<>();
 
   public PostProcessorOperator() {
@@ -48,11 +45,13 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    final PostProcessorRegistry postProcessorRegistry = (PostProcessorRegistry) context.getProperties()
-        .get(Constants.K_POST_PROCESSOR_REGISTRY);
-    requireNonNull(postProcessorRegistry, "PostProcessorRegistry is not set");
+    final PostProcessorRegistry postProcessorRegistry = context
+        .getPlanNodeContext()
+        .getApplicationContext()
+        .getPostProcessorRegistry();
 
-    final Map<String, Object> nodeParams = optional(planNode.getParams()).map(TemplatableMap::valueMap)
+    final Map<String, Object> nodeParams = optional(planNode.getParams()).map(
+            TemplatableMap::valueMap)
         .orElseThrow(() -> new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
             "'type' in " + getOperatorName() + "params"));
 

@@ -20,6 +20,7 @@ import {
 } from "../params/params.util";
 
 const PLACEHOLDER_ROUTE_ID = ":id";
+const PLACEHOLDER_ROUTE_NAME = ":name";
 
 export const AppRouteRelative = {
     ADMIN: "admin",
@@ -87,7 +88,17 @@ export const AppRouteRelative = {
     EVENTS_CREATE: "create",
     EVENTS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
     EVENTS_ALL_RANGE: "range",
-};
+    WELCOME: "welcome",
+    WELCOME_LANDING: "landing",
+    WELCOME_ONBOARD_DATASOURCE: "onboard-datasource",
+    WELCOME_ONBOARD_DATASOURCE_DATASOURCE: "datasource",
+    WELCOME_ONBOARD_DATASOURCE_DATASETS: `${PLACEHOLDER_ROUTE_NAME}/datasets`,
+    WELCOME_CREATE_ALERT: "create-alert",
+    WELCOME_CREATE_ALERT_SELECT_TYPE: "select-type",
+    WELCOME_CREATE_ALERT_SETUP_MONITORING: "setup-monitoring",
+    WELCOME_CREATE_ALERT_SETUP_DETAILS: "setup-details",
+    WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION: "setup-dimension-groups",
+} as const;
 
 export const AppRoute = {
     BASE: "/",
@@ -96,6 +107,7 @@ export const AppRoute = {
     COHORT_RECOMMENDER: `/${AppRouteRelative.COHORT_RECOMMENDER}`,
     LOGIN: "/login",
     LOGOUT: "/logout",
+    SWAGGER: `/swagger`,
     SETUP: `/${AppRouteRelative.SETUP}`,
     SETUP_DATASOURCE: `/${AppRouteRelative.SETUP}/${AppRouteRelative.SETUP_DATASOURCE}`,
     SETUP_DATASET: `/${AppRouteRelative.SETUP}/${AppRouteRelative.SETUP_DATASET}`,
@@ -163,6 +175,22 @@ export const AppRoute = {
     EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
     EVENTS_ALL_RANGE: `/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}/${AppRouteRelative.EVENTS_ALL_RANGE}`,
     EVENTS: `/${AppRouteRelative.EVENTS}`,
+    WELCOME: `/${AppRouteRelative.WELCOME}`,
+    WELCOME_LANDING: `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_LANDING}`,
+    WELCOME_ONBOARD_DATASOURCE: `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE}`,
+    WELCOME_ONBOARD_DATASOURCE_DATASOURCE:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE}` +
+        `/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE}`,
+    WELCOME_ONBOARD_DATASOURCE_DATASETS:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE}` +
+        `/${AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS}`,
+    WELCOME_CREATE_ALERT: `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}`,
+    WELCOME_CREATE_ALERT_SELECT_TYPE:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}` +
+        `/${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`,
+    WELCOME_CREATE_ALERT_SETUP_MONITORING:
+        `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}` +
+        `/${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -277,6 +305,10 @@ export const getAnomaliesAnomalyViewPath = (id: number): string => {
 
 export const getConfigurationPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.CONFIGURATION);
+};
+
+export const getSwaggerPath = (): string => {
+    return `${AppRoute.SWAGGER}`;
 };
 
 export const getSubscriptionGroupsPath = (): string => {
@@ -473,6 +505,27 @@ export const getRootCauseAnalysisForAnomalyInvestigatePath = (
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return path;
+};
+
+export const getDataConfigurationCreatePath = (): string => {
+    return AppRoute.WELCOME_ONBOARD_DATASOURCE;
+};
+
+export const getDataConfigurationCreateDatasetsPath = (
+    datasourceName: string
+): string => {
+    let path: string = AppRoute.WELCOME_ONBOARD_DATASOURCE_DATASETS;
+    path = path.replace(PLACEHOLDER_ROUTE_NAME, `${datasourceName}`);
+
+    return path;
+};
+
+export const getWelcomeLandingPath = (): string => {
+    return AppRoute.WELCOME_LANDING;
+};
+
+export const getWelcomeCreateAlert = (): string => {
+    return AppRoute.WELCOME_CREATE_ALERT;
 };
 
 export const getLoginPath = (): string => {

@@ -103,12 +103,11 @@ const mockDefaultDatasource = {
     name: "mypinot",
     type: "pinot",
     properties: {
-        zookeeperUrl: "pinot-zookeeper-headless.managed.svc.cluster.local:2181",
-        clusterName: "pinot",
-        controllerConnectionScheme: "https",
-        controllerHost:
-            "pinot-pinot-controller-headless.managed.svc.cluster.local",
+        clusterName: "QuickStartCluster",
+        controllerConnectionScheme: "http",
+        controllerHost: "localhost",
         controllerPort: 9000,
+        zookeeperUrl: "localhost:2123",
     },
 };
 

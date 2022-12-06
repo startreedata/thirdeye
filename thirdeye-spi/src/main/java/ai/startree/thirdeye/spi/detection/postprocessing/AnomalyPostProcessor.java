@@ -13,18 +13,11 @@
  */
 package ai.startree.thirdeye.spi.detection.postprocessing;
 
-import ai.startree.thirdeye.spi.detection.BaseComponent;
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Map;
 import org.joda.time.Interval;
 
-public interface AnomalyPostProcessor<T extends PostProcessorSpec> extends BaseComponent<T> {
-
-  /**
-   * Spec class of the PostProcessor.
-   */
-  Class<T> specClass();
+public interface AnomalyPostProcessor {
 
   /**
    * Value to put in AnomalyLabelDTO$sourcePostProcessor field.

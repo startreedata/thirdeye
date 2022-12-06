@@ -8,8 +8,8 @@
       "params": {
         "type": "EVENTS",
         "component.ignore": "${eventFilterIgnore}",
-        "component.beforeHolidayMargin": "${eventFilterBeforeHolidayMargin}",
-        "component.afterHolidayMargin": "${eventFilterAfterHolidayMargin}"
+        "component.beforeEventMargin": "${eventFilterBeforeEventMargin}",
+        "component.afterEventMargin": "${eventFilterAfterEventMargin}"
       },
       "inputs": [
         {
@@ -199,6 +199,10 @@
       "aggregationFunction": "${rcaAggregationFunction}",
       "where": "${queryFilters}"
     },
+    "eventContext": {
+      "types": "${rcaEventTypes}",
+      "sqlFilter" : "${rcaEventSqlFilter}"
+    },
     "timezone": "${timezone}",
     "mergeMaxGap": "${mergeMaxGap}",
     "mergeMaxDuration": "${mergeMaxDuration}",
@@ -216,6 +220,8 @@
     "queryFilters": "",
     "rcaIncludedDimensions": [],
     "rcaExcludedDimensions": [],
+    "rcaEventTypes": [],
+    "rcaEventSqlFilter": "",
     "coldStartIgnore": "true",
     "timeOfWeekIgnore": "true",
     "daysOfWeek": [],
@@ -228,8 +234,8 @@
     "eventFilterLookaround": "P2D",
     "eventFilterTypes": [],
     "eventFilterIgnore": false,
-    "eventFilterBeforeHolidayMargin": "P0D",
-    "eventFilterAfterHolidayMargin": "P0D",
+    "eventFilterBeforeEventMargin": "P0D",
+    "eventFilterAfterEventMargin": "P0D",
     "queryLimit": "100000000"
   }
 }

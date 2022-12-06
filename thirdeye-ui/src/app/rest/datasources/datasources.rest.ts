@@ -26,6 +26,14 @@ export const getDatasource = async (id: number): Promise<Datasource> => {
     return response.data;
 };
 
+export const getDatasourceByName = async (
+    name: string
+): Promise<Datasource> => {
+    const response = await axios.get(`${BASE_URL_DATASOURCES}/name/${name}`);
+
+    return response.data;
+};
+
 export const getAllDatasources = async (): Promise<Datasource[]> => {
     const response = await axios.get(BASE_URL_DATASOURCES);
 
@@ -90,6 +98,16 @@ export const getStatusForDatasource = async (
     const url = `${BASE_URL_DATASOURCES}/validate?${queryParams.toString()}`;
 
     const response = await axios.get(url);
+
+    return response.data;
+};
+
+export const getTablesForDatasource = async (
+    dataSourceName: string
+): Promise<Dataset[]> => {
+    const response = await axios.get(
+        `${BASE_URL_DATASOURCES}/name/${dataSourceName}/datasets`
+    );
 
     return response.data;
 };

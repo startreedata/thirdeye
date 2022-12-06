@@ -54,11 +54,13 @@ export const CohortDetectorPage: FunctionComponent = () => {
         <PageV1>
             <PageHeader
                 transparentBackground
-                title="Automated cohort recommender"
+                title={t("label.automated-cohort-recommender")}
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <DatasetDetails
+                        submitButtonLabel={t("label.find-cohorts")}
+                        title={t("label.dataset-details")}
                         onSearchButtonClick={handleSearchButtonClick}
                     />
                 </Grid>
@@ -66,6 +68,7 @@ export const CohortDetectorPage: FunctionComponent = () => {
                     <CohortsTable
                         cohortsData={cohortsResponse}
                         getCohortsRequestStatus={status}
+                        title={t("label.cohorts")}
                     />
                 </Grid>
             </PageContentsGridV1>

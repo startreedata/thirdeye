@@ -18,13 +18,17 @@
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>ai.startree.thirdeye.plugins</groupId>
-    <version>1.107.0-SNAPSHOT</version>
+    <version>1.108.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>thirdeye-postprocessors</artifactId>
 
   <dependencies>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-spi</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.google.auto.service</groupId>
       <artifactId>auto-service-annotations</artifactId>

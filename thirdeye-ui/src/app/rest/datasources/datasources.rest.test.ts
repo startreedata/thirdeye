@@ -21,7 +21,9 @@ import {
     deleteDatasource,
     getAllDatasources,
     getDatasource,
+    getDatasourceByName,
     getStatusForDatasource,
+    getTablesForDatasource,
     onboardAllDatasets,
     updateDatasource,
     updateDatasources,
@@ -48,6 +50,28 @@ describe("Datasources REST", () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getDatasource(1)).rejects.toThrow("testError");
+    });
+
+    it("getDatasourceByName should invoke axios.get with appropriate input and return appropriate datasource", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: mockDatasourceByNameResponse,
+        });
+
+        await expect(getDatasourceByName("datasourceName")).resolves.toEqual(
+            mockDatasourceByNameResponse
+        );
+
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/data-sources/name/datasourceName"
+        );
+    });
+
+    it("getDatasourceByName should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(getDatasourceByName("datasourceName")).rejects.toThrow(
+            "testError"
+        );
     });
 
     it("getAllDatasources should invoke axios.get with appropriate input and return appropriate datasources", async () => {
@@ -218,6 +242,28 @@ describe("Datasources REST", () => {
             "testError"
         );
     });
+
+    it("getTablesForDatasource should invoke axios.get with appropriate input and return appropriate status", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: mockStatusResponse,
+        });
+
+        await expect(
+            getTablesForDatasource("datasource-name")
+        ).resolves.toEqual(mockStatusResponse);
+
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/data-sources/name/datasource-name/datasets"
+        );
+    });
+
+    it("getTablesForDatasource should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(getTablesForDatasource("datasource-name")).rejects.toThrow(
+            "testError"
+        );
+    });
 });
 
 const mockDatasourceRequest = {
@@ -230,6 +276,9 @@ const mockDatasetsResponse = {
 
 const mockDatasourceResponse = {
     name: "testNameDatasourceResponse",
+};
+const mockDatasourceByNameResponse = {
+    id: 1,
 };
 const mockStatusResponse = {
     code: "HEALTHY",

@@ -23,6 +23,7 @@ import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
+import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
@@ -110,8 +111,9 @@ public class RcaRelatedResource {
 
     final @NonNull EventContextDto eventContext = rcaInfo.getEventContext();
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
-    final List<@NonNull String> types = optional(type).map(List::of)
-        .orElse(eventContext.getTypes());
+    final List<@NonNull String> types = optional(type)
+        .map(List::of)
+        .orElse(optional(eventContext.getTypes()).map(Templatable::value).orElse(List.of()));
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
         endWithLookahead,
         types,

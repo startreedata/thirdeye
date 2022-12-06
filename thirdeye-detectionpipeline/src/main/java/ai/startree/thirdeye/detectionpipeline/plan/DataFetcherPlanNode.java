@@ -19,11 +19,9 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.DataFetcherOperator;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,9 +60,6 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
         .setDetectionInterval(detectionInterval)
         .setPredicates(predicates)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(
-            Constants.K_DATA_SOURCE_CACHE, dataSourceCache,
-            Constants.K_DATASET_MANAGER, datasetDao))
     );
     return dataFetcherOperator;
   }

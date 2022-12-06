@@ -28,6 +28,7 @@ import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
+import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import {
@@ -42,7 +43,12 @@ import { TimeRangeSelectorButton } from "../../time-range/v2/time-range-selector
 import { DatasetDetailsProps } from "./dataset-details.interfaces";
 
 export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
+    title,
+    subtitle,
+    submitButtonLabel,
     onSearchButtonClick,
+    onMetricSelect,
+    onAggregationFunctionSelect,
 }) => {
     const {
         datasources,
@@ -156,9 +162,12 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                 <Grid container>
                     <Grid item xs={12}>
                         <Box marginBottom={2}>
-                            <Typography variant="h5">
-                                {t("label.dataset-details")}
-                            </Typography>
+                            <Typography variant="h5">{title}</Typography>
+                            {subtitle && (
+                                <Typography variant="body2">
+                                    {subtitle}
+                                </Typography>
+                            )}
                         </Box>
                     </Grid>
 
@@ -269,7 +278,14 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 )}
                                 value={selectedMetric}
                                 onChange={(_, metric) => {
-                                    metric && setSelectedMetric(metric);
+                                    if (metric) {
+                                        setSelectedMetric(metric);
+                                        onMetricSelect?.(
+                                            metric,
+                                            selectedTable?.dataset as Dataset,
+                                            selectedAggregationFunction
+                                        );
+                                    }
                                 }}
                             />
                         }
@@ -305,10 +321,14 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 )}
                                 value={selectedAggregationFunction}
                                 onChange={(_, aggregationFunction) => {
-                                    aggregationFunction &&
+                                    if (aggregationFunction) {
                                         setSelectedAggregationFunction(
                                             aggregationFunction as MetricAggFunction
                                         );
+                                        onAggregationFunctionSelect?.(
+                                            aggregationFunction as MetricAggFunction
+                                        );
+                                    }
                                 }}
                             />
                         }
@@ -436,13 +456,13 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
 
                     <InputSection
                         inputComponent={
-                            <Box textAlign="right">
+                            <Box>
                                 <Button
                                     color="primary"
                                     disabled={!selectedTable || !selectedMetric}
                                     onClick={handleSearchClick}
                                 >
-                                    {t("label.find-cohorts")}
+                                    {submitButtonLabel}
                                 </Button>
                             </Box>
                         }

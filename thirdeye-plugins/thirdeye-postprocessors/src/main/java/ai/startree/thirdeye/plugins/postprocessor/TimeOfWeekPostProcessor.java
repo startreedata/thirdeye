@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -20,12 +21,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
+import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
+import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -37,9 +40,9 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
-public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekPostProcessorSpec> {
+public class TimeOfWeekPostProcessor implements AnomalyPostProcessor {
 
-  public static final String NAME = "TIME_OF_WEEK";
+  private static final String NAME = "TIME_OF_WEEK";
 
   private static final boolean DEFAULT_IGNORE = false;
   private static final Set<Integer> DEFAULT_INT_DAYS_OF_WEEK = Set.of();
@@ -63,8 +66,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
   private boolean ignore;
   private String labelName;
 
-  @Override
-  public void init(final TimeOfWeekPostProcessorSpec spec) {
+  public TimeOfWeekPostProcessor(final TimeOfWeekPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
     this.intDaysOfWeek = optional(spec.getDaysOfWeek()).map(l -> l.stream()
         .map(TimeOfWeekPostProcessor::dayStringToDayInt)
@@ -75,11 +77,6 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
     this.labelName = labelName(spec.getDaysOfWeek(),
         spec.getHoursOfDay(),
         spec.getDayHoursOfWeek());
-  }
-
-  @Override
-  public Class<TimeOfWeekPostProcessorSpec> specClass() {
-    return TimeOfWeekPostProcessorSpec.class;
   }
 
   @Override
@@ -150,7 +147,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
   }
 
   private static Integer dayStringToDayInt(final String day) {
-    final String preparedString = day.toUpperCase(Locale.ENGLISH);
+    final String preparedString = day.toUpperCase(DEFAULT_LOCALE);
     checkArgument(VALID_DAYS.contains(preparedString),
         "Invalid day string: %s. Valid day strings: %s",
         day,
@@ -173,5 +170,20 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor<TimeOfWeekP
       label += "|Day-Hours " + dayHoursOfWeek;
     }
     return label;
+  }
+
+  public static class Factory implements AnomalyPostProcessorFactory {
+
+    @Override
+    public String name() {
+      return NAME;
+    }
+
+    @Override
+    public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
+      final TimeOfWeekPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+          TimeOfWeekPostProcessorSpec.class);
+      return new TimeOfWeekPostProcessor(spec);
+    }
   }
 }

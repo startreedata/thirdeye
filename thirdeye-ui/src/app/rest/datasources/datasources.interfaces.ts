@@ -13,6 +13,7 @@
  * the License.
  */
 import { ActionHook } from "../actions.interfaces";
+import { Dataset } from "../dto/dataset.interfaces";
 import { Datasource } from "../dto/datasource.interfaces";
 
 export interface GetStatusResponse {
@@ -33,4 +34,19 @@ export interface GetDatasourceStatus extends ActionHook {
 export interface GetDatasources extends ActionHook {
     datasources: Datasource[] | null;
     getDatasources: () => Promise<Datasource[] | undefined>;
+}
+
+export interface GetDatasource extends ActionHook {
+    datasource: Datasource | null;
+    getDatasource: (id: number) => Promise<Datasource | undefined>;
+}
+
+export interface GetDatasourceByName extends ActionHook {
+    datasource: Datasource | null;
+    getDatasourceByName: (name: string) => Promise<Datasource | undefined>;
+}
+
+export interface GetTablesForDatasourceByName extends ActionHook {
+    tables: Dataset[] | null;
+    getTableForDatasourceName: (name: string) => Promise<Dataset[] | undefined>;
 }

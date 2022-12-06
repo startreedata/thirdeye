@@ -13,13 +13,23 @@
  * the License.
  */
 import { useHTTPAction } from "../create-rest-action";
+import { Dataset } from "../dto/dataset.interfaces";
 import { Datasource } from "../dto/datasource.interfaces";
 import {
+    GetDatasource,
+    GetDatasourceByName,
     GetDatasources,
     GetDatasourceStatus,
     GetStatusResponse,
+    GetTablesForDatasourceByName,
 } from "./datasources.interfaces";
-import { getAllDatasources, getStatusForDatasource } from "./datasources.rest";
+import {
+    getAllDatasources,
+    getDatasource as getDatasourceREST,
+    getDatasourceByName as getDatasourceByNameREST,
+    getStatusForDatasource,
+    getTablesForDatasource,
+} from "./datasources.rest";
 
 export const useGetDatasourceStatus = (): GetDatasourceStatus => {
     const { data, makeRequest, status, errorMessages } =
@@ -44,3 +54,48 @@ export const useGetDatasources = (): GetDatasources => {
 
     return { datasources: data, getDatasources, status, errorMessages };
 };
+
+export const useGetDatasource = (): GetDatasource => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<Datasource>(getDatasourceREST);
+
+    const getDatasource = (id: number): Promise<Datasource | undefined> => {
+        return makeRequest(id);
+    };
+
+    return { datasource: data, getDatasource, status, errorMessages };
+};
+
+// Datasource may also be fetched by name
+export const useGetDatasourceByName = (): GetDatasourceByName => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<Datasource>(getDatasourceByNameREST);
+
+    const getDatasourceByName = (
+        name: string
+    ): Promise<Datasource | undefined> => {
+        return makeRequest(name);
+    };
+
+    return { datasource: data, getDatasourceByName, status, errorMessages };
+};
+
+export const useGetTablesForDatasourceName =
+    (): GetTablesForDatasourceByName => {
+        const { data, makeRequest, status, errorMessages } = useHTTPAction<
+            Dataset[]
+        >(getTablesForDatasource);
+
+        const getTableForDatasourceName = (
+            name: string
+        ): Promise<Dataset[] | undefined> => {
+            return makeRequest(name);
+        };
+
+        return {
+            tables: data,
+            getTableForDatasourceName,
+            status,
+            errorMessages,
+        };
+    };

@@ -29,10 +29,10 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessControlBuilder;
 import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;

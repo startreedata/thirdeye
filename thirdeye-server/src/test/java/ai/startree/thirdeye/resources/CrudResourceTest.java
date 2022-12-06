@@ -109,7 +109,7 @@ public class CrudResourceTest {
 
   private ThirdEyePrincipal getPrincipal(String name) {
     final String name1 = OidcBindingsCache.getName(new Builder().claim(NAME_CLAIM, name).build());
-    return new ThirdEyePrincipal(null, name1);
+    return new ThirdEyePrincipal(name1, "");
   }
 
   private Timestamp getCurrentTime() {

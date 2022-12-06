@@ -1,3 +1,13 @@
+## [1.73.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.72.1...thirdeye-ui-1.73.0) (2022-12-05)
+
+
+### Features
+
+* [TE-1068](https://cortexdata.atlassian.net/browse/TE-1068) added sidebar link to swagger ([05855341b](https://github.com/startreedata/thirdeye/commit/05855341bf3b02f769c86137a0b43aa982582866))
+* [TE-1072](https://cortexdata.atlassian.net/browse/TE-1072) data config flow ([e6238b8fc](https://github.com/startreedata/thirdeye/commit/e6238b8fc0b256855edb0dd3e7b1a2d342b512fd))
+* [TE-1092](https://cortexdata.atlassian.net/browse/TE-1092) parsing `properties` key in alert template for default properties ([84b01bdf2](https://github.com/startreedata/thirdeye/commit/84b01bdf2f684d9419a8432a7e930c05aa81d647))
+* [TE-1106](https://cortexdata.atlassian.net/browse/TE-1106) integrate dimension exploration flow into the welcome create alert flow ([a424d67af](https://github.com/startreedata/thirdeye/commit/a424d67afc2b04677d15ee8f9d88555563f426e1))
+
 ### [1.72.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.72.0...thirdeye-ui-1.72.1) (2022-11-28)
 
 

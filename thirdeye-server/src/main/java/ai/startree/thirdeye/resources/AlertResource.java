@@ -24,6 +24,7 @@ import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
+import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -86,8 +87,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertCreater alertCreater,
       final AlertDeleter alertDeleter,
       final AlertEvaluator alertEvaluator,
-      final AlertInsightsProvider alertInsightsProvider) {
-    super(alertManager, ImmutableMap.of());
+      final AlertInsightsProvider alertInsightsProvider,
+      final AccessControl accessControl) {
+    super(alertManager, ImmutableMap.of(), accessControl);
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertEvaluator = alertEvaluator;

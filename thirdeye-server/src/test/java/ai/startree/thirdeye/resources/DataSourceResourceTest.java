@@ -17,6 +17,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.auth.AccessControlModule;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -43,7 +44,9 @@ public class DataSourceResourceTest {
     dataSourceCache = mock(DataSourceCache.class);
     dataSourceResource = new DataSourceResource(mock(DataSourceManager.class),
         dataSourceCache,
-        mock(DataSourceOnboarder.class));
+        mock(DataSourceOnboarder.class),
+        AccessControlModule.alwaysAllow
+        );
   }
 
   @Test

@@ -30,10 +30,9 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AccessControl;
-import ai.startree.thirdeye.auth.AccessControlBuilder;
 import ai.startree.thirdeye.auth.AccessType;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.ResourceIdentifier;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -72,7 +71,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
-  public AccessControl accessControl = AccessControlBuilder.build();
+  public final AccessControl accessControl;
 
   protected final AbstractManager<DtoT> dtoManager;
   protected final ImmutableMap<String, String> apiToIndexMap;
@@ -80,12 +79,14 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Inject
   public CrudResource(
       final AbstractManager<DtoT> dtoManager,
-      final ImmutableMap<String, String> apiToIndexMap) {
+      final ImmutableMap<String, String> apiToIndexMap,
+      final AccessControl accessControl) {
     this.dtoManager = dtoManager;
     this.apiToIndexMap = ImmutableMap.<String, String>builder()
         .put("id", "baseId")
         .putAll(apiToIndexMap)
         .build();
+    this.accessControl = accessControl;
   }
 
   /**

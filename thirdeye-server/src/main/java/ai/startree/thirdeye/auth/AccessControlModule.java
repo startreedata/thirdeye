@@ -11,17 +11,30 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package ai.startree.thirdeye.auth;
 
-public class AccessControlBuilder {
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 
-  public static AccessControl alwaysAllow = (
+public class AccessControlModule extends AbstractModule {
+
+  public final static AccessControl alwaysAllow = (
       final ThirdEyePrincipal principal,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> true;
 
-  public static AccessControl build() {
+  public final static AccessControl alwaysDeny = (
+      final ThirdEyePrincipal principal,
+      final ResourceIdentifier identifiers,
+      final AccessType accessType
+  ) -> false;
+
+  @Singleton
+  @Provides
+  public AccessControl provideAccessControl() {
     return alwaysAllow;
   }
 }

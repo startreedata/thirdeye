@@ -18,9 +18,10 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AccessControlModule;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
@@ -47,23 +48,18 @@ import org.testng.annotations.Test;
 
 public class CrudResourceTest {
 
-  final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
-  private DummyManager manager;
-  private DummyResource resource;
-
-  @BeforeClass
-  public void setup() {
-    manager = mock(DummyManager.class);// new DummyManager(dao);
+  @Test
+  public void createUserInfoTest() {
+    final DummyManager manager = mock(DummyManager.class);// new DummyManager(dao);
     when(manager.save(any(DummyDto.class))).thenAnswer((Answer<Long>) invocationOnMock -> {
       ((DummyDto) invocationOnMock.getArgument(0)).setId(1L);
       return 1L;
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
-    resource = new DummyResource(manager, ImmutableMap.of());
-  }
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysAllow);
 
-  @Test
-  public void createUserInfoTest() {
+    final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
     final DummyApi api = new DummyApi().setData("testData");
 
@@ -81,6 +77,16 @@ public class CrudResourceTest {
 
   @Test
   public void updateUserInfoTest() {
+    final DummyManager manager = mock(DummyManager.class);// new DummyManager(dao);
+    when(manager.save(any(DummyDto.class))).thenAnswer((Answer<Long>) invocationOnMock -> {
+      ((DummyDto) invocationOnMock.getArgument(0)).setId(1L);
+      return 1L;
+    });
+    when(manager.update(any(DummyDto.class))).thenReturn(1);
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysAllow);
+
+    final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = getCurrentTime();
     final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
     final ThirdEyePrincipal updater = getPrincipal(emails.get(1));
@@ -118,7 +124,7 @@ public class CrudResourceTest {
 
   @Test
   public void testGetAll_withNoAccess() {
-    reset(manager);
+    final DummyManager manager = mock(DummyManager.class);
     UriInfo uriInfo = mock(UriInfo.class);
     when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
     when(manager.findAll()).thenReturn(Arrays.asList(
@@ -127,9 +133,8 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
-        AccessType accessType) -> false;
-
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
@@ -140,7 +145,7 @@ public class CrudResourceTest {
 
   @Test
   public void testGetAll_withPartialAccess() {
-    reset(manager);
+    final DummyManager manager = mock(DummyManager.class);
     UriInfo uriInfo = mock(UriInfo.class);
     when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
     when(manager.findAll()).thenReturn(Arrays.asList(
@@ -149,8 +154,9 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
 
-    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
-        AccessType accessType) -> identifiers.name.equals("2");
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
+            -> identifiers.name.equals("2"));
 
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
@@ -163,44 +169,38 @@ public class CrudResourceTest {
 
   @Test(expectedExceptions = ForbiddenException.class)
   public void testGet_withNoAccess() {
-    reset(manager);
+    final DummyManager manager = mock(DummyManager.class);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
-
-    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
-        AccessType accessType) -> false;
-
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
     resource.get(new ThirdEyePrincipal("nobody", ""), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
   public void testDelete_withNoAccess() {
-    reset(manager);
+    final DummyManager manager = mock(DummyManager.class);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
-
-    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
-        AccessType accessType) -> false;
-
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
     resource.delete(new ThirdEyePrincipal("nobody", ""), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
   public void testDeleteAll_withNoAccess() {
-    reset(manager);
+    final DummyManager manager = mock(DummyManager.class);
     when(manager.findAll()).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
     ));
-
-    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
-        AccessType accessType) -> false;
-
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
     resource.deleteAll(new ThirdEyePrincipal("nobody", ""));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
   public void testDeleteAll_withPartialAccess() {
-    reset(manager);
+    final DummyManager manager = mock(DummyManager.class);
     var dtos = Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
@@ -208,9 +208,9 @@ public class CrudResourceTest {
     );
     when(manager.findAll()).thenReturn(dtos);
 
-    resource.accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifiers,
-        AccessType accessType) -> identifiers.name.equals("2");
-
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
+            -> identifiers.name.equals("2"));
     resource.deleteAll(new ThirdEyePrincipal("nobody", ""));
   }
 }
@@ -299,8 +299,9 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
 
   public DummyResource(
     final DummyManager dtoManager,
-    final ImmutableMap<String, String> apiToBeanMap) {
-    super(dtoManager, apiToBeanMap);
+    final ImmutableMap<String, String> apiToBeanMap,
+    final AccessControl accessControl) {
+    super(dtoManager, apiToBeanMap, accessControl);
   }
 
   @Override

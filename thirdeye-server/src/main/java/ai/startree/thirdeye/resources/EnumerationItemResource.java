@@ -16,6 +16,7 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 
+import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -41,8 +42,9 @@ import javax.ws.rs.core.MediaType;
 public class EnumerationItemResource extends CrudResource<EnumerationItemApi, EnumerationItemDTO> {
 
   @Inject
-  public EnumerationItemResource(final EnumerationItemManager enumerationItemManager) {
-    super(enumerationItemManager, ImmutableMap.of());
+  public EnumerationItemResource(final EnumerationItemManager enumerationItemManager,
+      final AccessControl accessControl) {
+    super(enumerationItemManager, ImmutableMap.of(), accessControl);
   }
 
   @Override

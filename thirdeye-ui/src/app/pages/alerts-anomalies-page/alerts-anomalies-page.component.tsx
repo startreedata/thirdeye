@@ -13,7 +13,12 @@
  * the License.
  */
 import { Box, FormControlLabel, Grid, Switch } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, {
+    FunctionComponent,
+    useCallback,
+    useEffect,
+    useMemo,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
@@ -67,6 +72,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         status: getAlertStatus,
     } = useGetAlert();
     const {
+        anomalies,
         getAnomalies,
         errorMessages: getAnomaliesErrorsMessages,
         status: anomaliesRequestStatus,
@@ -77,7 +83,6 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         errorMessages: getEnumerationItemErrorsMessages,
         status: getEnumerationItemStatus,
     } = useGetEnumerationItem();
-    const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
     const [startTime, endTime, enumerationItemIdStr, showAllAnomalies] =
         useMemo(
@@ -111,19 +116,29 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             endTime,
             enumerationItemId: Number(enumerationItemIdStr),
             showAllAnomalies: true,
-        }).then((anomalies) => {
-            if (anomalies) {
-                // All anomalies being fetched, and then filtered here at UI level
-                const filteredAnomalies = filterAnomaliesByFunctions(
-                    anomalies,
-                    showAllAnomalies
-                        ? []
-                        : [(a) => !(isAnomalyFlagged(a) || isAnomalyIgnored(a))]
-                );
-                setUiAnomalies(getUiAnomalies(filteredAnomalies));
-            }
         });
     };
+
+    const getFilteredUiAnomalies = useCallback(
+        (anomaliesProp: typeof anomalies): UiAnomaly[] | null => {
+            if (!anomaliesProp) {
+                return null;
+            }
+
+            // All anomalies being fetched, and then filtered here at UI level
+            const filteredAnomalies = filterAnomaliesByFunctions(
+                anomaliesProp,
+                showAllAnomalies
+                    ? []
+                    : [(a) => !(isAnomalyFlagged(a) || isAnomalyIgnored(a))]
+            );
+
+            return getUiAnomalies(filteredAnomalies);
+        },
+        [showAllAnomalies]
+    );
+
+    const uiAnomalies = getFilteredUiAnomalies(anomalies);
 
     useEffect(() => {
         if (enumerationItemIdStr) {
@@ -138,7 +153,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
         fetchData();
-    }, [alert, startTime, endTime, enumerationItemIdStr, showAllAnomalies]);
+    }, [alert, startTime, endTime, enumerationItemIdStr]);
 
     useEffect(() => {
         notifyIfErrors(
@@ -185,16 +200,11 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                         notify,
                         t("label.anomaly"),
                         t("label.anomalies")
-                    ).then((deletedAnomalies) => {
-                        setUiAnomalies(() => {
-                            return [...uiAnomalies].filter((candidate) => {
-                                return (
-                                    deletedAnomalies.findIndex(
-                                        (d) => d.id === candidate.id
-                                    ) === -1
-                                );
-                            });
-                        });
+                    ).then(() => {
+                        // Since the uiAnomaly data is a computed value from `anomalies` and will be
+                        // re-computed every time the `showAllAnomalies` is changed, the data is
+                        // being re-fetched to avoid having to complicate the local state
+                        fetchData();
                     });
             },
             t,

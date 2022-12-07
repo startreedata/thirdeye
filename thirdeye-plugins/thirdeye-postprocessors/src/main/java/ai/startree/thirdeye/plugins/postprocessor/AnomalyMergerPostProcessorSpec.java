@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.postprocessor;
 
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 
@@ -36,7 +37,7 @@ public class AnomalyMergerPostProcessorSpec extends PostProcessorSpec {
   /**
    * Expected to be set at detection pipeline runtime.
    */
-  private Long enumerationId;
+  private EnumerationItemDTO enumerationItemDTO;
 
   /**
    * Expected to be set at detection pipeline runtime.
@@ -94,12 +95,13 @@ public class AnomalyMergerPostProcessorSpec extends PostProcessorSpec {
     return this;
   }
 
-  public Long getEnumerationId() {
-    return enumerationId;
+  public EnumerationItemDTO getEnumerationItemDTO() {
+    return enumerationItemDTO;
   }
 
-  public AnomalyMergerPostProcessorSpec setEnumerationId(final Long enumerationId) {
-    this.enumerationId = enumerationId;
+  public AnomalyMergerPostProcessorSpec setEnumerationItemDTO(
+      final EnumerationItemDTO enumerationItemDTO) {
+    this.enumerationItemDTO = enumerationItemDTO;
     return this;
   }
 }

@@ -25,6 +25,7 @@ import ai.startree.thirdeye.plugins.postprocessor.merger.AnomalyKey;
 import ai.startree.thirdeye.plugins.postprocessor.merger.AnomalyTimelinesView;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -89,7 +90,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   private Period mergeMaxGap;
   private Period mergeMaxDuration;
   private final Long alertId;
-  private final Long enumerationId;
+  private final EnumerationItemDTO enumerationItem;
   private DetectionPipelineUsage usage;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
@@ -101,7 +102,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     this.mergeMaxDuration = isoPeriod(spec.getMergeMaxDuration(), DEFAULT_ANOMALY_MAX_DURATION);
     this.alertId = spec.getAlertId();
     this.usage = spec.getUsage();
-    this.enumerationId = spec.getEnumerationId();
+    this.enumerationItem = spec.getEnumerationItemDTO();
 
     this.mergedAnomalyResultManager = spec.getMergedAnomalyResultManager();
   }
@@ -115,6 +116,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
     chronology = detectionInterval.getChronology();
+
+    // FIXME CYRIL BEFORE PR MERGE add short-circuit if merge is disabled ie maxMergeGap = 0
 
     for (final OperatorResult operatorResult : resultMap.values()) {
       postProcessResult(operatorResult);
@@ -131,12 +134,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
     // fixme cyril hack - operatorResult is not mutable and can be a custom implementation - exploit list mutability - will bug if one day the list is made immutable or a protective copy is returned
     //  need to rethink the OperatorResult interface
-    final List<MergedAnomalyResultDTO> mergedAnomalies = mergeAnomalies(operatorAnomalies);
+    final List<MergedAnomalyResultDTO> mergedAnomalies = merge(operatorAnomalies);
     operatorAnomalies.clear();
     operatorAnomalies.addAll(mergedAnomalies);
   }
 
-  protected List<MergedAnomalyResultDTO> mergeAnomalies(
+  protected List<MergedAnomalyResultDTO> merge(
       final List<MergedAnomalyResultDTO> operatorAnomalies) {
     if (operatorAnomalies.isEmpty()) {
       return emptyList();
@@ -181,7 +184,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
           mergeLowerBound,
           mergeUpperBound,
           alertId,
-          enumerationId);
+          optional(enumerationItem).map(AbstractDTO::getId).orElse(null));
     } else {
       throw new UnsupportedOperationException("Unknown DetectionPipelineUsage: " + usage);
     }
@@ -459,6 +462,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return new ArrayList<>(labels);
   }
 
+  @VisibleForTesting
+  protected void setChronology(final Chronology chronology) {
+    this.chronology = chronology;
+  }
+
   public static class Factory implements AnomalyPostProcessorFactory {
 
     @Override
@@ -474,6 +482,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       spec.setMergedAnomalyResultManager(context.getMergedAnomalyResultManager());
       spec.setAlertId(context.getAlertId());
       spec.setUsage(context.getUsage());
+      spec.setEnumerationItemDTO(context.getEnumerationItemDTO());
 
       return new AnomalyMergerPostProcessor(spec);
     }

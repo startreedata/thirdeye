@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
-import ai.startree.thirdeye.spi.detection.v2.AnomalyDetectorOperatorResult.Builder;
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;

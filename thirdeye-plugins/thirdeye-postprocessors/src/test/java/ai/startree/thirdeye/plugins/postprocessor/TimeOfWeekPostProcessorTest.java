@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.plugins.postprocessor.TimeOfWeekPostProcessor
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import ai.startree.thirdeye.spi.detection.v2.AnomalyDetectorOperatorResult;
+import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;

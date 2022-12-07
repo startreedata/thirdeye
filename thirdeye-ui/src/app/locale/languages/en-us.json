@@ -358,6 +358,7 @@
         "add-new-pinot-datasource": "Add new Pinot datasource",
         "add-the-final-details-for-your-alert": "Add the final details for your alert",
         "advanced-options-are-only-available-in-the-enterprise": "Advanced options are only available in the enterprise edition of ThirdEye",
+        "alert-configuration-examples": "Alert Configurations Examples",
         "alert-is-active": "Alert is active",
         "alert-is-inactive": "Alert is inactive",
         "alert-reset-error": "An issue was experienced while resetting alert. Please try again.",
@@ -521,6 +522,7 @@
         "startree-ets-algorithm-description": "Compares current value to the value predicted combining a regression model and an ETS forecasting algorithm.",
         "statistical-forecasting-advanced-description": "Compares current value to the value predicted. Good for daily data and hourly data.",
         "subscription-group-name-required": "Subscription Group name is required",
+        "te-recipes": "ThirdEye Recipes",
         "the-setup-is-completed": "The setup is completed",
         "there-have-been-no-recent-entity-in-the-timePeriod": "There have been no recent {{entity}} in the {{timePeriod}}",
         "this-is-the-detector-algorithm-that-will-rule-alert": "This is the detector algorithm that will rule your alert",
@@ -542,9 +544,11 @@
     },
     "server": {},
     "url": {
+        "alert-config-examples": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/alert-create-examples",
         "create-an-alert": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/getting-started/create-your-first-alert",
         "getting-started": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/",
         "how-to-investigate-anomaly": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/perform-root-cause-analysis",
-        "how-to-use-te-video": "https://drive.google.com/file/d/1vsiWz_GHH9E8S8ivsDrwr-B1YA_aSVBj/view"
+        "how-to-use-te-video": "https://drive.google.com/file/d/1vsiWz_GHH9E8S8ivsDrwr-B1YA_aSVBj/view",
+        "te-recipes": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/"
     }
 }

@@ -14,11 +14,13 @@
  */
 import { Box, Button, Grid, Link, Typography } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import DvrIcon from "@material-ui/icons/Dvr";
 import FindInPageIcon from "@material-ui/icons/FindInPage";
 import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
 import SchoolIcon from "@material-ui/icons/School";
+import WidgetsIcon from "@material-ui/icons/Widgets";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { RecommendedDocumentationProps } from "./recommended-documentation.interfaces";
@@ -26,6 +28,44 @@ import { RecommendedDocumentationProps } from "./recommended-documentation.inter
 export const RecommendedDocumentation: FunctionComponent<RecommendedDocumentationProps> =
     ({ onHideDocumentationClick }) => {
         const { t } = useTranslation();
+
+        const items = useMemo(
+            () => [
+                {
+                    icon: <SchoolIcon fontSize="large" />,
+                    href: t("url.getting-started"),
+                    label: t("label.getting-started"),
+                },
+                {
+                    icon: <WifiTetheringIcon fontSize="large" />,
+                    href: t("url.create-an-alert"),
+                    label: t("label.create-an-entity", {
+                        entity: t("label.alert"),
+                    }),
+                },
+                {
+                    icon: <FindInPageIcon fontSize="large" />,
+                    href: t("url.how-to-use-te-video"),
+                    label: t("label.how-to-investigate-anomaly"),
+                },
+                {
+                    icon: <PlayCircleFilledIcon fontSize="large" />,
+                    href: t("url.how-to-use-te-video"),
+                    label: t("label.learn-how-to-use-te"),
+                },
+                {
+                    icon: <WidgetsIcon fontSize="large" />,
+                    href: t("url.te-recipes"),
+                    label: t("message.te-recipes"),
+                },
+                {
+                    icon: <DvrIcon fontSize="large" />,
+                    href: t("url.alert-config-examples"),
+                    label: t("message.alert-configuration-examples"),
+                },
+            ],
+            []
+        );
 
         return (
             <>
@@ -61,125 +101,29 @@ export const RecommendedDocumentation: FunctionComponent<RecommendedDocumentatio
                     </Grid>
                 </Box>
                 <Grid container alignItems="stretch">
-                    <Grid item sm={3} xs={12}>
-                        <PageContentsCardV1 fullHeight>
-                            <Link
-                                href={t("url.getting-started")}
-                                target="_blank"
-                            >
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    wrap="nowrap"
-                                >
-                                    <Grid item>
-                                        <SchoolIcon fontSize="large" />
+                    {items.map(({ href, label, icon }) => (
+                        <Grid item key={label} sm={4} xs={12}>
+                            <PageContentsCardV1 fullHeight>
+                                <Link href={href} target="_blank">
+                                    <Grid
+                                        container
+                                        alignItems="center"
+                                        wrap="nowrap"
+                                    >
+                                        <Grid item>{icon}</Grid>
+                                        <Grid item>
+                                            <Typography
+                                                color="textPrimary"
+                                                variant="subtitle1"
+                                            >
+                                                <Grid item>{label}</Grid>
+                                            </Typography>
+                                        </Grid>
                                     </Grid>
-                                    <Grid item>
-                                        <Typography
-                                            color="textPrimary"
-                                            variant="subtitle1"
-                                        >
-                                            <Grid item>
-                                                {t("label.getting-started")}
-                                            </Grid>
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Link>
-                        </PageContentsCardV1>
-                    </Grid>
-                    <Grid item sm={3} xs={12}>
-                        <PageContentsCardV1 fullHeight>
-                            <Link
-                                href={t("url.create-an-alert")}
-                                target="_blank"
-                            >
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    wrap="nowrap"
-                                >
-                                    <Grid item>
-                                        <WifiTetheringIcon
-                                            color="primary"
-                                            fontSize="large"
-                                        />
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography
-                                            color="textPrimary"
-                                            variant="subtitle1"
-                                        >
-                                            {t("label.create-an-entity", {
-                                                entity: t("label.alert"),
-                                            })}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Link>
-                        </PageContentsCardV1>
-                    </Grid>
-                    <Grid item sm={3} xs={12}>
-                        <PageContentsCardV1 fullHeight>
-                            <Link
-                                href={t("url.how-to-use-te-video")}
-                                target="_blank"
-                            >
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    wrap="nowrap"
-                                >
-                                    <Grid item>
-                                        <FindInPageIcon
-                                            color="primary"
-                                            fontSize="large"
-                                        />
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography
-                                            color="textPrimary"
-                                            variant="subtitle1"
-                                        >
-                                            {t(
-                                                "label.how-to-investigate-anomaly"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Link>
-                        </PageContentsCardV1>
-                    </Grid>
-                    <Grid item sm={3} xs={12}>
-                        <PageContentsCardV1 fullHeight>
-                            <Link
-                                href={t("url.how-to-use-te-video")}
-                                target="_blank"
-                            >
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    wrap="nowrap"
-                                >
-                                    <Grid item>
-                                        <PlayCircleFilledIcon
-                                            color="primary"
-                                            fontSize="large"
-                                        />
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography
-                                            color="textPrimary"
-                                            variant="subtitle1"
-                                        >
-                                            {t("label.learn-how-to-use-te")}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Link>
-                        </PageContentsCardV1>
-                    </Grid>
+                                </Link>
+                            </PageContentsCardV1>
+                        </Grid>
+                    ))}
                 </Grid>
             </>
         );

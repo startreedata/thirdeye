@@ -19,6 +19,7 @@ import ai.startree.thirdeye.spi.Constants.SubjectType;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
+import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
@@ -193,6 +194,10 @@ public class EmailContentBuilder {
     final Multimap<String, AnomalyReportDataApi> map = ArrayListMultimap.create();
     for (AnomalyReportApi anomalyReportApi : anomalyReports) {
       final AnomalyReportDataApi data = anomalyReportApi.getData();
+      optional(anomalyReportApi.getAnomaly())
+          .map(AnomalyApi::getEnumerationItem)
+          .map(EnumerationItemApi::getName)
+          .ifPresent(name -> data.setDimensions(List.of(name)));
       map.put(data.getFunction(), data);
     }
     return map.asMap();

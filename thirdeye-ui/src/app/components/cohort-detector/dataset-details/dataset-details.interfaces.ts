@@ -12,8 +12,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Dataset } from "../../../rest/dto/dataset.interfaces";
+import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { GetCohortParams } from "../../../rest/rca/rca.interfaces";
 
 export interface DatasetDetailsProps {
     onSearchButtonClick: (getCohortsParams: GetCohortParams) => void;
+    title: string;
+    subtitle?: string;
+    submitButtonLabel: string;
+    onMetricSelect?: (
+        metric: string,
+        dataset: Dataset,
+        aggregationFunction: string
+    ) => void;
+    onAggregationFunctionSelect?: (
+        aggregationFunction: MetricAggFunction
+    ) => void;
 }

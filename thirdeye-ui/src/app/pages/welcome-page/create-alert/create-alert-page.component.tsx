@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
+import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { generateEmptyEmailSendGridConfiguration } from "../../../components/subscription-group-wizard/groups-editor/groups-editor.utils";
@@ -68,11 +69,17 @@ const STEPS = [
     },
 ];
 
+const MULTI_DIMENSION_SELECT_STEP = {
+    subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION,
+    translationLabel: "multidimension-setup",
+};
+
 export const CreateAlertPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const { notify } = useNotificationProviderV1();
+    const { setShowAppNavBar } = useAppBarConfigProvider();
 
     const {
         alertTemplates,
@@ -105,6 +112,23 @@ export const CreateAlertPage: FunctionComponent = () => {
         return generateAvailableAlgorithmOptions(t, availableTemplateNames);
     }, [alertTemplates]);
 
+    const stepsToDisplay = useMemo(() => {
+        const matchingDimensionExploration = [
+            ...simpleOptions,
+            ...advancedOptions,
+        ].find(
+            (c) =>
+                c.algorithmOption.alertTemplateForMultidimension ===
+                alert.template?.name
+        );
+
+        if (matchingDimensionExploration) {
+            return [STEPS[0], MULTI_DIMENSION_SELECT_STEP, ...STEPS.slice(1)];
+        }
+
+        return [...STEPS];
+    }, [alert]);
+
     const handleAlertPropertyChange = useMemo(() => {
         return handleAlertPropertyChangeGenerator(
             setAlert,
@@ -117,7 +141,7 @@ export const CreateAlertPage: FunctionComponent = () => {
     }, [setAlert]);
 
     const activeStep = useMemo(() => {
-        const activeStepDefinition = STEPS.find((candidate) =>
+        const activeStepDefinition = stepsToDisplay.find((candidate) =>
             pathname.includes(candidate.subPath)
         );
 
@@ -126,7 +150,7 @@ export const CreateAlertPage: FunctionComponent = () => {
         }
 
         return activeStepDefinition.subPath;
-    }, [pathname]);
+    }, [pathname, stepsToDisplay]);
 
     const selectedAlgorithmOption = useMemo(() => {
         return [...simpleOptions, ...advancedOptions].find(
@@ -144,9 +168,10 @@ export const CreateAlertPage: FunctionComponent = () => {
             [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
         ]);
 
-        return handleCreateAlertClickGenerator(notify, t, () =>
-            navigate(`${getHomePath()}?${queryParams.toString()}`)
-        );
+        return handleCreateAlertClickGenerator(notify, t, () => {
+            navigate(`${getHomePath()}?${queryParams.toString()}`);
+            setShowAppNavBar(true);
+        });
     }, [navigate, notify, t]);
 
     const handleCreateAlertClick = useCallback(() => {
@@ -156,7 +181,9 @@ export const CreateAlertPage: FunctionComponent = () => {
             alertWithName.name = generateGenericNameForAlert(
                 alert.templateProperties.aggregationColumn as string,
                 alert.templateProperties.aggregationFunction as string,
-                selectedAlgorithmOption?.algorithmOption.title as string
+                selectedAlgorithmOption?.algorithmOption.title as string,
+                selectedAlgorithmOption?.algorithmOption
+                    .alertTemplateForMultidimension === alert?.template?.name
             );
         }
 
@@ -220,7 +247,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                         <StepperV1
                             activeStep={activeStep}
                             stepLabelFn={(step: string): string => {
-                                const stepDefinition = STEPS.find(
+                                const stepDefinition = stepsToDisplay.find(
                                     (candidate) => candidate.subPath === step
                                 );
 
@@ -228,7 +255,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                                     `message.${stepDefinition?.translationLabel}`
                                 );
                             }}
-                            steps={STEPS.map((item) => item.subPath)}
+                            steps={stepsToDisplay.map((item) => item.subPath)}
                         />
                     </PageContentsCardV1>
                 </Grid>
@@ -252,6 +279,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                             createSubscriptionGroupStatus ===
                                 ActionStatus.Working ||
                             createAlertStatus === ActionStatus.Working,
+                        getAlertTemplates,
                     }}
                 />
             </LoadingErrorStateSwitch>

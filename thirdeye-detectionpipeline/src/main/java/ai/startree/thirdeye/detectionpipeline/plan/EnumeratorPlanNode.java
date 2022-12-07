@@ -21,10 +21,8 @@ import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
@@ -65,7 +63,6 @@ public class EnumeratorPlanNode extends DetectionPipelinePlanNode {
         .setDetectionInterval(detectionInterval)
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.K_DETECTION_REGISTRY, detectionRegistry))
         .setEnumerationItem(enumerationItem)
     );
     return operator;

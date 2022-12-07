@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
+import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
+
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -52,7 +55,8 @@ public class EnumerationItemResource extends CrudResource<EnumerationItemApi, En
 
   @Override
   protected EnumerationItemDTO toDto(final EnumerationItemApi api) {
-    return ApiBeanMapper.toEnumerationItemDTO(api);
+    throw badRequest(ERR_OPERATION_UNSUPPORTED,
+        "Enumeration Items are immutable. You can regenerate from the alert.");
   }
 
   @Override

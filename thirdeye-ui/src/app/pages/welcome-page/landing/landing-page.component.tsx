@@ -17,20 +17,18 @@ import { Box, Grid, Typography } from "@material-ui/core";
 import { capitalize } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { WelcomeStepCard } from "../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
-import { PageContentsCardV1, PageV1 } from "../../platform/components";
-import { DimensionV1 } from "../../platform/utils";
-import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetDatasets } from "../../rest/datasets/datasets.actions";
+import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { WelcomeStepCard } from "../../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
+import { PageContentsCardV1, PageV1 } from "../../../platform/components";
+import { DimensionV1 } from "../../../platform/utils";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import {
     getDataConfigurationCreatePath,
     getWelcomeCreateAlert,
-} from "../../utils/routes/routes.util";
+} from "../../../utils/routes/routes.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
-    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const { status, datasets, getDatasets } = useGetDatasets();
@@ -109,23 +107,20 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                         entity: t("label.data"),
                                     })}
                                     isComplete={hasDatasets}
+                                    link={getDataConfigurationCreatePath()}
                                     subtitle={t(
                                         "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
                                     )}
                                     title={t(
                                         "message.review-and-configure-data"
                                     )}
-                                    onClickCta={() => {
-                                        navigate(
-                                            getDataConfigurationCreatePath()
-                                        );
-                                    }}
                                 />
                                 <WelcomeStepCard
                                     ctaContent={t("message.create-entity", {
                                         entity: t("label.alert"),
                                     })}
                                     disabled={!hasDatasets}
+                                    link={getWelcomeCreateAlert()}
                                     subtitle={t(
                                         "message.explore-startree-thirdeye-in-one-click"
                                     )}
@@ -134,9 +129,6 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                             entity: t("label.alert"),
                                         })
                                     )}
-                                    onClickCta={() => {
-                                        navigate(getWelcomeCreateAlert());
-                                    }}
                                 />
                             </Box>
                         </LoadingErrorStateSwitch>

@@ -17,7 +17,7 @@ export interface WelcomeStepCardProps {
     title: string;
     subtitle: string;
     ctaContent: string | JSX.Element;
-    onClickCta?: () => void;
+    link: string;
     disabled?: boolean;
     isComplete?: boolean;
 }

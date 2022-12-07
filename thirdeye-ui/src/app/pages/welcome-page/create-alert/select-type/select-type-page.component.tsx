@@ -12,14 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlgorithmSelection } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
 import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { SampleAlertSelection } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
-import { PageContentsGridV1 } from "../../../../platform/components";
+import { NoDataIndicator } from "../../../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
+import {
+    PageContentsCardV1,
+    PageContentsGridV1,
+} from "../../../../platform/components";
+import { createDefaultAlertTemplates } from "../../../../rest/alert-templates/alert-templates.rest";
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
 import { AppRouteRelative } from "../../../../utils/routes/routes.util";
 
@@ -27,28 +33,39 @@ export const SelectTypePage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const { handleAlertPropertyChange, simpleOptions, advancedOptions } =
-        useOutletContext<{
-            alert: EditableAlert;
-            handleAlertPropertyChange: (
-                contents: Partial<EditableAlert>
-            ) => void;
-            simpleOptions: AvailableAlgorithmOption[];
-            advancedOptions: AvailableAlgorithmOption[];
-        }>();
+    const {
+        handleAlertPropertyChange,
+        simpleOptions,
+        advancedOptions,
+        getAlertTemplates,
+    } = useOutletContext<{
+        alert: EditableAlert;
+        handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+        simpleOptions: AvailableAlgorithmOption[];
+        advancedOptions: AvailableAlgorithmOption[];
+        getAlertTemplates: () => void;
+    }>();
 
     const handleAlgorithmSelection = (
         isDimensionExploration: boolean
     ): void => {
         if (isDimensionExploration) {
             navigate(
-                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
             );
+
+            return;
         }
 
         navigate(
             `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
         );
+    };
+
+    const handleCreateDefaultAlertTemplates = (): void => {
+        createDefaultAlertTemplates().then(() => {
+            getAlertTemplates();
+        });
     };
 
     return (
@@ -69,12 +86,42 @@ export const SelectTypePage: FunctionComponent = () => {
                 />
             </Grid>
             <Grid item xs={12}>
-                <AlgorithmSelection
-                    advancedOptions={advancedOptions}
-                    simpleOptions={simpleOptions}
-                    onAlertPropertyChange={handleAlertPropertyChange}
-                    onSelectionComplete={handleAlgorithmSelection}
-                />
+                <EmptyStateSwitch
+                    emptyState={
+                        <PageContentsCardV1>
+                            <Box padding={10}>
+                                <NoDataIndicator>
+                                    <Box textAlign="center">
+                                        {t("message.no-entity-created", {
+                                            entity: t("label.alert-templates"),
+                                        })}
+                                    </Box>
+                                    <Box marginTop={2} textAlign="center">
+                                        <Button
+                                            color="primary"
+                                            onClick={
+                                                handleCreateDefaultAlertTemplates
+                                            }
+                                        >
+                                            {t("label.load-defaults")}
+                                        </Button>
+                                    </Box>
+                                </NoDataIndicator>
+                            </Box>
+                        </PageContentsCardV1>
+                    }
+                    isEmpty={
+                        advancedOptions.length === 0 &&
+                        simpleOptions.length === 0
+                    }
+                >
+                    <AlgorithmSelection
+                        advancedOptions={advancedOptions}
+                        simpleOptions={simpleOptions}
+                        onAlertPropertyChange={handleAlertPropertyChange}
+                        onSelectionComplete={handleAlgorithmSelection}
+                    />
+                </EmptyStateSwitch>
             </Grid>
         </PageContentsGridV1>
     );

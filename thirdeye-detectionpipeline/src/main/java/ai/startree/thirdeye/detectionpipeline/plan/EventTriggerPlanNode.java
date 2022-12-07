@@ -20,9 +20,7 @@ import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EventTriggerOperator;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
@@ -56,8 +54,6 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
     eventTriggerOperator.init(createOperatorContext()
         .setInputsMap(inputsMap)
         .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.K_DETECTION_REGISTRY,
-            detectionRegistry))
     );
     return eventTriggerOperator;
   }

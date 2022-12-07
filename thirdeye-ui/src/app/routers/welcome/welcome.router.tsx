@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, lazy, Suspense } from "react";
+import React, { FunctionComponent, lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
@@ -42,31 +43,43 @@ const SetupDetailsPage = lazy(() =>
     ).then((module) => ({ default: module.SetupDetailsPage }))
 );
 
+const SetupDimensionGroupsPage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-dimension-groups-page" */ "../../pages/welcome-page/create-alert/setup-dimension-groups/setup-dimension-groups-page.component"
+    ).then((module) => ({ default: module.SetupDimensionGroupsPage }))
+);
+
 const WelcomeLandingPage = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-landing-page/welcome-landing-page.component"
+        /* webpackChunkName: "welcome-landing-page" */ "../../pages/welcome-page/landing/landing-page.component"
     ).then((module) => ({ default: module.WelcomeLandingPage }))
 );
 
 const WelcomeOnboardDatasourceWizard = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-onboard-datasource" */ "../../pages/welcome-onboard-datasource-wizard/welcome-onboard-datasource-wizard.component"
+        /* webpackChunkName: "welcome-onboard-datasource" */ "../../pages/welcome-page/create-datasource/create-datasource-page.component"
     ).then((module) => ({ default: module.WelcomeOnboardDatasourceWizard }))
 );
 
 const WelcomeSelectDatasource = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-select-datasource" */ "../../pages/welcome-onboard-datasource-select-datasource/welcome-onboard-datasource-select-datasource.component"
+        /* webpackChunkName: "elect-datasource" */ "../../pages/welcome-page/create-datasource/onboard-datasource/onboard-datasource-page.component"
     ).then((module) => ({ default: module.WelcomeSelectDatasource }))
 );
 
 const WelcomeSelectDatasets = lazy(() =>
     import(
-        /* webpackChunkName: "welcome-select-datasets" */ "../../pages/welcome-onboard-datasource-select-datasets/welcome-onboard-datasource-select-datasets.component"
+        /* webpackChunkName: "select-datasets" */ "../../pages/welcome-page/create-datasource/onboard-datasets/onboard-datasets-page.component"
     ).then((module) => ({ default: module.WelcomeSelectDatasets }))
 );
 
 export const WelcomeRouter: FunctionComponent = () => {
+    const { setShowAppNavBar } = useAppBarConfigProvider();
+
+    useEffect(() => {
+        setShowAppNavBar(false);
+    }, []);
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
@@ -159,6 +172,14 @@ export const WelcomeRouter: FunctionComponent = () => {
                     <Route
                         element={<SelectTypePage />}
                         path={AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}
+                    />
+
+                    {/* Welcome create alert select dimension groups path */}
+                    <Route
+                        element={<SetupDimensionGroupsPage />}
+                        path={
+                            AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
+                        }
                     />
 
                     {/* Welcome create alert setup monitoring path */}

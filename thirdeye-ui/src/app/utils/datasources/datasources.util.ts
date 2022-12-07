@@ -24,6 +24,20 @@ import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createDefaultDatasource = (): Datasource => {
+    if (window.location.host.includes("localhost")) {
+        return {
+            name: "mypinot",
+            type: "pinot",
+            properties: {
+                zookeeperUrl: "localhost:2123",
+                clusterName: "QuickStartCluster",
+                controllerConnectionScheme: "http",
+                controllerHost: "localhost",
+                controllerPort: 9000,
+            } as DatasourceProperties,
+        } as Datasource;
+    }
+
     return {
         name: "mypinot",
         type: "pinot",

@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.EventFetcherSpec;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
@@ -37,10 +36,12 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    final EventManager eventDao = (EventManager) context.getProperties()
-        .get(Constants.K_EVENT_MANAGER);
-    this.eventFetcher = createEventFetcher(optional(planNode.getParams()).map(TemplatableMap::valueMap)
-        .orElse(null), eventDao);
+    final EventManager eventDao = requireNonNull(context.getPlanNodeContext()
+        .getApplicationContext()
+        .getEventManager());
+    final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
+        .orElse(null);
+    this.eventFetcher = createEventFetcher(params, eventDao);
 
     checkArgument(inputMap == null || inputMap.size() == 0,
         OPERATOR_NAME + " must have exactly 0 input node.");

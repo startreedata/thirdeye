@@ -13,7 +13,12 @@
  * the License.
  */
 
-export interface DatasetOption {
-    label: string;
-    value: number | string;
+import { ReactNode } from "react";
+
+export interface AppBarConfigProviderProps {
+    children?: ReactNode;
+}
+
+export interface AppBarConfigProviderPropsContextProps {
+    setShowAppNavBar: (flag: boolean) => void;
 }

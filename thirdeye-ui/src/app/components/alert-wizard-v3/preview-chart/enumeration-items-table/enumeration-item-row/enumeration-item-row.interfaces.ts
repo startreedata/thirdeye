@@ -12,5 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Anomaly } from "../../../../../rest/dto/anomaly.interfaces";
+import { DetectionEvaluation } from "../../../../../rest/dto/detection.interfaces";
 
-export const SELECT_ALL = "select-all";
+export interface EnumerationItemRowProps {
+    detectionEvaluation: DetectionEvaluation;
+    anomalies: Anomaly[];
+    onDeleteClick?: () => void;
+}

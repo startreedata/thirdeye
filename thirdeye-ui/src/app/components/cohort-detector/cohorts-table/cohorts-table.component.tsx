@@ -19,6 +19,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
     DataGridScrollV1,
+    DataGridSelectionModelV1,
     DataGridSortOrderV1,
     DataGridV1,
     PageContentsCardV1,
@@ -40,6 +41,10 @@ const PERCENTAGE = "percentage";
 export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
     getCohortsRequestStatus,
     cohortsData,
+    onSelectionChange,
+    children,
+    title,
+    subtitle,
 }) => {
     const { t } = useTranslation();
     const tableRows: CohortTableRowData[] = useMemo(() => {
@@ -105,6 +110,18 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
         },
     ];
 
+    const handleSelectionChange = (
+        selectedCohorts: DataGridSelectionModelV1<CohortTableRowData>
+    ): void => {
+        if (!selectedCohorts || !selectedCohorts.rowKeyValueMap) {
+            return;
+        }
+        onSelectionChange &&
+            onSelectionChange(
+                Array.from(selectedCohorts.rowKeyValueMap.values())
+            );
+    };
+
     return (
         <PageContentsCardV1>
             <Grid container>
@@ -115,9 +132,12 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                         justifyContent="space-between"
                     >
                         <Grid item>
-                            <Typography variant="h5">
-                                {t("label.cohorts")}
-                            </Typography>
+                            <Typography variant="h5">{title}</Typography>
+                            {subtitle && (
+                                <Typography variant="body2">
+                                    {subtitle}
+                                </Typography>
+                            )}
                         </Grid>
                         <Grid item>
                             {cohortsData &&
@@ -158,21 +178,23 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                         )}
 
                         {cohortsData && tableRows.length > 0 && (
-                            <DataGridV1<CohortTableRowData>
-                                disableMultiSelection
-                                disableSearch
-                                disableSelection
-                                hideBorder
-                                hideToolbar
-                                columns={columns}
-                                data={tableRows}
-                                initialSortState={{
-                                    key: PERCENTAGE,
-                                    order: DataGridSortOrderV1.DESC,
-                                }}
-                                rowKey="name"
-                                scroll={DataGridScrollV1.Body}
-                            />
+                            <>
+                                <DataGridV1<CohortTableRowData>
+                                    disableSearch
+                                    hideBorder
+                                    hideToolbar
+                                    columns={columns}
+                                    data={tableRows}
+                                    disableSelection={!onSelectionChange}
+                                    initialSortState={{
+                                        key: PERCENTAGE,
+                                        order: DataGridSortOrderV1.DESC,
+                                    }}
+                                    rowKey="name"
+                                    scroll={DataGridScrollV1.Body}
+                                    onSelectionChange={handleSelectionChange}
+                                />
+                            </>
                         )}
 
                         {cohortsData && tableRows.length === 0 && (
@@ -186,6 +208,7 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                     </LoadingErrorStateSwitch>
                 </Grid>
             </Grid>
+            {cohortsData && tableRows.length > 0 && children}
         </PageContentsCardV1>
     );
 };

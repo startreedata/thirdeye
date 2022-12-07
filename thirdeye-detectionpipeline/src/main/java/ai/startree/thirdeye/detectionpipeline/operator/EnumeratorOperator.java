@@ -15,10 +15,10 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.Enumerator.Context;
@@ -42,8 +42,8 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    detectionRegistry = (DetectionRegistry) context.getProperties()
-        .get(Constants.K_DETECTION_REGISTRY);
+    detectionRegistry = requireNonNull(
+        context.getPlanNodeContext().getApplicationContext().getDetectionRegistry());
 
     enumerationItemFromContext = context.getEnumerationItem();
   }

@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { delay } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { AppBar } from "./components/app-bar/app-bar.component";
+import { AppBarConfigProvider } from "./components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import {
     AppContainerV1,
     NotificationScopeV1,
@@ -27,7 +26,6 @@ import { AppRouter } from "./routers/app/app.router";
 
 // ThirdEye UI app
 export const App: FunctionComponent = () => {
-    const [showAppNavBar, setShowAppNavBar] = useState(false);
     const {
         authDisabled,
         authDisabledNotification,
@@ -35,11 +33,6 @@ export const App: FunctionComponent = () => {
     } = useAuthProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-
-    useEffect(() => {
-        // Slight delay in rendering nav bar helps avoid flicker during initial page redirects
-        delay(setShowAppNavBar, 200, true);
-    }, []);
 
     useEffect(() => {
         if (authDisabled && authDisabledNotification) {
@@ -56,8 +49,9 @@ export const App: FunctionComponent = () => {
 
     return (
         <AppContainerV1 name={t("label.thirdeye")}>
-            {showAppNavBar && <AppBar />}
-            <AppRouter />
+            <AppBarConfigProvider>
+                <AppRouter />
+            </AppBarConfigProvider>
         </AppContainerV1>
     );
 };

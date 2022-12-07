@@ -13,11 +13,11 @@
  * the License.
  */
 import type { DefaultNamespace, UseTranslationResponse } from "react-i18next";
-import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { Datasource } from "../../../../rest/dto/datasource.interfaces";
 import type {
     DatasourceOption,
     DatasourceOptionGroups,
-} from "./welcome-onboard-datasource-select-datasource.interfaces";
+} from "./onboard-datasource-page.interfaces";
 
 export const STARTREE_CLOUD = "startree-cloud";
 export const OTHER_SOURCES = "other-sources";

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datasource.calcite;
 
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
 import static ai.startree.thirdeye.spi.metric.MetricAggFunction.AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.addAlias;
@@ -27,7 +28,6 @@ import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.util.CalciteUtils;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlFunctionCategory;
@@ -128,7 +128,7 @@ public class QueryProjection {
   public SqlNode toDialectSpecificSqlNode(final Config sqlParserConfig,
       final SqlExpressionBuilder expressionBuilder) {
     if (operator != null) {
-      final String operatorUpper = operator.toUpperCase(Locale.ENGLISH);
+      final String operatorUpper = operator.toUpperCase(DEFAULT_LOCALE);
       // 1. a datasource can customize any metricAggFunction based SQL
       if (AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES.contains(operatorUpper)) {
         final MetricAggFunction metricAggFunction = MetricAggFunction.valueOf(operatorUpper);

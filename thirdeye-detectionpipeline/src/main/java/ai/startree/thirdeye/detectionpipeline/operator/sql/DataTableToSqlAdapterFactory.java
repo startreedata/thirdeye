@@ -13,13 +13,14 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator.sql;
 
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
+
 import ai.startree.thirdeye.spi.detection.v2.DataTableToSqlAdapter;
-import java.util.Locale;
 
 public class DataTableToSqlAdapterFactory {
 
   public static DataTableToSqlAdapter create(final String sqlEngine) {
-    switch (sqlEngine.toUpperCase(Locale.ENGLISH)) {
+    switch (sqlEngine.toUpperCase(DEFAULT_LOCALE)) {
       case "CALCITE":
         return new CalciteDataTableToSqlAdapter();
       case "HYPERSQL": case "HSQLDB":

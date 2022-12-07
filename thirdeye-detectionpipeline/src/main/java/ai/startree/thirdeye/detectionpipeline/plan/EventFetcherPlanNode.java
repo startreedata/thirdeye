@@ -19,10 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.operator.EventFetcherOperator;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
-import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
@@ -53,8 +51,7 @@ public class EventFetcherPlanNode extends DetectionPipelinePlanNode {
     final EventFetcherOperator eventFetcherOperator = new EventFetcherOperator();
     eventFetcherOperator.init(createOperatorContext()
         .setDetectionInterval(detectionInterval)
-        .setPlanNode(planNodeBean)
-        .setProperties(ImmutableMap.of(Constants.K_EVENT_MANAGER, eventManager)));
+        .setPlanNode(planNodeBean));
     return eventFetcherOperator;
   }
 }

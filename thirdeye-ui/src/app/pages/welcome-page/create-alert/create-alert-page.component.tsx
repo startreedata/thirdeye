@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
+import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { generateEmptyEmailSendGridConfiguration } from "../../../components/subscription-group-wizard/groups-editor/groups-editor.utils";
@@ -78,6 +79,7 @@ export const CreateAlertPage: FunctionComponent = () => {
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const { notify } = useNotificationProviderV1();
+    const { setShowAppNavBar } = useAppBarConfigProvider();
 
     const {
         alertTemplates,
@@ -166,9 +168,10 @@ export const CreateAlertPage: FunctionComponent = () => {
             [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
         ]);
 
-        return handleCreateAlertClickGenerator(notify, t, () =>
-            navigate(`${getHomePath()}?${queryParams.toString()}`)
-        );
+        return handleCreateAlertClickGenerator(notify, t, () => {
+            navigate(`${getHomePath()}?${queryParams.toString()}`);
+            setShowAppNavBar(true);
+        });
     }, [navigate, notify, t]);
 
     const handleCreateAlertClick = useCallback(() => {
@@ -276,6 +279,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                             createSubscriptionGroupStatus ===
                                 ActionStatus.Working ||
                             createAlertStatus === ActionStatus.Working,
+                        getAlertTemplates,
                     }}
                 />
             </LoadingErrorStateSwitch>

@@ -14,8 +14,8 @@
  */
 
 import type { Dispatch, SetStateAction } from "react";
-import type { Datasource } from "../../rest/dto/datasource.interfaces";
-import type { ADD_NEW_DATASOURCE } from "./welcome-onboard-datasource-select-datasource.utils";
+import type { Datasource } from "../../../../rest/dto/datasource.interfaces";
+import type { ADD_NEW_DATASOURCE } from "./onboard-datasource-page.utils";
 
 export interface DatasourceOption {
     label: string;

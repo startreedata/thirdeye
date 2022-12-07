@@ -17,19 +17,19 @@ import { Box, Button, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
-import { PageHeader } from "../../components/page-header/page-header.component";
+import { PageHeader } from "../../../components/page-header/page-header.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     StepperV1,
-} from "../../platform/components";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
+} from "../../../platform/components";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 
 const STEPS = [
     {
         subPath: AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE,
-        translationLabel: "onboard-datasource-select-datasource",
+        translationLabel: "select-datasource",
     },
     {
         subPath: AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS,

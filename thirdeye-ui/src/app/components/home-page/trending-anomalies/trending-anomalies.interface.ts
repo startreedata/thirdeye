@@ -14,5 +14,5 @@
  */
 
 export interface TrendingAnomaliesProps {
-    startTime?: number;
+    startTime: number;
 }

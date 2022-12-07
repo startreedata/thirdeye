@@ -29,10 +29,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
-import {
-    generateDateRangeMonthsFromNow,
-    getAnomaliesAllRangePath,
-} from "../../../utils/routes/routes.util";
+import { getAnomaliesAllRangePath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
@@ -83,7 +80,7 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
 
     useEffect(() => {
         getAnomalies({
-            startTime: startTime || generateDateRangeMonthsFromNow(6)[0],
+            startTime,
         }).then((anomalies) => {
             if (!anomalies) {
                 return;

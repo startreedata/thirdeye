@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
+import ai.startree.thirdeye.spi.detection.v2.AnomalyDetectorOperatorResult;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;

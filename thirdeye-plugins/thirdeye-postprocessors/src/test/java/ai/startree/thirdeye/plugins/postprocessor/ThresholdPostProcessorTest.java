@@ -22,7 +22,7 @@ import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 import static ai.startree.thirdeye.spi.detection.AnomalyDetector.KEY_CURRENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
+import ai.startree.thirdeye.spi.detection.v2.AnomalyDetectorOperatorResult;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;

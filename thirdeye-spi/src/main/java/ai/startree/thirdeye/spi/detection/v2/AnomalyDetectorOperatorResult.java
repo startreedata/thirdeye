@@ -11,12 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detectionpipeline.operator;
+package ai.startree.thirdeye.spi.detection.v2;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
-import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Anomaly detection result. Contains a list of anomalies detected and the associated timeseries
  * which includes timestamps, predicted baseline, current value, upper/lower bounds.
  */
+// todo cyril most of the interface should go down to OperatorResult
 public class AnomalyDetectorOperatorResult implements OperatorResult {
 
   private final List<MergedAnomalyResultDTO> anomalies;

@@ -15,7 +15,7 @@ package ai.startree.thirdeye.alert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
+import ai.startree.thirdeye.spi.detection.v2.AnomalyDetectorOperatorResult;
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;

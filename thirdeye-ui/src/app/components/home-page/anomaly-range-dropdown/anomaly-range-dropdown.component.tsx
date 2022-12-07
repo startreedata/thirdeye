@@ -15,6 +15,7 @@
 
 import { MenuItem, Paper, Select } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import {
     generateDateRangeDaysFromNow,
     generateDateRangeMonthsFromNow,
@@ -23,6 +24,8 @@ import type { AnomalyRangeDropdownProps } from "./anomaly-range-dropdown.interfa
 
 export const AnomalyRangeDropdown: FunctionComponent<AnomalyRangeDropdownProps> =
     ({ anomalyStartTime, setAnomalyStartTime }) => {
+        const { t } = useTranslation();
+
         const handleChange = (
             e: React.ChangeEvent<{ name?: string; value: number | unknown }>
         ): void => {
@@ -30,12 +33,18 @@ export const AnomalyRangeDropdown: FunctionComponent<AnomalyRangeDropdownProps> 
         };
 
         const options = [
-            { label: "Last 7 days", value: generateDateRangeDaysFromNow(7)[0] },
             {
-                label: "Last 6 months",
+                label: t("label.last-7-days"),
+                value: generateDateRangeDaysFromNow(7)[0],
+            },
+            {
+                label: t("label.last-6-months"),
                 value: generateDateRangeMonthsFromNow(6)[0],
             },
-            { label: "All", value: generateDateRangeMonthsFromNow(60)[0] },
+            {
+                label: t("label.all"),
+                value: generateDateRangeMonthsFromNow(60)[0],
+            },
         ];
 
         return (

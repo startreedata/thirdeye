@@ -17,6 +17,6 @@ import { makeStyles } from "@material-ui/core";
 export const useAnomalyListV1Styles = makeStyles(() => ({
     muted: {
         opacity: 0.5,
-        filter: "grayscale(0.55)",
+        filter: "grayscale(0.35)",
     },
 }));

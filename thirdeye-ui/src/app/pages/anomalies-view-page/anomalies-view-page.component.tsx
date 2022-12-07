@@ -261,7 +261,11 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         isFlagged,
         isIgnored,
     }: UiAnomaly): string =>
-        [name, isIgnored && "(ignored)", !isIgnored && isFlagged && "(flagged)"]
+        [
+            name,
+            isIgnored && `(${t("label.ignored")})`,
+            !isIgnored && isFlagged && `(${t("label.flagged")})`,
+        ]
             .filter(Boolean)
             .join(" ");
 

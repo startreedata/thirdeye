@@ -581,7 +581,7 @@ export const generateDateRangeMonthsFromNow = (
 
 /**
  * Helper function to quickly generate a date range for any number of days from
- * now. The month ago will start at the beginning of the days.
+ * now. The days ago will start at the beginning of the days.
  *
  * @param daysAgo - Number of days to set the start of range
  * @param nowOverride - Override now with this value

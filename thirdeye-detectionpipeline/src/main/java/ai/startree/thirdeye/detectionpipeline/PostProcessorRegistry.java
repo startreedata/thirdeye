@@ -66,11 +66,14 @@ public class PostProcessorRegistry {
             anomalyPostProcessorFactoryMap.keySet()));
     final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
 
+    final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
+        .getDetectionPipelineContext();
     final PostProcessingContext postProcessingContext = new PostProcessingContext(datasetDao,
         minMaxTimeLoader, anomalyDao,
-        context.getPlanNodeContext().getDetectionPipelineContext().getAlertId(),
-        context.getPlanNodeContext().getDetectionPipelineContext().getUsage()
-        );
+        detectionPipelineContext.getAlertId(),
+        detectionPipelineContext.getUsage(),
+        detectionPipelineContext.getEnumerationItem()
+    );
     return anomalyPostProcessorFactoryMap.get(factoryName)
         .build(componentSpec, postProcessingContext);
   }

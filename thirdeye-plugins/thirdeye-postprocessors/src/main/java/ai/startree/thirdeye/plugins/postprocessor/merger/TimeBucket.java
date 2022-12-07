@@ -11,9 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.util;
+package ai.startree.thirdeye.plugins.postprocessor.merger;
 
-import ai.startree.thirdeye.datasource.comparison.Row;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -88,15 +87,6 @@ public class TimeBucket implements Comparable<TimeBucket> {
     TimeBucket that = (TimeBucket) obj;
     return this.baselineStart == that.baselineStart && this.baselineEnd == that.baselineEnd
         && this.currentStart == that.currentStart && this.currentEnd == that.currentEnd;
-  }
-
-  public static TimeBucket fromRow(Row row) {
-    TimeBucket bucket = new TimeBucket();
-    bucket.setBaselineStart(row.getBaselineStart().getMillis());
-    bucket.setBaselineEnd(row.getBaselineEnd().getMillis());
-    bucket.setCurrentStart(row.getCurrentStart().getMillis());
-    bucket.setCurrentEnd(row.getCurrentEnd().getMillis());
-    return bucket;
   }
 
   public static void main(String[] args) {

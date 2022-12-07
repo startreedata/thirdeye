@@ -11,13 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.worker.task.runner;
+package ai.startree.thirdeye.plugins.postprocessor.merger;
 
+import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
+import java.util.Arrays;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 public class AnomalyKey {
+
+  private static final String PROP_PATTERN_KEY = "pattern";
+  private static final String PROP_GROUP_KEY = "groupKey";
 
   final String metric;
   final String collection;
@@ -56,5 +62,27 @@ public class AnomalyKey {
   @Override
   public int hashCode() {
     return Objects.hash(metric, collection, dimensions, mergeKey, componentKey, type);
+  }
+
+  public static AnomalyKey create(final MergedAnomalyResultDTO anomaly) {
+    final String groupKey = anomaly.getProperties().getOrDefault(PROP_GROUP_KEY, "");
+    final String patternKey = getPatternKey(anomaly);
+    return new AnomalyKey(anomaly.getMetric(),
+        anomaly.getCollection(),
+        anomaly.getDimensions(),
+        StringUtils.join(Arrays.asList(groupKey, patternKey), ","),
+        "",
+        anomaly.getType());
+  }
+
+  private static String getPatternKey(final MergedAnomalyResultDTO anomaly) {
+    String patternKey = "";
+    if (anomaly.getProperties().containsKey(PROP_PATTERN_KEY)) {
+      patternKey = anomaly.getProperties().get(PROP_PATTERN_KEY);
+    } else if (!Double.isNaN(anomaly.getAvgBaselineVal())
+        && !Double.isNaN(anomaly.getAvgCurrentVal())) {
+      patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
+    }
+    return patternKey;
   }
 }

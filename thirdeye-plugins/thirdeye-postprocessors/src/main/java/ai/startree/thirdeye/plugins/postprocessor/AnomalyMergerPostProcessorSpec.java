@@ -17,7 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 
-public class AnomalyMergerSpec extends PostProcessorSpec {
+public class AnomalyMergerPostProcessorSpec extends PostProcessorSpec {
 
   /**
    * ISO-8601 format. Max gap between to anomalies for the anomalies to be merged.
@@ -36,6 +36,11 @@ public class AnomalyMergerSpec extends PostProcessorSpec {
   /**
    * Expected to be set at detection pipeline runtime.
    */
+  private Long enumerationId;
+
+  /**
+   * Expected to be set at detection pipeline runtime.
+   */
   private MergedAnomalyResultManager mergedAnomalyResultManager;
 
   /**
@@ -47,7 +52,7 @@ public class AnomalyMergerSpec extends PostProcessorSpec {
     return mergeMaxGap;
   }
 
-  public AnomalyMergerSpec setMergeMaxGap(final String mergeMaxGap) {
+  public AnomalyMergerPostProcessorSpec setMergeMaxGap(final String mergeMaxGap) {
     this.mergeMaxGap = mergeMaxGap;
     return this;
   }
@@ -56,7 +61,7 @@ public class AnomalyMergerSpec extends PostProcessorSpec {
     return mergeMaxDuration;
   }
 
-  public AnomalyMergerSpec setMergeMaxDuration(final String mergeMaxDuration) {
+  public AnomalyMergerPostProcessorSpec setMergeMaxDuration(final String mergeMaxDuration) {
     this.mergeMaxDuration = mergeMaxDuration;
     return this;
   }
@@ -65,7 +70,7 @@ public class AnomalyMergerSpec extends PostProcessorSpec {
     return alertId;
   }
 
-  public AnomalyMergerSpec setAlertId(final Long alertId) {
+  public AnomalyMergerPostProcessorSpec setAlertId(final Long alertId) {
     this.alertId = alertId;
     return this;
   }
@@ -74,7 +79,7 @@ public class AnomalyMergerSpec extends PostProcessorSpec {
     return mergedAnomalyResultManager;
   }
 
-  public AnomalyMergerSpec setMergedAnomalyResultManager(
+  public AnomalyMergerPostProcessorSpec setMergedAnomalyResultManager(
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     return this;
@@ -84,8 +89,17 @@ public class AnomalyMergerSpec extends PostProcessorSpec {
     return usage;
   }
 
-  public AnomalyMergerSpec setUsage(final DetectionPipelineUsage usage) {
+  public AnomalyMergerPostProcessorSpec setUsage(final DetectionPipelineUsage usage) {
     this.usage = usage;
+    return this;
+  }
+
+  public Long getEnumerationId() {
+    return enumerationId;
+  }
+
+  public AnomalyMergerPostProcessorSpec setEnumerationId(final Long enumerationId) {
+    this.enumerationId = enumerationId;
     return this;
   }
 }

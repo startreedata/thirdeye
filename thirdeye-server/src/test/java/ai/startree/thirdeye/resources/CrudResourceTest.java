@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.auth.ThirdEyePrincipal.NAME_CLAIM;
+import static ai.startree.thirdeye.auth.oauth.OidcBindingsCache.NAME_CLAIM;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,12 +21,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
-import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -97,7 +98,8 @@ public class CrudResourceTest {
   }
 
   private ThirdEyePrincipal getPrincipal(String name) {
-    return new ThirdEyePrincipal(new JWTClaimsSet.Builder().claim(NAME_CLAIM, name).build());
+    final String name1 = OidcBindingsCache.getName(new Builder().claim(NAME_CLAIM, name).build());
+    return new ThirdEyePrincipal(name1);
   }
 
   private Timestamp getCurrentTime() {

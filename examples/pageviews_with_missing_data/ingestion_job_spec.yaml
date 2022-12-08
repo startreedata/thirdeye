@@ -32,7 +32,7 @@ recordReaderSpec:
   configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
 tableSpec:
   tableName: 'pageviews_with_missing_data'
-  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews_with_missing_data/schema'
-  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews_with_missing_data'
+  schemaURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/pageviews_with_missing_data/schema'
+  tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/pageviews_with_missing_data'
 pinotClusterSpecs:
-  - controllerURI: 'http://${controllerHost}:${controllerPort}'
+  - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'

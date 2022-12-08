@@ -32,7 +32,7 @@ recordReaderSpec:
   configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
 tableSpec:
   tableName: 'us_monthly_air_passengers_simplified'
-  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/us_monthly_air_passengers_simplified/schema'
-  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/us_monthly_air_passengers_simplified'
+  schemaURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/us_monthly_air_passengers_simplified/schema'
+  tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/us_monthly_air_passengers_simplified'
 pinotClusterSpecs:
-  - controllerURI: 'http://${controllerHost}:${controllerPort}'
+  - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'

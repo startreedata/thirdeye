@@ -32,7 +32,7 @@ recordReaderSpec:
   configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
 tableSpec:
   tableName: 'pageviews_with_floats'
-  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews_with_floats/schema'
-  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews_with_floats'
+  schemaURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/pageviews_with_floats/schema'
+  tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/pageviews_with_floats'
 pinotClusterSpecs:
-  - controllerURI: 'http://${controllerHost}:${controllerPort}'
+  - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'

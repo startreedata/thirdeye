@@ -6,6 +6,18 @@
     "nodes": [
       {
         "name": "root",
+        "type": "PostProcessor",
+        "params": {
+          "type": "ANOMALY_MERGER"
+        },
+        "inputs": [
+          {
+            "sourcePlanNode": "detector"
+          }
+        ]
+      },
+      {
+        "name": "detector",
         "type": "AnomalyDetector",
         "params": {
           "type": "THRESHOLD",

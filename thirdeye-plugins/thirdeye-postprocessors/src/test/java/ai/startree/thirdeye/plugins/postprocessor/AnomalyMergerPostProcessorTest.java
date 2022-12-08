@@ -44,6 +44,7 @@ public class AnomalyMergerPostProcessorTest {
   public static final long ALERT_ID = 1L;
   private static final long JANUARY_1_2021_01H = 1609462800_000L;
   private static final long JANUARY_1_2021_02H = 1609466400_000L;
+  private static final long JANUARY_1_2021_03H = 1609470000000L;
   private static long ANOMALY_ID = 1000L;
   private MergedAnomalyResultManager mergedAnomalyResultManager;
   private AnomalyMergerPostProcessorSpec detectionSpec;
@@ -135,16 +136,31 @@ public class AnomalyMergerPostProcessorTest {
   }
 
   @Test
-  public void testSingleAnomalyWithMerge() {
+  public void testSingleAnomalyMergeWithExisting() {
     final MergedAnomalyResultDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
     when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
 
-    final List<MergedAnomalyResultDTO> output = detectionMerger.merge(
-        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H),
-            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10))));
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
+    final List<MergedAnomalyResultDTO> output = detectionMerger.merge(List.of(new1));
     assertThat(output).isEqualTo(List.of(existingAnomaly));
+    assertThat(existingAnomaly.getChildren().size()).isEqualTo(2);
+  }
+
+  @Test
+  public void testSingleAnomalyNoMergeWithExistingIfUsageIsEvaluate() {
+    final MergedAnomalyResultDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H);
+    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
+
+    detectionSpec.setUsage(DetectionPipelineUsage.EVALUATION);
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
+    final List<MergedAnomalyResultDTO> output = detectionMerger.merge(List.of(new1));
+    assertThat(output).isEqualTo(List.of(new1));
+    assertThat(new1.getChildren().size()).isEqualTo(0);
   }
 
   @Test

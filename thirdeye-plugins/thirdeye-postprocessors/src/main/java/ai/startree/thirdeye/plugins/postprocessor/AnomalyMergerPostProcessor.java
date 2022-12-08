@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
@@ -132,9 +133,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       return;
     }
 
-    // fixme cyril hack - operatorResult is not mutable and can be a custom implementation - exploit list mutability - will bug if one day the list is made immutable or a protective copy is returned
-    //  need to rethink the OperatorResult interface
     final List<MergedAnomalyResultDTO> mergedAnomalies = merge(operatorAnomalies);
+    // fixme cyril hack - operatorResult is not mutable - exploit list mutability to update the anomalies
+    //  could silently bug if a protective copy is returned by an OperatorResult implementation
+    // ensure no protective copy is done comparing references
+    checkArgument(operatorAnomalies == operatorResult.getAnomalies());
     operatorAnomalies.clear();
     operatorAnomalies.addAll(mergedAnomalies);
   }

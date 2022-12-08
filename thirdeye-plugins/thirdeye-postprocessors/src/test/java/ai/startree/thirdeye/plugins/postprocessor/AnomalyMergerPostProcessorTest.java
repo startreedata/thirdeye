@@ -399,6 +399,7 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(merged.get(1)).isEqualTo(new1);
   }
 
+  // note: there is no need to test for multiple enumerationItems - merger is run for each enumeration independently
   @Test
   public void testSingleAnomalyWithMergeAndSaveWithEnumerationItem() {
     final long enumerationItemId = 1L;
@@ -419,41 +420,5 @@ public class AnomalyMergerPostProcessorTest {
 
     assertThat(output).isEqualTo(List.of(existingAnomaly));
   }
-//
-//  @Test
-//  public void testAnomaliesWithMergeAndSaveWith2EnumerationItems() {
-//    final EnumerationItemDTO ei1 = newEnumerationItemRef(1L);
-//    final EnumerationItemDTO ei2 = newEnumerationItemRef(2L);
-//    final MergedAnomalyResultDTO enum1ExistingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
-//        JANUARY_1_2021_02H).setEnumerationItem(ei1);
-//    final MergedAnomalyResultDTO enum2ExistingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
-//        JANUARY_1_2021_02H).setEnumerationItem(ei2);
-//    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-//        anyLong(),
-//        anyLong(),
-//        eq(1L))).thenAnswer(i -> singletonList(enum1ExistingAnomaly));
-//    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-//        anyLong(),
-//        anyLong(),
-//        eq(2L))).thenAnswer(i -> singletonList(enum2ExistingAnomaly));
-//
-//    final List<MergedAnomalyResultDTO> output1 = anomalyMergerPostProcessor.merge(newAlert(),
-//        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
-//            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1),
-//            newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
-//            newAnomaly(JANUARY_1_2021_01H,
-//                plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1)));
-//    assertThat(output1).isEqualTo(List.of(enum1ExistingAnomaly));
-//
-//    final List<MergedAnomalyResultDTO> output2 = anomalyMergerPostProcessor.merge(newAlert(),
-//        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
-//            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei1),
-//            newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei2),
-//            newAnomaly(JANUARY_1_2021_01H,
-//                plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(ei2)));
-//
-//    // expecting 2 more invocations
-//    assertThat(output2).isEqualTo(List.of(enum1ExistingAnomaly, enum2ExistingAnomaly));
-//  }
 }
 

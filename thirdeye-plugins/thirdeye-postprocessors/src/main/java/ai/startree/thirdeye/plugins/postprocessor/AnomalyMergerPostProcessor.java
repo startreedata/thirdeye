@@ -97,11 +97,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   @VisibleForTesting
   protected static final Period DEFAULT_ANOMALY_MAX_DURATION = Period.days(7);
 
-  private Period mergeMaxGap;
-  private Period mergeMaxDuration;
-  private final Long alertId;
-  private final EnumerationItemDTO enumerationItem;
-  private DetectionPipelineUsage usage;
+  private final Period mergeMaxGap;
+  private final Period mergeMaxDuration;
+  private final @Nullable Long alertId;
+  private final @Nullable EnumerationItemDTO enumerationItem;
+  private final DetectionPipelineUsage usage;
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
 
   // obtained at runtime
@@ -125,10 +125,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   @Override
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
+    if (mergeMaxGap.equals(Period.ZERO)) {
+      // short-circuit - merging is disabled
+      return resultMap;
+    }
+
     chronology = detectionInterval.getChronology();
-
-    // FIXME CYRIL BEFORE PR MERGE add short-circuit if merge is disabled ie maxMergeGap = 0
-
     for (final OperatorResult operatorResult : resultMap.values()) {
       postProcessResult(operatorResult);
     }
@@ -191,7 +193,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       final long mergeUpperBound = new DateTime(maxTime, chronology).plus(mergeMaxGap)
           .plus(1)
           .getMillis();
-
+      requireNonNull(alertId, "Cannot pull existing anomalies with null alertId.");
       return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(
           mergeLowerBound,
           mergeUpperBound,

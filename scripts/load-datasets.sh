@@ -51,9 +51,12 @@ function add_dataset() {
   schema="$1/schema.json"
   job_spec="$1/ingestion_job_spec.yaml"
 
+  data_dir="$1/rawdata"
+  segment_dir="tmp/data/segments/${1##*/}"
+
   echo "Adding table: $1"
-  create_table "$table_config" "$schema"
-  "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" -values controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}"
+#  create_table "$table_config" "$schema"
+  "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" -values controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}" dataDir="${data_dir}" segmentDir="${segment_dir}"
 }
 
 # Add datasets

@@ -13,11 +13,12 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertMetadataDTO {
 
   private DataSourceDTO datasource;
@@ -29,13 +30,6 @@ public class AlertMetadataDTO {
   private String granularity;
   private String timezone;
   private EventContextDto eventContext;
-
-  @Deprecated // now set in the AnomalyMergerPostProcessor node
-  @JsonIgnore
-  private String mergeMaxGap;
-  @Deprecated // now set in the AnomalyMergerPostProcessor node
-  @JsonIgnore
-  private String mergeMaxDuration;
 
   public DataSourceDTO getDatasource() {
     return datasource;

@@ -55,6 +55,12 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Merge anomalies.
+ * If used with dimension exploration, must be run inside each enumeration.
+ * The current implementation should not be run after the forkjoin node, it would merge anomalies
+ * from different enumerations.
+ */
 public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyMergerPostProcessor.class);

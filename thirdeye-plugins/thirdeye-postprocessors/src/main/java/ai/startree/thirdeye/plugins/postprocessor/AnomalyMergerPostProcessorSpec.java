@@ -30,22 +30,22 @@ public class AnomalyMergerPostProcessorSpec extends PostProcessorSpec {
   private String mergeMaxDuration;
 
   /**
-   * Expected to be set at detection pipeline runtime.
+   * Set by the detection pipeline at runtime.
    */
   private Long alertId;
 
   /**
-   * Expected to be set at detection pipeline runtime.
+   * Set by the detection pipeline at runtime.
    */
   private EnumerationItemDTO enumerationItemDTO;
 
   /**
-   * Expected to be set at detection pipeline runtime.
+   * Set by the detection pipeline at runtime.
    */
   private MergedAnomalyResultManager mergedAnomalyResultManager;
 
   /**
-   * Expected to be set at detection pipeline runtime.
+   * Set by the detection pipeline at runtime.
    */
   private DetectionPipelineUsage usage;
 

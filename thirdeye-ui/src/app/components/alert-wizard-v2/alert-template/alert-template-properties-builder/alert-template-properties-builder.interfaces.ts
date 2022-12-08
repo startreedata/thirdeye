@@ -24,7 +24,7 @@ export interface AlertTemplatePropertiesBuilderProps {
     templateProperties: TemplatePropertiesObject;
     defaultTemplateProperties: TemplatePropertiesObject;
     onPropertyValueChange: (newChanges: TemplatePropertiesObject) => void;
-    propertyDetails: ReturnType<typeof getPropertyDetails>;
+    propertyDetails?: ReturnType<typeof getPropertyDetails>;
 }
 
 export interface PropertyRenderConfig {

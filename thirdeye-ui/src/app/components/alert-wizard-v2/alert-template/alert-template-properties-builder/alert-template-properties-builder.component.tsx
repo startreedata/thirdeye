@@ -146,17 +146,20 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                     <Typography variant="body2">
                                         {item.key}
                                     </Typography>
-                                    <Typography
-                                        className={
-                                            classes.alertPropertyLabelDescription
-                                        }
-                                        variant="caption"
-                                    >
-                                        {
-                                            propertyDetails?.[item.key]
-                                                ?.description
-                                        }
-                                    </Typography>
+                                    {propertyDetails?.[item.key]
+                                        ?.description ? (
+                                        <Typography
+                                            className={
+                                                classes.alertPropertyLabelDescription
+                                            }
+                                            variant="caption"
+                                        >
+                                            {
+                                                propertyDetails?.[item.key]
+                                                    ?.description
+                                            }
+                                        </Typography>
+                                    ) : null}
                                 </Box>
                             }
                         />
@@ -230,17 +233,21 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                             <Typography variant="body2">
                                                 {item.key}
                                             </Typography>
-                                            <Typography
-                                                className={
-                                                    classes.alertPropertyLabelDescription
-                                                }
-                                                variant="caption"
-                                            >
-                                                {
-                                                    propertyDetails?.[item.key]
-                                                        ?.description
-                                                }
-                                            </Typography>
+                                            {propertyDetails?.[item.key]
+                                                ?.description ? (
+                                                <Typography
+                                                    className={
+                                                        classes.alertPropertyLabelDescription
+                                                    }
+                                                    variant="caption"
+                                                >
+                                                    {
+                                                        propertyDetails?.[
+                                                            item.key
+                                                        ]?.description
+                                                    }
+                                                </Typography>
+                                            ) : null}{" "}
                                         </Box>
                                     }
                                 />

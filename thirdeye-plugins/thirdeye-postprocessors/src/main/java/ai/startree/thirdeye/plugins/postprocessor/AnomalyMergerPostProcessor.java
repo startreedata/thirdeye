@@ -57,9 +57,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Merge anomalies.
+ *
+ * Note:
  * If used with dimension exploration, must be run inside each enumeration.
  * The current implementation should not be run after the forkjoin node, it would merge anomalies
- * from different enumerations.
+ * from different enumerations. Merge after dx can be implemented by adding enumerationItem to the
+ * anomaly key.
  */
 public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 

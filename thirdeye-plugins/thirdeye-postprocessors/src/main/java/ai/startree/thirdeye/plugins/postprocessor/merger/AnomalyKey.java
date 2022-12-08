@@ -15,31 +15,20 @@ package ai.startree.thirdeye.plugins.postprocessor.merger;
 
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
-import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
-import java.util.Arrays;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 public class AnomalyKey {
 
-  private static final String PROP_PATTERN_KEY = "pattern";
-  private static final String PROP_GROUP_KEY = "groupKey";
-
   final String metric;
   final String collection;
-  final DimensionMap dimensions;
-  final String mergeKey;
-  final String componentKey;
+  final String patternKey;
   final AnomalyType type;
 
-  public AnomalyKey(String metric, String collection, DimensionMap dimensions, String mergeKey,
-      String componentKey,
-      AnomalyType type) {
+  private AnomalyKey(final String metric, final String collection, final String patternKey,
+      final AnomalyType type) {
     this.metric = metric;
     this.collection = collection;
-    this.dimensions = dimensions;
-    this.mergeKey = mergeKey;
-    this.componentKey = componentKey;
+    this.patternKey = patternKey;
     this.type = type;
   }
 
@@ -53,34 +42,23 @@ public class AnomalyKey {
     }
     AnomalyKey that = (AnomalyKey) o;
     return Objects.equals(metric, that.metric) && Objects.equals(collection, that.collection)
-        && Objects.equals(
-        dimensions, that.dimensions) && Objects.equals(mergeKey, that.mergeKey) && Objects
-        .equals(componentKey,
-            that.componentKey) && Objects.equals(type, that.type);
+        && Objects.equals(patternKey, that.patternKey) && Objects.equals(type, that.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(metric, collection, dimensions, mergeKey, componentKey, type);
+    return Objects.hash(metric, collection, patternKey, type);
   }
 
   public static AnomalyKey create(final MergedAnomalyResultDTO anomaly) {
-    final String groupKey = anomaly.getProperties().getOrDefault(PROP_GROUP_KEY, "");
     final String patternKey = getPatternKey(anomaly);
-    return new AnomalyKey(anomaly.getMetric(),
-        anomaly.getCollection(),
-        anomaly.getDimensions(),
-        StringUtils.join(Arrays.asList(groupKey, patternKey), ","),
-        "",
+    return new AnomalyKey(anomaly.getMetric(), anomaly.getCollection(), patternKey,
         anomaly.getType());
   }
 
   private static String getPatternKey(final MergedAnomalyResultDTO anomaly) {
     String patternKey = "";
-    if (anomaly.getProperties().containsKey(PROP_PATTERN_KEY)) {
-      patternKey = anomaly.getProperties().get(PROP_PATTERN_KEY);
-    } else if (!Double.isNaN(anomaly.getAvgBaselineVal())
-        && !Double.isNaN(anomaly.getAvgCurrentVal())) {
+    if (!Double.isNaN(anomaly.getAvgBaselineVal()) && !Double.isNaN(anomaly.getAvgCurrentVal())) {
       patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
     }
     return patternKey;

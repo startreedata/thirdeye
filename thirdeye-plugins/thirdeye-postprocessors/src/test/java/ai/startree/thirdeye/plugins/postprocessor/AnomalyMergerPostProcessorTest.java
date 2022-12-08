@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -49,12 +48,6 @@ public class AnomalyMergerPostProcessorTest {
   private MergedAnomalyResultManager mergedAnomalyResultManager;
   private AnomalyMergerPostProcessorSpec detectionSpec;
   private AnomalyMergerPostProcessor detectionMerger;
-
-  private static AlertDTO newAlert() {
-    final AlertDTO alert = new AlertDTO();
-    alert.setId(ALERT_ID);
-    return alert;
-  }
 
   private static EnumerationItemDTO newEnumerationItemRef(final long enumerationItemId) {
     final EnumerationItemDTO enumerationItemDTO = new EnumerationItemDTO();

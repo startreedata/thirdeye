@@ -142,6 +142,26 @@ public class AnomalyMergerPostProcessorTest {
   }
 
   @Test
+  public void testSingleAnomalyNoMergeIfPatternIsUpVsDown() {
+    final MergedAnomalyResultDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
+        JANUARY_1_2021_02H);
+    // existing anomaly is pattern UP
+    existingAnomaly.setAvgBaselineVal(0);
+    existingAnomaly.setAvgCurrentVal(10);
+    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
+
+    final MergedAnomalyResultDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
+    // existing anomaly is pattern DOWN
+    new1.setAvgBaselineVal(10);
+    new1.setAvgCurrentVal(0);
+    final List<MergedAnomalyResultDTO> output = detectionMerger.merge(List.of(new1));
+    assertThat(output).isEqualTo(List.of(existingAnomaly, new1));
+    assertThat(existingAnomaly.getChildren().isEmpty()).isTrue();
+    assertThat(new1.getChildren().isEmpty()).isTrue();
+  }
+
+  @Test
   public void testSingleAnomalyNoMergeWithExistingIfUsageIsEvaluate() {
     final MergedAnomalyResultDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);

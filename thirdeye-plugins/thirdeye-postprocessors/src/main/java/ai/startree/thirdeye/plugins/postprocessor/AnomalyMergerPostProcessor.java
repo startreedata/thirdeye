@@ -41,8 +41,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -222,7 +222,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected List<MergedAnomalyResultDTO> doMerge(
       final Collection<MergedAnomalyResultDTO> sortedAnomalies) {
     final List<MergedAnomalyResultDTO> anomaliesToUpdate = new ArrayList<>();
-    final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new HashMap<>();
+    final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new LinkedHashMap<>();
     for (final MergedAnomalyResultDTO anomaly : sortedAnomalies) {
       // skip child anomalies. merge their parents instead
       if (anomaly.isChild()) {

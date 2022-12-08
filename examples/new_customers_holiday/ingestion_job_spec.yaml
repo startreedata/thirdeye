@@ -19,9 +19,9 @@ executionFrameworkSpec:
   segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
   segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
 jobType: SegmentCreationAndTarPush
-inputDirURI: 'examples/new_customers_holiday/rawdata'
+inputDirURI: '${dataDir}'
 includeFileNamePattern: 'glob:**/*.csv'
-outputDirURI: 'tmp/data/segments/new_customers_holiday'
+outputDirURI: '${segmentDir}'
 overwriteOutput: true
 pinotFSSpecs:
   - scheme: file

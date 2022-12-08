@@ -56,7 +56,6 @@ import org.testng.annotations.Test;
  * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.6/aspectjweaver-1.9.6.jar
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  */
-// todo cyril pinot is not necessary - implement and use csv/in-memory datasource instead
 public class SchedulingTest {
 
   private static final Logger log = LoggerFactory.getLogger(SchedulingTest.class);

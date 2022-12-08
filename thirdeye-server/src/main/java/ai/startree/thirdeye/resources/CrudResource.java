@@ -199,11 +199,13 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     dtoManager.delete(dto);
   }
 
-  public boolean hasAccess(ThirdEyePrincipal principal, DtoT dto, AccessType accessType) {
+  public boolean hasAccess(final ThirdEyePrincipal principal, final AbstractDTO dto,
+      final AccessType accessType) {
     return accessControl.hasAccess(principal, ResourceIdentifier.fromDto(dto), accessType);
   }
 
-  void ensureHasAccess(ThirdEyePrincipal principal, DtoT dto, AccessType accessType) {
+  public void ensureHasAccess(final ThirdEyePrincipal principal, final AbstractDTO dto,
+      final AccessType accessType) {
     if (!hasAccess(principal, dto, accessType)) {
       throw new ForbiddenException(Response.status(Status.FORBIDDEN).build());
     }

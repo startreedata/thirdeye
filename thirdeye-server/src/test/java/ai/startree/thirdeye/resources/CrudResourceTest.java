@@ -43,7 +43,6 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.mockito.stubbing.Answer;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class CrudResourceTest {
@@ -125,7 +124,7 @@ public class CrudResourceTest {
   @Test
   public void testGetAll_withNoAccess() {
     final DummyManager manager = mock(DummyManager.class);
-    UriInfo uriInfo = mock(UriInfo.class);
+    final UriInfo uriInfo = mock(UriInfo.class);
     when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
     when(manager.findAll()).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
@@ -138,7 +137,7 @@ public class CrudResourceTest {
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
-      List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
       assertThat(entities).isEmpty();
     }
   }
@@ -146,7 +145,7 @@ public class CrudResourceTest {
   @Test
   public void testGetAll_withPartialAccess() {
     final DummyManager manager = mock(DummyManager.class);
-    UriInfo uriInfo = mock(UriInfo.class);
+    final UriInfo uriInfo = mock(UriInfo.class);
     when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
     when(manager.findAll()).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
@@ -161,7 +160,7 @@ public class CrudResourceTest {
     try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
-      List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
       assertThat(1).isEqualTo(entities.size());
       assertThat(2L).isEqualTo(entities.get(0).getId());
     }
@@ -201,7 +200,7 @@ public class CrudResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testDeleteAll_withPartialAccess() {
     final DummyManager manager = mock(DummyManager.class);
-    var dtos = Arrays.asList(
+    final List<DummyDto> dtos = Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)

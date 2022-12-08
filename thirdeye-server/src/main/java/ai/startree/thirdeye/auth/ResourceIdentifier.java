@@ -24,13 +24,13 @@ public class ResourceIdentifier {
   public final String namespace;
   public final String entityType;
 
-  public ResourceIdentifier(String name, String namespace, String entityType) {
+  public ResourceIdentifier(final String name, final String namespace, final String entityType) {
     this.name = name;
     this.namespace = namespace;
     this.entityType = entityType;
   }
 
-  static public ResourceIdentifier fromDto(AbstractDTO dto) {
+  static public ResourceIdentifier fromDto(final AbstractDTO dto) {
     if (dto instanceof AlertDTO) {
       return new ResourceIdentifier(
           ((AlertDTO) dto).getName(),

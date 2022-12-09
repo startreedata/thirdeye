@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.spi.api;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -31,13 +30,6 @@ public class AlertMetadataApi {
   private String granularity;
   private String timezone;
   private EventContextApi eventContext;
-
-  @JsonIgnore
-  @Deprecated // now set in the AnomalyMergerPostProcessor node
-  private String mergeMaxGap;
-  @JsonIgnore
-  @Deprecated // now set in the AnomalyMergerPostProcessor node
-  private String mergeMaxDuration;
 
   public DataSourceApi getDatasource() {
     return datasource;

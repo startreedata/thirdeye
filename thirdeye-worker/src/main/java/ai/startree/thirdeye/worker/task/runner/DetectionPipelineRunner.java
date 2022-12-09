@@ -73,14 +73,11 @@ public class DetectionPipelineRunner {
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
     final OperatorResult result = executePlan(alert, detectionInterval);
-    enrichAnomalies(result, alert);
+    enrichAnomalies(result);
     return result;
   }
 
-  private void enrichAnomalies(final OperatorResult result, final AlertDTO alert) {
-    // generic enrichment
-    result.getAnomalies().forEach(anomaly -> anomaly.setDetectionConfigId(alert.getId()));
-
+  private void enrichAnomalies(final OperatorResult result) {
     // dimension exploration enrichment
     // TODO spyne can this casting thing be eliminated?
     if (result instanceof CombinerResult) {

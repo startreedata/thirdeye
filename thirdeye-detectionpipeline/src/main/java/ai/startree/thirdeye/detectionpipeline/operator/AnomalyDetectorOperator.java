@@ -55,6 +55,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private AnomalyDetector<? extends AbstractSpec> detector;
   private Period monitoringGranularity;
+  private Long alertId;
 
   public AnomalyDetectorOperator() {
     super();
@@ -68,6 +69,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
             .getDetectionRegistry());
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
+    alertId = context.getPlanNodeContext().getDetectionPipelineContext().getAlertId();
     detector = createDetector(params, detectionRegistry);
   }
 
@@ -117,6 +119,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     // annotate each anomaly with the available metadata
     for (MergedAnomalyResultDTO anomaly : operatorResult.getAnomalies()) {
+      anomaly.setDetectionConfigId(alertId);
       anomalyMetric.ifPresent(anomaly::setMetric);
       anomalyDataset.ifPresent(anomaly::setCollection);
       anomalySource.ifPresent(anomaly::setSource);

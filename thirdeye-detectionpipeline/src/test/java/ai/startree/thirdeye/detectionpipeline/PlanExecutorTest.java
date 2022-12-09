@@ -36,6 +36,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.collect.ImmutableMap;
@@ -65,6 +66,10 @@ public class PlanExecutorTest {
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
     );
     final EnumerationItemManager enumerationItemManager = mock(EnumerationItemManager.class);
+    when(enumerationItemManager.save(any())).thenAnswer(e -> {
+      ((EnumerationItemDTO) e.getArguments()[0]).setId(1L);
+      return 1L;
+    });
     planExecutor = new PlanExecutor(planNodeFactory,
         dataSourceCache,
         detectionRegistry,
@@ -160,6 +165,7 @@ public class PlanExecutorTest {
         System.currentTimeMillis(),
         DateTimeZone.UTC);
     final DetectionPipelineContext runTimeContext = new DetectionPipelineContext()
+        .setUsage(DetectionPipelineUsage.DETECTION)
         .setApplicationContext(planExecutor.applicationContext)
         .setDetectionInterval(detectionInterval);
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,

@@ -101,16 +101,18 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   private List<EnumerationItemDTO> prepareEnumerationItems(
       List<EnumerationItemDTO> enumerationItems) {
-    if (detectionPipelineContext.getUsage().equals(DetectionPipelineUsage.DETECTION)) {
+    final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
+        "Detection pipeline usage is not set");
+    if (usage.equals(DetectionPipelineUsage.DETECTION)) {
       enumerationItems = enumerationItems.stream()
           .map(this::findExistingOrCreate)
           .collect(Collectors.toList());
-    } else if (detectionPipelineContext.getUsage().equals(DetectionPipelineUsage.EVALUATION)) {
+    } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
       // do nothing - no need to persist enumerationItems nor fetch existing one downstream
     } else {
       // don't remove - put here to ensure it breaks if an enum is added one day
       throw new UnsupportedOperationException(
-          "DetectionPipelineUsage not implemented: " + detectionPipelineContext.getUsage());
+          "DetectionPipelineUsage not implemented: " + usage);
     }
     return enumerationItems;
   }

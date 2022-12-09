@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline;
 import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -71,7 +72,7 @@ public class PostProcessorRegistry {
     final PostProcessingContext postProcessingContext = new PostProcessingContext(datasetDao,
         minMaxTimeLoader, anomalyDao,
         detectionPipelineContext.getAlertId(),
-        detectionPipelineContext.getUsage(),
+        requireNonNull(detectionPipelineContext.getUsage(), "Detection pipeline usage is not set"),
         detectionPipelineContext.getEnumerationItem()
     );
     return anomalyPostProcessorFactoryMap.get(factoryName)

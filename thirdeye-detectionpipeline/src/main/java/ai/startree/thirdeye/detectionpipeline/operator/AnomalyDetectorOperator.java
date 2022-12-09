@@ -87,7 +87,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     if (enumerationItem == null) {
       return null;
     }
-    final DetectionPipelineUsage usage = detectionPipelineContext.getUsage();
+    final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
+        "Detection pipeline usage is not set");
     if (usage.equals(DetectionPipelineUsage.DETECTION)) {
       return (EnumerationItemDTO) new EnumerationItemDTO().setId(enumerationItem.getId());
     } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
@@ -185,8 +186,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
         final long startTimeMillis = timeMillisSeries.get(i);
         anomaly.setStartTime(startTimeMillis);
-        if (i < df.size() -1) {
-          anomaly.setEndTime(timeMillisSeries.get(i+1));
+        if (i < df.size() - 1) {
+          anomaly.setEndTime(timeMillisSeries.get(i + 1));
         } else {
           final DateTime endTime = new DateTime(startTimeMillis, detectionInterval.getChronology())
               .plus(monitoringGranularity);

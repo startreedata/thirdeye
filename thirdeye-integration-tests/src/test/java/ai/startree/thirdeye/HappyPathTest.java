@@ -171,7 +171,7 @@ public class HappyPathTest {
 
     assertThat(response.getStatus()).isEqualTo(200);
     final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
-    alertId = ((Number) alerts.get(0).getId()).longValue();
+    alertId = alerts.get(0).getId();
   }
 
   @DataProvider(name = "happyPathAlerts")

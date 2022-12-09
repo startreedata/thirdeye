@@ -203,3 +203,22 @@ mysql:
 #    s3:
 #      bucket: thirdeye-backup
 #      region: us-west-2
+
+quickstart:
+  enabled: false
+#  pinot:
+#    controllerProtocol: http
+#    controllerHost: pinot-pinot-controller-headless
+#    controllerPort: 9000
+#    commandOptions: "-authToken 'Basic <auth token>'"
+
+#  # pass the array of base directories of the datasets that needs to be ingested to pinot
+#  # the dataset base directory must follow the below structure
+#  #  <dataset_name>
+#  #    |-rawdata
+#  #    |   |-data.csv
+#  #    |-scheme.json
+#  #    |-table_config.json
+#  #    |-ingestion_job_spec.yaml
+#  datasets:
+#    - https://raw.githubusercontent.com/startreedata/thirdeye/master/examples/order_events

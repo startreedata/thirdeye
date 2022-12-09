@@ -24,6 +24,7 @@ import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AccessControlModule;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -93,6 +94,7 @@ public class AlertResourceTest {
         mock(AlertCreater.class),
         mock(AlertDeleter.class),
         mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         AccessControlModule.alwaysDeny
     ).runTask(new ThirdEyePrincipal("nobody", ""), 1L, 0L, 1L);
@@ -108,6 +110,7 @@ public class AlertResourceTest {
         mock(AlertCreater.class),
         mock(AlertDeleter.class),
         mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         AccessControlModule.alwaysDeny
     ).reset(new ThirdEyePrincipal("nobody", ""), 1L);

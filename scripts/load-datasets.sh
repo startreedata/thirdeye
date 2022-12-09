@@ -18,6 +18,9 @@ TE_REPO="${SCRIPT_DIR}/.."
 if [ -z "${PINOT_VERSION}" ]; then
   PINOT_VERSION=0.11.0
 fi
+if [ -z "${CONTROLLER_PROTOCOL}" ]; then
+  CONTROLLER_PROTOCOL=http
+fi
 if [ -z "${CONTROLLER_HOST}" ]; then
   CONTROLLER_HOST=localhost
 fi
@@ -35,7 +38,7 @@ PINOT_ADMIN_SH="${PINOT_DIST_ROOT}/bin/pinot-admin.sh"
 function create_table() {
   tableConfigFile=$1
   schemaFile=$2
-  "${PINOT_ADMIN_SH}" AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile" -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} -exec
+  "${PINOT_ADMIN_SH}" AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile" -controllerProtocol ${CONTROLLER_PROTOCOL} -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} -exec
 }
 
 # #unused. Please do not remove.
@@ -43,7 +46,7 @@ function create_table() {
 # Usage: add_segments /path/to/segments
 function add_segments() {
   segmentDirectoryPath=$1
-  "${PINOT_ADMIN_SH}" UploadSegment -controllerHost "${CONTROLLER_HOST}" -controllerPort "${CONTROLLER_PORT}" -segmentDir "$segmentDirectoryPath"
+  "${PINOT_ADMIN_SH}" UploadSegment -controllerProtocol ${CONTROLLER_PROTOCOL} -controllerHost "${CONTROLLER_HOST}" -controllerPort "${CONTROLLER_PORT}" -segmentDir "$segmentDirectoryPath"
 }
 
 function add_dataset() {
@@ -51,9 +54,12 @@ function add_dataset() {
   schema="$1/schema.json"
   job_spec="$1/ingestion_job_spec.yaml"
 
+  data_dir="$1/rawdata"
+  segment_dir="tmp/data/segments/${1##*/}"
+
   echo "Adding table: $1"
-  create_table "$table_config" "$schema"
-  "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" -values controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}"
+#  create_table "$table_config" "$schema"
+  "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" -values controllerProtocol="${CONTROLLER_PROTOCOL}" controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}" dataDir="${data_dir}" segmentDir="${segment_dir}"
 }
 
 # Add datasets
@@ -75,7 +81,7 @@ add_dataset "examples/new_customers_holiday"
 # - Step 3: Ingest Data
 #
 function add_table_beta() {
-  CONTROLLER_URI="http://localhost:9000"
+  CONTROLLER_URI="${CONTROLLER_PROTOCOL}://${CONTROLLER_HOST}:${CONTROLLER_PORT}"
   TABLE_NAME_WITH_TYPE="pageviews_OFFLINE"
 
   curl -F schemaName=@schema.json "${CONTROLLER_URI}/schemas"

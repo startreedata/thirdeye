@@ -19,9 +19,9 @@ executionFrameworkSpec:
   segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
   segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
 jobType: SegmentCreationAndTarPush
-inputDirURI: 'examples/pageviews_with_nulls/rawdata'
+inputDirURI: '${dataDir}'
 includeFileNamePattern: 'glob:**/*.csv'
-outputDirURI: 'tmp/data/segments/pageviews_with_nulls'
+outputDirURI: '${segmentDir}'
 overwriteOutput: true
 pinotFSSpecs:
   - scheme: file
@@ -32,7 +32,7 @@ recordReaderSpec:
   configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
 tableSpec:
   tableName: 'pageviews_with_nulls'
-  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews_with_nulls/schema'
-  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/pageviews_with_nulls'
+  schemaURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/pageviews_with_nulls/schema'
+  tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/pageviews_with_nulls'
 pinotClusterSpecs:
-  - controllerURI: 'http://${controllerHost}:${controllerPort}'
+  - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'

@@ -25,6 +25,8 @@ import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
+import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -93,8 +95,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertDeleter alertDeleter,
       final AlertEvaluator alertEvaluator,
       final AppAnalyticsService analyticsService,
-      final AlertInsightsProvider alertInsightsProvider) {
-    super(alertManager, ImmutableMap.of());
+      final AlertInsightsProvider alertInsightsProvider,
+      final AccessControl accessControl) {
+    super(alertManager, ImmutableMap.of(), accessControl);
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertEvaluator = alertEvaluator;
@@ -160,8 +163,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
-    final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
+    ensureHasAccess(principal, dto, AccessType.READ);
 
+    final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
     return Response.ok(insights).build();
   }
 
@@ -187,11 +191,12 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
   ) {
+    final AlertDTO dto = get(id);
+    ensureExists(dto);
     ensureExists(startTime, "start");
-    ensureExists(get(id));
+    ensureHasAccess(principal, dto, AccessType.UPDATE);
 
     alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
-
     return Response.ok().build();
   }
 
@@ -243,6 +248,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
+    ensureHasAccess(principal, dto, AccessType.UPDATE);
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     alertDeleter.deleteAssociatedAnomalies(dto.getId());

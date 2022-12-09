@@ -13,16 +13,11 @@
  */
 package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+public interface AccessControl {
 
-import io.dropwizard.auth.AuthenticationException;
-import io.dropwizard.auth.Authenticator;
-import java.util.Optional;
-
-public class ThirdEyeAuthenticatorDisabled implements Authenticator<String, ThirdEyePrincipal> {
-
-  @Override
-  public Optional<ThirdEyePrincipal> authenticate(final String s) throws AuthenticationException {
-    return optional(new ThirdEyePrincipal(s, ""));
-  }
+  boolean hasAccess(
+      ThirdEyePrincipal principal,
+      ResourceIdentifier identifier,
+      AccessType accessType
+  );
 }

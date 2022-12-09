@@ -81,16 +81,12 @@ public class DetectionPipelineRunner {
     // dimension exploration enrichment
     // TODO spyne can this casting thing be eliminated?
     if (result instanceof CombinerResult) {
-      enrichAnomaliesFromCombinerResult((CombinerResult) result);
+      ((CombinerResult) result)
+          .getDetectionResults()
+          .stream()
+          .filter(r -> r.getEnumerationItem() != null)
+          .forEach(this::enrichAnomaliesWithEnumerationItem);
     }
-  }
-
-  private void enrichAnomaliesFromCombinerResult(final CombinerResult result) {
-    result
-        .getDetectionResults()
-        .stream()
-        .filter(r -> r.getEnumerationItem() != null)
-        .forEach(this::enrichAnomaliesWithEnumerationItem);
   }
 
   private void enrichAnomaliesWithEnumerationItem(final OperatorResult result) {

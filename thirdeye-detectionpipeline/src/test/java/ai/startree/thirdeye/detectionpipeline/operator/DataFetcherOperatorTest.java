@@ -30,6 +30,7 @@ import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -71,7 +72,9 @@ public class DataFetcherOperatorTest {
                 mock(EventManager.class),
                 datasetDao,
                 mock(ExecutorService.class),
+                mock(EnumerationItemManager.class),
                 new DetectionPipelineConfiguration()
+
         )
     ));
   }

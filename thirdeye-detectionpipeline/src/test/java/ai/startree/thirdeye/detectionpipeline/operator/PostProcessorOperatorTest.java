@@ -32,6 +32,7 @@ import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -88,6 +89,7 @@ public class PostProcessorOperatorTest {
                 mock(EventManager.class),
                 mock(DatasetConfigManager.class),
                 mock(ExecutorService.class),
+                mock(EnumerationItemManager.class),
                 new DetectionPipelineConfiguration()
         )));
   }

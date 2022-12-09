@@ -32,6 +32,7 @@ import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -63,12 +64,14 @@ public class PlanExecutorTest {
     final DatasetConfigManager datasetConfigManager = mock(DatasetConfigManager.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
     );
+    final EnumerationItemManager enumerationItemManager = mock(EnumerationItemManager.class);
     planExecutor = new PlanExecutor(planNodeFactory,
         dataSourceCache,
         detectionRegistry,
         postProcessorRegistry,
         eventManager,
         datasetConfigManager,
+        enumerationItemManager,
         new DetectionPipelineConfiguration());
     enumerator = mock(Enumerator.class);
 

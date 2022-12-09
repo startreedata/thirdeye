@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
@@ -30,11 +31,13 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -56,6 +59,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private AnomalyDetector<? extends AbstractSpec> detector;
   private Period monitoringGranularity;
   private Long alertId;
+  private EnumerationItemDTO enumerationItemRef;
 
   public AnomalyDetectorOperator() {
     super();
@@ -69,8 +73,29 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
             .getDetectionRegistry());
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
-    alertId = context.getPlanNodeContext().getDetectionPipelineContext().getAlertId();
     detector = createDetector(params, detectionRegistry);
+
+    final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
+        .getDetectionPipelineContext();
+    alertId = detectionPipelineContext.getAlertId();
+    enumerationItemRef = prepareEnumerationItemRef(detectionPipelineContext);
+  }
+
+  private EnumerationItemDTO prepareEnumerationItemRef(
+      final DetectionPipelineContext detectionPipelineContext) {
+    final EnumerationItemDTO enumerationItem = detectionPipelineContext.getEnumerationItem();
+    if (enumerationItem == null) {
+      return null;
+    }
+    final DetectionPipelineUsage usage = detectionPipelineContext.getUsage();
+    if (usage.equals(DetectionPipelineUsage.DETECTION)) {
+      return (EnumerationItemDTO) new EnumerationItemDTO().setId(enumerationItem.getId());
+    } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
+      // don't put enumerationItemInfo
+      return null;
+    } else {
+      throw new UnsupportedOperationException("Unsupported DetectionPipelineUsage: " + usage);
+    }
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
@@ -99,14 +124,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
 
-    OperatorResult operatorResult = buildDetectionResult(detectorResult);
-
-    addMetadata(operatorResult);
+    final OperatorResult operatorResult = buildDetectionResult(detectorResult);
 
     setOutput(DEFAULT_OUTPUT_KEY, operatorResult);
   }
 
-  private void addMetadata(final OperatorResult operatorResult) {
+  private void addMetadata(final List<MergedAnomalyResultDTO> anomalies) {
     final Optional<String> anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
         .map(Templatable::value)
         .map(Object::toString);
@@ -118,8 +141,9 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         .map(Object::toString);
 
     // annotate each anomaly with the available metadata
-    for (MergedAnomalyResultDTO anomaly : operatorResult.getAnomalies()) {
+    for (MergedAnomalyResultDTO anomaly : anomalies) {
       anomaly.setDetectionConfigId(alertId);
+      anomaly.setEnumerationItem(enumerationItemRef);
       anomalyMetric.ifPresent(anomaly::setMetric);
       anomalyDataset.ifPresent(anomaly::setCollection);
       anomalySource.ifPresent(anomaly::setSource);
@@ -136,6 +160,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame());
+    addMetadata(anomalies);
     final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
         .sortedBy(COL_TIME));
     return new Builder()

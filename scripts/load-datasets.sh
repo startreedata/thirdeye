@@ -58,7 +58,7 @@ function add_dataset() {
   segment_dir="tmp/data/segments/${1##*/}"
 
   echo "Adding table: $1"
-#  create_table "$table_config" "$schema"
+  create_table "$table_config" "$schema"
   "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" -values controllerProtocol="${CONTROLLER_PROTOCOL}" controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}" dataDir="${data_dir}" segmentDir="${segment_dir}"
 }
 

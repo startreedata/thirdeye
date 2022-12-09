@@ -16,10 +16,10 @@ package ai.startree.thirdeye.detectionpipeline;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses={DetectionPipelineContextMapper.class})
-public interface PlanNodeContextMapper {
+@Mapper
+public interface DetectionPipelineContextMapper {
 
-  PlanNodeContextMapper INSTANCE = Mappers.getMapper(PlanNodeContextMapper.class);
+  DetectionPipelineContextMapper INSTANCE = Mappers.getMapper(DetectionPipelineContextMapper.class);
 
-  PlanNodeContext clone(PlanNodeContext o);
+  DetectionPipelineContext clone(DetectionPipelineContext o);
 }

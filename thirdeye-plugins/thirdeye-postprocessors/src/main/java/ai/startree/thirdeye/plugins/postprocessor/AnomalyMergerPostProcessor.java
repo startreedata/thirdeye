@@ -44,6 +44,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -353,7 +354,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
    */
   private void mergeAnomalyProperties(final Map<String, String> parent,
       final Map<String, String> child) {
-    for (final var e : child.entrySet()) {
+    for (final Entry<String, String> e : child.entrySet()) {
       final String key = e.getKey();
       if (!parent.containsKey(key)) {
         parent.put(key, e.getValue());

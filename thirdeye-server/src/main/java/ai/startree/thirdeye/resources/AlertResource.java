@@ -27,12 +27,15 @@ import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.UserApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -46,6 +49,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -57,6 +61,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -79,6 +84,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertCreater alertCreater;
   private final AlertDeleter alertDeleter;
   private final AlertEvaluator alertEvaluator;
+  private final AppAnalyticsService analyticsService;
   private final AlertInsightsProvider alertInsightsProvider;
 
   @Inject
@@ -87,17 +93,19 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertCreater alertCreater,
       final AlertDeleter alertDeleter,
       final AlertEvaluator alertEvaluator,
+      final AppAnalyticsService analyticsService,
       final AlertInsightsProvider alertInsightsProvider,
       final AccessControl accessControl) {
     super(alertManager, ImmutableMap.of(), accessControl);
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertEvaluator = alertEvaluator;
+    this.analyticsService = analyticsService;
     this.alertInsightsProvider = alertInsightsProvider;
   }
 
   @Override
-  protected void deleteDto(AlertDTO dto) {
+  protected void deleteDto(final AlertDTO dto) {
     alertDeleter.delete(dto);
   }
 
@@ -151,7 +159,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   @Deprecated(forRemoval = true)
-  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getInsights(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     ensureHasAccess(principal, dto, AccessType.READ);
@@ -164,7 +172,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getInsights(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getInsights(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
@@ -177,7 +185,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response runTask(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
@@ -197,12 +205,12 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   // can be moved to CrudResource if /validate is needed for other entities.
   public Response validateMultiple(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      List<AlertApi> list) {
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      final List<AlertApi> list) {
     ensureExists(list, "Invalid request");
 
-    for (AlertApi api : list) {
-      AlertDTO existing =
+    for (final AlertApi api : list) {
+      final AlertDTO existing =
           api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
       validate(api, existing);
     }
@@ -214,7 +222,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response evaluate(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       final AlertEvaluationApi request
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
@@ -236,7 +244,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
     ensureHasAccess(principal, dto, AccessType.UPDATE);
@@ -262,5 +270,29 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       return currentMaximumPossibleEndTime;
     }
     return endTime;
+  }
+
+  @GET
+  @Timed
+  @Path("{id}/stats")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getAnalytics(
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @PathParam("id") final Long id,
+      @QueryParam("enumerationItem.id") final Long enumerationId,
+      @QueryParam("startTime") final Long startTime,
+      @QueryParam("endTime") final Long endTime
+  ) {
+    ensureExists(id);
+    final List<Predicate> predicates = new ArrayList<>();
+    predicates.add(Predicate.EQ("detectionConfigId", id));
+
+    // optional filters
+    optional(enumerationId).ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
+    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
+    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
+
+    final DaoFilter filter = new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
+    return respondOk(analyticsService.computeAnomalyStats(filter));
   }
 }

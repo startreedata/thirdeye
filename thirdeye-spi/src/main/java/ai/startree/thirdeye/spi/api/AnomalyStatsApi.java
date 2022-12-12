@@ -17,7 +17,7 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AnomalyStatsApi {
+public class AnomalyStatsApi implements ThirdEyeApi {
 
   private Long totalCount;
   private Long countWithFeedback;

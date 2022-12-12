@@ -140,3 +140,21 @@ export const getDefaultProperties = (
 
     return { ...oldDefaultProperties, ...newDefaultProperties };
 };
+
+// Add all the extra data required by each property in the AlertTemplatePropertiesBuilder
+//  in the below key type and getter function
+export type PropertyDetailsKeys = "description";
+
+export const getPropertyDetails = (
+    alertTemplate: AlertTemplate | null
+): Record<string, Record<PropertyDetailsKeys, string>> | null => {
+    if (!alertTemplate?.properties) {
+        return null;
+    }
+
+    const properties = alertTemplate.properties.map(
+        ({ name, description }) => ({ [name]: { description } })
+    );
+
+    return Object.assign({}, ...properties);
+};

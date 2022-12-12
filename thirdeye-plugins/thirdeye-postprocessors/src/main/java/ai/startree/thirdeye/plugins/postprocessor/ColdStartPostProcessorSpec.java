@@ -15,9 +15,10 @@ package ai.startree.thirdeye.plugins.postprocessor;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 
-public class ColdStartPostProcessorSpec extends PostProcessorSpec {
+public class ColdStartPostProcessorSpec {
+
+  private Boolean ignore;
 
   /**
    * Cold start period in ISO-8601 format eg P1D.
@@ -72,6 +73,15 @@ public class ColdStartPostProcessorSpec extends PostProcessorSpec {
   public ColdStartPostProcessorSpec setMinMaxTimeLoader(
       final MinMaxTimeLoader minMaxTimeLoader) {
     this.minMaxTimeLoader = minMaxTimeLoader;
+    return this;
+  }
+
+  public Boolean getIgnore() {
+    return ignore;
+  }
+
+  public ColdStartPostProcessorSpec setIgnore(final Boolean ignore) {
+    this.ignore = ignore;
     return this;
   }
 }

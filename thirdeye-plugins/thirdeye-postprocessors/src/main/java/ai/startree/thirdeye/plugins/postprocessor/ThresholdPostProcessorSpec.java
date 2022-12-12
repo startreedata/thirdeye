@@ -13,10 +13,9 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
+public class ThresholdPostProcessorSpec {
 
-public class ThresholdPostProcessorSpec extends PostProcessorSpec {
-
+  private Boolean ignore;
   private Double min;
   private Double max;
   /**
@@ -49,6 +48,15 @@ public class ThresholdPostProcessorSpec extends PostProcessorSpec {
 
   public ThresholdPostProcessorSpec setValueName(final String valueName) {
     this.valueName = valueName;
+    return this;
+  }
+
+  public Boolean getIgnore() {
+    return ignore;
+  }
+
+  public ThresholdPostProcessorSpec setIgnore(final Boolean ignore) {
+    this.ignore = ignore;
     return this;
   }
 }

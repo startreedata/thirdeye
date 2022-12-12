@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
+import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.DatasetApi;
@@ -42,8 +43,9 @@ public class DatasetResource extends CrudResource<DatasetApi, DatasetConfigDTO> 
       .build();
 
   @Inject
-  public DatasetResource(final DatasetConfigManager datasetConfigManager) {
-    super(datasetConfigManager, API_TO_INDEX_FILTER_MAP);
+  public DatasetResource(final DatasetConfigManager datasetConfigManager,
+      final AccessControl accessControl) {
+    super(datasetConfigManager, API_TO_INDEX_FILTER_MAP, accessControl);
   }
 
   @Override

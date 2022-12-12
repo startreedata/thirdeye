@@ -16,6 +16,7 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
+import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
@@ -65,8 +66,9 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final HolidayEventsLoader holidayEventsLoader,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    super(eventManager, API_TO_INDEX_FILTER_MAP);
+      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AccessControl accessControl) {
+    super(eventManager, API_TO_INDEX_FILTER_MAP, accessControl);
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.holidayEventsLoader = holidayEventsLoader;
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;

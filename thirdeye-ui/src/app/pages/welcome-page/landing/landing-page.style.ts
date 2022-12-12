@@ -8,21 +8,20 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import { makeStyles } from "@material-ui/core";
+import { DimensionV1 } from "../../../platform/utils";
 
-import io.dropwizard.auth.AuthenticationException;
-import io.dropwizard.auth.Authenticator;
-import java.util.Optional;
-
-public class ThirdEyeAuthenticatorDisabled implements Authenticator<String, ThirdEyePrincipal> {
-
-  @Override
-  public Optional<ThirdEyePrincipal> authenticate(final String s) throws AuthenticationException {
-    return optional(new ThirdEyePrincipal(s, ""));
-  }
-}
+export const useLandingPageStyles = makeStyles(() => ({
+    introVideo: {
+        height: "100%",
+        width: "100%",
+        aspectRatio: "16 / 9",
+        borderRadius: DimensionV1.BorderRadiusDefault,
+        border: "none",
+    },
+}));

@@ -19,9 +19,9 @@ executionFrameworkSpec:
   segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
   segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
 jobType: SegmentCreationAndTarPush
-inputDirURI: 'examples/order_events/rawdata'
+inputDirURI: '${dataDir}'
 includeFileNamePattern: 'glob:**/*.csv'
-outputDirURI: 'tmp/data/segments/order_events'
+outputDirURI: '${segmentDir}'
 overwriteOutput: true
 pinotFSSpecs:
   - scheme: file
@@ -32,7 +32,7 @@ recordReaderSpec:
   configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
 tableSpec:
   tableName: 'order_events'
-  schemaURI: 'http://${controllerHost}:${controllerPort}/tables/order_events/schema'
-  tableConfigURI: 'http://${controllerHost}:${controllerPort}/tables/order_events'
+  schemaURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/order_events/schema'
+  tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/order_events'
 pinotClusterSpecs:
-  - controllerURI: 'http://${controllerHost}:${controllerPort}'
+  - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'

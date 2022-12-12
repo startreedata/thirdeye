@@ -32,18 +32,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public abstract class AlertEvaluatorResponseMapper {
 
   public static AlertEvaluationApi toAlertEvaluationApi(
       final Map<String, OperatorResult> outputMap) {
     final Map<String, DetectionEvaluationApi> map = new HashMap<>();
-    for (final String key : outputMap.keySet()) {
-      final OperatorResult result = outputMap.get(key);
+    for (final Entry<String, OperatorResult> entry : outputMap.entrySet()) {
       final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = operatorResultToApi(
-          result);
+          entry.getValue());
       detectionEvaluationApiMap.keySet()
-          .forEach(apiKey -> map.put(key + "_" + apiKey, detectionEvaluationApiMap.get(apiKey)));
+          .forEach(apiKey -> map.put(entry.getKey() + "_" + apiKey, detectionEvaluationApiMap.get(apiKey)));
     }
     return new AlertEvaluationApi().setDetectionEvaluations(map);
   }

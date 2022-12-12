@@ -38,9 +38,7 @@ public class TemplatableMap<K, V> extends HashMap<K, Templatable<V>> {
 
   public static <K, V> TemplatableMap<K, V> fromValueMap(Map<K, V> map) {
     final TemplatableMap<K, V> templatableMap = new TemplatableMap<>();
-    for (K k: map.keySet()) {
-      templatableMap.put(k, new Templatable<V>().setValue(map.get(k)));
-    }
+    map.forEach((key, value) -> templatableMap.put(key, new Templatable<V>().setValue(value)));
     return templatableMap;
   }
 

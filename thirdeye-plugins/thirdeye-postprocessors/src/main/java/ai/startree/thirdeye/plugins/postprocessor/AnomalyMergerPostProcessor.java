@@ -353,9 +353,10 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
    */
   private void mergeAnomalyProperties(final Map<String, String> parent,
       final Map<String, String> child) {
-    for (final String key : child.keySet()) {
+    for (final var e : child.entrySet()) {
+      final String key = e.getKey();
       if (!parent.containsKey(key)) {
-        parent.put(key, child.get(key));
+        parent.put(key, e.getValue());
       } else {
         // combine detectorComponentName
         if (key.equals(GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME)) {
@@ -373,8 +374,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
                 .fromJsonString(child.get(TIME_SERIES_SNAPSHOT_KEY));
             parent.put(TIME_SERIES_SNAPSHOT_KEY,
                 mergeTimeSeriesSnapshot(parentTimeSeries, childTimeSeries).toJsonString());
-          } catch (final Exception e) {
-            LOG.warn("Unable to merge time series, so skipping...", e);
+          } catch (final Exception error) {
+            LOG.warn("Unable to merge time series, so skipping...", error);
           }
         }
       }

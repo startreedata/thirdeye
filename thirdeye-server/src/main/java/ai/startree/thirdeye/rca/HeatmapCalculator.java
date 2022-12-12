@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -119,13 +120,14 @@ public class HeatmapCalculator {
   private void fillMissingKeysWithZeroes(final Map<String, Map<String, Double>> fromBreakdown,
       final Map<String, Map<String, Double>> toBreakdown) {
     // all keys that are present in fromBreakdown but not in toBreakdown are inserted with a value of 0
-    for (String dimensionName : fromBreakdown.keySet()) {
+    for (final Entry<String, Map<String, Double>> e : fromBreakdown.entrySet()) {
+      final String dimensionName = e.getKey();
       if (!toBreakdown.containsKey(dimensionName)) {
         toBreakdown.put(dimensionName, new HashMap<>());
       }
-      final Map<String, Double> fromCounts = fromBreakdown.get(dimensionName);
+      final Map<String, Double> fromCounts = e.getValue();
       final Map<String, Double> toCounts = toBreakdown.get(dimensionName);
-      for (String dimensionValue : fromCounts.keySet()) {
+      for (final String dimensionValue : fromCounts.keySet()) {
         if (!toCounts.containsKey(dimensionValue)) {
           toCounts.put(dimensionValue, 0.);
         }

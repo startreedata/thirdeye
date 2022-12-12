@@ -12,12 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { Alert } from "../../../rest/dto/alert.interfaces";
-import type { Anomaly } from "../../../rest/dto/anomaly.interfaces";
-import type { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
-export interface EntitySearchProps {
-    subscriptionGroups: SubscriptionGroup[] | null;
-    alerts: Alert[] | null;
-    anomalies: Anomaly[] | null;
+export interface AnomalyRangeDropdownProps {
+    anomalyStartTime: number;
+    setAnomalyStartTime: (p: number) => void;
 }

@@ -247,7 +247,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                                         ]?.description
                                                     }
                                                 </Typography>
-                                            ) : null}{" "}
+                                            ) : null}
                                         </Box>
                                     }
                                 />

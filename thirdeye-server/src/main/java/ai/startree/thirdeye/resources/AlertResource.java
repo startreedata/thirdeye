@@ -288,9 +288,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     predicates.add(Predicate.EQ("detectionConfigId", id));
 
     // optional filters
-    optional(enumerationId).map(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
-    optional(startTime).map(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime).map(end -> predicates.add(Predicate.LE("endTime", endTime)));
+    optional(enumerationId).ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
+    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
+    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
     final DaoFilter filter = new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
     return respondOk(analyticsService.computeAnomalyStats(filter));

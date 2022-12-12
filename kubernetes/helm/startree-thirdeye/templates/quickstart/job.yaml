@@ -17,11 +17,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: quickstart-datasets
+  name: quickstart-pinot
 spec:
   template:
     metadata:
-      name: quickstart-datasets
+      name: quickstart-pinot
     spec:
       initContainers:
       - name: wait-for-pinot
@@ -77,7 +77,7 @@ spec:
       volumes:
         - name: quickstart-resources
           configMap:
-            name: quickstart-scripts
+            name: pinot-scripts
             defaultMode: 0777
       restartPolicy: Never
 {{- end }}

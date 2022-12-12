@@ -26,7 +26,6 @@ import ai.startree.thirdeye.plugins.postprocessor.merger.AnomalyKey;
 import ai.startree.thirdeye.plugins.postprocessor.merger.AnomalyTimelinesView;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -194,11 +193,15 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
           .plus(1)
           .getMillis();
       requireNonNull(alertId, "Cannot pull existing anomalies with null alertId.");
+      Long enumerationItemId = null;
+      if (enumerationItem != null) {
+        enumerationItemId = requireNonNull(enumerationItem.getId());
+      }
       return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(
           mergeLowerBound,
           mergeUpperBound,
           alertId,
-          optional(enumerationItem).map(AbstractDTO::getId).orElse(null));
+          enumerationItemId);
     } else {
       throw new UnsupportedOperationException("Unknown DetectionPipelineUsage: " + usage);
     }

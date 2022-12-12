@@ -24,6 +24,7 @@ public class PostProcessorsPlugin implements Plugin {
   @Override
   public Iterable<AnomalyPostProcessorFactory> getAnomalyPostProcessorFactories() {
     return List.of(
+        new AnomalyMergerPostProcessor.Factory(),
         new ColdStartPostProcessor.Factory(),
         new TimeOfWeekPostProcessor.Factory(),
         new ThresholdPostProcessor.Factory(),

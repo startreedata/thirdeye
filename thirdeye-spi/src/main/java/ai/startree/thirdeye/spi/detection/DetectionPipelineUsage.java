@@ -11,15 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.detectionpipeline;
+package ai.startree.thirdeye.spi.detection;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
-
-@Mapper(uses={DetectionPipelineContextMapper.class})
-public interface PlanNodeContextMapper {
-
-  PlanNodeContextMapper INSTANCE = Mappers.getMapper(PlanNodeContextMapper.class);
-
-  PlanNodeContext clone(PlanNodeContext o);
+public enum DetectionPipelineUsage {
+  DETECTION,
+  EVALUATION
 }

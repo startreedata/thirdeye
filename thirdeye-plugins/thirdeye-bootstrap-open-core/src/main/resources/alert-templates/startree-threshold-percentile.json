@@ -6,6 +6,20 @@
       "name": "root",
       "type": "PostProcessor",
       "params": {
+        "type": "ANOMALY_MERGER",
+        "component.mergeMaxGap": "${mergeMaxGap}",
+        "component.mergeMaxDuration": "${mergeMaxDuration}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "eventProcessor"
+        }
+      ]
+    },
+    {
+      "name": "eventProcessor",
+      "type": "PostProcessor",
+      "params": {
         "type": "EVENTS",
         "component.ignore": "${eventFilterIgnore}",
         "component.beforeEventMargin": "${eventFilterBeforeEventMargin}",
@@ -172,8 +186,6 @@
       "sqlFilter" : "${rcaEventSqlFilter}"
     },
     "timezone": "${timezone}",
-    "mergeMaxGap": "${mergeMaxGap}",
-    "mergeMaxDuration": "${mergeMaxDuration}",
     "granularity": "${monitoringGranularity}"
   },
   "properties": [

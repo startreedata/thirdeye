@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -31,6 +32,7 @@ import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
@@ -70,7 +72,7 @@ public class PostProcessorOperatorTest {
   @BeforeClass
   public void setUp() {
     final PostProcessorRegistry postProcessorRegistry = mock(PostProcessorRegistry.class);
-    when(postProcessorRegistry.build(anyString(), anyMap())).thenAnswer(
+    when(postProcessorRegistry.build(anyString(), anyMap(), any())).thenAnswer(
         i -> {
           final Map<String, Object> nodeParams = i.getArgument(1);
           final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
@@ -87,6 +89,7 @@ public class PostProcessorOperatorTest {
                 mock(EventManager.class),
                 mock(DatasetConfigManager.class),
                 mock(ExecutorService.class),
+                mock(EnumerationItemManager.class),
                 new DetectionPipelineConfiguration()
         )));
   }

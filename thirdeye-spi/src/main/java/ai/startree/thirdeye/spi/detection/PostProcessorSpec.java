@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
+// FIXME cyril remove this inheritance design
 public class PostProcessorSpec extends AbstractSpec {
 
   // move to post processor spec

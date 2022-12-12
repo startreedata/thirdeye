@@ -52,7 +52,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AlertManager alertManager;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
   private final DetectionPipelineRunner detectionPipelineRunner;
-  private final AnomalyMerger anomalyMerger;
   private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
   private final MergedAnomalyResultManager anomalyDao;
 
@@ -60,13 +59,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
       final MetricRegistry metricRegistry, final DetectionPipelineRunner detectionPipelineRunner,
-      final AnomalyMerger anomalyMerger,
       final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
       final MergedAnomalyResultManager anomalyDao) {
     this.alertManager = alertManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.detectionPipelineRunner = detectionPipelineRunner;
-    this.anomalyMerger = anomalyMerger;
     this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
     this.anomalyDao = anomalyDao;
 
@@ -88,7 +85,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
           String.format("Could not resolve config id %d", info.getConfigId()));
 
-      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(alert,
+      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
+          alert,
           info.getStart(), info.getEnd());
 
       final OperatorResult result = detectionPipelineRunner.run(alert, detectionInterval);
@@ -104,7 +102,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
       alert.setLastTimestamp(detectionInterval.getEndMillis());
       alertManager.update(alert);
-      postExecution(alert, result);
+      postExecution(result);
 
       detectionTaskSuccessCounter.inc();
       LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
@@ -120,10 +118,12 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     }
   }
 
-  private void postExecution(final AlertDTO alert, final OperatorResult result) {
-    final List<MergedAnomalyResultDTO> mergedAnomalies =  anomalyMerger.merge(alert, result.getAnomalies());
-
-    for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalies) {
+  private void postExecution(final OperatorResult result) {
+    final List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
+    if (anomalies == null) {
+      return;
+    }
+    for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : anomalies) {
       final Long id = anomalyDao.save(mergedAnomalyResultDTO);
       if (id == null) {
         LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
@@ -132,7 +132,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
     // re-notify the anomalies if any
     // note cyril - dead code - renotify is always false
-    for (final MergedAnomalyResultDTO anomaly : result.getAnomalies()) {
+    for (final MergedAnomalyResultDTO anomaly : anomalies) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {
         DetectionUtils.renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);

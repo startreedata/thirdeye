@@ -15,7 +15,6 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
@@ -53,19 +52,20 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
     final Map<String, Object> nodeParams = optional(planNode.getParams()).map(
             TemplatableMap::valueMap)
         .orElseThrow(() -> new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
-            "'type' in " + getOperatorName() + "params"));
+            "'params' in " + getOperatorName() + " " + planNode.getName()));
 
-    final String type = ensureExists(MapUtils.getString(nodeParams, PROP_TYPE),
-        ERR_MISSING_CONFIGURATION_FIELD,
-        "'type' in " + getOperatorName() + "params");
+    final String type = optional(MapUtils.getString(nodeParams, PROP_TYPE))
+        .orElseThrow(() -> new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
+            "'type' in 'params' of " + getOperatorName() + " " + planNode.getName()));
 
-    postProcessor = postProcessorRegistry.build(type, nodeParams);
+    postProcessor = postProcessorRegistry.build(type, nodeParams, context);
   }
 
   @Override
   public void execute() throws Exception {
     // split combiner results - to hide CombinerResult from PostProcessor implementations
-    final Map<String, OperatorResult> inputWithCombinerResultsSplit = splitCombinerResults(inputMap);
+    final Map<String, OperatorResult> inputWithCombinerResultsSplit = splitCombinerResults(
+        inputMap);
 
     final Map<String, OperatorResult> outputsWithCombinerResultsSplit = postProcessor.postProcess(
         detectionInterval,
@@ -73,7 +73,8 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
     outputsWithCombinerResultsSplit.values().forEach(this::enrichAnomalyLabels);
 
     // merge back combiner results
-    final Map<String, OperatorResult> output = mergeCombinerResults(outputsWithCombinerResultsSplit);
+    final Map<String, OperatorResult> output = mergeCombinerResults(
+        outputsWithCombinerResultsSplit);
 
     resultMap.putAll(output);
   }
@@ -113,6 +114,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
       return;
     }
 
+    // fixme cyril asap this is broken - all labels are overriden by downstream postProcessors - move down to each postProcessor or do a set operation
     for (final MergedAnomalyResultDTO anomaly : anomalies) {
       final @Nullable List<AnomalyLabelDTO> anomalyLabels = anomaly.getAnomalyLabels();
       if (anomalyLabels == null) {

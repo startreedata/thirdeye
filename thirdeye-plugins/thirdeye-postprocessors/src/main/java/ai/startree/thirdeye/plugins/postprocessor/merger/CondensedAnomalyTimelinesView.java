@@ -11,11 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.notification;
+package ai.startree.thirdeye.plugins.postprocessor.merger;
 
-import static ai.startree.thirdeye.util.ThirdEyeUtils.getRoundedDouble;
-
-import ai.startree.thirdeye.util.TimeBucket;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -287,5 +284,25 @@ public class CondensedAnomalyTimelinesView {
     String jsonString = OBJECT_MAPPER.writeValueAsString(this);
 
     return jsonString;
+  }
+
+  /**
+   * Get rounded double value, according to the value of the double.
+   * Max rounding will be up to 4 decimals
+   * For values >= 0.1, use 2 decimals (eg. 123, 2.5, 1.26, 0.5, 0.162)
+   * For values < 0.1, use 3 decimals (eg. 0.08, 0.071, 0.0123)
+   *
+   * @param value any double value
+   * @return the rounded double value
+   */
+  public static Double getRoundedDouble(Double value) {
+    if (Double.isNaN(value) || Double.isInfinite(value)) {
+      return Double.NaN;
+    }
+    if (value >= 0.1) {
+      return Math.round(value * (Math.pow(10, 2))) / (Math.pow(10, 2));
+    } else {
+      return Math.round(value * (Math.pow(10, 3))) / (Math.pow(10, 3));
+    }
   }
 }

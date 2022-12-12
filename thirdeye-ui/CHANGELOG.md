@@ -1,3 +1,19 @@
+## [1.74.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.73.0...thirdeye-ui-1.74.0) (2022-12-12)
+
+
+### Features
+
+* [TE-1082](https://cortexdata.atlassian.net/browse/TE-1082) added recipes and alert examples links to document section ([71f4e7536](https://github.com/startreedata/thirdeye/commit/71f4e7536b2aaa656e94d9eaf0946f1dee728bd2))
+* [TE-1105](https://cortexdata.atlassian.net/browse/TE-1105) recent anomalies home page ([f57ecd526](https://github.com/startreedata/thirdeye/commit/f57ecd5263aa740609f3d9f2c2c8cd9e2a02155e))
+* [TE-1120](https://cortexdata.atlassian.net/browse/TE-1120) added intro video to welcome screen ([8d9508212](https://github.com/startreedata/thirdeye/commit/8d9508212ab9d555326f68c6658a0d8b625204b4))
+* [TE-1128](https://cortexdata.atlassian.net/browse/TE-1128) fix overflow for long text in enumeration table ([9d78d662e](https://github.com/startreedata/thirdeye/commit/9d78d662ea0623470fe212ccfaecb4a341f1d7c6))
+* [TE-1129](https://cortexdata.atlassian.net/browse/TE-1129) added property description to alert template builder ([d0713a847](https://github.com/startreedata/thirdeye/commit/d0713a847e298499d34ad7a73c1f38a50f59b3bd))
+
+
+### Bug Fixes
+
+* [TE-1112](https://cortexdata.atlassian.net/browse/TE-1112) show empty message when alert templates for a section is missing ([60f68a134](https://github.com/startreedata/thirdeye/commit/60f68a134e139be1bf3524eaf5fbc61624f9cb7a))
+
 ## [1.73.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.72.1...thirdeye-ui-1.73.0) (2022-12-05)
 
 

@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
@@ -58,8 +59,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private AnomalyDetector<? extends AbstractSpec> detector;
   private Period monitoringGranularity;
+
+  // anomaly metadata
   private Long alertId;
   private EnumerationItemDTO enumerationItemRef;
+  private Optional<String> anomalyMetric;
+  private Optional<String> anomalyDataset;
+  private Optional<String> anomalySource;
 
   public AnomalyDetectorOperator() {
     super();
@@ -79,6 +85,15 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         .getDetectionPipelineContext();
     alertId = detectionPipelineContext.getAlertId();
     enumerationItemRef = prepareEnumerationItemRef(detectionPipelineContext);
+    anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
+        .map(Templatable::value)
+        .map(Object::toString);
+    anomalyDataset = optional(planNode.getParams().get("anomaly.dataset"))
+        .map(Templatable::value)
+        .map(Object::toString);
+    anomalySource = optional(planNode.getParams().get("anomaly.source"))
+        .map(Templatable::value)
+        .map(Object::toString);
   }
 
   private EnumerationItemDTO prepareEnumerationItemRef(
@@ -130,27 +145,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     setOutput(DEFAULT_OUTPUT_KEY, operatorResult);
   }
 
-  private void addMetadata(final List<MergedAnomalyResultDTO> anomalies) {
-    final Optional<String> anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
-        .map(Templatable::value)
-        .map(Object::toString);
-    final Optional<String> anomalyDataset = optional(planNode.getParams().get("anomaly.dataset"))
-        .map(Templatable::value)
-        .map(Object::toString);
-    final Optional<String> anomalySource = optional(planNode.getParams().get("anomaly.source"))
-        .map(Templatable::value)
-        .map(Object::toString);
-
-    // annotate each anomaly with the available metadata
-    for (MergedAnomalyResultDTO anomaly : anomalies) {
-      anomaly.setDetectionConfigId(alertId);
-      anomaly.setEnumerationItem(enumerationItemRef);
-      anomalyMetric.ifPresent(anomaly::setMetric);
-      anomalyDataset.ifPresent(anomaly::setCollection);
-      anomalySource.ifPresent(anomaly::setSource);
-    }
-  }
-
   @Override
   public String getOperatorName() {
     return "AnomalyDetectorOperator";
@@ -161,7 +155,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame());
-    addMetadata(anomalies);
     final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
         .sortedBy(COL_TIME));
     return new Builder()
@@ -183,7 +176,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     for (int i = 0; i < df.size(); i++) {
       if (!isAnomalySeries.isNull(i) && BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
-        final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+        final MergedAnomalyResultDTO anomaly = newAnomaly();
         final long startTimeMillis = timeMillisSeries.get(i);
         anomaly.setStartTime(startTimeMillis);
         if (i < df.size() - 1) {
@@ -204,6 +197,17 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     }
 
     return anomalies;
+  }
+
+  @NonNull
+  private MergedAnomalyResultDTO newAnomaly() {
+    final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+    anomaly.setDetectionConfigId(alertId);
+    anomaly.setEnumerationItem(enumerationItemRef);
+    anomalyMetric.ifPresent(anomaly::setMetric);
+    anomalyDataset.ifPresent(anomaly::setCollection);
+    anomalySource.ifPresent(anomaly::setSource);
+    return anomaly;
   }
 
   /**

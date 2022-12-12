@@ -32,6 +32,7 @@ import { ActiveAlertsCount } from "../../components/home-page/active-alerts-coun
 import { AlertAccuracy } from "../../components/home-page/alert-accuracy/alert-accuracy.component";
 import { AnomaliesPendingFeedbackCount } from "../../components/home-page/anomalies-pending-feedback-count/anomalies-pending-feedback-count.component";
 import { AnomaliesReportedCount } from "../../components/home-page/anomalies-reported-count/anomalies-reported-count.component";
+import { AnomalyRangeDropdown } from "../../components/home-page/anomaly-range-dropdown/anomaly-range-dropdown.component";
 import { EntitySearch } from "../../components/home-page/entity-search/entity-search.component";
 import { RecentAnomalies } from "../../components/home-page/recent-anomalies/recent-anomalies.component";
 import { RecommendedDocumentation } from "../../components/home-page/recommended-documentation/recommended-documentation.component";
@@ -47,14 +48,19 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
+import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.action";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
+import { generateDateRangeDaysFromNow } from "../../utils/routes/routes.util";
 import { useUserPreferences } from "../../utils/user-preferences/user-preferences";
 import { UserPreferencesKeys } from "../../utils/user-preferences/user-preferences.interfaces";
 import { useHomePageStyles } from "./home-page.styles";
 
 export const HomePage: FunctionComponent = () => {
+    const [anomalyStartTime, setAnomalyStartTime] = useState<number>(
+        generateDateRangeDaysFromNow(7)[0]
+    );
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -62,6 +68,7 @@ export const HomePage: FunctionComponent = () => {
     const style = useHomePageStyles();
     const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("md"));
     const { appAnalytics, getAppAnalytics, status } = useGetAppAnalytics();
+    const { anomalies, getAnomalies } = useGetAnomalies();
     const {
         subscriptionGroups,
         getSubscriptionGroups,
@@ -78,6 +85,7 @@ export const HomePage: FunctionComponent = () => {
         getAppAnalytics();
         getSubscriptionGroups();
         getAlerts();
+        getAnomalies();
     }, []);
 
     const handleHideDocumentationClick = (): void => {
@@ -132,23 +140,21 @@ export const HomePage: FunctionComponent = () => {
                         <Box width={screenWidthSmUp ? 500 : "100%"}>
                             <EntitySearch
                                 alerts={alerts}
+                                anomalies={anomalies}
                                 subscriptionGroups={subscriptionGroups}
                             />
                         </Box>
                     </PageHeaderActionsV1>
                 }
-                title={t("label.overview")}
+                subtitle={t(
+                    "message.alerts-monitor-your-kpis-and-anomalies-help-you-to-find-outliers-in-the-kpis"
+                )}
+                title={t("message.kpis-monitor-and-outliers")}
             />
             <PageContentsGridV1>
-                <Grid item sm={8} xs={12}>
+                <Grid item sm={12} xs={12}>
                     <Grid container alignItems="stretch">
-                        <Grid item sm={12} xs={12}>
-                            <PageContentsCardV1 fullHeight>
-                                <TrendingAnomalies />
-                            </PageContentsCardV1>
-                        </Grid>
-
-                        <Grid item sm={6} xs={12}>
+                        <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <ActiveAlertsCount
                                     alerts={alerts}
@@ -156,8 +162,7 @@ export const HomePage: FunctionComponent = () => {
                                 />
                             </PageContentsCardV1>
                         </Grid>
-
-                        <Grid item sm={6} xs={12}>
+                        <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <AlertAccuracy
                                     appAnalytics={appAnalytics}
@@ -165,6 +170,62 @@ export const HomePage: FunctionComponent = () => {
                                         noDataIndicator: style.noDataIndicator,
                                     }}
                                     getAppAnalyticsStatus={status}
+                                />
+                            </PageContentsCardV1>
+                        </Grid>
+                        <Grid item sm={4} xs={12}>
+                            <PageContentsCardV1 fullHeight>
+                                <TotalSubscriptionGroupCount
+                                    classes={{
+                                        noDataIndicator: style.noDataIndicator,
+                                    }}
+                                    getSubscriptionGroupsStatus={
+                                        getSubscriptionGroupsStatus
+                                    }
+                                    subscriptionGroups={subscriptionGroups}
+                                />
+                            </PageContentsCardV1>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+                {!shouldHideDocumentation && (
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            <RecommendedDocumentation
+                                onHideDocumentationClick={
+                                    handleHideDocumentationClick
+                                }
+                            />
+                        </PageContentsCardV1>
+                    </Grid>
+                )}
+
+                <Grid item sm={12} xs={12}>
+                    <Grid container justifyContent="space-between">
+                        <Grid item sm={8} xs={12}>
+                            <Typography variant="h5">
+                                {t("label.recent-entity", {
+                                    entity: t("label.anomalies"),
+                                })}
+                            </Typography>
+                        </Grid>
+
+                        <Grid item sm={4} xs={12}>
+                            <AnomalyRangeDropdown
+                                anomalyStartTime={anomalyStartTime}
+                                setAnomalyStartTime={setAnomalyStartTime}
+                            />
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+                <Grid item sm={8} xs={12}>
+                    <Grid container alignItems="stretch">
+                        <Grid item sm={12} xs={12}>
+                            <PageContentsCardV1 fullHeight>
+                                <TrendingAnomalies
+                                    startTime={anomalyStartTime}
                                 />
                             </PageContentsCardV1>
                         </Grid>
@@ -195,33 +256,8 @@ export const HomePage: FunctionComponent = () => {
                                 />
                             </PageContentsCardV1>
                         </Grid>
-                        <Grid item>
-                            <PageContentsCardV1 fullHeight>
-                                <TotalSubscriptionGroupCount
-                                    classes={{
-                                        noDataIndicator: style.noDataIndicator,
-                                    }}
-                                    getSubscriptionGroupsStatus={
-                                        getSubscriptionGroupsStatus
-                                    }
-                                    subscriptionGroups={subscriptionGroups}
-                                />
-                            </PageContentsCardV1>
-                        </Grid>
                     </Grid>
                 </Grid>
-
-                {!shouldHideDocumentation && (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <RecommendedDocumentation
-                                onHideDocumentationClick={
-                                    handleHideDocumentationClick
-                                }
-                            />
-                        </PageContentsCardV1>
-                    </Grid>
-                )}
 
                 <Grid item xs={12}>
                     <RecentAnomalies />

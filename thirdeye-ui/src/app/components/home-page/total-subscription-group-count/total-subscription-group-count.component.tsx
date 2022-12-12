@@ -14,6 +14,7 @@
  */
 import { Box, Grid, Link, Typography } from "@material-ui/core";
 import classNames from "classnames";
+import { capitalize } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -37,9 +38,11 @@ export const TotalSubscriptionGroupCount: FunctionComponent<TotalSubscriptionGro
                             component={RouterLink}
                             to={getSubscriptionGroupsAllPath()}
                         >
-                            {t("label.review-entities", {
-                                entity: t("label.subscriptions"),
-                            })}
+                            {capitalize(
+                                t("label.review-entities", {
+                                    entity: t("label.subscriptions"),
+                                })
+                            )}
                         </Link>
                     </Box>
                 </Grid>

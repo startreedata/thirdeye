@@ -35,6 +35,7 @@ import {
 } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
+import { useEnumerationItemRowStyles } from "./enumeration-item-row.style";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     alertId,
@@ -52,6 +53,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     const [isExpanded, setIsExpanded] = useState(
         expanded.includes(nameForDetectionEvaluation)
     );
+    const classes = useEnumerationItemRowStyles();
 
     useEffect(() => {
         setIsExpanded(expanded.includes(nameForDetectionEvaluation));
@@ -95,7 +97,10 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                                 ? { sm: 8, xs: 12 }
                                 : { sm: 4, xs: 12 })}
                         >
-                            <Typography variant="subtitle1">
+                            <Typography
+                                className={classes.name}
+                                variant="subtitle1"
+                            >
                                 {nameForDetectionEvaluation}
                             </Typography>
                         </Grid>

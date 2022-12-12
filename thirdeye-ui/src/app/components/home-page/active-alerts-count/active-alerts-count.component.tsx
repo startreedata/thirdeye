@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Grid, Link, Typography } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -38,16 +39,20 @@ export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
                 <Box>{t("label.active-alerts")}</Box>
                 <Box>
                     <Link component={RouterLink} to={getAlertsCreatePath()}>
-                        {t("label.create-entity", {
-                            entity: t("label.alert"),
-                        })}
+                        {capitalize(
+                            t("label.create-entity", {
+                                entity: t("label.alert"),
+                            })
+                        )}
                     </Link>
                 </Box>
                 <Box>
                     <Link component={RouterLink} to={getAlertsAllPath()}>
-                        {t("label.view-all-entities", {
-                            entity: t("label.alerts"),
-                        })}
+                        {capitalize(
+                            t("label.view-all-entities", {
+                                entity: t("label.alerts"),
+                            })
+                        )}
                     </Link>
                 </Box>
             </Grid>

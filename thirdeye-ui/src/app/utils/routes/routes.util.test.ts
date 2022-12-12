@@ -15,6 +15,7 @@
 import { DateTime } from "luxon";
 import {
     createPathWithRecognizedQueryString,
+    generateDateRangeDaysFromNow,
     generateDateRangeMonthsFromNow,
     getAlertsAlertViewPath,
     getAlertsAllPath,
@@ -237,7 +238,19 @@ describe("Routes Util", () => {
             "day"
         );
 
-        // about 115 days
+        // about 56 days (April 01 to May 26 => 30 + 26)
         expect(range[1] - range[0]).toEqual(4838399999);
+    });
+
+    it("generateDateRangeDaysFromNow should return expected values", () => {
+        const range = generateDateRangeDaysFromNow(
+            3,
+            // Sunday, August 07, 2022 12:00:00 PM
+            DateTime.fromMillis(1659853800000),
+            "day"
+        );
+
+        // about 4 days (Aug 07 - 3 days => Aug 04)
+        expect(range[1] - range[0]).toEqual(345599999);
     });
 });

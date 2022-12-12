@@ -13,7 +13,9 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-public class ThresholdPostProcessorSpec {
+import ai.startree.thirdeye.spi.detection.AbstractSpec;
+
+public class ThresholdPostProcessorSpec extends AbstractSpec {
 
   private Boolean ignore;
   private Double min;

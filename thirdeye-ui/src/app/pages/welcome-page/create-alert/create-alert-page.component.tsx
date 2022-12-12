@@ -234,7 +234,16 @@ export const CreateAlertPage: FunctionComponent = () => {
         <PageV1>
             <PageHeader
                 transparentBackground
-                customActions={<Button>{t("label.help")}</Button>}
+                customActions={
+                    <Button
+                        color="primary"
+                        href={t("url.documentation-homepage")}
+                        target="_blank"
+                        variant="contained"
+                    >
+                        {t("label.help")}
+                    </Button>
+                }
                 subtitle={t("message.by-creating-an-alert-youll-be-able")}
                 title={t("message.lets-create-your-first-alert")}
             />

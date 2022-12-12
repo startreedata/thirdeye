@@ -156,14 +156,10 @@ export const generateOptions = (
 };
 
 export const filterOptionWithTemplateNames = (
-    options: AlgorithmOption[],
-    availableTemplateNames: string[]
-): AlgorithmOption[] => {
+    options: AvailableAlgorithmOption[]
+): AvailableAlgorithmOption[] => {
     return options.filter(
-        (c) =>
-            availableTemplateNames.includes(c.alertTemplate) ||
-            availableTemplateNames.includes(c.alertTemplateForPercentile) ||
-            availableTemplateNames.includes(c.alertTemplateForMultidimension)
+        (c) => c.hasAlertTemplate || c.hasPercentile || c.hasMultidimension
     );
 };
 
@@ -171,16 +167,7 @@ export const generateAvailableAlgorithmOptions = (
     t: (id: string) => string,
     availableTemplateNames: string[]
 ): [AvailableAlgorithmOption[], AvailableAlgorithmOption[]] => {
-    let [simpleOptions, advancedOptions] = generateOptions(t);
-
-    simpleOptions = filterOptionWithTemplateNames(
-        simpleOptions,
-        availableTemplateNames
-    );
-    advancedOptions = filterOptionWithTemplateNames(
-        advancedOptions,
-        availableTemplateNames
-    );
+    const [simpleOptions, advancedOptions] = generateOptions(t);
 
     const availableSimpleOptions = simpleOptions.map((option) => {
         return {

@@ -138,8 +138,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                                     {subtitle}
                                 </Typography>
                             )}
-                        </Grid>
-                        <Grid item>
                             {cohortsData &&
                                 tableRows.length !==
                                     cohortsData.results.length && (
@@ -147,6 +145,9 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                                         {t("message.showing-top-100")}
                                     </Typography>
                                 )}
+                        </Grid>
+                        <Grid item>
+                            {cohortsData && tableRows.length > 0 && children}
                         </Grid>
                     </Grid>
                 </Grid>

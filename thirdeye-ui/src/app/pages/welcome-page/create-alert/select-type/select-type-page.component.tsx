@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlgorithmSelection } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
 import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
+import { filterOptionWithTemplateNames } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
 import { SampleAlertSelection } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
 import { NoDataIndicator } from "../../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
@@ -92,9 +93,9 @@ export const SelectTypePage: FunctionComponent = () => {
                             <Box padding={10}>
                                 <NoDataIndicator>
                                     <Box textAlign="center">
-                                        {t("message.no-entity-created", {
-                                            entity: t("label.alert-templates"),
-                                        })}
+                                        {t(
+                                            "message.in-order-to-continue-you-will-need-to-load"
+                                        )}
                                     </Box>
                                     <Box marginTop={2} textAlign="center">
                                         <Button
@@ -111,8 +112,10 @@ export const SelectTypePage: FunctionComponent = () => {
                         </PageContentsCardV1>
                     }
                     isEmpty={
-                        advancedOptions.length === 0 &&
-                        simpleOptions.length === 0
+                        filterOptionWithTemplateNames(advancedOptions)
+                            .length === 0 &&
+                        filterOptionWithTemplateNames(simpleOptions).length ===
+                            0
                     }
                 >
                     <AlgorithmSelection

@@ -258,12 +258,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                         </Grid>
                     </Grid>
 
-                    <PreviewChart
-                        alert={alert}
-                        showLoadButton={!!selectedMetric}
-                        onAlertPropertyChange={onAlertPropertyChange}
-                    />
-
                     <Grid item xs={12}>
                         <Box padding={1} />
                     </Grid>
@@ -445,6 +439,18 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                             }
                         )}
                 </Grid>
+
+                <Grid item xs={12}>
+                    <Box marginBottom={2} marginTop={2} padding={1}>
+                        <Divider />
+                    </Box>
+                </Grid>
+
+                <PreviewChart
+                    alert={alert}
+                    showLoadButton={!!selectedMetric}
+                    onAlertPropertyChange={onAlertPropertyChange}
+                />
             </LoadingErrorStateSwitch>
         </PageContentsCardV1>
     );

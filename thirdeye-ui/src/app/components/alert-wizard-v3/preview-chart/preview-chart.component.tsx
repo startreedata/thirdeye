@@ -38,6 +38,7 @@ import {
     extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { generateChartOptionsForAlert } from "../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
@@ -53,6 +54,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     showLoadButton,
     onAlertPropertyChange,
 }) => {
+    const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -263,6 +265,25 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         previewChartClasses.alertContainer
                                     }
                                 >
+                                    <Box position="absolute" width="100%">
+                                        <Grid
+                                            container
+                                            justifyContent="space-around"
+                                        >
+                                            <Grid item>
+                                                <Alert
+                                                    className={
+                                                        sharedWizardClasses.infoAlert
+                                                    }
+                                                    severity="info"
+                                                >
+                                                    Please complete the missing
+                                                    information to see the
+                                                    preview.
+                                                </Alert>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                     <Grid
                                         container
                                         alignItems="center"
@@ -279,6 +300,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                                 onClick={handleAutoRangeClick}
                                             >
                                                 <RefreshIcon fontSize="large" />
+                                                {t("label.load-chart")}
                                             </Button>
                                         </Grid>
                                     </Grid>

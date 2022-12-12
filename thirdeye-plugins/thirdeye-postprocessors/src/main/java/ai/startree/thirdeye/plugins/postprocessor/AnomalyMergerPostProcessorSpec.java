@@ -16,12 +16,11 @@ package ai.startree.thirdeye.plugins.postprocessor;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 
-public class AnomalyMergerPostProcessorSpec extends PostProcessorSpec {
+public class AnomalyMergerPostProcessorSpec {
 
   /**
-   * ISO-8601 format. Max gap between to anomalies for the anomalies to be merged.
+   * ISO-8601 format. Max gap between two anomalies for the anomalies to be merged.
    */
   private String mergeMaxGap;
   /**

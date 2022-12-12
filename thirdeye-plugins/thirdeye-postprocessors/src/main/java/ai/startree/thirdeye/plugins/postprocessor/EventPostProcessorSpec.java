@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
+public class EventPostProcessorSpec {
 
-public class EventPostProcessorSpec extends PostProcessorSpec {
+  private Boolean ignore;
 
   /**
    * A period added before the event that corresponds to a period that is also impacted
@@ -43,6 +43,15 @@ public class EventPostProcessorSpec extends PostProcessorSpec {
 
   public EventPostProcessorSpec setAfterEventMargin(final String afterEventMargin) {
     this.afterEventMargin = afterEventMargin;
+    return this;
+  }
+
+  public Boolean getIgnore() {
+    return ignore;
+  }
+
+  public EventPostProcessorSpec setIgnore(final Boolean ignore) {
+    this.ignore = ignore;
     return this;
   }
 }

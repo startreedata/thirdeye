@@ -13,11 +13,12 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import ai.startree.thirdeye.spi.detection.PostProcessorSpec;
 import java.util.List;
 import java.util.Map;
 
-public class TimeOfWeekPostProcessorSpec extends PostProcessorSpec {
+public class TimeOfWeekPostProcessorSpec {
+
+  private Boolean ignore;
 
   private List<String> daysOfWeek;
 
@@ -50,6 +51,15 @@ public class TimeOfWeekPostProcessorSpec extends PostProcessorSpec {
   public TimeOfWeekPostProcessorSpec setDayHoursOfWeek(
       final Map<String, List<Integer>> dayHoursOfWeek) {
     this.dayHoursOfWeek = dayHoursOfWeek;
+    return this;
+  }
+
+  public Boolean getIgnore() {
+    return ignore;
+  }
+
+  public TimeOfWeekPostProcessorSpec setIgnore(final Boolean ignore) {
+    this.ignore = ignore;
     return this;
   }
 }

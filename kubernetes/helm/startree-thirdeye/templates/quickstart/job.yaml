@@ -33,7 +33,31 @@ spec:
             value: {{ (.Values.quickstart.pinot).controllerHost | default "pinot-pinot-controller-headless" | quote }}
           - name: CONTROLLER_PORT
             value: {{ (.Values.quickstart.pinot).controllerPort | default "9000" | quote }}
-        command: ['sh', '-c', 'until curl -f $CONTROLLER_PROTOCOL://$CONTROLLER_HOST:$CONTROLLER_PORT/health; do echo waiting for pinot; sleep 2; done']
+        command:
+        - /bin/sh
+        - -c
+        - >
+          timeout=60 &&
+          retry=0 &&
+          until curl -f $CONTROLLER_PROTOCOL://$CONTROLLER_HOST:$CONTROLLER_PORT/health;
+          do 
+            if [ $retry -eq $timeout ];then
+              echo "Pinot controller probe timed out" &&
+              echo "Possible causes : " &&
+              echo "1. Pinot controller is not reachable from the cluster" &&
+              echo "2. Check if right protocol (http/https) is configured" &&
+              echo "3. Check if right port is configured. Use 80 (http) or 443 (https) for public dns url" &&
+              echo "4. If auth is enabled on Pinot set the quickstart.pinot.commandOptions: \"-authToken 'Basic <valid token>'\"" &&
+              echo "" &&
+              echo "Once the issue is identified :" &&
+              echo "- disable the quickstart with 'quickstart.enabled: false'." &&
+              echo "- re-enable the quickstart with 'quickstart.enabled: true' along with the revised configs."
+              return 1
+            fi
+            echo "waiting for pinot" &&
+            sleep 5 &&
+            retry=$((retry+1))
+          done
       containers:
       - name: load-datasets
         image: apachepinot/pinot:latest-jdk11

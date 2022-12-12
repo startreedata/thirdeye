@@ -195,7 +195,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       requireNonNull(alertId, "Cannot pull existing anomalies with null alertId.");
       Long enumerationItemId = null;
       if (enumerationItem != null) {
-        enumerationItemId = requireNonNull(enumerationItem.getId());
+        enumerationItemId = requireNonNull(enumerationItem.getId(),
+            "Enumeration item id is null. Cannot ensure enumeration item exists in persistence layer before merging anomalies by enumeration.");
       }
       return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(
           mergeLowerBound,

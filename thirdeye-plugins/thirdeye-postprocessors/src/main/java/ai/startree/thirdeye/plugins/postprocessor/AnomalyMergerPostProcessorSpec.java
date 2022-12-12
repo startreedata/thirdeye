@@ -20,7 +20,7 @@ import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 public class AnomalyMergerPostProcessorSpec {
 
   /**
-   * ISO-8601 format. Max gap between to anomalies for the anomalies to be merged.
+   * ISO-8601 format. Max gap between two anomalies for the anomalies to be merged.
    */
   private String mergeMaxGap;
   /**

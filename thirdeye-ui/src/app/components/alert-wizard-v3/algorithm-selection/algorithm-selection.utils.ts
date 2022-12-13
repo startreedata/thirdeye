@@ -61,7 +61,7 @@ export const generateOptions = (
                     {
                         templatePropertyName: "sensitivity",
                         label: t("label.sensitivity"),
-                        description: "TBD",
+                        description: "",
                         type: "slider",
                         min: -26,
                         max: 14,
@@ -78,13 +78,13 @@ export const generateOptions = (
                     {
                         templatePropertyName: "baselineOffset",
                         label: t("label.baseline-offset"),
-                        description: "TBD",
+                        description: "",
                         type: "number",
                     },
                     {
                         templatePropertyName: "percentageChange",
                         label: t("label.percentage-change"),
-                        description: "TBD",
+                        description: "",
                         type: "number",
                     },
                 ],
@@ -101,13 +101,13 @@ export const generateOptions = (
                     {
                         templatePropertyName: "baselineOffset",
                         label: t("label.baseline-offset"),
-                        description: "TBD",
+                        description: "",
                         type: "number",
                     },
                     {
                         templatePropertyName: "absoluteChange",
                         label: t("label.absolute-change"),
-                        description: "TBD",
+                        description: "",
                         type: "number",
                     },
                 ],
@@ -127,7 +127,7 @@ export const generateOptions = (
                     {
                         templatePropertyName: "sensitivity",
                         label: t("label.sensitivity"),
-                        description: "TBD",
+                        description: "",
                         type: "slider",
                         min: -26,
                         max: 14,
@@ -144,7 +144,7 @@ export const generateOptions = (
                     {
                         templatePropertyName: "sensitivity",
                         label: t("label.sensitivity"),
-                        description: "TBD",
+                        description: "",
                         type: "slider",
                         min: -26,
                         max: 14,

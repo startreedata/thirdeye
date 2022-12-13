@@ -12,14 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Button,
-    Grid,
-    Switch,
-    TextField,
-    Typography,
-} from "@material-ui/core";
+import { Box, Grid, Switch, TextField, Typography } from "@material-ui/core";
 import {
     default as React,
     FunctionComponent,
@@ -27,15 +20,12 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    Link as RouterLink,
-    useNavigate,
-    useOutletContext,
-} from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlertFrequency } from "../../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
 import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { EmailListInput } from "../../../../components/form-basics/email-list-input/email-list-input.component";
 import { InputSection } from "../../../../components/form-basics/input-section/input-section.component";
+import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
@@ -218,32 +208,14 @@ export const SetupDetailsPage: FunctionComponent = () => {
                 </Grid>
             </PageContentsGridV1>
 
-            <Box width="100%">
-                <PageContentsCardV1>
-                    <Grid container justifyContent="flex-end">
-                        <Grid item>
-                            <Button
-                                color="secondary"
-                                component={RouterLink}
-                                to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
-                            >
-                                {t("label.back")}
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                color="primary"
-                                disabled={isCreatingAlert}
-                                onClick={handleCreateAlertClick}
-                            >
-                                {isCreatingAlert
-                                    ? t("label.creating")
-                                    : t("label.next")}
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </PageContentsCardV1>
-            </Box>
+            <WizardBottomBar
+                backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
+                handleNextClick={handleCreateAlertClick}
+                nextButtonIsDisabled={isCreatingAlert}
+                nextButtonLabel={
+                    isCreatingAlert ? t("label.creating") : t("label.next")
+                }
+            />
         </>
     );
 };

@@ -20,6 +20,8 @@ import { AlgorithmSelection } from "../../../../components/alert-wizard-v3/algor
 import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { filterOptionWithTemplateNames } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
 import { SampleAlertSelection } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
+import { SampleAlertOption } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.interfaces";
+import { useAppBarConfigProvider } from "../../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { NoDataIndicator } from "../../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import {
@@ -27,24 +29,33 @@ import {
     PageContentsGridV1,
 } from "../../../../platform/components";
 import { createDefaultAlertTemplates } from "../../../../rest/alert-templates/alert-templates.rest";
+import { createAlert } from "../../../../rest/alerts/alerts.rest";
+import { AlertTemplate } from "../../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { AppRouteRelative } from "../../../../utils/routes/routes.util";
+import { QUERY_PARAM_KEYS } from "../../../../utils/constants/constants.util";
+import {
+    AppRouteRelative,
+    getHomePath,
+} from "../../../../utils/routes/routes.util";
 
 export const SelectTypePage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { setShowAppNavBar } = useAppBarConfigProvider();
 
     const {
         handleAlertPropertyChange,
         simpleOptions,
         advancedOptions,
         getAlertTemplates,
+        alertTemplates,
     } = useOutletContext<{
         alert: EditableAlert;
         handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
         simpleOptions: AvailableAlgorithmOption[];
         advancedOptions: AvailableAlgorithmOption[];
         getAlertTemplates: () => void;
+        alertTemplates: AlertTemplate[];
     }>();
 
     const handleAlgorithmSelection = (
@@ -69,6 +80,16 @@ export const SelectTypePage: FunctionComponent = () => {
         });
     };
 
+    const handleSampleAlertSelect = (option: SampleAlertOption): void => {
+        createAlert(option.alertConfiguration).then(() => {
+            const queryParams = new URLSearchParams([
+                [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
+            ]);
+            navigate(`${getHomePath()}?${queryParams.toString()}`);
+            setShowAppNavBar(true);
+        });
+    };
+
     return (
         <PageContentsGridV1>
             <Grid item xs={12}>
@@ -81,11 +102,10 @@ export const SelectTypePage: FunctionComponent = () => {
                     )}
                 </Typography>
             </Grid>
-            <Grid item xs={12}>
-                <SampleAlertSelection
-                    onSampleAlertSelect={handleAlertPropertyChange}
-                />
-            </Grid>
+            <SampleAlertSelection
+                alertTemplates={alertTemplates}
+                onSampleAlertSelect={handleSampleAlertSelect}
+            />
             <Grid item xs={12}>
                 <EmptyStateSwitch
                     emptyState={

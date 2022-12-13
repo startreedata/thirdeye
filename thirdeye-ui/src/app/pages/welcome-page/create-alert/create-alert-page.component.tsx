@@ -291,6 +291,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                                 ActionStatus.Working ||
                             createAlertStatus === ActionStatus.Working,
                         getAlertTemplates,
+                        alertTemplates,
                     }}
                 />
             </LoadingErrorStateSwitch>

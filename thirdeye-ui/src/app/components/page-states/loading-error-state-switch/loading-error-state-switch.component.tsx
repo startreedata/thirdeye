@@ -44,7 +44,7 @@ export const LoadingErrorStateSwitch: FunctionComponent<LoadingErrorStateSwitchP
     }) => {
         if (isError) {
             if (errorState) {
-                return errorState;
+                return <>{errorState}</>;
             }
 
             if (wrapInGrid && wrapInCard) {
@@ -70,7 +70,7 @@ export const LoadingErrorStateSwitch: FunctionComponent<LoadingErrorStateSwitchP
 
         if (isLoading) {
             if (loadingState) {
-                return loadingState;
+                return <>{loadingState}</>;
             }
 
             if (wrapInGrid && wrapInCard) {

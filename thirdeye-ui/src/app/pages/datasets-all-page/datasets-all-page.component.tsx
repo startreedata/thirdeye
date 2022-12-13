@@ -107,6 +107,8 @@ export const DatasetsAllPage: FunctionComponent = () => {
             <ConfigurationPageHeader selectedIndex={1} />
             <PageContentsGridV1 fullHeight>
                 <LoadingErrorStateSwitch
+                    wrapInCard
+                    wrapInGrid
                     isError={status === ActionStatus.Error}
                     isLoading={status === ActionStatus.Working}
                 >

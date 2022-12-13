@@ -144,6 +144,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             <ConfigurationPageHeader selectedIndex={4} />
             <PageContentsGridV1 fullHeight>
                 <LoadingErrorStateSwitch
+                    wrapInCard
+                    wrapInGrid
                     isError={
                         getSubscriptionGroupStatus === ActionStatus.Error ||
                         getAlertsStatus === ActionStatus.Error

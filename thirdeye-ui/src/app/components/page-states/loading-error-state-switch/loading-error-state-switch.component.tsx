@@ -18,37 +18,81 @@ import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitchProps } from "./loading-error-state-switch.interfaces";
 
+const DEFAULT_ERROR_ELEMENT = (
+    <Box pb={20} pt={20}>
+        <NoDataIndicator />
+    </Box>
+);
+
+const DEFAULT_LOADING_ELEMENT = (
+    <>
+        <SkeletonV1 animation="pulse" />
+        <SkeletonV1 animation="pulse" />
+        <SkeletonV1 animation="pulse" />
+    </>
+);
+
 export const LoadingErrorStateSwitch: FunctionComponent<LoadingErrorStateSwitchProps> =
-    ({ isError, isLoading, errorState, loadingState, children }) => {
-        return (
-            <>
-                {isError && (
-                    <>
-                        {errorState ?? (
-                            <Grid xs={12}>
-                                <PageContentsCardV1>
-                                    <Box pb={20} pt={20}>
-                                        <NoDataIndicator />
-                                    </Box>
-                                </PageContentsCardV1>
-                            </Grid>
-                        )}
-                    </>
-                )}
-                {!isError && isLoading && (
-                    <>
-                        {loadingState ?? (
-                            <Grid item xs={12}>
-                                <PageContentsCardV1>
-                                    <SkeletonV1 animation="pulse" />
-                                    <SkeletonV1 animation="pulse" />
-                                    <SkeletonV1 animation="pulse" />
-                                </PageContentsCardV1>
-                            </Grid>
-                        )}
-                    </>
-                )}
-                {!isError && !isLoading && children}
-            </>
-        );
+    ({
+        isError,
+        isLoading,
+        errorState,
+        loadingState,
+        children,
+        wrapInGrid,
+        wrapInCard,
+    }) => {
+        if (isError) {
+            if (errorState) {
+                return errorState;
+            }
+
+            if (wrapInGrid && wrapInCard) {
+                return (
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            {DEFAULT_ERROR_ELEMENT}
+                        </PageContentsCardV1>
+                    </Grid>
+                );
+            }
+
+            if (wrapInGrid) {
+                return (
+                    <Grid item xs={12}>
+                        {DEFAULT_ERROR_ELEMENT}
+                    </Grid>
+                );
+            }
+
+            return DEFAULT_ERROR_ELEMENT;
+        }
+
+        if (isLoading) {
+            if (loadingState) {
+                return loadingState;
+            }
+
+            if (wrapInGrid && wrapInCard) {
+                return (
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            {DEFAULT_LOADING_ELEMENT}
+                        </PageContentsCardV1>
+                    </Grid>
+                );
+            }
+
+            if (wrapInGrid) {
+                return (
+                    <Grid item xs={12}>
+                        {DEFAULT_LOADING_ELEMENT}
+                    </Grid>
+                );
+            }
+
+            return DEFAULT_LOADING_ELEMENT;
+        }
+
+        return <>{children}</>;
     };

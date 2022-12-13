@@ -271,6 +271,8 @@ export const CreateAlertPage: FunctionComponent = () => {
             </PageContentsGridV1>
 
             <LoadingErrorStateSwitch
+                wrapInCard
+                wrapInGrid
                 isError={false}
                 isLoading={alertTemplatesRequestStatus === ActionStatus.Working}
             >

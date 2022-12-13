@@ -31,7 +31,6 @@ import { useTranslation } from "react-i18next";
 import {
     JSONEditorV1,
     PageContentsCardV1,
-    SkeletonV1,
     useDialogProviderV1,
 } from "../../../platform/components";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
@@ -211,13 +210,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     getMetricsStatus === ActionStatus.Error
                 }
                 isLoading={isPinotInfraLoading}
-                loadingState={
-                    <>
-                        <SkeletonV1 animation="pulse" />
-                        <SkeletonV1 animation="pulse" />
-                        <SkeletonV1 animation="pulse" />
-                    </>
-                }
             >
                 <Grid container>
                     <Grid item xs={12}>

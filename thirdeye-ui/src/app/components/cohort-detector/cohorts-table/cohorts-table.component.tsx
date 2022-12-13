@@ -23,7 +23,6 @@ import {
     DataGridSortOrderV1,
     DataGridV1,
     PageContentsCardV1,
-    SkeletonV1,
 } from "../../../platform/components";
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
@@ -156,13 +155,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                         isError={getCohortsRequestStatus === ActionStatus.Error}
                         isLoading={
                             getCohortsRequestStatus === ActionStatus.Working
-                        }
-                        loadingState={
-                            <>
-                                <SkeletonV1 animation="pulse" />
-                                <SkeletonV1 animation="pulse" />
-                                <SkeletonV1 animation="pulse" />
-                            </>
                         }
                     >
                         {!cohortsData && (

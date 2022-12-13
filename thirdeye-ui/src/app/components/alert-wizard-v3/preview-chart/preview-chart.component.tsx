@@ -277,9 +277,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                                     }
                                                     severity="info"
                                                 >
-                                                    Please complete the missing
-                                                    information to see the
-                                                    preview.
+                                                    {t(
+                                                        "message.please-complete-the-missing-information-to-see-preview"
+                                                    )}
                                                 </Alert>
                                             </Grid>
                                         </Grid>

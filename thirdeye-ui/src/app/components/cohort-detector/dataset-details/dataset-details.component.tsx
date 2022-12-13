@@ -24,7 +24,7 @@ import {
 import { Autocomplete } from "@material-ui/lab";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
+import { PageContentsCardV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
@@ -151,13 +151,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                     getMetricsStatus === ActionStatus.Error
                 }
                 isLoading={isPinotInfraLoading}
-                loadingState={
-                    <>
-                        <SkeletonV1 animation="pulse" />
-                        <SkeletonV1 animation="pulse" />
-                        <SkeletonV1 animation="pulse" />
-                    </>
-                }
             >
                 <Grid container>
                     <Grid item xs={12}>

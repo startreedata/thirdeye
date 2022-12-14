@@ -54,9 +54,13 @@ import {
     useGetEvaluation,
     useResetAlert,
 } from "../../rest/alerts/alerts.actions";
-import { deleteAlert, updateAlert } from "../../rest/alerts/alerts.rest";
+import {
+    deleteAlert,
+    getAlertStats,
+    updateAlert,
+} from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { Alert, AlertStats } from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
@@ -78,6 +82,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
+    const [alertStats, setAlertStats] = useState<AlertStats | null>(null);
     const {
         alert: alertThatWasReset,
         resetAlert,
@@ -126,6 +131,14 @@ export const AlertsViewPage: FunctionComponent = () => {
         ],
         [searchParams]
     );
+
+    useEffect(() => {
+        if (Number(alertId)) {
+            getAlertStats(Number(alertId)).then((alertStatsData) => {
+                setAlertStats(alertStatsData);
+            });
+        }
+    }, [alertId]);
 
     const fetchData = (): void => {
         if (!alert || !startTime || !endTime) {
@@ -419,6 +432,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                                     return (
                                         <EnumerationItemsTable
                                             alertId={Number(alertId)}
+                                            alertsStats={{
+                                                [Number(alertId)]: alertStats,
+                                            }}
                                             detectionEvaluations={
                                                 detectionEvaluations
                                             }

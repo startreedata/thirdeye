@@ -46,6 +46,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         onSearchTermChange,
         sortOrder,
         onSortOrderChange,
+        alertsStats,
     }) => {
         const [filteredDetectionEvaluations, setFilteredDetectionEvaluations] =
             useState(
@@ -237,6 +238,9 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                 return (
                                     <EnumerationItemRow
                                         alertId={alertId}
+                                        alertStats={
+                                            alertsStats?.[alertId] ?? null
+                                        }
                                         anomalies={
                                             detectionEvaluation.anomalies
                                         }

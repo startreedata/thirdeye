@@ -25,8 +25,13 @@ public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProv
 
   @Override
   public List<AlertTemplateApi> getAlertTemplates() {
-    return readJsonObjectsFromResourcesFolder(RESOURCES_TEMPLATES_PATH,
+    final List<AlertTemplateApi> alertTemplateApis = readJsonObjectsFromResourcesFolder(
+        RESOURCES_TEMPLATES_PATH,
         this.getClass(),
         AlertTemplateApi.class);
+
+    CommonProperties.enrichCommonProperties(alertTemplateApis);
+
+    return alertTemplateApis;
   }
 }

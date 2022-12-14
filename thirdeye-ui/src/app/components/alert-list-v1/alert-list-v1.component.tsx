@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid, Link, Typography, useTheme } from "@material-ui/core";
+import { Button, Grid, Link } from "@material-ui/core";
 import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
@@ -28,17 +28,16 @@ import {
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
-    SkeletonV1,
 } from "../../platform/components";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
-import { getAlertAccuracyData } from "../../utils/alerts/alerts.util";
 import {
     getAlertsAlertPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
+import { AlertAccuracyColored } from "../alert-accuracy-colored/alert-accuracy-colored.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
 import type { AlertListV1Props } from "./alert-list-v1.interfaces";
 
@@ -53,7 +52,6 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     const navigate = useNavigate();
 
     const { t } = useTranslation();
-    const theme = useTheme();
 
     const generateDataWithChildren = (data: UiAlert[]): UiAlert[] => {
         return data?.map((alert, index) => ({
@@ -94,24 +92,13 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     const renderAlertAccuracy = (
         _: Record<string, unknown>,
         data: UiAlert
-    ): ReactElement => {
-        if (!data.accuracyStatistics) {
-            return <SkeletonV1 width={50} />;
-        }
-
-        const [accuracyNumber, colorScheme] = getAlertAccuracyData(
-            data.accuracyStatistics
-        );
-
-        const color = theme.palette[colorScheme].main;
-        const accuracyString = `${100 * accuracyNumber}%`;
-
-        return (
-            <Typography style={{ color }} variant="body2">
-                {accuracyString}
-            </Typography>
-        );
-    };
+    ): ReactElement => (
+        <AlertAccuracyColored
+            alertStats={data.accuracyStatistics ?? null}
+            renderCustomText={(accuracyNumber) => `${100 * accuracyNumber}%`}
+            typographyProps={{ variant: "body2" }}
+        />
+    );
 
     const renderAlertAccuracyTooltip = (
         _: Record<string, unknown>,

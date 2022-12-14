@@ -14,7 +14,7 @@
  */
 
 import { Typography, TypographyProps, useTheme } from "@material-ui/core";
-import React, { FunctionComponent, ReactElement } from "react";
+import React, { FunctionComponent, ReactElement, ReactNode } from "react";
 import { SkeletonV1 } from "../../platform/components";
 import { SkeletonV1Props } from "../../platform/components/skeleton-v1/skeleton-v1.interfaces";
 import { AlertStats } from "../../rest/dto/alert.interfaces";
@@ -25,7 +25,7 @@ export const AlertAccuracyColored: FunctionComponent<{
     renderCustomLoading?: ReactElement;
     defaultSkeletonProps?: SkeletonV1Props;
     typographyProps?: Partial<TypographyProps>;
-    renderCustomText?: (accuracy: number) => ReactElement;
+    renderCustomText?: (accuracy: number) => ReactNode;
 }> = ({
     alertStats,
     renderCustomLoading,

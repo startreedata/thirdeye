@@ -20,15 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The goal of this class is to maintain a list of commonly used description for template properties
- * For such properties, default metadata is provided
+ * The goal of this class is to maintain a list of description for commonly used properties.
  */
 public class CommonProperties {
 
   // please maintain this list in alphabetical order
   public static final Map<String, String> COMMON_DESCRIPTIONS = ImmutableMap.<String, String>builder()
-      .put("dataSource", "The Pinot datasource to use.")
       .put("dataset", "The dataset to query.")
+      .put("dataSource", "The Pinot datasource to use.")
       .put("timeColumn",
           "TimeColumn used to group by time. If set to AUTO (the default value), the Pinot primary time column is used.")
       .put("timezone", "Timezone used to group by time.")
@@ -44,7 +43,6 @@ public class CommonProperties {
         if (p.getDescription() == null) {
           p.setDescription(COMMON_DESCRIPTIONS.get(p.getName()));
         }
-        // could set other metadata fields here with other maps
       }
     }
   }

@@ -32,6 +32,7 @@ import {
 } from "../../platform/components";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
+import { getAlertAccuracyData } from "../../utils/alerts/alerts.util";
 import {
     getAlertsAlertPath,
     getAlertsCreateCopyPath,
@@ -94,21 +95,20 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         _: Record<string, unknown>,
         data: UiAlert
     ): ReactElement => {
-        if (!data.accuracy) {
+        if (!data.accuracyStatistics) {
             return <SkeletonV1 width={50} />;
         }
 
-        let color = theme.palette.success.main;
-        const accuracy = `${100 * data.accuracy}%`;
-        if (data.accuracy < 0.4) {
-            color = theme.palette.error.main;
-        } else if (data.accuracy < 0.7) {
-            color = theme.palette.warning.main;
-        }
+        const [accuracyNumber, colorScheme] = getAlertAccuracyData(
+            data.accuracyStatistics
+        );
+
+        const color = theme.palette[colorScheme].main;
+        const accuracyString = `${100 * accuracyNumber}%`;
 
         return (
             <Typography style={{ color }} variant="body2">
-                {accuracy}
+                {accuracyString}
             </Typography>
         );
     };

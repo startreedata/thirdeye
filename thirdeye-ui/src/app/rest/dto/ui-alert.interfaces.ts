@@ -19,7 +19,6 @@ export interface UiAlert {
     name: string;
     active: boolean;
     activeText: string;
-    accuracy?: number;
     accuracyStatistics?: AlertStats;
     userId: number;
     createdBy: string;

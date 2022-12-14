@@ -214,41 +214,17 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     // Since the alert accuracy is fetched via a different API, that data is not being injected
     // into the main uiAnomaly state to avoid adding complexity to the state updated; instead,
-    // the accuracy data is stored in alertsAccuracy and injected into the uiAlerts state data
-    // asynchronously, as and when it is resolved before that is passed on to the to the
+    // the accuracyStatistics data is stored in alertsAccuracy and injected into the uiAlerts state
+    //  data asynchronously, as and when it is resolved before that is passed on to the to the
     // AlertListV1 component. This separate storage of accuracy data in this component might
     // not be especially advantageous right now, but it will be helpful if the alerts API needs
     // to be called multiple times, say for searching and filtering
     const uiAlertsWithAccuracy = useMemo<typeof uiAlerts>(
         () =>
-            uiAlerts?.map((uiAlert) => {
-                const alertStat = alertsStats[uiAlert.id];
-
-                if (!alertStat) {
-                    return uiAlert;
-                }
-
-                // If there have been zero anomalies so far, then there is no data,
-                // so just set the accuracy to be 100%
-                if (alertStat.totalCount === 0) {
-                    return {
-                        ...uiAlert,
-                        accuracy: 1,
-                        accuracyStatistics: alertStat,
-                    };
-                }
-
-                // Returns a decimal value with four digits of precision
-                const accuracy = Number(
-                    (
-                        1 -
-                        alertStat.feedbackStats.NOT_ANOMALY /
-                            alertStat.totalCount
-                    ).toFixed(4)
-                );
-
-                return { ...uiAlert, accuracy, accuracyStatistics: alertStat };
-            }) ?? null,
+            uiAlerts?.map((uiAlert) => ({
+                ...uiAlert,
+                accuracyStatistics: alertsStats[uiAlert.id],
+            })) ?? null,
         [uiAlerts, alertsStats]
     );
 

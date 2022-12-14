@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AnomalyFeedbackType } from "./anomaly.interfaces";
 import { DetectionEvaluation } from "./detection.interfaces";
 import { User } from "./user.interfaces";
 
@@ -123,5 +124,17 @@ export interface EnumerationItemConfig {
     name?: string;
     params: {
         queryFilters: string;
+    };
+}
+
+export interface AlertStats {
+    totalCount: number;
+    countWithFeedback: number;
+    feedbackStats: {
+        [AnomalyFeedbackType.ANOMALY_NEW_TREND]: number;
+        [AnomalyFeedbackType.NOT_ANOMALY]: number;
+        [AnomalyFeedbackType.ANOMALY]: number;
+        [AnomalyFeedbackType.ANOMALY_EXPECTED]: number;
+        [AnomalyFeedbackType.NO_FEEDBACK]: number;
     };
 }

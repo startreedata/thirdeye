@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid, Link } from "@material-ui/core";
+import { Button, Grid, Link, Typography, useTheme } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -22,12 +23,15 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
+    DataGridColumnV1,
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
+    SkeletonV1,
 } from "../../platform/components";
-import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
+import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
+import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
     getAlertsAlertPath,
     getAlertsCreateCopyPath,
@@ -35,7 +39,7 @@ import {
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
-import { AlertListV1Props } from "./alert-list-v1.interfaces";
+import type { AlertListV1Props } from "./alert-list-v1.interfaces";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     alerts,
@@ -48,6 +52,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     const navigate = useNavigate();
 
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const generateDataWithChildren = (data: UiAlert[]): UiAlert[] => {
         return data?.map((alert, index) => ({
@@ -82,6 +87,61 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
             <Link onClick={() => handleAlertViewDetails(data.id)}>
                 {cellValue}
             </Link>
+        );
+    };
+
+    const renderAlertAccuracy = (
+        _: Record<string, unknown>,
+        data: UiAlert
+    ): ReactElement => {
+        if (!data.accuracy) {
+            return <SkeletonV1 width={50} />;
+        }
+
+        let color = theme.palette.success.main;
+        const accuracy = `${100 * data.accuracy}%`;
+        if (data.accuracy < 0.4) {
+            color = theme.palette.error.main;
+        } else if (data.accuracy < 0.7) {
+            color = theme.palette.warning.main;
+        }
+
+        return (
+            <Typography style={{ color }} variant="body2">
+                {accuracy}
+            </Typography>
+        );
+    };
+
+    const renderAlertAccuracyTooltip = (
+        _: Record<string, unknown>,
+        data: UiAlert
+    ): ReactElement | undefined => {
+        if (!data.accuracyStatistics) {
+            return (
+                <>
+                    {capitalize(
+                        t("message.fetching-entity", {
+                            entity: t("label.data"),
+                        })
+                    )}
+                    ...
+                </>
+            );
+        }
+
+        const { totalCount, countWithFeedback, feedbackStats } =
+            data.accuracyStatistics;
+
+        return (
+            <>
+                {t("message.total-reported-anomalies")}: {totalCount}
+                <br />
+                {t("message.anomalies-with-feedback")}: {countWithFeedback}
+                <br />
+                {t("message.misreported-anomalies")}:
+                {feedbackStats[AnomalyFeedbackType.NOT_ANOMALY]}
+            </>
         );
     };
 
@@ -141,7 +201,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         onAlertReset && onAlertReset(selectedSingleAlert.alert);
     };
 
-    const alertGroupColumns = [
+    const alertGroupColumns: DataGridColumnV1<UiAlert>[] = [
         {
             key: "name",
             dataKey: "name",
@@ -157,6 +217,15 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
             header: t("label.created-by"),
             minWidth: 0,
             flex: 1,
+        },
+        {
+            key: "accuracy",
+            dataKey: "accuracy",
+            header: t("label.accuracy"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderAlertAccuracy,
+            customCellTooltipRenderer: renderAlertAccuracyTooltip,
         },
         {
             key: "active",

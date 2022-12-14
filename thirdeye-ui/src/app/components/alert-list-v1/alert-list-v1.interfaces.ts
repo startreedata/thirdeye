@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Alert } from "../../rest/dto/alert.interfaces";
-import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
+import type { Alert } from "../../rest/dto/alert.interfaces";
+import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 
 export interface AlertListV1Props {
     alerts: UiAlert[] | null;

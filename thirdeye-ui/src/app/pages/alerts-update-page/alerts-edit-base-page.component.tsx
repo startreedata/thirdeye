@@ -229,7 +229,7 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
             </PageHeader>
 
             <Outlet
-                context={[
+                context={{
                     alert,
                     handleAlertPropertyChange,
                     selectedSubscriptionGroups,
@@ -237,7 +237,7 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                     selectedAlertTemplate,
                     setSelectedAlertTemplate,
                     alertTemplateOptions,
-                ]}
+                }}
             />
 
             <WizardBottomBar

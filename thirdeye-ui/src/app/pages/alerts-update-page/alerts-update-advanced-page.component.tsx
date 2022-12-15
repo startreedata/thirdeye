@@ -25,30 +25,19 @@ import {
 import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { MessageDisplayState } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 import { PageContentsCardV1 } from "../../platform/components";
-import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { AlertEditPageOutletContextProps } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
         useState(false);
-    const [
+    const {
         alert,
-        onAlertPropertyChange,
+        handleAlertPropertyChange: onAlertPropertyChange,
         selectedSubscriptionGroups,
-        onSubscriptionGroupsChange,
+        handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
-    ] =
-        useOutletContext<
-            [
-                EditableAlert,
-                (contents: Partial<EditableAlert>) => void,
-                SubscriptionGroup[],
-                (groups: SubscriptionGroup[]) => void,
-                AlertTemplateType
-            ]
-        >();
+    } = useOutletContext<AlertEditPageOutletContextProps>();
 
     const requiredFields = useMemo(() => {
         if (selectedAlertTemplate) {

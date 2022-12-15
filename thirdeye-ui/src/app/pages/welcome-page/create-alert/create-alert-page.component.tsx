@@ -53,6 +53,7 @@ import {
     getHomePath,
 } from "../../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../../utils/subscription-groups/subscription-groups.util";
+import { CreateAlertPageProps } from "./create-alert-page.interface";
 
 const STEPS = [
     {
@@ -74,7 +75,9 @@ const MULTI_DIMENSION_SELECT_STEP = {
     translationLabel: "multidimension-setup",
 };
 
-export const CreateAlertPage: FunctionComponent = () => {
+export const CreateAlertPage: FunctionComponent<CreateAlertPageProps> = ({
+    hideHeader,
+}) => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const navigate = useNavigate();
@@ -232,21 +235,24 @@ export const CreateAlertPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader
-                transparentBackground
-                customActions={
-                    <Button
-                        color="primary"
-                        href={t("url.documentation-homepage")}
-                        target="_blank"
-                        variant="contained"
-                    >
-                        {t("label.help")}
-                    </Button>
-                }
-                subtitle={t("message.by-creating-an-alert-youll-be-able")}
-                title={t("message.lets-create-your-first-alert")}
-            />
+            {!hideHeader && (
+                <PageHeader
+                    transparentBackground
+                    customActions={
+                        <Button
+                            color="primary"
+                            href={t("url.documentation-homepage")}
+                            target="_blank"
+                            variant="contained"
+                        >
+                            {t("label.help")}
+                        </Button>
+                    }
+                    subtitle={t("message.by-creating-an-alert-youll-be-able")}
+                    title={t("message.lets-create-your-first-alert")}
+                />
+            )}
+
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <PageContentsCardV1>

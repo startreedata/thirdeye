@@ -218,7 +218,8 @@ export const AlertsAllPage: FunctionComponent = () => {
     //  data asynchronously, as and when it is resolved before that is passed on to the to the
     // AlertListV1 component. This separate storage of accuracy data in this component might
     // not be especially advantageous right now, but it will be helpful if the alerts API needs
-    // to be called multiple times, say for searching and filtering
+    // to be called multiple times, say for searching and filtering. Also helpful in keeping the
+    // state mutation simple in cases of alert deletion.
     const uiAlertsWithAccuracy = useMemo<typeof uiAlerts>(
         () =>
             uiAlerts?.map((uiAlert) => ({

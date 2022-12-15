@@ -18,6 +18,7 @@ import { useOutletContext } from "react-router-dom";
 import { AlertDetails } from "../../../components/alert-wizard-v2/alert-details/alert-details.component";
 import { AlertNotifications } from "../../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import { AlertTemplate } from "../../../components/alert-wizard-v2/alert-template/alert-template.component";
+import { PageContentsGridV1 } from "../../../platform/components";
 import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
@@ -45,7 +46,7 @@ export const AlertsCreateSimplePage: FunctionComponent = () => {
         >();
 
     return (
-        <>
+        <PageContentsGridV1>
             <Grid item xs={12}>
                 <AlertDetails
                     alert={alert}
@@ -68,6 +69,6 @@ export const AlertsCreateSimplePage: FunctionComponent = () => {
                     onSubscriptionGroupsChange={onSubscriptionGroupsChange}
                 />
             </Grid>
-        </>
+        </PageContentsGridV1>
     );
 };

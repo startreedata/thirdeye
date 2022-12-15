@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, ButtonGroup, Grid, Typography } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
 import { isEmpty, isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,11 +25,10 @@ import {
 } from "react-router-dom";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
-    PageContentsCardV1,
-    PageContentsGridV1,
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageV1,
@@ -171,7 +170,7 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
             <PageHeader
                 customActions={
                     <PageHeaderActionsV1>
-                        <Box padding={1}>View:</Box>
+                        <Box padding={1}>{t("label.view")}:</Box>
                         <ButtonGroup color="primary" variant="outlined">
                             <Button
                                 component={NavLink}
@@ -181,12 +180,14 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                                     search: searchParams.toString(),
                                 }}
                                 variant={
-                                    location.pathname.includes("simple")
+                                    location.pathname.includes(
+                                        AppRouteRelative.ALERTS_CREATE_SIMPLE
+                                    )
                                         ? "contained"
                                         : "outlined"
                                 }
                             >
-                                Simple
+                                {t("label.simple")}
                             </Button>
                             <Button
                                 component={NavLink}
@@ -196,12 +197,14 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                                     search: searchParams.toString(),
                                 }}
                                 variant={
-                                    location.pathname.includes("advanced")
+                                    location.pathname.includes(
+                                        AppRouteRelative.ALERTS_CREATE_ADVANCED
+                                    )
                                         ? "contained"
                                         : "outlined"
                                 }
                             >
-                                Advanced
+                                {t("label.advanced")}
                             </Button>
                         </ButtonGroup>
                     </PageHeaderActionsV1>
@@ -224,42 +227,25 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                     </TooltipV1>
                 </PageHeaderTextV1>
             </PageHeader>
-            <PageContentsGridV1>
-                <Outlet
-                    context={[
-                        alert,
-                        handleAlertPropertyChange,
-                        selectedSubscriptionGroups,
-                        handleSubscriptionGroupChange,
-                        selectedAlertTemplate,
-                        setSelectedAlertTemplate,
-                        alertTemplateOptions,
-                    ]}
-                />
-            </PageContentsGridV1>
 
-            <Box width="100%">
-                <PageContentsCardV1>
-                    <Grid container justifyContent="flex-end">
-                        <Grid item>
-                            <Button
-                                color="secondary"
-                                onClick={handlePageExitChecks}
-                            >
-                                {t("label.cancel")}
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                color="primary"
-                                onClick={handleSubmitAlertClick}
-                            >
-                                {submitButtonLabel}
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </PageContentsCardV1>
-            </Box>
+            <Outlet
+                context={[
+                    alert,
+                    handleAlertPropertyChange,
+                    selectedSubscriptionGroups,
+                    handleSubscriptionGroupChange,
+                    selectedAlertTemplate,
+                    setSelectedAlertTemplate,
+                    alertTemplateOptions,
+                ]}
+            />
+
+            <WizardBottomBar
+                backButtonLabel={t("label.cancel")}
+                handleBackClick={handlePageExitChecks}
+                handleNextClick={handleSubmitAlertClick}
+                nextButtonLabel={submitButtonLabel}
+            />
         </PageV1>
     );
 };

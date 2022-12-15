@@ -151,7 +151,7 @@ public class RcaInfoFetcher {
     // take config from persistence - ensure dataset/metric DTO configs are correct for RCA
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metricName, datasetName);
     if (metricConfigDTO == null) {
-      LOG.warn("Could not find metric %s for dataset %s. Building a custom metric for RCA.");
+      LOG.warn("Could not find metric {} for dataset {}. Building a custom metric for RCA.", metricName, datasetName);
       final String metricAggFunction = metadataMetricDTO.getDefaultAggFunction();
       ensure(StringUtils.isNotBlank(metricAggFunction),
           ERR_MISSING_CONFIGURATION_FIELD,

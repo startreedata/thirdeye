@@ -130,11 +130,5 @@ export interface EnumerationItemConfig {
 export interface AlertStats {
     totalCount: number;
     countWithFeedback: number;
-    feedbackStats: {
-        [AnomalyFeedbackType.ANOMALY_NEW_TREND]: number;
-        [AnomalyFeedbackType.NOT_ANOMALY]: number;
-        [AnomalyFeedbackType.ANOMALY]: number;
-        [AnomalyFeedbackType.ANOMALY_EXPECTED]: number;
-        [AnomalyFeedbackType.NO_FEEDBACK]: number;
-    };
+    feedbackStats: Record<keyof typeof AnomalyFeedbackType, number>;
 }

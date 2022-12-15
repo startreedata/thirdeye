@@ -346,9 +346,9 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    const overallAccuracySubtitle = useMemo(() => {
+    const overallAccuracySubtitle = useMemo<string | undefined>(() => {
         if (!overallAlertStats) {
-            return "Loading...";
+            return undefined;
         }
 
         const [accuracyNumber] = getAlertAccuracyData(overallAlertStats);

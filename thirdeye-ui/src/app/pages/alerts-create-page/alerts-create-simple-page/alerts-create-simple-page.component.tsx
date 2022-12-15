@@ -13,7 +13,7 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { AlertDetails } from "../../../components/alert-wizard-v2/alert-details/alert-details.component";
 import { AlertNotifications } from "../../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
@@ -29,7 +29,12 @@ export const AlertsCreateSimplePage: FunctionComponent = () => {
         selectedAlertTemplate,
         setSelectedAlertTemplate,
         alertTemplateOptions,
+        setShowBottomBar,
     } = useOutletContext<AlertEditPageOutletContextProps>();
+
+    useEffect(() => {
+        setShowBottomBar(true);
+    }, []);
 
     return (
         <PageContentsGridV1>

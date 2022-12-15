@@ -39,6 +39,7 @@ export const AlertsCreateAdvancePage: FunctionComponent = () => {
         handleAlertPropertyChange: onAlertPropertyChange,
         handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
+        setShowBottomBar,
     } = useOutletContext<AlertEditPageOutletContextProps>();
 
     const requiredFields = useMemo(() => {
@@ -60,6 +61,10 @@ export const AlertsCreateAdvancePage: FunctionComponent = () => {
 
         setIsRequiredPropertyValuesSet(isValid);
     }, [selectedAlertTemplate, alert]);
+
+    useEffect(() => {
+        setShowBottomBar(true);
+    }, []);
 
     return (
         <PageContentsGridV1>

@@ -114,15 +114,18 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
       return;
     }
 
-    // fixme cyril asap this is broken - all labels are overriden by downstream postProcessors - move down to each postProcessor or do a set operation
     for (final MergedAnomalyResultDTO anomaly : anomalies) {
       final @Nullable List<AnomalyLabelDTO> anomalyLabels = anomaly.getAnomalyLabels();
       if (anomalyLabels == null) {
         continue;
       }
       for (final AnomalyLabelDTO label : anomalyLabels) {
-        label.setSourcePostProcessor(postProcessor.name());
-        label.setSourceNodeName(planNode.getName());
+        if (label.getSourcePostProcessor() == null) {
+          label.setSourcePostProcessor(postProcessor.name());
+        }
+        if (label.getSourceNodeName() == null) {
+          label.setSourceNodeName(planNode.getName());
+        }
       }
     }
   }

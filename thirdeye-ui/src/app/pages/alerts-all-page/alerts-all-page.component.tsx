@@ -145,7 +145,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                     .map((UiAlertItem) => UiAlertItem.id)
                     .filter((alertId) => !(alertId in alertsStats)) // Only fetch stats for those not already fetched
                     .forEach((alertId) => {
-                        getAlertStats(alertId).then((alertStatsData) => {
+                        getAlertStats({ alertId }).then((alertStatsData) => {
                             setAlertsStats((alertsStatsProp) => ({
                                 ...alertsStatsProp,
                                 [alertId]: alertStatsData,

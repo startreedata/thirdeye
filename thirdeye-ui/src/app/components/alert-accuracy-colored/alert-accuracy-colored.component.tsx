@@ -13,44 +13,40 @@
  * the License.
  */
 
-import { Typography, TypographyProps, useTheme } from "@material-ui/core";
-import React, { FunctionComponent, ReactElement, ReactNode } from "react";
+import { Typography, useTheme } from "@material-ui/core";
+import React, { FunctionComponent } from "react";
 import { SkeletonV1 } from "../../platform/components";
-import { SkeletonV1Props } from "../../platform/components/skeleton-v1/skeleton-v1.interfaces";
-import { AlertStats } from "../../rest/dto/alert.interfaces";
 import { getAlertAccuracyData } from "../../utils/alerts/alerts.util";
+import type { AlertAccuracyColoredProps } from "./alert-accuracy-colored.interface";
 
-export const AlertAccuracyColored: FunctionComponent<{
-    alertStats: AlertStats | null;
-    renderCustomLoading?: ReactElement;
-    defaultSkeletonProps?: SkeletonV1Props;
-    typographyProps?: Partial<TypographyProps>;
-    renderCustomText?: (accuracy: number) => ReactNode;
-}> = ({
-    alertStats,
-    renderCustomLoading,
-    typographyProps,
-    renderCustomText,
-    defaultSkeletonProps,
-}) => {
-    const theme = useTheme();
+export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> =
+    ({
+        alertStats,
+        renderCustomLoading,
+        typographyProps,
+        renderCustomText,
+        defaultSkeletonProps,
+    }) => {
+        const theme = useTheme();
 
-    if (!alertStats) {
+        if (!alertStats) {
+            return (
+                renderCustomLoading || (
+                    <SkeletonV1 width={50} {...defaultSkeletonProps} />
+                )
+            );
+        }
+
+        const [accuracyNumber, colorScheme] = getAlertAccuracyData(alertStats);
+
+        const accuracyString = `Accuracy: ${(100 * accuracyNumber).toFixed(
+            2
+        )}%`;
+        const color = theme.palette[colorScheme].main;
+
         return (
-            renderCustomLoading || (
-                <SkeletonV1 width={50} {...defaultSkeletonProps} />
-            )
+            <Typography style={{ color }} variant="body1" {...typographyProps}>
+                {renderCustomText?.(accuracyNumber) || accuracyString}
+            </Typography>
         );
-    }
-
-    const [accuracyNumber, colorScheme] = getAlertAccuracyData(alertStats);
-
-    const accuracyString = `Accuracy: ${100 * accuracyNumber}%`;
-    const color = theme.palette[colorScheme].main;
-
-    return (
-        <Typography style={{ color }} variant="body1" {...typographyProps}>
-            {renderCustomText?.(accuracyNumber) || accuracyString}
-        </Typography>
-    );
-};
+    };

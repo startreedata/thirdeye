@@ -33,9 +33,27 @@ export const getAlert = async (id: number): Promise<Alert> => {
     return response.data;
 };
 
-export const getAlertStats = async (id: number): Promise<AlertStats> => {
+export const getAlertStats = async ({
+    alertId,
+    startTime,
+    endTime,
+}: {
+    alertId: number;
+    startTime?: number;
+    endTime?: number;
+}): Promise<AlertStats> => {
+    const queryParams = new URLSearchParams([]);
+
+    if (startTime) {
+        queryParams.set("startTime", `${startTime}`);
+    }
+
+    if (endTime) {
+        queryParams.set("endTime", `${endTime}`);
+    }
+
     const response = await axios.get<AlertStats>(
-        `${BASE_URL_ALERTS}/${id}/stats`
+        `${BASE_URL_ALERTS}/${alertId}/stats?${queryParams.toString()}`
     );
 
     return response.data;

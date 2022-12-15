@@ -64,6 +64,7 @@ import { Alert, AlertStats } from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
+    getAlertAccuracyData,
 } from "../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
@@ -82,7 +83,13 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
+
+    // To be used for overall accuracy
+    const [overallAlertStats, setOverallAlertStats] =
+        useState<AlertStats | null>(null);
+    // To be used for accuracy filtered by startTime and endTime
     const [alertStats, setAlertStats] = useState<AlertStats | null>(null);
+
     const {
         alert: alertThatWasReset,
         resetAlert,
@@ -134,11 +141,15 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         if (Number(alertId)) {
-            getAlertStats(Number(alertId)).then((alertStatsData) => {
+            getAlertStats({
+                alertId: Number(alertId),
+                startTime,
+                endTime,
+            }).then((alertStatsData) => {
                 setAlertStats(alertStatsData);
             });
         }
-    }, [alertId]);
+    }, [alertId, startTime, endTime]);
 
     const fetchData = (): void => {
         if (!alert || !startTime || !endTime) {
@@ -195,6 +206,11 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         getAlert(Number(alertId));
+        getAlertStats({
+            alertId: Number(alertId),
+        }).then((overallAlertStatsData) => {
+            setOverallAlertStats(overallAlertStatsData);
+        });
     }, [alertId]);
 
     useEffect(() => {
@@ -330,6 +346,16 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
+    const overallAccuracySubtitle = useMemo(() => {
+        if (!overallAlertStats) {
+            return "Loading...";
+        }
+
+        const [accuracyNumber] = getAlertAccuracyData(overallAlertStats);
+
+        return `Overall Accuracy: ${100 * accuracyNumber}%`;
+    }, [overallAlertStats]);
+
     return (
         <PageV1>
             <PageHeader
@@ -375,6 +401,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                         ""
                     )
                 }
+                subtitle={overallAccuracySubtitle}
                 title={alert ? alert.name : ""}
             >
                 {getAlertStatus === ActionStatus.Working && (

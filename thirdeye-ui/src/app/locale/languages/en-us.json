@@ -180,6 +180,7 @@
         "how-to-investigate-anomaly": "How to investigate an anomaly?",
         "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
         "id": "ID",
+        "impact-score": "Impact Score",
         "improve-alert-accuracy": "Improve alert accuracy",
         "inactive": "Inactive",
         "individual-contribution": "Individual contribution",

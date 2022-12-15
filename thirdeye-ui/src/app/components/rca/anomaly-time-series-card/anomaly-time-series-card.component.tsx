@@ -139,7 +139,9 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
             }
 
             const dataRequests = timeSeriesFiltersSet.map((filterSet) => {
-                const filters = filterSet.map(concatKeyValueWithEqual);
+                const filters = filterSet.map((item) =>
+                    concatKeyValueWithEqual(item, false)
+                );
 
                 return getAlertEvaluation(
                     createAlertEvaluation(anomaly.alert.id, startTime, endTime),

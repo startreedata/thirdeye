@@ -297,6 +297,33 @@ describe("Params Util", () => {
                     value: "1",
                 },
             ])
+        ).toEqual("a=1,c=2=4,z=1,z=2,z=3");
+        expect(
+            serializeKeyValuePair(
+                [
+                    {
+                        key: "z",
+                        value: "3",
+                    },
+                    {
+                        key: "a",
+                        value: "1",
+                    },
+                    {
+                        key: "z",
+                        value: "2",
+                    },
+                    {
+                        key: "c",
+                        value: "2=4",
+                    },
+                    {
+                        key: "z",
+                        value: "1",
+                    },
+                ],
+                true
+            )
         ).toEqual("a='1',c='2=4',z='1',z='2',z='3'");
     });
 

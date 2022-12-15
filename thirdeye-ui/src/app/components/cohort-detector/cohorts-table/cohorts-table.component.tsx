@@ -27,7 +27,8 @@ import {
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { CohortResult } from "../../../rest/dto/rca.interfaces";
-import { generateFilterStrings } from "../../anomaly-dimension-analysis/algorithm-table/algorithm-table.utils";
+import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
+import { generateFilterOptions } from "../../anomaly-dimension-analysis/algorithm-table/algorithm-table.utils";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     CohortsTableProps,
@@ -65,9 +66,10 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                 columnKeys.push(dimensionColumn);
             });
 
-            copied.name = generateFilterStrings(values, columnKeys, []).join(
-                NAME_JOIN_KEY
-            );
+            copied.name = generateFilterOptions(values, columnKeys, [])
+                .map((item) => concatKeyValueWithEqual(item, true))
+                .sort()
+                .join(NAME_JOIN_KEY);
 
             return copied;
         });

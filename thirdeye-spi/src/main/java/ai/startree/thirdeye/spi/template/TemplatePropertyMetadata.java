@@ -48,6 +48,10 @@ public class TemplatePropertyMetadata {
    */
   private List<Object> options;
   /**
+   * Whether multiple options can be selected.
+   */
+  private boolean isMultiselect = false;
+  /**
    * Helps the UI build input fields.
    */
   private JsonType jsonType;
@@ -121,6 +125,15 @@ public class TemplatePropertyMetadata {
 
   public TemplatePropertyMetadata setDescription(final String description) {
     this.description = description;
+    return this;
+  }
+
+  public boolean isMultiselect() {
+    return isMultiselect;
+  }
+
+  public TemplatePropertyMetadata setMultiselect(final boolean multiselect) {
+    isMultiselect = multiselect;
     return this;
   }
 

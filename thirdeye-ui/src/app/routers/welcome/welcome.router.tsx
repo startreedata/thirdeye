@@ -13,41 +13,12 @@
  * the License.
  */
 import React, { FunctionComponent, lazy, Suspense, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
-
-const CreateAlertPage = lazy(() =>
-    import(
-        /* webpackChunkName: "create-alert-page" */ "../../pages/welcome-page/create-alert/create-alert-page.component"
-    ).then((module) => ({ default: module.CreateAlertPage }))
-);
-
-const SelectTypePage = lazy(() =>
-    import(
-        /* webpackChunkName: "select-type-page" */ "../../pages/welcome-page/create-alert/select-type/select-type-page.component"
-    ).then((module) => ({ default: module.SelectTypePage }))
-);
-
-const SetupMonitoringPage = lazy(() =>
-    import(
-        /* webpackChunkName: "select-monitoring-page" */ "../../pages/welcome-page/create-alert/setup-monitoring/setup-monitoring-page.component"
-    ).then((module) => ({ default: module.SetupMonitoringPage }))
-);
-
-const SetupDetailsPage = lazy(() =>
-    import(
-        /* webpackChunkName: "select-details-page" */ "../../pages/welcome-page/create-alert/setup-details/setup-details-page.component"
-    ).then((module) => ({ default: module.SetupDetailsPage }))
-);
-
-const SetupDimensionGroupsPage = lazy(() =>
-    import(
-        /* webpackChunkName: "select-dimension-groups-page" */ "../../pages/welcome-page/create-alert/setup-dimension-groups/setup-dimension-groups-page.component"
-    ).then((module) => ({ default: module.SetupDimensionGroupsPage }))
-);
 
 const WelcomeLandingPage = lazy(() =>
     import(
@@ -73,7 +44,14 @@ const WelcomeSelectDatasets = lazy(() =>
     ).then((module) => ({ default: module.WelcomeSelectDatasets }))
 );
 
+const AlertsCreateGuidedRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-guided-create" */ "../alerts-guided-create/alerts-guided-create.router"
+    ).then((module) => ({ default: module.AlertsCreateGuidedRouter }))
+);
+
 export const WelcomeRouter: FunctionComponent = () => {
+    const { t } = useTranslation();
     const { setShowAppNavBar } = useAppBarConfigProvider();
 
     useEffect(() => {
@@ -151,53 +129,14 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                 {/* Welcome create alert path */}
                 <Route
-                    element={<CreateAlertPage />}
+                    element={
+                        <AlertsCreateGuidedRouter
+                            createLabel={t("label.create")}
+                            inProgressLabel={t("label.creating")}
+                        />
+                    }
                     path={`${AppRouteRelative.WELCOME_CREATE_ALERT}/*`}
-                >
-                    {/* Welcome create alert index path */}
-                    {/* Redirect to create alert select type path */}
-                    <Route
-                        index
-                        element={
-                            <Navigate
-                                replace
-                                to={
-                                    AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
-                                }
-                            />
-                        }
-                    />
-
-                    {/* Welcome create alert select type path */}
-                    <Route
-                        element={<SelectTypePage />}
-                        path={AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}
-                    />
-
-                    {/* Welcome create alert select dimension groups path */}
-                    <Route
-                        element={<SetupDimensionGroupsPage />}
-                        path={
-                            AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
-                        }
-                    />
-
-                    {/* Welcome create alert setup monitoring path */}
-                    <Route
-                        element={<SetupMonitoringPage />}
-                        path={
-                            AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
-                        }
-                    />
-
-                    {/* Welcome create alert setup details path */}
-                    <Route
-                        element={<SetupDetailsPage />}
-                        path={
-                            AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS
-                        }
-                    />
-                </Route>
+                />
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

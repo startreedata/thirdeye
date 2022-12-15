@@ -41,6 +41,7 @@ export const AppRouteRelative = {
     ALERTS_CREATE_NEW: "new",
     ALERTS_CREATE_COPY: `copy/${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_CREATE_SIMPLE: "simple",
+    ALERTS_CREATE_NEW_USER: "new-user",
     ALERTS_CREATE_ADVANCED: "advanced",
     ALERTS_UPDATE: "update",
     ALERTS_UPDATE_SIMPLE: "simple",

@@ -201,44 +201,167 @@
     },
     "eventContext": {
       "types": "${rcaEventTypes}",
-      "sqlFilter" : "${rcaEventSqlFilter}"
+      "sqlFilter": "${rcaEventSqlFilter}"
     },
     "timezone": "${timezone}",
     "granularity": "${monitoringGranularity}"
   },
-  "defaultProperties": {
-    "timezone": "UTC",
-    "timeColumn": "AUTO",
-    "timeColumnFormat": "",
-    "pattern": "UP_OR_DOWN",
-    "completenessDelay": "P0D",
-    "mergeMaxGap": "",
-    "mergeMaxDuration": "",
-    "rcaAggregationFunction": "",
-    "queryFilters": "",
-    "queryLimit": "100000000",
-    "rcaIncludedDimensions": [],
-    "rcaExcludedDimensions": [],
-    "rcaEventTypes": [],
-    "rcaEventSqlFilter": "",
-    "coldStartIgnore": "true",
-    "timeOfWeekIgnore": "true",
-    "daysOfWeek": [],
-    "hoursOfDay": [],
-    "dayHoursOfWeek": {},
-    "thresholdIgnore": "true",
-    "thresholdFilterMin": "-1",
-    "thresholdFilterMax": "-1",
-    "guardrailMetricIgnore": "true",
-    "guardrailMetricMin": "-1",
-    "guardrailMetricMax": "-1",
-    "guardrailMetric": "COUNT(*)",
-    "eventFilterSqlFilter": "",
-    "eventFilterLookaround": "P2D",
-    "eventFilterTypes": [],
-    "eventFilterIgnore": false,
-    "eventFilterBeforeEventMargin": "P0D",
-    "eventFilterAfterEventMargin": "P0D",
-    "seasonalityPeriod": "PT0S"
-  }
+  "properties": [
+    {
+      "name":  "dataSource"
+    },
+    {
+      "name":  "dataset"
+    },
+    {
+      "name":  "aggregationColumn"
+    },
+    {
+      "name":  "aggregationFunction"
+    },
+    {
+      "name":  "aggregationParameter"
+    },
+    {
+      "name":  "lookback"
+    },
+    {
+      "name":  "monitoringGranularity"
+    },
+    {
+      "name":  "sensitivity"
+    },
+    {
+      "name": "timezone",
+      "defaultValue": "UTC"
+    },
+    {
+      "name": "timeColumn",
+      "defaultValue": "AUTO"
+    },
+    {
+      "name": "timeColumnFormat",
+      "defaultValue": ""
+    },
+    {
+      "name": "pattern",
+      "defaultValue": "UP_OR_DOWN"
+    },
+    {
+      "name": "completenessDelay",
+      "defaultValue": "P0D"
+    },
+    {
+      "name": "mergeMaxGap",
+      "defaultValue": ""
+    },
+    {
+      "name": "mergeMaxDuration",
+      "defaultValue": ""
+    },
+    {
+      "name": "rcaAggregationFunction",
+      "defaultValue": ""
+    },
+    {
+      "name": "queryFilters",
+      "defaultValue": ""
+    },
+    {
+      "name": "queryLimit",
+      "defaultValue": "100000000"
+    },
+    {
+      "name": "rcaIncludedDimensions",
+      "defaultValue": []
+    },
+    {
+      "name": "rcaExcludedDimensions",
+      "defaultValue": []
+    },
+    {
+      "name": "rcaEventTypes",
+      "defaultValue": []
+    },
+    {
+      "name": "rcaEventSqlFilter",
+      "defaultValue": ""
+    },
+    {
+      "name": "coldStartIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "timeOfWeekIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "daysOfWeek",
+      "defaultValue": []
+    },
+    {
+      "name": "hoursOfDay",
+      "defaultValue": []
+    },
+    {
+      "name": "dayHoursOfWeek",
+      "defaultValue": {}
+    },
+    {
+      "name": "thresholdIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "thresholdFilterMin",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "thresholdFilterMax",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "guardrailMetricIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "guardrailMetricMin",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "guardrailMetricMax",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "guardrailMetric",
+      "defaultValue": "COUNT(*)"
+    },
+    {
+      "name": "eventFilterSqlFilter",
+      "defaultValue": ""
+    },
+    {
+      "name": "eventFilterLookaround",
+      "defaultValue": "P2D"
+    },
+    {
+      "name": "eventFilterTypes",
+      "defaultValue": []
+    },
+    {
+      "name": "eventFilterIgnore",
+      "defaultValue": false
+    },
+    {
+      "name": "eventFilterBeforeEventMargin",
+      "defaultValue": "P0D"
+    },
+    {
+      "name": "eventFilterAfterEventMargin",
+      "defaultValue": "P0D"
+    },
+    {
+      "name": "seasonalityPeriod",
+      "defaultValue": "PT0S"
+    }
+  ]
 }

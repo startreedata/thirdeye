@@ -37,8 +37,12 @@ import {
     AppRouteRelative,
     getHomePath,
 } from "../../../../utils/routes/routes.util";
+import { SelectTypePageProps } from "./select-type-page.interface";
 
-export const SelectTypePage: FunctionComponent = () => {
+export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
+    sampleAlertsBottom,
+    hideSampleAlerts,
+}) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { setShowAppNavBar } = useAppBarConfigProvider();
@@ -102,10 +106,12 @@ export const SelectTypePage: FunctionComponent = () => {
                     )}
                 </Typography>
             </Grid>
-            <SampleAlertSelection
-                alertTemplates={alertTemplates}
-                onSampleAlertSelect={handleSampleAlertSelect}
-            />
+            {!hideSampleAlerts && !sampleAlertsBottom && (
+                <SampleAlertSelection
+                    alertTemplates={alertTemplates}
+                    onSampleAlertSelect={handleSampleAlertSelect}
+                />
+            )}
             <Grid item xs={12}>
                 <EmptyStateSwitch
                     emptyState={
@@ -146,6 +152,13 @@ export const SelectTypePage: FunctionComponent = () => {
                     />
                 </EmptyStateSwitch>
             </Grid>
+
+            {!hideSampleAlerts && sampleAlertsBottom && (
+                <SampleAlertSelection
+                    alertTemplates={alertTemplates}
+                    onSampleAlertSelect={handleSampleAlertSelect}
+                />
+            )}
         </PageContentsGridV1>
     );
 };

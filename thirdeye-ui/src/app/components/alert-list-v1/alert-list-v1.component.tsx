@@ -122,11 +122,11 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
 
         return (
             <>
-                {t("message.total-reported-anomalies")}: {totalCount}
+                {t("message.total-reported-anomalies")}:&nbsp;{totalCount}
                 <br />
-                {t("message.anomalies-with-feedback")}: {countWithFeedback}
+                {t("message.anomalies-with-feedback")}:&nbsp;{countWithFeedback}
                 <br />
-                {t("message.misreported-anomalies")}:
+                {t("message.misreported-anomalies")}:&nbsp;
                 {feedbackStats[AnomalyFeedbackType.NOT_ANOMALY]}
             </>
         );

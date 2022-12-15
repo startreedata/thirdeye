@@ -41,7 +41,7 @@ export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> 
 
         const [accuracyNumber, colorScheme] = getAlertAccuracyData(alertStats);
 
-        const accuracyString = `${t("labels.accuracy")}: ${(
+        const accuracyString = `${t("label.accuracy")}: ${(
             100 * accuracyNumber
         ).toFixed(2)}%`;
         const color = theme.palette[colorScheme].main;

@@ -28,7 +28,9 @@ export const FilteredTimeSeriesRow: FunctionComponent<FilteredTimeSeriesProps> =
         const classes = useFilteredTimeSeriesRowStyles();
         const { t } = useTranslation();
 
-        const name = filterSet.map(concatKeyValueWithEqual).join(" & ");
+        const name = filterSet
+            .map((item) => concatKeyValueWithEqual(item, false))
+            .join(" & ");
         const seriesData = series.find((candidate) => candidate.name === name);
 
         let color = colorScale(name);

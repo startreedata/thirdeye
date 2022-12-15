@@ -21,6 +21,7 @@ import {
     Grid,
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -353,7 +354,11 @@ export const AlertsViewPage: FunctionComponent = () => {
 
         const [accuracyNumber] = getAlertAccuracyData(overallAlertStats);
 
-        return `Overall Accuracy: ${100 * accuracyNumber}%`;
+        return capitalize(
+            `${t("label.overall-entity", {
+                entity: t("label.accuracy"),
+            })}: ${100 * accuracyNumber}%`
+        );
     }, [overallAlertStats]);
 
     return (

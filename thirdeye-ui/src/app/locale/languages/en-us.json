@@ -244,6 +244,7 @@
         "optional": "Optional",
         "optional-overrides": "Optional Overrides",
         "options": "Options",
+        "overall-entity": "Overall {{entity}}",
         "overview": "Overview",
         "page-not-found": "Page Not Found",
         "pair-separator": " / ",

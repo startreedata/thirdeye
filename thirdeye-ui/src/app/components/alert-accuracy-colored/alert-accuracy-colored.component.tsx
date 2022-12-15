@@ -15,6 +15,7 @@
 
 import { Typography, useTheme } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import { SkeletonV1 } from "../../platform/components";
 import { getAlertAccuracyData } from "../../utils/alerts/alerts.util";
 import type { AlertAccuracyColoredProps } from "./alert-accuracy-colored.interface";
@@ -28,6 +29,7 @@ export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> 
         defaultSkeletonProps,
     }) => {
         const theme = useTheme();
+        const { t } = useTranslation();
 
         if (!alertStats) {
             return (
@@ -39,9 +41,9 @@ export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> 
 
         const [accuracyNumber, colorScheme] = getAlertAccuracyData(alertStats);
 
-        const accuracyString = `Accuracy: ${(100 * accuracyNumber).toFixed(
-            2
-        )}%`;
+        const accuracyString = `${t("labels.accuracy")}: ${(
+            100 * accuracyNumber
+        ).toFixed(2)}%`;
         const color = theme.palette[colorScheme].main;
 
         return (

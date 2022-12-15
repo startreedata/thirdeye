@@ -237,6 +237,8 @@ const mockEmptyUiAnomaly = {
     endTimeVal: -1,
     datasetName: "label.no-data-marker",
     hasFeedback: false,
+    isFlagged: false,
+    isIgnored: false,
 };
 
 const mockAnomaly1 = {

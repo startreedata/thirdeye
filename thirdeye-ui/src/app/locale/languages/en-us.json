@@ -334,6 +334,7 @@
         "type": "Type",
         "update": "Update",
         "update-entity": "Update {{entity}}",
+        "updating": "Updating",
         "upper-and-lower-bound": "Upper and Lower bound",
         "upper-bound": "Upper bound",
         "value": "Value",

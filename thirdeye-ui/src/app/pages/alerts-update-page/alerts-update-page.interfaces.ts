@@ -31,7 +31,10 @@ export interface AlertsEditPageProps {
 
 export interface AlertEditPageOutletContextProps {
     alert: EditableAlert;
-    handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+    handleAlertPropertyChange: (
+        contents: Partial<EditableAlert>,
+        isTotalReplace?: boolean
+    ) => void;
     selectedSubscriptionGroups: SubscriptionGroup[];
     handleSubscriptionGroupChange: (groups: SubscriptionGroup[]) => void;
     selectedAlertTemplate: AlertTemplateType;
@@ -40,4 +43,5 @@ export interface AlertEditPageOutletContextProps {
     ) => void;
     alertTemplateOptions: AlertTemplateType[];
     setShowBottomBar: (flag: boolean) => void;
+    handleSubmitAlertClick: (alert: EditableAlert) => void;
 }

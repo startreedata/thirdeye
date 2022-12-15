@@ -70,6 +70,8 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     const [alertTemplateOptions, setAlertTemplateOptions] = useState<
         AlertTemplateType[]
     >([]);
+    // This is  used by the guided create alert routes
+    const [showBottomBar, setShowBottomBar] = useState<boolean>(true);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
 
@@ -129,8 +131,8 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
         onSubscriptionGroupChange(updatedGroups);
     };
 
-    const handleSubmitAlertClick = (): void => {
-        onSubmit && onSubmit(alert);
+    const handleSubmitAlertClick = (alertToSubmit: EditableAlert): void => {
+        onSubmit && onSubmit(alertToSubmit);
     };
 
     /**
@@ -172,6 +174,23 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                     <PageHeaderActionsV1>
                         <Box padding={1}>{t("label.view")}:</Box>
                         <ButtonGroup color="primary" variant="outlined">
+                            <Button
+                                component={NavLink}
+                                to={{
+                                    pathname:
+                                        AppRouteRelative.ALERTS_CREATE_NEW_USER,
+                                    search: searchParams.toString(),
+                                }}
+                                variant={
+                                    location.pathname.includes(
+                                        AppRouteRelative.ALERTS_CREATE_NEW_USER
+                                    )
+                                        ? "contained"
+                                        : "outlined"
+                                }
+                            >
+                                {t("label.new-user")}
+                            </Button>
                             <Button
                                 component={NavLink}
                                 to={{
@@ -237,15 +256,19 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                     selectedAlertTemplate,
                     setSelectedAlertTemplate,
                     alertTemplateOptions,
+                    setShowBottomBar,
+                    handleSubmitAlertClick,
                 }}
             />
 
-            <WizardBottomBar
-                backButtonLabel={t("label.cancel")}
-                handleBackClick={handlePageExitChecks}
-                handleNextClick={handleSubmitAlertClick}
-                nextButtonLabel={submitButtonLabel}
-            />
+            {showBottomBar && (
+                <WizardBottomBar
+                    backButtonLabel={t("label.cancel")}
+                    handleBackClick={handlePageExitChecks}
+                    handleNextClick={() => handleSubmitAlertClick(alert)}
+                    nextButtonLabel={submitButtonLabel}
+                />
+            )}
         </PageV1>
     );
 };

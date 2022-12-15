@@ -13,6 +13,7 @@
  * the License.
  */
 import React, { FunctionComponent, lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertsUpdateBasePage } from "../../pages/alerts-update-page/alerts-update-base-page.component";
@@ -85,7 +86,15 @@ const PageNotFoundPage = lazy(() =>
     ).then((module) => ({ default: module.PageNotFoundPage }))
 );
 
+const AlertsCreateGuidedRouter = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-guided-create" */ "../alerts-guided-create/alerts-guided-create.router"
+    ).then((module) => ({ default: module.AlertsCreateGuidedRouter }))
+);
+
 export const AlertsRouter: FunctionComponent = () => {
+    const { t } = useTranslation();
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
@@ -135,6 +144,19 @@ export const AlertsRouter: FunctionComponent = () => {
                         />
 
                         <Route
+                            element={
+                                <AlertsCreateGuidedRouter
+                                    hideHeader
+                                    hideSubscriptionGroup
+                                    sampleAlertsBottom
+                                    createLabel={t("label.create")}
+                                    inProgressLabel={t("label.creating")}
+                                />
+                            }
+                            path={`${AppRouteRelative.ALERTS_CREATE_NEW_USER}/*`}
+                        />
+
+                        <Route
                             element={<AlertsCreateSimplePage />}
                             path={AppRouteRelative.ALERTS_CREATE_SIMPLE}
                         />
@@ -160,6 +182,19 @@ export const AlertsRouter: FunctionComponent = () => {
                                     to={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                                 />
                             }
+                        />
+
+                        <Route
+                            element={
+                                <AlertsCreateGuidedRouter
+                                    hideHeader
+                                    hideSampleAlerts
+                                    hideSubscriptionGroup
+                                    createLabel={t("label.create")}
+                                    inProgressLabel={t("label.creating")}
+                                />
+                            }
+                            path={`${AppRouteRelative.ALERTS_CREATE_NEW_USER}/*`}
                         />
 
                         <Route
@@ -241,6 +276,21 @@ export const AlertsRouter: FunctionComponent = () => {
                                     to={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
                                 />
                             }
+                        />
+
+                        <Route
+                            element={
+                                <AlertsCreateGuidedRouter
+                                    hideHeader
+                                    hideSampleAlerts
+                                    hideSubscriptionGroup
+                                    createLabel={t("label.update-entity", {
+                                        entity: t("label.alert"),
+                                    })}
+                                    inProgressLabel={t("label.updating")}
+                                />
+                            }
+                            path={`${AppRouteRelative.ALERTS_CREATE_NEW_USER}/*`}
                         />
 
                         <Route

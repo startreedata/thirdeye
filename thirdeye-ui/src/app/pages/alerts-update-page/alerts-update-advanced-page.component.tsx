@@ -24,7 +24,10 @@ import {
 } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { MessageDisplayState } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
-import { PageContentsCardV1 } from "../../platform/components";
+import {
+    PageContentsCardV1,
+    PageContentsGridV1,
+} from "../../platform/components";
 import { AlertEditPageOutletContextProps } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
@@ -37,6 +40,7 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
         selectedSubscriptionGroups,
         handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
+        setShowBottomBar,
     } = useOutletContext<AlertEditPageOutletContextProps>();
 
     const requiredFields = useMemo(() => {
@@ -59,8 +63,12 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
         setIsRequiredPropertyValuesSet(isValid);
     }, [selectedAlertTemplate, alert]);
 
+    useEffect(() => {
+        setShowBottomBar(true);
+    }, []);
+
     return (
-        <>
+        <PageContentsGridV1>
             <Grid item xs={12}>
                 <PageContentsCardV1>
                     <AlertJson
@@ -96,6 +104,6 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
                     onSubscriptionGroupsChange={onSubscriptionGroupsChange}
                 />
             </Grid>
-        </>
+        </PageContentsGridV1>
     );
 };

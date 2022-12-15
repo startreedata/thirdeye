@@ -193,6 +193,11 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
 
             <WizardBottomBar
                 backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`}
+                nextBtnLink={
+                    alert.templateProperties?.enumerationItems
+                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+                        : undefined
+                }
             />
         </>
     );

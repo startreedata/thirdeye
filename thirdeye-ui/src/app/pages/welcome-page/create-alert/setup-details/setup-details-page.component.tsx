@@ -33,8 +33,13 @@ import {
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
 import { generateGenericNameForAlert } from "../../../../utils/alerts/alerts.util";
 import { AppRouteRelative } from "../../../../utils/routes/routes.util";
+import { SetupDetailsPageProps } from "./setup-details-page.interface";
 
-export const SetupDetailsPage: FunctionComponent = () => {
+export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
+    inProgressLabel,
+    createLabel,
+    hideSubscriptionGroup,
+}) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -166,46 +171,50 @@ export const SetupDetailsPage: FunctionComponent = () => {
                     </PageContentsCardV1>
                 </Grid>
 
-                <Grid item xs={12}>
-                    <PageContentsCardV1>
-                        <Grid container>
-                            <Grid item lg={3} md={5} sm={10} xs={10}>
-                                <Box marginBottom={2}>
-                                    <Typography variant="h5">
-                                        {t("label.configure-notifications")}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {t(
-                                            "message.select-who-to-notify-when-finding-anomalies"
-                                        )}
-                                    </Typography>
-                                </Box>
-                            </Grid>
-                            <Grid item lg={9} md={7} sm={2} xs={2}>
-                                <Switch
-                                    checked={isNotificationsOn}
-                                    color="primary"
-                                    name="checked"
-                                    onChange={() =>
-                                        setIsNotificationsOn(!isNotificationsOn)
-                                    }
-                                />
-                            </Grid>
+                {!hideSubscriptionGroup && (
+                    <Grid item xs={12}>
+                        <PageContentsCardV1>
+                            <Grid container>
+                                <Grid item lg={3} md={5} sm={10} xs={10}>
+                                    <Box marginBottom={2}>
+                                        <Typography variant="h5">
+                                            {t("label.configure-notifications")}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {t(
+                                                "message.select-who-to-notify-when-finding-anomalies"
+                                            )}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                                <Grid item lg={9} md={7} sm={2} xs={2}>
+                                    <Switch
+                                        checked={isNotificationsOn}
+                                        color="primary"
+                                        name="checked"
+                                        onChange={() =>
+                                            setIsNotificationsOn(
+                                                !isNotificationsOn
+                                            )
+                                        }
+                                    />
+                                </Grid>
 
-                            {isNotificationsOn && (
-                                <InputSection
-                                    inputComponent={
-                                        <EmailListInput
-                                            emails={emails}
-                                            onChange={setEmails}
-                                        />
-                                    }
-                                    label={t("label.add-email")}
-                                />
-                            )}
-                        </Grid>
-                    </PageContentsCardV1>
-                </Grid>
+                                {isNotificationsOn && (
+                                    <InputSection
+                                        inputComponent={
+                                            <EmailListInput
+                                                emails={emails}
+                                                onChange={setEmails}
+                                            />
+                                        }
+                                        label={t("label.add-email")}
+                                    />
+                                )}
+                            </Grid>
+                        </PageContentsCardV1>
+                    </Grid>
+                )}
             </PageContentsGridV1>
 
             <WizardBottomBar
@@ -213,7 +222,7 @@ export const SetupDetailsPage: FunctionComponent = () => {
                 handleNextClick={handleCreateAlertClick}
                 nextButtonIsDisabled={isCreatingAlert}
                 nextButtonLabel={
-                    isCreatingAlert ? t("label.creating") : t("label.next")
+                    isCreatingAlert ? inProgressLabel : createLabel
                 }
             />
         </>

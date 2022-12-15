@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
-import { DetectionEvaluationForRender } from "../../enumeration-item-merger/enumeration-item-merger.interfaces";
+import type { AlertStats } from "../../../../rest/dto/alert.interfaces";
+import type { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
+import type { DetectionEvaluationForRender } from "../../enumeration-item-merger/enumeration-item-merger.interfaces";
 
 export interface EnumerationItemRowProps {
     alertId: number;
@@ -21,4 +22,5 @@ export interface EnumerationItemRowProps {
     anomalies: Anomaly[];
     expanded: string[];
     onExpandChange: (isOpen: boolean, name: string) => void;
+    alertStats: AlertStats | null;
 }

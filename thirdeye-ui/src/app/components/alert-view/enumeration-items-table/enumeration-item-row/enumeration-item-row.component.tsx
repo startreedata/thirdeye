@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { getAlertsAlertAnomaliesPath } from "../../../../utils/routes/routes.util";
+import { AlertAccuracyColored } from "../../../alert-accuracy-colored/alert-accuracy-colored.component";
 import { Pluralize } from "../../../pluralize/pluralize.component";
 import {
     CHART_SIZE_OPTIONS,
@@ -43,6 +44,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     anomalies,
     expanded,
     onExpandChange,
+    alertStats,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -94,8 +96,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                         <Grid
                             item
                             {...(isExpanded
-                                ? { sm: 8, xs: 12 }
-                                : { sm: 4, xs: 12 })}
+                                ? { sm: 6, xs: 12 }
+                                : { sm: 2, xs: 12 })}
                         >
                             <Typography
                                 className={classes.name}
@@ -103,6 +105,15 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                             >
                                 {nameForDetectionEvaluation}
                             </Typography>
+                        </Grid>
+                        <Grid item sm={2} xs={12}>
+                            <AlertAccuracyColored
+                                alertStats={alertStats}
+                                defaultSkeletonProps={{
+                                    width: 100,
+                                    height: 30,
+                                }}
+                            />
                         </Grid>
                         <Grid item sm={2} xs={12}>
                             <Button

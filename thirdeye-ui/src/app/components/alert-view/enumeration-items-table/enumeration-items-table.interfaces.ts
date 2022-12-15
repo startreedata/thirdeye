@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { DataGridSortOrderV1 } from "../../../platform/components";
-import { DetectionEvaluationForRender } from "../enumeration-item-merger/enumeration-item-merger.interfaces";
+import type { DataGridSortOrderV1 } from "../../../platform/components";
+import type { AlertStats } from "../../../rest/dto/alert.interfaces";
+import type { DetectionEvaluationForRender } from "../enumeration-item-merger/enumeration-item-merger.interfaces";
 
 export interface EnumerationItemsTableProps {
     detectionEvaluations: DetectionEvaluationForRender[];
@@ -24,4 +25,5 @@ export interface EnumerationItemsTableProps {
     initialSearchTerm: string;
     onSearchTermChange: (newTerm: string) => void;
     onSortOrderChange: (newOrder: DataGridSortOrderV1) => void;
+    alertsStats?: Record<number, AlertStats | null> | null;
 }

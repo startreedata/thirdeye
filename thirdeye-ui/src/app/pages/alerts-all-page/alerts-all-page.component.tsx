@@ -13,7 +13,7 @@
  * the License.
  */
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
-import { AxiosError } from "axios";
+import axios, { AxiosError, CancelTokenSource } from "axios";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
@@ -82,11 +82,17 @@ export const AlertsAllPage: FunctionComponent = () => {
     }, [status]);
 
     useEffect(() => {
+        const cancelTokenSource = axios.CancelToken.source();
+
         // Time range refreshed, fetch alerts
-        fetchAllAlerts();
+        fetchAllAlerts(cancelTokenSource);
+
+        return () => {
+            cancelTokenSource.cancel();
+        };
     }, []);
 
-    const fetchAllAlerts = (): void => {
+    const fetchAllAlerts = (cancelTokenSource: CancelTokenSource): void => {
         setIsLoading(true);
         setUiAlerts(null);
 
@@ -145,7 +151,12 @@ export const AlertsAllPage: FunctionComponent = () => {
                     .map((UiAlertItem) => UiAlertItem.id)
                     .filter((alertId) => !(alertId in alertsStats)) // Only fetch stats for those not already fetched
                     .forEach((alertId) => {
-                        getAlertStats({ alertId }).then((alertStatsData) => {
+                        getAlertStats({
+                            alertId,
+                            axiosConfig: {
+                                cancelToken: cancelTokenSource.token,
+                            },
+                        }).then((alertStatsData) => {
                             setAlertsStats((alertsStatsProp) => ({
                                 ...alertsStatsProp,
                                 [alertId]: alertStatsData,

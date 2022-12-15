@@ -30,4 +30,7 @@ export const useAlertWizardV2Styles = makeStyles((theme) => ({
         backgroundColor: lighten(theme.palette.warning.light, 0.9),
         color: darken(theme.palette.warning.light, 0.5),
     },
+    alertPropertyLabelDescription: {
+        color: theme.palette.text.hint,
+    },
 }));

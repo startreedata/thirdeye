@@ -8,22 +8,16 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection;
 
-public class PostProcessorSpec extends AbstractSpec {
-
-  // move to post processor spec
-  private Boolean ignore;
-
-  public Boolean getIgnore() {
-    return ignore;
-  }
-
-  public PostProcessorSpec setIgnore(final Boolean ignore) {
-    this.ignore = ignore;
-    return this;
-  }
+export interface AlertsGuidedCreateRouterProps {
+    hideHeader?: boolean;
+    sampleAlertsBottom?: boolean;
+    hideSampleAlerts?: boolean;
+    hideSubscriptionGroup?: boolean;
+    createLabel: string;
+    inProgressLabel: string;
 }

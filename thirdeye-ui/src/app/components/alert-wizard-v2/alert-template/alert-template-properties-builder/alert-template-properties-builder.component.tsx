@@ -49,6 +49,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
         templateProperties,
         onPropertyValueChange,
         requiredFields,
+        propertyDetails,
     }) => {
         const { t } = useTranslation();
         const classes = useAlertWizardV2Styles();
@@ -142,7 +143,23 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                             key={item.key}
                             labelComponent={
                                 <Box paddingBottom={1} paddingTop={1}>
-                                    <label>{item.key}</label>
+                                    <Typography variant="body2">
+                                        {item.key}
+                                    </Typography>
+                                    {propertyDetails?.[item.key]
+                                        ?.description ? (
+                                        <Typography
+                                            className={
+                                                classes.alertPropertyLabelDescription
+                                            }
+                                            variant="caption"
+                                        >
+                                            {
+                                                propertyDetails?.[item.key]
+                                                    ?.description
+                                            }
+                                        </Typography>
+                                    ) : null}
                                 </Box>
                             }
                         />
@@ -213,7 +230,24 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                     key={item.key}
                                     labelComponent={
                                         <Box paddingBottom={1} paddingTop={1}>
-                                            <label>{item.key}</label>
+                                            <Typography variant="body2">
+                                                {item.key}
+                                            </Typography>
+                                            {propertyDetails?.[item.key]
+                                                ?.description ? (
+                                                <Typography
+                                                    className={
+                                                        classes.alertPropertyLabelDescription
+                                                    }
+                                                    variant="caption"
+                                                >
+                                                    {
+                                                        propertyDetails?.[
+                                                            item.key
+                                                        ]?.description
+                                                    }
+                                                </Typography>
+                                            ) : null}
                                         </Box>
                                     }
                                 />

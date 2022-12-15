@@ -8,20 +8,12 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.anomaly.grouping;
 
-import java.util.Collections;
-import java.util.Map;
-
-public abstract class BaseAlertGrouper implements AlertGrouper {
-
-  protected Map<String, String> props = Collections.emptyMap();
-
-  @Override
-  public void setParameters(Map<String, String> props) {
-    this.props = props;
-  }
+export interface SelectTypePageProps {
+    sampleAlertsBottom?: boolean;
+    hideSampleAlerts?: boolean;
 }

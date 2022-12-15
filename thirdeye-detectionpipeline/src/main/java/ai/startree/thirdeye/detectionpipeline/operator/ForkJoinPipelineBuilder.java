@@ -34,7 +34,7 @@ public class ForkJoinPipelineBuilder {
     final Map<String, PlanNode> clonedPipelinePlanNodes = new HashMap<>();
     for (final Map.Entry<String, PlanNode> key : pipelinePlanNodes.entrySet()) {
       final PlanNode planNode = deepCloneWithNewContext(key.getValue(),
-          enumerationItem.getParams(),
+          enumerationItem,
           clonedPipelinePlanNodes);
       clonedPipelinePlanNodes.put(key.getKey(), planNode);
     }
@@ -42,14 +42,15 @@ public class ForkJoinPipelineBuilder {
   }
 
   private PlanNode deepCloneWithNewContext(final PlanNode sourceNode,
-      final Map<String, Object> templateProperties,
+      final EnumerationItemDTO enumerationItem,
       final Map<String, PlanNode> clonedPipelinePlanNodes) {
     try {
       /* Cloned context should contain the new nodes */
       final PlanNodeContext context = sourceNode.getContext();
       final PlanNodeContext clonedContext = PlanNodeContext.copy(context)
-          .setPlanNodeBean(clonePlanNodeBean(templateProperties, context.getPlanNodeBean()))
+          .setPlanNodeBean(clonePlanNodeBean(enumerationItem.getParams(), context.getPlanNodeBean()))
           .setPipelinePlanNodes(clonedPipelinePlanNodes);
+      clonedContext.getDetectionPipelineContext().setEnumerationItem(enumerationItem);
 
       return PlanNodeFactory.build(sourceNode.getClass(), clonedContext);
     } catch (final ReflectiveOperationException e) {

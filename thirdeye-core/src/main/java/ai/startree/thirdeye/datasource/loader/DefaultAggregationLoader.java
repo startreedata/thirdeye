@@ -211,6 +211,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
     final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),
         thirdEyeDataSource.getSqlExpressionBuilder());
+    LOG.info("Sending query: {}", query.replace("\n", ""));
     // table info is only used with legacy Pinot client - should be removed
     final DataSourceRequest requestV2 = new DataSourceRequest(null, query, Map.of());
     return thirdEyeDataSource.fetchDataTable(requestV2).getDataFrame();

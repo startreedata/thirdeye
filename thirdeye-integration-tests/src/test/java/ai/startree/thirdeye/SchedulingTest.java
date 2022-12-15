@@ -16,6 +16,8 @@ package ai.startree.thirdeye;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
+import static ai.startree.thirdeye.HappyPathTest.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.HappyPathTest.ANOMALIES_LIST_TYPE;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,11 +27,11 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -56,9 +58,7 @@ import org.testng.annotations.Test;
  * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.6/aspectjweaver-1.9.6.jar
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  */
-// todo cyril pinot is not necessary - implement and use csv/in-memory datasource instead
 public class SchedulingTest {
-
   private static final Logger log = LoggerFactory.getLogger(SchedulingTest.class);
 
   private static final AlertApi ALERT_API;
@@ -142,8 +142,8 @@ public class SchedulingTest {
     Response createResponse = request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
     assertThat(createResponse.getStatus()).isEqualTo(200);
-    List<Map<String, Object>> alerts = createResponse.readEntity(List.class);
-    alertId = ((Number) alerts.get(0).get("id")).longValue();
+    List<AlertApi> alerts = createResponse.readEntity(ALERT_LIST_TYPE);
+    alertId = alerts.get(0).getId();
 
     // time advancing should not impact lastTimestamp
     CLOCK.tick(5);
@@ -156,11 +156,9 @@ public class SchedulingTest {
   @Test(dependsOnMethods = "testCreateAlertLastTimestamp", timeOut = 60000L)
   public void testOnboardingLastTimestamp() throws Exception {
     // wait for anomalies - proxy to know when the onboarding task has run
-    List<Map<String, Object>> anomalies = List.of();
-    while (anomalies.size() == 0) {
+    while (getAnomalies().size() == 0) {
       // see taskDriver server config for optimization
       Thread.sleep(1000);
-      anomalies = getAnomalies();
     }
 
     // check that lastTimestamp is the endTime of the Onboarding task: March 21 1H
@@ -171,8 +169,7 @@ public class SchedulingTest {
   @Test(dependsOnMethods = "testOnboardingLastTimestamp", timeOut = 60000L)
   public void testAfterDetectionCronLastTimestamp() throws InterruptedException {
     // get current number of anomalies
-    List<Map<String, Object>> anomalies = getAnomalies();
-    int numAnomaliesBeforeDetectionRun = anomalies.size();
+    int numAnomaliesBeforeDetectionRun = getAnomalies().size();
 
     // advance detection time to March 22, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 21 - March 22]
@@ -183,9 +180,8 @@ public class SchedulingTest {
     Thread.sleep(1000);
 
     // wait for the new anomaly to be created - proxy to know when the detection has run
-    while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
+    while (getAnomalies().size() == numAnomaliesBeforeDetectionRun) {
       Thread.sleep(1000);
-      anomalies = getAnomalies();
     }
 
     // check that lastTimestamp after detection is the runTime of the cron
@@ -195,7 +191,7 @@ public class SchedulingTest {
 
   @Test(dependsOnMethods = "testAfterDetectionCronLastTimestamp", timeOut = 60000L)
   public void testSecondAnomalyIsMerged() throws InterruptedException {
-    List<Map<String, Object>> anomalies = getAnomalies();
+    List<AnomalyApi> anomalies = getAnomalies();
     int numAnomaliesBeforeDetectionRun = anomalies.size();
 
     // advance detection time to March 23, 2020, 00:00:00 UTC
@@ -217,30 +213,29 @@ public class SchedulingTest {
     assertThat(alertLastTimestamp).isEqualTo(MARCH_23_2020_00H00);
 
     // find anomalies starting on MARCH 21 - there should be 2
-    List<Map<String, Object>> march21Anomalies = anomalies.stream()
-        .filter(a -> (long) a.get("startTime") == MARCH_21_2020_00H00)
+    final List<AnomalyApi> march21Anomalies = anomalies.stream()
+        .filter(a -> a.getStartTime().getTime() == MARCH_21_2020_00H00)
         .collect(Collectors.toList());
     assertThat(march21Anomalies.size()).isEqualTo(2);
     // check that one anomaly finishes on MARCH 22: the child anomaly
     assertThat(march21Anomalies.stream()
-        .anyMatch(a -> (long) a.get("endTime") == MARCH_22_2020_00H00)).isTrue();
+        .anyMatch(a -> a.getEndTime().getTime() == MARCH_22_2020_00H00)).isTrue();
     // check that one anomaly finishes on MARCH 23: the parent anomaly
     assertThat(march21Anomalies.stream()
-        .anyMatch(a -> (long) a.get("endTime") == MARCH_23_2020_00H00)).isTrue();
+        .anyMatch(a -> a.getEndTime().getTime() == MARCH_23_2020_00H00)).isTrue();
   }
 
-  private List<Map<String, Object>> getAnomalies() {
+  private List<AnomalyApi> getAnomalies() {
     Response response = request("api/anomalies").get();
     assertThat(response.getStatus()).isEqualTo(200);
-    return response.readEntity(List.class);
+    return response.readEntity(ANOMALIES_LIST_TYPE);
   }
 
   private long getAlertLastTimestamp() {
-    Response getResponse = request("api/alerts/" + alertId).get();
+    final Response getResponse = request("api/alerts/" + alertId).get();
     assertThat(getResponse.getStatus()).isEqualTo(200);
-    Map<String, Object> alert = getResponse.readEntity(Map.class);
-    long alertLastTimestamp = ((Number) alert.get("lastTimestamp")).longValue();
-    return alertLastTimestamp;
+    final AlertApi alert = getResponse.readEntity(AlertApi.class);
+    return alert.getLastTimestamp().getTime();
   }
 
   private Builder request(final String urlFragment) {

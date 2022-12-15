@@ -20,18 +20,19 @@ import { Trans, useTranslation } from "react-i18next";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WelcomeStepCard } from "../../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
 import { PageContentsCardV1, PageV1 } from "../../../platform/components";
-import { DimensionV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import {
     getDataConfigurationCreatePath,
     getWelcomeCreateAlert,
 } from "../../../utils/routes/routes.util";
+import { useLandingPageStyles } from "./landing-page.style";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     const { status, datasets, getDatasets } = useGetDatasets();
+    const styles = useLandingPageStyles();
 
     const hasDatasets = !!(datasets && datasets.length > 0);
 
@@ -51,7 +52,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                             justifyContent="center"
                             spacing={4}
                         >
-                            <Grid item xs={8}>
+                            <Grid item sm={8} xs={12}>
                                 <Box clone fontWeight="500" pt={2}>
                                     <Typography variant="body1">
                                         {t("message.welcome-to-thirdeye")}
@@ -68,21 +69,14 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                     <Trans i18nKey="message.by-creating-an-alert-message" />
                                 </Typography>
                             </Grid>
-                            <Grid item xs={4}>
-                                <Box
-                                    border="1px solid"
-                                    borderColor="primary.main"
-                                    borderRadius={
-                                        DimensionV1.BorderRadiusDefault
-                                    }
-                                    style={{
-                                        aspectRatio: "16 / 9",
-                                    }}
-                                    textAlign="center"
-                                    width="100%"
-                                >
-                                    {/* TODO: Demo video goes here */}
-                                </Box>
+                            <Grid item sm={4} xs={12}>
+                                <iframe
+                                    allowFullScreen
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    className={styles.introVideo}
+                                    frameBorder="0"
+                                    src={t("url.startree-te-demo")}
+                                />
                             </Grid>
                         </Grid>
                         <Box clone pb={2} pt={4} textAlign="center">
@@ -92,6 +86,8 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                         </Box>
 
                         <LoadingErrorStateSwitch
+                            wrapInCard
+                            wrapInGrid
                             isError={status === ActionStatus.Error}
                             isLoading={status === ActionStatus.Working}
                         >

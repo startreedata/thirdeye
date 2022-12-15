@@ -16,7 +16,7 @@ package ai.startree.thirdeye.detectionpipeline;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses={DetectionPipelineContextMapper.class})
 public interface PlanNodeContextMapper {
 
   PlanNodeContextMapper INSTANCE = Mappers.getMapper(PlanNodeContextMapper.class);

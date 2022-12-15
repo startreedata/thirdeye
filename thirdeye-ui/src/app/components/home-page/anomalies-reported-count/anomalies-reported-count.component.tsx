@@ -14,6 +14,7 @@
  */
 import { Box, Grid, Link, Typography } from "@material-ui/core";
 import classNames from "classnames";
+import { capitalize } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -34,9 +35,11 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                     <Box>{t("label.anomalies-reported")}</Box>
                     <Box>
                         <Link component={RouterLink} to={getAnomaliesAllPath()}>
-                            {t("label.view-recent-entities", {
-                                entity: t("label.anomalies"),
-                            })}
+                            {capitalize(
+                                t("label.view-all-entities", {
+                                    entity: t("label.anomalies"),
+                                })
+                            )}
                         </Link>
                     </Box>
                 </Grid>

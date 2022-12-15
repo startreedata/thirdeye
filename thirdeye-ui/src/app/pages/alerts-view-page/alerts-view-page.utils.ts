@@ -8,11 +8,11 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.notification.performanceEvaluation;
 
-public enum PerformanceEvaluationMethod {
-  ANOMALY_PERCENTAGE, RECALL, PRECISION, F1_SCORE, PRECISION_AND_RECALL
-}
+export const QUERY_PARAM_KEY_FOR_SEARCH = "search";
+export const QUERY_PARAM_KEY_FOR_SORT = "sort";
+export const CONCAT_SEPARATOR = "+";

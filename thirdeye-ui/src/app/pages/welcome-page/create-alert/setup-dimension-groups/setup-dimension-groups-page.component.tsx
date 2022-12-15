@@ -20,17 +20,13 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    Link as RouterLink,
-    useNavigate,
-    useOutletContext,
-} from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { generateTemplateProperties } from "../../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
 import { CohortsTable } from "../../../../components/cohort-detector/cohorts-table/cohorts-table.component";
 import { DatasetDetails } from "../../../../components/cohort-detector/dataset-details/dataset-details.component";
+import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
-    PageContentsCardV1,
     PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../../../platform/components";
@@ -195,21 +191,14 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                 </Grid>
             </PageContentsGridV1>
 
-            <Box width="100%">
-                <PageContentsCardV1>
-                    <Grid container justifyContent="flex-end">
-                        <Grid item>
-                            <Button
-                                color="secondary"
-                                component={RouterLink}
-                                to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`}
-                            >
-                                {t("label.back")}
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </PageContentsCardV1>
-            </Box>
+            <WizardBottomBar
+                backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`}
+                nextBtnLink={
+                    alert.templateProperties?.enumerationItems
+                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+                        : undefined
+                }
+            />
         </>
     );
 };

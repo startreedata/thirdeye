@@ -27,11 +27,12 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
     handleBackClick,
     nextButtonLabel,
     backButtonLabel,
+    nextButtonIsDisabled,
 }) => {
     const { t } = useTranslation();
 
     return (
-        <Box marginTop="auto" width="100%">
+        <Box bottom={0} marginTop="auto" position="sticky" width="100%">
             <PageContentsCardV1>
                 <Grid container justifyContent="flex-end">
                     <Grid item>
@@ -52,7 +53,11 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
                     </Grid>
                     <Grid item>
                         {handleNextClick && (
-                            <Button color="primary" onClick={handleNextClick}>
+                            <Button
+                                color="primary"
+                                disabled={nextButtonIsDisabled}
+                                onClick={handleNextClick}
+                            >
                                 {nextButtonLabel || t("label.next")}
                             </Button>
                         )}
@@ -60,6 +65,7 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
                             <Button
                                 color="primary"
                                 component={RouterLink}
+                                disabled={nextButtonIsDisabled}
                                 to={nextBtnLink}
                             >
                                 {nextButtonLabel || t("label.next")}

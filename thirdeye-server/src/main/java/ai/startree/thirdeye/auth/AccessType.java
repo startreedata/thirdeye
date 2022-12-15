@@ -11,9 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.notification.performanceEvaluation;
+package ai.startree.thirdeye.auth;
 
-public interface PerformanceEvaluate {
-
-  double evaluate();
+public enum AccessType {
+  READ, UPDATE
 }

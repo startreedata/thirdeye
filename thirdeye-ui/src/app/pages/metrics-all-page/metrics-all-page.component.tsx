@@ -100,6 +100,8 @@ export const MetricsAllPage: FunctionComponent = () => {
             <ConfigurationPageHeader selectedIndex={2} />
             <PageContentsGridV1 fullHeight>
                 <LoadingErrorStateSwitch
+                    wrapInCard
+                    wrapInGrid
                     isError={isError}
                     isLoading={isLoading}
                 >

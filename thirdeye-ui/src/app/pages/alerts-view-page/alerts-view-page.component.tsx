@@ -66,10 +66,11 @@ import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
-
-const QUERY_PARAM_KEY_FOR_SEARCH = "search";
-const QUERY_PARAM_KEY_FOR_SORT = "sort";
-const CONCAT_SEPARATOR = "+";
+import {
+    CONCAT_SEPARATOR,
+    QUERY_PARAM_KEY_FOR_SEARCH,
+    QUERY_PARAM_KEY_FOR_SORT,
+} from "./alerts-view-page.utils";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const navigate = useNavigate();

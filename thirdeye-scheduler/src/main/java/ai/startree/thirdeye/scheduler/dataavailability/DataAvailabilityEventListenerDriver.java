@@ -59,9 +59,9 @@ public class DataAvailabilityEventListenerDriver {
 
   public void start() {
     final String rootDir = System.getProperty("dw.rootDir");
-    try {
-      this.consumerProps
-          .load(new FileInputStream(rootDir + "/" + this.config.getKafkaConsumerPropPath()));
+    final String name = rootDir + "/" + this.config.getKafkaConsumerPropPath();
+    try (final FileInputStream inStream = new FileInputStream(name);) {
+      this.consumerProps.load(inStream);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

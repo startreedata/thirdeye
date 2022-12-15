@@ -40,6 +40,7 @@ import { AlertTemplateProps } from "./alert-template.interfaces";
 import {
     findRequiredFields,
     getDefaultProperties,
+    getPropertyDetails,
     hasRequiredPropertyValuesSet,
 } from "./alert-template.utils";
 import { PreviewChart } from "./preview-chart/preview-chart.component";
@@ -72,6 +73,8 @@ function AlertTemplate({
     const defaultProperties = getDefaultProperties(
         selectedAlertTemplate
     ) as TemplatePropertiesObject;
+
+    const propertyDetails = getPropertyDetails(selectedAlertTemplate);
 
     useEffect(() => {
         const isValid =
@@ -239,6 +242,7 @@ function AlertTemplate({
                     <AlertTemplatePropertiesBuilder
                         alertTemplateId={selectedAlertTemplate.id}
                         defaultTemplateProperties={defaultProperties}
+                        propertyDetails={propertyDetails}
                         requiredFields={requiredFields}
                         templateProperties={alertTemplateProperties}
                         onPropertyValueChange={handlePropertyValueChange}

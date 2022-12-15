@@ -41,6 +41,7 @@ export const AppRouteRelative = {
     ALERTS_CREATE_NEW: "new",
     ALERTS_CREATE_COPY: `copy/${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_CREATE_SIMPLE: "simple",
+    ALERTS_CREATE_NEW_USER: "new-user",
     ALERTS_CREATE_ADVANCED: "advanced",
     ALERTS_UPDATE: "update",
     ALERTS_UPDATE_SIMPLE: "simple",
@@ -326,6 +327,13 @@ export const getSubscriptionGroupsViewPath = (id: number): string => {
     return path;
 };
 
+export const getAnomaliesViewPath = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_ANOMALY;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
 export const getSubscriptionGroupsCreatePath = (): string => {
     return AppRoute.SUBSCRIPTION_GROUPS_CREATE;
 };
@@ -571,4 +579,24 @@ export const generateDateRangeMonthsFromNow = (
     const xMonthsAgo = now.minus({ month: monthsAgo }).startOf("month");
 
     return [xMonthsAgo.toMillis(), roundedNow.toMillis()];
+};
+
+/**
+ * Helper function to quickly generate a date range for any number of days from
+ * now. The days ago will start at the beginning of the days.
+ *
+ * @param daysAgo - Number of days to set the start of range
+ * @param nowOverride - Override now with this value
+ * @param roundNowTime - Round the end time
+ */
+export const generateDateRangeDaysFromNow = (
+    daysAgo: number,
+    nowOverride?: DateTime,
+    roundNowTime?: DurationUnit
+): [number, number] => {
+    const now = nowOverride || DateTime.local();
+    const roundedNow = now.endOf(roundNowTime || "hour");
+    const xDaysAgo = now.minus({ days: daysAgo }).startOf("days");
+
+    return [xDaysAgo.toMillis(), roundedNow.toMillis()];
 };

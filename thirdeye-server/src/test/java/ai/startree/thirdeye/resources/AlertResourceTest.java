@@ -15,9 +15,20 @@ package ai.startree.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.alert.AlertCreater;
+import ai.startree.thirdeye.alert.AlertDeleter;
+import ai.startree.thirdeye.alert.AlertEvaluator;
+import ai.startree.thirdeye.alert.AlertInsightsProvider;
+import ai.startree.thirdeye.auth.AccessControlModule;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.common.io.Resources;
@@ -27,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.ForbiddenException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -70,5 +82,37 @@ public class AlertResourceTest {
     Assert.assertEquals(nodes.get(2).getType(), "DataFetcher");
     Assert.assertEquals(nodes.get(3).getType(), "DataFetcher");
     Assert.assertEquals(nodes.get(4).getType(), "SqlQueryExecutor");
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testRunTask_withNoAccess() {
+    final AlertManager alertManager = mock(AlertManager.class);
+    when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
+
+    new AlertResource(
+        alertManager,
+        mock(AlertCreater.class),
+        mock(AlertDeleter.class),
+        mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
+        mock(AlertInsightsProvider.class),
+        AccessControlModule.alwaysDeny
+    ).runTask(new ThirdEyePrincipal("nobody", ""), 1L, 0L, 1L);
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testReset_withNoAccess() {
+    final AlertManager alertManager = mock(AlertManager.class);
+    when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
+
+    new AlertResource(
+        alertManager,
+        mock(AlertCreater.class),
+        mock(AlertDeleter.class),
+        mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
+        mock(AlertInsightsProvider.class),
+        AccessControlModule.alwaysDeny
+    ).reset(new ThirdEyePrincipal("nobody", ""), 1L);
   }
 }

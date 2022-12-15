@@ -23,13 +23,11 @@ import { Link as RouterLink } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
-import {
-    generateDateRangeMonthsFromNow,
-    getAnomaliesAllPath,
-} from "../../../utils/routes/routes.util";
+import { getAnomaliesAllPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { Pluralize } from "../../pluralize/pluralize.component";
 import { AnomalyRow } from "./anomaly-row/anomaly-row.component";
 
 export const RecentAnomalies: FunctionComponent = () => {
@@ -37,7 +35,7 @@ export const RecentAnomalies: FunctionComponent = () => {
     const { anomalies, getAnomalies, status } = useGetAnomalies();
 
     useEffect(() => {
-        getAnomalies({ startTime: generateDateRangeMonthsFromNow(6)[0] });
+        getAnomalies();
     }, []);
 
     const anomaliesToDisplay = useMemo(() => {
@@ -56,9 +54,15 @@ export const RecentAnomalies: FunctionComponent = () => {
             <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
                     <Typography variant="h5">
-                        {t("label.recent-entity", {
-                            entity: t("label.anomalies"),
-                        })}
+                        <Pluralize
+                            count={anomaliesToDisplay.length}
+                            plural={t("label.latest-entity", {
+                                entity: t("label.anomalies"),
+                            })}
+                            singular={t("label.latest-entity", {
+                                entity: t("label.anomaly"),
+                            })}
+                        />
                     </Typography>
                     <Typography variant="body1">
                         <LoadingErrorStateSwitch
@@ -67,13 +71,12 @@ export const RecentAnomalies: FunctionComponent = () => {
                             loadingState={<SkeletonV1 animation="pulse" />}
                         >
                             {capitalize(
-                                `${
-                                    anomaliesToDisplay.length
-                                        ? `${anomaliesToDisplay.length} latest `
-                                        : "No recent "
-                                }${t("message.entity-detected-in-your-alerts", {
-                                    entity: t("label.anomalies"),
-                                })}`
+                                `${anomalies?.length} ${t(
+                                    "message.total-entity-from-start",
+                                    {
+                                        entity: t("label.anomalies"),
+                                    }
+                                )}`
                             )}
                         </LoadingErrorStateSwitch>
                     </Typography>

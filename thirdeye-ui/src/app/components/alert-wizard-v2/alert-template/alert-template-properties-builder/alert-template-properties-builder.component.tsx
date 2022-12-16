@@ -16,9 +16,12 @@ import {
     Box,
     Button,
     Divider,
+    FormControl,
+    FormHelperText,
     Grid,
     Link,
     TextField,
+    TextFieldProps,
     Typography,
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
@@ -83,6 +86,39 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
             [onPropertyValueChange]
         );
 
+        const getFormInput = useCallback(
+            ({
+                item,
+                textFieldProps,
+            }: {
+                item: PropertyRenderConfig;
+                textFieldProps: TextFieldProps;
+            }): JSX.Element => (
+                <InputSection
+                    gridContainerProps={{ alignItems: "flex-start" }}
+                    inputComponent={
+                        <FormControl fullWidth>
+                            <TextField
+                                data-testid={`textfield-${item.key}`}
+                                defaultValue={item.value}
+                                {...textFieldProps}
+                            />
+                            <FormHelperText>
+                                {propertyDetails?.[item.key]?.description}
+                            </FormHelperText>
+                        </FormControl>
+                    }
+                    key={item.key}
+                    labelComponent={
+                        <Box paddingBottom={1} paddingTop={1}>
+                            <Typography variant="body2">{item.key}</Typography>
+                        </Box>
+                    }
+                />
+            ),
+            [propertyDetails]
+        );
+
         return (
             <>
                 <Grid container item xs={12}>
@@ -120,51 +156,23 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                         </Typography>
                     </Box>
                 </Grid>
-                {requiredKeys.map((item, idx) => {
-                    return (
-                        <InputSection
-                            inputComponent={
-                                <TextField
-                                    fullWidth
-                                    data-testid={`textfield-${item.key}`}
-                                    defaultValue={item.value}
-                                    inputProps={{ tabIndex: idx + 1 }}
-                                    placeholder={t("label.add-property-value", {
-                                        key: item.key,
-                                    })}
-                                    onChange={(e) => {
-                                        handlePropertyValueChange(
-                                            item.key,
-                                            e.currentTarget.value
-                                        );
-                                    }}
-                                />
-                            }
-                            key={item.key}
-                            labelComponent={
-                                <Box paddingBottom={1} paddingTop={1}>
-                                    <Typography variant="body2">
-                                        {item.key}
-                                    </Typography>
-                                    {propertyDetails?.[item.key]
-                                        ?.description ? (
-                                        <Typography
-                                            className={
-                                                classes.alertPropertyLabelDescription
-                                            }
-                                            variant="caption"
-                                        >
-                                            {
-                                                propertyDetails?.[item.key]
-                                                    ?.description
-                                            }
-                                        </Typography>
-                                    ) : null}
-                                </Box>
-                            }
-                        />
-                    );
-                })}
+                {requiredKeys.map((item, idx) =>
+                    getFormInput({
+                        item,
+                        textFieldProps: {
+                            inputProps: { tabIndex: idx + 1 },
+                            placeholder: t("label.add-property-value", {
+                                key: item.key,
+                            }),
+                            onChange: (e) => {
+                                handlePropertyValueChange(
+                                    item.key,
+                                    e.currentTarget.value
+                                );
+                            },
+                        },
+                    })
+                )}
                 {!showMore && optionalKeys.length > 0 && (
                     <>
                         <Grid item xs={12}>
@@ -204,55 +212,24 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 </Typography>
                             </Box>
                         </Grid>
-                        {optionalKeys.map((item, idx) => {
-                            return (
-                                <InputSection
-                                    inputComponent={
-                                        <TextField
-                                            fullWidth
-                                            data-testid={`textfield-${item.key}`}
-                                            defaultValue={item.value}
-                                            inputProps={{
-                                                tabIndex:
-                                                    requiredKeys.length +
-                                                    idx +
-                                                    1,
-                                            }}
-                                            placeholder={item.defaultValue.toString()}
-                                            onChange={(e) =>
-                                                handlePropertyValueChange(
-                                                    item.key,
-                                                    e.currentTarget.value
-                                                )
-                                            }
-                                        />
-                                    }
-                                    key={item.key}
-                                    labelComponent={
-                                        <Box paddingBottom={1} paddingTop={1}>
-                                            <Typography variant="body2">
-                                                {item.key}
-                                            </Typography>
-                                            {propertyDetails?.[item.key]
-                                                ?.description ? (
-                                                <Typography
-                                                    className={
-                                                        classes.alertPropertyLabelDescription
-                                                    }
-                                                    variant="caption"
-                                                >
-                                                    {
-                                                        propertyDetails?.[
-                                                            item.key
-                                                        ]?.description
-                                                    }
-                                                </Typography>
-                                            ) : null}
-                                        </Box>
-                                    }
-                                />
-                            );
-                        })}
+                        {optionalKeys.map((item, idx) =>
+                            getFormInput({
+                                item,
+                                textFieldProps: {
+                                    inputProps: {
+                                        tabIndex: requiredKeys.length + idx + 1,
+                                    },
+                                    placeholder: item.defaultValue.toString(),
+
+                                    onChange: (e) => {
+                                        handlePropertyValueChange(
+                                            item.key,
+                                            e.currentTarget.value
+                                        );
+                                    },
+                                },
+                            })
+                        )}
                     </>
                 )}
                 {showMore && optionalKeys.length > 0 && (

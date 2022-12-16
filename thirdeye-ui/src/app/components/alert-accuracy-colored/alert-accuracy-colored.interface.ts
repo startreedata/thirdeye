@@ -12,11 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { Alert } from "../../rest/dto/alert.interfaces";
-import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 
-export interface AlertListV1Props {
-    alerts: UiAlert[] | null;
-    onDelete?: (uiAlert: UiAlert) => void;
-    onAlertReset?: (alert: Alert) => void;
+import type { TypographyProps } from "@material-ui/core";
+import type { ReactElement, ReactNode } from "react";
+import type { SkeletonV1Props } from "../../platform/components/skeleton-v1/skeleton-v1.interfaces";
+import type { AlertStats } from "../../rest/dto/alert.interfaces";
+
+export interface AlertAccuracyColoredProps {
+    alertStats: AlertStats | null;
+    renderCustomLoading?: ReactElement;
+    defaultSkeletonProps?: SkeletonV1Props;
+    typographyProps?: Partial<TypographyProps>;
+    renderCustomText?: (accuracy: number) => ReactNode;
 }

@@ -41,7 +41,6 @@ import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-
 import {
     filterAnomaliesByFunctions,
     getUiAnomalies,
-    isAnomalyFlagged,
     isAnomalyIgnored,
 } from "../../utils/anomalies/anomalies.util";
 import {
@@ -128,9 +127,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             // All anomalies being fetched, and then filtered here at UI level
             const filteredAnomalies = filterAnomaliesByFunctions(
                 anomaliesProp,
-                showAllAnomalies
-                    ? []
-                    : [(a) => !(isAnomalyFlagged(a) || isAnomalyIgnored(a))]
+                showAllAnomalies ? [] : [(a) => !isAnomalyIgnored(a)]
             );
 
             return getUiAnomalies(filteredAnomalies);
@@ -262,9 +259,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                                     }
                                                 />
                                             }
-                                            label={t(
-                                                "message.show-flagged-ignored"
-                                            )}
+                                            label={t("message.show-ignored")}
                                         />
                                     </Box>
                                     <AnomalyQuickFilters showTimeSelectorOnly />

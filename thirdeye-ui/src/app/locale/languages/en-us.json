@@ -528,7 +528,7 @@
         "setup-notifications-for-your-subscription-groups": "Setup notifications for your subscription groups",
         "setup-properties-based-on-your-needs": "Setup properties based on your needs",
         "show-count-entity-for-time-range": "Show {{count}} {{entity}} for time range",
-        "show-flagged-ignored": "Show flagged/ignored",
+        "show-ignored": "Show ignored",
         "showing-top-100": "Showing top 100",
         "skipped-creating-a-new-subscription-group-error": "Skipped creating a new subscription group since an error was experienced while creating a new one",
         "startree-cloud-sources": "StarTree cloud sources",

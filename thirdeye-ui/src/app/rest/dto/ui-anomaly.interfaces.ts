@@ -35,5 +35,4 @@ export interface UiAnomaly {
     datasetName: string;
     hasFeedback: boolean;
     isIgnored: boolean;
-    isFlagged: boolean;
 }

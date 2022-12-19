@@ -24,8 +24,10 @@ import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -37,7 +39,9 @@ import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
@@ -50,6 +54,7 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -86,6 +91,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   private final AlertEvaluator alertEvaluator;
   private final AppAnalyticsService analyticsService;
   private final AlertInsightsProvider alertInsightsProvider;
+  private final AlertTemplateManager alertTemplateManager;
 
   @Inject
   public AlertResource(
@@ -95,6 +101,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertEvaluator alertEvaluator,
       final AppAnalyticsService analyticsService,
       final AlertInsightsProvider alertInsightsProvider,
+      final AlertTemplateManager alertTemplateManager,
       final AccessControl accessControl) {
     super(alertManager, ImmutableMap.of(), accessControl);
     this.alertCreater = alertCreater;
@@ -102,6 +109,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertEvaluator = alertEvaluator;
     this.analyticsService = analyticsService;
     this.alertInsightsProvider = alertInsightsProvider;
+    this.alertTemplateManager = alertTemplateManager;
   }
 
   @Override
@@ -154,6 +162,14 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return ApiBeanMapper.toApi(dto);
   }
 
+  @Override
+  public List<ResourceIdentifier> relatedDtos(final AlertDTO dto) {
+    final AlertTemplateDTO wantAlertTemplateDTO = dto.getTemplate();
+    final AlertTemplateDTO realAlertTemplateDTO = new AlertTemplateRenderer(
+        (AlertManager) dtoManager, alertTemplateManager).getTemplate(wantAlertTemplateDTO);
+    return Collections.singletonList(ResourceIdentifier.fromAlertTemplateDto(realAlertTemplateDTO));
+  }
+
   @Path("{id}/insights")
   @GET
   @Timed
@@ -176,6 +192,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
+    ensureHasAccessToRelatedResources(principal, alert);
 
     final AlertInsightsApi insights = alertInsightsProvider.getInsights(request);
     return Response.ok(insights).build();
@@ -213,6 +230,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertDTO existing =
           api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
       validate(api, existing);
+      ensureHasAccess(principal, api, AccessType.UPDATE);
+      ensureHasAccessToRelatedResources(principal, api);
     }
 
     return Response.ok().build();
@@ -231,6 +250,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     request.setEnd(new Date(safeEndTime));
 
     final AlertApi alert = request.getAlert();
+    ensureHasAccessToRelatedResources(principal, alert);
     ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
@@ -288,7 +308,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     predicates.add(Predicate.EQ("detectionConfigId", id));
 
     // optional filters
-    optional(enumerationId).ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
+    optional(enumerationId).ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId",
+        enumerationId)));
     optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
     optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 

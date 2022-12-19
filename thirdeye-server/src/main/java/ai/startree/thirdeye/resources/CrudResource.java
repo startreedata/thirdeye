@@ -33,17 +33,20 @@ import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiParam;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -109,6 +112,11 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     validate(api, existing);
 
     final DtoT updated = toDto(api);
+
+    // Check the that user can modify the resource before and after the update.
+    ensureHasAccess(principal, existing, AccessType.UPDATE);
+    ensureHasAccess(principal, updated, AccessType.UPDATE);
+    ensureHasAccessToRelatedResources(principal, updated);
 
     // Allow downstream classes to process any additional changes
     prepareUpdatedDto(principal, existing, updated);
@@ -206,9 +214,34 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   public void ensureHasAccess(final ThirdEyePrincipal principal, final AbstractDTO dto,
       final AccessType accessType) {
-    if (!hasAccess(principal, dto, accessType)) {
-      throw new ForbiddenException(Response.status(Status.FORBIDDEN).build());
+    ensureHasAccess(principal, ResourceIdentifier.fromDto(dto), accessType);
+  }
+
+  public void ensureHasAccess(final ThirdEyePrincipal principal, final ApiT api,
+      final AccessType accessType) {
+    ensureHasAccess(principal, ResourceIdentifier.fromDto(toDto(api)), accessType);
+  }
+
+  public void ensureHasAccess(final ThirdEyePrincipal principal, final ResourceIdentifier id,
+      final AccessType accessType) {
+    if (!accessControl.hasAccess(principal, id, accessType)) {
+      throw new ForbiddenException(Response.status(
+          Status.FORBIDDEN.getStatusCode(),
+          String.format("%s access denied for entity %s %s", accessType, id.entityType, id.name)
+      ).build());
     }
+  }
+
+  public final void ensureHasAccessToRelatedResources(ThirdEyePrincipal principal, ApiT api) {
+    ensureHasAccessToRelatedResources(principal, toDto(api));
+  }
+
+  public final void ensureHasAccessToRelatedResources(ThirdEyePrincipal principal, DtoT dto) {
+    relatedDtos(dto).forEach(related -> ensureHasAccess(principal, related, AccessType.READ));
+  }
+
+  public List<ResourceIdentifier> relatedDtos(final DtoT dto) {
+    return Collections.emptyList();
   }
 
   @GET
@@ -287,6 +320,8 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final RequestCache cache = createRequestCache();
     return list.stream()
         .peek(api1 -> validate(api1, null))
+        .peek(api -> ensureHasAccess(principal, api, AccessType.UPDATE))
+        .peek(api -> ensureHasAccessToRelatedResources(principal, api))
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
@@ -362,8 +397,9 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
     final CountApi api = new CountApi();
     final Long count = queryParameters.size() > 0
-      ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters).getPredicate())
-      : dtoManager.count();
+        ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters)
+        .getPredicate())
+        : dtoManager.count();
     api.setCount(count);
     return Response.ok(api).build();
   }

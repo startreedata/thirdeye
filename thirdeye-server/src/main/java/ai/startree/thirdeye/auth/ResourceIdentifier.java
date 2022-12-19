@@ -15,6 +15,8 @@ package ai.startree.thirdeye.auth;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import javax.annotation.Nullable;
 
 public class ResourceIdentifier {
 
@@ -22,30 +24,41 @@ public class ResourceIdentifier {
 
   public final String name;
   public final String namespace;
-  public final String entityType;
+  public final EntityType entityType;
 
-  public ResourceIdentifier(final String name, final String namespace, final String entityType) {
+  public ResourceIdentifier(final String name, @Nullable final String namespace,
+      final EntityType entityType) {
     this.name = name;
-    this.namespace = namespace;
+    this.namespace = namespace != null ? namespace : DefaultNamespace;
     this.entityType = entityType;
   }
 
   static public ResourceIdentifier fromDto(final AbstractDTO dto) {
     if (dto instanceof AlertDTO) {
-      return new ResourceIdentifier(
-          ((AlertDTO) dto).getName(),
-          // TODO jackson: Add a namespace field for alerts.
-          ResourceIdentifier.DefaultNamespace,
-          "alert"
-      );
+      return fromAlertDto((AlertDTO) dto);
+    }
+    if (dto instanceof AlertTemplateDTO) {
+      return fromAlertTemplateDto((AlertTemplateDTO) dto);
     }
 
     // TODO jackson: Add remaining resources.
 
+    return fromUnspecified(dto.getId());
+  }
+
+  static public ResourceIdentifier fromAlertDto(final AlertDTO dto) {
+    return new ResourceIdentifier(dto.getName(), dto.getNamespace(), EntityType.Alert);
+  }
+
+  static public ResourceIdentifier fromAlertTemplateDto(final AlertTemplateDTO dto) {
+    return new ResourceIdentifier(dto.getName(), dto.getNamespace(), EntityType.AlertTemplate);
+  }
+
+  static public ResourceIdentifier fromUnspecified(final Long id) {
     return new ResourceIdentifier(
-        dto.getId().toString(),
+        (id != null) ? id.toString() : "none",
         ResourceIdentifier.DefaultNamespace,
-        "unspecified"
+        EntityType.Unspecified
     );
   }
 }

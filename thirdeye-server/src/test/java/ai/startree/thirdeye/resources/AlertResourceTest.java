@@ -23,21 +23,30 @@ import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AccessControlModule;
+import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AppAnalyticsService;
+import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
+import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import javax.ws.rs.ForbiddenException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -53,9 +62,10 @@ public class AlertResourceTest {
     final Map<String, Object> alertEvaluationPlanApiContext = ThirdEyeSerialization.getObjectMapper()
         .readValue(resource.openStream(), Map.class);
 
-    final AlertEvaluationApi api = ThirdEyeSerialization.getObjectMapper().readValue(StringTemplateUtils.renderTemplate(
-        jsonString,
-        alertEvaluationPlanApiContext), AlertEvaluationApi.class);
+    final AlertEvaluationApi api = ThirdEyeSerialization.getObjectMapper()
+        .readValue(StringTemplateUtils.renderTemplate(
+            jsonString,
+            alertEvaluationPlanApiContext), AlertEvaluationApi.class);
 
     Assert.assertEquals(api.getAlert().getName(), "percentage-change-template");
     Assert.assertEquals(api.getAlert().getDescription(),
@@ -85,6 +95,27 @@ public class AlertResourceTest {
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
+  public void testCreateMultiple_withNoAccessToTemplate() {
+    final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
+    when(alertTemplateManager.findById(2L))
+        .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(2L)).setName("template1"));
+
+    new AlertResource(
+        mock(AlertManager.class),
+        mock(AlertCreater.class),
+        mock(AlertDeleter.class),
+        mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
+        mock(AlertInsightsProvider.class),
+        alertTemplateManager,
+        (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
+            -> identifier.name.equals("alert1")
+    ).createMultiple(new ThirdEyePrincipal("nobody", ""), Collections.singletonList(
+        new AlertApi().setName("alert1").setTemplate(new AlertTemplateApi().setId(2L))
+    ));
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
   public void testRunTask_withNoAccess() {
     final AlertManager alertManager = mock(AlertManager.class);
     when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
@@ -96,8 +127,76 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
+        mock(AlertTemplateManager.class),
         AccessControlModule.alwaysDeny
     ).runTask(new ThirdEyePrincipal("nobody", ""), 1L, 0L, 1L);
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testValidate_withNoAccess() {
+    new AlertResource(
+        mock(AlertManager.class),
+        mock(AlertCreater.class),
+        mock(AlertDeleter.class),
+        mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
+        mock(AlertInsightsProvider.class),
+        mock(AlertTemplateManager.class),
+        AccessControlModule.alwaysDeny
+    ).validateMultiple(
+        new ThirdEyePrincipal("nobody", ""),
+        Collections.singletonList(
+            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
+        )
+    );
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testValidate_withNoAccessToTemplate() {
+    final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
+    when(alertTemplateManager.findById(1L))
+        .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1"));
+
+    new AlertResource(
+        mock(AlertManager.class),
+        mock(AlertCreater.class),
+        mock(AlertDeleter.class),
+        mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
+        mock(AlertInsightsProvider.class),
+        alertTemplateManager,
+        (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
+            -> identifier.name.equals("alert1")
+    ).validateMultiple(
+        new ThirdEyePrincipal("nobody", ""),
+        Collections.singletonList(
+            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
+        )
+    );
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testEvaluate_withNoAccessToTemplate() throws ExecutionException {
+    final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
+    when(alertTemplateManager.findById(1L)).thenReturn((AlertTemplateDTO) new AlertTemplateDTO().setId(
+        1L));
+
+    new AlertResource(
+        mock(AlertManager.class),
+        mock(AlertCreater.class),
+        mock(AlertDeleter.class),
+        mock(AlertEvaluator.class),
+        mock(AppAnalyticsService.class),
+        mock(AlertInsightsProvider.class),
+        alertTemplateManager,
+        AccessControlModule.alwaysDeny
+    ).evaluate(
+        new ThirdEyePrincipal("nobody", ""),
+        new AlertEvaluationApi()
+            .setAlert(new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)))
+            .setStart(new Date())
+            .setEnd(new Date())
+    );
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -112,6 +211,7 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
+        mock(AlertTemplateManager.class),
         AccessControlModule.alwaysDeny
     ).reset(new ThirdEyePrincipal("nobody", ""), 1L);
   }

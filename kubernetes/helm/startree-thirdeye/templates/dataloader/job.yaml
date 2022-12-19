@@ -13,26 +13,26 @@
 #
 
 
-{{- if .Values.quickstart.enabled }}
+{{- if .Values.dataloader.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: quickstart-pinot
+  name: dataloader-pinot
 spec:
   template:
     metadata:
-      name: quickstart-pinot
+      name: dataloader-pinot
     spec:
       initContainers:
       - name: wait-for-pinot
         image: alpine/curl:latest
         env:
           - name: CONTROLLER_PROTOCOL
-            value: {{ (.Values.quickstart.pinot).controllerProtocol | default "http" | quote }}
+            value: {{ (.Values.dataloader.pinot).controllerProtocol | default "http" | quote }}
           - name: CONTROLLER_HOST
-            value: {{ (.Values.quickstart.pinot).controllerHost | default "pinot-pinot-controller-headless" | quote }}
+            value: {{ (.Values.dataloader.pinot).controllerHost | default "pinot-pinot-controller-headless" | quote }}
           - name: CONTROLLER_PORT
-            value: {{ (.Values.quickstart.pinot).controllerPort | default "9000" | quote }}
+            value: {{ (.Values.dataloader.pinot).controllerPort | default "9000" | quote }}
         command:
         - /bin/sh
         - -c
@@ -47,11 +47,11 @@ spec:
               echo "1. Pinot controller is not reachable from the cluster" &&
               echo "2. Check if right protocol (http/https) is configured" &&
               echo "3. Check if right port is configured. Use 80 (http) or 443 (https) for public dns url" &&
-              echo "4. If auth is enabled on Pinot set the quickstart.pinot.commandOptions: \"-authToken 'Basic <valid token>'\"" &&
+              echo "4. If auth is enabled on Pinot set the dataloader.pinot.commandOptions: \"-authToken 'Basic <valid token>'\"" &&
               echo "" &&
               echo "Once the issue is identified :" &&
-              echo "- disable the quickstart with 'quickstart.enabled: false'." &&
-              echo "- re-enable the quickstart with 'quickstart.enabled: true' along with the revised configs."
+              echo "- disable the dataloader with 'dataloader.enabled: false'." &&
+              echo "- re-enable the dataloader with 'dataloader.enabled: true' along with the revised configs."
               return 1
             fi
             echo "waiting for pinot" &&
@@ -61,21 +61,21 @@ spec:
       containers:
       - name: load-datasets
         image: apachepinot/pinot:latest-jdk11
-        command: ["/quickstart/resources/quickstart.sh"]
+        command: ["/dataloader/resources/dataloader.sh"]
         volumeMounts:
-        - name: quickstart-resources
-          mountPath: /quickstart/resources/
+        - name: dataloader-resources
+          mountPath: /dataloader/resources/
         env:
           - name: JAVA_OPTS
             value: "-Xms256M -Xmx1G -XX:+UseG1GC -Dlog4j2.configurationFile=conf/log4j2.xml -Dpinot.admin.system.exit=true"
           - name: CONTROLLER_PROTOCOL
-            value: {{ (.Values.quickstart.pinot).controllerProtocol | default "http" | quote }}
+            value: {{ (.Values.dataloader.pinot).controllerProtocol | default "http" | quote }}
           - name: CONTROLLER_HOST
-            value: {{ (.Values.quickstart.pinot).controllerHost | default "pinot-pinot-controller-headless" | quote }}
+            value: {{ (.Values.dataloader.pinot).controllerHost | default "pinot-pinot-controller-headless" | quote }}
           - name: CONTROLLER_PORT
-            value: {{ (.Values.quickstart.pinot).controllerPort | default "9000" | quote }}
+            value: {{ (.Values.dataloader.pinot).controllerPort | default "9000" | quote }}
       volumes:
-        - name: quickstart-resources
+        - name: dataloader-resources
           configMap:
             name: pinot-scripts
             defaultMode: 0777

@@ -12,13 +12,13 @@
 # the License.
 #
 
-{{- if .Values.quickstart.enabled }}
+{{- if .Values.dataloader.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: pinot-scripts
 data:
-  quickstart.sh: |
+  dataloader.sh: |
     #!/bin/bash
     
     PINOT_ADMIN_SH="/opt/pinot/bin/pinot-admin.sh"
@@ -28,7 +28,7 @@ data:
       echo "Adding table: $1"
       tableConfigFile=$1
       schemaFile=$2
-      "${PINOT_ADMIN_SH}" AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile" -controllerProtocol ${CONTROLLER_PROTOCOL} -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} {{ (.Values.quickstart.pinot).commandOptions }} -exec
+      "${PINOT_ADMIN_SH}" AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile" -controllerProtocol ${CONTROLLER_PROTOCOL} -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} {{ (.Values.dataloader.pinot).commandOptions }} -exec
     }
       
     function ingest_data() {
@@ -37,7 +37,7 @@ data:
       mkdir $segment_dir
       
       echo "Creating and ingesting segment"
-      "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" {{ (.Values.quickstart.pinot).commandOptions }} -values controllerProtocol="${CONTROLLER_PROTOCOL}" controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}" dataDir="${data_dir}" segmentDir="${segment_dir}"
+      "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" {{ (.Values.dataloader.pinot).commandOptions }} -values controllerProtocol="${CONTROLLER_PROTOCOL}" controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}" dataDir="${data_dir}" segmentDir="${segment_dir}"
     }
       
     function add_dataset() {
@@ -52,7 +52,7 @@ data:
     function load_dataset() {
       echo "Downloading files"
       dataset_name=${1##*/}
-      base_dir="/quickstart/$dataset_name"
+      base_dir="/dataloader/$dataset_name"
       mkdir -p "$base_dir/rawdata"
       curl -O --output-dir "$base_dir/rawdata" "$1/rawdata/data.csv"
       curl -O --output-dir "$base_dir" "$1/ingestion_job_spec.yaml"
@@ -64,7 +64,7 @@ data:
     }   
     
     # Add datasets
-    {{- range $dataset := .Values.quickstart.datasets }}
+    {{- range $dataset := .Values.dataloader.sampleDatasets }}
     load_dataset {{ $dataset | quote }}
     {{- end }}
 

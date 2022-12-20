@@ -22,6 +22,7 @@ import {
     useAuthProviderV1,
     useNotificationProviderV1,
 } from "./platform/components";
+import { AppWalkthroughV1 } from "./platform/components/app-walkthrough-v1/app-walkthrough-v1.components";
 import { AppRouter } from "./routers/app/app.router";
 
 // ThirdEye UI app
@@ -49,9 +50,11 @@ export const App: FunctionComponent = () => {
 
     return (
         <AppContainerV1 name={t("label.thirdeye")}>
-            <AppBarConfigProvider>
-                <AppRouter />
-            </AppBarConfigProvider>
+            <AppWalkthroughV1>
+                <AppBarConfigProvider>
+                    <AppRouter />
+                </AppBarConfigProvider>
+            </AppWalkthroughV1>
         </AppContainerV1>
     );
 };

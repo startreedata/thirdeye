@@ -34,5 +34,6 @@ server {
         try_files /index.html;
         expires -1;
         add_header Cache-Control no-cache;
+        proxy_cache_revalidate on;
     }
 }

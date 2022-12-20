@@ -1,0 +1,71 @@
+#
+# Copyright 2022 StarTree Inc
+#
+# Licensed under the StarTree Community License (the "License"); you may not use
+# this file except in compliance with the License. You may obtain a copy of the
+# License at http://www.startree.ai/legal/startree-community-license
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the
+# License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+# either express or implied.
+# See the License for the specific language governing permissions and limitations under
+# the License.
+#
+
+{{- if .Values.dataloader.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pinot-scripts
+data:
+  dataloader.sh: |
+    #!/bin/bash
+    
+    PINOT_ADMIN_SH="/opt/pinot/bin/pinot-admin.sh"
+    
+    # Create a pinot table using a given schema and table config
+    function create_table() {
+      echo "Adding table: $1"
+      tableConfigFile=$1
+      schemaFile=$2
+      "${PINOT_ADMIN_SH}" AddTable -tableConfigFile "$tableConfigFile" -schemaFile "$schemaFile" -controllerProtocol ${CONTROLLER_PROTOCOL} -controllerHost ${CONTROLLER_HOST} -controllerPort ${CONTROLLER_PORT} {{ (.Values.dataloader.pinot).commandOptions }} -exec
+    }
+      
+    function ingest_data() {
+      data_dir="$1/rawdata"
+      segment_dir="$1/segments"
+      mkdir $segment_dir
+      
+      echo "Creating and ingesting segment"
+      "${PINOT_ADMIN_SH}" LaunchDataIngestionJob -jobSpecFile "${job_spec}" {{ (.Values.dataloader.pinot).commandOptions }} -values controllerProtocol="${CONTROLLER_PROTOCOL}" controllerHost="${CONTROLLER_HOST}" controllerPort="${CONTROLLER_PORT}" dataDir="${data_dir}" segmentDir="${segment_dir}"
+    }
+      
+    function add_dataset() {
+      table_config="$1/table_config.json"
+      schema="$1/schema.json"
+      job_spec="$base_dir/ingestion_job_spec.yaml"
+    
+      create_table "$table_config" "$schema"
+      ingest_data $1
+    }
+      
+    function load_dataset() {
+      echo "Downloading files"
+      dataset_name=${1##*/}
+      base_dir="/dataloader/$dataset_name"
+      mkdir -p "$base_dir/rawdata"
+      curl -O --output-dir "$base_dir/rawdata" "$1/rawdata/data.csv"
+      curl -O --output-dir "$base_dir" "$1/ingestion_job_spec.yaml"
+      curl -O --output-dir "$base_dir" "$1/schema.json"
+      curl -O --output-dir "$base_dir" "$1/table_config.json"
+    
+      echo "Adding dataset $dataset_name"
+      add_dataset $base_dir
+    }   
+    
+    # Add datasets
+    {{- range $dataset := .Values.dataloader.sampleDatasets }}
+    load_dataset {{ $dataset | quote }}
+    {{- end }}
+
+{{- end }}

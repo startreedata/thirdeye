@@ -40,6 +40,7 @@ import { notifyIfErrors } from "../../../../utils/notifications/notifications.ut
 import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import {
     AppRouteRelative,
+    getAlertsAlertViewPath,
     getHomePath,
 } from "../../../../utils/routes/routes.util";
 import { SelectTypePageProps } from "./select-type-page.interface";
@@ -47,6 +48,7 @@ import { SelectTypePageProps } from "./select-type-page.interface";
 export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
     sampleAlertsBottom,
     hideSampleAlerts,
+    navigateToAlertDetailAfterCreate,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -96,11 +98,15 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
             "-" + Math.random().toString(36).substring(2, 5);
 
         createAlert(clonedConfiguration)
-            .then(() => {
-                const queryParams = new URLSearchParams([
-                    [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
-                ]);
-                navigate(`${getHomePath()}?${queryParams.toString()}`);
+            .then((alert) => {
+                if (navigateToAlertDetailAfterCreate) {
+                    navigate(`${getAlertsAlertViewPath(alert.id)}`);
+                } else {
+                    const queryParams = new URLSearchParams([
+                        [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
+                    ]);
+                    navigate(`${getHomePath()}?${queryParams.toString()}`);
+                }
                 setShowAppNavBar(true);
             })
             .catch((error: AxiosError): void => {

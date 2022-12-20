@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
@@ -30,11 +31,13 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -46,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
@@ -55,6 +59,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private AnomalyDetector<? extends AbstractSpec> detector;
   private Period monitoringGranularity;
+
+  // anomaly metadata
+  private Long alertId;
+  private EnumerationItemDTO enumerationItemRef;
+  private Optional<String> anomalyMetric;
+  private Optional<String> anomalyDataset;
+  private Optional<String> anomalySource;
 
   public AnomalyDetectorOperator() {
     super();
@@ -69,6 +80,38 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
     detector = createDetector(params, detectionRegistry);
+
+    final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
+        .getDetectionPipelineContext();
+    alertId = detectionPipelineContext.getAlertId();
+    enumerationItemRef = prepareEnumerationItemRef(detectionPipelineContext);
+    anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
+        .map(Templatable::value)
+        .map(Object::toString);
+    anomalyDataset = optional(planNode.getParams().get("anomaly.dataset"))
+        .map(Templatable::value)
+        .map(Object::toString);
+    anomalySource = optional(planNode.getParams().get("anomaly.source"))
+        .map(Templatable::value)
+        .map(Object::toString);
+  }
+
+  private EnumerationItemDTO prepareEnumerationItemRef(
+      final DetectionPipelineContext detectionPipelineContext) {
+    final EnumerationItemDTO enumerationItem = detectionPipelineContext.getEnumerationItem();
+    if (enumerationItem == null) {
+      return null;
+    }
+    final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
+        "Detection pipeline usage is not set");
+    if (usage.equals(DetectionPipelineUsage.DETECTION)) {
+      return (EnumerationItemDTO) new EnumerationItemDTO().setId(enumerationItem.getId());
+    } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
+      // don't put enumerationItemInfo
+      return null;
+    } else {
+      throw new UnsupportedOperationException("Unsupported DetectionPipelineUsage: " + usage);
+    }
   }
 
   private AnomalyDetector<? extends AbstractSpec> createDetector(
@@ -97,30 +140,9 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
 
-    OperatorResult operatorResult = buildDetectionResult(detectorResult);
-
-    addMetadata(operatorResult);
+    final OperatorResult operatorResult = buildDetectionResult(detectorResult);
 
     setOutput(DEFAULT_OUTPUT_KEY, operatorResult);
-  }
-
-  private void addMetadata(final OperatorResult operatorResult) {
-    final Optional<String> anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
-        .map(Templatable::value)
-        .map(Object::toString);
-    final Optional<String> anomalyDataset = optional(planNode.getParams().get("anomaly.dataset"))
-        .map(Templatable::value)
-        .map(Object::toString);
-    final Optional<String> anomalySource = optional(planNode.getParams().get("anomaly.source"))
-        .map(Templatable::value)
-        .map(Object::toString);
-
-    // annotate each anomaly with the available metadata
-    for (MergedAnomalyResultDTO anomaly : operatorResult.getAnomalies()) {
-      anomalyMetric.ifPresent(anomaly::setMetric);
-      anomalyDataset.ifPresent(anomaly::setCollection);
-      anomalySource.ifPresent(anomaly::setSource);
-    }
   }
 
   @Override
@@ -152,84 +174,40 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DoubleSeries currentSeries = df.getDoubles(Constants.COL_CURRENT);
     final DoubleSeries baselineSeries = df.getDoubles(Constants.COL_VALUE);
 
-    long lastStartMillis = -1;
-    AnomalyStatsAccumulator anomalyStatsAccumulator = new AnomalyStatsAccumulator();
-
     for (int i = 0; i < df.size(); i++) {
       if (!isAnomalySeries.isNull(i) && BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
-        // inside an anomaly range
-        if (lastStartMillis < 0) {
-          // start of an anomaly range
-          lastStartMillis = timeMillisSeries.get(i);
+        final MergedAnomalyResultDTO anomaly = newAnomaly();
+        final long startTimeMillis = timeMillisSeries.get(i);
+        anomaly.setStartTime(startTimeMillis);
+        if (i < df.size() - 1) {
+          anomaly.setEndTime(timeMillisSeries.get(i + 1));
+        } else {
+          final DateTime endTime = new DateTime(startTimeMillis, detectionInterval.getChronology())
+              .plus(monitoringGranularity);
+          anomaly.setEndTime(endTime.getMillis());
         }
         if (!currentSeries.isNull(i)) {
-          anomalyStatsAccumulator.addCurrentValue(currentSeries.getDouble(i));
+          anomaly.setAvgCurrentVal(currentSeries.getDouble(i));
         }
         if (!baselineSeries.isNull(i)) {
-          anomalyStatsAccumulator.addBaselineValue(baselineSeries.getDouble(i));
+          anomaly.setAvgBaselineVal(baselineSeries.getDouble(i));
         }
-      } else if (lastStartMillis >= 0) {
-        // anomaly range opened - let's close the anomaly
-        long endMillis = timeMillisSeries.get(i);
-        anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endMillis));
-
-        // reset variables for next anomaly
-        anomalyStatsAccumulator.reset();
-        lastStartMillis = -1;
+        anomalies.add(anomaly);
       }
-    }
-
-    if (lastStartMillis >= 0) {
-      // last anomaly has not been closed - let's close it - compute end time of anomaly range
-      final long lastTimestamp = timeMillisSeries.getLong(timeMillisSeries.size() - 1);
-      // exact computation of end of period
-      DateTime endTime = new DateTime(lastTimestamp, detectionInterval.getChronology())
-          .plus(monitoringGranularity);
-      anomalies.add(anomalyStatsAccumulator.buildAnomaly(lastStartMillis, endTime.getMillis()));
     }
 
     return anomalies;
   }
 
-  private static class AnomalyStatsAccumulator {
-
-    private double currentSum = 0;
-    private int currentCount = 0;
-    private double baselineSum = 0;
-    private int baselineCount = 0;
-
-    public AnomalyStatsAccumulator() {
-    }
-
-    public MergedAnomalyResultDTO buildAnomaly(long startMillis, long endMillis) {
-      final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
-      anomaly.setStartTime(startMillis);
-      anomaly.setEndTime(endMillis);
-      if (currentCount > 0) {
-        anomaly.setAvgCurrentVal(currentSum / currentCount);
-      }
-      if (baselineCount > 0) {
-        anomaly.setAvgBaselineVal(baselineSum / baselineCount);
-      }
-      return anomaly;
-    }
-
-    public void addCurrentValue(double currentValue) {
-      currentSum += currentValue;
-      ++currentCount;
-    }
-
-    public void addBaselineValue(double baselineValue) {
-      baselineSum += baselineValue;
-      ++baselineCount;
-    }
-
-    public void reset() {
-      currentSum = 0;
-      currentCount = 0;
-      baselineSum = 0;
-      baselineCount = 0;
-    }
+  @NonNull
+  private MergedAnomalyResultDTO newAnomaly() {
+    final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+    anomaly.setDetectionConfigId(alertId);
+    anomaly.setEnumerationItem(enumerationItemRef);
+    anomalyMetric.ifPresent(anomaly::setMetric);
+    anomalyDataset.ifPresent(anomaly::setCollection);
+    anomalySource.ifPresent(anomaly::setSource);
+    return anomaly;
   }
 
   /**

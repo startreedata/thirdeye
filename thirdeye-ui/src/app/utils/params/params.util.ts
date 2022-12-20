@@ -176,9 +176,10 @@ export const isValidNumberId = (param: string): boolean => {
 };
 
 export const concatKeyValueWithEqual = (
-    filterOption: AnomalyFilterOption
+    filterOption: AnomalyFilterOption,
+    shouldQuoteStrings = false
 ): string => {
-    if (isNumber(filterOption.value)) {
+    if (isNumber(filterOption.value) || !shouldQuoteStrings) {
         return `${filterOption.key}=${filterOption.value}`;
     }
 
@@ -200,10 +201,11 @@ export const concatKeyValueWithEqual = (
  * @param {array} keysValues - array of objects with "key" and "value" properties
  */
 export const serializeKeyValuePair = (
-    keysValues: AnomalyFilterOption[]
+    keysValues: AnomalyFilterOption[],
+    shouldQuoteStrings = false
 ): string => {
     return keysValues
-        .map(concatKeyValueWithEqual)
+        .map((item) => concatKeyValueWithEqual(item, shouldQuoteStrings))
         .sort()
         .join(SINGLE_SEARCH_PARAM_SEPARATOR);
 };

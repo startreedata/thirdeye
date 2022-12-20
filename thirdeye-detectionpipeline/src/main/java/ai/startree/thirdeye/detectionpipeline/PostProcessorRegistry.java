@@ -16,8 +16,10 @@ package ai.startree.thirdeye.detectionpipeline;
 import static ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator.getComponentSpec;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
@@ -38,13 +40,16 @@ public class PostProcessorRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(PostProcessorRegistry.class);
 
   private final Map<String, AnomalyPostProcessorFactory> anomalyPostProcessorFactoryMap = new HashMap<>();
-  private final  DatasetConfigManager datasetDao;
+  private final DatasetConfigManager datasetDao;
   private final MinMaxTimeLoader minMaxTimeLoader;
+  private final MergedAnomalyResultManager anomalyDao;
 
   @Inject
-  public PostProcessorRegistry(final DatasetConfigManager datasetDao, final MinMaxTimeLoader minMaxTimeLoader) {
+  public PostProcessorRegistry(final DatasetConfigManager datasetDao,
+      final MinMaxTimeLoader minMaxTimeLoader, final MergedAnomalyResultManager anomalyDao) {
     this.datasetDao = datasetDao;
     this.minMaxTimeLoader = minMaxTimeLoader;
+    this.anomalyDao = anomalyDao;
   }
 
   public void addAnomalyPostProcessorFactory(final AnomalyPostProcessorFactory f) {
@@ -54,15 +59,22 @@ public class PostProcessorRegistry {
     anomalyPostProcessorFactoryMap.put(f.name(), f);
   }
 
-  public AnomalyPostProcessor build(final String factoryName, final Map<String, Object> nodeParams) {
+  public AnomalyPostProcessor build(final String factoryName, final Map<String, Object> nodeParams,
+      final OperatorContext context) {
     checkArgument(anomalyPostProcessorFactoryMap.containsKey(factoryName),
         String.format("Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
             factoryName,
             anomalyPostProcessorFactoryMap.keySet()));
     final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
 
+    final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
+        .getDetectionPipelineContext();
     final PostProcessingContext postProcessingContext = new PostProcessingContext(datasetDao,
-        minMaxTimeLoader);
+        minMaxTimeLoader, anomalyDao,
+        detectionPipelineContext.getAlertId(),
+        requireNonNull(detectionPipelineContext.getUsage(), "Detection pipeline usage is not set"),
+        detectionPipelineContext.getEnumerationItem()
+    );
     return anomalyPostProcessorFactoryMap.get(factoryName)
         .build(componentSpec, postProcessingContext);
   }

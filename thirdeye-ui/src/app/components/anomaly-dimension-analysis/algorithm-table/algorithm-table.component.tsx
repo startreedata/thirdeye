@@ -20,6 +20,7 @@ import {
     TableRow,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { AlgorithmRow } from "./algorithm-row.component";
 import { AlgorithmTableProps } from "./algorithm-table.interfaces";
@@ -33,6 +34,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
         chartTimeSeriesFilterSet,
         onCheckClick,
     }) => {
+        const { t } = useTranslation();
         const totalSum = anomalyDimensionAnalysisData.responseRows.reduce(
             (countSoFar, current) => {
                 return countSoFar + current.cost;
@@ -51,13 +53,13 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
                     <TableRow>
                         <TableCell />
                         <TableCell>
-                            <strong>Name</strong>
+                            <strong>{t("label.name")}</strong>
                         </TableCell>
                         <TableCell>
-                            <strong>Type</strong>
+                            <strong>{t("label.type")}</strong>
                         </TableCell>
                         <TableCell>
-                            <strong>Impact Score</strong>
+                            <strong>{t("label.impact-score")}</strong>
                         </TableCell>
                         <TableCell />
                     </TableRow>
@@ -73,7 +75,9 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
                         const checked = chartTimeSeriesFilterSet.some(
                             (filterSet) =>
                                 filterSet
-                                    .map(concatKeyValueWithEqual)
+                                    .map((item) =>
+                                        concatKeyValueWithEqual(item, false)
+                                    )
                                     .sort()
                                     .join() === id
                         );

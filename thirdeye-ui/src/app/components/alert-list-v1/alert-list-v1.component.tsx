@@ -13,6 +13,7 @@
  * the License.
  */
 import { Button, Grid, Link } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -22,20 +23,23 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
+    DataGridColumnV1,
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
     PageContentsCardV1,
 } from "../../platform/components";
-import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
+import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
+import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
     getAlertsAlertPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
+import { AlertAccuracyColored } from "../alert-accuracy-colored/alert-accuracy-colored.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
-import { AlertListV1Props } from "./alert-list-v1.interfaces";
+import type { AlertListV1Props } from "./alert-list-v1.interfaces";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     alerts,
@@ -70,18 +74,53 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         setAlertsData(alertsData);
     }, [alerts]);
 
-    const handleAlertViewDetails = (id: number): void => {
-        navigate(getAlertsAlertPath(id));
-    };
-
     const renderLink = (
         cellValue: Record<string, unknown>,
         data: UiAlert
     ): ReactElement => {
+        return <Link href={getAlertsAlertPath(data.id)}>{cellValue}</Link>;
+    };
+
+    const renderAlertAccuracy = (
+        _: Record<string, unknown>,
+        data: UiAlert
+    ): ReactElement => (
+        <AlertAccuracyColored
+            alertStats={data.accuracyStatistics ?? null}
+            renderCustomText={(accuracyNumber) => `${100 * accuracyNumber}%`}
+            typographyProps={{ variant: "body2" }}
+        />
+    );
+
+    const renderAlertAccuracyTooltip = (
+        _: Record<string, unknown>,
+        data: UiAlert
+    ): ReactElement | undefined => {
+        if (!data.accuracyStatistics) {
+            return (
+                <>
+                    {capitalize(
+                        t("message.fetching-entity", {
+                            entity: t("label.data"),
+                        })
+                    )}
+                    ...
+                </>
+            );
+        }
+
+        const { totalCount, countWithFeedback, feedbackStats } =
+            data.accuracyStatistics;
+
         return (
-            <Link onClick={() => handleAlertViewDetails(data.id)}>
-                {cellValue}
-            </Link>
+            <>
+                {t("message.total-reported-anomalies")}:&nbsp;{totalCount}
+                <br />
+                {t("message.anomalies-with-feedback")}:&nbsp;{countWithFeedback}
+                <br />
+                {t("message.misreported-anomalies")}:&nbsp;
+                {feedbackStats[AnomalyFeedbackType.NOT_ANOMALY]}
+            </>
         );
     };
 
@@ -141,7 +180,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         onAlertReset && onAlertReset(selectedSingleAlert.alert);
     };
 
-    const alertGroupColumns = [
+    const alertGroupColumns: DataGridColumnV1<UiAlert>[] = [
         {
             key: "name",
             dataKey: "name",
@@ -157,6 +196,15 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
             header: t("label.created-by"),
             minWidth: 0,
             flex: 1,
+        },
+        {
+            key: "accuracy",
+            dataKey: "accuracy",
+            header: t("label.accuracy"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderAlertAccuracy,
+            customCellTooltipRenderer: renderAlertAccuracyTooltip,
         },
         {
             key: "active",

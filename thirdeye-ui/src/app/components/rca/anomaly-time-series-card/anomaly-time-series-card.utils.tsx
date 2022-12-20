@@ -97,7 +97,9 @@ export const generateSeriesDataForDetectionEvaluation = (
             const timestamps = filteredAlertEvaluationTimeSeriesData.timestamp;
 
             filteredTimeSeriesData.push({
-                name: filterOptions.map(concatKeyValueWithEqual).join(" & "),
+                name: filterOptions
+                    .map((item) => concatKeyValueWithEqual(item, false))
+                    .join(" & "),
                 type: SeriesType.LINE,
                 data: filteredAlertEvaluationTimeSeriesData.current
                     .map((value, idx) => {

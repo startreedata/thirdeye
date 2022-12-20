@@ -19,6 +19,7 @@ import {
     AlertAnomalyDetectorNode,
     AlertEvaluation,
     AlertNodeType,
+    AlertStats,
     EditableAlert,
 } from "../../rest/dto/alert.interfaces";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
@@ -403,4 +404,42 @@ export const generateGenericNameForAlert = (
     }
 
     return nameSoFar;
+};
+
+type AlertAccuracyColor = "success" | "warning" | "error";
+
+/**
+ *
+ * @param alertStat - instance of AlertStats
+ * @returns `[accuracy, colorScheme]`
+ * @param accuracy - number between 0 to 1
+ * @param colorScheme - "success" | "warning" | "error",
+ */
+export const getAlertAccuracyData = (
+    alertStat: AlertStats
+): [number, AlertAccuracyColor] => {
+    // Default values
+    let colorScheme: AlertAccuracyColor = "success";
+    let accuracy = 1;
+
+    // There's no point of calculating the accuracy if there is no feedback reported.
+    // In which case, just return the default value of accuracy=100%
+    if (alertStat.countWithFeedback && alertStat.countWithFeedback > 0) {
+        // Returns a decimal value with four digits of precision
+        accuracy = Number(
+            (
+                1 -
+                alertStat.feedbackStats.NOT_ANOMALY /
+                    alertStat.countWithFeedback
+            ).toFixed(4)
+        );
+
+        if (accuracy < 0.4) {
+            colorScheme = "error";
+        } else if (accuracy < 0.7) {
+            colorScheme = "warning";
+        }
+    }
+
+    return [accuracy, colorScheme];
 };

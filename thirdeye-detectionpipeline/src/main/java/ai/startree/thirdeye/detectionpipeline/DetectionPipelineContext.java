@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import java.util.List;
 import org.joda.time.Interval;
 
@@ -25,7 +26,10 @@ public class DetectionPipelineContext {
   private Interval detectionInterval;
   private List<Predicate> predicates;
   private EnumerationItemDTO enumerationItem;
+  // fixme cyril can be removed in favor of usage
   private boolean preserveOutputDataFrames = false;
+  private DetectionPipelineUsage usage;
+  private Long alertId;
 
   public ApplicationContext getApplicationContext() {
     return applicationContext;
@@ -72,6 +76,25 @@ public class DetectionPipelineContext {
   public DetectionPipelineContext setPreserveOutputDataFrames(
       final boolean preserveOutputDataFrames) {
     this.preserveOutputDataFrames = preserveOutputDataFrames;
+    return this;
+  }
+
+  public DetectionPipelineUsage getUsage() {
+    return usage;
+  }
+
+  public DetectionPipelineContext setUsage(
+      final DetectionPipelineUsage usage) {
+    this.usage = usage;
+    return this;
+  }
+
+  public Long getAlertId() {
+    return alertId;
+  }
+
+  public DetectionPipelineContext setAlertId(final Long alertId) {
+    this.alertId = alertId;
     return this;
   }
 }

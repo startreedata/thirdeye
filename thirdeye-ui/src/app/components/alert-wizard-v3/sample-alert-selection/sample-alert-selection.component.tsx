@@ -13,54 +13,80 @@
  * the License.
  */
 import { Button, CardActions, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
+import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { AlgorithmOptionCard } from "../algorithm-selection/algorithm-option-card/algorithm-option-card.component";
 import { SampleAlertSelectionProps } from "./sample-alert-selection.interfaces";
 import { generateOptions } from "./sample-alert.utils";
 
 export const SampleAlertSelection: FunctionComponent<SampleAlertSelectionProps> =
-    ({ onSampleAlertSelect }) => {
+    ({ onSampleAlertSelect, alertTemplates }) => {
         const { t } = useTranslation();
 
+        const { datasets, getDatasets } = useGetDatasets();
+
         const options = useMemo(() => {
-            return generateOptions(t);
+            if (datasets === null || alertTemplates === null) {
+                return [];
+            }
+
+            return generateOptions(t, datasets, alertTemplates);
+        }, [datasets, alertTemplates]);
+
+        useEffect(() => {
+            getDatasets();
         }, []);
 
-        return (
-            <PageContentsCardV1>
-                <Grid container alignItems="stretch">
-                    <Grid item xs={12}>
-                        <Typography variant="h5">
-                            {t("message.you-can-create-sample-alerts")}
-                        </Typography>
-                        <Typography variant="body2">
-                            {t("message.create-sample-alert-description")}
-                        </Typography>
-                    </Grid>
+        if (options.length === 0) {
+            return <></>;
+        }
 
-                    <Grid container item xs={12}>
-                        {options.map((option) => {
-                            return (
-                                <Grid item key={option.title} sm={3} xs={12}>
-                                    <AlgorithmOptionCard option={option}>
-                                        <CardActions>
-                                            <Button
-                                                size="small"
-                                                onClick={() =>
-                                                    onSampleAlertSelect(option)
-                                                }
-                                            >
-                                                {t("label.create-sample-alert")}
-                                            </Button>
-                                        </CardActions>
-                                    </AlgorithmOptionCard>
-                                </Grid>
-                            );
-                        })}
+        return (
+            <Grid item xs={12}>
+                <PageContentsCardV1>
+                    <Grid container alignItems="stretch">
+                        <Grid item xs={12}>
+                            <Typography variant="h5">
+                                {t("message.you-can-create-sample-alerts")}
+                            </Typography>
+                            <Typography variant="body2">
+                                {t("message.create-sample-alert-description")}
+                            </Typography>
+                        </Grid>
+
+                        <Grid container item xs={12}>
+                            {options.map((option) => {
+                                return (
+                                    <Grid
+                                        item
+                                        key={option.title}
+                                        sm={3}
+                                        xs={12}
+                                    >
+                                        <AlgorithmOptionCard option={option}>
+                                            <CardActions>
+                                                <Button
+                                                    size="small"
+                                                    onClick={() =>
+                                                        onSampleAlertSelect(
+                                                            option
+                                                        )
+                                                    }
+                                                >
+                                                    {t(
+                                                        "label.create-sample-alert"
+                                                    )}
+                                                </Button>
+                                            </CardActions>
+                                        </AlgorithmOptionCard>
+                                    </Grid>
+                                );
+                            })}
+                        </Grid>
                     </Grid>
-                </Grid>
-            </PageContentsCardV1>
+                </PageContentsCardV1>
+            </Grid>
         );
     };

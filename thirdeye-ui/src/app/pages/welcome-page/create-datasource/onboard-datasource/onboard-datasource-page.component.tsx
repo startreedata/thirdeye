@@ -190,6 +190,8 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                         </Box>
 
                         <LoadingErrorStateSwitch
+                            wrapInCard
+                            wrapInGrid
                             isError={status === ActionStatus.Error}
                             isLoading={status === ActionStatus.Working}
                         >

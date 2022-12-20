@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 import { ReactNode } from "react";
 
 export interface LoadingErrorStateSwitchProps {
-    children: ReactNode;
     errorState?: ReactNode;
     loadingState?: ReactNode;
     isLoading: boolean;
     isError: boolean;
+    wrapInGrid?: boolean;
+    wrapInCard?: boolean;
 }

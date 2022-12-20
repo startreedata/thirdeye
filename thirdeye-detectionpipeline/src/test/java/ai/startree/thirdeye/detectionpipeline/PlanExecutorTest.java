@@ -32,9 +32,11 @@ import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.collect.ImmutableMap;
@@ -63,12 +65,18 @@ public class PlanExecutorTest {
     final DatasetConfigManager datasetConfigManager = mock(DatasetConfigManager.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
     );
+    final EnumerationItemManager enumerationItemManager = mock(EnumerationItemManager.class);
+    when(enumerationItemManager.save(any())).thenAnswer(e -> {
+      ((EnumerationItemDTO) e.getArguments()[0]).setId(1L);
+      return 1L;
+    });
     planExecutor = new PlanExecutor(planNodeFactory,
         dataSourceCache,
         detectionRegistry,
         postProcessorRegistry,
         eventManager,
         datasetConfigManager,
+        enumerationItemManager,
         new DetectionPipelineConfiguration());
     enumerator = mock(Enumerator.class);
 
@@ -157,6 +165,7 @@ public class PlanExecutorTest {
         System.currentTimeMillis(),
         DateTimeZone.UTC);
     final DetectionPipelineContext runTimeContext = new DetectionPipelineContext()
+        .setUsage(DetectionPipelineUsage.DETECTION)
         .setApplicationContext(planExecutor.applicationContext)
         .setDetectionInterval(detectionInterval);
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,

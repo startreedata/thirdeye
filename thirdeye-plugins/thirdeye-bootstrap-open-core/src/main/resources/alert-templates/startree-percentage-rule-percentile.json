@@ -6,6 +6,20 @@
       "name": "root",
       "type": "PostProcessor",
       "params": {
+        "type": "ANOMALY_MERGER",
+        "component.mergeMaxGap": "${mergeMaxGap}",
+        "component.mergeMaxDuration": "${mergeMaxDuration}"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "eventProcessor"
+        }
+      ]
+    },
+    {
+      "name": "eventProcessor",
+      "type": "PostProcessor",
+      "params": {
         "type": "EVENTS",
         "component.ignore": "${eventFilterIgnore}",
         "component.beforeEventMargin": "${eventFilterBeforeEventMargin}",
@@ -201,41 +215,147 @@
     },
     "eventContext": {
       "types": "${rcaEventTypes}",
-      "sqlFilter" : "${rcaEventSqlFilter}"
+      "sqlFilter": "${rcaEventSqlFilter}"
     },
     "timezone": "${timezone}",
-    "mergeMaxGap": "${mergeMaxGap}",
-    "mergeMaxDuration": "${mergeMaxDuration}",
     "granularity": "${monitoringGranularity}"
   },
-  "defaultProperties": {
-    "timezone": "UTC",
-    "timeColumn": "AUTO",
-    "timeColumnFormat": "",
-    "pattern": "UP_OR_DOWN",
-    "completenessDelay": "P0D",
-    "mergeMaxGap": "",
-    "mergeMaxDuration": "",
-    "rcaAggregationFunction": "",
-    "queryFilters": "",
-    "rcaIncludedDimensions": [],
-    "rcaExcludedDimensions": [],
-    "rcaEventTypes": [],
-    "rcaEventSqlFilter": "",
-    "coldStartIgnore": "true",
-    "timeOfWeekIgnore": "true",
-    "daysOfWeek": [],
-    "hoursOfDay": [],
-    "dayHoursOfWeek": {},
-    "thresholdIgnore": "true",
-    "thresholdFilterMin": "-1",
-    "thresholdFilterMax": "-1",
-    "eventFilterSqlFilter": "",
-    "eventFilterLookaround": "P2D",
-    "eventFilterTypes": [],
-    "eventFilterIgnore": false,
-    "eventFilterBeforeEventMargin": "P0D",
-    "eventFilterAfterEventMargin": "P0D",
-    "queryLimit": "100000000"
-  }
+  "properties": [
+    {
+      "name":  "aggregationColumn"
+    },
+    {
+      "name":  "aggregationFunction"
+    },
+    {
+      "name": "aggregationParameter"
+    },
+    {
+      "name":  "baselineOffset"
+    },
+    {
+      "name":  "dataSource"
+    },
+    {
+      "name":  "dataset"
+    },
+    {
+      "name":  "monitoringGranularity"
+    },
+    {
+      "name":  "percentageChange"
+    },
+    {
+      "name": "timezone",
+      "defaultValue": "UTC"
+    },
+    {
+      "name": "timeColumn",
+      "defaultValue": "AUTO"
+    },
+    {
+      "name": "timeColumnFormat",
+      "defaultValue": ""
+    },
+    {
+      "name": "pattern",
+      "defaultValue": "UP_OR_DOWN"
+    },
+    {
+      "name": "completenessDelay",
+      "defaultValue": "P0D"
+    },
+    {
+      "name": "mergeMaxGap",
+      "defaultValue": ""
+    },
+    {
+      "name": "mergeMaxDuration",
+      "defaultValue": ""
+    },
+    {
+      "name": "rcaAggregationFunction",
+      "defaultValue": ""
+    },
+    {
+      "name": "queryFilters",
+      "defaultValue": ""
+    },
+    {
+      "name": "rcaIncludedDimensions",
+      "defaultValue": []
+    },
+    {
+      "name": "rcaExcludedDimensions",
+      "defaultValue": []
+    },
+    {
+      "name": "rcaEventTypes",
+      "defaultValue": []
+    },
+    {
+      "name": "rcaEventSqlFilter",
+      "defaultValue": ""
+    },
+    {
+      "name": "coldStartIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "timeOfWeekIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "daysOfWeek",
+      "defaultValue": []
+    },
+    {
+      "name": "hoursOfDay",
+      "defaultValue": []
+    },
+    {
+      "name": "dayHoursOfWeek",
+      "defaultValue": {}
+    },
+    {
+      "name": "thresholdIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "thresholdFilterMin",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "thresholdFilterMax",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "eventFilterSqlFilter",
+      "defaultValue": ""
+    },
+    {
+      "name": "eventFilterLookaround",
+      "defaultValue": "P2D"
+    },
+    {
+      "name": "eventFilterTypes",
+      "defaultValue": []
+    },
+    {
+      "name": "eventFilterIgnore",
+      "defaultValue": false
+    },
+    {
+      "name": "eventFilterBeforeEventMargin",
+      "defaultValue": "P0D"
+    },
+    {
+      "name": "eventFilterAfterEventMargin",
+      "defaultValue": "P0D"
+    },
+    {
+      "name": "queryLimit",
+      "defaultValue": "100000000"
+    }
+  ]
 }

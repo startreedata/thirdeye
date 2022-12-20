@@ -11,19 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection;
+package ai.startree.thirdeye.detectionpipeline;
 
-public class PostProcessorSpec extends AbstractSpec {
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-  // move to post processor spec
-  private Boolean ignore;
+@Mapper
+public interface DetectionPipelineContextMapper {
 
-  public Boolean getIgnore() {
-    return ignore;
-  }
+  DetectionPipelineContextMapper INSTANCE = Mappers.getMapper(DetectionPipelineContextMapper.class);
 
-  public PostProcessorSpec setIgnore(final Boolean ignore) {
-    this.ignore = ignore;
-    return this;
-  }
+  DetectionPipelineContext clone(DetectionPipelineContext o);
 }

@@ -8,11 +8,20 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.notification.performanceEvaluation;
 
-public enum PerformanceEvaluationMethod {
-  ANOMALY_PERCENTAGE, RECALL, PRECISION, F1_SCORE, PRECISION_AND_RECALL
+import type { TypographyProps } from "@material-ui/core";
+import type { ReactElement, ReactNode } from "react";
+import type { SkeletonV1Props } from "../../platform/components/skeleton-v1/skeleton-v1.interfaces";
+import type { AlertStats } from "../../rest/dto/alert.interfaces";
+
+export interface AlertAccuracyColoredProps {
+    alertStats: AlertStats | null;
+    renderCustomLoading?: ReactElement;
+    defaultSkeletonProps?: SkeletonV1Props;
+    typographyProps?: Partial<TypographyProps>;
+    renderCustomText?: (accuracy: number) => ReactNode;
 }

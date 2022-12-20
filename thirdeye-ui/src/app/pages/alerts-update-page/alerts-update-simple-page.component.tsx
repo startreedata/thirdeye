@@ -13,39 +13,32 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { AlertDetails } from "../../components/alert-wizard-v2/alert-details/alert-details.component";
 import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import { AlertTemplate } from "../../components/alert-wizard-v2/alert-template/alert-template.component";
-import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { PageContentsGridV1 } from "../../platform/components";
+import { AlertEditPageOutletContextProps } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateSimplePage: FunctionComponent = () => {
-    const [
+    const {
         alert,
-        onAlertPropertyChange,
+        handleAlertPropertyChange: onAlertPropertyChange,
         selectedSubscriptionGroups,
-        onSubscriptionGroupsChange,
+        handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
         setSelectedAlertTemplate,
         alertTemplateOptions,
-    ] =
-        useOutletContext<
-            [
-                EditableAlert,
-                (contents: Partial<EditableAlert>) => void,
-                SubscriptionGroup[],
-                (groups: SubscriptionGroup[]) => void,
-                AlertTemplateType,
-                (newAlertTemplate: AlertTemplateType | null) => void,
-                AlertTemplateType[]
-            ]
-        >();
+        setShowBottomBar,
+    } = useOutletContext<AlertEditPageOutletContextProps>();
+
+    useEffect(() => {
+        setShowBottomBar(true);
+    }, []);
 
     return (
-        <>
+        <PageContentsGridV1>
             <Grid item xs={12}>
                 <AlertDetails
                     alert={alert}
@@ -70,6 +63,6 @@ export const AlertsUpdateSimplePage: FunctionComponent = () => {
                     onSubscriptionGroupsChange={onSubscriptionGroupsChange}
                 />
             </Grid>
-        </>
+        </PageContentsGridV1>
     );
 };

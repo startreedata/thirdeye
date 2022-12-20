@@ -171,6 +171,8 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <LoadingErrorStateSwitch
+                        wrapInCard
+                        wrapInGrid
                         isError={getTablesStatus === ActionStatus.Error}
                         isLoading={getTablesStatus === ActionStatus.Working}
                     >
@@ -190,6 +192,8 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                     )}
                                 </Typography>
                                 <LoadingErrorStateSwitch
+                                    wrapInCard
+                                    wrapInGrid
                                     isError={
                                         getTablesStatus === ActionStatus.Error
                                     }

@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import axios from "axios";
+import axios, { AxiosRequestConfig, CancelToken } from "axios";
 import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
 import { filterOutIgnoredAnomalies } from "../../utils/anomalies/anomalies.util";
-import {
+import type {
     Alert,
     AlertEvaluation,
     AlertInsight,
+    AlertStats,
     EditableAlert,
 } from "../dto/alert.interfaces";
 import { EnumerationItemParams } from "../dto/detection.interfaces";
@@ -27,7 +28,37 @@ import { GetEvaluationRequestPayload } from "./alerts.interfaces";
 const BASE_URL_ALERTS = "/api/alerts";
 
 export const getAlert = async (id: number): Promise<Alert> => {
-    const response = await axios.get(`${BASE_URL_ALERTS}/${id}`);
+    const response = await axios.get<Alert>(`${BASE_URL_ALERTS}/${id}`);
+
+    return response.data;
+};
+
+export const getAlertStats = async ({
+    alertId,
+    startTime,
+    endTime,
+    axiosConfig,
+}: {
+    alertId: number;
+    startTime?: number;
+    endTime?: number;
+    cancelToken?: CancelToken;
+    axiosConfig?: AxiosRequestConfig;
+}): Promise<AlertStats> => {
+    const queryParams = new URLSearchParams([]);
+
+    if (startTime) {
+        queryParams.set("startTime", `${startTime}`);
+    }
+
+    if (endTime) {
+        queryParams.set("endTime", `${endTime}`);
+    }
+
+    const response = await axios.get<AlertStats>(
+        `${BASE_URL_ALERTS}/${alertId}/stats?${queryParams.toString()}`,
+        axiosConfig
+    );
 
     return response.data;
 };

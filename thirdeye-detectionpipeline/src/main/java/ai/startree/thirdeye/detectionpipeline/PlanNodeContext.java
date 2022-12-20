@@ -27,7 +27,7 @@ public class PlanNodeContext {
   private PlanNodeBean planNodeBean;
 
   public static PlanNodeContext copy(final PlanNodeContext src) {
-    return PlanNodeContextMapper.INSTANCE.clone(src);  // shallow copy
+    return PlanNodeContextMapper.INSTANCE.clone(src);  // a new detectionPipelineContext  instance is created, the rest is shallow copy
   }
 
   public DetectionPipelineContext getDetectionPipelineContext() {

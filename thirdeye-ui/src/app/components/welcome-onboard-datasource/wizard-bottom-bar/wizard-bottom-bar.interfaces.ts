@@ -20,4 +20,5 @@ export interface WizardBottomBarProps {
     backButtonLabel?: string;
     backBtnLink?: string;
     nextBtnLink?: string;
+    nextButtonIsDisabled?: boolean;
 }

@@ -116,6 +116,8 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   public Response getDatasets(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("name") String name) {
+    ensureExists(name, "name is a required field");
+    authorizationManager.ensureCanRead(principal, getDtoByName(name));
 
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
     final List<DatasetApi> datasets = dataSource.getDatasets().stream()
@@ -135,6 +137,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
 
     ensureExists(dataSourceName, "dataSourceName is a required field");
     ensureExists(datasetName, "datasetName is a required field");
+    authorizationManager.ensureCanRead(principal, getDtoByName(dataSourceName));
 
     final DatasetConfigDTO datasetConfigDTO = dataSourceOnboarder.onboardDataset(dataSourceName,
         datasetName);
@@ -151,6 +154,8 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @FormParam("name") String name) {
 
     ensureExists(name, "name is a required field");
+    authorizationManager.ensureCanRead(principal, getDtoByName(name));
+
     final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(name);
 
     return respondOk(datasets.stream()
@@ -166,6 +171,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("name") String name) {
     ensureExists(name, "name is a required field");
+    authorizationManager.ensureCanRead(principal, getDtoByName(name));
 
     final List<DatasetConfigDTO> datasets = dataSourceOnboarder.offboardAll(name);
 

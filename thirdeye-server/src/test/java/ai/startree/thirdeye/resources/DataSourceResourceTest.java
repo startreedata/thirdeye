@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +28,10 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import java.util.Collections;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -80,5 +84,58 @@ public class DataSourceResourceTest {
 
     final StatusApi statusApi = entity.getList().get(0);
     assertThat(statusApi.getCode()).isEqualTo(ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_FAILED);
+  }
+
+  final ThirdEyePrincipal Nobody = new ThirdEyePrincipal("nobody", "");
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testOnboardDataset_withNoAccess() {
+    final DataSourceManager dataSourceManager = mock(DataSourceManager.class);
+    when(dataSourceManager.filter(any())).thenReturn(Collections.singletonList(
+        ((DataSourceDTO) new DataSourceDTO().setId(1L)).setName("datasource1"))
+    );
+    new DataSourceResource(
+        dataSourceManager,
+        mock(DataSourceCache.class),
+        mock(DataSourceOnboarder.class),
+        new AuthorizationManager(
+            mock(AlertTemplateRenderer.class),
+            AccessControlProvider.alwaysDeny
+        )
+    ).onboardDataset(Nobody, "datasource1", "dataset1");
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testOnboardAll_withNoAccess() {
+    final DataSourceManager dataSourceManager = mock(DataSourceManager.class);
+    when(dataSourceManager.filter(any())).thenReturn(Collections.singletonList(
+        ((DataSourceDTO) new DataSourceDTO().setId(1L)).setName("datasource1"))
+    );
+    new DataSourceResource(
+        dataSourceManager,
+        mock(DataSourceCache.class),
+        mock(DataSourceOnboarder.class),
+        new AuthorizationManager(
+            mock(AlertTemplateRenderer.class),
+            AccessControlProvider.alwaysDeny
+        )
+    ).onboardAll(Nobody, "datasource1");
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testOffboardAll_withNoAccess() {
+    final DataSourceManager dataSourceManager = mock(DataSourceManager.class);
+    when(dataSourceManager.filter(any())).thenReturn(Collections.singletonList(
+        ((DataSourceDTO) new DataSourceDTO().setId(1L)).setName("datasource1"))
+    );
+    new DataSourceResource(
+        dataSourceManager,
+        mock(DataSourceCache.class),
+        mock(DataSourceOnboarder.class),
+        new AuthorizationManager(
+            mock(AlertTemplateRenderer.class),
+            AccessControlProvider.alwaysDeny
+        )
+    ).offboardAll(Nobody, "datasource1");
   }
 }

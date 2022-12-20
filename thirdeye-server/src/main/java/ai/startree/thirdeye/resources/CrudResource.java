@@ -241,6 +241,12 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final RequestCache cache = createRequestCache();
     ensureExists(name, ERR_MISSING_NAME);
 
+    final DtoT dto = getDtoByName(name);
+    authorizationManager.ensureCanRead(principal, dto);
+    return respondOk(toApi(dto, cache));
+  }
+
+  public DtoT getDtoByName(final String name) {
     /* If name column is mapped, use the mapping, else use 'name' */
     final String nameColumn = optional(apiToIndexMap.get("name")).orElse("name");
     final List<DtoT> byName = dtoManager.filter(new DaoFilter()
@@ -250,9 +256,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     if (byName.size() > 1) {
       throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
     }
-    DtoT dtoT = byName.iterator().next();
-    authorizationManager.ensureCanRead(principal, dtoT);
-    return respondOk(toApi(dtoT, cache));
+    return byName.iterator().next();
   }
 
   @POST

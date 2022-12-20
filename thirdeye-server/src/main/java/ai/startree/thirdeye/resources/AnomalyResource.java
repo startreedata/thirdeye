@@ -121,6 +121,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
       @PathParam("id") Long id,
       AnomalyFeedbackApi api) {
     final AnomalyDTO dto = get(id);
+    authorizationManager.ensureCanSetFeedback(principal, dto);
 
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
     dto.setFeedback(feedbackDTO);

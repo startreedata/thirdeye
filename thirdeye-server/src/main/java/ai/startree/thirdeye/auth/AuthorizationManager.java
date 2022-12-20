@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -81,6 +82,10 @@ public class AuthorizationManager {
 
   public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
     ensureCanCreate(principal, entity);
+  }
+
+  public void ensureCanSetFeedback(final ThirdEyePrincipal principal, final AnomalyDTO entity) {
+    ensureHasAccess(principal, entity, AccessType.WRITE);
   }
 
   public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,

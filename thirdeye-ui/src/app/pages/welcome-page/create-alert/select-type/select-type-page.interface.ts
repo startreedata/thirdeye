@@ -17,4 +17,5 @@ export interface SelectTypePageProps {
     sampleAlertsBottom?: boolean;
     hideSampleAlerts?: boolean;
     navigateToAlertDetailAfterCreate?: boolean;
+    hideCurrentlySelected?: boolean;
 }

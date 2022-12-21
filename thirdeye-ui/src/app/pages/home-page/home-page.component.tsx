@@ -26,7 +26,7 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ReactComponent as SetupCompleteLogo } from "../../../assets/images/thirdeye-startree-setup-complete.svg";
 import { ActiveAlertsCount } from "../../components/home-page/active-alerts-count/active-alerts-count.component";
 import { AlertAccuracy } from "../../components/home-page/alert-accuracy/alert-accuracy.component";
@@ -52,7 +52,10 @@ import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.action";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
-import { generateDateRangeDaysFromNow } from "../../utils/routes/routes.util";
+import {
+    generateDateRangeDaysFromNow,
+    getAlertsAllPath,
+} from "../../utils/routes/routes.util";
 import { useUserPreferences } from "../../utils/user-preferences/user-preferences";
 import { UserPreferencesKeys } from "../../utils/user-preferences/user-preferences.interfaces";
 import { useHomePageStyles } from "./home-page.styles";
@@ -61,6 +64,7 @@ export const HomePage: FunctionComponent = () => {
     const [anomalyStartTime, setAnomalyStartTime] = useState<number>(
         generateDateRangeDaysFromNow(7)[0]
     );
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -120,7 +124,12 @@ export const HomePage: FunctionComponent = () => {
                 ),
                 headerText: t("message.setup-finished-exclamation"),
                 okButtonText: t("label.close"),
-                hideCancelButton: true,
+                cancelButtonText: t("label.view-all-entities", {
+                    entity: t("label.alerts"),
+                }),
+                onCancel: () => {
+                    navigate(getAlertsAllPath());
+                },
                 onOk: () => {
                     searchParams.delete(
                         QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS

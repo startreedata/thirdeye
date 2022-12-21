@@ -16,17 +16,17 @@ import {
     Box,
     Button,
     Divider,
-    FormControl,
-    FormHelperText,
     Grid,
     Link,
     TextField,
     TextFieldProps,
+    Tooltip,
     Typography,
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import InfoIcon from "@material-ui/icons/Info";
+import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
 import Alert from "@material-ui/lab/Alert";
 import { debounce } from "lodash";
 import React, {
@@ -97,21 +97,41 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                 <InputSection
                     gridContainerProps={{ alignItems: "flex-start" }}
                     inputComponent={
-                        <FormControl fullWidth>
-                            <TextField
-                                data-testid={`textfield-${item.key}`}
-                                defaultValue={item.value}
-                                {...textFieldProps}
-                            />
-                            <FormHelperText>
-                                {propertyDetails?.[item.key]?.description}
-                            </FormHelperText>
-                        </FormControl>
+                        <TextField
+                            fullWidth
+                            data-testid={`textfield-${item.key}`}
+                            defaultValue={item.value}
+                            {...textFieldProps}
+                        />
                     }
                     key={item.key}
                     labelComponent={
-                        <Box paddingBottom={1} paddingTop={1}>
+                        <Box
+                            alignItems="center"
+                            display="flex"
+                            gridGap={8}
+                            paddingBottom={1}
+                            paddingTop={1}
+                        >
                             <Typography variant="body2">{item.key}</Typography>
+                            {propertyDetails?.[item.key]?.description ? (
+                                <Tooltip
+                                    arrow
+                                    interactive
+                                    placement="top"
+                                    title={
+                                        <Typography variant="caption">
+                                            {propertyDetails?.[item.key]
+                                                ?.description || "N/A"}
+                                        </Typography>
+                                    }
+                                >
+                                    <InfoIconOutlined
+                                        color="secondary"
+                                        fontSize="small"
+                                    />
+                                </Tooltip>
+                            ) : null}
                         </Box>
                     }
                 />

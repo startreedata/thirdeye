@@ -22,7 +22,7 @@ export const useGetAppAnalytics = (): GetAppAnalytics => {
         useHTTPAction<AppAnalytics>(getAppAnalyticsREST);
 
     const getAppAnalytics = (
-        appAnalyticsParams: AppAnalyticsProps
+        appAnalyticsParams?: AppAnalyticsProps
     ): Promise<AppAnalytics | undefined> => {
         return makeRequest(appAnalyticsParams);
     };

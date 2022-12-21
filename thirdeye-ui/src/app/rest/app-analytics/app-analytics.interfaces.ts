@@ -23,6 +23,6 @@ export interface AppAnalyticsProps {
 export interface GetAppAnalytics extends ActionHook {
     appAnalytics: AppAnalytics | null;
     getAppAnalytics: (
-        appAnalyticsParams: AppAnalyticsProps
+        appAnalyticsParams?: AppAnalyticsProps
     ) => Promise<AppAnalytics | undefined>;
 }

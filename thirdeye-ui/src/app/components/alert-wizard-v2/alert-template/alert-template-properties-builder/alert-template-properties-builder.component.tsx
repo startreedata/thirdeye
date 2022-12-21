@@ -18,15 +18,11 @@ import {
     Divider,
     Grid,
     Link,
-    TextField,
-    TextFieldProps,
-    Tooltip,
     Typography,
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import InfoIcon from "@material-ui/icons/Info";
-import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
 import Alert from "@material-ui/lab/Alert";
 import { debounce } from "lodash";
 import React, {
@@ -37,8 +33,8 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { getAlertTemplatesUpdatePath } from "../../../../utils/routes/routes.util";
-import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
+import { AlertTemplateFormField } from "../alert-template-form-field/alert-template-form-field.component";
 import { setUpFieldInputRenderConfig } from "../alert-template.utils";
 import {
     AlertTemplatePropertiesBuilderProps,
@@ -86,59 +82,6 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
             [onPropertyValueChange]
         );
 
-        const getFormInput = useCallback(
-            ({
-                item,
-                textFieldProps,
-            }: {
-                item: PropertyRenderConfig;
-                textFieldProps: TextFieldProps;
-            }): JSX.Element => (
-                <InputSection
-                    gridContainerProps={{ alignItems: "flex-start" }}
-                    inputComponent={
-                        <TextField
-                            fullWidth
-                            data-testid={`textfield-${item.key}`}
-                            defaultValue={item.value}
-                            {...textFieldProps}
-                        />
-                    }
-                    key={item.key}
-                    labelComponent={
-                        <Box
-                            alignItems="center"
-                            display="flex"
-                            gridGap={8}
-                            paddingBottom={1}
-                            paddingTop={1}
-                        >
-                            <Typography variant="body2">{item.key}</Typography>
-                            {propertyDetails?.[item.key]?.description ? (
-                                <Tooltip
-                                    arrow
-                                    interactive
-                                    placement="top"
-                                    title={
-                                        <Typography variant="caption">
-                                            {propertyDetails?.[item.key]
-                                                ?.description || "N/A"}
-                                        </Typography>
-                                    }
-                                >
-                                    <InfoIconOutlined
-                                        color="secondary"
-                                        fontSize="small"
-                                    />
-                                </Tooltip>
-                            ) : null}
-                        </Box>
-                    }
-                />
-            ),
-            [propertyDetails]
-        );
-
         return (
             <>
                 <Grid container item xs={12}>
@@ -176,10 +119,11 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                         </Typography>
                     </Box>
                 </Grid>
-                {requiredKeys.map((item, idx) =>
-                    getFormInput({
-                        item,
-                        textFieldProps: {
+                {requiredKeys.map((item, idx) => (
+                    <AlertTemplateFormField
+                        item={item}
+                        key={item.key}
+                        textFieldProps={{
                             inputProps: { tabIndex: idx + 1 },
                             placeholder: t("label.add-property-value", {
                                 key: item.key,
@@ -190,9 +134,10 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                     e.currentTarget.value
                                 );
                             },
-                        },
-                    })
-                )}
+                        }}
+                        tooltipText={propertyDetails?.[item.key]?.description}
+                    />
+                ))}
                 {!showMore && optionalKeys.length > 0 && (
                     <>
                         <Grid item xs={12}>
@@ -232,24 +177,27 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 </Typography>
                             </Box>
                         </Grid>
-                        {optionalKeys.map((item, idx) =>
-                            getFormInput({
-                                item,
-                                textFieldProps: {
+                        {optionalKeys.map((item, idx) => (
+                            <AlertTemplateFormField
+                                item={item}
+                                key={item.key}
+                                textFieldProps={{
                                     inputProps: {
                                         tabIndex: requiredKeys.length + idx + 1,
                                     },
                                     placeholder: item.defaultValue.toString(),
-
                                     onChange: (e) => {
                                         handlePropertyValueChange(
                                             item.key,
                                             e.currentTarget.value
                                         );
                                     },
-                                },
-                            })
-                        )}
+                                }}
+                                tooltipText={
+                                    propertyDetails?.[item.key]?.description
+                                }
+                            />
+                        ))}
                     </>
                 )}
                 {showMore && optionalKeys.length > 0 && (

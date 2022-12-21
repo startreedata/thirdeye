@@ -1,0 +1,47 @@
+{
+  "schemaName": "AdCampaignData",
+  "dimensionFieldSpecs": [
+    {
+      "name": "AdCampaignSize",
+      "dataType": "STRING"
+    },
+    {
+      "name": "Country",
+      "dataType": "STRING"
+    },
+    {
+      "name": "AdCampaignType",
+      "dataType": "STRING"
+    },
+    {
+      "name": "Exchange",
+      "dataType": "STRING"
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "Impressions",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "Clicks",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "LostBids",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "FailedBids",
+      "dataType": "DOUBLE"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "CampaignDeliveryTimestamp",
+      "dataType": "LONG",
+      "format": "1:SECONDS:EPOCH",
+      "granularity": "1:SECONDS"
+    }
+  ]
+}

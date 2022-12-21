@@ -1,0 +1,67 @@
+{
+  "schemaName": "USStoreSalesOrderData",
+  "dimensionFieldSpecs": [
+    {
+      "name": "SalesChannel",
+      "dataType": "STRING"
+    },
+    {
+      "name": "WarehouseCode",
+      "dataType": "STRING"
+    },
+    {
+      "name": "SalesRegion",
+      "dataType": "STRING"
+    },
+    {
+      "name": "CustomerName",
+      "dataType": "STRING"
+    },
+    {
+      "name": "StoreLocation",
+      "dataType": "STRING"
+    },
+    {
+      "name": "ProductName",
+      "dataType": "STRING"
+    },
+    {
+      "name": "OrderQuantity",
+      "dataType": "LONG"
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "DiscountApplied",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "UnitPrice",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "UnitCost",
+      "dataType": "DOUBLE"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "OrderDate",
+      "dataType": "STRING",
+      "format": "1:MILLISECONDS:SIMPLE_DATE_FORMAT:yyyy-MM-dd",
+      "granularity": "1:MILLISECONDS"
+    },
+    {
+      "name": "ShipDate",
+      "dataType": "STRING",
+      "format": "1:MILLISECONDS:SIMPLE_DATE_FORMAT:yyyy-MM-dd",
+      "granularity": "1:MILLISECONDS"
+    },
+    {
+      "name": "DeliveryDate",
+      "dataType": "STRING",
+      "format": "1:MILLISECONDS:SIMPLE_DATE_FORMAT:yyyy-MM-dd",
+      "granularity": "1:MILLISECONDS"
+    }
+  ]
+}

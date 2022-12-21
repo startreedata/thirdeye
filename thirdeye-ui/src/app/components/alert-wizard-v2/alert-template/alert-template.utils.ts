@@ -21,12 +21,13 @@ import {
     TemplatePropertiesObject,
 } from "../../../rest/dto/alert.interfaces";
 import { PropertyRenderConfig } from "./alert-template-properties-builder/alert-template-properties-builder.interfaces";
+import { AlertTemplatePropertyParsedMetadata } from "./alert-template.interfaces";
 
 const PROPERTY_CAPTURE = /\${(\w*)}/g;
 // 5am, Monday through Friday
 const DEFAULT_CRON = "0 0 5 ? * MON-FRI *";
 
-export function findRequiredFields(alertTemplate: AlertTemplate): string[] {
+export function findAvailableFields(alertTemplate: AlertTemplate): string[] {
     const matches = new Set<string>();
     let match;
 
@@ -39,24 +40,89 @@ export function findRequiredFields(alertTemplate: AlertTemplate): string[] {
     return Array.from(matches).sort();
 }
 
-export function setUpFieldInputRenderConfig(
-    requiredFields: string[],
-    templateProperties: TemplatePropertiesObject,
-    defaultProperties: TemplatePropertiesObject
-): [PropertyRenderConfig[], PropertyRenderConfig[]] {
-    const keysWithDefaultProperties = new Set(Object.keys(defaultProperties));
+export function determinePropertyFieldConfigurationFromDefaultFields(
+    alertTemplate: AlertTemplate,
+    defaultProperties: { [index: string]: string }
+): AlertTemplatePropertyParsedMetadata[] {
+    const availableInputFields = findAvailableFields(alertTemplate);
 
+    return availableInputFields.map((fieldName) => {
+        const metadata: MetadataProperty = {
+            name: fieldName,
+            defaultIsNull: false,
+            multiselect: false,
+        };
+        const isOptional = defaultProperties[fieldName] !== undefined;
+
+        if (isOptional) {
+            metadata.defaultValue = defaultProperties[fieldName];
+        }
+
+        return {
+            name: fieldName,
+            isOptional,
+            metadata,
+        };
+    });
+}
+
+export function determinePropertyFieldConfigurationFromProperties(
+    properties: MetadataProperty[]
+): AlertTemplatePropertyParsedMetadata[] {
+    return properties.map((property) => {
+        return {
+            name: property.name,
+            isOptional:
+                property.defaultValue !== undefined || property.defaultIsNull,
+            metadata: property,
+        };
+    });
+}
+
+export function determinePropertyFieldConfiguration(
+    alertTemplate: AlertTemplate
+): AlertTemplatePropertyParsedMetadata[] {
+    const metadata: {
+        [key: string]: AlertTemplatePropertyParsedMetadata;
+    } = {};
+
+    // This is the old way of figuring out if a field is required or not
+    determinePropertyFieldConfigurationFromDefaultFields(
+        alertTemplate,
+        alertTemplate.defaultProperties ?? {}
+    ).forEach((propertyMetadata) => {
+        metadata[propertyMetadata.name] = propertyMetadata;
+    });
+
+    // `properties` was introduced in December 2022 to explicitly define
+    // what the fields are
+    if (alertTemplate.properties) {
+        // Override any existing metadata determined by the old way with the new
+        determinePropertyFieldConfigurationFromProperties(
+            alertTemplate.properties
+        ).forEach((propertyMetadata) => {
+            metadata[propertyMetadata.name] = propertyMetadata;
+        });
+    }
+
+    return Object.values(metadata);
+}
+
+export function setUpFieldInputRenderConfig(
+    availableFields: AlertTemplatePropertyParsedMetadata[],
+    templateProperties: TemplatePropertiesObject
+): [PropertyRenderConfig[], PropertyRenderConfig[]] {
     const requiredKeys: PropertyRenderConfig[] = [];
     const optionalKeys: PropertyRenderConfig[] = [];
 
-    requiredFields.forEach((fieldKey: string) => {
+    availableFields.forEach((propertyMetadata) => {
         const renderConfig = {
-            key: fieldKey,
-            value: templateProperties[fieldKey],
-            defaultValue: defaultProperties[fieldKey],
+            key: propertyMetadata.name,
+            value: templateProperties[propertyMetadata.name],
+            metadata: propertyMetadata.metadata,
         };
 
-        if (keysWithDefaultProperties.has(fieldKey)) {
+        if (propertyMetadata.isOptional) {
             optionalKeys.push(renderConfig);
         } else {
             requiredKeys.push(renderConfig);
@@ -67,34 +133,16 @@ export function setUpFieldInputRenderConfig(
 }
 
 export function hasRequiredPropertyValuesSet(
-    requiredFields: string[],
-    alertTemplateProperties: TemplatePropertiesObject,
-    defaultProperties: TemplatePropertiesObject
+    availableFields: AlertTemplatePropertyParsedMetadata[],
+    alertTemplateProperties: TemplatePropertiesObject
 ): boolean {
-    return requiredFields.every((fieldKey) => {
-        if (alertTemplateProperties[fieldKey] !== undefined) {
-            // See https://cortexdata.atlassian.net/browse/TE-817
-            // Just check is not an empty value (empty array is ok)
-            if (typeof alertTemplateProperties[fieldKey] === "boolean") {
-                return true;
-            } else {
-                return !!alertTemplateProperties[fieldKey];
-            }
-        } else if (defaultProperties[fieldKey] !== undefined) {
-            // Empty string can be valid for default property
-            return true;
+    return availableFields.every((fieldMetadata) => {
+        if (!fieldMetadata.isOptional) {
+            return !!alertTemplateProperties[fieldMetadata.name];
         }
 
-        return false;
+        return true;
     });
-}
-
-export function ensureArrayOfStrings(candidate: string | string[]): string[] {
-    if (typeof candidate === "string") {
-        return [candidate];
-    }
-
-    return candidate;
 }
 
 export function createNewStartingAlert(): EditableAlert {
@@ -118,43 +166,3 @@ export function createNewStartingAlert(): EditableAlert {
         },
     };
 }
-
-type DefaultValue = NonNullable<MetadataProperty["defaultValue"]>;
-
-export const getDefaultProperties = (
-    alertTemplate: AlertTemplate | null
-): Record<string, DefaultValue> => {
-    if (!alertTemplate) {
-        return {};
-    }
-
-    const oldDefaultProperties = alertTemplate.defaultProperties || {};
-    const newDefaultProperties: Record<string, DefaultValue> = Object.assign(
-        {},
-        ...(alertTemplate.properties || [])
-            .filter(({ defaultValue }) => typeof defaultValue !== "undefined")
-            .map(({ name, defaultValue }) => ({
-                [name]: defaultValue,
-            }))
-    );
-
-    return { ...oldDefaultProperties, ...newDefaultProperties };
-};
-
-// Add all the extra data required by each property in the AlertTemplatePropertiesBuilder
-//  in the below key type and getter function
-export type PropertyDetailsKeys = "description";
-
-export const getPropertyDetails = (
-    alertTemplate: AlertTemplate | null
-): Record<string, Record<PropertyDetailsKeys, string>> | null => {
-    if (!alertTemplate?.properties) {
-        return null;
-    }
-
-    const properties = alertTemplate.properties.map(
-        ({ name, description }) => ({ [name]: { description } })
-    );
-
-    return Object.assign({}, ...properties);
-};

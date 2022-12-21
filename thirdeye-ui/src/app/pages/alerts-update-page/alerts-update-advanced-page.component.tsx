@@ -19,7 +19,7 @@ import { useOutletContext } from "react-router-dom";
 import { AlertJson } from "../../components/alert-wizard-v2/alert-json/alert-json.component";
 import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import {
-    findRequiredFields,
+    determinePropertyFieldConfiguration,
     hasRequiredPropertyValuesSet,
 } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
@@ -43,9 +43,9 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
         setShowBottomBar,
     } = useOutletContext<AlertEditPageOutletContextProps>();
 
-    const requiredFields = useMemo(() => {
+    const availableFields = useMemo(() => {
         if (selectedAlertTemplate) {
-            return findRequiredFields(selectedAlertTemplate);
+            return determinePropertyFieldConfiguration(selectedAlertTemplate);
         }
 
         return [];
@@ -55,9 +55,8 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
         const isValid =
             !!selectedAlertTemplate &&
             hasRequiredPropertyValuesSet(
-                requiredFields,
-                alert.templateProperties,
-                selectedAlertTemplate.defaultProperties || {}
+                availableFields,
+                alert.templateProperties
             );
 
         setIsRequiredPropertyValuesSet(isValid);

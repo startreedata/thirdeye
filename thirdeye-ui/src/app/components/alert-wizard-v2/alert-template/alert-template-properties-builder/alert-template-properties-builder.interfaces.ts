@@ -12,23 +12,22 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { MetadataProperty } from "../../../../rest/dto/alert-template.interfaces";
 import type {
     PropertyConfigValueTypes,
     TemplatePropertiesObject,
 } from "../../../../rest/dto/alert.interfaces";
-import type { getPropertyDetails } from "../alert-template.utils";
+import { AlertTemplatePropertyParsedMetadata } from "../alert-template.interfaces";
 
 export interface AlertTemplatePropertiesBuilderProps {
     alertTemplateId: number;
-    requiredFields: string[];
+    availableFields: AlertTemplatePropertyParsedMetadata[];
     templateProperties: TemplatePropertiesObject;
-    defaultTemplateProperties: TemplatePropertiesObject;
     onPropertyValueChange: (newChanges: TemplatePropertiesObject) => void;
-    propertyDetails?: ReturnType<typeof getPropertyDetails>;
 }
 
 export interface PropertyRenderConfig {
     key: string;
     value: PropertyConfigValueTypes;
-    defaultValue: PropertyConfigValueTypes;
+    metadata: MetadataProperty;
 }

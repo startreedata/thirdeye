@@ -19,6 +19,7 @@ import {
     useMediaQuery,
     useTheme,
 } from "@material-ui/core";
+import { DateTime } from "luxon";
 import {
     default as React,
     FunctionComponent,
@@ -87,7 +88,6 @@ export const HomePage: FunctionComponent = () => {
     );
 
     useEffect(() => {
-        getAppAnalytics();
         getSubscriptionGroups();
         getAnomalies();
         getAlerts().then((alerts) => {
@@ -96,6 +96,13 @@ export const HomePage: FunctionComponent = () => {
             }
         });
     }, []);
+
+    useEffect(() => {
+        getAppAnalytics({
+            startTime: anomalyStartTime,
+            endTime: DateTime.local().endOf("hour").toMillis(),
+        });
+    }, [anomalyStartTime]);
 
     const handleHideDocumentationClick = (): void => {
         setShouldHideDocumentation(true);

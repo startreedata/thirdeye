@@ -15,7 +15,14 @@
 import { ActionHook } from "../actions.interfaces";
 import { AppAnalytics } from "../dto/app-analytics.interfaces";
 
+export interface AppAnalyticsProps {
+    startTime?: number;
+    endTime?: number;
+}
+
 export interface GetAppAnalytics extends ActionHook {
     appAnalytics: AppAnalytics | null;
-    getAppAnalytics: () => Promise<AppAnalytics | undefined>;
+    getAppAnalytics: (
+        appAnalyticsParams: AppAnalyticsProps
+    ) => Promise<AppAnalytics | undefined>;
 }

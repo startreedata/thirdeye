@@ -13,12 +13,28 @@
  * the License.
  */
 import axios from "axios";
-import { AppAnalytics } from "../dto/app-analytics.interfaces";
+import type { AppAnalytics } from "../dto/app-analytics.interfaces";
+import type { AppAnalyticsProps } from "./app-analytics.interfaces";
 
 const URL_CONFIG = "/api/app-analytics";
 
-export const getAppAnalytics = async (): Promise<AppAnalytics> => {
-    const response = await axios.get(URL_CONFIG);
+export const getAppAnalytics = async ({
+    startTime,
+    endTime,
+}: AppAnalyticsProps): Promise<AppAnalytics> => {
+    const queryParams = new URLSearchParams([]);
+
+    if (startTime) {
+        queryParams.set("startTime", `[gte]${startTime}`);
+    }
+
+    if (endTime) {
+        queryParams.set("endTime", `[lte]${endTime}`);
+    }
+
+    const response = await axios.get<AppAnalytics>(
+        `${URL_CONFIG}?${queryParams.toString()}`
+    );
 
     return response.data;
 };

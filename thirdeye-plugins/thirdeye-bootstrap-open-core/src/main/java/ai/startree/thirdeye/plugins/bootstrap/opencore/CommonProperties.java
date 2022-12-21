@@ -26,10 +26,19 @@ public class CommonProperties {
 
   // please maintain this list in alphabetical order
   public static final Map<String, String> COMMON_DESCRIPTIONS = ImmutableMap.<String, String>builder()
+      .put("aggregationColumn", "The column to aggregate. Can be a derived metric.")
+      .put("aggregationFunction", "The aggregation function to apply on the aggregationColumn. Eg AVG.")
+      .put("aggregationParameter", "The second argument of the aggregationFunction. Eg for PERCENTILETDIGEST: 95.")
+      .put("coldStartIgnore", "Ignore anomalies at the start of the dataset.")
       .put("dataset", "The dataset to query.")
       .put("dataSource", "The Pinot datasource to use.")
+      .put("lookback", "Historical time period to use to train the model. In ISO-8601 format. Eg P21D.")
+      .put("monitoringGranularity", "The period of aggregation of the timeseries. In ISO-8601 format. Eg PT1H.")
+      .put("sensitivity", "The sensitivity of the model. The smaller, the less anomaly are detected.")
       .put("timeColumn",
           "TimeColumn used to group by time. If set to AUTO (the default value), the Pinot primary time column is used.")
+      // TODO CYRIL add once markdown rendering is implemented
+      //.put("timeColumnFormat", "Required if timeColumn is not AUTO. [Learn more](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/reference/operators/data-fetcher#timeformat-strings).")
       .put("timezone", "Timezone used to group by time.")
       .build();
 

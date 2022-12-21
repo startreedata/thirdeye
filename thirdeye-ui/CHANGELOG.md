@@ -1,3 +1,33 @@
+## [2.0.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.75.0...thirdeye-ui-2.0.0) (2022-12-20)
+
+
+### Features
+
+* [TE-1150](https://cortexdata.atlassian.net/browse/TE-1150) turn alert name into href in alerts table ([ec073223b](https://github.com/startreedata/thirdeye/commit/ec073223b67a5c34fc6812a45b9d6a57e3a0be81))
+
+
+### Major
+
+* 2.0 releae for ui ([9dd087e3e](https://github.com/startreedata/thirdeye/commit/9dd087e3e48c7afa7648a4f5de482d70dc4f30a7))
+
+## [1.75.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.74.0...thirdeye-ui-1.75.0) (2022-12-16)
+
+
+### Features
+
+* [TE-1118](https://cortexdata.atlassian.net/browse/TE-1118) enhancements to the welcome alert creation flow ([ee32548f1](https://github.com/startreedata/thirdeye/commit/ee32548f12507b8d357a55fa93ead84ad330c186))
+* [TE-1119](https://cortexdata.atlassian.net/browse/TE-1119) first iteration of new alert creation flow integration with configuration page ([6abe93f59](https://github.com/startreedata/thirdeye/commit/6abe93f59ec03a9b5ee46b1aa28bb006c937ad6f))
+* [TE-1121](https://cortexdata.atlassian.net/browse/TE-1121) wire up the sample alert buttons and hide them if missing dataset ([475782a65](https://github.com/startreedata/thirdeye/commit/475782a65950feeb95c2d11160f19209b9008f6c))
+* [TE-1127](https://cortexdata.atlassian.net/browse/TE-1127) added alert accuracy fetching to alerts list table ([786960d5a](https://github.com/startreedata/thirdeye/commit/786960d5a022bab7b08d28aea52b2c25f43925f2))
+
+
+### Bug Fixes
+
+* [TE-1119](https://cortexdata.atlassian.net/browse/TE-1119) wrap simple and advance mode edit pages in grid ([bbdbded11](https://github.com/startreedata/thirdeye/commit/bbdbded1193fe5cd0d007298720853b033f5cadd))
+* [TE-1138](https://cortexdata.atlassian.net/browse/TE-1138) more enhancements to the alert creation ui ([9c697a8c3](https://github.com/startreedata/thirdeye/commit/9c697a8c370663778c6e5d3b88b91f6014b314ae))
+* [TE-1147](https://cortexdata.atlassian.net/browse/TE-1147) fix bug where UI should send non quoted strings ([f1c3443e1](https://github.com/startreedata/thirdeye/commit/f1c3443e149d8d6bd11d0a52f308aaeb298b6501))
+* ensure reactnode is returned in LoadingErrorStateSwitch ([4cb355409](https://github.com/startreedata/thirdeye/commit/4cb3554095129cb592e09d38c2f4ca2e01c69c01))
+
 ## [1.74.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.73.0...thirdeye-ui-1.74.0) (2022-12-12)
 
 

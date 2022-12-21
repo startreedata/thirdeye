@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { AxiosError } from "axios";
 import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -27,14 +28,19 @@ import { EmptyStateSwitch } from "../../../../components/page-states/empty-state
 import {
     PageContentsCardV1,
     PageContentsGridV1,
+    useNotificationProviderV1,
 } from "../../../../platform/components";
+import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { createDefaultAlertTemplates } from "../../../../rest/alert-templates/alert-templates.rest";
 import { createAlert } from "../../../../rest/alerts/alerts.rest";
 import { AlertTemplate } from "../../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
 import { QUERY_PARAM_KEYS } from "../../../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
+import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import {
     AppRouteRelative,
+    getAlertsAlertViewPath,
     getHomePath,
 } from "../../../../utils/routes/routes.util";
 import { SelectTypePageProps } from "./select-type-page.interface";
@@ -42,10 +48,12 @@ import { SelectTypePageProps } from "./select-type-page.interface";
 export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
     sampleAlertsBottom,
     hideSampleAlerts,
+    navigateToAlertDetailAfterCreate,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { setShowAppNavBar } = useAppBarConfigProvider();
+    const { notify } = useNotificationProviderV1();
 
     const {
         handleAlertPropertyChange,
@@ -85,13 +93,34 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
     };
 
     const handleSampleAlertSelect = (option: SampleAlertOption): void => {
-        createAlert(option.alertConfiguration).then(() => {
-            const queryParams = new URLSearchParams([
-                [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
-            ]);
-            navigate(`${getHomePath()}?${queryParams.toString()}`);
-            setShowAppNavBar(true);
-        });
+        const clonedConfiguration = { ...option.alertConfiguration };
+        clonedConfiguration.name +=
+            "-" + Math.random().toString(36).substring(2, 5);
+
+        createAlert(clonedConfiguration)
+            .then((alert) => {
+                if (navigateToAlertDetailAfterCreate) {
+                    navigate(`${getAlertsAlertViewPath(alert.id)}`);
+                } else {
+                    const queryParams = new URLSearchParams([
+                        [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
+                    ]);
+                    navigate(`${getHomePath()}?${queryParams.toString()}`);
+                }
+                setShowAppNavBar(true);
+            })
+            .catch((error: AxiosError): void => {
+                const errMessages = getErrorMessages(error);
+
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    errMessages,
+                    notify,
+                    t("message.create-error", {
+                        entity: t("label.sample-alert"),
+                    })
+                );
+            });
     };
 
     return (

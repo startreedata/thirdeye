@@ -32,7 +32,8 @@ server {
     }
     location @index {
         try_files /index.html;
+        expires -1;
         add_header Cache-Control no-cache;
-        expires 0;
+        proxy_cache_revalidate on;
     }
 }

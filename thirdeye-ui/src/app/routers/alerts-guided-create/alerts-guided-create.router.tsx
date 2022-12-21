@@ -80,6 +80,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                         <Route
                             element={
                                 <SelectTypePage
+                                    navigateToAlertDetailAfterCreate
                                     hideSampleAlerts={hideSampleAlerts}
                                     sampleAlertsBottom={sampleAlertsBottom}
                                 />

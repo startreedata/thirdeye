@@ -18,11 +18,12 @@ import type { AppAnalyticsProps } from "./app-analytics.interfaces";
 
 const URL_CONFIG = "/api/app-analytics";
 
-export const getAppAnalytics = async ({
-    startTime,
-    endTime,
-}: AppAnalyticsProps): Promise<AppAnalytics> => {
+export const getAppAnalytics = async (
+    params?: AppAnalyticsProps
+): Promise<AppAnalytics> => {
     const queryParams = new URLSearchParams([]);
+
+    const { startTime, endTime } = params || {};
 
     if (startTime) {
         queryParams.set("startTime", `[gte]${startTime}`);

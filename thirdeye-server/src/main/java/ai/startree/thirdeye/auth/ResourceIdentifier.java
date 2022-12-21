@@ -17,10 +17,13 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import java.util.Objects;
 
 public class ResourceIdentifier {
 
+  static public final String DEFAULT_NAME = "0";
   static public final String DEFAULT_NAMESPACE = "default";
+  static public final String DEFAULT_ENTITY_TYPE = "RESOURCE";
 
   public final String name;
   public final String namespace;
@@ -34,9 +37,10 @@ public class ResourceIdentifier {
 
   static public <T extends AbstractDTO> ResourceIdentifier from(final T dto) {
     return new ResourceIdentifier(
-        optional(dto.getId()).orElse(0L).toString(),
+        optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
         optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
-        SubEntities.getType(dto.getClass())
+        optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
+            .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE)
     );
   }
 }

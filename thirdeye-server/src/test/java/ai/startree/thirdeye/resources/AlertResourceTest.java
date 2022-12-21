@@ -22,8 +22,10 @@ import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
+import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessControlModule;
 import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AppAnalyticsService;
@@ -41,7 +43,6 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -94,11 +95,18 @@ public class AlertResourceTest {
     Assert.assertEquals(nodes.get(4).getType(), "SqlQueryExecutor");
   }
 
+  static ThirdEyePrincipal nobody() {
+    return new ThirdEyePrincipal("nobody", "");
+  }
+
   @Test(expectedExceptions = ForbiddenException.class)
   public void testCreateMultiple_withNoAccessToTemplate() {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(2L))
         .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(2L)).setName("template1"));
+
+    final AccessControl accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
+        -> identifier.name.equals("0");
 
     new AlertResource(
         mock(AlertManager.class),
@@ -107,10 +115,12 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        alertTemplateManager,
-        (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
-            -> identifier.name.equals("0")
-    ).createMultiple(new ThirdEyePrincipal("nobody", ""), Collections.singletonList(
+        new AuthorizationManager(
+            mock(AlertManager.class),
+            alertTemplateManager,
+            accessControl
+        )
+    ).createMultiple(nobody(), Collections.singletonList(
         new AlertApi().setName("alert1").setTemplate(new AlertTemplateApi().setId(2L))
     ));
   }
@@ -127,9 +137,12 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        mock(AlertTemplateManager.class),
-        AccessControlModule.alwaysDeny
-    ).runTask(new ThirdEyePrincipal("nobody", ""), 1L, 0L, 1L);
+        new AuthorizationManager(
+            alertManager,
+            mock(AlertTemplateManager.class),
+            AccessControlModule.alwaysDeny
+        )
+    ).runTask(nobody(), 1L, 0L, 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -141,10 +154,13 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        mock(AlertTemplateManager.class),
-        AccessControlModule.alwaysDeny
+        new AuthorizationManager(
+            mock(AlertManager.class),
+            mock(AlertTemplateManager.class),
+            AccessControlModule.alwaysDeny
+        )
     ).validateMultiple(
-        new ThirdEyePrincipal("nobody", ""),
+        nobody(),
         Collections.singletonList(
             new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
         )
@@ -157,6 +173,9 @@ public class AlertResourceTest {
     when(alertTemplateManager.findById(1L))
         .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1"));
 
+    final AccessControl accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
+        -> identifier.name.equals("alert1");
+
     new AlertResource(
         mock(AlertManager.class),
         mock(AlertCreater.class),
@@ -164,9 +183,11 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        alertTemplateManager,
-        (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
-            -> identifier.name.equals("alert1")
+        new AuthorizationManager(
+            mock(AlertManager.class),
+            alertTemplateManager,
+            accessControl
+        )
     ).validateMultiple(
         new ThirdEyePrincipal("nobody", ""),
         Collections.singletonList(
@@ -188,10 +209,12 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        alertTemplateManager,
-        AccessControlModule.alwaysDeny
-    ).evaluate(
-        new ThirdEyePrincipal("nobody", ""),
+        new AuthorizationManager(
+            mock(AlertManager.class),
+            alertTemplateManager,
+            AccessControlModule.alwaysDeny
+        )
+    ).evaluate(nobody(),
         new AlertEvaluationApi()
             .setAlert(new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)))
             .setStart(new Date())
@@ -211,8 +234,11 @@ public class AlertResourceTest {
         mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        mock(AlertTemplateManager.class),
-        AccessControlModule.alwaysDeny
-    ).reset(new ThirdEyePrincipal("nobody", ""), 1L);
+        new AuthorizationManager(
+            alertManager,
+            mock(AlertTemplateManager.class),
+            AccessControlModule.alwaysDeny
+        )
+    ).reset(nobody(), 1L);
   }
 }

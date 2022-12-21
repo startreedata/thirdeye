@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.RequestCache.buildCache;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.RequestCache;
-import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -69,8 +69,8 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   public AnomalyResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
-      final AccessControl accessControl) {
-    super(mergedAnomalyResultManager, API_TO_INDEX_FILTER_MAP, accessControl);
+      final AuthorizationManager authorizationManager) {
+    super(mergedAnomalyResultManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
   }

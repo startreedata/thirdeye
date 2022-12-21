@@ -69,7 +69,7 @@ public class SubEntities {
   static final ImmutableMap<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>
       BEAN_INDEX_MAP = buildBeanIndexMap();
 
-  static final ImmutableMap<Class<? extends AbstractDTO>, SubEntityType>
+  public static final ImmutableMap<Class<? extends AbstractDTO>, SubEntityType>
       BEAN_TYPE_MAP = buildTypeBeanBimap();
 
   private static ImmutableMap<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>
@@ -125,7 +125,7 @@ public class SubEntities {
         .build();
   }
 
-  public static String getType(final Class<? extends AbstractDTO> pojoClass) {
+  static String getType(final Class<? extends AbstractDTO> pojoClass) {
     final SubEntityType subEntityType = BEAN_TYPE_MAP.get(pojoClass);
     return requireNonNull(subEntityType, "entity type not found!").toString();
   }

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessControlModule;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
@@ -29,6 +30,8 @@ import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
@@ -121,6 +124,10 @@ public class CrudResourceTest {
     return new Timestamp(new Date().getTime());
   }
 
+  static ThirdEyePrincipal nobody() {
+    return new ThirdEyePrincipal("nobody", "");
+  }
+
   @Test
   public void testGetAll_withNoAccess() {
     final DummyManager manager = mock(DummyManager.class);
@@ -134,7 +141,7 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         AccessControlModule.alwaysDeny);
-    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
+    try (Response resp = resource.getAll(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -157,7 +164,7 @@ public class CrudResourceTest {
         (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
             -> identifiers.name.equals("2"));
 
-    try (Response resp = resource.getAll(new ThirdEyePrincipal("nobody", ""), uriInfo)) {
+    try (Response resp = resource.getAll(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -181,7 +188,7 @@ public class CrudResourceTest {
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         AccessControlModule.alwaysDeny);
-    resource.delete(new ThirdEyePrincipal("nobody", ""), 1L);
+    resource.delete(nobody(), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -194,7 +201,7 @@ public class CrudResourceTest {
     ));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         AccessControlModule.alwaysDeny);
-    resource.deleteAll(new ThirdEyePrincipal("nobody", ""));
+    resource.deleteAll(nobody());
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -210,7 +217,7 @@ public class CrudResourceTest {
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
             -> identifiers.name.equals("2"));
-    resource.deleteAll(new ThirdEyePrincipal("nobody", ""));
+    resource.deleteAll(nobody());
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -219,10 +226,8 @@ public class CrudResourceTest {
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         AccessControlModule.alwaysDeny);
 
-    resource.createMultiple(
-        new ThirdEyePrincipal("nobody", ""),
-        Arrays.asList(new DummyApi(), new DummyApi(), new DummyApi())
-    );
+    resource.createMultiple(nobody(),
+        Arrays.asList(new DummyApi(), new DummyApi(), new DummyApi()));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -232,7 +237,7 @@ public class CrudResourceTest {
         AccessControlModule.alwaysDeny);
 
     resource.createMultiple(
-        new ThirdEyePrincipal("nobody", ""),
+        nobody(),
         Arrays.asList(new DummyApi(), new DummyApi(), new DummyApi())
     );
   }
@@ -247,7 +252,7 @@ public class CrudResourceTest {
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         AccessControlModule.alwaysDeny);
 
-    resource.editMultiple(new ThirdEyePrincipal("nobody", ""), Arrays.asList(
+    resource.editMultiple(nobody(), Arrays.asList(
         new DummyApi().setId(1L),
         new DummyApi().setId(2L),
         new DummyApi().setId(3L)
@@ -265,7 +270,7 @@ public class CrudResourceTest {
         (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
             -> identifiers.name.equals("2"));
 
-    resource.editMultiple(new ThirdEyePrincipal("nobody", ""), Arrays.asList(
+    resource.editMultiple(nobody(), Arrays.asList(
         new DummyApi().setId(1L),
         new DummyApi().setId(2L),
         new DummyApi().setId(3L)
@@ -359,7 +364,8 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
     final DummyManager dtoManager,
     final ImmutableMap<String, String> apiToBeanMap,
     final AccessControl accessControl) {
-    super(dtoManager, apiToBeanMap, accessControl);
+    super(dtoManager, apiToBeanMap, new AuthorizationManager(
+        mock(AlertManager.class), mock(AlertTemplateManager.class), accessControl));
   }
 
   @Override

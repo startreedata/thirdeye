@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -55,8 +55,8 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
   @Inject
   public AlertTemplateResource(final AlertTemplateManager alertTemplateManager,
       final BootstrapResourcesRegistry bootstrapResourcesRegistry,
-      final AccessControl accessControl) {
-    super(alertTemplateManager, ImmutableMap.of(), accessControl);
+      final AuthorizationManager authorizationManager) {
+    super(alertTemplateManager, ImmutableMap.of(), authorizationManager);
     this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
   }
 

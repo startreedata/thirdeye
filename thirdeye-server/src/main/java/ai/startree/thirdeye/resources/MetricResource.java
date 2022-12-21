@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
-import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.MetricApi;
@@ -50,8 +50,8 @@ public class MetricResource extends CrudResource<MetricApi, MetricConfigDTO> {
   @Inject
   public MetricResource(final MetricConfigManager metricConfigManager,
       final DatasetConfigManager datasetConfigManager,
-      final AccessControl accessControl) {
-    super(metricConfigManager, ImmutableMap.of(), accessControl);
+      final AuthorizationManager authorizationManager) {
+    super(metricConfigManager, ImmutableMap.of(), authorizationManager);
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
   }

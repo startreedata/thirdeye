@@ -26,7 +26,6 @@ import java.util.Objects;
 public class AlertDTO extends AbstractDTO {
 
   String name;
-  String namespace;
   String description;
   boolean active;
   String cron;
@@ -60,14 +59,6 @@ public class AlertDTO extends AbstractDTO {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public void setNamespace(final String namespace) {
-    this.namespace = namespace;
   }
 
   public String getDescription() {

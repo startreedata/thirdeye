@@ -23,7 +23,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class AlertTemplateDTO extends AbstractDTO {
 
   private String name;
-  private String namespace;
   private String description;
   private String cron;
   private Date created;
@@ -44,15 +43,6 @@ public class AlertTemplateDTO extends AbstractDTO {
 
   public AlertTemplateDTO setName(final String name) {
     this.name = name;
-    return this;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public AlertTemplateDTO setNamespace(final String namespace) {
-    this.namespace = namespace;
     return this;
   }
 

@@ -33,14 +33,12 @@ import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
@@ -209,17 +207,17 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   public boolean hasAccess(final ThirdEyePrincipal principal, final AbstractDTO dto,
       final AccessType accessType) {
-    return accessControl.hasAccess(principal, ResourceIdentifier.fromDto(dto), accessType);
+    return accessControl.hasAccess(principal, ResourceIdentifier.from(dto), accessType);
   }
 
   public void ensureHasAccess(final ThirdEyePrincipal principal, final AbstractDTO dto,
       final AccessType accessType) {
-    ensureHasAccess(principal, ResourceIdentifier.fromDto(dto), accessType);
+    ensureHasAccess(principal, ResourceIdentifier.from(dto), accessType);
   }
 
   public void ensureHasAccess(final ThirdEyePrincipal principal, final ApiT api,
       final AccessType accessType) {
-    ensureHasAccess(principal, ResourceIdentifier.fromDto(toDto(api)), accessType);
+    ensureHasAccess(principal, ResourceIdentifier.from(toDto(api)), accessType);
   }
 
   public void ensureHasAccess(final ThirdEyePrincipal principal, final ResourceIdentifier id,

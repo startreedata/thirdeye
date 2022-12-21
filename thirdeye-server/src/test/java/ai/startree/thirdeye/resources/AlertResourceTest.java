@@ -109,7 +109,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         alertTemplateManager,
         (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
-            -> identifier.name.equals("alert1")
+            -> identifier.name.equals("0")
     ).createMultiple(new ThirdEyePrincipal("nobody", ""), Collections.singletonList(
         new AlertApi().setName("alert1").setTemplate(new AlertTemplateApi().setId(2L))
     ));

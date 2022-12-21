@@ -13,52 +13,30 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
+import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import javax.annotation.Nullable;
 
 public class ResourceIdentifier {
 
-  static public final String DefaultNamespace = "default";
+  static public final String DEFAULT_NAMESPACE = "default";
 
   public final String name;
   public final String namespace;
-  public final EntityType entityType;
+  public final String entityType;
 
-  public ResourceIdentifier(final String name, @Nullable final String namespace,
-      final EntityType entityType) {
+  public ResourceIdentifier(final String name, final String namespace, final String entityType) {
     this.name = name;
-    this.namespace = namespace != null ? namespace : DefaultNamespace;
+    this.namespace = namespace;
     this.entityType = entityType;
   }
 
-  static public ResourceIdentifier fromDto(final AbstractDTO dto) {
-    if (dto instanceof AlertDTO) {
-      return fromAlertDto((AlertDTO) dto);
-    }
-    if (dto instanceof AlertTemplateDTO) {
-      return fromAlertTemplateDto((AlertTemplateDTO) dto);
-    }
-
-    // TODO jackson: Add remaining resources.
-
-    return fromUnspecified(dto.getId());
-  }
-
-  static public ResourceIdentifier fromAlertDto(final AlertDTO dto) {
-    return new ResourceIdentifier(dto.getName(), dto.getNamespace(), EntityType.Alert);
-  }
-
-  static public ResourceIdentifier fromAlertTemplateDto(final AlertTemplateDTO dto) {
-    return new ResourceIdentifier(dto.getName(), dto.getNamespace(), EntityType.AlertTemplate);
-  }
-
-  static public ResourceIdentifier fromUnspecified(final Long id) {
+  static public <T extends AbstractDTO> ResourceIdentifier from(final T dto) {
     return new ResourceIdentifier(
-        (id != null) ? id.toString() : "none",
-        ResourceIdentifier.DefaultNamespace,
-        EntityType.Unspecified
+        optional(dto.getId()).orElse(0L).toString(),
+        optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
+        SubEntities.getType(dto.getClass())
     );
   }
 }

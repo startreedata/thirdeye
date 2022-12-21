@@ -167,7 +167,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertTemplateDTO wantAlertTemplateDTO = dto.getTemplate();
     final AlertTemplateDTO realAlertTemplateDTO = new AlertTemplateRenderer(
         (AlertManager) dtoManager, alertTemplateManager).getTemplate(wantAlertTemplateDTO);
-    return Collections.singletonList(ResourceIdentifier.fromAlertTemplateDto(realAlertTemplateDTO));
+    return Collections.singletonList(ResourceIdentifier.from(realAlertTemplateDTO));
   }
 
   @Path("{id}/insights")

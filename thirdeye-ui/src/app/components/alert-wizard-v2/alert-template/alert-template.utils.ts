@@ -137,7 +137,11 @@ export function hasRequiredPropertyValuesSet(
     alertTemplateProperties: TemplatePropertiesObject
 ): boolean {
     return availableFields.every((fieldMetadata) => {
-        if (!fieldMetadata.isOptional) {
+        // See https://cortexdata.atlassian.net/browse/TE-817
+        // Just check is not an empty value (empty array is ok)
+        if (typeof alertTemplateProperties[fieldMetadata.name] === "boolean") {
+            return true;
+        } else if (!fieldMetadata.isOptional) {
             return !!alertTemplateProperties[fieldMetadata.name];
         }
 

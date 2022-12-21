@@ -28,10 +28,10 @@ describe("AlertTemplatePropertiesBuilder", () => {
         render(
             <AlertTemplatePropertiesBuilder
                 alertTemplateId={1}
-                defaultTemplateProperties={{
-                    optionalField: "fooBar",
-                }}
-                requiredFields={["requiredField", "optionalField"]}
+                availableFields={[
+                    REQUIRED_FIELD_METADATA,
+                    OPTIONAL_FIELD_METADATA,
+                ]}
                 templateProperties={{
                     requiredField: "helloWorld",
                 }}
@@ -52,10 +52,10 @@ describe("AlertTemplatePropertiesBuilder", () => {
         render(
             <AlertTemplatePropertiesBuilder
                 alertTemplateId={1}
-                defaultTemplateProperties={{
-                    optionalField: "fooBar",
-                }}
-                requiredFields={["requiredField", "optionalField"]}
+                availableFields={[
+                    REQUIRED_FIELD_METADATA,
+                    OPTIONAL_FIELD_METADATA,
+                ]}
                 templateProperties={{
                     requiredField: "helloWorld",
                 }}
@@ -76,3 +76,24 @@ describe("AlertTemplatePropertiesBuilder", () => {
         expect(screen.getByTestId("hide-more-btn")).toBeInTheDocument();
     });
 });
+
+const OPTIONAL_FIELD_METADATA = {
+    name: "optionalField",
+    isOptional: true,
+    metadata: {
+        name: "optionalField",
+        defaultValue: "fooBar",
+        defaultIsNull: false,
+        multiselect: false,
+    },
+};
+
+const REQUIRED_FIELD_METADATA = {
+    name: "requiredField",
+    isOptional: false,
+    metadata: {
+        name: "requiredField",
+        defaultIsNull: false,
+        multiselect: false,
+    },
+};

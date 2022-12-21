@@ -66,16 +66,17 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         [searchParams]
     );
     const { notify } = useNotificationProviderV1();
-    const [detectionEvaluations, setDetectionEvaluations] =
-        useState<DetectionEvaluation[]>();
-    const [alertForCurrentEvaluation, setAlertForCurrentEvaluation] =
-        useState<EditableAlert>();
 
     const {
         getEvaluation,
         errorMessages: getEvaluationRequestErrors,
         status: getEvaluationStatus,
     } = useGetEvaluation();
+
+    const [detectionEvaluations, setDetectionEvaluations] =
+        useState<DetectionEvaluation[]>();
+    const [alertForCurrentEvaluation, setAlertForCurrentEvaluation] =
+        useState<EditableAlert>();
 
     const fetchAlertEvaluation = async (
         start: number,
@@ -195,9 +196,15 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                 disabled={!showLoadButton}
                                 variant="outlined"
                                 onClick={() => {
-                                    if (
+                                    const isNotInitialRequest =
                                         (getEvaluationStatus as ActionStatus) !==
-                                        ActionStatus.Initial
+                                        ActionStatus.Initial;
+                                    const missingStartEnd =
+                                        !startTime || !endTime;
+
+                                    if (
+                                        isNotInitialRequest &&
+                                        !missingStartEnd
                                     ) {
                                         fetchAlertEvaluation(
                                             startTime,

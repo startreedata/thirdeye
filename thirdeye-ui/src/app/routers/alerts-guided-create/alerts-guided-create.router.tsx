@@ -56,6 +56,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
         hideSubscriptionGroup,
         createLabel,
         inProgressLabel,
+        hideCurrentlySelected,
     }) => {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
@@ -81,6 +82,9 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                             element={
                                 <SelectTypePage
                                     navigateToAlertDetailAfterCreate
+                                    hideCurrentlySelected={
+                                        hideCurrentlySelected
+                                    }
                                     hideSampleAlerts={hideSampleAlerts}
                                     sampleAlertsBottom={sampleAlertsBottom}
                                 />

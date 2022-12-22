@@ -18,6 +18,7 @@ export interface AlertsGuidedCreateRouterProps {
     sampleAlertsBottom?: boolean;
     hideSampleAlerts?: boolean;
     hideSubscriptionGroup?: boolean;
+    hideCurrentlySelected?: boolean;
     createLabel: string;
     inProgressLabel: string;
 }

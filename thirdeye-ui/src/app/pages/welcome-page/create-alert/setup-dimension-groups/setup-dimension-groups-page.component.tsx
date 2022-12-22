@@ -31,6 +31,7 @@ import {
     useNotificationProviderV1,
 } from "../../../../platform/components";
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
+import { MetricAggFunction } from "../../../../rest/dto/metric.interfaces";
 import { CohortResult } from "../../../../rest/dto/rca.interfaces";
 import { useGetCohort } from "../../../../rest/rca/rca.actions";
 import { GetCohortParams } from "../../../../rest/rca/rca.interfaces";
@@ -134,6 +135,19 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                 </Grid>
                 <Grid item xs={12}>
                     <DatasetDetails
+                        initialSelectedAggregationFunc={
+                            alert.templateProperties
+                                .aggregationFunction as MetricAggFunction
+                        }
+                        initialSelectedDataset={
+                            alert.templateProperties.dataset as string
+                        }
+                        initialSelectedDatasource={
+                            alert.templateProperties.dataSource as string
+                        }
+                        initialSelectedMetric={
+                            alert.templateProperties.aggregationColumn as string
+                        }
                         submitButtonLabel={t(
                             "message.generate-dimensions-to-monitor"
                         )}

@@ -28,13 +28,16 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
     nextButtonLabel,
     backButtonLabel,
     nextButtonIsDisabled,
+    children,
 }) => {
     const { t } = useTranslation();
 
     return (
         <Box bottom={0} marginTop="auto" position="sticky" width="100%">
             <PageContentsCardV1>
-                <Grid container justifyContent="flex-end">
+                <Grid container alignItems="center" justifyContent="flex-end">
+                    {children && <Grid item>{children}</Grid>}
+
                     <Grid item>
                         {handleBackClick && (
                             <Button color="secondary" onClick={handleBackClick}>

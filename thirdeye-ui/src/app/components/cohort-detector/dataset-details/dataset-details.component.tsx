@@ -49,6 +49,10 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     onSearchButtonClick,
     onMetricSelect,
     onAggregationFunctionSelect,
+    initialSelectedMetric,
+    initialSelectedDataset,
+    initialSelectedDatasource,
+    initialSelectedAggregationFunc,
 }) => {
     const {
         datasources,
@@ -81,7 +85,9 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     );
     const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
     const [selectedAggregationFunction, setSelectedAggregationFunction] =
-        useState<MetricAggFunction>(MetricAggFunction.SUM);
+        useState<MetricAggFunction>(
+            initialSelectedAggregationFunc ?? MetricAggFunction.SUM
+        );
     const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
     const [queryValue, setQueryValue] = useState<string>("");
 
@@ -110,6 +116,23 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
             },
             []
         );
+
+        if (
+            initialSelectedDataset &&
+            initialSelectedMetric &&
+            initialSelectedDatasource
+        ) {
+            const matchingDataset = datasetInfo.find(
+                (item) =>
+                    item.dataset.name === initialSelectedDataset &&
+                    item.datasource === initialSelectedDatasource
+            );
+
+            if (matchingDataset) {
+                setSelectedTable(matchingDataset);
+                setSelectedMetric(initialSelectedMetric);
+            }
+        }
 
         setDatasetsInfo(datasetInfo);
 

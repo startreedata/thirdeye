@@ -445,6 +445,7 @@
         "generate-dimensions-to-monitor": "Generate dimensions to monitor",
         "holt-winters-rule-algorithm-description": "Timeseries are extracted as a sum of trend, seasonality and noise.",
         "how-often-pipeline-checks": "How often the pipeline checks for anomalies in the system",
+        "in-iso8601-format-eg-p21d": "In ISO-8601 format. Eg P21D.",
         "in-order-to-continue-you-will-need-to-load": "In order to continue, you will need to load the default alert templates",
         "invalid-cron-input-1": "Invalid cron input, See ",
         "invalid-cron-input-2": " for more details on the expected format",

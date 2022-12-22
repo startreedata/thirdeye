@@ -18,8 +18,12 @@ import { User } from "./user.interfaces";
 
 export type PropertyConfigValueTypes =
     | string
-    | string[]
+    | number
+    | string[] // Array
+    | number[] // Array
+    | Record<string, unknown> // Object
     | boolean
+    | null
     | EnumerationItemConfig[];
 
 export interface TemplatePropertiesObject {

@@ -78,8 +78,8 @@ export const generateOptions = (
                     {
                         templatePropertyName: "baselineOffset",
                         label: t("label.baseline-offset"),
-                        description: "",
-                        type: "number",
+                        description: t("message.in-iso8601-format-eg-p21d"),
+                        type: "string",
                     },
                     {
                         templatePropertyName: "percentageChange",
@@ -101,8 +101,8 @@ export const generateOptions = (
                     {
                         templatePropertyName: "baselineOffset",
                         label: t("label.baseline-offset"),
-                        description: "",
-                        type: "number",
+                        description: t("message.in-iso8601-format-eg-p21d"),
+                        type: "string",
                     },
                     {
                         templatePropertyName: "absoluteChange",

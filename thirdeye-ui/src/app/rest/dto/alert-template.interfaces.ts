@@ -13,23 +13,19 @@
  * the License.
  */
 
+import { PropertyConfigValueTypes } from "./alert.interfaces";
+
 export interface MetadataProperty {
     name: string;
-    description: string;
-    defaultValue:
-        | string
-        | number
-        | string[] // Array
-        | number[] // Array
-        | Record<string, unknown> // Object
-        | boolean
-        | null;
+    description?: string;
+    defaultValue?: PropertyConfigValueTypes;
     defaultIsNull: boolean;
+    multiselect: boolean;
 
     /**
      * See spec https://json-schema.org/understanding-json-schema/reference/type.html
      */
-    jsonType:
+    jsonType?:
         | "STRING"
         | "NUMBER"
         | "INTEGER"

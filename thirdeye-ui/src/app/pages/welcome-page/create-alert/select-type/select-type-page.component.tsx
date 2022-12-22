@@ -25,6 +25,7 @@ import { SampleAlertOption } from "../../../../components/alert-wizard-v3/sample
 import { useAppBarConfigProvider } from "../../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { NoDataIndicator } from "../../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
@@ -49,6 +50,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
     sampleAlertsBottom,
     hideSampleAlerts,
     navigateToAlertDetailAfterCreate,
+    hideCurrentlySelected,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -61,6 +63,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         advancedOptions,
         getAlertTemplates,
         alertTemplates,
+        selectedAlgorithmOption,
     } = useOutletContext<{
         alert: EditableAlert;
         handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
@@ -68,6 +71,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         advancedOptions: AvailableAlgorithmOption[];
         getAlertTemplates: () => void;
         alertTemplates: AlertTemplate[];
+        selectedAlgorithmOption: AvailableAlgorithmOption;
     }>();
 
     const handleAlgorithmSelection = (
@@ -124,70 +128,87 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
     };
 
     return (
-        <PageContentsGridV1>
-            <Grid item xs={12}>
-                <Typography variant="h5">
-                    {t("message.select-alert-type")}
-                </Typography>
-                <Typography variant="body1">
-                    {t(
-                        "message.this-is-the-detector-algorithm-that-will-rule-alert"
-                    )}
-                </Typography>
-            </Grid>
-            {!hideSampleAlerts && !sampleAlertsBottom && (
-                <SampleAlertSelection
-                    alertTemplates={alertTemplates}
-                    onSampleAlertSelect={handleSampleAlertSelect}
-                />
-            )}
-            <Grid item xs={12}>
-                <EmptyStateSwitch
-                    emptyState={
-                        <PageContentsCardV1>
-                            <Box padding={10}>
-                                <NoDataIndicator>
-                                    <Box textAlign="center">
-                                        {t(
-                                            "message.in-order-to-continue-you-will-need-to-load"
-                                        )}
-                                    </Box>
-                                    <Box marginTop={2} textAlign="center">
-                                        <Button
-                                            color="primary"
-                                            onClick={
-                                                handleCreateDefaultAlertTemplates
-                                            }
-                                        >
-                                            {t("label.load-defaults")}
-                                        </Button>
-                                    </Box>
-                                </NoDataIndicator>
-                            </Box>
-                        </PageContentsCardV1>
-                    }
-                    isEmpty={
-                        filterOptionWithTemplateNames(advancedOptions)
-                            .length === 0 &&
-                        filterOptionWithTemplateNames(simpleOptions).length ===
-                            0
-                    }
-                >
-                    <AlgorithmSelection
-                        advancedOptions={advancedOptions}
-                        simpleOptions={simpleOptions}
-                        onAlertPropertyChange={handleAlertPropertyChange}
-                        onSelectionComplete={handleAlgorithmSelection}
+        <>
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <Typography variant="h5">
+                        {t("message.select-alert-type")}
+                    </Typography>
+                    <Typography variant="body1">
+                        {t(
+                            "message.this-is-the-detector-algorithm-that-will-rule-alert"
+                        )}
+                    </Typography>
+                </Grid>
+                {!hideSampleAlerts && !sampleAlertsBottom && (
+                    <SampleAlertSelection
+                        alertTemplates={alertTemplates}
+                        onSampleAlertSelect={handleSampleAlertSelect}
                     />
-                </EmptyStateSwitch>
-            </Grid>
+                )}
+                <Grid item xs={12}>
+                    <EmptyStateSwitch
+                        emptyState={
+                            <PageContentsCardV1>
+                                <Box padding={10}>
+                                    <NoDataIndicator>
+                                        <Box textAlign="center">
+                                            {t(
+                                                "message.in-order-to-continue-you-will-need-to-load"
+                                            )}
+                                        </Box>
+                                        <Box marginTop={2} textAlign="center">
+                                            <Button
+                                                color="primary"
+                                                onClick={
+                                                    handleCreateDefaultAlertTemplates
+                                                }
+                                            >
+                                                {t("label.load-defaults")}
+                                            </Button>
+                                        </Box>
+                                    </NoDataIndicator>
+                                </Box>
+                            </PageContentsCardV1>
+                        }
+                        isEmpty={
+                            filterOptionWithTemplateNames(advancedOptions)
+                                .length === 0 &&
+                            filterOptionWithTemplateNames(simpleOptions)
+                                .length === 0
+                        }
+                    >
+                        <AlgorithmSelection
+                            advancedOptions={advancedOptions}
+                            simpleOptions={simpleOptions}
+                            onAlertPropertyChange={handleAlertPropertyChange}
+                            onSelectionComplete={handleAlgorithmSelection}
+                        />
+                    </EmptyStateSwitch>
+                </Grid>
 
-            {!hideSampleAlerts && sampleAlertsBottom && (
-                <SampleAlertSelection
-                    alertTemplates={alertTemplates}
-                    onSampleAlertSelect={handleSampleAlertSelect}
-                />
+                {!hideSampleAlerts && sampleAlertsBottom && (
+                    <SampleAlertSelection
+                        alertTemplates={alertTemplates}
+                        onSampleAlertSelect={handleSampleAlertSelect}
+                    />
+                )}
+            </PageContentsGridV1>
+
+            {!hideCurrentlySelected && selectedAlgorithmOption && (
+                <WizardBottomBar
+                    nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
+                    nextButtonLabel={t("label.continue-dont-change")}
+                >
+                    {t(
+                        "message.algorithm-is-selected-for-current-configuration",
+                        {
+                            algorithmName:
+                                selectedAlgorithmOption.algorithmOption.title,
+                        }
+                    )}
+                </WizardBottomBar>
             )}
-        </PageContentsGridV1>
+        </>
     );
 };

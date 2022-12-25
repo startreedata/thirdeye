@@ -18,7 +18,6 @@ import {
     Divider,
     Grid,
     Link,
-    TextField,
     Typography,
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
@@ -34,8 +33,8 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { getAlertTemplatesUpdatePath } from "../../../../utils/routes/routes.util";
-import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
+import { AlertTemplateFormField } from "../alert-template-form-field/alert-template-form-field.component";
 import { setUpFieldInputRenderConfig } from "../alert-template.utils";
 import {
     AlertTemplatePropertiesBuilderProps,
@@ -117,47 +116,25 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                         </Typography>
                     </Box>
                 </Grid>
-                {requiredKeys.map((item, idx) => {
-                    return (
-                        <InputSection
-                            inputComponent={
-                                <TextField
-                                    fullWidth
-                                    data-testid={`textfield-${item.key}`}
-                                    defaultValue={item.value}
-                                    inputProps={{ tabIndex: idx + 1 }}
-                                    placeholder={t("label.add-property-value", {
-                                        key: item.key,
-                                    })}
-                                    onChange={(e) => {
-                                        handlePropertyValueChange(
-                                            item.key,
-                                            e.currentTarget.value
-                                        );
-                                    }}
-                                />
-                            }
-                            key={item.key}
-                            labelComponent={
-                                <Box paddingBottom={1} paddingTop={1}>
-                                    <Typography variant="body2">
-                                        {item.key}
-                                    </Typography>
-                                    {item.metadata.description && (
-                                        <Typography
-                                            className={
-                                                classes.alertPropertyLabelDescription
-                                            }
-                                            variant="caption"
-                                        >
-                                            {item.metadata.description}
-                                        </Typography>
-                                    )}
-                                </Box>
-                            }
-                        />
-                    );
-                })}
+                {requiredKeys.map((item, idx) => (
+                    <AlertTemplateFormField
+                        item={item}
+                        key={item.key}
+                        textFieldProps={{
+                            inputProps: { tabIndex: idx + 1 },
+                            placeholder: t("label.add-property-value", {
+                                key: item.key,
+                            }),
+                            onChange: (e) => {
+                                handlePropertyValueChange(
+                                    item.key,
+                                    e.currentTarget.value
+                                );
+                            },
+                        }}
+                        tooltipText={item.metadata.description}
+                    />
+                ))}
                 {!showMore && optionalKeys.length > 0 && (
                     <>
                         <Grid item xs={12}>
@@ -197,54 +174,27 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 </Typography>
                             </Box>
                         </Grid>
-                        {optionalKeys.map((item, idx) => {
-                            return (
-                                <InputSection
-                                    inputComponent={
-                                        <TextField
-                                            fullWidth
-                                            data-testid={`textfield-${item.key}`}
-                                            defaultValue={item.value}
-                                            inputProps={{
-                                                tabIndex:
-                                                    requiredKeys.length +
-                                                    idx +
-                                                    1,
-                                            }}
-                                            placeholder={
-                                                item.metadata.defaultValue
-                                                    ? item.metadata.defaultValue.toString()
-                                                    : ""
-                                            }
-                                            onChange={(e) =>
-                                                handlePropertyValueChange(
-                                                    item.key,
-                                                    e.currentTarget.value
-                                                )
-                                            }
-                                        />
-                                    }
-                                    key={item.key}
-                                    labelComponent={
-                                        <Box paddingBottom={1} paddingTop={1}>
-                                            <Typography variant="body2">
-                                                {item.key}
-                                            </Typography>
-                                            {item.metadata.description && (
-                                                <Typography
-                                                    className={
-                                                        classes.alertPropertyLabelDescription
-                                                    }
-                                                    variant="caption"
-                                                >
-                                                    {item.metadata.description}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    }
-                                />
-                            );
-                        })}
+                        {optionalKeys.map((item, idx) => (
+                            <AlertTemplateFormField
+                                item={item}
+                                key={item.key}
+                                textFieldProps={{
+                                    inputProps: {
+                                        tabIndex: requiredKeys.length + idx + 1,
+                                    },
+                                    placeholder: item.metadata.defaultValue
+                                        ? item.metadata.defaultValue.toString()
+                                        : "",
+                                    onChange: (e) => {
+                                        handlePropertyValueChange(
+                                            item.key,
+                                            e.currentTarget.value
+                                        );
+                                    },
+                                }}
+                                tooltipText={item.metadata.description}
+                            />
+                        ))}
                     </>
                 )}
                 {showMore && optionalKeys.length > 0 && (

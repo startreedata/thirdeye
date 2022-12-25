@@ -12,14 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { GridProps } from "@material-ui/core";
-import type { ReactElement } from "react";
+import type { TextFieldProps } from "@material-ui/core";
+import type { PropertyRenderConfig } from "../alert-template-properties-builder/alert-template-properties-builder.interfaces";
 
-export interface InputSectionProps {
-    label?: string;
-    helperLabel?: string;
-    labelComponent?: ReactElement;
-    inputComponent: ReactElement;
-    fullWidth?: boolean;
-    gridContainerProps?: GridProps;
+export interface AlertTemplateFormFieldProps {
+    item: PropertyRenderConfig;
+    textFieldProps: TextFieldProps;
+    tooltipText?: string | null;
 }

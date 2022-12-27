@@ -147,11 +147,15 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                         />
                     );
                 })}
-            {series.map((seriesData: NormalizedSeries, idx: number) => {
-                if (seriesData.enabled) {
+            {series
+                .filter((seriesData) => seriesData.enabled)
+                .map((seriesData: NormalizedSeries, idx: number) => {
                     const color =
                         seriesData.color ??
                         colorScale(seriesData.name as string);
+
+                    const key: string = seriesData.name || `${idx}`;
+
                     if (seriesData.type === SeriesType.LINE) {
                         return (
                             <LinePath<DataPoint>
@@ -159,7 +163,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                 defined={(timeSeriesPoint) => {
                                     return !!Number.isFinite(timeSeriesPoint.y);
                                 }}
-                                key={seriesData.name || `${idx}`}
+                                key={key}
                                 stroke={seriesData.stroke || color}
                                 strokeDasharray={seriesData.strokeDasharray}
                                 strokeWidth={seriesData.strokeWidth}
@@ -171,11 +175,13 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                 }
                             />
                         );
-                    } else if (seriesData.type === SeriesType.AREA_CLOSED) {
+                    }
+
+                    if (seriesData.type === SeriesType.AREA_CLOSED) {
                         const gradientId = `${seriesData.name}-gradient`;
 
                         return (
-                            <>
+                            <React.Fragment key={key}>
                                 {seriesData.gradient && (
                                     <LinearGradient
                                         {...seriesData.gradient}
@@ -201,7 +207,6 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                             : color
                                     }
                                     fillOpacity={seriesData.fillOpacity}
-                                    key={seriesData.name || `${idx}`}
                                     stroke={seriesData.stroke}
                                     strokeOpacity={1}
                                     strokeWidth={seriesData.strokeWidth}
@@ -219,9 +224,11 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                     }
                                     yScale={yScaleToUse}
                                 />
-                            </>
+                            </React.Fragment>
                         );
-                    } else if (seriesData.type === SeriesType.BAR) {
+                    }
+
+                    if (seriesData.type === SeriesType.BAR) {
                         const data = seriesData.data as DataPoint[];
 
                         const granularity = determineGranularity(
@@ -229,7 +236,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                         );
 
                         return (
-                            <>
+                            <React.Fragment key={key}>
                                 {data.map((d: DataPoint) => {
                                     const barHeight =
                                         yMax - (dataScale(d.y) ?? 0);
@@ -264,9 +271,11 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                                         />
                                     );
                                 })}
-                            </>
+                            </React.Fragment>
                         );
-                    } else if (seriesData.type === SeriesType.CUSTOM) {
+                    }
+
+                    if (seriesData.type === SeriesType.CUSTOM) {
                         // #TODO implement intuitive ordering system
                         if (seriesData.customRenderer) {
                             afterChildren = [
@@ -278,10 +287,9 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                             ];
                         }
                     }
-                }
 
-                return;
-            })}
+                    return null;
+                })}
             {children && children(xScaleToUse, yScaleToUse)}
             {/* #TODO implement intuitive ordering system */}
             {afterChildren}

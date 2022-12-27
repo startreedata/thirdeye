@@ -32,6 +32,7 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { RCA_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
@@ -96,7 +97,9 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             }),
             cancelButtonText: t("label.cancel"),
             contents: (
-                <>
+                <div
+                    data-tour-observe-id={RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT}
+                >
                     {updateHasError && (
                         <Box
                             color="warning.main"
@@ -114,7 +117,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         minRows={3}
                         name="comment"
                     />
-                </>
+                </div>
             ),
             okButtonText: t("label.change"),
             onOk: () =>
@@ -186,7 +189,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                 <Box marginRight={1} paddingTop={1}>
                     <label>{t("message.is-this-an-anomaly")}</label>
                 </Box>
-                <Box>
+                <Box data-tour-id={RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN}>
                     {/** The single dropdown should trigger the menu open */}
                     <ButtonGroup
                         color="primary"
@@ -209,6 +212,11 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         </Button>
                     </ButtonGroup>
                     <DropdownMenuV1
+                        // TODO: Get this working
+                        // PaperProps={{
+                        //     "data-tour-observe-id":
+                        //         RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN,
+                        // }}
                         anchorEl={feedbackMenuAnchorEl}
                         className="dropdown-button-v1-menu"
                         dropdownMenuItems={shortcutCreateMenuItems}
@@ -233,6 +241,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                     >
                         <Button
                             color="primary"
+                            data-tour-id={RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT}
                             size="small"
                             variant="outlined"
                             onClick={handleCommentUpdateClick}

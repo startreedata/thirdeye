@@ -17,6 +17,7 @@ import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
+import { RCA_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card/anomaly-summary-card-deatil.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
@@ -41,52 +42,76 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
             <CardContent>
                 {props.uiAnomaly && (
                     <Grid container spacing={4}>
-                        {/* Start */}
-                        <Grid item lg={2} sm={6} xs={12}>
-                            <AnomalySummaryCardDetail
-                                label={t("label.start")}
-                                value={props.uiAnomaly.startTime}
-                            />
+                        <Grid
+                            container
+                            item
+                            data-tour-id={
+                                RCA_TOUR_IDS.ANOMALY_START_END_DATE_TEXT
+                            }
+                            lg={7}
+                            sm={8}
+                            xs={12}
+                        >
+                            {/* Start */}
+                            <Grid item sm={5} xs={12}>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.start")}
+                                    value={props.uiAnomaly.startTime}
+                                />
+                            </Grid>
+
+                            {/* End */}
+                            <Grid item sm={5} xs={12}>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.end")}
+                                    value={props.uiAnomaly.endTime}
+                                />
+                            </Grid>
+
+                            {/* Duration */}
+                            <Grid item sm={2} xs={12}>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.duration")}
+                                    value={props.uiAnomaly.duration}
+                                />
+                            </Grid>
                         </Grid>
 
-                        {/* End */}
-                        <Grid item lg={2} sm={6} xs={12}>
-                            <AnomalySummaryCardDetail
-                                label={t("label.end")}
-                                value={props.uiAnomaly.endTime}
-                            />
-                        </Grid>
+                        <Grid
+                            container
+                            item
+                            data-tour-id={
+                                RCA_TOUR_IDS.CURRENT_PREDICTED_DEVIATION
+                            }
+                            lg={5}
+                            sm={4}
+                            xs={12}
+                        >
+                            <Grid item zeroMinWidth sm={2} xs={12} />
 
-                        {/* Duration */}
-                        <Grid item xs={2}>
-                            <AnomalySummaryCardDetail
-                                label={t("label.duration")}
-                                value={props.uiAnomaly.duration}
-                            />
-                        </Grid>
+                            {/* Current/Predicted */}
+                            <Grid item sm={6} xs={12}>
+                                <AnomalySummaryCardDetail
+                                    label={`${t("label.current")}${t(
+                                        "label.pair-separator"
+                                    )}${t("label.predicted")}`}
+                                    value={`${props.uiAnomaly.current}${t(
+                                        "label.pair-separator"
+                                    )}${props.uiAnomaly.predicted}`}
+                                />
+                            </Grid>
 
-                        {/* Current/Predicted */}
-                        <Grid item xs={2}>
-                            <AnomalySummaryCardDetail
-                                label={`${t("label.current")}${t(
-                                    "label.pair-separator"
-                                )}${t("label.predicted")}`}
-                                value={`${props.uiAnomaly.current}${t(
-                                    "label.pair-separator"
-                                )}${props.uiAnomaly.predicted}`}
-                            />
-                        </Grid>
-
-                        {/* Deviation */}
-                        <Grid item xs={2}>
-                            <AnomalySummaryCardDetail
-                                label={t("label.deviation")}
-                                value={props.uiAnomaly.deviation}
-                                valueClassName={classnames({
-                                    [anomalyCardClasses.deviation]:
-                                        props.uiAnomaly.negativeDeviation,
-                                })}
-                            />
+                            {/* Deviation */}
+                            <Grid item sm={4} xs={12}>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.deviation")}
+                                    value={props.uiAnomaly.deviation}
+                                    valueClassName={classnames({
+                                        [anomalyCardClasses.deviation]:
+                                            props.uiAnomaly.negativeDeviation,
+                                    })}
+                                />
+                            </Grid>
                         </Grid>
                     </Grid>
                 )}

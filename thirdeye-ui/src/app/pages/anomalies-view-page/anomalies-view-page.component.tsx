@@ -36,6 +36,7 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { RCA_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
@@ -279,7 +280,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         : undefined
                 }
             >
-                <PageHeaderTextV1>
+                <PageHeaderTextV1
+                    data-tour-id={RCA_TOUR_IDS.ANOMALY_HEADER_TEXT}
+                >
                     {anomaly && uiAnomaly && (
                         <>
                             <Link

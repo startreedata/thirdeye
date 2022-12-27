@@ -30,10 +30,11 @@ import {
     ProviderProps,
     TourProvider,
 } from "@reactour/tour";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router";
 import { DimensionV1 } from "../../utils";
-import { HomepageTourSteps } from "./app-walkthrough-v1.utils";
+import { getSteps } from "./app-walkthrough-v1.utils";
 
 const TourCard: FunctionComponent<PopoverContentProps> = ({
     steps,
@@ -45,8 +46,10 @@ const TourCard: FunctionComponent<PopoverContentProps> = ({
     const handleClose = (): void => {
         setIsOpen(false);
     };
+    const location = useLocation();
 
-    console.log({ currentStep });
+    // TODO: Load tour steps based on location
+    console.log({ location });
 
     const handleBack = (): void => {
         if (currentStep === 0) {
@@ -135,33 +138,34 @@ const TourCard: FunctionComponent<PopoverContentProps> = ({
 export const AppWalkthroughV1: FunctionComponent = ({ children }) => {
     const theme = useTheme();
 
-    const tourProps: Omit<ProviderProps, "children"> = {
-        scrollSmooth: true,
-        disableInteraction: true,
-        steps: HomepageTourSteps.map((s) => ({
-            ...s,
-            selector: `[data-tour-id=${s.selector}]`,
-        })),
-        ContentComponent: TourCard,
-        styles: {
-            badge: (base) => ({
-                ...base,
-                background: theme.palette.primary.main,
-            }),
-            dot: (base, options) => ({
-                ...base,
-                background: options?.current
-                    ? theme.palette.primary.main
-                    : theme.palette.grey["500"],
-            }),
-            popover: (base) => ({
-                ...base,
-                padding: "6px 8px",
-                borderRadius: DimensionV1.BorderRadiusDefault,
-                minWidth: 300,
-            }),
-        },
-    };
+    const tourProps = useMemo<Omit<ProviderProps, "children">>(
+        () => ({
+            scrollSmooth: true,
+            onClickMask: (): void => undefined,
+            // disableInteraction: true,
+            steps: getSteps(),
+            ContentComponent: TourCard,
+            styles: {
+                badge: (base) => ({
+                    ...base,
+                    background: theme.palette.primary.main,
+                }),
+                dot: (base, options) => ({
+                    ...base,
+                    background: options?.current
+                        ? theme.palette.primary.main
+                        : theme.palette.grey["500"],
+                }),
+                popover: (base) => ({
+                    ...base,
+                    padding: "6px 8px",
+                    borderRadius: DimensionV1.BorderRadiusDefault,
+                    minWidth: 300,
+                }),
+            },
+        }),
+        []
+    );
 
     return <TourProvider {...tourProps}>{children}</TourProvider>;
 };

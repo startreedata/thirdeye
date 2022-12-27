@@ -1,3 +1,5 @@
+import { MenuProps } from "@material-ui/core";
+
 /*
  * Copyright 2022 StarTree Inc
  *
@@ -12,7 +14,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface DropdownMenuV1Props {
+export interface DropdownMenuV1Props
+    extends Omit<Partial<MenuProps>, "onClick"> {
     dropdownMenuItems: DropdownMenuItemV1[];
     anchorEl?: null | Element | ((element: Element) => Element);
     open: boolean;

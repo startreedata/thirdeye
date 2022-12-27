@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.TaskApi;
@@ -66,8 +66,9 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   private final TaskManager taskManager;
 
   @Inject
-  public TaskResource(final TaskManager taskManager, final AccessControl accessControl) {
-    super(taskManager, API_TO_INDEX_FILTER_MAP, accessControl);
+  public TaskResource(final TaskManager taskManager,
+      final AuthorizationManager authorizationManager) {
+    super(taskManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
     this.taskManager = taskManager;
   }
 

@@ -18,12 +18,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.AccessControlModule;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import javax.ws.rs.core.Response;
@@ -45,7 +48,11 @@ public class DataSourceResourceTest {
     dataSourceResource = new DataSourceResource(mock(DataSourceManager.class),
         dataSourceCache,
         mock(DataSourceOnboarder.class),
-        AccessControlModule.alwaysAllow
+        new AuthorizationManager(
+            mock(AlertManager.class),
+            mock(AlertTemplateManager.class),
+            AccessControlModule.alwaysAllow
+        )
         );
   }
 

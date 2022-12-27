@@ -24,8 +24,9 @@ import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
-import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -95,8 +96,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertEvaluator alertEvaluator,
       final AppAnalyticsService analyticsService,
       final AlertInsightsProvider alertInsightsProvider,
-      final AccessControl accessControl) {
-    super(alertManager, ImmutableMap.of(), accessControl);
+      final AuthorizationManager authorizationManager) {
+    super(alertManager, ImmutableMap.of(), authorizationManager);
     this.alertCreater = alertCreater;
     this.alertDeleter = alertDeleter;
     this.alertEvaluator = alertEvaluator;
@@ -162,7 +163,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   public Response getInsights(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
-    ensureHasAccess(principal, dto, AccessType.READ);
+    authorizationManager.ensureHasAccess(principal, ResourceIdentifier.from(dto), AccessType.READ);
 
     final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
     return Response.ok(insights).build();
@@ -193,7 +194,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertDTO dto = get(id);
     ensureExists(dto);
     ensureExists(startTime, "start");
-    ensureHasAccess(principal, dto, AccessType.UPDATE);
+    authorizationManager.ensureHasAccess(principal, ResourceIdentifier.from(dto), AccessType.UPDATE);
 
     alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
     return Response.ok().build();
@@ -213,6 +214,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertDTO existing =
           api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
       validate(api, existing);
+      authorizationManager.ensureCanValidate(principal, toDto(api));
     }
 
     return Response.ok().build();
@@ -234,7 +236,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
-
+    authorizationManager.ensureCanEvaluate(principal, toDto(alert));
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 
@@ -247,7 +249,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
-    ensureHasAccess(principal, dto, AccessType.UPDATE);
+    authorizationManager.ensureHasAccess(principal, ResourceIdentifier.from(dto), AccessType.UPDATE);
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     alertDeleter.deleteAssociatedAnomalies(dto.getId());

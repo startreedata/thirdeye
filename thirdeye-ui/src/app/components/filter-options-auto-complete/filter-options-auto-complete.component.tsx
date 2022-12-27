@@ -46,16 +46,29 @@ function FilterOptionsAutoComplete<FetchedDataType>({
         useState<FilterOption | null>(selected);
 
     useEffect(() => {
+        // isMounted ensures that the state updates are not run if the component has been unmounted
+        let isMounted = true;
+
         fetchOptions()
             .then((dataFromServer: FetchedDataType[]) => {
-                setAvailableOptions(dataFromServer.map(formatOptionFromServer));
+                if (isMounted) {
+                    setAvailableOptions(
+                        dataFromServer.map(formatOptionFromServer)
+                    );
+                }
             })
             .catch(() => {
-                notify(
-                    NotificationTypeV1.Warning,
-                    t("message.error-while-fetching", { entity: label })
-                );
+                if (isMounted) {
+                    notify(
+                        NotificationTypeV1.Warning,
+                        t("message.error-while-fetching", { entity: label })
+                    );
+                }
             });
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     useEffect(() => {

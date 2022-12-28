@@ -160,8 +160,6 @@ export function createNewStartingAlert(): EditableAlert {
         templateProperties: {
             dataSource: "sample_datasource",
             dataset: "sample_dataset",
-            timeColumn: "report_date",
-            timeColumnFormat: "EPOCH",
             aggregationFunction: "SUM",
             seasonalityPeriod: "P7D",
             lookback: "P90D",

@@ -1,6 +1,6 @@
 {
-  "name": "startree-percentage-rule-percentile",
-  "description": "Percentage rule template. Aggregation function with 2 operands: PERCENTILETDIGEST, DISTINCTCOUNTHLL,etc...",
+  "name": "startree-mean-variance",
+  "description": "Mean-Variance template. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",
@@ -27,7 +27,7 @@
       },
       "inputs": [
         {
-          "sourcePlanNode": "thresholdProcessor"
+          "sourcePlanNode": "guardrailThresholdProcessor"
         },
         {
           "targetProperty": "current_events",
@@ -38,7 +38,30 @@
       "outputs": []
     },
     {
-      "name": "thresholdProcessor",
+      "name": "guardrailThresholdProcessor",
+      "type": "PostProcessor",
+      "params": {
+        "type": "THRESHOLD",
+        "component.ignore": "${guardrailMetricIgnore}",
+        "component.min": "${guardrailMetricMin}",
+        "component.max": "${guardrailMetricMax}",
+        "component.valueName": "${guardrailMetric}",
+        "component.timestamp": "ts",
+        "component.metric": "guardrail"
+      },
+      "inputs": [
+        {
+          "sourcePlanNode": "metricThresholdProcessor"
+        },
+        {
+          "targetProperty": "current",
+          "sourcePlanNode": "missingDataPointsFiller",
+          "sourceProperty": "preparedCurrentDataWithHistory"
+        }
+      ]
+    },
+    {
+      "name": "metricThresholdProcessor",
       "type": "PostProcessor",
       "params": {
         "type": "THRESHOLD",
@@ -77,7 +100,7 @@
         "type": "COLD_START",
         "component.ignore": "${coldStartIgnore}",
         "component.tableName": "${dataset}",
-        "component.coldStartPeriod": "${baselineOffset}"
+        "component.coldStartPeriod": "${lookback}"
       },
       "inputs": [
         {
@@ -90,63 +113,26 @@
       "name": "anomalyDetector",
       "type": "AnomalyDetector",
       "params": {
-        "component.percentageChange": "${percentageChange}",
-        "component.monitoringGranularity": "${monitoringGranularity}",
         "component.metric": "met",
+        "component.monitoringGranularity": "${monitoringGranularity}",
+        "component.lookbackPeriod": "${lookback}",
         "component.timestamp": "ts",
         "anomaly.metric": "${aggregationColumn}",
         "anomaly.dataset": "${dataset}",
-        "anomaly.source": "percentage-change-template/root",
-        "type": "PERCENTAGE_CHANGE",
-        "component.pattern": "${pattern}"
+        "anomaly.source": "meanVariance-template/root",
+        "type": "MEAN_VARIANCE",
+        "component.pattern": "${pattern}",
+        "component.sensitivity": "${sensitivity}",
+        "component.seasonalityPeriod": "${seasonalityPeriod}"
       },
       "inputs": [
         {
-          "targetProperty": "baseline",
-          "sourcePlanNode": "baselineMissingDataManager",
-          "sourceProperty": "baselineOutput"
-        },
-        {
           "targetProperty": "current",
-          "sourcePlanNode": "currentMissingDataManager",
-          "sourceProperty": "currentOutput"
+          "sourcePlanNode": "missingDataPointsFiller",
+          "sourceProperty": "preparedCurrentDataWithHistory"
         }
       ],
       "outputs": []
-    },
-    {
-      "name": "baselineMissingDataManager",
-      "type": "TimeIndexFiller",
-      "params": {
-        "component.timestamp": "ts"
-      },
-      "inputs": [
-        {
-          "sourcePlanNode": "baselineDataFetcher",
-          "sourceProperty": "baselineOutput"
-        }
-      ],
-      "outputs": [
-        {
-          "outputName": "baselineOutput"
-        }
-      ]
-    },
-    {
-      "name": "baselineDataFetcher",
-      "type": "DataFetcher",
-      "params": {
-        "component.dataSource": "${dataSource}",
-        "component.tableName": "${dataset}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}, ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${baselineOffset}', '${baselineOffset}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
-      },
-      "inputs": [],
-      "outputs": [
-        {
-          "outputKey": "pinot",
-          "outputName": "baselineOutput"
-        }
-      ]
     },
     {
       "name": "eventsDataFetcher",
@@ -164,36 +150,36 @@
       ]
     },
     {
-      "name": "currentMissingDataManager",
+      "name": "missingDataPointsFiller",
       "type": "TimeIndexFiller",
       "params": {
         "component.timestamp": "ts"
       },
       "inputs": [
         {
-          "sourcePlanNode": "currentDataFetcher",
-          "sourceProperty": "currentOutput"
+          "sourcePlanNode": "currentDataWithHistoryFetcher",
+          "sourceProperty": "currentDataWithHistory"
         }
       ],
       "outputs": [
         {
-          "outputName": "currentOutput"
+          "outputName": "preparedCurrentDataWithHistory"
         }
       ]
     },
     {
-      "name": "currentDataFetcher",
+      "name": "currentDataWithHistoryFetcher",
       "type": "DataFetcher",
       "params": {
         "component.dataSource": "${dataSource}",
         "component.tableName": "${dataset}",
-        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}, ${aggregationParameter}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
+        "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregationFunction}(${aggregationColumn}) as met, ${guardrailMetric} as guardrail FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}', '${lookback}') ${queryFilters} GROUP BY ts ORDER BY ts LIMIT ${queryLimit}"
       },
       "inputs": [],
       "outputs": [
         {
-          "outputKey": "pinot",
-          "outputName": "currentOutput"
+          "outputKey": "currentDataWithHistory",
+          "outputName": "currentDataWithHistory"
         }
       ]
     }
@@ -222,28 +208,25 @@
   },
   "properties": [
     {
-      "name":  "aggregationColumn"
-    },
-    {
-      "name":  "aggregationFunction"
-    },
-    {
-      "name": "aggregationParameter"
-    },
-    {
-      "name":  "baselineOffset"
-    },
-    {
       "name":  "dataSource"
     },
     {
       "name":  "dataset"
     },
     {
+      "name":  "aggregationColumn"
+    },
+    {
+      "name":  "aggregationFunction"
+    },
+    {
+      "name":  "lookback"
+    },
+    {
       "name":  "monitoringGranularity"
     },
     {
-      "name":  "percentageChange"
+      "name":  "sensitivity"
     },
     {
       "name": "timezone",
@@ -280,6 +263,10 @@
     {
       "name": "queryFilters",
       "defaultValue": ""
+    },
+    {
+      "name": "queryLimit",
+      "defaultValue": "100000000"
     },
     {
       "name": "rcaIncludedDimensions",
@@ -330,6 +317,22 @@
       "defaultValue": "-1"
     },
     {
+      "name": "guardrailMetricIgnore",
+      "defaultValue": "true"
+    },
+    {
+      "name": "guardrailMetricMin",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "guardrailMetricMax",
+      "defaultValue": "-1"
+    },
+    {
+      "name": "guardrailMetric",
+      "defaultValue": "COUNT(*)"
+    },
+    {
       "name": "eventFilterSqlFilter",
       "defaultValue": ""
     },
@@ -354,8 +357,8 @@
       "defaultValue": "P0D"
     },
     {
-      "name": "queryLimit",
-      "defaultValue": "100000000"
+      "name": "seasonalityPeriod",
+      "defaultValue": "PT0S"
     }
   ]
 }

@@ -18,6 +18,8 @@ import static ai.startree.thirdeye.spi.util.FileUtils.readJsonObjectsFromResourc
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProvider;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProvider {
 
@@ -25,13 +27,19 @@ public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProv
 
   @Override
   public List<AlertTemplateApi> getAlertTemplates() {
-    final List<AlertTemplateApi> alertTemplateApis = readJsonObjectsFromResourcesFolder(
+    final List<AlertTemplateApi> templates = readJsonObjectsFromResourcesFolder(
         RESOURCES_TEMPLATES_PATH,
         this.getClass(),
         AlertTemplateApi.class);
 
-    CommonProperties.enrichCommonProperties(alertTemplateApis);
+    final List<AlertTemplateApi> percentileTemplates = templates.stream()
+        .map(PercentileTemplateCreator::createPercentileVariant)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+    templates.addAll(percentileTemplates);
 
-    return alertTemplateApis;
+    CommonProperties.enrichCommonProperties(templates);
+
+    return templates;
   }
 }

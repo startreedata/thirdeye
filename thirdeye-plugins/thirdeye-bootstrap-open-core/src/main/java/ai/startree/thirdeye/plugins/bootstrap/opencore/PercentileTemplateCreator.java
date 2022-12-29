@@ -60,7 +60,7 @@ public class PercentileTemplateCreator {
     if (queryObj.isEmpty()) {
       return false;
     }
-    // don't try catch on purpose - fail fast
+    // no try catch on purpose - fail fast
     final String originalQuery = (String) queryObj.get();
     final String percentileQuery = originalQuery.replace(
         "${aggregationFunction}(${aggregationColumn})",

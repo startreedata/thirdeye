@@ -87,17 +87,18 @@ public class PinotControllerRestClient {
   public List<String> getAllTablesFromPinot() throws IOException {
     final HttpGet tablesReq = new HttpGet(PINOT_TABLES_ENDPOINT);
     LOG.info("Retrieving datasets: {}", tablesReq);
-    final CloseableHttpResponse tablesRes = pinotControllerRestClientSupplier.get()
-        .execute(pinotControllerHost, tablesReq);
-    if (tablesRes.getStatusLine().getStatusCode() != 200) {
-      throw new IllegalStateException(tablesRes.getStatusLine().toString());
+    try (final CloseableHttpResponse tablesRes = pinotControllerRestClientSupplier.get()
+        .execute(pinotControllerHost, tablesReq)) {
+      if (tablesRes.getStatusLine().getStatusCode() != 200) {
+        throw new IllegalStateException(tablesRes.getStatusLine().toString());
+      }
+      final InputStream tablesContent = tablesRes.getEntity().getContent();
+      final GetTablesResponseApi api = OBJECT_MAPPER.readValue(tablesContent,
+          GetTablesResponseApi.class);
+      return optional(api)
+          .map(GetTablesResponseApi::getTables)
+          .orElse(Collections.emptyList());
     }
-    final InputStream tablesContent = tablesRes.getEntity().getContent();
-    final GetTablesResponseApi api = OBJECT_MAPPER.readValue(tablesContent,
-        GetTablesResponseApi.class);
-    return optional(api)
-        .map(GetTablesResponseApi::getTables)
-        .orElse(Collections.emptyList());
   }
 
   /**

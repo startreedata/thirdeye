@@ -246,6 +246,17 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testGetAnomalies")
+  public void testEvaluateWithAlertIdOnly() {
+    // corresponds to the evaluate call performed from an anomaly page - only the alertId is passed
+    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(new AlertApi().setId(alertId),
+        PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
+
+    final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
+    assertThat(response.getStatus()).isEqualTo(200);
+
+  }
+
+  @Test(dependsOnMethods = "testGetAnomalies")
   public void testAnomalyFeedback() {
     final Response responseBeforeFeedback = request("api/anomalies/" + anomalyId).get();
     assertThat(responseBeforeFeedback.getStatus()).isEqualTo(200);

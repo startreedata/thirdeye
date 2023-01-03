@@ -214,7 +214,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertDTO existing =
           api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
       validate(api, existing);
-      authorizationManager.ensureCanValidate(principal, toDto(api));
+      authorizationManager.ensureCanValidate(principal, optional(existing).orElse(toDto(api)));
     }
 
     return Response.ok().build();
@@ -236,7 +236,9 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
-    authorizationManager.ensureCanEvaluate(principal, toDto(alert));
+    // fixme jackson cyril quickfix for TE-1172 - need redesign - is it authorizationManager or its consumer that is responsible for fetching the complete DTO?
+    final AlertDTO alertDTO = optional(alert.getId()).map(this::get).orElseGet(() -> toDto(alert));
+    authorizationManager.ensureCanEvaluate(principal, alertDTO);
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 

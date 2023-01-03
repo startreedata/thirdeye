@@ -1,0 +1,51 @@
+{
+  "schemaName": "rideshare",
+  "dimensionFieldSpecs": [
+    {
+      "name": "ver",
+      "dataType": "STRING"
+    },
+    {
+      "name": "RideType",
+      "dataType": "STRING"
+    },
+    {
+      "name": "City",
+      "dataType": "STRING"
+    },
+    {
+      "name": "Device_Type",
+      "dataType": "STRING"
+    },
+    {
+      "name": "OS_Version",
+      "dataType": "STRING"
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "Ride_Cancellations",
+      "dataType": "FLOAT"
+    },
+    {
+      "name": "Rides_Completed",
+      "dataType": "FLOAT"
+    },
+    {
+      "name": "Ride_Request_WaitTime",
+      "dataType": "FLOAT"
+    },
+    {
+      "name": "Driver_Request_API_Errors",
+      "dataType": "FLOAT"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "timestamp",
+      "dataType": "LONG",
+      "format": "1:SECONDS:EPOCH",
+      "granularity": "1:SECONDS"
+    }
+  ]
+}

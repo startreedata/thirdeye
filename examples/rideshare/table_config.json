@@ -1,0 +1,19 @@
+{
+  "tableName": "rideshare",
+  "segmentsConfig" : {
+    "timeColumnName": "timestamp",
+    "timeType": "SECONDS",
+    "replication" : "1",
+    "schemaName" : "rideshare"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP"
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

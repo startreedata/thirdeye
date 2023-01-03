@@ -70,6 +70,7 @@ add_dataset "examples/pageviews_with_nulls"
 add_dataset "examples/pageviews_with_floats"
 add_dataset "examples/order_events"
 add_dataset "examples/new_customers_holiday"
+add_dataset "examples/rideshare"
 
 #
 # Add a dataset in pinot using REST APIs

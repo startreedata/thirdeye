@@ -17,7 +17,7 @@ import { LinearGradient } from "@visx/gradient";
 import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { AreaClosed, Bar, LinePath } from "@visx/shape";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, ReactNode, useMemo } from "react";
 import {
     determineGranularity,
     formatLargeNumberForVisualization,
@@ -125,7 +125,19 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
         return null;
     }
 
-    let afterChildren: React.ReactElement[] = [];
+    const afterChildren: ReactNode[] = series
+        .filter(
+            (seriesData) =>
+                seriesData.type === SeriesType.CUSTOM &&
+                seriesData.customRenderer
+        )
+        .map(({ customRenderer }) =>
+            (
+                customRenderer as NonNullable<
+                    NormalizedSeries["customRenderer"]
+                >
+            )?.(xScaleToUse, yScaleToUse)
+        );
 
     return (
         <Group
@@ -148,7 +160,11 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                     );
                 })}
             {series
-                .filter((seriesData) => seriesData.enabled)
+                .filter(
+                    (seriesData) =>
+                        seriesData.enabled &&
+                        seriesData.type !== SeriesType.CUSTOM
+                )
                 .map((seriesData: NormalizedSeries, idx: number) => {
                     const color =
                         seriesData.color ??
@@ -275,21 +291,9 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                         );
                     }
 
-                    if (seriesData.type === SeriesType.CUSTOM) {
-                        // #TODO implement intuitive ordering system
-                        if (seriesData.customRenderer) {
-                            afterChildren = [
-                                ...afterChildren,
-                                ...seriesData.customRenderer(
-                                    xScaleToUse,
-                                    yScaleToUse
-                                ),
-                            ];
-                        }
-                    }
-
                     return null;
-                })}
+                })
+                .filter(Boolean)}
             {children && children(xScaleToUse, yScaleToUse)}
             {/* #TODO implement intuitive ordering system */}
             {afterChildren}

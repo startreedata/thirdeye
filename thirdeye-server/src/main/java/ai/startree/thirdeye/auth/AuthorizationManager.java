@@ -14,8 +14,6 @@
 package ai.startree.thirdeye.auth;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -29,18 +27,15 @@ import javax.ws.rs.core.Response.Status;
 
 public class AuthorizationManager {
 
-  public final AlertManager alertManager;
-  public final AlertTemplateManager alertTemplateManager;
-  public final AccessControl accessControl;
+  private final AlertTemplateRenderer alertTemplateRenderer;
+  private final AccessControl accessControl;
 
   @Inject
   public AuthorizationManager(
-      final AlertManager alertManager,
-      final AlertTemplateManager alertTemplateManager,
+      final AlertTemplateRenderer alertTemplateRenderer,
       final AccessControl accessControl
   ) {
-    this.alertManager = alertManager;
-    this.alertTemplateManager = alertTemplateManager;
+    this.alertTemplateRenderer = alertTemplateRenderer;
     this.accessControl = accessControl;
   }
 
@@ -92,8 +87,7 @@ public class AuthorizationManager {
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof AlertDTO) {
       final AlertDTO alertDto = (AlertDTO) entity;
-      final AlertTemplateDTO alertTemplateDTO = new AlertTemplateRenderer(
-          alertManager, alertTemplateManager).getTemplate(alertDto.getTemplate());
+      final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(alertDto.getTemplate());
       return Collections.singletonList(ResourceIdentifier.from(alertTemplateDTO));
     }
     return new ArrayList<>();

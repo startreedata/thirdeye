@@ -20,18 +20,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessControlModule;
+import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.auth.ResourceIdentifier;
-import ai.startree.thirdeye.auth.AccessType;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
@@ -365,7 +364,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
     final ImmutableMap<String, String> apiToBeanMap,
     final AccessControl accessControl) {
     super(dtoManager, apiToBeanMap, new AuthorizationManager(
-        mock(AlertManager.class), mock(AlertTemplateManager.class), accessControl));
+        mock(AlertTemplateRenderer.class), accessControl));
   }
 
   @Override

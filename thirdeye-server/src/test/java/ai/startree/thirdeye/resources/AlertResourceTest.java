@@ -22,6 +22,7 @@ import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessControlModule;
 import ai.startree.thirdeye.auth.AccessType;
@@ -104,6 +105,8 @@ public class AlertResourceTest {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(2L))
         .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(2L)).setName("template1"));
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
+        mock(AlertManager.class), alertTemplateManager);
 
     final AccessControl accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.name.equals("0");
@@ -116,8 +119,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
-            mock(AlertManager.class),
-            alertTemplateManager,
+            alertTemplateRenderer,
             accessControl
         )
     ).createMultiple(nobody(), Collections.singletonList(
@@ -129,6 +131,8 @@ public class AlertResourceTest {
   public void testRunTask_withNoAccess() {
     final AlertManager alertManager = mock(AlertManager.class);
     when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
+        mock(AlertTemplateManager.class));
 
     new AlertResource(
         alertManager,
@@ -138,8 +142,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
-            alertManager,
-            mock(AlertTemplateManager.class),
+            alertTemplateRenderer,
             AccessControlModule.alwaysDeny
         )
     ).runTask(nobody(), 1L, 0L, 1L);
@@ -155,8 +158,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
-            mock(AlertManager.class),
-            mock(AlertTemplateManager.class),
+            mock(AlertTemplateRenderer.class),
             AccessControlModule.alwaysDeny
         )
     ).validateMultiple(
@@ -172,6 +174,7 @@ public class AlertResourceTest {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(1L))
         .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1"));
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class),alertTemplateManager);
 
     final AccessControl accessControl = (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.name.equals("alert1");
@@ -184,8 +187,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
-            mock(AlertManager.class),
-            alertTemplateManager,
+            alertTemplateRenderer,
             accessControl
         )
     ).validateMultiple(
@@ -199,8 +201,10 @@ public class AlertResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testEvaluate_withNoAccessToTemplate() throws ExecutionException {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
-    when(alertTemplateManager.findById(1L)).thenReturn((AlertTemplateDTO) new AlertTemplateDTO().setId(
-        1L));
+    when(alertTemplateManager.findById(1L)).thenReturn(
+        (AlertTemplateDTO) new AlertTemplateDTO().setId(
+            1L));
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class), alertTemplateManager);
 
     new AlertResource(
         mock(AlertManager.class),
@@ -210,8 +214,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
-            mock(AlertManager.class),
-            alertTemplateManager,
+            alertTemplateRenderer,
             AccessControlModule.alwaysDeny
         )
     ).evaluate(nobody(),
@@ -226,6 +229,7 @@ public class AlertResourceTest {
   public void testReset_withNoAccess() {
     final AlertManager alertManager = mock(AlertManager.class);
     when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager, mock(AlertTemplateManager.class));
 
     new AlertResource(
         alertManager,
@@ -235,8 +239,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
-            alertManager,
-            mock(AlertTemplateManager.class),
+            alertTemplateRenderer,
             AccessControlModule.alwaysDeny
         )
     ).reset(nobody(), 1L);

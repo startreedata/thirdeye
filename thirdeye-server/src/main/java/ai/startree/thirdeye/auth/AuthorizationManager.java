@@ -94,7 +94,9 @@ public class AuthorizationManager {
       final AlertDTO alertDto = (AlertDTO) entity;
       final AlertTemplateDTO alertTemplateDTO = new AlertTemplateRenderer(
           alertManager, alertTemplateManager).getTemplate(alertDto.getTemplate());
-      return Collections.singletonList(ResourceIdentifier.from(alertTemplateDTO));
+      if (alertTemplateDTO != null) {
+        return Collections.singletonList(ResourceIdentifier.from(alertTemplateDTO));
+      }
     }
     return new ArrayList<>();
   }

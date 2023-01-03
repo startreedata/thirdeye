@@ -236,6 +236,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
+    // see TE-1172 - ensure the dto passed to the authManager is complete, not only a reference {id:1234}
     final AlertDTO alertDTO = optional(alert.getId()).map(this::get).orElseGet(() -> toDto(alert));
     authorizationManager.ensureCanEvaluate(principal, alertDTO);
     return Response.ok(alertEvaluator.evaluate(request)).build();

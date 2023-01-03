@@ -236,7 +236,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(alert)
         .setOwner(new UserApi()
             .setPrincipal(principal.getName()));
-    authorizationManager.ensureCanEvaluate(principal, toDto(alert));
+    authorizationManager.ensureCanEvaluate(principal, get(alert.getId()));
     return Response.ok(alertEvaluator.evaluate(request)).build();
   }
 

@@ -20,11 +20,12 @@ import {
     ReactMarkdownOptions,
 } from "react-markdown/lib/react-markdown";
 import { LinkV1 } from "../../platform/components";
+import type { ParseMarkdownProps } from "./parse-markdown.interfaces";
 
-export const ParseMarkdown: FunctionComponent<{
-    children: string;
-    customOptions?: Partial<ReactMarkdownOptions>;
-}> = ({ children, customOptions }) => {
+export const ParseMarkdown: FunctionComponent<ParseMarkdownProps> = ({
+    children,
+    customOptions,
+}) => {
     const options: ReactMarkdownOptions = {
         components: {
             h1: ({ children }) => (

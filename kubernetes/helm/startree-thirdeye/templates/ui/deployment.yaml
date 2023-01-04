@@ -92,7 +92,7 @@ spec:
                 proxy_read_timeout 300;
               }
               location / {
-                try_files $uri $uri/ @index;
+                try_files $uri $uri/ /index.html;
               }
               location ~ /index.html {
                 add_header Cache-Control "no-cache, no-store, must-revalidate";

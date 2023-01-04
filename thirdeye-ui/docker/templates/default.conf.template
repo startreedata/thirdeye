@@ -30,11 +30,6 @@ server {
     location / {
         try_files $uri $uri/ @index;
     }
-    location @index {
-        try_files /index.html;
-        add_header Cache-Control no-cache;
-        expires 0;
-    }
     location ~ /index.html {
         add_header Cache-Control "no-cache, no-store, must-revalidate";
     }

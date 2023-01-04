@@ -77,7 +77,13 @@ public class DataSourceCache {
   private Integer getHealthyDatasourceCount() {
     return Math.toIntExact(dataSourceManager.findAll().stream()
         .map(dto -> getDataSource(dto.getName()))
-        .filter(ThirdEyeDataSource::validate)
+        .filter(ds -> {
+          try {
+            return ds.validate();
+          } catch (Exception e) {
+            return false;
+          }
+        })
         .count());
   }
 

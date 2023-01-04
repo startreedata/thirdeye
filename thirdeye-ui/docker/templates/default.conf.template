@@ -1,13 +1,14 @@
 server {
     listen  ${NGINX_PORT};
+    set $backend_servers ${THIRDEYE_API_BASE_URL};
+    resolver ${DNS_RESOLVER} valid=30s;
     location ~/api(.*) {
         if ($args != "") {
-            proxy_pass ${THIRDEYE_API_BASE_URL}/api$1?$args;
+            proxy_pass $backend_servers/api$1?$args;
         }
         if ($args = "") {
-            proxy_pass ${THIRDEYE_API_BASE_URL}/api$1;
+            proxy_pass $backend_servers/api$1;
         }
-        resolver ${DNS_RESOLVER} valid=30s;
         proxy_ssl_server_name on;
         proxy_redirect off;
         proxy_set_header Host $proxy_host;
@@ -16,9 +17,8 @@ server {
         proxy_set_header X-Forwarded-Host $server_name;
         proxy_read_timeout 300;
     }
-    location /swagger {
-        proxy_pass ${THIRDEYE_API_BASE_URL}/swagger;
-        resolver ${DNS_RESOLVER} valid=30s;
+    location ~/swagger(.*) {
+        proxy_pass $backend_servers/swagger$1;
         proxy_ssl_server_name on;
         proxy_redirect off;
         proxy_set_header Host $proxy_host;
@@ -28,12 +28,9 @@ server {
         proxy_read_timeout 300;
     }
     location / {
-        try_files $uri $uri/ @index;
+        try_files $uri $uri/ /index.html;
     }
-    location @index {
-        try_files /index.html;
-        expires -1;
-        add_header Cache-Control no-cache;
-        proxy_cache_revalidate on;
+    location ~ /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
     }
 }

@@ -14,7 +14,8 @@
  */
 
 export interface AlertsGuidedCreateRouterProps {
-    hideHeader?: boolean;
+    navigateToAlertDetailAfterSampleAlertCreate?: boolean;
+    useParentForNonWelcomeFlow?: boolean;
     sampleAlertsBottom?: boolean;
     hideSampleAlerts?: boolean;
     hideSubscriptionGroup?: boolean;

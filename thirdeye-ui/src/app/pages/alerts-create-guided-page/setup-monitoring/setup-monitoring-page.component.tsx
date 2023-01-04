@@ -16,21 +16,21 @@ import { Grid, Typography } from "@material-ui/core";
 import { default as React, FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
-import { ThresholdSetup } from "../../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
-import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
-import { PageContentsGridV1 } from "../../../../platform/components";
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { AppRouteRelative } from "../../../../utils/routes/routes.util";
+import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
+import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
+import { PageContentsGridV1 } from "../../../platform/components";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 
 export const SetupMonitoringPage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const { alert, handleAlertPropertyChange, selectedAlgorithmOption } =
+    const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
         useOutletContext<{
             alert: EditableAlert;
-            handleAlertPropertyChange: (
+            onAlertPropertyChange: (
                 contents: Partial<EditableAlert>,
                 isTotalChange?: boolean
             ) => void;
@@ -59,7 +59,7 @@ export const SetupMonitoringPage: FunctionComponent = () => {
                     <ThresholdSetup
                         alert={alert}
                         algorithmOptionConfig={selectedAlgorithmOption}
-                        onAlertPropertyChange={handleAlertPropertyChange}
+                        onAlertPropertyChange={onAlertPropertyChange}
                     />
                 </Grid>
             </PageContentsGridV1>

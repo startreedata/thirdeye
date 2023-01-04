@@ -13,6 +13,6 @@
  * the License.
  */
 
-export interface CreateAlertPageProps {
-    hideHeader?: boolean;
+export interface OnlyEmailsProps {
+    initialEmails?: string[];
 }

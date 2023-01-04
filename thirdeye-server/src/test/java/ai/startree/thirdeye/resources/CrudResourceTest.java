@@ -13,46 +13,54 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.auth.ThirdEyePrincipal.NAME_CLAIM;
+import static ai.startree.thirdeye.auth.oauth.OidcBindingsCache.NAME_CLAIM;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AccessControlModule;
+import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
-import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.mockito.stubbing.Answer;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class CrudResourceTest {
 
-  final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
-  private DummyManager manager;
-  private DummyResource resource;
-
-  @BeforeClass
-  public void setup() {
-    manager = mock(DummyManager.class);// new DummyManager(dao);
+  @Test
+  public void createUserInfoTest() {
+    final DummyManager manager = mock(DummyManager.class);// new DummyManager(dao);
     when(manager.save(any(DummyDto.class))).thenAnswer((Answer<Long>) invocationOnMock -> {
       ((DummyDto) invocationOnMock.getArgument(0)).setId(1L);
       return 1L;
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
-    resource = new DummyResource(manager, ImmutableMap.of());
-  }
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysAllow);
 
-  @Test
-  public void createUserInfoTest() {
+    final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
     final DummyApi api = new DummyApi().setData("testData");
 
@@ -70,7 +78,17 @@ public class CrudResourceTest {
 
   @Test
   public void updateUserInfoTest() {
-    final Timestamp before = getCurrentTime();
+    final DummyManager manager = mock(DummyManager.class);// new DummyManager(dao);
+    when(manager.save(any(DummyDto.class))).thenAnswer((Answer<Long>) invocationOnMock -> {
+      ((DummyDto) invocationOnMock.getArgument(0)).setId(1L);
+      return 1L;
+    });
+    when(manager.update(any(DummyDto.class))).thenReturn(1);
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysAllow);
+
+    final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
+    final Timestamp before = new Timestamp(1671476530000L);
     final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
     final ThirdEyePrincipal updater = getPrincipal(emails.get(1));
 
@@ -97,11 +115,165 @@ public class CrudResourceTest {
   }
 
   private ThirdEyePrincipal getPrincipal(String name) {
-    return new ThirdEyePrincipal(new JWTClaimsSet.Builder().claim(NAME_CLAIM, name).build());
+    final String name1 = OidcBindingsCache.getName(new Builder().claim(NAME_CLAIM, name).build());
+    return new ThirdEyePrincipal(name1, "");
   }
 
   private Timestamp getCurrentTime() {
     return new Timestamp(new Date().getTime());
+  }
+
+  static ThirdEyePrincipal nobody() {
+    return new ThirdEyePrincipal("nobody", "");
+  }
+
+  @Test
+  public void testGetAll_withNoAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    final UriInfo uriInfo = mock(UriInfo.class);
+    when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
+    when(manager.findAll()).thenReturn(Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    ));
+
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
+    try (Response resp = resource.getAll(nobody(), uriInfo)) {
+      assertThat(resp.getStatus()).isEqualTo(200);
+
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      assertThat(entities).isEmpty();
+    }
+  }
+
+  @Test
+  public void testGetAll_withPartialAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    final UriInfo uriInfo = mock(UriInfo.class);
+    when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
+    when(manager.findAll()).thenReturn(Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    ));
+
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
+            -> identifiers.name.equals("2"));
+
+    try (Response resp = resource.getAll(nobody(), uriInfo)) {
+      assertThat(resp.getStatus()).isEqualTo(200);
+
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      assertThat(1).isEqualTo(entities.size());
+      assertThat(2L).isEqualTo(entities.get(0).getId());
+    }
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testGet_withNoAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
+    resource.get(new ThirdEyePrincipal("nobody", ""), 1L);
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testDelete_withNoAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
+    resource.delete(nobody(), 1L);
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testDeleteAll_withNoAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    when(manager.findAll()).thenReturn(Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    ));
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
+    resource.deleteAll(nobody());
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testDeleteAll_withPartialAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    final List<DummyDto> dtos = Arrays.asList(
+        (DummyDto) new DummyDto().setId(1L),
+        (DummyDto) new DummyDto().setId(2L),
+        (DummyDto) new DummyDto().setId(3L)
+    );
+    when(manager.findAll()).thenReturn(dtos);
+
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
+            -> identifiers.name.equals("2"));
+    resource.deleteAll(nobody());
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testCreateMultiple_withNoAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
+
+    resource.createMultiple(nobody(),
+        Arrays.asList(new DummyApi(), new DummyApi(), new DummyApi()));
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testCreateMultiple_withNoAccessToRelatedResources() {
+    final DummyManager manager = mock(DummyManager.class);
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
+
+    resource.createMultiple(
+        nobody(),
+        Arrays.asList(new DummyApi(), new DummyApi(), new DummyApi())
+    );
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testUpdateMultiple_withNoAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
+    when(manager.findById(2L)).thenReturn((DummyDto) new DummyDto().setId(2L));
+    when(manager.findById(3L)).thenReturn((DummyDto) new DummyDto().setId(3L));
+
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        AccessControlModule.alwaysDeny);
+
+    resource.editMultiple(nobody(), Arrays.asList(
+        new DummyApi().setId(1L),
+        new DummyApi().setId(2L),
+        new DummyApi().setId(3L)
+    ));
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void testUpdateMultiple_withPartialAccess() {
+    final DummyManager manager = mock(DummyManager.class);
+    when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
+    when(manager.findById(2L)).thenReturn((DummyDto) new DummyDto().setId(2L));
+    when(manager.findById(3L)).thenReturn((DummyDto) new DummyDto().setId(3L));
+
+    final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
+        (ThirdEyePrincipal principal, ResourceIdentifier identifiers, AccessType accessType)
+            -> identifiers.name.equals("2"));
+
+    resource.editMultiple(nobody(), Arrays.asList(
+        new DummyApi().setId(1L),
+        new DummyApi().setId(2L),
+        new DummyApi().setId(3L)
+    ));
   }
 }
 
@@ -189,8 +361,10 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
 
   public DummyResource(
     final DummyManager dtoManager,
-    final ImmutableMap<String, String> apiToBeanMap) {
-    super(dtoManager, apiToBeanMap);
+    final ImmutableMap<String, String> apiToBeanMap,
+    final AccessControl accessControl) {
+    super(dtoManager, apiToBeanMap, new AuthorizationManager(
+        mock(AlertTemplateRenderer.class), accessControl));
   }
 
   @Override

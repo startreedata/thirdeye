@@ -195,6 +195,6 @@ export const generateFilterStrings = (
     otherDimensionValues: string[]
 ): string[] => {
     return generateFilterOptions(names, dimensionColumns, otherDimensionValues)
-        .map(concatKeyValueWithEqual)
+        .map((item) => concatKeyValueWithEqual(item, false))
         .sort();
 };

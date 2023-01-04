@@ -14,8 +14,8 @@
 package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
+import static com.google.api.client.util.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -66,8 +66,8 @@ public class IntegrationTestUtils {
         .append("/plugins")
         .toString();
     final File pluginsDir = new File(pluginsPath);
-    assertThat(pluginsDir.exists()).isTrue();
-    assertThat(pluginsDir.isDirectory()).isTrue();
+    checkState(pluginsDir.exists() && pluginsDir.isDirectory(),
+        "Could not find plugins directory %s. Try to rebuild TE?", pluginsPath);
 
     System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
   }

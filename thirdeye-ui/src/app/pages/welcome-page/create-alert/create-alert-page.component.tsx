@@ -22,9 +22,15 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+    Outlet,
+    useLocation,
+    useNavigate,
+    useOutletContext,
+} from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
+import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { generateEmptyEmailSendGridConfiguration } from "../../../components/subscription-group-wizard/groups-editor/groups-editor.utils";
@@ -52,6 +58,8 @@ import {
     getHomePath,
 } from "../../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../../utils/subscription-groups/subscription-groups.util";
+import { AlertEditPageOutletContextProps } from "../../alerts-update-page/alerts-update-page.interfaces";
+import { CreateAlertPageProps } from "./create-alert-page.interface";
 
 const STEPS = [
     {
@@ -73,11 +81,17 @@ const MULTI_DIMENSION_SELECT_STEP = {
     translationLabel: "multidimension-setup",
 };
 
-export const CreateAlertPage: FunctionComponent = () => {
+export const CreateAlertPage: FunctionComponent<CreateAlertPageProps> = ({
+    hideHeader,
+}) => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const { notify } = useNotificationProviderV1();
+    const { setShowAppNavBar } = useAppBarConfigProvider();
+
+    const configurationFlowParentContext: AlertEditPageOutletContextProps | null =
+        useOutletContext<AlertEditPageOutletContextProps>();
 
     const {
         alertTemplates,
@@ -90,8 +104,8 @@ export const CreateAlertPage: FunctionComponent = () => {
         status: createSubscriptionGroupStatus,
     } = useCreateSubscriptionGroup();
 
-    const [alert, setAlert] = useState<EditableAlert>(() =>
-        createNewStartingAlert()
+    const [alert, setAlert] = useState<EditableAlert>(
+        () => configurationFlowParentContext?.alert ?? createNewStartingAlert()
     );
     const [emails, setEmails] = useState<string[]>([]);
     const [createAlertStatus, setCreateAlertStatus] = useState<ActionStatus>(
@@ -128,14 +142,26 @@ export const CreateAlertPage: FunctionComponent = () => {
     }, [alert]);
 
     const handleAlertPropertyChange = useMemo(() => {
-        return handleAlertPropertyChangeGenerator(
-            setAlert,
-            [],
-            () => {
-                return;
-            },
-            t
-        );
+        const localHandleAlertPropertyChange =
+            handleAlertPropertyChangeGenerator(
+                setAlert,
+                [],
+                () => {
+                    return;
+                },
+                t
+            );
+
+        return (
+            contentsToReplace: Partial<EditableAlert>,
+            isTotalReplace = false
+        ): void => {
+            localHandleAlertPropertyChange(contentsToReplace, isTotalReplace);
+            configurationFlowParentContext?.handleAlertPropertyChange(
+                contentsToReplace,
+                isTotalReplace
+            );
+        };
     }, [setAlert]);
 
     const activeStep = useMemo(() => {
@@ -166,9 +192,10 @@ export const CreateAlertPage: FunctionComponent = () => {
             [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
         ]);
 
-        return handleCreateAlertClickGenerator(notify, t, () =>
-            navigate(`${getHomePath()}?${queryParams.toString()}`)
-        );
+        return handleCreateAlertClickGenerator(notify, t, () => {
+            navigate(`${getHomePath()}?${queryParams.toString()}`);
+            setShowAppNavBar(true);
+        });
     }, [navigate, notify, t]);
 
     const handleCreateAlertClick = useCallback(() => {
@@ -182,6 +209,14 @@ export const CreateAlertPage: FunctionComponent = () => {
                 selectedAlgorithmOption?.algorithmOption
                     .alertTemplateForMultidimension === alert?.template?.name
             );
+        }
+
+        if (configurationFlowParentContext?.handleSubmitAlertClick) {
+            configurationFlowParentContext.handleSubmitAlertClick(
+                alertWithName
+            );
+
+            return;
         }
 
         if (emails && emails.length > 0) {
@@ -225,16 +260,32 @@ export const CreateAlertPage: FunctionComponent = () => {
 
     useEffect(() => {
         getAlertTemplates();
+
+        // If this page is under the configuration create alert
+        // route, disable the parent's bottom bar
+        configurationFlowParentContext?.setShowBottomBar(false);
     }, []);
 
     return (
         <PageV1>
-            <PageHeader
-                transparentBackground
-                customActions={<Button>{t("label.help")}</Button>}
-                subtitle={t("message.by-creating-an-alert-youll-be-able")}
-                title={t("message.lets-create-your-first-alert")}
-            />
+            {!hideHeader && (
+                <PageHeader
+                    transparentBackground
+                    customActions={
+                        <Button
+                            color="primary"
+                            href={t("url.documentation-homepage")}
+                            target="_blank"
+                            variant="contained"
+                        >
+                            {t("label.help")}
+                        </Button>
+                    }
+                    subtitle={t("message.by-creating-an-alert-youll-be-able")}
+                    title={t("message.lets-create-your-first-alert")}
+                />
+            )}
+
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <PageContentsCardV1>
@@ -259,6 +310,8 @@ export const CreateAlertPage: FunctionComponent = () => {
             </PageContentsGridV1>
 
             <LoadingErrorStateSwitch
+                wrapInCard
+                wrapInGrid
                 isError={false}
                 isLoading={alertTemplatesRequestStatus === ActionStatus.Working}
             >
@@ -276,6 +329,8 @@ export const CreateAlertPage: FunctionComponent = () => {
                             createSubscriptionGroupStatus ===
                                 ActionStatus.Working ||
                             createAlertStatus === ActionStatus.Working,
+                        getAlertTemplates,
+                        alertTemplates,
                     }}
                 />
             </LoadingErrorStateSwitch>

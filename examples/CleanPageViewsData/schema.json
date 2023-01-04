@@ -1,0 +1,43 @@
+{
+  "schemaName": "CleanPageViewsData",
+  "dimensionFieldSpecs": [
+    {
+      "name": "country",
+      "dataType": "STRING"
+    },
+    {
+      "name": "browser",
+      "dataType": "STRING"
+    },
+    {
+      "name": "gender",
+      "dataType": "STRING"
+    },
+    {
+      "name": "device",
+      "dataType": "STRING"
+    },
+    {
+      "name": "os",
+      "dataType": "STRING"
+    },
+    {
+      "name": "version",
+      "dataType": "DOUBLE"
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "views",
+      "dataType": "LONG"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "pageviewdate",
+      "dataType": "STRING",
+      "format": "1:MILLISECONDS:SIMPLE_DATE_FORMAT:yyyy-MM-dd",
+      "granularity": "1:MILLISECONDS"
+    }
+  ]
+}

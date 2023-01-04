@@ -137,7 +137,7 @@ public class AlertTemplateRenderer {
         alertName);
   }
 
-  private AlertTemplateDTO getTemplate(final AlertTemplateDTO alertTemplateDTO) {
+  public AlertTemplateDTO getTemplate(final AlertTemplateDTO alertTemplateDTO) {
     final Long id = alertTemplateDTO.getId();
     if (id != null) {
       return alertTemplateManager.findById(id);

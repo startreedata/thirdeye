@@ -45,6 +45,7 @@ import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -69,6 +70,8 @@ import org.testng.annotations.Test;
  */
 public class HappyPathTest {
 
+  public static final GenericType<List<AnomalyApi>> ANOMALIES_LIST_TYPE = new GenericType<>() {};
+  public static final GenericType<List<AlertApi>> ALERT_LIST_TYPE = new GenericType<>() {};
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 
   private static final AlertApi MAIN_ALERT_API;
@@ -167,8 +170,8 @@ public class HappyPathTest {
     final Response response = request("api/alerts").post(Entity.json(List.of(MAIN_ALERT_API)));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    final List<Map<String, Object>> alerts = response.readEntity(List.class);
-    alertId = ((Number) alerts.get(0).get("id")).longValue();
+    final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
+    alertId = alerts.get(0).getId();
   }
 
   @DataProvider(name = "happyPathAlerts")
@@ -221,16 +224,18 @@ public class HappyPathTest {
   public void testGetAnomalies() throws InterruptedException {
     // test get anomalies
     // need to wait for the taskRunner to run the onboard task - can take some time
-    List<Map<String, Object>> anomalies = List.of();
+    List<AnomalyApi> anomalies = List.of();
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
       Thread.sleep(1000);
-      final Response response = request("api/anomalies").get();
+      final Response response = request("api/anomalies?isChild=false").get();
       assertThat(response.getStatus()).isEqualTo(200);
-      anomalies = response.readEntity(List.class);
+      anomalies = response.readEntity(ANOMALIES_LIST_TYPE);
     }
-    // the second anomaly is the March 21 - March 23 anomaly
-    anomalyId = (int) anomalies.get(1).get("id");
+    // the third anomaly is the March 21 - March 23 anomaly
+    assertThat(anomalies.get(2).getStartTime().getTime()).isEqualTo(1584748800000L);
+    assertThat(anomalies.get(2).getEndTime().getTime()).isEqualTo(1584921600000L);
+    anomalyId = anomalies.get(2).getId();
   }
 
   @Test(dependsOnMethods = "testGetAnomalies")
@@ -238,6 +243,17 @@ public class HappyPathTest {
     // test get a single anomaly
     final Response response = request("api/anomalies/" + anomalyId).get();
     assertThat(response.getStatus()).isEqualTo(200);
+  }
+
+  @Test(dependsOnMethods = "testGetAnomalies")
+  public void testEvaluateWithAlertIdOnly() {
+    // corresponds to the evaluate call performed from an anomaly page - only the alertId is passed
+    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(new AlertApi().setId(alertId),
+        PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
+
+    final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
+    assertThat(response.getStatus()).isEqualTo(200);
+
   }
 
   @Test(dependsOnMethods = "testGetAnomalies")
@@ -272,16 +288,22 @@ public class HappyPathTest {
     Response response = request("api/anomalies/count").get();
     assertThat(response.getStatus()).isEqualTo(200);
     Long anomalyCount = response.readEntity(CountApi.class).getCount();
-    assertThat(anomalyCount).isEqualTo(4);
+    assertThat(anomalyCount).isEqualTo(22);
+
+    // there are only 5 parent anomalies
+    response = request("api/anomalies/count?isChild=false").get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    anomalyCount = response.readEntity(CountApi.class).getCount();
+    assertThat(anomalyCount).isEqualTo(6);
 
     // there are only 2 anomalies that have startTime greater than or equal this value
     long startTime = 1585353600000L;
 
     // with filters
-    response = request("api/anomalies/count?startTime=[gte]" + startTime).get();
+    response = request("api/anomalies/count?isChild=false&startTime=[gte]" + startTime).get();
     assertThat(response.getStatus()).isEqualTo(200);
     anomalyCount = response.readEntity(CountApi.class).getCount();
-    assertThat(anomalyCount).isEqualTo(2);
+    assertThat(anomalyCount).isEqualTo(3);
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")

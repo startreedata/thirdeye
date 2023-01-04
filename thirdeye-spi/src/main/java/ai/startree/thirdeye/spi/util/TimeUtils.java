@@ -14,9 +14,9 @@
 package ai.startree.thirdeye.spi.util;
 
 import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
@@ -29,10 +29,11 @@ public class TimeUtils {
     return Period.parse(period, ISOPeriodFormat.standard());
   }
 
-  public static Period isoPeriod(@Nullable final String period, final Period defaultIfNull) {
-    return optional(period)
-        .map(p -> Period.parse(p, ISOPeriodFormat.standard()))
-        .orElse(defaultIfNull);
+  public static Period isoPeriod(@Nullable final String period, final Period defaultIfNullOrEmpty) {
+    if (Strings.isNullOrEmpty(period)) {
+      return defaultIfNullOrEmpty;
+    }
+    return isoPeriod(period);
   }
 
   /**

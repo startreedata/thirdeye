@@ -13,17 +13,25 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.spi.Constants.K_EVENT_MANAGER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
+import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -32,6 +40,7 @@ import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
@@ -71,11 +80,11 @@ public class EventFetcherOperatorTest {
       .setTargetDimensionMap(Map.of(DIMENSION_COUNTRY,
           List.of(COUNTRY_VALUE_US, COUNTRY_VALUE_FR)));
 
-  private EventManager eventDao;
+  private PlanNodeContext planNodeContext;
 
   @BeforeMethod
   public void setUp() {
-    eventDao = mock(EventManager.class);
+    final EventManager eventDao = mock(EventManager.class);
     when(eventDao.findEventsBetweenTimeRange(anyLong(),
         anyLong(),
         nullable(List.class),
@@ -83,6 +92,19 @@ public class EventFetcherOperatorTest {
         CHRISTMAS_EVENT,
         FR_ONLY_EVENT,
         DEPLOY_EVENT));
+    planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
+        new DetectionPipelineContext().setApplicationContext(
+            new ApplicationContext(
+                mock(DataSourceCache.class),
+                mock(DetectionRegistry.class),
+                mock(PostProcessorRegistry.class),
+                eventDao,
+                mock(DatasetConfigManager.class),
+                mock(ExecutorService.class),
+                mock(EnumerationItemManager.class),
+                new DetectionPipelineConfiguration()
+            )
+        ));
   }
 
   @Test
@@ -105,7 +127,7 @@ public class EventFetcherOperatorTest {
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(new Interval(0L, 1L, DateTimeZone.UTC)) // ignored with FROM_DATA
         .setPlanNode(planNodeBean)
-        .setProperties(Map.of(K_EVENT_MANAGER, eventDao));
+        .setPlanNodeContext(planNodeContext);
 
     final EventFetcherOperator eventFetcherOperator = new EventFetcherOperator();
     eventFetcherOperator.init(context);

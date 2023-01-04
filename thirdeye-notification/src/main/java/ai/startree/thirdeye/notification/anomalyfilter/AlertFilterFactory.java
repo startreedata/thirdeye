@@ -32,11 +32,12 @@ public class AlertFilterFactory {
 
   public AlertFilterFactory(String AlertFilterConfigPath) {
     props = new Properties();
-    try {
-      InputStream input = new FileInputStream(AlertFilterConfigPath);
+    try (InputStream input = new FileInputStream(AlertFilterConfigPath)) {
       loadPropertiesFromInputStream(input);
     } catch (FileNotFoundException e) {
       LOGGER.error("Alert Filter Property File {} not found", AlertFilterConfigPath, e);
+    } catch (IOException e) {
+      LOGGER.error("Error opening alert filter property file {}", AlertFilterConfigPath, e);
     }
   }
 

@@ -23,6 +23,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
 
   private Long id;
   private String name;
+  private String namespace;
   private String description;
   private String cron;
   private Date created;
@@ -51,6 +52,15 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
 
   public AlertTemplateApi setName(final String name) {
     this.name = name;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public AlertTemplateApi setNamespace(final String namespace) {
+    this.namespace = namespace;
     return this;
   }
 

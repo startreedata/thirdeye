@@ -23,6 +23,6 @@ public class ThirdEyeAuthenticatorDisabled implements Authenticator<String, Thir
 
   @Override
   public Optional<ThirdEyePrincipal> authenticate(final String s) throws AuthenticationException {
-    return optional(new ThirdEyePrincipal(s));
+    return optional(new ThirdEyePrincipal(s, ""));
   }
 }

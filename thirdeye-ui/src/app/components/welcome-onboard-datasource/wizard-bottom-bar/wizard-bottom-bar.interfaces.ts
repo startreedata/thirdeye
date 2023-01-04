@@ -14,8 +14,11 @@
  */
 
 export interface WizardBottomBarProps {
-    handleBackClick: () => void;
-    handleNextClick: () => void;
+    handleBackClick?: () => void;
+    handleNextClick?: () => void;
     nextButtonLabel?: string;
     backButtonLabel?: string;
+    backBtnLink?: string;
+    nextBtnLink?: string;
+    nextButtonIsDisabled?: boolean;
 }

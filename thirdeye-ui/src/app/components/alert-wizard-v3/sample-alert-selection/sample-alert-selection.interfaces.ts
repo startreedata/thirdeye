@@ -13,11 +13,16 @@
  * the License.
  */
 
+import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+
 export interface SampleAlertSelectionProps {
     onSampleAlertSelect: (sampleAlertOption: SampleAlertOption) => void;
+    alertTemplates: AlertTemplate[];
 }
 
 export interface SampleAlertOption {
     title: string;
     description: string;
+    alertConfiguration: EditableAlert;
 }

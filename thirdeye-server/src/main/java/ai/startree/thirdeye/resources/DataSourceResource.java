@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -69,8 +70,10 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Inject
   public DataSourceResource(
       final DataSourceManager dataSourceManager,
-      final DataSourceCache dataSourceCache, final DataSourceOnboarder dataSourceOnboarder) {
-    super(dataSourceManager, ImmutableMap.of());
+      final DataSourceCache dataSourceCache,
+      final DataSourceOnboarder dataSourceOnboarder,
+      final AuthorizationManager authorizationManager) {
+    super(dataSourceManager, ImmutableMap.of(), authorizationManager);
     this.dataSourceCache = dataSourceCache;
     this.dataSourceOnboarder = dataSourceOnboarder;
   }

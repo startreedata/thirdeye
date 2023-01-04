@@ -17,12 +17,27 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import com.google.common.cache.CacheLoader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
 import javax.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OidcBindingsCache extends CacheLoader<String, ThirdEyePrincipal> {
 
+  public static final String NAME_CLAIM = "email";
+  private static final Logger log = LoggerFactory.getLogger(ThirdEyePrincipal.class);
+
   private OidcJWTProcessor processor;
   private OidcContext context;
+
+  public static String getName(final JWTClaimsSet claims) {
+    try {
+      return claims.getStringClaim(NAME_CLAIM);
+    } catch (ParseException e) {
+      log.error("Could not get user name. email should be a String", e);
+      return null;
+    }
+  }
 
   public OidcBindingsCache setProcessor(final OidcJWTProcessor processor) {
     this.processor = processor;
@@ -39,6 +54,6 @@ public class OidcBindingsCache extends CacheLoader<String, ThirdEyePrincipal> {
       throws Exception {
     SignedJWT jwt = SignedJWT.parse(authToken);
     JWTClaimsSet claims = processor.process(jwt, context);
-    return new ThirdEyePrincipal(claims);
+    return new ThirdEyePrincipal(getName(claims), authToken);
   }
 }

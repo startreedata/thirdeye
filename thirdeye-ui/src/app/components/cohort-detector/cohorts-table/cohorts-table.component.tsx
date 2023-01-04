@@ -23,12 +23,12 @@ import {
     DataGridSortOrderV1,
     DataGridV1,
     PageContentsCardV1,
-    SkeletonV1,
 } from "../../../platform/components";
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { CohortResult } from "../../../rest/dto/rca.interfaces";
-import { generateFilterStrings } from "../../anomaly-dimension-analysis/algorithm-table/algorithm-table.utils";
+import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
+import { generateFilterOptions } from "../../anomaly-dimension-analysis/algorithm-table/algorithm-table.utils";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     CohortsTableProps,
@@ -66,9 +66,10 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                 columnKeys.push(dimensionColumn);
             });
 
-            copied.name = generateFilterStrings(values, columnKeys, []).join(
-                NAME_JOIN_KEY
-            );
+            copied.name = generateFilterOptions(values, columnKeys, [])
+                .map((item) => concatKeyValueWithEqual(item, true))
+                .sort()
+                .join(NAME_JOIN_KEY);
 
             return copied;
         });
@@ -138,8 +139,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                                     {subtitle}
                                 </Typography>
                             )}
-                        </Grid>
-                        <Grid item>
                             {cohortsData &&
                                 tableRows.length !==
                                     cohortsData.results.length && (
@@ -148,6 +147,9 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                                     </Typography>
                                 )}
                         </Grid>
+                        <Grid item>
+                            {cohortsData && tableRows.length > 0 && children}
+                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
@@ -155,13 +157,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                         isError={getCohortsRequestStatus === ActionStatus.Error}
                         isLoading={
                             getCohortsRequestStatus === ActionStatus.Working
-                        }
-                        loadingState={
-                            <>
-                                <SkeletonV1 animation="pulse" />
-                                <SkeletonV1 animation="pulse" />
-                                <SkeletonV1 animation="pulse" />
-                            </>
                         }
                     >
                         {!cohortsData && (

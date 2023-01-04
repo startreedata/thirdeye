@@ -31,7 +31,6 @@ import { useTranslation } from "react-i18next";
 import {
     JSONEditorV1,
     PageContentsCardV1,
-    SkeletonV1,
     useDialogProviderV1,
 } from "../../../platform/components";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
@@ -169,7 +168,12 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     disableValidation
                     value={alert}
                     onChange={(updates) => {
-                        setAdvancedEditorAlert(() => JSON.parse(updates));
+                        try {
+                            const parsedString = JSON.parse(updates);
+                            setAdvancedEditorAlert(() => parsedString);
+                        } catch {
+                            // do nothing if invalid JSON string
+                        }
                     }}
                 />
             ),
@@ -211,13 +215,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     getMetricsStatus === ActionStatus.Error
                 }
                 isLoading={isPinotInfraLoading}
-                loadingState={
-                    <>
-                        <SkeletonV1 animation="pulse" />
-                        <SkeletonV1 animation="pulse" />
-                        <SkeletonV1 animation="pulse" />
-                    </>
-                }
             >
                 <Grid container>
                     <Grid item xs={12}>
@@ -257,12 +254,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                             </Grid>
                         </Grid>
                     </Grid>
-
-                    <PreviewChart
-                        alert={alert}
-                        showLoadButton={!!selectedMetric}
-                        onAlertPropertyChange={onAlertPropertyChange}
-                    />
 
                     <Grid item xs={12}>
                         <Box padding={1} />
@@ -445,6 +436,18 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                             }
                         )}
                 </Grid>
+
+                <Grid item xs={12}>
+                    <Box marginBottom={2} marginTop={2} padding={1}>
+                        <Divider />
+                    </Box>
+                </Grid>
+
+                <PreviewChart
+                    alert={alert}
+                    showLoadButton={!!selectedMetric}
+                    onAlertPropertyChange={onAlertPropertyChange}
+                />
             </LoadingErrorStateSwitch>
         </PageContentsCardV1>
     );

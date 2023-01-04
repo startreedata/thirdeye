@@ -27,7 +27,6 @@ import {
     PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
-    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -162,25 +161,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
             <PageContentsGridV1 fullHeight>
                 <LoadingErrorStateSwitch
-                    errorState={
-                        <Grid item xs={12}>
-                            <PageContentsCardV1>
-                                <NoDataIndicator />
-                            </PageContentsCardV1>
-                        </Grid>
-                    }
+                    wrapInCard
+                    wrapInGrid
                     isError={getAnomaliesRequestStatus === ActionStatus.Error}
                     isLoading={
                         getAnomaliesRequestStatus === ActionStatus.Working
-                    }
-                    loadingState={
-                        <Grid item xs={12}>
-                            <PageContentsCardV1>
-                                <SkeletonV1 animation="pulse" />
-                                <SkeletonV1 animation="pulse" />
-                                <SkeletonV1 animation="pulse" />
-                            </PageContentsCardV1>
-                        </Grid>
                     }
                 >
                     <EmptyStateSwitch

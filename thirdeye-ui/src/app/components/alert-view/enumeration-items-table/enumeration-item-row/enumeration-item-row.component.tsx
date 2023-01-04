@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { getAlertsAlertAnomaliesPath } from "../../../../utils/routes/routes.util";
+import { AlertAccuracyColored } from "../../../alert-accuracy-colored/alert-accuracy-colored.component";
 import { Pluralize } from "../../../pluralize/pluralize.component";
 import {
     CHART_SIZE_OPTIONS,
@@ -35,6 +36,7 @@ import {
 } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
+import { useEnumerationItemRowStyles } from "./enumeration-item-row.style";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     alertId,
@@ -42,6 +44,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     anomalies,
     expanded,
     onExpandChange,
+    alertStats,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -52,6 +55,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     const [isExpanded, setIsExpanded] = useState(
         expanded.includes(nameForDetectionEvaluation)
     );
+    const classes = useEnumerationItemRowStyles();
 
     useEffect(() => {
         setIsExpanded(expanded.includes(nameForDetectionEvaluation));
@@ -92,12 +96,24 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                         <Grid
                             item
                             {...(isExpanded
-                                ? { sm: 8, xs: 12 }
-                                : { sm: 4, xs: 12 })}
+                                ? { sm: 6, xs: 12 }
+                                : { sm: 2, xs: 12 })}
                         >
-                            <Typography variant="subtitle1">
+                            <Typography
+                                className={classes.name}
+                                variant="subtitle1"
+                            >
                                 {nameForDetectionEvaluation}
                             </Typography>
+                        </Grid>
+                        <Grid item sm={2} xs={12}>
+                            <AlertAccuracyColored
+                                alertStats={alertStats}
+                                defaultSkeletonProps={{
+                                    width: 100,
+                                    height: 30,
+                                }}
+                            />
                         </Grid>
                         <Grid item sm={2} xs={12}>
                             <Button

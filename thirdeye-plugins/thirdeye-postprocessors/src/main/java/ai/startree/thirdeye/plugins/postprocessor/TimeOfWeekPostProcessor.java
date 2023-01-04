@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -28,7 +29,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -147,7 +147,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor {
   }
 
   private static Integer dayStringToDayInt(final String day) {
-    final String preparedString = day.toUpperCase(Locale.ENGLISH);
+    final String preparedString = day.toUpperCase(DEFAULT_LOCALE);
     checkArgument(VALID_DAYS.contains(preparedString),
         "Invalid day string: %s. Valid day strings: %s",
         day,

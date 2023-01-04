@@ -21,6 +21,7 @@ import {
     Grid,
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -54,22 +55,28 @@ import {
     useGetEvaluation,
     useResetAlert,
 } from "../../rest/alerts/alerts.actions";
-import { deleteAlert, updateAlert } from "../../rest/alerts/alerts.rest";
+import {
+    deleteAlert,
+    getAlertStats,
+    updateAlert,
+} from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { Alert, AlertStats } from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
+    getAlertAccuracyData,
 } from "../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
-
-const QUERY_PARAM_KEY_FOR_SEARCH = "search";
-const QUERY_PARAM_KEY_FOR_SORT = "sort";
-const CONCAT_SEPARATOR = "+";
+import {
+    CONCAT_SEPARATOR,
+    QUERY_PARAM_KEY_FOR_SEARCH,
+    QUERY_PARAM_KEY_FOR_SORT,
+} from "./alerts-view-page.utils";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const navigate = useNavigate();
@@ -77,6 +84,13 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
+
+    // To be used for overall accuracy
+    const [overallAlertStats, setOverallAlertStats] =
+        useState<AlertStats | null>(null);
+    // To be used for accuracy filtered by startTime and endTime
+    const [alertStats, setAlertStats] = useState<AlertStats | null>(null);
+
     const {
         alert: alertThatWasReset,
         resetAlert,
@@ -125,6 +139,18 @@ export const AlertsViewPage: FunctionComponent = () => {
         ],
         [searchParams]
     );
+
+    useEffect(() => {
+        if (Number(alertId)) {
+            getAlertStats({
+                alertId: Number(alertId),
+                startTime,
+                endTime,
+            }).then((alertStatsData) => {
+                setAlertStats(alertStatsData);
+            });
+        }
+    }, [alertId, startTime, endTime]);
 
     const fetchData = (): void => {
         if (!alert || !startTime || !endTime) {
@@ -181,6 +207,11 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         getAlert(Number(alertId));
+        getAlertStats({
+            alertId: Number(alertId),
+        }).then((overallAlertStatsData) => {
+            setOverallAlertStats(overallAlertStatsData);
+        });
     }, [alertId]);
 
     useEffect(() => {
@@ -316,6 +347,20 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
+    const overallAccuracySubtitle = useMemo<string | undefined>(() => {
+        if (!overallAlertStats) {
+            return undefined;
+        }
+
+        const [accuracyNumber] = getAlertAccuracyData(overallAlertStats);
+
+        return capitalize(
+            `${t("label.overall-entity", {
+                entity: t("label.accuracy"),
+            })}: ${100 * accuracyNumber}%`
+        );
+    }, [overallAlertStats]);
+
     return (
         <PageV1>
             <PageHeader
@@ -361,6 +406,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                         ""
                     )
                 }
+                subtitle={overallAccuracySubtitle}
                 title={alert ? alert.name : ""}
             >
                 {getAlertStatus === ActionStatus.Working && (
@@ -418,6 +464,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                                     return (
                                         <EnumerationItemsTable
                                             alertId={Number(alertId)}
+                                            alertsStats={{
+                                                [Number(alertId)]: alertStats,
+                                            }}
                                             detectionEvaluations={
                                                 detectionEvaluations
                                             }

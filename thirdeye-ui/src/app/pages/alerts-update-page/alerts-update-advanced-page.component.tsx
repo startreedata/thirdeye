@@ -19,40 +19,33 @@ import { useOutletContext } from "react-router-dom";
 import { AlertJson } from "../../components/alert-wizard-v2/alert-json/alert-json.component";
 import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import {
-    findRequiredFields,
+    determinePropertyFieldConfiguration,
     hasRequiredPropertyValuesSet,
 } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { MessageDisplayState } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
-import { PageContentsCardV1 } from "../../platform/components";
-import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    PageContentsCardV1,
+    PageContentsGridV1,
+} from "../../platform/components";
+import { AlertEditPageOutletContextProps } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
         useState(false);
-    const [
+    const {
         alert,
-        onAlertPropertyChange,
+        handleAlertPropertyChange: onAlertPropertyChange,
         selectedSubscriptionGroups,
-        onSubscriptionGroupsChange,
+        handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
-    ] =
-        useOutletContext<
-            [
-                EditableAlert,
-                (contents: Partial<EditableAlert>) => void,
-                SubscriptionGroup[],
-                (groups: SubscriptionGroup[]) => void,
-                AlertTemplateType
-            ]
-        >();
+        setShowBottomBar,
+    } = useOutletContext<AlertEditPageOutletContextProps>();
 
-    const requiredFields = useMemo(() => {
+    const availableFields = useMemo(() => {
         if (selectedAlertTemplate) {
-            return findRequiredFields(selectedAlertTemplate);
+            return determinePropertyFieldConfiguration(selectedAlertTemplate);
         }
 
         return [];
@@ -62,16 +55,19 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
         const isValid =
             !!selectedAlertTemplate &&
             hasRequiredPropertyValuesSet(
-                requiredFields,
-                alert.templateProperties,
-                selectedAlertTemplate.defaultProperties || {}
+                availableFields,
+                alert.templateProperties
             );
 
         setIsRequiredPropertyValuesSet(isValid);
     }, [selectedAlertTemplate, alert]);
 
+    useEffect(() => {
+        setShowBottomBar(true);
+    }, []);
+
     return (
-        <>
+        <PageContentsGridV1>
             <Grid item xs={12}>
                 <PageContentsCardV1>
                     <AlertJson
@@ -107,6 +103,6 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
                     onSubscriptionGroupsChange={onSubscriptionGroupsChange}
                 />
             </Grid>
-        </>
+        </PageContentsGridV1>
     );
 };

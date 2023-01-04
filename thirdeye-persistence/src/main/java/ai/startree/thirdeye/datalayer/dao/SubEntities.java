@@ -69,7 +69,7 @@ public class SubEntities {
   static final ImmutableMap<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>
       BEAN_INDEX_MAP = buildBeanIndexMap();
 
-  static final ImmutableMap<Class<? extends AbstractDTO>, SubEntityType>
+  public static final ImmutableMap<Class<? extends AbstractDTO>, SubEntityType>
       BEAN_TYPE_MAP = buildTypeBeanBimap();
 
   private static ImmutableMap<Class<? extends AbstractDTO>, Class<? extends AbstractIndexEntity>>

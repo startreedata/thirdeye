@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, CardActions, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import { Box, Button, CardActions, Grid, Typography } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { AlgorithmOptionCard } from "./algorithm-option-card/algorithm-option-card.component";
@@ -21,6 +22,7 @@ import {
     AlgorithmOption,
     AlgorithmSelectionProps,
 } from "./algorithm-selection.interfaces";
+import { filterOptionWithTemplateNames } from "./algorithm-selection.utils";
 
 export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
     onAlertPropertyChange,
@@ -29,6 +31,9 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
     advancedOptions,
 }) => {
     const { t } = useTranslation();
+    const hasNoAvailableAdvancedOptions = useMemo(() => {
+        return filterOptionWithTemplateNames(advancedOptions).length === 0;
+    }, [advancedOptions]);
 
     const handleAlgorithmClick = (
         algorithmOption: AlgorithmOption,
@@ -140,6 +145,15 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                 </Grid>
 
                 <Grid item xs={12}>
+                    {hasNoAvailableAdvancedOptions && (
+                        <Box paddingBottom={2} textAlign="center">
+                            <Alert severity="info" variant="outlined">
+                                {t(
+                                    "message.advanced-options-are-only-available-in-the-enterprise"
+                                )}
+                            </Alert>
+                        </Box>
+                    )}
                     <Grid container spacing={3}>
                         {advancedOptions.map((option) => {
                             return (

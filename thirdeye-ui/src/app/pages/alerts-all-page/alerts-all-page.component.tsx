@@ -13,8 +13,8 @@
  * the License.
  */
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
-import { AxiosError } from "axios";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import axios, { AxiosError, CancelTokenSource } from "axios";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -31,8 +31,12 @@ import {
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useResetAlert } from "../../rest/alerts/alerts.actions";
-import { deleteAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import {
+    deleteAlert,
+    getAlertStats,
+    getAllAlerts,
+} from "../../rest/alerts/alerts.rest";
+import { Alert, AlertStats } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
@@ -46,6 +50,9 @@ export const AlertsAllPage: FunctionComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
+    const [alertsStats, setAlertsStats] = useState<
+        Record<Alert["id"], AlertStats>
+    >({});
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -75,11 +82,17 @@ export const AlertsAllPage: FunctionComponent = () => {
     }, [status]);
 
     useEffect(() => {
+        const cancelTokenSource = axios.CancelToken.source();
+
         // Time range refreshed, fetch alerts
-        fetchAllAlerts();
+        fetchAllAlerts(cancelTokenSource);
+
+        return () => {
+            cancelTokenSource.cancel();
+        };
     }, []);
 
-    const fetchAllAlerts = (): void => {
+    const fetchAllAlerts = (cancelTokenSource: CancelTokenSource): void => {
         setIsLoading(true);
         setUiAlerts(null);
 
@@ -132,6 +145,24 @@ export const AlertsAllPage: FunctionComponent = () => {
             .finally(() => {
                 setIsLoading(false);
                 setUiAlerts(fetchedUiAlerts);
+
+                // Fetch the alert stats data to get the accuracy of each alert
+                fetchedUiAlerts
+                    .map((UiAlertItem) => UiAlertItem.id)
+                    .filter((alertId) => !(alertId in alertsStats)) // Only fetch stats for those not already fetched
+                    .forEach((alertId) => {
+                        getAlertStats({
+                            alertId,
+                            axiosConfig: {
+                                cancelToken: cancelTokenSource.token,
+                            },
+                        }).then((alertStatsData) => {
+                            setAlertsStats((alertsStatsProp) => ({
+                                ...alertsStatsProp,
+                                [alertId]: alertStatsData,
+                            }));
+                        });
+                    });
             });
     };
 
@@ -192,9 +223,28 @@ export const AlertsAllPage: FunctionComponent = () => {
         });
     };
 
+    // Since the alert accuracy is fetched via a different API, that data is not being injected
+    // into the main uiAnomaly state to avoid adding complexity to the state updated; instead,
+    // the accuracyStatistics data is stored in alertsAccuracy and injected into the uiAlerts state
+    //  data asynchronously, as and when it is resolved before that is passed on to the to the
+    // AlertListV1 component. This separate storage of accuracy data in this component might
+    // not be especially advantageous right now, but it will be helpful if the alerts API needs
+    // to be called multiple times, say for searching and filtering. Also helpful in keeping the
+    // state mutation simple in cases of alert deletion.
+    const uiAlertsWithAccuracy = useMemo<typeof uiAlerts>(
+        () =>
+            uiAlerts?.map((uiAlert) => ({
+                ...uiAlert,
+                accuracyStatistics: alertsStats[uiAlert.id],
+            })) ?? null,
+        [uiAlerts, alertsStats]
+    );
+
     const loadingErrorStateParams = {
         isError,
         isLoading,
+        wrapInGrid: true,
+        wrapInCard: true,
     };
 
     const emptyStateParams = {
@@ -250,7 +300,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                 <LoadingErrorStateSwitch {...loadingErrorStateParams}>
                     <EmptyStateSwitch {...emptyStateParams}>
                         <AlertListV1
-                            alerts={uiAlerts}
+                            alerts={uiAlertsWithAccuracy}
                             onAlertReset={handleAlertReset}
                             onDelete={handleAlertDelete}
                         />

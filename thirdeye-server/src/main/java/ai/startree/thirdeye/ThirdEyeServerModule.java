@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.AUTH_BASIC;
 import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static com.google.common.base.Preconditions.checkState;
 
+import ai.startree.thirdeye.auth.AccessControlModule;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -70,6 +71,7 @@ public class ThirdEyeServerModule extends AbstractModule {
     install(new ThirdEyeDetectionPipelineModule(configuration.getDetectionPipelineConfiguration()));
     install(new ThirdEyeWorkerModule(configuration.getTaskDriverConfiguration()));
     install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
+    install(new AccessControlModule());
 
     bind(AuthConfiguration.class).toInstance(configuration.getAuthConfiguration());
     bind(MetricRegistry.class).toInstance(metricRegistry);

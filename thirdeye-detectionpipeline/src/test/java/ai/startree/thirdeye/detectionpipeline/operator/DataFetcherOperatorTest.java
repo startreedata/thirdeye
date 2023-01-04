@@ -13,19 +13,25 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.spi.Constants.K_DATASET_MANAGER;
-import static ai.startree.thirdeye.spi.Constants.K_DATA_SOURCE_CACHE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
+import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -34,6 +40,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.Assert;
@@ -43,21 +50,33 @@ import org.testng.annotations.Test;
 public class DataFetcherOperatorTest {
 
   public static final String TABLE_NAME = "myTable";
-  private DataSourceCache dataSourceCache;
-  private DatasetConfigManager datasetDao;
   private String dataSourceName;
+  private PlanNodeContext planNodeContext;
 
   @BeforeMethod
   public void setUp() {
     dataSourceName = "pinot-cluster-1";
-
-    dataSourceCache = mock(DataSourceCache.class);
-    datasetDao = mock(DatasetConfigManager.class);
+    final DataSourceCache dataSourceCache = mock(DataSourceCache.class);
+    final DatasetConfigManager datasetDao = mock(DatasetConfigManager.class);
     when(datasetDao.findByDataset(anyString())).thenReturn(new DatasetConfigDTO().setDataset
         (TABLE_NAME));
     final ThirdEyeDataSource thirdEyeDataSource = mock(ThirdEyeDataSource.class);
     when(dataSourceCache.getDataSource(dataSourceName))
         .thenReturn(thirdEyeDataSource);
+    planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
+        new DetectionPipelineContext().setApplicationContext(
+            new ApplicationContext(
+                dataSourceCache,
+                mock(DetectionRegistry.class),
+                mock(PostProcessorRegistry.class),
+                mock(EventManager.class),
+                datasetDao,
+                mock(ExecutorService.class),
+                mock(EnumerationItemManager.class),
+                new DetectionPipelineConfiguration()
+
+        )
+    ));
   }
 
   @Test
@@ -67,15 +86,13 @@ public class DataFetcherOperatorTest {
         .setParams(TemplatableMap.fromValueMap(ImmutableMap.of("component.dataSource",
             dataSourceName)))
         .setOutputs(ImmutableList.of());
-    final Map<String, Object> properties = ImmutableMap.of(K_DATA_SOURCE_CACHE,
-        dataSourceCache, K_DATASET_MANAGER, datasetDao);
     final long startTime = System.currentTimeMillis();
     final long endTime = startTime + 1000L;
     final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setProperties(properties);
+        .setPlanNodeContext(planNodeContext);
     dataFetcherOperator.init(context);
     assertThat(dataFetcherOperator.getDetectionInterval()).isEqualTo(detectionInterval);
   }
@@ -96,13 +113,11 @@ public class DataFetcherOperatorTest {
         .setInputs(ImmutableList.of())
         .setParams(TemplatableMap.fromValueMap(params));
 
-    final Map<String, Object> properties = ImmutableMap.of(K_DATA_SOURCE_CACHE,
-        dataSourceCache, K_DATASET_MANAGER, datasetDao);
     final Interval detectionInterval = new Interval(startTime, endTime, DateTimeZone.UTC);
     final OperatorContext context = new OperatorContext()
         .setDetectionInterval(detectionInterval)
         .setPlanNode(planNodeBean)
-        .setProperties(properties);
+        .setPlanNodeContext(planNodeContext);
     dataFetcherOperator.init(context);
 
     assertThat(dataFetcherOperator.getDetectionInterval()).isEqualTo(detectionInterval);

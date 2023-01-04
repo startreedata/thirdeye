@@ -16,30 +16,64 @@
 import { Box, Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { WizardBottomBarProps } from "./wizard-bottom-bar.interfaces";
 
 export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
+    backBtnLink,
+    nextBtnLink,
     handleNextClick,
     handleBackClick,
     nextButtonLabel,
     backButtonLabel,
+    nextButtonIsDisabled,
+    children,
 }) => {
     const { t } = useTranslation();
 
     return (
-        <Box marginTop="auto" width="100%">
+        <Box bottom={0} marginTop="auto" position="sticky" width="100%">
             <PageContentsCardV1>
-                <Grid container justifyContent="flex-end">
+                <Grid container alignItems="center" justifyContent="flex-end">
+                    {children && <Grid item>{children}</Grid>}
+
                     <Grid item>
-                        <Button color="secondary" onClick={handleBackClick}>
-                            {backButtonLabel || t("label.back")}
-                        </Button>
+                        {handleBackClick && (
+                            <Button color="secondary" onClick={handleBackClick}>
+                                {backButtonLabel || t("label.back")}
+                            </Button>
+                        )}
+                        {backBtnLink && (
+                            <Button
+                                color="secondary"
+                                component={RouterLink}
+                                to={backBtnLink}
+                            >
+                                {backButtonLabel || t("label.back")}
+                            </Button>
+                        )}
                     </Grid>
                     <Grid item>
-                        <Button color="primary" onClick={handleNextClick}>
-                            {nextButtonLabel || t("label.next")}
-                        </Button>
+                        {handleNextClick && (
+                            <Button
+                                color="primary"
+                                disabled={nextButtonIsDisabled}
+                                onClick={handleNextClick}
+                            >
+                                {nextButtonLabel || t("label.next")}
+                            </Button>
+                        )}
+                        {nextBtnLink && (
+                            <Button
+                                color="primary"
+                                component={RouterLink}
+                                disabled={nextButtonIsDisabled}
+                                to={nextBtnLink}
+                            >
+                                {nextButtonLabel || t("label.next")}
+                            </Button>
+                        )}
                     </Grid>
                 </Grid>
             </PageContentsCardV1>

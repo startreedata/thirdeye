@@ -34,6 +34,7 @@ public class TemplatePropertyMetadata {
   /**
    * Used to set a defaultValue to null. (defaultValue=null is interpreted as no defaultValue).
    */
+  // FIXME cyril box the boolean
   private boolean defaultIsNull = false;
 
   /**
@@ -47,6 +48,11 @@ public class TemplatePropertyMetadata {
    * Should not be combined with min/maxValue
    */
   private List<Object> options;
+  /**
+   * Whether multiple options can be selected.
+   */
+  // FIXME cyril box the boolean
+  private boolean isMultiselect = false;
   /**
    * Helps the UI build input fields.
    */
@@ -121,6 +127,15 @@ public class TemplatePropertyMetadata {
 
   public TemplatePropertyMetadata setDescription(final String description) {
     this.description = description;
+    return this;
+  }
+
+  public boolean isMultiselect() {
+    return isMultiselect;
+  }
+
+  public TemplatePropertyMetadata setMultiselect(final boolean multiselect) {
+    isMultiselect = multiselect;
     return this;
   }
 

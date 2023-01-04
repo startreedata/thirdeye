@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREAT
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
@@ -59,8 +60,9 @@ public class SubscriptionGroupResource extends
 
   @Inject
   public SubscriptionGroupResource(
-      final SubscriptionGroupManager subscriptionGroupManager) {
-    super(subscriptionGroupManager, ImmutableMap.of());
+      final SubscriptionGroupManager subscriptionGroupManager,
+      final AuthorizationManager authorizationManager) {
+    super(subscriptionGroupManager, ImmutableMap.of(), authorizationManager);
     this.subscriptionGroupManager = subscriptionGroupManager;
   }
 

@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertMetadataApi {
 
   private DataSourceApi datasource;
@@ -27,15 +29,6 @@ public class AlertMetadataApi {
    */
   private String granularity;
   private String timezone;
-  /**
-   * ISO-8601 format. Max gap between to anomalies for the anomalies to be merged.
-   */
-  private String mergeMaxGap;
-  /**
-   * ISO-8601 format. Max duration of a merger of anomalies.
-   */
-  private String mergeMaxDuration;
-
   private EventContextApi eventContext;
 
   public DataSourceApi getDatasource() {
@@ -80,24 +73,6 @@ public class AlertMetadataApi {
 
   public AlertMetadataApi setTimezone(final String timezone) {
     this.timezone = timezone;
-    return this;
-  }
-
-  public String getMergeMaxGap() {
-    return mergeMaxGap;
-  }
-
-  public AlertMetadataApi setMergeMaxGap(final String mergeMaxGap) {
-    this.mergeMaxGap = mergeMaxGap;
-    return this;
-  }
-
-  public String getMergeMaxDuration() {
-    return mergeMaxDuration;
-  }
-
-  public AlertMetadataApi setMergeMaxDuration(final String mergeMaxDuration) {
-    this.mergeMaxDuration = mergeMaxDuration;
     return this;
   }
 

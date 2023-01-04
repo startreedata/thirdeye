@@ -35,4 +35,7 @@ server {
         add_header Cache-Control no-cache;
         expires 0;
     }
+    location ~ /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
 }

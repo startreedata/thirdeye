@@ -145,18 +145,25 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         useEffect(() => {
             getMetricBreakdown(anomalyId, {
                 baselineOffset: comparisonOffset,
-                filters: [...anomalyFilters.map(concatKeyValueWithEqual)],
+                filters: [
+                    ...anomalyFilters.map((item) =>
+                        concatKeyValueWithEqual(item, false)
+                    ),
+                ],
             });
         }, [anomalyId, comparisonOffset, anomalyFilters]);
 
         useEffect(() => {
             const id = anomalyFilters
-                .map(concatKeyValueWithEqual)
+                .map((item) => concatKeyValueWithEqual(item, false))
                 .sort()
                 .join();
             const existsInSet = chartTimeSeriesFilterSet.some(
                 (filterSet) =>
-                    filterSet.map(concatKeyValueWithEqual).sort().join() === id
+                    filterSet
+                        .map((item) => concatKeyValueWithEqual(item, false))
+                        .sort()
+                        .join() === id
             );
             setShouldDisplayRemoveText(existsInSet);
         }, [chartTimeSeriesFilterSet, anomalyFilters]);

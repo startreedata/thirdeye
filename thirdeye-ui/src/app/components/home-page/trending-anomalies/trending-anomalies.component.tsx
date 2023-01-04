@@ -29,10 +29,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
-import {
-    generateDateRangeMonthsFromNow,
-    getAnomaliesAllRangePath,
-} from "../../../utils/routes/routes.util";
+import { getAnomaliesAllRangePath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
@@ -47,8 +44,11 @@ import {
     ZoomDomain,
 } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { getMinMax } from "../../visualizations/time-series-chart/time-series-chart.utils";
+import { TrendingAnomaliesProps } from "./trending-anomalies.interface";
 
-export const TrendingAnomalies: FunctionComponent = () => {
+export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
+    startTime,
+}) => {
     const { t } = useTranslation();
     const [timeseriesOptions, setTimeseriesOptions] =
         useState<TimeSeriesChartProps>();
@@ -79,79 +79,75 @@ export const TrendingAnomalies: FunctionComponent = () => {
     }, [currentChartZoom]);
 
     useEffect(() => {
-        getAnomalies({ startTime: generateDateRangeMonthsFromNow(6)[0] }).then(
-            (anomalies) => {
-                if (!anomalies) {
-                    return;
-                }
-
-                const trendingData: { [key: string]: number } = {};
-                anomalies.forEach((anomaly) => {
-                    if (anomaly.startTime) {
-                        const dt = DateTime.fromMillis(anomaly.startTime);
-                        const dtStartOfDay = dt.startOf("day");
-                        const count =
-                            trendingData[dtStartOfDay.toMillis().toString()] ||
-                            0;
-                        trendingData[dtStartOfDay.toMillis().toString()] =
-                            count + 1;
-                    }
-                });
-
-                const dataset = Object.keys(trendingData)
-                    .sort()
-                    .map((timestamp: string) => {
-                        return {
-                            x: Number(timestamp),
-                            y: trendingData[timestamp],
-                        };
-                    });
-                const minMaxValue = getMinMax(
-                    [
-                        {
-                            data: dataset,
-                        },
-                    ],
-                    (d: DataPoint) => d.y
-                );
-                const colorScale = scaleLinear(minMaxValue, [
-                    "#DAE8FF",
-                    "#1850A6",
-                ]);
-
-                dataset.forEach((d: DataPoint) => {
-                    d.color = colorScale(d.y);
-                });
-
-                setTimeseriesOptions({
-                    series: [
-                        {
-                            name: t("label.anomaly-count"),
-                            type: SeriesType.BAR,
-                            data: dataset,
-                            color: "#1850A6",
-                        },
-                    ],
-                    margins: {
-                        left: 0,
-                        right: 25,
-                        top: 10,
-                        bottom: 10,
-                    },
-                    legend: false,
-                    brush: false,
-                    zoom: true,
-                    tooltip: true,
-                    yAxis: {
-                        position: Orientation.right,
-                    },
-                    chartEvents: {
-                        onZoomChange: handleZoomChange,
-                    },
-                });
+        getAnomalies({
+            startTime,
+        }).then((anomalies) => {
+            if (!anomalies) {
+                return;
             }
-        );
-    }, []);
+
+            const trendingData: { [key: string]: number } = {};
+            anomalies.forEach((anomaly) => {
+                if (anomaly.startTime) {
+                    const dt = DateTime.fromMillis(anomaly.startTime);
+                    const dtStartOfDay = dt.startOf("day");
+                    const count =
+                        trendingData[dtStartOfDay.toMillis().toString()] || 0;
+                    trendingData[dtStartOfDay.toMillis().toString()] =
+                        count + 1;
+                }
+            });
+
+            const dataset = Object.keys(trendingData)
+                .sort()
+                .map((timestamp: string) => {
+                    return {
+                        x: Number(timestamp),
+                        y: trendingData[timestamp],
+                    };
+                });
+            const minMaxValue = getMinMax(
+                [
+                    {
+                        data: dataset,
+                    },
+                ],
+                (d: DataPoint) => d.y
+            );
+            const colorScale = scaleLinear(minMaxValue, ["#DAE8FF", "#1850A6"]);
+
+            dataset.forEach((d: DataPoint) => {
+                d.color = colorScale(d.y);
+            });
+
+            setTimeseriesOptions({
+                series: [
+                    {
+                        name: t("label.anomaly-count"),
+                        type: SeriesType.BAR,
+                        data: dataset,
+                        color: "#1850A6",
+                    },
+                ],
+                margins: {
+                    left: 0,
+                    right: 25,
+                    top: 10,
+                    bottom: 10,
+                },
+                legend: false,
+                brush: false,
+                zoom: true,
+                tooltip: true,
+                yAxis: {
+                    position: Orientation.right,
+                },
+                chartEvents: {
+                    onZoomChange: handleZoomChange,
+                },
+            });
+        });
+    }, [startTime]);
 
     const isTimeSeriesEmpty =
         status === ActionStatus.Done && timeseriesOptions?.series

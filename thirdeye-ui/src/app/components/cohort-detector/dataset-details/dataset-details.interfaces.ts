@@ -29,4 +29,9 @@ export interface DatasetDetailsProps {
     onAggregationFunctionSelect?: (
         aggregationFunction: MetricAggFunction
     ) => void;
+
+    initialSelectedMetric?: string;
+    initialSelectedDataset?: string;
+    initialSelectedDatasource?: string;
+    initialSelectedAggregationFunc?: MetricAggFunction;
 }

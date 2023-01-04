@@ -15,12 +15,14 @@
 import { Box, Button, ButtonGroup, TextField } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import { useTour } from "@reactour/tour";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     MouseEvent,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from "react";
@@ -32,7 +34,10 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { RCA_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import {
+    getTourSelector,
+    RCA_TOUR_IDS,
+} from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
@@ -183,6 +188,42 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
         text: ALL_OPTIONS_TO_DESCRIPTIONS[optionKey],
     }));
 
+    const { isOpen, currentStep, setCurrentStep, steps, setDisabledActions } =
+        useTour();
+
+    // If the tour is open AND at the step where the controls need to be disabled,
+    // and to wait for user action
+    const isFeedbackDropdownStep = useMemo<boolean>(
+        () =>
+            isOpen &&
+            currentStep ===
+                steps.findIndex(
+                    (step) =>
+                        step.selector ===
+                        getTourSelector(RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN)
+                ),
+        [isOpen, currentStep, steps]
+    );
+
+    // If the tour is open at the feedback step, and the user opens the dropdown, advance the tour
+    const handleDropdownTourNext = (): void => {
+        if (isFeedbackDropdownStep && feedbackMenuAnchorEl) {
+            setCurrentStep(currentStep + 1);
+        }
+    };
+
+    // Disable navigation if the user is at the feedback step in the tour
+    useEffect(() => {
+        if (isFeedbackDropdownStep) {
+            setFeedbackMenuAnchorEl(null);
+            setDisabledActions(true);
+        }
+
+        return () => {
+            setDisabledActions(false);
+        };
+    }, [isFeedbackDropdownStep]);
+
     return (
         <>
             <Box display="flex">
@@ -212,11 +253,12 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         </Button>
                     </ButtonGroup>
                     <DropdownMenuV1
-                        // TODO: Get this working
-                        // PaperProps={{
-                        //     "data-tour-observe-id":
-                        //         RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN,
-                        // }}
+                        PaperProps={{
+                            "data-tour-id":
+                                RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN_EXPANDED,
+                            // Trigger the rca tour to progress
+                            onTransitionEnd: handleDropdownTourNext,
+                        }}
                         anchorEl={feedbackMenuAnchorEl}
                         className="dropdown-button-v1-menu"
                         dropdownMenuItems={shortcutCreateMenuItems}

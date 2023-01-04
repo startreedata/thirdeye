@@ -51,13 +51,19 @@ export const RCA_TOUR_IDS = {
     ANOMALY_START_END_DATE_TEXT: `${TOURS.RCA}__ANOMALY_START_END_DATE_TEXT`,
     CURRENT_PREDICTED_DEVIATION: `${TOURS.RCA}__CURRENT_PREDICTED_DEVIATION`,
     ANOMALY_FEEDBACK_DROPDOWN: `${TOURS.RCA}__ANOMALY_FEEDBACK_DROPDOWN`,
+    ANOMALY_FEEDBACK_DROPDOWN_EXPANDED: `${TOURS.RCA}__ANOMALY_FEEDBACK_DROPDOWN_EXPANDED`,
     ANOMALY_FEEDBACK_COMMENT: `${TOURS.RCA}__ANOMALY_FEEDBACK_COMMENT`,
     CHANGE_START_END_RANGE: `${TOURS.RCA}__CHANGE_START_END_RANGE`,
     CHART_LABELS: `${TOURS.RCA}__CHART_LABELS`,
     INVESTIGATE_ANOMALY: `${TOURS.RCA}__INVESTIGATE_ANOMALY`,
 } as const;
 
-export const RcaTourSteps: StepType[] = [
+export interface ExtendedStepType extends StepType {
+    id: typeof RCA_TOUR_IDS[keyof typeof RCA_TOUR_IDS]; // TODO: Use generic Tour IDs
+    disableNext?: boolean; // Disable manual "next" navigation. Useful if the user needs to interact
+}
+
+export const RcaTourSteps: ExtendedStepType[] = [
     {
         selector: RCA_TOUR_IDS.ANOMALY_HEADER_TEXT,
         content: "ANOMALY_HEADER_TEXT",
@@ -74,9 +80,16 @@ export const RcaTourSteps: StepType[] = [
         selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN,
         content: "ANOMALY_FEEDBACK_DROPDOWN",
         position: "top",
-        highlightedSelectors: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
-        resizeObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
-        mutationObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
+        // TODO: Are these selectors/observables needed?
+        // highlightedSelectors: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
+        // resizeObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
+        // mutationObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
+        disableNext: true,
+    },
+    {
+        selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN_EXPANDED,
+        content: "ANOMALY_FEEDBACK_DROPDOWN_EXPANDED",
+        position: "top",
     },
     {
         selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT,
@@ -98,16 +111,16 @@ export const RcaTourSteps: StepType[] = [
     //     selector: RCA_TOUR_IDS.INVESTIGATE_ANOMALY,
     //     content: "INVESTIGATE_ANOMALY",
     // },
-];
+].map((step) => ({ ...(step as StepType), id: step.selector }));
 
 export type SelectorType = "tour" | "tour-observe";
 
-const getTourSelector = (
+export const getTourSelector = (
     p: string,
     selectorType: SelectorType = "tour"
 ): string => `[data-${selectorType}-id='${p}']`;
 
-export const getSteps = (): StepType[] => {
+export const getSteps = (): ExtendedStepType[] => {
     const selectedSteps = RcaTourSteps;
 
     return selectedSteps.map((s) => ({

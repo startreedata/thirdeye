@@ -19,6 +19,7 @@ import {
     Card,
     CardActions,
     CardContent,
+    IconButton,
     Typography,
     useTheme,
 } from "@material-ui/core";
@@ -30,26 +31,27 @@ import {
     ProviderProps,
     TourProvider,
 } from "@reactour/tour";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { ComponentType, FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { DimensionV1 } from "../../utils";
-import { getSteps } from "./app-walkthrough-v1.utils";
+import { ExtendedStepType, getSteps } from "./app-walkthrough-v1.utils";
 
-const TourCard: FunctionComponent<PopoverContentProps> = ({
-    steps,
-    setCurrentStep,
-    currentStep,
-    setIsOpen,
-}) => {
+const TourCard: FunctionComponent<
+    PopoverContentProps & { steps: ExtendedStepType[] }
+> = ({ steps, setCurrentStep, currentStep, setIsOpen }) => {
     const { t } = useTranslation();
     const handleClose = (): void => {
         setIsOpen(false);
+        setCurrentStep(0);
     };
+    // TODO: Load based on location
     const location = useLocation();
 
+    const currentStepData = steps?.[currentStep];
+
     // TODO: Load tour steps based on location
-    console.log({ location });
+    // console.log({ location });
 
     const handleBack = (): void => {
         if (currentStep === 0) {
@@ -59,6 +61,10 @@ const TourCard: FunctionComponent<PopoverContentProps> = ({
         }
     };
     const handleNext = (): void => {
+        if (currentStepData.disableNext) {
+            return;
+        }
+
         if (currentStep >= steps.length - 1) {
             handleClose();
         } else {
@@ -69,23 +75,23 @@ const TourCard: FunctionComponent<PopoverContentProps> = ({
     return (
         <Card elevation={0}>
             <CardContent>
-                <Box>
+                <Box
+                    alignItems="center"
+                    display="flex"
+                    justifyContent="space-between"
+                >
                     <Typography variant="body2">
                         {steps[currentStep].content}
                     </Typography>
-                    {/* <IconButton
-                        color="default"
+                    <IconButton
+                        color="secondary"
                         size="small"
                         onClick={() => {
-                            onClickClose?.({
-                                setIsOpen,
-                                setCurrentStep,
-                                currentStep,
-                            });
+                            handleClose();
                         }}
                     >
                         <CloseIcon fontSize="small" />
-                    </IconButton> */}
+                    </IconButton>
                 </Box>
             </CardContent>
             <CardActions>
@@ -114,6 +120,7 @@ const TourCard: FunctionComponent<PopoverContentProps> = ({
                     </Typography>
                     <Button
                         color="primary"
+                        disabled={currentStepData?.disableNext}
                         endIcon={
                             currentStep === steps.length - 1 ? (
                                 <CloseIcon fontSize="small" />
@@ -144,7 +151,7 @@ export const AppWalkthroughV1: FunctionComponent = ({ children }) => {
             onClickMask: (): void => undefined,
             // disableInteraction: true,
             steps: getSteps(),
-            ContentComponent: TourCard,
+            ContentComponent: TourCard as ComponentType<PopoverContentProps>,
             styles: {
                 badge: (base) => ({
                     ...base,

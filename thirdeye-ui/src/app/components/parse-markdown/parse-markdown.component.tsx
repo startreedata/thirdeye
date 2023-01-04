@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { Typography } from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import {
     ReactMarkdown,
@@ -55,6 +55,11 @@ export const ParseMarkdown: FunctionComponent<{
                 >
                     {children}
                 </LinkV1>
+            ),
+            strong: ({ children }) => (
+                <Box component="strong" fontWeight={600}>
+                    {children}
+                </Box>
             ),
         },
         children,

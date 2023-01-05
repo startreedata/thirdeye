@@ -47,6 +47,7 @@ export const HomepageTourSteps: StepType[] = [
 
 // TODO: Is this naming convention fine?
 export const RCA_TOUR_IDS = {
+    INTRO: `${TOURS.RCA}__INTRO`,
     ANOMALY_HEADER_TEXT: `${TOURS.RCA}__ANOMALY_HEADER_TEXT`,
     ANOMALY_START_END_DATE_TEXT: `${TOURS.RCA}__ANOMALY_START_END_DATE_TEXT`,
     CURRENT_PREDICTED_DEVIATION: `${TOURS.RCA}__CURRENT_PREDICTED_DEVIATION`,
@@ -58,60 +59,70 @@ export const RCA_TOUR_IDS = {
     INVESTIGATE_ANOMALY: `${TOURS.RCA}__INVESTIGATE_ANOMALY`,
 } as const;
 
+// TODO: Move to a generic type utils file
+export type ValueOf<T> = T[keyof T];
+
+// TODO: Use generic Tour IDs
+export type StepIdType = ValueOf<typeof RCA_TOUR_IDS>;
+
 export interface ExtendedStepType extends StepType {
-    id: typeof RCA_TOUR_IDS[keyof typeof RCA_TOUR_IDS]; // TODO: Use generic Tour IDs
+    id: StepIdType;
     disableNext?: boolean; // Disable manual "next" navigation. Useful if the user needs to interact
 }
 
-export const RcaTourSteps: ExtendedStepType[] = [
-    {
-        selector: RCA_TOUR_IDS.ANOMALY_HEADER_TEXT,
-        content: "ANOMALY_HEADER_TEXT",
-    },
-    {
-        selector: RCA_TOUR_IDS.ANOMALY_START_END_DATE_TEXT,
-        content: "ANOMALY_START_END_DATE_TEXT",
-    },
-    {
-        selector: RCA_TOUR_IDS.CURRENT_PREDICTED_DEVIATION,
-        content: "CURRENT_PREDICTED_DEVIATION",
-    },
-    {
-        selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN,
-        content: "ANOMALY_FEEDBACK_DROPDOWN",
-        position: "top",
-        // TODO: Are these selectors/observables needed?
-        // highlightedSelectors: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
-        // resizeObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
-        // mutationObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN],
-        disableNext: true,
-    },
-    {
-        selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN_EXPANDED,
-        content: "ANOMALY_FEEDBACK_DROPDOWN_EXPANDED",
-        position: "top",
-    },
-    {
-        selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT,
-        content: "ANOMALY_FEEDBACK_COMMENT",
-        position: "top",
-        highlightedSelectors: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT],
-        resizeObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT],
-        mutationObservables: [RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT],
-    },
-    // {
-    //     selector: RCA_TOUR_IDS.CHANGE_START_END_RANGE,
-    //     content: "CHANGE_START_END_RANGE",
-    // },
-    // {
-    //     selector: RCA_TOUR_IDS.CHART_LABELS,
-    //     content: "CHART_LABELS",
-    // },
-    // {
-    //     selector: RCA_TOUR_IDS.INVESTIGATE_ANOMALY,
-    //     content: "INVESTIGATE_ANOMALY",
-    // },
-].map((step) => ({ ...(step as StepType), id: step.selector }));
+export const RcaTourSteps: ExtendedStepType[] = (
+    [
+        {
+            // No selector needed for this first one
+            // selector: RCA_TOUR_IDS.INTRO,
+            content: "ANOMALY_HEADER_TEXT__INTRO",
+            position: "center",
+        },
+        {
+            selector: RCA_TOUR_IDS.ANOMALY_HEADER_TEXT,
+            content: "ANOMALY_HEADER_TEXT",
+        },
+        {
+            selector: RCA_TOUR_IDS.ANOMALY_START_END_DATE_TEXT,
+            content: "ANOMALY_START_END_DATE_TEXT",
+        },
+        {
+            selector: RCA_TOUR_IDS.CURRENT_PREDICTED_DEVIATION,
+            content: "CURRENT_PREDICTED_DEVIATION",
+        },
+        {
+            selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN,
+            content: "ANOMALY_FEEDBACK_DROPDOWN",
+            position: "top",
+        },
+        // * Interactive tour shelved for now, will re-add in the future
+        // {
+        //     selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN_EXPANDED,
+        //     content: "ANOMALY_FEEDBACK_DROPDOWN_EXPANDED",
+        //     position: "top",
+        // },
+        {
+            selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT,
+            content: "ANOMALY_FEEDBACK_COMMENT",
+            position: "top",
+        },
+        // {
+        //     selector: RCA_TOUR_IDS.CHANGE_START_END_RANGE,
+        //     content: "CHANGE_START_END_RANGE",
+        // },
+        // {
+        //     selector: RCA_TOUR_IDS.CHART_LABELS,
+        //     content: "CHART_LABELS",
+        // },
+        // {
+        //     selector: RCA_TOUR_IDS.INVESTIGATE_ANOMALY,
+        //     content: "INVESTIGATE_ANOMALY",
+        // },
+    ] as StepType[]
+).map<ExtendedStepType>((step) => ({
+    ...step,
+    id: step.selector as StepIdType,
+}));
 
 export type SelectorType = "tour" | "tour-observe";
 

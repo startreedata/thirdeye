@@ -14,6 +14,7 @@
  */
 import { CardContent, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { RCA_TOUR_IDS } from "../../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { DEFAULT_FEEDBACK } from "../../../../utils/alerts/alerts.util";
 import { AnomalyFeedback } from "../../../anomaly-feedback/anomaly-feedback.component";
 import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";
@@ -42,6 +43,7 @@ export const ViewAnomalyHeader: FunctionComponent<ViewAnomalyHeaderProps> = ({
                 <Grid
                     item
                     alignContent="flex-end"
+                    data-tour-id={RCA_TOUR_IDS.CHANGE_START_END_RANGE}
                     lg="auto"
                     md="auto"
                     sm={8}

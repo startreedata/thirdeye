@@ -31,7 +31,7 @@ export const AppWalkthroughV1: FunctionComponent = ({ children }) => {
         () => ({
             scrollSmooth: true,
             onClickMask: (): void => undefined,
-            // disableInteraction: true,
+            disableInteraction: true, // Disable interaction for the first iteration
             steps: getSteps(),
             ContentComponent: TourCard as ComponentType<PopoverContentProps>,
             styles: {
@@ -50,6 +50,7 @@ export const AppWalkthroughV1: FunctionComponent = ({ children }) => {
                     padding: "6px 8px",
                     borderRadius: DimensionV1.BorderRadiusDefault,
                     minWidth: 300,
+                    maxWidth: 600,
                 }),
             },
         }),

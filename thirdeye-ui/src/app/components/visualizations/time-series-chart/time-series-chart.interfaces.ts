@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { GridProps } from "@material-ui/core";
 import { AxisScale, Orientation } from "@visx/axis";
 import { ScaleOrdinal } from "d3-scale";
 import React, { FunctionComponent } from "react";
@@ -177,6 +178,7 @@ export interface LegendProps {
     colorScale: ScaleOrdinal<string, string, never>;
     events: EventWithChartState[];
     onEventsStateChange: (events: EventWithChartState[]) => void;
+    gridContainerProps?: Partial<GridProps>;
 }
 
 export interface EventWithChartState extends Event {

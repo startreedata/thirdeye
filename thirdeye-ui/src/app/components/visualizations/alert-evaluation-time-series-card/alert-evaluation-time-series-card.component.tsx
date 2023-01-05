@@ -17,10 +17,13 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
+import { RCA_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { generateChartOptionsForAlert } from "../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
+import { Legend } from "../time-series-chart/legend/legend.component";
 import { TimeSeriesChart } from "../time-series-chart/time-series-chart.component";
-import { AlertEvaluationTimeSeriesCardProps } from "./alert-evaluation-time-series-card.interfaces";
+import type { LegendProps } from "../time-series-chart/time-series-chart.interfaces";
+import type { AlertEvaluationTimeSeriesCardProps } from "./alert-evaluation-time-series-card.interfaces";
 
 export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTimeSeriesCardProps> =
     ({
@@ -72,6 +75,16 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
                                 anomalies,
                                 t,
                                 disableNavigation ? undefined : navigate
+                            )}
+                            LegendComponent={(props: LegendProps) => (
+                                <Legend
+                                    {...props}
+                                    gridContainerProps={{
+                                        ...props?.gridContainerProps,
+                                        "data-tour-id":
+                                            RCA_TOUR_IDS.CHART_LABELS,
+                                    }}
+                                />
                             )}
                         />
                     )}

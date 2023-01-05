@@ -65,13 +65,17 @@ export const TourCard: FunctionComponent<
         <Card elevation={0}>
             <CardContent>
                 <Box
-                    alignItems="center"
+                    alignItems="flex-start"
                     display="flex"
                     justifyContent="space-between"
                 >
-                    <Typography variant="body2">
-                        {steps[currentStep].content}
-                    </Typography>
+                    {typeof currentStepData.content === "string" ? (
+                        <Typography variant="body2">
+                            {currentStepData.content}
+                        </Typography>
+                    ) : (
+                        currentStepData.content
+                    )}
                     <IconButton
                         color="secondary"
                         size="small"
@@ -121,9 +125,10 @@ export const TourCard: FunctionComponent<
                         variant="text"
                         onClick={handleNext}
                     >
-                        {currentStep === steps.length - 1
-                            ? "End Tour"
-                            : t("label.next")}
+                        {currentStepData?.nextLabel ||
+                            (currentStep === steps.length - 1
+                                ? "End Tour"
+                                : t("label.next"))}
                     </Button>
                 </Box>
             </CardActions>

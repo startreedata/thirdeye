@@ -33,6 +33,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
     series,
     onSeriesClick,
     colorScale,
+    gridContainerProps,
 }) => {
     const handleOnClick = (seriesData: Series): void => {
         const idx = series.findIndex((s) => s === seriesData);
@@ -42,7 +43,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
     return (
         <LegendOrdinal<ScaleOrdinal<string, string, never>> scale={colorScale}>
             {() => (
-                <Grid container justifyContent="center">
+                <Grid container justifyContent="center" {...gridContainerProps}>
                     {sortSeries(series).map((seriesData) => {
                         let color = colorScale(seriesData.name as string);
 

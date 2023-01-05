@@ -256,6 +256,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         <Button
                             color="primary"
                             component="button"
+                            data-tour-id={RCA_TOUR_IDS.INVESTIGATE_ANOMALY}
                             href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
                                 Number(anomalyId)
                             )}?${searchParams.toString()}`}
@@ -329,7 +330,11 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* Alert evaluation time series */}
-                <Grid item xs={12}>
+                <Grid
+                    item
+                    data-tour-id={RCA_TOUR_IDS.ANOMALY_FEEDBACK_CHART_AREA}
+                    xs={12}
+                >
                     {chartDataHasIssues && (
                         <PageContentsCardV1>
                             <Box pb={20} pt={20}>
@@ -358,7 +363,11 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 </Grid>
 
                 {/* Existing investigations */}
-                <Grid item xs={12}>
+                <Grid
+                    item
+                    data-tour-id={RCA_TOUR_IDS.PREVIOUS_INVESTIGATIONS}
+                    xs={12}
+                >
                     <InvestigationsList
                         getInvestigationsRequestStatus={
                             getInvestigationsRequestStatus

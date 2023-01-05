@@ -165,39 +165,43 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                     return null;
                 })}
 
-            <Grid container>
-                {hasSomeConfig && (
-                    <Grid item xs={12}>
-                        <Box paddingBottom={1} paddingTop={1}>
-                            <Typography variant="h5">
-                                {t("label.add-more-channels")}
-                            </Typography>
-                        </Box>
-                    </Grid>
-                )}
-                {availableSpecTypes.map((item) => (
-                    <Grid item key={item.id}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => handleShortcutCreateOnclick(item.id)}
-                        >
-                            <Box display="block" minWidth={100}>
-                                <Box color="primary" textAlign="center">
-                                    <Icon height={48} icon={item.icon} />
-                                </Box>
-
-                                <Box
-                                    color="primary"
-                                    marginTop={2}
-                                    textAlign="center"
-                                >
-                                    {t(item.internationalizationString)}
-                                </Box>
+            <Box paddingBottom={1} paddingTop={1}>
+                <Grid container>
+                    {hasSomeConfig && (
+                        <Grid item xs={12}>
+                            <Box>
+                                <Typography variant="h5">
+                                    {t("label.add-more-channels")}
+                                </Typography>
                             </Box>
-                        </Button>
-                    </Grid>
-                ))}
-            </Grid>
+                        </Grid>
+                    )}
+                    {availableSpecTypes.map((item) => (
+                        <Grid item key={item.id}>
+                            <Button
+                                variant="outlined"
+                                onClick={() =>
+                                    handleShortcutCreateOnclick(item.id)
+                                }
+                            >
+                                <Box display="block" minWidth={100}>
+                                    <Box color="primary" textAlign="center">
+                                        <Icon height={48} icon={item.icon} />
+                                    </Box>
+
+                                    <Box
+                                        color="primary"
+                                        marginTop={2}
+                                        textAlign="center"
+                                    >
+                                        {t(item.internationalizationString)}
+                                    </Box>
+                                </Box>
+                            </Button>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Box>
         </>
     );
 };

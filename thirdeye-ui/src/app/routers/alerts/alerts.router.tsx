@@ -146,7 +146,6 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={
                                 <AlertsCreateGuidedRouter
-                                    hideSubscriptionGroup
                                     navigateToAlertDetailAfterSampleAlertCreate
                                     sampleAlertsBottom
                                     useParentForNonWelcomeFlow
@@ -189,7 +188,6 @@ export const AlertsRouter: FunctionComponent = () => {
                             element={
                                 <AlertsCreateGuidedRouter
                                     hideSampleAlerts
-                                    hideSubscriptionGroup
                                     navigateToAlertDetailAfterSampleAlertCreate
                                     useParentForNonWelcomeFlow
                                     createLabel={t("label.create")}
@@ -284,7 +282,6 @@ export const AlertsRouter: FunctionComponent = () => {
                             element={
                                 <AlertsCreateGuidedRouter
                                     hideSampleAlerts
-                                    hideSubscriptionGroup
                                     navigateToAlertDetailAfterSampleAlertCreate
                                     useParentForNonWelcomeFlow
                                     createLabel={t("label.update-entity", {

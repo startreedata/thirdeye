@@ -16,5 +16,5 @@
 export interface SetupDetailsPageProps {
     inProgressLabel: string;
     createLabel: string;
-    hideSubscriptionGroup?: boolean;
+    showEmailOnlyForSubscriptionGroup?: boolean;
 }

@@ -448,6 +448,7 @@ export const handleCreateAlertClickGenerator = (
     ): void => {
         onAlertCreateStatusUpdate &&
             onAlertCreateStatusUpdate(ActionStatus.Working);
+
         createAlert(alert)
             .then((alert) => {
                 if (isEmpty(subscriptionGroups)) {

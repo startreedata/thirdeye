@@ -12,18 +12,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { isEmpty } from "lodash";
 import { Box } from "@material-ui/core";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-whizard.utils";
 import {
+    NotificationTypeV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
+import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditBasePage } from "../alerts-update-page/alerts-edit-base-page.component";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
 
@@ -39,7 +46,10 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
 
     const { showDialog, hideDialog } = useDialogProviderV1();
 
-    const handleCreateAlertClick = useMemo(() => {
+    const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
+        useState<SubscriptionGroup>(createEmptySubscriptionGroup());
+
+    const createAlertAndUpdateSubscriptionGroups = useMemo(() => {
         return handleCreateAlertClickGenerator(notify, t, (savedAlert) => {
             showDialog({
                 type: DialogType.CUSTOM,
@@ -60,8 +70,45 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         });
     }, [navigate, notify, t]);
 
+    const handleCreateAlertClick = async (
+        alert: EditableAlert
+    ): Promise<void> => {
+        if (
+            validateSubscriptionGroup(singleNewSubscriptionGroup) &&
+            singleNewSubscriptionGroup.specs?.length > 0
+        ) {
+            try {
+                const newlyCreatedSubGroup = await createSubscriptionGroup(
+                    singleNewSubscriptionGroup
+                );
+                // If creating new subscription group is successful, add it
+                // to the list of subscription groups to assign alert to
+                createAlertAndUpdateSubscriptionGroups(alert, [
+                    ...subscriptionGroups,
+                    newlyCreatedSubGroup,
+                ]);
+            } catch (error) {
+                const errMessages = getErrorMessages(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.experienced-error-creating-subscription-group-while-creating-alert"
+                    )
+                );
+                !isEmpty(errMessages) &&
+                    errMessages.map((err) =>
+                        notify(NotificationTypeV1.Error, err)
+                    );
+            }
+        } else {
+            createAlertAndUpdateSubscriptionGroups(alert, subscriptionGroups);
+        }
+    };
+
     return (
         <AlertsEditBasePage
+            newSubscriptionGroup={singleNewSubscriptionGroup}
             pageTitle={t("label.create-entity", {
                 entity: t("label.alert"),
             })}
@@ -70,9 +117,8 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             submitButtonLabel={t("label.create-entity", {
                 entity: t("label.alert"),
             })}
-            onSubmit={(alert) =>
-                handleCreateAlertClick(alert, subscriptionGroups)
-            }
+            onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
+            onSubmit={handleCreateAlertClick}
             onSubscriptionGroupChange={setSubscriptionGroups}
         />
     );

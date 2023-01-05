@@ -25,6 +25,7 @@ import {
 } from "react-router-dom";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     HelpLinkIconV1,
@@ -41,7 +42,6 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { handleAlertPropertyChangeGenerator } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import {
@@ -57,6 +57,8 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     submitButtonLabel,
     selectedSubscriptionGroups,
     onSubscriptionGroupChange,
+    newSubscriptionGroup,
+    onNewSubscriptionGroupChange,
 }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -124,12 +126,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
             t
         );
     }, [setAlert, alertTemplateOptions, setSelectedAlertTemplate]);
-
-    const handleSubscriptionGroupChange = (
-        updatedGroups: SubscriptionGroup[]
-    ): void => {
-        onSubscriptionGroupChange(updatedGroups);
-    };
 
     const handleSubmitAlertClick = (alertToSubmit: EditableAlert): void => {
         onSubmit && onSubmit(alertToSubmit);
@@ -247,19 +243,29 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                 </PageHeaderTextV1>
             </PageHeader>
 
-            <Outlet
-                context={{
-                    alert,
-                    handleAlertPropertyChange,
-                    selectedSubscriptionGroups,
-                    handleSubscriptionGroupChange,
-                    selectedAlertTemplate,
-                    setSelectedAlertTemplate,
-                    alertTemplateOptions,
-                    setShowBottomBar,
-                    handleSubmitAlertClick,
-                }}
-            />
+            <LoadingErrorStateSwitch
+                wrapInCard
+                wrapInGrid
+                isError={false}
+                isLoading={alertTemplatesRequestStatus === ActionStatus.Working}
+            >
+                <Outlet
+                    context={{
+                        alert,
+                        handleAlertPropertyChange,
+                        selectedSubscriptionGroups,
+                        handleSubscriptionGroupChange:
+                            onSubscriptionGroupChange,
+                        selectedAlertTemplate,
+                        setSelectedAlertTemplate,
+                        alertTemplateOptions,
+                        setShowBottomBar,
+                        handleSubmitAlertClick,
+                        newSubscriptionGroup,
+                        onNewSubscriptionGroupChange,
+                    }}
+                />
+            </LoadingErrorStateSwitch>
 
             {showBottomBar && (
                 <WizardBottomBar

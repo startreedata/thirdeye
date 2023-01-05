@@ -18,7 +18,6 @@ import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlgorithmSelection } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
-import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { filterOptionWithTemplateNames } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
 import { SampleAlertSelection } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
 import { SampleAlertOption } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.interfaces";
@@ -36,8 +35,6 @@ import { DialogType } from "../../../platform/components/dialog-provider-v1/dial
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
 import { createAlert } from "../../../rest/alerts/alerts.rest";
-import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { QUERY_PARAM_KEYS } from "../../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../utils/rest/rest.util";
@@ -46,6 +43,7 @@ import {
     getAlertsAlertViewPath,
     getHomePath,
 } from "../../../utils/routes/routes.util";
+import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 import { SelectTypePageProps } from "./select-type-page.interface";
 
 export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
@@ -67,15 +65,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         getAlertTemplates,
         alertTemplates,
         selectedAlgorithmOption,
-    } = useOutletContext<{
-        alert: EditableAlert;
-        onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
-        simpleOptions: AvailableAlgorithmOption[];
-        advancedOptions: AvailableAlgorithmOption[];
-        getAlertTemplates: () => void;
-        alertTemplates: AlertTemplate[];
-        selectedAlgorithmOption: AvailableAlgorithmOption;
-    }>();
+    } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const handleAlgorithmSelection = (
         isDimensionExploration: boolean

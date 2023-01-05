@@ -132,6 +132,7 @@ export const WelcomeRouter: FunctionComponent = () => {
                     element={
                         <AlertsCreateGuidedRouter
                             hideCurrentlySelected
+                            showEmailOnlyForSubscriptionGroup
                             createLabel={t("label.create")}
                             inProgressLabel={t("label.creating")}
                         />

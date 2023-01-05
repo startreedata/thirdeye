@@ -53,6 +53,7 @@ import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.actio
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
 import {
+    AppRoute,
     generateDateRangeDaysFromNow,
     getAlertsAllPath,
 } from "../../utils/routes/routes.util";
@@ -88,8 +89,12 @@ export const HomePage: FunctionComponent = () => {
     useEffect(() => {
         getAppAnalytics();
         getSubscriptionGroups();
-        getAlerts();
         getAnomalies();
+        getAlerts().then((alerts) => {
+            if (alerts?.length === 0) {
+                navigate(AppRoute.WELCOME);
+            }
+        });
     }, []);
 
     const handleHideDocumentationClick = (): void => {

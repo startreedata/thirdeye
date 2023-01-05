@@ -17,5 +17,6 @@ export interface AlgorithmOptionCardProps {
     option: {
         title: string;
         description: string;
+        recipeLink?: string;
     };
 }

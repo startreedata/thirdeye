@@ -25,4 +25,5 @@ export interface SampleAlertOption {
     title: string;
     description: string;
     alertConfiguration: EditableAlert;
+    recipeLink?: string;
 }

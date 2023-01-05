@@ -21,24 +21,17 @@ import {
     CardContent,
     IconButton,
     Typography,
-    useTheme,
 } from "@material-ui/core";
 import LeftIcon from "@material-ui/icons/ChevronLeft";
 import RightIcon from "@material-ui/icons/ChevronRight";
 import CloseIcon from "@material-ui/icons/Close";
-import {
-    PopoverContentProps,
-    ProviderProps,
-    TourProvider,
-} from "@reactour/tour";
-import React, { ComponentType, FunctionComponent, useMemo } from "react";
+import { PopoverContentProps } from "@reactour/tour";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router";
-import { DimensionV1 } from "../../utils";
-import { ExtendedStepType, getSteps } from "./app-walkthrough-v1.utils";
+import { ExtendedStepType } from "../app-walkthrough-v1.utils";
 
-const TourCard: FunctionComponent<
-    PopoverContentProps & { steps: ExtendedStepType[] }
+export const TourCard: FunctionComponent<
+    Omit<PopoverContentProps, "steps"> & { steps: ExtendedStepType[] }
 > = ({ steps, setCurrentStep, currentStep, setIsOpen }) => {
     const { t } = useTranslation();
     const handleClose = (): void => {
@@ -46,12 +39,8 @@ const TourCard: FunctionComponent<
         setCurrentStep(0);
     };
     // TODO: Load based on location
-    const location = useLocation();
 
     const currentStepData = steps?.[currentStep];
-
-    // TODO: Load tour steps based on location
-    // console.log({ location });
 
     const handleBack = (): void => {
         if (currentStep === 0) {
@@ -140,39 +129,4 @@ const TourCard: FunctionComponent<
             </CardActions>
         </Card>
     );
-};
-
-export const AppWalkthroughV1: FunctionComponent = ({ children }) => {
-    const theme = useTheme();
-
-    const tourProps = useMemo<Omit<ProviderProps, "children">>(
-        () => ({
-            scrollSmooth: true,
-            onClickMask: (): void => undefined,
-            // disableInteraction: true,
-            steps: getSteps(),
-            ContentComponent: TourCard as ComponentType<PopoverContentProps>,
-            styles: {
-                badge: (base) => ({
-                    ...base,
-                    background: theme.palette.primary.main,
-                }),
-                dot: (base, options) => ({
-                    ...base,
-                    background: options?.current
-                        ? theme.palette.primary.main
-                        : theme.palette.grey["500"],
-                }),
-                popover: (base) => ({
-                    ...base,
-                    padding: "6px 8px",
-                    borderRadius: DimensionV1.BorderRadiusDefault,
-                    minWidth: 300,
-                }),
-            },
-        }),
-        []
-    );
-
-    return <TourProvider {...tourProps}>{children}</TourProvider>;
 };

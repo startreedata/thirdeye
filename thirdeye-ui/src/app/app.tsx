@@ -22,7 +22,7 @@ import {
     useAuthProviderV1,
     useNotificationProviderV1,
 } from "./platform/components";
-import { AppWalkthroughV1 } from "./platform/components/app-walkthrough-v1/app-walkthrough-v1.components";
+import { AppWalkthroughV1 } from "./platform/components/app-walkthrough-v1/app-walkthrough-v1.component";
 import { AppRouter } from "./routers/app/app.router";
 
 // ThirdEye UI app

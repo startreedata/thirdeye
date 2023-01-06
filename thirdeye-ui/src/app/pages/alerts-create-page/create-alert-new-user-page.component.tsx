@@ -14,6 +14,7 @@
  */
 import { default as React, FunctionComponent, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
+import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { CreateAlertGuidedPage } from "../alerts-create-guided-page/alerts-create-guided-page.component";
 import { AlertEditPageOutletContextProps } from "../alerts-update-page/alerts-update-page.interfaces";
 
@@ -34,6 +35,19 @@ export const CreateAlertNewUserPage: FunctionComponent = () => {
         setShowBottomBar(false);
     }, []);
 
+    const handleOnSubmit = (
+        alert: EditableAlert,
+        suggestedName: string
+    ): void => {
+        const copied = { ...alert };
+
+        if (alert.name === "") {
+            copied.name = suggestedName;
+        }
+
+        handleSubmitAlertClick(copied);
+    };
+
     return (
         <CreateAlertGuidedPage
             alert={alert}
@@ -41,7 +55,7 @@ export const CreateAlertNewUserPage: FunctionComponent = () => {
             getAlertTemplates={refreshAlertTemplates}
             isCreatingAlert={false}
             onAlertPropertyChange={handleAlertPropertyChange}
-            onSubmit={() => handleSubmitAlertClick(alert)}
+            onSubmit={handleOnSubmit}
         />
     );
 };

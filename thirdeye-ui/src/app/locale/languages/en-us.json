@@ -514,6 +514,7 @@
         "range-metric-simple-advanced": "Detect an anomaly if a metric is above a maximum or below a minimum range. Good for signals that are mostly flat.",
         "rca-legend-information": "Select or unselect a row to add to the chart. Click on the “Remove button” to remove a filter.  You can add a filter by selecting rows from “Top contributors” or Events in the bottom tabs section",
         "redirected-to-another-page": "You’re about to be redirected to another page.",
+        "redirecting-to-alert-in-10-seconds": "Redirecting to alert in 10 seconds",
         "remove-item-from-configuration": "Remove item from configuration",
         "reset-alert-confirmation-prompt": "Are you sure you want to reset the \"{{alertName}}\" alert?",
         "reset-alert-information": "Resetting the alert will delete existing anomalies as well as saved investigations and rerun the detection algorithm.",

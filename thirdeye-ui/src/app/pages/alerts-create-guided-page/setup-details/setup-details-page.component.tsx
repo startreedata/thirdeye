@@ -57,7 +57,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
         selectedAlgorithmOption: AvailableAlgorithmOption;
         emails: string[];
         setEmails: (emails: string[]) => void;
-        handleCreateAlertClick: () => void;
+        handleCreateAlertClick: (alert: EditableAlert) => void;
         isCreatingAlert: boolean;
     }>();
 
@@ -219,7 +219,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
 
             <WizardBottomBar
                 backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
-                handleNextClick={handleCreateAlertClick}
+                handleNextClick={() => handleCreateAlertClick(alert)}
                 nextButtonIsDisabled={isCreatingAlert}
                 nextButtonLabel={
                     isCreatingAlert ? inProgressLabel : createLabel

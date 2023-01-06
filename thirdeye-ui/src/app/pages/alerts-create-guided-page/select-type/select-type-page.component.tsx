@@ -29,8 +29,10 @@ import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/
 import {
     PageContentsCardV1,
     PageContentsGridV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
 import { createAlert } from "../../../rest/alerts/alerts.rest";
@@ -56,6 +58,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
     const { t } = useTranslation();
     const { setShowAppNavBar } = useAppBarConfigProvider();
     const { notify } = useNotificationProviderV1();
+    const { showDialog, hideDialog } = useDialogProviderV1();
 
     const {
         onAlertPropertyChange,
@@ -104,7 +107,24 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         createAlert(clonedConfiguration)
             .then((alert) => {
                 if (navigateToAlertDetailAfterCreate) {
-                    navigate(`${getAlertsAlertViewPath(alert.id)}`);
+                    showDialog({
+                        type: DialogType.CUSTOM,
+                        contents: (
+                            <Box textAlign="center">
+                                {t(
+                                    "message.redirecting-to-alert-in-10-seconds"
+                                )}
+                            </Box>
+                        ),
+                        hideCancelButton: true,
+                        hideOkButton: true,
+                    });
+
+                    // Wait 10 seconds so the initial anomalies task run completes
+                    setTimeout(() => {
+                        hideDialog();
+                        navigate(`${getAlertsAlertViewPath(alert.id)}`);
+                    }, 10000);
                 } else {
                     const queryParams = new URLSearchParams([
                         [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],

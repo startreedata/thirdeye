@@ -15,10 +15,8 @@
 
 import { Box, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import {
-    ReactMarkdown,
-    ReactMarkdownOptions,
-} from "react-markdown/lib/react-markdown";
+import type { Options as ReactMarkdownOptions } from "react-markdown";
+import ReactMarkdown from "react-markdown";
 import { LinkV1 } from "../../platform/components";
 import type { ParseMarkdownProps } from "./parse-markdown.interfaces";
 

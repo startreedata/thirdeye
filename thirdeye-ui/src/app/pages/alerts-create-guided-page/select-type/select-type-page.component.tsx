@@ -17,33 +17,33 @@ import { AxiosError } from "axios";
 import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { AlgorithmSelection } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
-import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
-import { filterOptionWithTemplateNames } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
-import { SampleAlertSelection } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
-import { SampleAlertOption } from "../../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.interfaces";
-import { useAppBarConfigProvider } from "../../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
-import { NoDataIndicator } from "../../../../components/no-data-indicator/no-data-indicator.component";
-import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
-import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
+import { AlgorithmSelection } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
+import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
+import { filterOptionWithTemplateNames } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
+import { SampleAlertSelection } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
+import { SampleAlertOption } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.interfaces";
+import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
+import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
     useNotificationProviderV1,
-} from "../../../../platform/components";
-import { ActionStatus } from "../../../../rest/actions.interfaces";
-import { createDefaultAlertTemplates } from "../../../../rest/alert-templates/alert-templates.rest";
-import { createAlert } from "../../../../rest/alerts/alerts.rest";
-import { AlertTemplate } from "../../../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { QUERY_PARAM_KEYS } from "../../../../utils/constants/constants.util";
-import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
-import { getErrorMessages } from "../../../../utils/rest/rest.util";
+} from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
+import { createAlert } from "../../../rest/alerts/alerts.rest";
+import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { QUERY_PARAM_KEYS } from "../../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { getErrorMessages } from "../../../utils/rest/rest.util";
 import {
     AppRouteRelative,
     getAlertsAlertViewPath,
     getHomePath,
-} from "../../../../utils/routes/routes.util";
+} from "../../../utils/routes/routes.util";
 import { SelectTypePageProps } from "./select-type-page.interface";
 
 export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
@@ -58,7 +58,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
     const { notify } = useNotificationProviderV1();
 
     const {
-        handleAlertPropertyChange,
+        onAlertPropertyChange,
         simpleOptions,
         advancedOptions,
         getAlertTemplates,
@@ -66,7 +66,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         selectedAlgorithmOption,
     } = useOutletContext<{
         alert: EditableAlert;
-        handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+        onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
         simpleOptions: AvailableAlgorithmOption[];
         advancedOptions: AvailableAlgorithmOption[];
         getAlertTemplates: () => void;
@@ -181,7 +181,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                         <AlgorithmSelection
                             advancedOptions={advancedOptions}
                             simpleOptions={simpleOptions}
-                            onAlertPropertyChange={handleAlertPropertyChange}
+                            onAlertPropertyChange={onAlertPropertyChange}
                             onSelectionComplete={handleAlgorithmSelection}
                         />
                     </EmptyStateSwitch>

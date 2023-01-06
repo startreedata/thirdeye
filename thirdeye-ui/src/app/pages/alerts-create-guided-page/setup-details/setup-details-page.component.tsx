@@ -21,18 +21,18 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { AlertFrequency } from "../../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
-import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
-import { EmailListInput } from "../../../../components/form-basics/email-list-input/email-list-input.component";
-import { InputSection } from "../../../../components/form-basics/input-section/input-section.component";
-import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
+import { AlertFrequency } from "../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
+import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
+import { EmailListInput } from "../../../components/form-basics/email-list-input/email-list-input.component";
+import { InputSection } from "../../../components/form-basics/input-section/input-section.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
-} from "../../../../platform/components";
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { generateGenericNameForAlert } from "../../../../utils/alerts/alerts.util";
-import { AppRouteRelative } from "../../../../utils/routes/routes.util";
+} from "../../../platform/components";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { generateGenericNameForAlert } from "../../../utils/alerts/alerts.util";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { SetupDetailsPageProps } from "./setup-details-page.interface";
 
 export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
@@ -45,7 +45,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
 
     const {
         alert,
-        handleAlertPropertyChange,
+        onAlertPropertyChange,
         selectedAlgorithmOption,
         emails,
         setEmails,
@@ -53,7 +53,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
         isCreatingAlert,
     } = useOutletContext<{
         alert: EditableAlert;
-        handleAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+        onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
         selectedAlgorithmOption: AvailableAlgorithmOption;
         emails: string[];
         setEmails: (emails: string[]) => void;
@@ -121,7 +121,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                                             )
                                         }
                                         onChange={(e) =>
-                                            handleAlertPropertyChange({
+                                            onAlertPropertyChange({
                                                 name: e.currentTarget.value,
                                             })
                                         }
@@ -163,7 +163,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                                 <AlertFrequency
                                     alert={alert}
                                     onAlertPropertyChange={
-                                        handleAlertPropertyChange
+                                        onAlertPropertyChange
                                     }
                                 />
                             )}

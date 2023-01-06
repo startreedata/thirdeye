@@ -146,9 +146,10 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={
                                 <AlertsCreateGuidedRouter
-                                    hideHeader
                                     hideSubscriptionGroup
+                                    navigateToAlertDetailAfterSampleAlertCreate
                                     sampleAlertsBottom
+                                    useParentForNonWelcomeFlow
                                     createLabel={t("label.create")}
                                     inProgressLabel={t("label.creating")}
                                 />
@@ -187,9 +188,10 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={
                                 <AlertsCreateGuidedRouter
-                                    hideHeader
                                     hideSampleAlerts
                                     hideSubscriptionGroup
+                                    navigateToAlertDetailAfterSampleAlertCreate
+                                    useParentForNonWelcomeFlow
                                     createLabel={t("label.create")}
                                     inProgressLabel={t("label.creating")}
                                 />
@@ -281,9 +283,10 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={
                                 <AlertsCreateGuidedRouter
-                                    hideHeader
                                     hideSampleAlerts
                                     hideSubscriptionGroup
+                                    navigateToAlertDetailAfterSampleAlertCreate
+                                    useParentForNonWelcomeFlow
                                     createLabel={t("label.update-entity", {
                                         entity: t("label.alert"),
                                     })}

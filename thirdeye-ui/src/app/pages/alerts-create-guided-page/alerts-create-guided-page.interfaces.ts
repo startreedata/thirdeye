@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
 
-export interface SubscriptionGroupsProps {
+import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
+import { EditableAlert } from "../../rest/dto/alert.interfaces";
+
+export interface AlertsCreateGuidedPageProps {
     alert: EditableAlert;
-    onSubscriptionGroupsChange: (newGroups: SubscriptionGroup[]) => void;
-    initialSubscriptionGroups: SubscriptionGroup[];
-    hideCreateButton?: boolean;
+    alertTemplates: AlertTemplate[];
+    onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+    onSubmit: (alert: EditableAlert, suggestedName: string) => void;
+    isCreatingAlert: boolean;
+    emails?: string[];
+    setEmails?: (emails: string[]) => void;
+    getAlertTemplates: () => void;
 }

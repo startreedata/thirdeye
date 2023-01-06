@@ -20,50 +20,61 @@ import { AlertsGuidedCreateRouterProps } from "./alerts-guided-create.router.int
 
 const CreateAlertPageNewUser = lazy(() =>
     import(
-        /* webpackChunkName: "create-alert-page" */ "../../pages/welcome-page/create-alert/create-alert-page.component"
+        /* webpackChunkName: "create-alert-new-user-page" */ "../../pages/alerts-create-page/create-alert-new-user-page.component"
+    ).then((module) => ({ default: module.CreateAlertNewUserPage }))
+);
+
+const CreateAlertWelcomeFlow = lazy(() =>
+    import(
+        /* webpackChunkName: "create-alert-welcome-flow-page" */ "../../pages/welcome-page/create-alert/create-alert-page.component"
     ).then((module) => ({ default: module.CreateAlertPage }))
 );
 
 const SelectTypePage = lazy(() =>
     import(
-        /* webpackChunkName: "select-type-page" */ "../../pages/welcome-page/create-alert/select-type/select-type-page.component"
+        /* webpackChunkName: "select-type-page" */ "../../pages/alerts-create-guided-page/select-type/select-type-page.component"
     ).then((module) => ({ default: module.SelectTypePage }))
 );
 
 const SetupMonitoringPage = lazy(() =>
     import(
-        /* webpackChunkName: "select-monitoring-page" */ "../../pages/welcome-page/create-alert/setup-monitoring/setup-monitoring-page.component"
+        /* webpackChunkName: "select-monitoring-page" */ "../../pages/alerts-create-guided-page/setup-monitoring/setup-monitoring-page.component"
     ).then((module) => ({ default: module.SetupMonitoringPage }))
 );
 
 const SetupDetailsPage = lazy(() =>
     import(
-        /* webpackChunkName: "select-details-page" */ "../../pages/welcome-page/create-alert/setup-details/setup-details-page.component"
+        /* webpackChunkName: "select-details-page" */ "../../pages/alerts-create-guided-page/setup-details/setup-details-page.component"
     ).then((module) => ({ default: module.SetupDetailsPage }))
 );
 
 const SetupDimensionGroupsPage = lazy(() =>
     import(
-        /* webpackChunkName: "select-dimension-groups-page" */ "../../pages/welcome-page/create-alert/setup-dimension-groups/setup-dimension-groups-page.component"
+        /* webpackChunkName: "select-dimension-groups-page" */ "../../pages/alerts-create-guided-page/setup-dimension-groups/setup-dimension-groups-page.component"
     ).then((module) => ({ default: module.SetupDimensionGroupsPage }))
 );
 
 export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRouterProps> =
     ({
+        useParentForNonWelcomeFlow,
         sampleAlertsBottom,
-        hideHeader,
         hideSampleAlerts,
         hideSubscriptionGroup,
         createLabel,
         inProgressLabel,
         hideCurrentlySelected,
+        navigateToAlertDetailAfterSampleAlertCreate,
     }) => {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
                 <Routes>
                     <Route
                         element={
-                            <CreateAlertPageNewUser hideHeader={hideHeader} />
+                            useParentForNonWelcomeFlow ? (
+                                <CreateAlertPageNewUser />
+                            ) : (
+                                <CreateAlertWelcomeFlow />
+                            )
                         }
                         path="*"
                     >
@@ -81,11 +92,13 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                         <Route
                             element={
                                 <SelectTypePage
-                                    navigateToAlertDetailAfterCreate
                                     hideCurrentlySelected={
                                         hideCurrentlySelected
                                     }
                                     hideSampleAlerts={hideSampleAlerts}
+                                    navigateToAlertDetailAfterCreate={
+                                        navigateToAlertDetailAfterSampleAlertCreate
+                                    }
                                     sampleAlertsBottom={sampleAlertsBottom}
                                 />
                             }

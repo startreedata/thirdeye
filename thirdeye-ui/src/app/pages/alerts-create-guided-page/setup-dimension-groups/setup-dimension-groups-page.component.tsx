@@ -21,22 +21,22 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { AvailableAlgorithmOption } from "../../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
-import { generateTemplateProperties } from "../../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
-import { CohortsTable } from "../../../../components/cohort-detector/cohorts-table/cohorts-table.component";
-import { DatasetDetails } from "../../../../components/cohort-detector/dataset-details/dataset-details.component";
-import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
+import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
+import { generateTemplateProperties } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
+import { CohortsTable } from "../../../components/cohort-detector/cohorts-table/cohorts-table.component";
+import { DatasetDetails } from "../../../components/cohort-detector/dataset-details/dataset-details.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsGridV1,
     useNotificationProviderV1,
-} from "../../../../platform/components";
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { MetricAggFunction } from "../../../../rest/dto/metric.interfaces";
-import { CohortResult } from "../../../../rest/dto/rca.interfaces";
-import { useGetCohort } from "../../../../rest/rca/rca.actions";
-import { GetCohortParams } from "../../../../rest/rca/rca.interfaces";
-import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
-import { AppRouteRelative } from "../../../../utils/routes/routes.util";
+} from "../../../platform/components";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
+import { CohortResult } from "../../../rest/dto/rca.interfaces";
+import { useGetCohort } from "../../../rest/rca/rca.actions";
+import { GetCohortParams } from "../../../rest/rca/rca.interfaces";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 
 export const SetupDimensionGroupsPage: FunctionComponent = () => {
     const navigate = useNavigate();
@@ -46,10 +46,10 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
     const { cohortsResponse, getCohorts, status, errorMessages } =
         useGetCohort();
 
-    const { alert, handleAlertPropertyChange, selectedAlgorithmOption } =
+    const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
         useOutletContext<{
             alert: EditableAlert;
-            handleAlertPropertyChange: (
+            onAlertPropertyChange: (
                 contents: Partial<EditableAlert>,
                 isTotalChange?: boolean
             ) => void;
@@ -105,7 +105,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
             };
         });
 
-        handleAlertPropertyChange({
+        onAlertPropertyChange({
             templateProperties: {
                 ...alert.templateProperties,
                 queryFilters: "${queryFilters}",
@@ -156,7 +156,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                         )}
                         title={t("label.automated-generator")}
                         onAggregationFunctionSelect={(aggFunc) => {
-                            handleAlertPropertyChange({
+                            onAlertPropertyChange({
                                 templateProperties: {
                                     ...alert.templateProperties,
                                     aggregationFunction: aggFunc,
@@ -168,7 +168,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                             dataset,
                             aggregationFunction
                         ) => {
-                            handleAlertPropertyChange({
+                            onAlertPropertyChange({
                                 templateProperties: {
                                     ...alert.templateProperties,
                                     ...generateTemplateProperties(

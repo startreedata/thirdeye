@@ -49,8 +49,9 @@ export const ParseMarkdown: FunctionComponent<ParseMarkdownProps> = ({
             a: ({ children, href, ...props }) => (
                 <LinkV1
                     {...props}
+                    externalLink
                     color="primary"
-                    href={`//${href}`}
+                    href={href}
                     target="_blank"
                     variant="body2"
                 >

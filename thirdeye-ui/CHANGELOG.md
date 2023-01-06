@@ -1,3 +1,22 @@
+## [2.1.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.0.0...thirdeye-ui-2.1.0) (2023-01-03)
+
+
+### Features
+
+* [TE-1148](https://cortexdata.atlassian.net/browse/TE-1148) added a tool-tip for for alert form field description ([ff166df9e](https://github.com/startreedata/thirdeye/commit/ff166df9e85e1be7beb2d41cb2ebf0fbe5a47f3f))
+* [TE-1156](https://cortexdata.atlassian.net/browse/TE-1156) allow users to navigate to all alerts after successful alert creation from welcome flow ([49488a4b0](https://github.com/startreedata/thirdeye/commit/49488a4b05c7de7e27b8341e5d1e6c66489146c6))
+* [TE-1160](https://cortexdata.atlassian.net/browse/TE-1160) autofill metric, datasource, and dataset if they exist when using cohort recommender ([432e423f2](https://github.com/startreedata/thirdeye/commit/432e423f24eda830319ca82ac27f6c5e113d6ce8))
+
+
+### Bug Fixes
+
+* [TE-1152](https://cortexdata.atlassian.net/browse/TE-1152) incorporating the properties metadata into the validation for alert creation ([adff7ffcb](https://github.com/startreedata/thirdeye/commit/adff7ffcb10ac97beca92aba4580f77e38dd953b))
+* [TE-1153](https://cortexdata.atlassian.net/browse/TE-1153) append random 3 character string to sample alert name when creating ([ce116c19c](https://github.com/startreedata/thirdeye/commit/ce116c19cf12cfa8a06f70102500154a20aa46ad))
+* [TE-1154](https://cortexdata.atlassian.net/browse/TE-1154) ensure baselineOffset is a string ([fc3684ec6](https://github.com/startreedata/thirdeye/commit/fc3684ec62b40939ea0c143a9bb1eca59c71d41a))
+* [TE-1157](https://cortexdata.atlassian.net/browse/TE-1157) fix bug where invalid json will cause white screen ([492f5b1b7](https://github.com/startreedata/thirdeye/commit/492f5b1b788cdd66091ff2168d12045fd652c5c5))
+* [TE-1158](https://cortexdata.atlassian.net/browse/TE-1158) ensure valid start and end exist when fetching data ([2426ea609](https://github.com/startreedata/thirdeye/commit/2426ea609f1f897b31ec56e2644fb54fd181b773))
+* ensure loading state is shown when loading alerts ([5e11a3c08](https://github.com/startreedata/thirdeye/commit/5e11a3c080378c84db382cff37600390177d5d1d))
+
 ## [2.0.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-1.75.0...thirdeye-ui-2.0.0) (2022-12-20)
 
 

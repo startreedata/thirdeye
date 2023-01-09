@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 import {
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisMetricRow,
-} from "../../../rest/dto/rca.interfaces";
+} from "../../../../rest/dto/rca.interfaces";
 import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 
 export interface AlgorithmTableProps {

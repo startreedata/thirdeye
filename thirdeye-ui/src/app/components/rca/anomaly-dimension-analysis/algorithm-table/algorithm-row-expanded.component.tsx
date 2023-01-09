@@ -21,16 +21,16 @@ import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     useNotificationProviderV1,
-} from "../../../platform/components";
-import { formatLargeNumberV1 } from "../../../platform/utils";
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
-import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
-import { useCommonStyles } from "../../../utils/material-ui/common.styles";
-import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
-import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
-import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
-import { TimeSeriesChartProps } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+} from "../../../../platform/components";
+import { formatLargeNumberV1 } from "../../../../platform/utils";
+import { ActionStatus } from "../../../../rest/actions.interfaces";
+import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
+import { createAlertEvaluation } from "../../../../utils/anomalies/anomalies.util";
+import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
+import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
+import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
+import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AlgorithmRowExpandedProps } from "./algorithm-table.interfaces";
 import {
     generateComparisonChartOptions,

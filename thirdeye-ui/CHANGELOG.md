@@ -1,3 +1,21 @@
+## [2.2.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.1.0...thirdeye-ui-2.2.0) (2023-01-09)
+
+
+### Features
+
+* [TE-1108](https://cortexdata.atlassian.net/browse/TE-1108) redirect to welcome flow if no alerts exist ([9c8b3909f](https://github.com/startreedata/thirdeye/commit/9c8b3909f321716c261d18973d616e69147a6cee))
+* [TE-1149](https://cortexdata.atlassian.net/browse/TE-1149) add markdown support in alert create form helper tooltip ([1d13b6582](https://github.com/startreedata/thirdeye/commit/1d13b65822ebdf1602f0f4d0049b3caac72aac4a))
+* [TE-1159](https://cortexdata.atlassian.net/browse/TE-1159) update sample alerts ([a2ab4896a](https://github.com/startreedata/thirdeye/commit/a2ab4896a7174d9800952408a2979544c29ce088))
+* [TE-1163](https://cortexdata.atlassian.net/browse/TE-1163) browser console cleanup for ThirdEye UI ([1f5bac0a2](https://github.com/startreedata/thirdeye/commit/1f5bac0a284869703cd6965430e4aab44d61b282))
+* [TE-1194](https://cortexdata.atlassian.net/browse/TE-1194) make users wait 10 seconds after creating an alert before redirect ([882e2cca3](https://github.com/startreedata/thirdeye/commit/882e2cca3cd26cf41a452d6223926b40a3e54699))
+* [TE-1196](https://cortexdata.atlassian.net/browse/TE-1196) replace blank recent anomalies chart with message ([25c3da8d9](https://github.com/startreedata/thirdeye/commit/25c3da8d96b53a8d064fac58a0f273f484e95220))
+
+
+### Bug Fixes
+
+* [TE-1179](https://cortexdata.atlassian.net/browse/TE-1179) display no root cause found in top contributors table ([01be2a769](https://github.com/startreedata/thirdeye/commit/01be2a769221a6710c3805235359f599fb459ed7))
+* [TE-1198](https://cortexdata.atlassian.net/browse/TE-1198) preview chart styling fix in alert creation simple mode ([1da512c96](https://github.com/startreedata/thirdeye/commit/1da512c96e825f337e1497fe2434da7836d771b0))
+
 ## [2.1.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.0.0...thirdeye-ui-2.1.0) (2023-01-03)
 
 

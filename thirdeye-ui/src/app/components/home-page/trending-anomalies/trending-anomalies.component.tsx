@@ -195,10 +195,10 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
                         <Typography variant="h6">
                             {capitalize(
                                 t(
-                                    "message.there-have-been-no-entity-in-the-timePeriod",
+                                    "message.there-have-been-no-entity-in-the-time-period",
                                     {
                                         entity: t("label.anomalies"),
-                                        timePeriod: t(
+                                        "time-period": t(
                                             "label.selected-time-range"
                                         ),
                                     }

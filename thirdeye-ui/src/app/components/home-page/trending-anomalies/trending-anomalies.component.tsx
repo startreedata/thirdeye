@@ -31,6 +31,7 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
 import { getAnomaliesAllRangePath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     TimeRange,
@@ -149,11 +150,10 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
         });
     }, [startTime]);
 
-    const isTimeSeriesEmpty =
-        status === ActionStatus.Done && timeseriesOptions?.series
-            ? timeseriesOptions.series.length === 0 || // Either there are no series
-              !timeseriesOptions.series.some(({ data }) => data.length > 0) // Or none of the series have data to render
-            : false;
+    const isTimeSeriesEmpty: boolean = timeseriesOptions?.series
+        ? timeseriesOptions.series.length === 0 || // Either there are no series
+          !timeseriesOptions.series.some(({ data }) => data.length > 0) // Or none of the series have data to render
+        : false;
 
     return (
         <LoadingErrorStateSwitch
@@ -183,57 +183,59 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
                 </Box>
             }
         >
-            {timeseriesOptions && (
-                <>
-                    {isTimeSeriesEmpty ? (
-                        <Box
-                            alignItems="center"
-                            display="flex"
-                            justifyContent="center"
-                            minHeight={195}
-                            position="relative"
-                        >
-                            <Typography variant="h6">
-                                {capitalize(
-                                    t(
-                                        "message.there-have-been-no-entity-in-the-timePeriod",
-                                        {
-                                            entity: t("label.anomalies"),
-                                            timePeriod: t(
-                                                "label.selected-time-range"
-                                            ),
-                                        }
-                                    )
-                                )}
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Box position="relative">
-                            <Box position="absolute" zIndex={500}>
-                                <Typography variant="h6">
-                                    {t("label.daily-anomalies")}
-                                </Typography>
-                                {currentChartZoom && (
-                                    <Link
-                                        component={RouterLink}
-                                        to={
-                                            getAnomaliesAllRangePath() +
-                                            allAnomaliesLinkSearchParams.toString()
-                                        }
-                                    >
-                                        {t(
-                                            "label.view-anomalies-for-zoom-range"
-                                        )}
-                                    </Link>
-                                )}
-                            </Box>
-                            <Box height={195}>
-                                <TimeSeriesChart {...timeseriesOptions} />
-                            </Box>
+            <EmptyStateSwitch
+                emptyState={
+                    <Box
+                        alignItems="center"
+                        display="flex"
+                        justifyContent="center"
+                        minHeight={195}
+                        position="relative"
+                    >
+                        <Typography variant="h6">
+                            {capitalize(
+                                t(
+                                    "message.there-have-been-no-entity-in-the-timePeriod",
+                                    {
+                                        entity: t("label.anomalies"),
+                                        timePeriod: t(
+                                            "label.selected-time-range"
+                                        ),
+                                    }
+                                )
+                            )}
+                        </Typography>
+                    </Box>
+                }
+                isEmpty={isTimeSeriesEmpty}
+            >
+                <Box position="relative">
+                    <Box position="absolute" zIndex={500}>
+                        <Typography variant="h6">
+                            {t("label.daily-anomalies")}
+                        </Typography>
+                        {currentChartZoom && (
+                            <Link
+                                component={RouterLink}
+                                to={
+                                    getAnomaliesAllRangePath() +
+                                    allAnomaliesLinkSearchParams.toString()
+                                }
+                            >
+                                {t("label.view-anomalies-for-zoom-range")}
+                            </Link>
+                        )}
+                    </Box>
+                    {/* Rendering `TimeSeriesChart` only when `timeseriesOptions` is defined helps 
+                    prevent an initialisation error where the component crashes when it initially 
+                    renders with an empty timeseriesOptions */}
+                    {timeseriesOptions && (
+                        <Box height={195}>
+                            <TimeSeriesChart {...timeseriesOptions} />
                         </Box>
                     )}
-                </>
-            )}
+                </Box>
+            </EmptyStateSwitch>
         </LoadingErrorStateSwitch>
     );
 };

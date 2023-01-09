@@ -19,9 +19,12 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
@@ -36,12 +39,16 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -64,15 +71,18 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       .build();
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
   private final AlertManager alertManager;
+  private final AppAnalyticsService analyticsService;
 
   @Inject
   public AnomalyResource(
       final MergedAnomalyResultManager mergedAnomalyResultManager,
       final AlertManager alertManager,
+      final AppAnalyticsService analyticsService,
       final AuthorizationManager authorizationManager) {
     super(mergedAnomalyResultManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
     this.alertManager = alertManager;
+    this.analyticsService = analyticsService;
   }
 
   @Override
@@ -127,5 +137,21 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
     return Response
         .ok()
         .build();
+  }
+
+  @GET
+  @Path("stats")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getAnomalyStats(
+      @QueryParam("startTime") final Long startTime,
+      @QueryParam("endTime") final Long endTime
+  ) {
+    final List<Predicate> predicates = new ArrayList<>();
+    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
+    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
+    final DaoFilter filter = predicates.isEmpty()
+        ? null : new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
+    return Response.ok(analyticsService.computeAnomalyStats(filter)).build();
   }
 }

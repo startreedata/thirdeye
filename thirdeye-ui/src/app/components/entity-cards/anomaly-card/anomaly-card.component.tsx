@@ -17,7 +17,7 @@ import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { RCA_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_ANOMALY_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card/anomaly-summary-card-deatil.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
@@ -46,7 +46,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             container
                             item
                             data-tour-id={
-                                RCA_TOUR_IDS.ANOMALY_START_END_DATE_TEXT
+                                RCA_ANOMALY_TOUR_IDS.ANOMALY_START_END_DATE_TEXT
                             }
                             lg={7}
                             sm={8}
@@ -81,7 +81,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                             container
                             item
                             data-tour-id={
-                                RCA_TOUR_IDS.CURRENT_PREDICTED_DEVIATION
+                                RCA_ANOMALY_TOUR_IDS.CURRENT_PREDICTED_DEVIATION
                             }
                             lg={5}
                             sm={4}

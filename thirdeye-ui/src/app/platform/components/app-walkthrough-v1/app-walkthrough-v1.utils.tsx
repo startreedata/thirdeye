@@ -13,11 +13,13 @@
  * the License.
  */
 import { Box, Card, CardContent, Chip, Typography } from "@material-ui/core";
-import type { StepType } from "@reactour/tour";
-import React, { ReactNode } from "react";
+import type { StepType, TourProps } from "@reactour/tour";
+import { useTour } from "@reactour/tour";
+import React, { ReactNode, useEffect } from "react";
 
 export const TOURS = {
-    RCA: "RCA",
+    RCA_ANOMALY: "RCA_ANOMALY",
+    RCA_INVESTIGATE: "RCA_INVESTIGATE",
 } as const;
 
 export const HOMEPAGE_TOUR_IDS = {
@@ -48,24 +50,24 @@ export const HomepageTourSteps: StepType[] = [
 ];
 
 // TODO: Is this naming convention fine?
-export const RCA_TOUR_IDS = {
-    ANOMALY_HEADER_TEXT: `${TOURS.RCA}__ANOMALY_HEADER_TEXT`,
-    ANOMALY_START_END_DATE_TEXT: `${TOURS.RCA}__ANOMALY_START_END_DATE_TEXT`,
-    CURRENT_PREDICTED_DEVIATION: `${TOURS.RCA}__CURRENT_PREDICTED_DEVIATION`,
-    ANOMALY_FEEDBACK_CHART_AREA: `${TOURS.RCA}ANOMALY_FEEDBACK_CHART_AREA`,
-    ANOMALY_FEEDBACK_DROPDOWN: `${TOURS.RCA}__ANOMALY_FEEDBACK_DROPDOWN`,
-    ANOMALY_FEEDBACK_COMMENT: `${TOURS.RCA}__ANOMALY_FEEDBACK_COMMENT`,
-    CHANGE_START_END_RANGE: `${TOURS.RCA}__CHANGE_START_END_RANGE`,
-    CHART_LABELS: `${TOURS.RCA}__CHART_LABELS`,
-    INVESTIGATE_ANOMALY: `${TOURS.RCA}__INVESTIGATE_ANOMALY`,
-    PREVIOUS_INVESTIGATIONS: `${TOURS.RCA}__PREVIOUS_INVESTIGATIONS`,
+export const RCA_ANOMALY_TOUR_IDS = {
+    ANOMALY_HEADER_TEXT: `${TOURS.RCA_ANOMALY}__ANOMALY_HEADER_TEXT`,
+    ANOMALY_START_END_DATE_TEXT: `${TOURS.RCA_ANOMALY}__ANOMALY_START_END_DATE_TEXT`,
+    CURRENT_PREDICTED_DEVIATION: `${TOURS.RCA_ANOMALY}__CURRENT_PREDICTED_DEVIATION`,
+    ANOMALY_FEEDBACK_CHART_AREA: `${TOURS.RCA_ANOMALY}ANOMALY_FEEDBACK_CHART_AREA`,
+    ANOMALY_FEEDBACK_DROPDOWN: `${TOURS.RCA_ANOMALY}__ANOMALY_FEEDBACK_DROPDOWN`,
+    ANOMALY_FEEDBACK_COMMENT: `${TOURS.RCA_ANOMALY}__ANOMALY_FEEDBACK_COMMENT`,
+    CHANGE_START_END_RANGE: `${TOURS.RCA_ANOMALY}__CHANGE_START_END_RANGE`,
+    CHART_LABELS: `${TOURS.RCA_ANOMALY}__CHART_LABELS`,
+    INVESTIGATE_ANOMALY: `${TOURS.RCA_ANOMALY}__INVESTIGATE_ANOMALY`,
+    PREVIOUS_INVESTIGATIONS: `${TOURS.RCA_ANOMALY}__PREVIOUS_INVESTIGATIONS`,
 } as const;
 
 // TODO: Move to a generic type utils file
 export type ValueOf<T> = T[keyof T];
 
 // TODO: Use generic Tour IDs
-export type StepIdType = ValueOf<typeof RCA_TOUR_IDS>;
+export type StepIdType = ValueOf<typeof RCA_ANOMALY_TOUR_IDS>;
 
 export interface ExtendedStepType extends StepType {
     id: StepIdType;
@@ -96,7 +98,7 @@ const getContentElement = (
     );
 };
 
-export const RcaTourSteps: ExtendedStepType[] = (
+export const RcaAnomalyTourSteps: ExtendedStepType[] = (
     [
         {
             // No selector needed for this first one
@@ -108,7 +110,7 @@ export const RcaTourSteps: ExtendedStepType[] = (
             nextLabel: "Start Tour",
         },
         {
-            selector: RCA_TOUR_IDS.ANOMALY_HEADER_TEXT,
+            selector: RCA_ANOMALY_TOUR_IDS.ANOMALY_HEADER_TEXT,
             content: getContentElement({
                 title: "Anomaly Page Header",
                 body: (
@@ -135,21 +137,21 @@ export const RcaTourSteps: ExtendedStepType[] = (
             }),
         },
         {
-            selector: RCA_TOUR_IDS.ANOMALY_START_END_DATE_TEXT,
+            selector: RCA_ANOMALY_TOUR_IDS.ANOMALY_START_END_DATE_TEXT,
             content: getContentElement({
                 title: "Anomaly Duration",
                 body: "These three fields in the Anomaly Card show the Start Date, the End Date, and the corresponding Duration when the anomalous activity was detected",
             }),
         },
         {
-            selector: RCA_TOUR_IDS.CURRENT_PREDICTED_DEVIATION,
+            selector: RCA_ANOMALY_TOUR_IDS.CURRENT_PREDICTED_DEVIATION,
             content: getContentElement({
                 title: "Deviation from prediction",
                 body: "These two fields in the Anomaly Card show how much the actual anomalous behaviour deviated from the system's prediction, in absolute and relative terms",
             }),
         },
         {
-            selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_CHART_AREA,
+            selector: RCA_ANOMALY_TOUR_IDS.ANOMALY_FEEDBACK_CHART_AREA,
             content: getContentElement({
                 title: "Anomaly chart",
                 body: "This is the chart for the detected anomaly, highlighted and plotted against the expected behavior",
@@ -157,7 +159,7 @@ export const RcaTourSteps: ExtendedStepType[] = (
             position: "top",
         },
         {
-            selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN,
+            selector: RCA_ANOMALY_TOUR_IDS.ANOMALY_FEEDBACK_DROPDOWN,
             content: getContentElement({
                 title: "Submit feedback",
                 body: "After reviewing the detected anomaly, you can submit feedback about the type and accuracy of this detection. This will help the system improve its \
@@ -166,7 +168,7 @@ export const RcaTourSteps: ExtendedStepType[] = (
             position: "top",
         },
         {
-            selector: RCA_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT,
+            selector: RCA_ANOMALY_TOUR_IDS.ANOMALY_FEEDBACK_COMMENT,
             content: getContentElement({
                 title: "Add a comment",
                 body: "You can also add a text comment to the anomaly to better explain the selected feedback, add context, or jot down notes",
@@ -174,14 +176,14 @@ export const RcaTourSteps: ExtendedStepType[] = (
             position: "top",
         },
         {
-            selector: RCA_TOUR_IDS.CHANGE_START_END_RANGE,
+            selector: RCA_ANOMALY_TOUR_IDS.CHANGE_START_END_RANGE,
             content: getContentElement({
                 title: "Start and End Date range",
                 body: "The date range for plotting the anomaly chart is auto-selected in proportion to the duration of the anomaly. Though not recommended, this can be changed as needed",
             }),
         },
         {
-            selector: RCA_TOUR_IDS.CHART_LABELS,
+            selector: RCA_ANOMALY_TOUR_IDS.CHART_LABELS,
             content: getContentElement({
                 title: "Chart Legend",
                 body: (
@@ -198,14 +200,14 @@ export const RcaTourSteps: ExtendedStepType[] = (
             }),
         },
         {
-            selector: RCA_TOUR_IDS.INVESTIGATE_ANOMALY,
+            selector: RCA_ANOMALY_TOUR_IDS.INVESTIGATE_ANOMALY,
             content: getContentElement({
                 title: "Investigate Anomaly",
                 body: "To further explore an Anomaly, click on this button to start an investigation",
             }),
         },
         {
-            selector: RCA_TOUR_IDS.PREVIOUS_INVESTIGATIONS,
+            selector: RCA_ANOMALY_TOUR_IDS.PREVIOUS_INVESTIGATIONS,
             content: getContentElement({
                 title: "Investigate Anomaly",
                 body: "All previous investigations are stored and displayed in this table at the bottom",
@@ -224,8 +226,15 @@ export const getTourSelector = (
     selectorType: SelectorType = "tour"
 ): string => `[data-${selectorType}-id='${p}']`;
 
-export const getSteps = (): ExtendedStepType[] => {
-    const selectedSteps = RcaTourSteps;
+export type TourType = keyof typeof TOURS;
+
+const tourStepsMap: Record<TourType, ExtendedStepType[]> = {
+    [TOURS.RCA_ANOMALY]: RcaAnomalyTourSteps,
+    [TOURS.RCA_INVESTIGATE]: RcaAnomalyTourSteps,
+};
+
+export const getTourSteps = (tourType: TourType): ExtendedStepType[] => {
+    const selectedSteps = tourStepsMap[tourType];
 
     return selectedSteps.map((s) => ({
         ...s,
@@ -248,4 +257,24 @@ export const getSteps = (): ExtendedStepType[] => {
             ),
         }),
     }));
+};
+
+type UseAppTourReturn = { startTour: () => void } & TourProps;
+
+// Use this hook throughout the app, as this will expose the minimal interface required
+// to use the in-app tour while handling all the common abstraction behind the scenes
+export const useAppTour = (tourType: TourType): UseAppTourReturn => {
+    const tourContext = useTour();
+
+    const { setIsOpen, setSteps } = tourContext;
+
+    useEffect(() => {
+        setSteps(getTourSteps(tourType));
+    }, []);
+
+    const startTour = (): void => {
+        setIsOpen(true);
+    };
+
+    return { startTour, ...tourContext };
 };

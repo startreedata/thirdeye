@@ -21,7 +21,6 @@ import {
 } from "@reactour/tour";
 import React, { ComponentType, FunctionComponent, useMemo } from "react";
 import { DimensionV1 } from "../../utils";
-import { getSteps } from "./app-walkthrough-v1.utils";
 import { TourCard } from "./tour-card/tour-card.component";
 
 export const AppWalkthroughV1: FunctionComponent = ({ children }) => {
@@ -32,7 +31,7 @@ export const AppWalkthroughV1: FunctionComponent = ({ children }) => {
             scrollSmooth: true,
             onClickMask: (): void => undefined,
             disableInteraction: true, // Disable interaction for the first iteration
-            steps: getSteps(),
+            steps: [], // Steps will be empty on init, to be set by the page initiating the tour
             ContentComponent: TourCard as ComponentType<PopoverContentProps>,
             styles: {
                 badge: (base) => ({

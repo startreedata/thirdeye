@@ -36,7 +36,10 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { RCA_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import {
+    RCA_ANOMALY_TOUR_IDS,
+    useAppTour,
+} from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
@@ -204,6 +207,12 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         });
     };
 
+    const { startTour } = useAppTour("RCA_ANOMALY");
+
+    const handleStartTour = (): void => {
+        startTour();
+    };
+
     useEffect(() => {
         if (anomalyRequestStatus === ActionStatus.Error) {
             isEmpty(anomalyRequestErrors)
@@ -256,7 +265,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         <Button
                             color="primary"
                             component="button"
-                            data-tour-id={RCA_TOUR_IDS.INVESTIGATE_ANOMALY}
+                            data-tour-id={
+                                RCA_ANOMALY_TOUR_IDS.INVESTIGATE_ANOMALY
+                            }
                             href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
                                 Number(anomalyId)
                             )}?${searchParams.toString()}`}
@@ -273,6 +284,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         >
                             {t("label.delete")}
                         </Button>
+                        <Button
+                            component="button"
+                            variant="contained"
+                            onClick={handleStartTour}
+                        >
+                            {t("label.help")}
+                        </Button>
                     </PageHeaderActionsV1>
                 }
                 subtitle={
@@ -282,7 +300,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 }
             >
                 <PageHeaderTextV1
-                    data-tour-id={RCA_TOUR_IDS.ANOMALY_HEADER_TEXT}
+                    data-tour-id={RCA_ANOMALY_TOUR_IDS.ANOMALY_HEADER_TEXT}
                 >
                     {anomaly && uiAnomaly && (
                         <>
@@ -332,7 +350,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 {/* Alert evaluation time series */}
                 <Grid
                     item
-                    data-tour-id={RCA_TOUR_IDS.ANOMALY_FEEDBACK_CHART_AREA}
+                    data-tour-id={
+                        RCA_ANOMALY_TOUR_IDS.ANOMALY_FEEDBACK_CHART_AREA
+                    }
                     xs={12}
                 >
                     {chartDataHasIssues && (
@@ -365,7 +385,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 {/* Existing investigations */}
                 <Grid
                     item
-                    data-tour-id={RCA_TOUR_IDS.PREVIOUS_INVESTIGATIONS}
+                    data-tour-id={RCA_ANOMALY_TOUR_IDS.PREVIOUS_INVESTIGATIONS}
                     xs={12}
                 >
                     <InvestigationsList

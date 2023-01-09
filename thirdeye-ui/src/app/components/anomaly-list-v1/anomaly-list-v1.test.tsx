@@ -76,18 +76,21 @@ jest.mock("../../platform/components/data-grid-v1", () => ({
                             {Array.isArray(props.columns) &&
                             props.columns.length
                                 ? props.columns.map(
-                                      (column: DataGridColumnV1<UiAnomaly>) =>
-                                          column.customCellRenderer &&
-                                          column.customCellRenderer(
-                                              anomaly[
-                                                  column.key as keyof UiAnomaly
-                                              ] as unknown as Record<
-                                                  string,
-                                                  unknown
-                                              >,
-                                              anomaly,
-                                              column
-                                          )
+                                      (column: DataGridColumnV1<UiAnomaly>) => (
+                                          <React.Fragment key={column.key}>
+                                              {column.customCellRenderer &&
+                                                  column.customCellRenderer(
+                                                      anomaly[
+                                                          column.key as keyof UiAnomaly
+                                                      ] as unknown as Record<
+                                                          string,
+                                                          unknown
+                                                      >,
+                                                      anomaly,
+                                                      column
+                                                  )}
+                                          </React.Fragment>
+                                      )
                                   )
                                 : null}
                         </span>

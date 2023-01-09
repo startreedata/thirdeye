@@ -16,6 +16,7 @@ import { Box, TextField, Tooltip, Typography } from "@material-ui/core";
 import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
 import React, { FunctionComponent } from "react";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
+import { ParseMarkdown } from "../../../parse-markdown/parse-markdown.component";
 import { AlertTemplateFormFieldProps } from "./alert-template-form-field.interfaces";
 
 export const AlertTemplateFormField: FunctionComponent<AlertTemplateFormFieldProps> =
@@ -48,7 +49,9 @@ export const AlertTemplateFormField: FunctionComponent<AlertTemplateFormFieldPro
                                 placement="top"
                                 title={
                                     <Typography variant="caption">
-                                        {tooltipText}
+                                        <ParseMarkdown>
+                                            {tooltipText}
+                                        </ParseMarkdown>
                                     </Typography>
                                 }
                             >

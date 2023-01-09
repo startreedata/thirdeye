@@ -19,7 +19,6 @@ import ErrorIcon from "@material-ui/icons/Error";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
-import { useTour } from "@reactour/tour";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -50,7 +49,6 @@ export const AppBar: FunctionComponent = () => {
     const { authDisabled, authenticated } = useAuthProviderV1();
     const location = useLocation();
     const { t } = useTranslation();
-    const { setIsOpen } = useTour();
     const isRouteCurrent = (route: string): boolean => {
         return location.pathname.indexOf(route) === 0;
     };
@@ -121,14 +119,6 @@ export const AppBar: FunctionComponent = () => {
             <NavBarSecondaryContainerV1>
                 {/* About */}
                 <AboutDialogNavBarButton />
-
-                {/* TODO: Move to a different component */}
-                <NavBarLinkV1 onClick={() => setIsOpen(true)}>
-                    <NavBarLinkIconV1>
-                        <HelpOutlineIcon />
-                    </NavBarLinkIconV1>
-                    <NavBarLinkTextV1>Start Tour</NavBarLinkTextV1>
-                </NavBarLinkV1>
 
                 {/* Documentation */}
                 <NavBarLinkV1

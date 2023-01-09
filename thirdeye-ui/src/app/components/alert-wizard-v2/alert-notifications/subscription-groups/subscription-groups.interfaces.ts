@@ -19,4 +19,5 @@ export interface SubscriptionGroupsProps {
     alert: EditableAlert;
     onSubscriptionGroupsChange: (newGroups: SubscriptionGroup[]) => void;
     initialSubscriptionGroups: SubscriptionGroup[];
+    hideCreateButton?: boolean;
 }

@@ -1,0 +1,20 @@
+
+{
+  "tableName": "AdCampaignData",
+  "segmentsConfig" : {
+    "schemaName": "AdCampaignData",
+    "replication": "1",
+    "timeColumnName": "CampaignDeliveryTimestamp",
+    "timeType": "SECONDS"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP"
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

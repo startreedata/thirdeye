@@ -29,8 +29,8 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
-import ai.startree.thirdeye.auth.AccessControl;
 import ai.startree.thirdeye.auth.AccessType;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -61,7 +60,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
@@ -71,7 +69,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
 
-  public final AccessControl accessControl;
+  public final AuthorizationManager authorizationManager;
 
   protected final AbstractManager<DtoT> dtoManager;
   protected final ImmutableMap<String, String> apiToIndexMap;
@@ -80,13 +78,13 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public CrudResource(
       final AbstractManager<DtoT> dtoManager,
       final ImmutableMap<String, String> apiToIndexMap,
-      final AccessControl accessControl) {
+      final AuthorizationManager authorizationManager) {
     this.dtoManager = dtoManager;
     this.apiToIndexMap = ImmutableMap.<String, String>builder()
         .put("id", "baseId")
         .putAll(apiToIndexMap)
         .build();
-    this.accessControl = accessControl;
+    this.authorizationManager = authorizationManager;
   }
 
   /**
@@ -109,6 +107,9 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     validate(api, existing);
 
     final DtoT updated = toDto(api);
+
+    // Check the that user can modify the resource before and after the update.
+    authorizationManager.ensureCanEdit(principal, existing, updated);
 
     // Allow downstream classes to process any additional changes
     prepareUpdatedDto(principal, existing, updated);
@@ -199,18 +200,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     dtoManager.delete(dto);
   }
 
-  public boolean hasAccess(final ThirdEyePrincipal principal, final AbstractDTO dto,
-      final AccessType accessType) {
-    return accessControl.hasAccess(principal, ResourceIdentifier.fromDto(dto), accessType);
-  }
-
-  public void ensureHasAccess(final ThirdEyePrincipal principal, final AbstractDTO dto,
-      final AccessType accessType) {
-    if (!hasAccess(principal, dto, accessType)) {
-      throw new ForbiddenException(Response.status(Status.FORBIDDEN).build());
-    }
-  }
-
   @GET
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
@@ -225,7 +214,9 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
     final RequestCache cache = createRequestCache();
     return respondOk(results.stream()
-        .filter(dto -> hasAccess(principal, dto, AccessType.READ))
+        .filter(dto -> authorizationManager.hasAccess(principal,
+            ResourceIdentifier.from(dto),
+            AccessType.READ))
         .map(dto -> toApi(dto, cache)));
   }
 
@@ -237,7 +228,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     final DtoT dto = get(id);
-    ensureHasAccess(principal, dto, AccessType.READ);
+    authorizationManager.ensureCanRead(principal, dto);
 
     final RequestCache cache = createRequestCache();
     return respondOk(toApi(dto, cache));
@@ -263,7 +254,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
     }
     DtoT dtoT = byName.iterator().next();
-    ensureHasAccess(principal, dtoT, AccessType.READ);
+    authorizationManager.ensureCanRead(principal, dtoT);
     return respondOk(toApi(dtoT, cache));
   }
 
@@ -287,6 +278,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     final RequestCache cache = createRequestCache();
     return list.stream()
         .peek(api1 -> validate(api1, null))
+        .peek(api -> authorizationManager.ensureCanCreate(principal, toDto(api)))
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
@@ -328,7 +320,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @PathParam("id") Long id) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
-      ensureHasAccess(principal, dto, AccessType.UPDATE);
+      authorizationManager.ensureCanDelete(principal, dto);
 
       deleteDto(dto);
       log.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
@@ -347,7 +339,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response deleteAll(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
     dtoManager.findAll()
         .stream()
-        .peek(dto -> ensureHasAccess(principal, dto, AccessType.UPDATE))
+        .peek(dto -> authorizationManager.ensureCanDelete(principal, dto))
         .forEach(this::deleteDto);
     return Response.ok().build();
   }

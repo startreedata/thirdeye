@@ -168,7 +168,12 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     disableValidation
                     value={alert}
                     onChange={(updates) => {
-                        setAdvancedEditorAlert(() => JSON.parse(updates));
+                        try {
+                            const parsedString = JSON.parse(updates);
+                            setAdvancedEditorAlert(() => parsedString);
+                        } catch {
+                            // do nothing if invalid JSON string
+                        }
                     }}
                 />
             ),

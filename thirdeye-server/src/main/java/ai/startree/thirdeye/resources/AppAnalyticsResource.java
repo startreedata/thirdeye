@@ -13,14 +13,22 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
+import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -41,11 +49,21 @@ public class AppAnalyticsResource {
   }
 
   @GET
-  public Response getAnalyticsPayload() {
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getAnalyticsPayload(
+      @QueryParam("startTime") final Long startTime,
+      @QueryParam("endTime") final Long endTime
+  ) {
+    final List<Predicate> predicates = new ArrayList<>();
+    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
+    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
+    final DaoFilter filter = predicates.isEmpty()
+        ? null : new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
     return Response.ok(new AppAnalyticsApi()
         .setVersion(appVersion())
         .setnMonitoredMetrics(appAnalyticsService.uniqueMonitoredMetricsCount())
-        .setAnomalyStats(appAnalyticsService.computeAnomalyStats(null))
+        .setAnomalyStats(appAnalyticsService.computeAnomalyStats(filter))
     ).build();
   }
 

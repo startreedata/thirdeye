@@ -74,19 +74,11 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         setAlertsData(alertsData);
     }, [alerts]);
 
-    const handleAlertViewDetails = (id: number): void => {
-        navigate(getAlertsAlertPath(id));
-    };
-
     const renderLink = (
         cellValue: Record<string, unknown>,
         data: UiAlert
     ): ReactElement => {
-        return (
-            <Link onClick={() => handleAlertViewDetails(data.id)}>
-                {cellValue}
-            </Link>
-        );
+        return <Link href={getAlertsAlertPath(data.id)}>{cellValue}</Link>;
     };
 
     const renderAlertAccuracy = (

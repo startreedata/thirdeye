@@ -50,5 +50,9 @@ module.exports = {
         "\\.svg$": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock SVG imports
         "\\.(css|scss)$": "identity-obj-proxy", // Mock style imports
         "^d3-(.*)$": "d3-$1/dist/d3-$1", // Map D3 to compiled bundle
+        // Add module mapping for react-markdown
+        // Ref: https://stackoverflow.com/questions/72382316/jest-encountered-an-unexpected-token-react-markdown
+        "react-markdown":
+            "<rootDir>/node_modules/react-markdown/react-markdown.min.js",
     },
 };

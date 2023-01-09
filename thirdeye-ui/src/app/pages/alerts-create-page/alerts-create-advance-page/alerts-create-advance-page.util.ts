@@ -14,7 +14,7 @@
  */
 import CronValidator from "cron-expression-validator";
 import {
-    findRequiredFields,
+    determinePropertyFieldConfiguration,
     hasRequiredPropertyValuesSet,
 } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
@@ -54,13 +54,14 @@ export function validateConfiguration(
             false
         );
     } else if (selectedAlertTemplate) {
-        const requiredFields = findRequiredFields(selectedAlertTemplate);
+        const availableFields = determinePropertyFieldConfiguration(
+            selectedAlertTemplate
+        );
         onValidationChange(
             CreateAlertConfigurationSection.TEMPLATE_PROPERTIES,
             hasRequiredPropertyValuesSet(
-                requiredFields,
-                alertConfig.templateProperties || {},
-                selectedAlertTemplate.defaultProperties || {}
+                availableFields,
+                alertConfig.templateProperties || {}
             )
         );
     } else {

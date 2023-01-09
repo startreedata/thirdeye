@@ -12,10 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box } from "@material-ui/core";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { useNotificationProviderV1 } from "../../platform/components";
+import {
+    useDialogProviderV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
@@ -32,10 +37,27 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         SubscriptionGroup[]
     >([]);
 
+    const { showDialog, hideDialog } = useDialogProviderV1();
+
     const handleCreateAlertClick = useMemo(() => {
-        return handleCreateAlertClickGenerator(notify, t, (savedAlert) =>
-            navigate(getAlertsAlertPath(savedAlert.id))
-        );
+        return handleCreateAlertClickGenerator(notify, t, (savedAlert) => {
+            showDialog({
+                type: DialogType.CUSTOM,
+                contents: (
+                    <Box textAlign="center">
+                        {t("message.redirecting-to-alert-in-10-seconds")}
+                    </Box>
+                ),
+                hideCancelButton: true,
+                hideOkButton: true,
+            });
+
+            // Wait 10 seconds so the initial anomalies task run completes
+            setTimeout(() => {
+                hideDialog();
+                navigate(getAlertsAlertPath(savedAlert.id));
+            }, 10000);
+        });
     }, [navigate, notify, t]);
 
     return (

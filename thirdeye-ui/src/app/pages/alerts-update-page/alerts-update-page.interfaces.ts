@@ -44,4 +44,5 @@ export interface AlertEditPageOutletContextProps {
     alertTemplateOptions: AlertTemplateType[];
     setShowBottomBar: (flag: boolean) => void;
     handleSubmitAlertClick: (alert: EditableAlert) => void;
+    refreshAlertTemplates: () => void;
 }

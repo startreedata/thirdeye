@@ -57,7 +57,7 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
                                     : series.color;
 
                             return (
-                                <>
+                                <React.Fragment key={series.name}>
                                     {series.tooltip.tooltipFormatter !==
                                         undefined &&
                                         series.tooltip.tooltipFormatter(
@@ -86,7 +86,7 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
                                             </td>
                                         </tr>
                                     )}
-                                </>
+                                </React.Fragment>
                             );
                         })}
                     </tbody>

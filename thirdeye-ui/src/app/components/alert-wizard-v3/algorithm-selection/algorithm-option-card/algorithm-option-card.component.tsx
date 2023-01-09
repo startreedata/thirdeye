@@ -17,9 +17,11 @@ import {
     Card,
     CardContent,
     CardProps,
+    Link,
     Typography,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import { AlgorithmOptionCardProps } from "./algorithm-option-card.interfaces";
 
 const OutlineCardComponent: FunctionComponent<CardProps> = (props) => {
@@ -28,6 +30,8 @@ const OutlineCardComponent: FunctionComponent<CardProps> = (props) => {
 
 export const AlgorithmOptionCard: FunctionComponent<AlgorithmOptionCardProps> =
     ({ option, children }) => {
+        const { t } = useTranslation();
+
         return (
             <Box
                 component={OutlineCardComponent}
@@ -46,6 +50,15 @@ export const AlgorithmOptionCard: FunctionComponent<AlgorithmOptionCardProps> =
                         </Typography>
                     </CardContent>
                 </Box>
+                {option.recipeLink && (
+                    <Box>
+                        <CardContent>
+                            <Link href={option.recipeLink} target="_blank">
+                                {t("label.view-recipe")}
+                            </Link>
+                        </CardContent>
+                    </Box>
+                )}
                 <Box>{children}</Box>
             </Box>
         );

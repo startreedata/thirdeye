@@ -72,6 +72,11 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
         return (
             <TextField
                 fullWidth
+                defaultValue={
+                    alert.templateProperties[
+                        inputFieldConfig.templatePropertyName
+                    ] ?? undefined
+                }
                 type={inputFieldConfig.type}
                 variant="outlined"
                 onChange={(e) => {

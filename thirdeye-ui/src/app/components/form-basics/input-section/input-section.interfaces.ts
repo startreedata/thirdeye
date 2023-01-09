@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ReactElement } from "react";
+import type { GridProps } from "@material-ui/core";
+import type { ReactElement } from "react";
 
 export interface InputSectionProps {
     label?: string;
@@ -20,4 +21,5 @@ export interface InputSectionProps {
     labelComponent?: ReactElement;
     inputComponent: ReactElement;
     fullWidth?: boolean;
+    gridContainerProps?: GridProps;
 }

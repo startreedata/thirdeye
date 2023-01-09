@@ -243,6 +243,8 @@ export const AlertsAllPage: FunctionComponent = () => {
     const loadingErrorStateParams = {
         isError,
         isLoading,
+        wrapInGrid: true,
+        wrapInCard: true,
     };
 
     const emptyStateParams = {

@@ -13,12 +13,17 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
+import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import java.util.Objects;
 
 public class ResourceIdentifier {
 
-  static public final String DefaultNamespace = "default";
+  static public final String DEFAULT_NAME = "0";
+  static public final String DEFAULT_NAMESPACE = "default";
+  static public final String DEFAULT_ENTITY_TYPE = "RESOURCE";
 
   public final String name;
   public final String namespace;
@@ -30,22 +35,12 @@ public class ResourceIdentifier {
     this.entityType = entityType;
   }
 
-  static public ResourceIdentifier fromDto(final AbstractDTO dto) {
-    if (dto instanceof AlertDTO) {
-      return new ResourceIdentifier(
-          ((AlertDTO) dto).getName(),
-          // TODO jackson: Add a namespace field for alerts.
-          ResourceIdentifier.DefaultNamespace,
-          "alert"
-      );
-    }
-
-    // TODO jackson: Add remaining resources.
-
+  static public <T extends AbstractDTO> ResourceIdentifier from(final T dto) {
     return new ResourceIdentifier(
-        dto.getId().toString(),
-        ResourceIdentifier.DefaultNamespace,
-        "unspecified"
+        optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
+        optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
+        optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
+            .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE)
     );
   }
 }

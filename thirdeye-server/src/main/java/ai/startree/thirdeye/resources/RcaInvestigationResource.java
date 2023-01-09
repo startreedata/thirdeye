@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
-import ai.startree.thirdeye.auth.AccessControl;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
@@ -48,8 +48,8 @@ public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, 
 
   @Inject
   public RcaInvestigationResource(final RcaInvestigationManager rootCauseSessionDAO,
-      final AccessControl accessControl) {
-    super(rootCauseSessionDAO, API_TO_INDEX_FILTER_MAP, accessControl);
+      final AuthorizationManager authorizationManager) {
+    super(rootCauseSessionDAO, API_TO_INDEX_FILTER_MAP, authorizationManager);
   }
 
   @Override

@@ -35,7 +35,6 @@ import { Palette } from "../../../utils/material-ui/palette.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { getAnomaliesAnomalyPath } from "../../../utils/routes/routes.util";
 import { determineGranularity } from "../../../utils/visualization/visualization.util";
-import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import {
     DataPoint,
     NormalizedSeries,
@@ -45,6 +44,7 @@ import {
     TimeSeriesChartProps,
     ZoomDomain,
 } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+import { AnomalyFilterOption } from "../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 
 export const ZOOM_START_KEY = "zoomStart";
 export const ZOOM_END_KEY = "zoomEnd";

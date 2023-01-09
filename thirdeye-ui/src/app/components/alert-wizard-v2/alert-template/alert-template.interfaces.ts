@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
+import {
+    AlertTemplate,
+    MetadataProperty,
+} from "../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 
 export interface AlertTemplateProps {
@@ -21,4 +24,10 @@ export interface AlertTemplateProps {
     selectedAlertTemplate: AlertTemplate | null;
     setSelectedAlertTemplate: (newAlertTemplate: AlertTemplate | null) => void;
     alertTemplateOptions: AlertTemplate[];
+}
+
+export interface AlertTemplatePropertyParsedMetadata {
+    name: string;
+    isOptional: boolean;
+    metadata: MetadataProperty;
 }

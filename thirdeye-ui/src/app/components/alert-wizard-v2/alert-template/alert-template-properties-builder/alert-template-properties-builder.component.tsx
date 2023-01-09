@@ -18,7 +18,6 @@ import {
     Divider,
     Grid,
     Link,
-    TextField,
     Typography,
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
@@ -34,8 +33,8 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { getAlertTemplatesUpdatePath } from "../../../../utils/routes/routes.util";
-import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
+import { AlertTemplateFormField } from "../alert-template-form-field/alert-template-form-field.component";
 import { setUpFieldInputRenderConfig } from "../alert-template.utils";
 import {
     AlertTemplatePropertiesBuilderProps,
@@ -45,11 +44,9 @@ import {
 export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplatePropertiesBuilderProps> =
     ({
         alertTemplateId,
-        defaultTemplateProperties,
         templateProperties,
         onPropertyValueChange,
-        requiredFields,
-        propertyDetails,
+        availableFields,
     }) => {
         const { t } = useTranslation();
         const classes = useAlertWizardV2Styles();
@@ -65,14 +62,13 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
 
         useEffect(() => {
             const [requiredKeys, optionalKeys] = setUpFieldInputRenderConfig(
-                requiredFields,
-                templateProperties,
-                defaultTemplateProperties
+                availableFields,
+                templateProperties
             );
 
             setRequiredKeys(requiredKeys);
             setOptionalKeys(optionalKeys);
-        }, [requiredFields]);
+        }, [availableFields]);
 
         const handlePropertyValueChange = useCallback(
             debounce((key, value) => {
@@ -85,30 +81,26 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
 
         return (
             <>
-                <Grid container item xs={12}>
-                    <Grid item xs={12}>
-                        <Box paddingBottom={2} paddingTop={2}>
-                            <Alert
-                                className={classes.infoAlert}
-                                icon={<InfoIcon />}
-                                severity="info"
+                <Grid item xs={12}>
+                    <Box paddingBottom={2} paddingTop={2}>
+                        <Alert
+                            className={classes.infoAlert}
+                            icon={<InfoIcon />}
+                            severity="info"
+                        >
+                            {t("message.changes-added-to-template-properties")}
+                            <Link
+                                href={getAlertTemplatesUpdatePath(
+                                    alertTemplateId
+                                )}
+                                target="_blank"
                             >
                                 {t(
-                                    "message.changes-added-to-template-properties"
-                                )}
-                                <Link
-                                    href={getAlertTemplatesUpdatePath(
-                                        alertTemplateId
-                                    )}
-                                    target="_blank"
-                                >
-                                    {t(
-                                        "label.template-configuration"
-                                    ).toLowerCase()}
-                                </Link>
-                            </Alert>
-                        </Box>
-                    </Grid>
+                                    "label.template-configuration"
+                                ).toLowerCase()}
+                            </Link>
+                        </Alert>
+                    </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box paddingBottom={2}>
@@ -120,51 +112,25 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                         </Typography>
                     </Box>
                 </Grid>
-                {requiredKeys.map((item, idx) => {
-                    return (
-                        <InputSection
-                            inputComponent={
-                                <TextField
-                                    fullWidth
-                                    data-testid={`textfield-${item.key}`}
-                                    defaultValue={item.value}
-                                    inputProps={{ tabIndex: idx + 1 }}
-                                    placeholder={t("label.add-property-value", {
-                                        key: item.key,
-                                    })}
-                                    onChange={(e) => {
-                                        handlePropertyValueChange(
-                                            item.key,
-                                            e.currentTarget.value
-                                        );
-                                    }}
-                                />
-                            }
-                            key={item.key}
-                            labelComponent={
-                                <Box paddingBottom={1} paddingTop={1}>
-                                    <Typography variant="body2">
-                                        {item.key}
-                                    </Typography>
-                                    {propertyDetails?.[item.key]
-                                        ?.description ? (
-                                        <Typography
-                                            className={
-                                                classes.alertPropertyLabelDescription
-                                            }
-                                            variant="caption"
-                                        >
-                                            {
-                                                propertyDetails?.[item.key]
-                                                    ?.description
-                                            }
-                                        </Typography>
-                                    ) : null}
-                                </Box>
-                            }
-                        />
-                    );
-                })}
+                {requiredKeys.map((item, idx) => (
+                    <AlertTemplateFormField
+                        item={item}
+                        key={item.key}
+                        textFieldProps={{
+                            inputProps: { tabIndex: idx + 1 },
+                            placeholder: t("label.add-property-value", {
+                                key: item.key,
+                            }),
+                            onChange: (e) => {
+                                handlePropertyValueChange(
+                                    item.key,
+                                    e.currentTarget.value
+                                );
+                            },
+                        }}
+                        tooltipText={item.metadata.description}
+                    />
+                ))}
                 {!showMore && optionalKeys.length > 0 && (
                     <>
                         <Grid item xs={12}>
@@ -184,9 +150,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                             </Button>
                         </Grid>
                         <Grid item xs={12}>
-                            <Box marginBottom={5}>
-                                <Divider />
-                            </Box>
+                            <Divider />
                         </Grid>
                     </>
                 )}
@@ -204,55 +168,27 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 </Typography>
                             </Box>
                         </Grid>
-                        {optionalKeys.map((item, idx) => {
-                            return (
-                                <InputSection
-                                    inputComponent={
-                                        <TextField
-                                            fullWidth
-                                            data-testid={`textfield-${item.key}`}
-                                            defaultValue={item.value}
-                                            inputProps={{
-                                                tabIndex:
-                                                    requiredKeys.length +
-                                                    idx +
-                                                    1,
-                                            }}
-                                            placeholder={item.defaultValue.toString()}
-                                            onChange={(e) =>
-                                                handlePropertyValueChange(
-                                                    item.key,
-                                                    e.currentTarget.value
-                                                )
-                                            }
-                                        />
-                                    }
-                                    key={item.key}
-                                    labelComponent={
-                                        <Box paddingBottom={1} paddingTop={1}>
-                                            <Typography variant="body2">
-                                                {item.key}
-                                            </Typography>
-                                            {propertyDetails?.[item.key]
-                                                ?.description ? (
-                                                <Typography
-                                                    className={
-                                                        classes.alertPropertyLabelDescription
-                                                    }
-                                                    variant="caption"
-                                                >
-                                                    {
-                                                        propertyDetails?.[
-                                                            item.key
-                                                        ]?.description
-                                                    }
-                                                </Typography>
-                                            ) : null}
-                                        </Box>
-                                    }
-                                />
-                            );
-                        })}
+                        {optionalKeys.map((item, idx) => (
+                            <AlertTemplateFormField
+                                item={item}
+                                key={item.key}
+                                textFieldProps={{
+                                    inputProps: {
+                                        tabIndex: requiredKeys.length + idx + 1,
+                                    },
+                                    placeholder: item.metadata.defaultValue
+                                        ? item.metadata.defaultValue.toString()
+                                        : "",
+                                    onChange: (e) => {
+                                        handlePropertyValueChange(
+                                            item.key,
+                                            e.currentTarget.value
+                                        );
+                                    },
+                                }}
+                                tooltipText={item.metadata.description}
+                            />
+                        ))}
                     </>
                 )}
                 {showMore && optionalKeys.length > 0 && (
@@ -271,9 +207,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                             </Button>
                         </Grid>
                         <Grid item xs={12}>
-                            <Box marginBottom={5}>
-                                <Divider />
-                            </Box>
+                            <Divider />
                         </Grid>
                     </>
                 )}

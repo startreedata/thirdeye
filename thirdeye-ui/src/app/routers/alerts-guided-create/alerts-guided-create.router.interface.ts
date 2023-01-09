@@ -14,10 +14,12 @@
  */
 
 export interface AlertsGuidedCreateRouterProps {
-    hideHeader?: boolean;
+    navigateToAlertDetailAfterSampleAlertCreate?: boolean;
+    useParentForNonWelcomeFlow?: boolean;
     sampleAlertsBottom?: boolean;
     hideSampleAlerts?: boolean;
     hideSubscriptionGroup?: boolean;
+    hideCurrentlySelected?: boolean;
     createLabel: string;
     inProgressLabel: string;
 }

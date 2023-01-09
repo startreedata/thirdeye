@@ -18,18 +18,20 @@ import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
     DataGridV1,
-    SkeletonV1,
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
 import { useGetSubscriptionGroups } from "../../../../rest/subscription-groups/subscription-groups.actions";
 import { getSubscriptionGroupsCreatePath } from "../../../../utils/routes/routes.util";
+import { EmptyStateSwitch } from "../../../page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupsProps } from "./subscription-groups.interfaces";
 
 export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
     alert,
     onSubscriptionGroupsChange,
     initialSubscriptionGroups,
+    hideCreateButton,
 }) => {
     const { t } = useTranslation();
     const { subscriptionGroups, getSubscriptionGroups, status } =
@@ -97,82 +99,103 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
 
     return (
         <Grid container item xs={12}>
-            {status === ActionStatus.Working && (
-                <Grid item xs={12}>
-                    <SkeletonV1 />
-                    <SkeletonV1 />
-                    <SkeletonV1 />
-                    <SkeletonV1 />
-                </Grid>
-            )}
-            <Grid container item xs={12}>
-                {status === ActionStatus.Done &&
-                    subscriptionGroups &&
-                    subscriptionGroups.length === 0 && (
-                        <Grid item xs={12}>
-                            <Box padding={3} textAlign="center">
-                                <Typography variant="h6">
-                                    No subscription groups created
-                                </Typography>
+            <LoadingErrorStateSwitch
+                wrapInGrid
+                isError={status === ActionStatus.Error}
+                isLoading={status === ActionStatus.Working}
+            >
+                <Grid container item xs={12}>
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Grid item xs={12}>
+                                <Box padding={3} textAlign="center">
+                                    <Typography variant="h6">
+                                        {t(
+                                            "message.no-subscription-groups-created"
+                                        )}
+                                    </Typography>
 
-                                <Typography variant="body2">
-                                    Create a subscription group in order to
-                                    create notifications for the alert
-                                </Typography>
+                                    <Typography variant="body2">
+                                        {t(
+                                            "message.create-a-subscription-group-in-order-to-create"
+                                        )}
+                                    </Typography>
 
-                                <Box marginTop={3}>
-                                    <Button
-                                        color="primary"
-                                        href={getSubscriptionGroupsCreatePath()}
-                                        target="_blank"
-                                        variant="outlined"
-                                    >
-                                        Create group
-                                    </Button>
+                                    <Box marginTop={3}>
+                                        <Button
+                                            color="primary"
+                                            href={getSubscriptionGroupsCreatePath()}
+                                            target="_blank"
+                                            variant="outlined"
+                                        >
+                                            {t("label.create-entity", {
+                                                entity: t(
+                                                    "label.subscription-group"
+                                                ),
+                                            })}
+                                        </Button>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </Grid>
-                    )}
-
-                {status === ActionStatus.Done &&
-                    subscriptionGroups &&
-                    subscriptionGroups.length > 0 && (
+                            </Grid>
+                        }
+                        isEmpty={
+                            !!subscriptionGroups &&
+                            subscriptionGroups.length === 0
+                        }
+                    >
                         <>
-                            <Grid item lg={3} md={4}>
-                                <Typography variant="h6">
-                                    Select subscription groups
-                                </Typography>
+                            <Grid container item xs={12}>
+                                <Grid item lg={5} md={6} xs={12}>
+                                    <Grid
+                                        container
+                                        justifyContent="space-between"
+                                    >
+                                        <Grid item>
+                                            <Typography variant="h6">
+                                                {t(
+                                                    "label.select-subscription-groups"
+                                                )}
+                                            </Typography>
+                                        </Grid>
+
+                                        {!hideCreateButton && (
+                                            <Grid item>
+                                                <Button
+                                                    color="primary"
+                                                    href={getSubscriptionGroupsCreatePath()}
+                                                    target="_blank"
+                                                    variant="outlined"
+                                                >
+                                                    {t("label.create-group")}
+                                                </Button>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </Grid>
                             </Grid>
-                            <Grid item lg={9} md={8}>
-                                <Button
-                                    color="primary"
-                                    href={getSubscriptionGroupsCreatePath()}
-                                    target="_blank"
-                                    variant="outlined"
-                                >
-                                    Create group
-                                </Button>
-                            </Grid>
-                            <Grid item lg={5} md={6} xs={12}>
-                                <Box height={300}>
-                                    <DataGridV1<SubscriptionGroup>
-                                        hideBorder
-                                        hideToolbar
-                                        columns={subscriptionGroupColumns}
-                                        data={subscriptionGroups}
-                                        rowKey="id"
-                                        selectionModel={
-                                            selectedSubscriptionGroup
-                                        }
-                                        onSelectionChange={
-                                            handleSelectedSubscriptionGroupChange
-                                        }
-                                    />
-                                </Box>
+                            <Grid container item xs={12}>
+                                <Grid item lg={5} md={6} xs={12}>
+                                    <Box height={300}>
+                                        <DataGridV1<SubscriptionGroup>
+                                            hideBorder
+                                            hideToolbar
+                                            columns={subscriptionGroupColumns}
+                                            data={subscriptionGroups}
+                                            rowKey="id"
+                                            selectionModel={
+                                                selectedSubscriptionGroup
+                                            }
+                                            onSelectionChange={
+                                                handleSelectedSubscriptionGroupChange
+                                            }
+                                        />
+                                    </Box>
+                                </Grid>
                             </Grid>
                         </>
-                    )}
-            </Grid>
+                    </EmptyStateSwitch>
+                </Grid>
+            </LoadingErrorStateSwitch>
         </Grid>
     );
 };

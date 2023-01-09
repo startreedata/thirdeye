@@ -1,0 +1,20 @@
+
+{
+  "tableName": "CleanPageViewsData",
+  "segmentsConfig" : {
+    "schemaName": "CleanPageViewsData",
+    "replication": "1",
+    "timeColumnName": "pageviewdate",
+    "timeType": "DAYS"
+  },
+  "tableIndexConfig" : {
+    "invertedIndexColumns" : [],
+    "loadMode"  : "MMAP"
+  },
+  "tenants" : {
+    "broker":"DefaultTenant",
+    "server":"DefaultTenant"
+  },
+  "tableType":"OFFLINE",
+  "metadata": {}
+}

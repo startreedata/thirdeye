@@ -38,9 +38,7 @@ import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertTemplatePropertiesBuilder } from "./alert-template-properties-builder/alert-template-properties-builder.component";
 import { AlertTemplateProps } from "./alert-template.interfaces";
 import {
-    findRequiredFields,
-    getDefaultProperties,
-    getPropertyDetails,
+    determinePropertyFieldConfiguration,
     hasRequiredPropertyValuesSet,
 } from "./alert-template.utils";
 import { PreviewChart } from "./preview-chart/preview-chart.component";
@@ -59,9 +57,9 @@ function AlertTemplate({
     const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
         useState(false);
 
-    const requiredFields = useMemo(() => {
+    const availableInputFields = useMemo(() => {
         if (selectedAlertTemplate) {
-            return findRequiredFields(selectedAlertTemplate);
+            return determinePropertyFieldConfiguration(selectedAlertTemplate);
         }
 
         return [];
@@ -70,19 +68,12 @@ function AlertTemplate({
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
 
-    const defaultProperties = getDefaultProperties(
-        selectedAlertTemplate
-    ) as TemplatePropertiesObject;
-
-    const propertyDetails = getPropertyDetails(selectedAlertTemplate);
-
     useEffect(() => {
         const isValid =
             !!selectedAlertTemplate &&
             hasRequiredPropertyValuesSet(
-                requiredFields,
-                alertTemplateProperties,
-                defaultProperties
+                availableInputFields,
+                alertTemplateProperties
             );
 
         setIsRequiredPropertyValuesSet(isValid);
@@ -102,10 +93,10 @@ function AlertTemplate({
              * they want to delete the override
              */
             Object.keys(newChanges).forEach((templatePropertyKey) => {
-                if (
-                    selectedAlertTemplate &&
-                    defaultProperties[templatePropertyKey] !== undefined
-                ) {
+                const propertyMetadata = availableInputFields.find(
+                    (item) => item.name === templatePropertyKey
+                );
+                if (propertyMetadata && propertyMetadata.isOptional) {
                     if (newChanges[templatePropertyKey] === "") {
                         delete newTemplateProperties[templatePropertyKey];
                     }
@@ -241,25 +232,25 @@ function AlertTemplate({
                 {selectedAlertTemplate && (
                     <AlertTemplatePropertiesBuilder
                         alertTemplateId={selectedAlertTemplate.id}
-                        defaultTemplateProperties={defaultProperties}
-                        propertyDetails={propertyDetails}
-                        requiredFields={requiredFields}
+                        availableFields={availableInputFields}
                         templateProperties={alertTemplateProperties}
                         onPropertyValueChange={handlePropertyValueChange}
                     />
                 )}
 
-                <PreviewChart
-                    alert={alert}
-                    displayState={
-                        selectedAlertTemplate
-                            ? isRequiredPropertyValuesSet
-                                ? MessageDisplayState.GOOD_TO_PREVIEW
-                                : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
-                            : MessageDisplayState.SELECT_TEMPLATE
-                    }
-                    subtitle={t("message.select-template-to-preview-alert")}
-                />
+                <Grid item xs={12}>
+                    <PreviewChart
+                        alert={alert}
+                        displayState={
+                            selectedAlertTemplate
+                                ? isRequiredPropertyValuesSet
+                                    ? MessageDisplayState.GOOD_TO_PREVIEW
+                                    : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
+                                : MessageDisplayState.SELECT_TEMPLATE
+                        }
+                        subtitle={t("message.select-template-to-preview-alert")}
+                    />
+                </Grid>
             </Grid>
         </PageContentsCardV1>
     );

@@ -14,27 +14,37 @@
 
 package ai.startree.thirdeye.auth;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-public class AccessControlModule extends AbstractModule {
+import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.accessControl.AccessType;
+import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
+import com.google.inject.Provider;
+
+public class AccessControlProvider implements Provider<AccessControl> {
 
   public final static AccessControl alwaysAllow = (
-      final ThirdEyePrincipal principal,
+      final String token,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> true;
 
   public final static AccessControl alwaysDeny = (
-      final ThirdEyePrincipal principal,
+      final String token,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> false;
 
-  @Singleton
-  @Provides
-  public AccessControl provideAccessControl() {
-    return alwaysAllow;
+  private AccessControl accessControl = null;
+
+  public void set(AccessControl accessControl) {
+    if (this.accessControl != null) {
+      throw new RuntimeException("Access control source can only be set once!");
+    }
+    this.accessControl = accessControl;
+  }
+
+  public AccessControl get() {
+    return optional(this.accessControl).orElse(alwaysAllow);
   }
 }

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi;
 
+import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
@@ -55,5 +56,9 @@ public interface Plugin {
 
   default Iterable<EnumeratorFactory> getEnumeratorFactories() {
     return Collections.emptyList();
+  }
+
+  default AccessControl getAccessControl() {
+    return null;
   }
 }

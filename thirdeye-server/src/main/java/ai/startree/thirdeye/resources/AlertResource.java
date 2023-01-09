@@ -24,12 +24,11 @@ import ai.startree.thirdeye.alert.AlertCreater;
 import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
-import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AppAnalyticsService;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
@@ -163,7 +162,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   public Response getInsights(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
-    authorizationManager.ensureHasAccess(principal, ResourceIdentifier.from(dto), AccessType.READ);
+    authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
 
     final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
     return Response.ok(insights).build();
@@ -194,7 +193,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertDTO dto = get(id);
     ensureExists(dto);
     ensureExists(startTime, "start");
-    authorizationManager.ensureHasAccess(principal, ResourceIdentifier.from(dto), AccessType.UPDATE);
+    authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
 
     alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
     return Response.ok().build();
@@ -251,7 +250,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     final AlertDTO dto = get(id);
-    authorizationManager.ensureHasAccess(principal, ResourceIdentifier.from(dto), AccessType.UPDATE);
+    authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     alertDeleter.deleteAssociatedAnomalies(dto.getId());

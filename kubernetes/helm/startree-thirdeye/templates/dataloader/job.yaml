@@ -39,7 +39,7 @@ spec:
         - >
           timeout=60 &&
           retry=0 &&
-          until curl -f $CONTROLLER_PROTOCOL://$CONTROLLER_HOST:$CONTROLLER_PORT/health;
+          until curl -k -f $CONTROLLER_PROTOCOL://$CONTROLLER_HOST:$CONTROLLER_PORT/health;
           do 
             if [ $retry -eq $timeout ];then
               echo "Pinot controller probe timed out" &&

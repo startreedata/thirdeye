@@ -15,7 +15,7 @@
 import { Box, Link, Typography } from "@material-ui/core";
 import { Orientation } from "@visx/axis";
 import { scaleLinear } from "d3-scale";
-import { capitalize } from "lodash";
+import { capitalize, isEmpty } from "lodash";
 import { DateTime } from "luxon";
 import React, {
     FunctionComponent,
@@ -55,7 +55,7 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
         useState<TimeSeriesChartProps>();
     const [currentChartZoom, setCurrentChartZoom] =
         useState<ZoomDomain | null>();
-    const { getAnomalies, status } = useGetAnomalies();
+    const { anomalies, getAnomalies, status } = useGetAnomalies();
 
     const handleZoomChange = useCallback(
         (domain: ZoomDomain | null) => {
@@ -150,10 +150,7 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
         });
     }, [startTime]);
 
-    const isTimeSeriesEmpty: boolean = timeseriesOptions?.series
-        ? timeseriesOptions.series.length === 0 || // Either there are no series
-          !timeseriesOptions.series.some(({ data }) => data.length > 0) // Or none of the series have data to render
-        : false;
+    const isTimeSeriesEmpty: boolean = isEmpty(anomalies);
 
     return (
         <LoadingErrorStateSwitch

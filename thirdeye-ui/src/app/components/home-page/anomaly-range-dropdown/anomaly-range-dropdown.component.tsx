@@ -43,7 +43,7 @@ export const AnomalyRangeDropdown: FunctionComponent<AnomalyRangeDropdownProps> 
             },
             {
                 label: t("label.all"),
-                value: generateDateRangeMonthsFromNow(60)[0],
+                value: generateDateRangeMonthsFromNow(24)[0],
             },
         ];
 

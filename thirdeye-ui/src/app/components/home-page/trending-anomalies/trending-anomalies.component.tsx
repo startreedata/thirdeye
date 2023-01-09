@@ -152,7 +152,7 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
     const isTimeSeriesEmpty =
         status === ActionStatus.Done && timeseriesOptions?.series
             ? timeseriesOptions.series.length === 0 || // Either there are no series
-              !timeseriesOptions.series.some(({ data }) => data.length > 0) // Or no series have data to render
+              !timeseriesOptions.series.some(({ data }) => data.length > 0) // Or none of the series have data to render
             : false;
 
     return (

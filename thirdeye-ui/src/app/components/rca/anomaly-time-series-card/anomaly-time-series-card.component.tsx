@@ -50,7 +50,6 @@ import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { getErrorMessages } from "../../../utils/rest/rest.util";
-import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { AnomalyFeedback } from "../../anomaly-feedback/anomaly-feedback.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
@@ -60,6 +59,7 @@ import {
     TimeSeriesChartProps,
     ZoomDomain,
 } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+import { AnomalyFilterOption } from "../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { AnomalyTimeSeriesCardProps } from "./anomaly-time-series-card.interfaces";
 import {
     CHART_SIZE_OPTIONS,

@@ -14,22 +14,23 @@
  */
 import { Chip } from "@material-ui/core";
 import React from "react";
-import { formatLargeNumberV1 } from "../../../platform/utils";
-import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
-import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
-import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
-import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
+import { TFunction } from "react-i18next";
+import { formatLargeNumberV1 } from "../../../../platform/utils";
+import { AlertEvaluation } from "../../../../rest/dto/alert.interfaces";
+import { AnomalyDimensionAnalysisMetricRow } from "../../../../rest/dto/rca.interfaces";
+import { extractDetectionEvaluation } from "../../../../utils/alerts/alerts.util";
+import { EMPTY_STRING_DISPLAY } from "../../../../utils/anomalies/anomalies.util";
 import {
     baselineOffsetToMilliseconds,
     comparisonOffsetReadableValue,
-} from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
-import { Dimension } from "../../../utils/material-ui/dimension.util";
-import { Palette } from "../../../utils/material-ui/palette.util";
-import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
+} from "../../../../utils/anomaly-breakdown/anomaly-breakdown.util";
+import { Dimension } from "../../../../utils/material-ui/dimension.util";
+import { Palette } from "../../../../utils/material-ui/palette.util";
+import { concatKeyValueWithEqual } from "../../../../utils/params/params.util";
 import {
     SeriesType,
     TimeSeriesChartProps,
-} from "../../visualizations/time-series-chart/time-series-chart.interfaces";
+} from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 
 export const SERVER_VALUE_FOR_OTHERS = "(ALL_OTHERS)";
@@ -39,9 +40,21 @@ export const generateName = (
     rowData: AnomalyDimensionAnalysisMetricRow,
     metric: string,
     dataset: string,
-    dimensionColumns: string[]
+    dimensionColumns: string[],
+    translation: TFunction
 ): JSX.Element => {
     const chips: JSX.Element[] = [];
+
+    if (rowData.names.length === 0) {
+        return (
+            <span>
+                {translation(
+                    "message.metric-from-dataset-moved-along-all-dimensions-no-specific-root",
+                    { metric: metric, dataset: dataset }
+                )}
+            </span>
+        );
+    }
 
     rowData.names.forEach((dimensionValue: string, idx: number) => {
         let displayValue = dimensionValue;

@@ -26,7 +26,8 @@ import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { createStyles, withStyles } from "@material-ui/styles";
 import classNames from "classnames";
 import React, { FunctionComponent, useState } from "react";
-import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
+import { useTranslation } from "react-i18next";
+import { AnomalyDimensionAnalysisMetricRow } from "../../../../rest/dto/rca.interfaces";
 import { AlgorithmRowExpanded } from "./algorithm-row-expanded.component";
 import { useAlgorithmRowExpandedStyles } from "./algorithm-row-expanded.styles";
 import { AlgorithmRowProps } from "./algorithm-table.interfaces";
@@ -66,13 +67,15 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     checked,
     onCheckClick,
 }) => {
+    const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const classes = useAlgorithmRowExpandedStyles();
     const nameDisplay = generateName(
         row as unknown as AnomalyDimensionAnalysisMetricRow,
         metric,
         dataset,
-        dimensionColumns
+        dimensionColumns,
+        t
     );
     const parentRowClasses = [classes.root];
 
@@ -96,10 +99,12 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
             {/** Main Content */}
             <TableRow className={classNames(...parentRowClasses)}>
                 <TableCell>
-                    <Checkbox
-                        checked={checked}
-                        onChange={handleOnCheckboxClick}
-                    />
+                    {row.names.length > 0 && (
+                        <Checkbox
+                            checked={checked}
+                            onChange={handleOnCheckboxClick}
+                        />
+                    )}
                 </TableCell>
                 <TableCell component="th" scope="row">
                     {row.names.includes(SERVER_VALUE_FOR_OTHERS) ? (
@@ -118,12 +123,14 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                         nameDisplay
                     )}
                 </TableCell>
-                <TableCell>Metric</TableCell>
+                <TableCell>{t("label.metric")}</TableCell>
                 <TableCell>
-                    <ScoreIndicator
-                        value={(row.cost / totalSum) * 100}
-                        variant="determinate"
-                    />
+                    {row.names.length > 0 && (
+                        <ScoreIndicator
+                            value={(row.cost / totalSum) * 100}
+                            variant="determinate"
+                        />
+                    )}
                 </TableCell>
                 <TableCell>
                     <IconButton

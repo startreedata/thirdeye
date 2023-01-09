@@ -28,8 +28,8 @@ import { formatLargeNumberV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { CohortResult } from "../../../rest/dto/rca.interfaces";
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
-import { generateFilterOptions } from "../../anomaly-dimension-analysis/algorithm-table/algorithm-table.utils";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { generateFilterOptions } from "../../rca/anomaly-dimension-analysis/algorithm-table/algorithm-table.utils";
 import {
     CohortsTableProps,
     CohortTableRowData,

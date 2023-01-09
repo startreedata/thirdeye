@@ -18,14 +18,14 @@ import { useTranslation } from "react-i18next";
 import {
     SkeletonV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { ActionStatus } from "../../rest/actions.interfaces";
-import { AnomalyDimensionAnalysisData } from "../../rest/dto/rca.interfaces";
-import { useGetAnomalyDimensionAnalysis } from "../../rest/rca/rca.actions";
-import { getFilterDimensionAnalysisData } from "../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
-import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
-import { LoadingErrorStateSwitch } from "../page-states/loading-error-state-switch/loading-error-state-switch.component";
+} from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { AnomalyDimensionAnalysisData } from "../../../rest/dto/rca.interfaces";
+import { useGetAnomalyDimensionAnalysis } from "../../../rest/rca/rca.actions";
+import { getFilterDimensionAnalysisData } from "../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnomalyDimensionAnalysisTable } from "./algorithm-table/algorithm-table.component";
 import { AnomalyDimensionAnalysisProps } from "./anomaly-dimension-analysis.interfaces";
 

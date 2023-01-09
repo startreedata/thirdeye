@@ -140,7 +140,7 @@ export const RecentAnomalies: FunctionComponent = () => {
                                         t(
                                             "message.no-recent-entity-found-in-the-timePeriod",
                                             {
-                                                entity: t("anomalies"),
+                                                entity: t("label.anomalies"),
                                                 timePeriod: t(
                                                     "label.last-6-months"
                                                 ),

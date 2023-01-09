@@ -59,7 +59,7 @@ export const TooltipMarkers: FunctionComponent<TooltipMarkersProps> = ({
                         : seriesData.color;
 
                 return (
-                    <>
+                    <React.Fragment key={seriesData.name}>
                         <circle
                             cx={xScale(xValue)}
                             cy={(yScale(dataPoint.y) as number) + 1}
@@ -110,7 +110,7 @@ export const TooltipMarkers: FunctionComponent<TooltipMarkersProps> = ({
                                 />
                             </>
                         )}
-                    </>
+                    </React.Fragment>
                 );
             })}
         </g>

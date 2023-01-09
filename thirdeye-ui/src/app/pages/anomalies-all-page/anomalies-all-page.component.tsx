@@ -85,11 +85,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, [searchParams]);
 
     useEffect(() => {
-        // Time range refreshed, fetch anomalies
-        fetchAnomaliesByTime();
-    }, [startTime, endTime, anomalyFilters]);
+        // isMounted ensures that the state updates are not run if the component has been unmounted
+        let isMounted = true;
 
-    const fetchAnomaliesByTime = (): void => {
+        // Time range refreshed, fetch anomalies
         setAnomalies([]);
 
         const params: GetAnomaliesProps = {
@@ -99,13 +98,19 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         };
 
         getAnomalies(params).then((anomalies) => {
-            if (anomalies && anomalies.length > 0) {
-                setAnomalies(anomalies);
-            } else {
-                setAnomalies([]);
+            if (isMounted) {
+                if (anomalies && anomalies.length > 0) {
+                    setAnomalies(anomalies);
+                } else {
+                    setAnomalies([]);
+                }
             }
         });
-    };
+
+        return () => {
+            isMounted = false;
+        };
+    }, [startTime, endTime, anomalyFilters]);
 
     const handleAnomalyDelete = (uiAnomaliesToDelete: UiAnomaly[]): void => {
         promptDeleteConfirmation(

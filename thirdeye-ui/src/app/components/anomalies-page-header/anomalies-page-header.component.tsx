@@ -23,8 +23,7 @@ import { Crumb } from "../breadcrumbs/breadcrumbs.interfaces";
 import { PageHeader } from "../page-header/page-header.component";
 
 export const AnomaliesPageHeader: FunctionComponent = () => {
-    const { search } = useLocation();
-    const { pathname } = useLocation();
+    const { search, pathname } = useLocation();
     const { t } = useTranslation();
     const crumbs: Crumb[] = [
         {
@@ -43,6 +42,12 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
         });
     }
 
+    const selectedSubNavigation: number =
+        [
+            { path: AppRouteRelative.ANOMALIES_LIST, index: 0 },
+            { path: AppRouteRelative.METRICS_REPORT, index: 1 },
+        ].find((s) => pathname.includes(s.path))?.index || 0;
+
     return (
         <PageHeader
             showCreateButton
@@ -57,13 +62,7 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
                     label: t("label.metrics-report"),
                 },
             ]}
-            subNavigationSelected={
-                pathname.indexOf(AppRouteRelative.ANOMALIES_LIST) > -1
-                    ? 0
-                    : pathname.indexOf(AppRouteRelative.METRICS_REPORT) > -1
-                    ? 1
-                    : undefined
-            }
+            subNavigationSelected={selectedSubNavigation}
             title={t("label.anomalies")}
         />
     );

@@ -215,24 +215,16 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 getAlertInsightStatus === ActionStatus.Working
             }
             loadingState={
-                <Box position="relative">
-                    <SkeletonV1
-                        animation="pulse"
-                        delayInMS={0}
-                        height={300}
-                        variant="rect"
-                    />
-                </Box>
+                <SkeletonV1
+                    animation="pulse"
+                    delayInMS={0}
+                    height={300}
+                    variant="rect"
+                />
             }
         >
             {/** Header Section **/}
-            <Grid
-                container
-                item
-                alignItems="center"
-                justifyContent="space-between"
-                xs={12}
-            >
+            <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
                     <Typography variant="h6">
                         {t("label.alert-preview")}

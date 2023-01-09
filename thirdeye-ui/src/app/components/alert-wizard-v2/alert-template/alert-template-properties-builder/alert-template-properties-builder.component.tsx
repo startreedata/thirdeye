@@ -81,30 +81,26 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
 
         return (
             <>
-                <Grid container item xs={12}>
-                    <Grid item xs={12}>
-                        <Box paddingBottom={2} paddingTop={2}>
-                            <Alert
-                                className={classes.infoAlert}
-                                icon={<InfoIcon />}
-                                severity="info"
+                <Grid item xs={12}>
+                    <Box paddingBottom={2} paddingTop={2}>
+                        <Alert
+                            className={classes.infoAlert}
+                            icon={<InfoIcon />}
+                            severity="info"
+                        >
+                            {t("message.changes-added-to-template-properties")}
+                            <Link
+                                href={getAlertTemplatesUpdatePath(
+                                    alertTemplateId
+                                )}
+                                target="_blank"
                             >
                                 {t(
-                                    "message.changes-added-to-template-properties"
-                                )}
-                                <Link
-                                    href={getAlertTemplatesUpdatePath(
-                                        alertTemplateId
-                                    )}
-                                    target="_blank"
-                                >
-                                    {t(
-                                        "label.template-configuration"
-                                    ).toLowerCase()}
-                                </Link>
-                            </Alert>
-                        </Box>
-                    </Grid>
+                                    "label.template-configuration"
+                                ).toLowerCase()}
+                            </Link>
+                        </Alert>
+                    </Box>
                 </Grid>
                 <Grid item xs={12}>
                     <Box paddingBottom={2}>
@@ -154,9 +150,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                             </Button>
                         </Grid>
                         <Grid item xs={12}>
-                            <Box marginBottom={5}>
-                                <Divider />
-                            </Box>
+                            <Divider />
                         </Grid>
                     </>
                 )}
@@ -213,9 +207,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                             </Button>
                         </Grid>
                         <Grid item xs={12}>
-                            <Box marginBottom={5}>
-                                <Divider />
-                            </Box>
+                            <Divider />
                         </Grid>
                     </>
                 )}

@@ -238,17 +238,19 @@ function AlertTemplate({
                     />
                 )}
 
-                <PreviewChart
-                    alert={alert}
-                    displayState={
-                        selectedAlertTemplate
-                            ? isRequiredPropertyValuesSet
-                                ? MessageDisplayState.GOOD_TO_PREVIEW
-                                : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
-                            : MessageDisplayState.SELECT_TEMPLATE
-                    }
-                    subtitle={t("message.select-template-to-preview-alert")}
-                />
+                <Grid item xs={12}>
+                    <PreviewChart
+                        alert={alert}
+                        displayState={
+                            selectedAlertTemplate
+                                ? isRequiredPropertyValuesSet
+                                    ? MessageDisplayState.GOOD_TO_PREVIEW
+                                    : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
+                                : MessageDisplayState.SELECT_TEMPLATE
+                        }
+                        subtitle={t("message.select-template-to-preview-alert")}
+                    />
+                </Grid>
             </Grid>
         </PageContentsCardV1>
     );

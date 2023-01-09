@@ -25,8 +25,10 @@ import {
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
-import { getAlertInsight } from "../../../rest/alerts/alerts.rest";
+import {
+    useGetAlertInsight,
+    useGetEvaluation,
+} from "../../../rest/alerts/alerts.actions";
 import {
     AlertEvaluation,
     EditableAlert,
@@ -72,6 +74,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         errorMessages: getEvaluationRequestErrors,
         status: getEvaluationStatus,
     } = useGetEvaluation();
+
+    const { getAlertInsight, status: getAlertInsightStatus } =
+        useGetAlertInsight();
 
     const [detectionEvaluations, setDetectionEvaluations] =
         useState<DetectionEvaluation[]>();
@@ -132,19 +137,25 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     const handleAutoRangeClick = (): void => {
         getAlertInsight({ alert }).then(
             (insights) => {
-                searchParams.set(
-                    TimeRangeQueryStringKey.START_TIME,
-                    insights.defaultStartTime.toString()
-                );
-                searchParams.set(
-                    TimeRangeQueryStringKey.END_TIME,
-                    insights.defaultEndTime.toString()
-                );
-                setSearchParams(searchParams, { replace: true });
-                fetchAlertEvaluation(
-                    insights.defaultStartTime,
-                    insights.defaultEndTime
-                );
+                let startToUse = startTime;
+                let endToUse = endTime;
+
+                if (insights) {
+                    searchParams.set(
+                        TimeRangeQueryStringKey.START_TIME,
+                        insights.defaultStartTime.toString()
+                    );
+                    searchParams.set(
+                        TimeRangeQueryStringKey.END_TIME,
+                        insights.defaultEndTime.toString()
+                    );
+                    setSearchParams(searchParams, { replace: true });
+
+                    startToUse = insights.defaultStartTime;
+                    endToUse = insights.defaultEndTime;
+                }
+
+                fetchAlertEvaluation(startToUse, endToUse);
             },
             () => {
                 // If API fails use current start and end
@@ -256,7 +267,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                             </Box>
                         }
                         isError={getEvaluationStatus === ActionStatus.Error}
-                        isLoading={getEvaluationStatus === ActionStatus.Working}
+                        isLoading={
+                            getEvaluationStatus === ActionStatus.Working ||
+                            getAlertInsightStatus === ActionStatus.Working
+                        }
                         loadingState={
                             <SkeletonV1
                                 animation="pulse"

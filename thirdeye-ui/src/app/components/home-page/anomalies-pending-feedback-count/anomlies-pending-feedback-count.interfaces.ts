@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import { AppAnalytics } from "../../../rest/dto/app-analytics.interfaces";
+import type { ActionStatus } from "../../../rest/actions.interfaces";
+import type { AnomalyStats } from "../../../rest/dto/anomaly.interfaces";
 
 export interface AnomaliesPendingFeedbackCountProps {
-    appAnalytics: AppAnalytics | null;
-    getAppAnalyticsStatus: ActionStatus;
+    anomalyStats: AnomalyStats | null;
+    getAnomalyStatsStatus: ActionStatus;
+
     classes?: {
         noDataIndicator?: string;
     };

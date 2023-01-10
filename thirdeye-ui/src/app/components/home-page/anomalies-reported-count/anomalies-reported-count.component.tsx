@@ -26,7 +26,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { AnomaliesReportedCountProps } from "./anomalies-reported-count.interfaces";
 
 export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountProps> =
-    ({ appAnalytics, getAppAnalyticsStatus, classes }) => {
+    ({ anomalyStats, getAnomalyStatsStatus: status, classes }) => {
         const { t } = useTranslation();
 
         return (
@@ -52,10 +52,8 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                                 {t("message.experienced-issues-fetching-data")}
                             </NoDataIndicator>
                         }
-                        isError={getAppAnalyticsStatus === ActionStatus.Error}
-                        isLoading={
-                            getAppAnalyticsStatus === ActionStatus.Working
-                        }
+                        isError={status === ActionStatus.Error}
+                        isLoading={status === ActionStatus.Working}
                         loadingState={
                             <Box
                                 className={classNames(classes?.noDataIndicator)}
@@ -68,8 +66,7 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                         }
                     >
                         <Typography variant="h2">
-                            {appAnalytics &&
-                                appAnalytics.anomalyStats.totalCount}
+                            {anomalyStats && anomalyStats.totalCount}
                         </Typography>
                     </LoadingErrorStateSwitch>
                 </Grid>

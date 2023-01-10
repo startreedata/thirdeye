@@ -25,7 +25,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { AnomaliesPendingFeedbackCountProps } from "./anomlies-pending-feedback-count.interfaces";
 
 export const AnomaliesPendingFeedbackCount: FunctionComponent<AnomaliesPendingFeedbackCountProps> =
-    ({ appAnalytics, getAppAnalyticsStatus, classes }) => {
+    ({ anomalyStats, getAnomalyStatsStatus: status, classes }) => {
         const { t } = useTranslation();
 
         return (
@@ -49,10 +49,8 @@ export const AnomaliesPendingFeedbackCount: FunctionComponent<AnomaliesPendingFe
                                 {t("message.experienced-issues-fetching-data")}
                             </NoDataIndicator>
                         }
-                        isError={getAppAnalyticsStatus === ActionStatus.Error}
-                        isLoading={
-                            getAppAnalyticsStatus === ActionStatus.Working
-                        }
+                        isError={status === ActionStatus.Error}
+                        isLoading={status === ActionStatus.Working}
                         loadingState={
                             <Box
                                 className={classNames(classes?.noDataIndicator)}
@@ -65,9 +63,9 @@ export const AnomaliesPendingFeedbackCount: FunctionComponent<AnomaliesPendingFe
                         }
                     >
                         <Typography variant="h2">
-                            {appAnalytics &&
-                                appAnalytics.anomalyStats.totalCount -
-                                    appAnalytics.anomalyStats.countWithFeedback}
+                            {anomalyStats &&
+                                anomalyStats.totalCount -
+                                    anomalyStats.countWithFeedback}
                         </Typography>
                     </LoadingErrorStateSwitch>
                 </Grid>

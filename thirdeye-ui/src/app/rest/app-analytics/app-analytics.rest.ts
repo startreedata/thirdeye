@@ -14,28 +14,11 @@
  */
 import axios from "axios";
 import type { AppAnalytics } from "../dto/app-analytics.interfaces";
-import type { AppAnalyticsProps } from "./app-analytics.interfaces";
 
 const URL_CONFIG = "/api/app-analytics";
 
-export const getAppAnalytics = async (
-    params?: AppAnalyticsProps
-): Promise<AppAnalytics> => {
-    const queryParams = new URLSearchParams([]);
-
-    const { startTime, endTime } = params || {};
-
-    if (startTime) {
-        queryParams.set("startTime", `[gte]${startTime}`);
-    }
-
-    if (endTime) {
-        queryParams.set("endTime", `[lte]${endTime}`);
-    }
-
-    const response = await axios.get<AppAnalytics>(
-        `${URL_CONFIG}?${queryParams.toString()}`
-    );
+export const getAppAnalytics = async (): Promise<AppAnalytics> => {
+    const response = await axios.get<AppAnalytics>(URL_CONFIG);
 
     return response.data;
 };

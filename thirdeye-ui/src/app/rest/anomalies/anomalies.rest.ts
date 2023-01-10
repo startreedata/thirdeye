@@ -80,11 +80,11 @@ export const getAnomalyStats = async ({
     const queryParams = new URLSearchParams([]);
 
     if (startTime) {
-        queryParams.set("startTime", `[gte]${startTime}`);
+        queryParams.set("startTime", `${startTime}`);
     }
 
     if (endTime) {
-        queryParams.set("endTime", `[lte]${endTime}`);
+        queryParams.set("endTime", `${endTime}`);
     }
 
     const response = await axios.get<AnomalyStats>(

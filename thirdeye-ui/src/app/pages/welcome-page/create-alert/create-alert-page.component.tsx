@@ -36,7 +36,10 @@ import {
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
+import {
+    SpecType,
+    SubscriptionGroup,
+} from "../../../rest/dto/subscription-group.interfaces";
 import { useCreateSubscriptionGroup } from "../../../rest/subscription-groups/subscription-groups.actions";
 import {
     handleAlertPropertyChangeGenerator,
@@ -65,6 +68,16 @@ export const CreateAlertPage: FunctionComponent = () => {
     } = useCreateSubscriptionGroup();
 
     const [alert, setAlert] = useState<EditableAlert>(createNewStartingAlert());
+    const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
+        useState<SubscriptionGroup>(() => {
+            const subscriptionGroup = createEmptySubscriptionGroup();
+            const newEmailConfiguration =
+                generateEmptyEmailSendGridConfiguration();
+            newEmailConfiguration.params.emailRecipients.to = emails;
+            subscriptionGroup.specs = [newEmailConfiguration];
+
+            return subscriptionGroup;
+        });
     const [emails, setEmails] = useState<string[]>([]);
     const [createAlertStatus, setCreateAlertStatus] = useState<ActionStatus>(
         ActionStatus.Initial
@@ -112,16 +125,18 @@ export const CreateAlertPage: FunctionComponent = () => {
              * Create an email only subscription group if the emails
              * list is not empty
              */
-            if (emails && emails.length > 0) {
-                const subscriptionGroup = createEmptySubscriptionGroup();
-                const newEmailConfiguration =
-                    generateEmptyEmailSendGridConfiguration();
+            if (
+                singleNewSubscriptionGroup &&
+                singleNewSubscriptionGroup.specs.length === 1 &&
+                singleNewSubscriptionGroup.specs[0].type ===
+                    SpecType.EmailSendgrid &&
+                singleNewSubscriptionGroup.specs[0].params.emailRecipients.to &&
+                singleNewSubscriptionGroup.specs[0].params.emailRecipients.to
+                    .length > 0
+            ) {
+                singleNewSubscriptionGroup.name = `${alertWithName.name}_emails_subscription_group`;
 
-                newEmailConfiguration.params.emailRecipients.to = emails;
-                subscriptionGroup.specs = [newEmailConfiguration];
-                subscriptionGroup.name = `${alertWithName.name}_emails_subscription_group`;
-
-                createNewSubscriptionGroup(subscriptionGroup)
+                createNewSubscriptionGroup(singleNewSubscriptionGroup)
                     .then((savedSubscriptionGroup: SubscriptionGroup): void => {
                         createAndHandleSubscriptionGroup(
                             alertWithName,
@@ -150,7 +165,12 @@ export const CreateAlertPage: FunctionComponent = () => {
                 );
             }
         },
-        [alert, createAndHandleSubscriptionGroup, emails]
+        [
+            alert,
+            createAndHandleSubscriptionGroup,
+            emails,
+            singleNewSubscriptionGroup,
+        ]
     );
 
     useEffect(() => {
@@ -191,8 +211,10 @@ export const CreateAlertPage: FunctionComponent = () => {
                             ActionStatus.Working ||
                         createAlertStatus === ActionStatus.Working
                     }
+                    newSubscriptionGroup={singleNewSubscriptionGroup}
                     setEmails={setEmails}
                     onAlertPropertyChange={handleAlertPropertyChange}
+                    onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
                     onSubmit={handleCreateAlertClick}
                 />
             </LoadingErrorStateSwitch>

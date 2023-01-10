@@ -13,8 +13,10 @@
  * the License.
  */
 
+import { AvailableAlgorithmOption } from "../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
 export interface AlertsCreateGuidedPageProps {
     alert: EditableAlert;
@@ -24,5 +26,30 @@ export interface AlertsCreateGuidedPageProps {
     isCreatingAlert: boolean;
     emails?: string[];
     setEmails?: (emails: string[]) => void;
+    selectedSubscriptionGroups?: SubscriptionGroup[];
+    onSubscriptionGroupChange?: (groups: SubscriptionGroup[]) => void;
     getAlertTemplates: () => void;
+    newSubscriptionGroup: SubscriptionGroup;
+    onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
+}
+
+export interface AlertCreatedGuidedPageOutletContext {
+    alert: EditableAlert;
+    onAlertPropertyChange: (
+        contents: Partial<EditableAlert>,
+        isTotalChange?: boolean
+    ) => void;
+    selectedAlgorithmOption: AvailableAlgorithmOption;
+    newSubscriptionGroup: SubscriptionGroup;
+    onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
+    handleCreateAlertClick: (alert: EditableAlert) => void;
+    isCreatingAlert: boolean;
+
+    simpleOptions: AvailableAlgorithmOption[];
+    advancedOptions: AvailableAlgorithmOption[];
+    getAlertTemplates: () => void;
+    alertTemplates: AlertTemplate[];
+
+    selectedSubscriptionGroups: SubscriptionGroup[];
+    handleSubscriptionGroupChange: (groups: SubscriptionGroup[]) => void;
 }

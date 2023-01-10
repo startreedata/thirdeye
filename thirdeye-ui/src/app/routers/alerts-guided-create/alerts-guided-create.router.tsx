@@ -59,11 +59,11 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
         useParentForNonWelcomeFlow,
         sampleAlertsBottom,
         hideSampleAlerts,
-        hideSubscriptionGroup,
         createLabel,
         inProgressLabel,
         hideCurrentlySelected,
         navigateToAlertDetailAfterSampleAlertCreate,
+        showEmailOnlyForSubscriptionGroup,
     }) => {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
@@ -125,10 +125,10 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                             element={
                                 <SetupDetailsPage
                                     createLabel={createLabel}
-                                    hideSubscriptionGroup={
-                                        hideSubscriptionGroup
-                                    }
                                     inProgressLabel={inProgressLabel}
+                                    showEmailOnlyForSubscriptionGroup={
+                                        showEmailOnlyForSubscriptionGroup
+                                    }
                                 />
                             }
                             path={

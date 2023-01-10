@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { isEmpty } from "lodash";
 import { Box } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -23,8 +23,8 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies.util";

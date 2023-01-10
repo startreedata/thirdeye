@@ -23,5 +23,8 @@ export interface AlertAccuracyColoredProps {
     renderCustomLoading?: ReactElement;
     defaultSkeletonProps?: SkeletonV1Props;
     typographyProps?: Partial<TypographyProps>;
-    renderCustomText?: (accuracy: number) => ReactNode;
+    renderCustomText?: (p: {
+        accuracy: number;
+        noAnomalyData: boolean;
+    }) => ReactNode;
 }

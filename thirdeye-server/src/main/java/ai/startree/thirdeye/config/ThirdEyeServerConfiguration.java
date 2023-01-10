@@ -25,7 +25,9 @@ import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ThirdEyeServerConfiguration extends Configuration {
 
@@ -67,6 +69,9 @@ public class ThirdEyeServerConfiguration extends Configuration {
 
   @JsonProperty("time")
   private TimeConfiguration timeConfiguration = new TimeConfiguration();
+
+  @JsonProperty("accessControl")
+  private Map<String, Object> accessControlConfiguration = new HashMap<>();
 
   private String phantomJsPath = "";
   private String failureFromAddress;
@@ -258,6 +263,15 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setDetectionPipelineConfiguration(
       final DetectionPipelineConfiguration detectionPipelineConfiguration) {
     this.detectionPipelineConfiguration = detectionPipelineConfiguration;
+    return this;
+  }
+
+  public Map<String, Object> getAccessControlConfiguration() {
+    return this.accessControlConfiguration;
+  }
+
+  public ThirdEyeServerConfiguration setAccessControlConfiguration(Map<String, Object> values) {
+    this.accessControlConfiguration = values;
     return this;
   }
 }

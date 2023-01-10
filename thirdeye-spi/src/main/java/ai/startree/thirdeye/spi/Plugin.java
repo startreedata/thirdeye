@@ -23,6 +23,7 @@ import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFac
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import java.util.Collections;
+import java.util.Map;
 
 public interface Plugin {
 
@@ -58,7 +59,7 @@ public interface Plugin {
     return Collections.emptyList();
   }
 
-  default AccessControl getAccessControl() {
+  default AccessControl getAccessControl(Map<String,Object> config) {
     return null;
   }
 }

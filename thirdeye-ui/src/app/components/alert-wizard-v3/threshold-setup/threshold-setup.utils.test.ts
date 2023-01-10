@@ -52,8 +52,6 @@ describe("AlertWizardV3/Threshold Setup Utils", () => {
             dataset: "mockDataset",
             aggregationFunction: "mockAggregationFunction",
             aggregationColumn: "mockMetric",
-            timeColumn: "mockTimeColumn",
-            timeColumnFormat: "mockFormat",
             timezone: "pst",
         });
     });

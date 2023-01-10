@@ -13,14 +13,16 @@
  * the License.
  */
 import axios from "axios";
-import {
+import type {
     AnomalyFeedback,
     AnomalyFeedbackType,
+    AnomalyStats,
 } from "../dto/anomaly.interfaces";
 import {
     deleteAnomaly,
     getAnomalies,
     getAnomaly,
+    getAnomalyStats,
     updateAnomalyFeedback,
 } from "./anomalies.rest";
 
@@ -45,6 +47,28 @@ describe("Anomalies REST", () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
         await expect(getAnomaly(1)).rejects.toThrow("testError");
+    });
+
+    it("getAnomalyStats should invoke axios.get with appropriate input and return appropriate anomaly", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: mockAnomalyStats,
+        });
+
+        await expect(
+            getAnomalyStats({ startTime: 1, endTime: 2 })
+        ).resolves.toEqual(mockAnomalyStats);
+
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/anomalies/stats?startTime=1&endTime=2"
+        );
+    });
+
+    it("getAnomalyStats should throw encountered error", async () => {
+        jest.spyOn(axios, "get").mockRejectedValue(mockError);
+
+        await expect(
+            getAnomalyStats({ startTime: 1, endTime: 2 })
+        ).rejects.toThrow("testError");
     });
 
     it("getAnomalies should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
@@ -172,6 +196,18 @@ describe("Anomalies REST", () => {
 const mockAnomaly = {
     id: 1,
 };
+
+const mockAnomalyStats = {
+    totalCount: 12,
+    countWithFeedback: 4,
+    feedbackStats: {
+        ANOMALY: 3,
+        ANOMALY_EXPECTED: 0,
+        NOT_ANOMALY: 1,
+        ANOMALY_NEW_TREND: 0,
+        NO_FEEDBACK: 0,
+    },
+} as AnomalyStats;
 
 const mockError = new Error("testError");
 

@@ -13,7 +13,7 @@
  * the License.
  */
 import axios from "axios";
-import type {
+import {
     AnomalyFeedback,
     AnomalyFeedbackType,
     AnomalyStats,

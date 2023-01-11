@@ -46,8 +46,6 @@ export function generateTemplateProperties(
         aggregationFunction: aggregationFunction,
     };
 
-    templateProperties.timeColumn = dataset.timeColumn.name;
-    templateProperties.timeColumnFormat = dataset.timeColumn.format;
     templateProperties.timezone = dataset.timeColumn.timezone;
 
     return templateProperties;

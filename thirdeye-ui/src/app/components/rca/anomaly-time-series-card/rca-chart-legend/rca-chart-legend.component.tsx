@@ -23,6 +23,7 @@ import Alert from "@material-ui/lab/Alert";
 import { scaleOrdinal } from "@visx/scale";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { Event } from "../../../../rest/dto/event.interfaces";
 import { Legend } from "../../../visualizations/time-series-chart/legend/legend.component";
 import { EventWithChartState } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
@@ -94,7 +95,12 @@ export const RCAChartLegend: FunctionComponent<RCAChartLegendProps> = ({
                             {t("message.rca-legend-information")}
                         </Alert>
                     </Box>
-                    <Table size="small">
+                    <Table
+                        data-tour-id={
+                            RCA_INVESTIGATE_TOUR_IDS.HEATMAP_DIMENSION_DRILLS_SELECTED
+                        }
+                        size="small"
+                    >
                         <TableHead>
                             <TableRow>
                                 <TableCell width="40px" />

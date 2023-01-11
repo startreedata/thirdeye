@@ -49,6 +49,7 @@ export const AppBar: FunctionComponent = () => {
     const { authDisabled, authenticated } = useAuthProviderV1();
     const location = useLocation();
     const { t } = useTranslation();
+
     const isRouteCurrent = (route: string): boolean => {
         return location.pathname.indexOf(route) === 0;
     };

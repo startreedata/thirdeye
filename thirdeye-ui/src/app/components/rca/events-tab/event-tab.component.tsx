@@ -30,6 +30,7 @@ import {
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
@@ -193,6 +194,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
                     hideToolbar
                     columns={eventColumns}
                     data={filteredEvents as Event[]}
+                    data-tour-id={RCA_INVESTIGATE_TOUR_IDS.EVENTS_INTRO}
                     rowKey="id"
                     scroll={DataGridScrollV1.Body}
                     searchDataKeys={searchDataKeys}

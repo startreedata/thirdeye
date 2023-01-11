@@ -19,6 +19,7 @@ import {
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { AnomalyDimensionAnalysisData } from "../../rest/dto/rca.interfaces";
 import { useGetAnomalyDimensionAnalysis } from "../../rest/rca/rca.actions";
@@ -102,6 +103,9 @@ export const AnomalyDimensionAnalysis: FunctionComponent<AnomalyDimensionAnalysi
                                     chartTimeSeriesFilterSet
                                 }
                                 comparisonOffset={comparisonOffset}
+                                data-tour-id={
+                                    RCA_INVESTIGATE_TOUR_IDS.TOP_CONTRIBUTORS
+                                }
                                 onCheckClick={onCheckClick}
                             />
                         )}

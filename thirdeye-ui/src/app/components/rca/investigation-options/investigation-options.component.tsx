@@ -21,6 +21,10 @@ import {
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import {
+    RCA_INVESTIGATE_TOUR_IDS,
+    useAppTour,
+} from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
 import {
     createInvestigation,
@@ -128,11 +132,20 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                 .finally(() => setIsSaving(false));
         };
 
+        const { startTour } = useAppTour("RCA_INVESTIGATE");
+
+        const handleStartTour = (): void => {
+            startTour();
+        };
+
         return (
             <>
                 {investigationId === null && (
                     <Button
                         color="primary"
+                        data-tour-id={
+                            RCA_INVESTIGATE_TOUR_IDS.SAVE_INVESTIGATION
+                        }
                         variant="contained"
                         onClick={() => setShouldShowCreateDialog(true)}
                     >
@@ -170,6 +183,9 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                         </Button>
                     </>
                 )}
+                <Button variant="contained" onClick={handleStartTour}>
+                    {t("label.help")}
+                </Button>
 
                 {shouldShowUpdateDialog && (
                     <ModifyInvestigationDialog

@@ -32,6 +32,7 @@ import {
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
@@ -234,7 +235,9 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
         }, [anomalyBreakdownReqStatus, anomalyBreakdownReqErrors]);
 
         return (
-            <>
+            <div
+                data-tour-id={RCA_INVESTIGATE_TOUR_IDS.HEATMAP_DIMENSION_DRILLS}
+            >
                 <CardContent>
                     {anomalyFilterOptions && (
                         <Grid container className={classes.filtersContainer}>
@@ -390,6 +393,6 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                         </Grid>
                     )}
                 </CardContent>
-            </>
+            </div>
         );
     };

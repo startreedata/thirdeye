@@ -35,6 +35,7 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
@@ -53,10 +54,11 @@ import { EventsWizard } from "../../event-wizard/event-wizard.component";
 import { AnomalyBreakdownComparisonHeatmap } from "../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { EventsTab } from "../events-tab/event-tab.component";
 import { AnalysisTabsProps } from "./analysis-tabs.interfaces";
+import {
+    ANALYSIS_TAB_IDX_KEY,
+    ANALYSIS_TAB_OFFSET,
+} from "./analysis-tabs.utils";
 import { BaselineOffsetSelection } from "./baseline-offset-selection/baseline-offset-selection.component";
-
-const ANALYSIS_TAB_IDX_KEY = "analysisTab";
-const ANALYSIS_TAB_OFFSET = "baselineWeekOffset";
 
 export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     anomalyId,
@@ -192,6 +194,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             <Grid item>
                                 <Button
                                     color="primary"
+                                    data-tour-id={
+                                        RCA_INVESTIGATE_TOUR_IDS.EVENTS_ADD
+                                    }
                                     variant="outlined"
                                     onClick={handleAddEventClick}
                                 >

@@ -143,6 +143,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
 
   private Set<Long> timestampOutOfThresholds(final DataFrame df) {
     final Set<Long> outOfThreshold = new HashSet<>();
+    // note - doing this on the whole dataframe is not efficient could be done between min and max of the anomalies only
     for (int i = 0; i < df.size(); i++) {
       if (isOutOfThreshold(df.getDouble(valueColumn, i))) {
         outOfThreshold.add(df.getLong(timestampColum, i));

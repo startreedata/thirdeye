@@ -111,7 +111,6 @@ export const HomePage: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        console.log({ anomalyStartTime });
         getAnomalyStats({
             startTime: anomalyStartTime,
             endTime: DateTime.local().endOf("hour").toMillis(),

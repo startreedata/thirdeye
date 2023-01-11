@@ -1,3 +1,12 @@
+## [2.3.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.2.0...thirdeye-ui-2.3.0) (2023-01-11)
+
+
+### Features
+
+* [TE-1155](https://cortexdata.atlassian.net/browse/TE-1155) update anomaly stats on homepage for date range change ([40fa84984](https://github.com/startreedata/thirdeye/commit/40fa8498470214faced25a7c2f83a90c8e2092c2))
+* [TE-1178](https://cortexdata.atlassian.net/browse/TE-1178) integrate creating subscription group on guided create alert flow ([6b9dc5feb](https://github.com/startreedata/thirdeye/commit/6b9dc5feb760e7c5529d82a099bf7aeee81c599f))
+* [TE-1179](https://cortexdata.atlassian.net/browse/TE-1179) alert accuracy only shown if anomalies are present ([35655bed2](https://github.com/startreedata/thirdeye/commit/35655bed2f8f30e68552bc855c205e53114b2ab3))
+
 ## [2.2.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.1.0...thirdeye-ui-2.2.0) (2023-01-09)
 
 

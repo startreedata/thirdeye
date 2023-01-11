@@ -48,6 +48,11 @@ plugins:
 rules:
     # ESLint rules
 
+    # No lingering console logs
+    no-console:
+        - error
+        - allow: ["error"]
+
     # Require type-safe equality operators
     eqeqeq:
         - error

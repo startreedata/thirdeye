@@ -54,7 +54,10 @@ export interface EditableAlert {
 
 export interface Alert extends EditableAlert {
     id: number;
+    created: number;
+    updated: number;
 }
+
 export interface AlertInsight {
     datasetStartTime: number;
     datasetEndTime: number;

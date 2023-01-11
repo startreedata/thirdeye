@@ -97,6 +97,12 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
             setSortedDetectionEvaluations(copied);
         }, [sortOrder, filteredDetectionEvaluations]);
 
+        useEffect(() => {
+            setFilteredDetectionEvaluations(
+                filterEvaluations(detectionEvaluations, searchTerm)
+            );
+        }, [detectionEvaluations]);
+
         return (
             <Card variant="outlined">
                 {detectionEvaluations.length > 1 && (

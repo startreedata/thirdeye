@@ -39,10 +39,12 @@ import { EnumerationItemsTable } from "../../components/alert-view/enumeration-i
 import { AlertViewSubHeader } from "../../components/alert-view/sub-header/alert-sub-header.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     DataGridSortOrderV1,
     NotificationTypeV1,
+    NotificationV1,
     PageContentsGridV1,
     PageV1,
     SkeletonV1,
@@ -81,7 +83,7 @@ import {
 export const AlertsViewPage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
+    const { notify, remove: removeNotification } = useNotificationProviderV1();
     const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
 
@@ -90,6 +92,10 @@ export const AlertsViewPage: FunctionComponent = () => {
         useState<AlertStats | null>(null);
     // To be used for accuracy filtered by startTime and endTime
     const [alertStats, setAlertStats] = useState<AlertStats | null>(null);
+    // Used for the scenario when user first creates an alert but no anomalies generated yet
+    const [refreshAttempts, setRefreshAttempts] = useState(0);
+    const [autoRefreshNotification, setAutoRefreshNotification] =
+        useState<NotificationV1 | null>(null);
 
     const {
         alert: alertThatWasReset,
@@ -140,15 +146,19 @@ export const AlertsViewPage: FunctionComponent = () => {
         [searchParams]
     );
 
+    const fetchStats = (): void => {
+        getAlertStats({
+            alertId: Number(alertId),
+            startTime,
+            endTime,
+        }).then((alertStatsData) => {
+            setAlertStats(alertStatsData);
+        });
+    };
+
     useEffect(() => {
         if (Number(alertId)) {
-            getAlertStats({
-                alertId: Number(alertId),
-                startTime,
-                endTime,
-            }).then((alertStatsData) => {
-                setAlertStats(alertStatsData);
-            });
+            fetchStats();
         }
     }, [alertId, startTime, endTime]);
 
@@ -251,6 +261,64 @@ export const AlertsViewPage: FunctionComponent = () => {
             })
         );
     }, [anomaliesRequestStatus, getAnomaliesErrorsMessages]);
+
+    /**
+     * Account for users visiting the alert right when they just created it and
+     * the initial job to create the alert hasn't run yet
+     */
+    useEffect(() => {
+        if (alert && alert.updated === alert.created) {
+            setAutoRefreshNotification(
+                notify(
+                    NotificationTypeV1.Info,
+                    t(
+                        "message.looks-like-this-alert-was-just-created-this-page-a"
+                    )
+                )
+            );
+        }
+    }, [alert]);
+    useEffect(() => {
+        if (
+            (anomalies && anomalies.length > 0) ||
+            anomaliesRequestStatus !== ActionStatus.Working
+        ) {
+            if (autoRefreshNotification) {
+                removeNotification(autoRefreshNotification);
+                setAutoRefreshNotification(null);
+            }
+
+            return;
+        }
+
+        if (alert && alert.updated === alert.created) {
+            if (refreshAttempts < 3) {
+                setTimeout(() => {
+                    setRefreshAttempts(refreshAttempts + 1);
+                    getAnomalies({
+                        alertId: alert.id,
+                        startTime,
+                        endTime,
+                    }).then((newAnomalies) => {
+                        if (newAnomalies && newAnomalies.length > 0) {
+                            fetchStats();
+                        }
+                    });
+                }, 5000);
+            } else {
+                if (autoRefreshNotification) {
+                    removeNotification(autoRefreshNotification);
+                    setAutoRefreshNotification(null);
+                }
+                notify(
+                    NotificationTypeV1.Warning,
+                    t("message.no-data-for-entity-for-date-range", {
+                        entity: t("label.anomalies"),
+                    })
+                );
+            }
+        }
+    }, [anomalies, alert]);
 
     const handleExpandedChange = (newExpanded: string[]): void => {
         if (newExpanded.length > 0) {
@@ -431,32 +499,38 @@ export const AlertsViewPage: FunctionComponent = () => {
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    {(evaluationRequestStatus === ActionStatus.Error ||
-                        getAlertStatus === ActionStatus.Error) && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Box pb={20} pt={20}>
-                                    <NoDataIndicator />
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {(evaluationRequestStatus === ActionStatus.Working ||
-                        getAlertStatus === ActionStatus.Working) && (
-                        <Card variant="outlined">
-                            <CardContent>
-                                <SkeletonV1 />
-                                <SkeletonV1 />
-                                <SkeletonV1 />
-                                <SkeletonV1 />
-                                <SkeletonV1 />
-                                <SkeletonV1 />
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {evaluationRequestStatus === ActionStatus.Done &&
-                        evaluation && (
+                    <LoadingErrorStateSwitch
+                        errorState={
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <Box pb={20} pt={20}>
+                                        <NoDataIndicator />
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        }
+                        isError={
+                            evaluationRequestStatus === ActionStatus.Error ||
+                            getAlertStatus === ActionStatus.Error
+                        }
+                        isLoading={
+                            evaluationRequestStatus === ActionStatus.Working ||
+                            getAlertStatus === ActionStatus.Working
+                        }
+                        loadingState={
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <SkeletonV1 />
+                                    <SkeletonV1 />
+                                    <SkeletonV1 />
+                                    <SkeletonV1 />
+                                    <SkeletonV1 />
+                                    <SkeletonV1 />
+                                </CardContent>
+                            </Card>
+                        }
+                    >
+                        {evaluation && (
                             <EnumerationItemMerger
                                 anomalies={anomalies || []}
                                 detectionEvaluations={extractDetectionEvaluation(
@@ -492,6 +566,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                                 }}
                             </EnumerationItemMerger>
                         )}
+                    </LoadingErrorStateSwitch>
                 </Grid>
             </PageContentsGridV1>
         </PageV1>

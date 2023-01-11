@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,10 +19,8 @@ import { useNavigate } from "react-router-dom";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-whizard.utils";
 import {
     NotificationTypeV1,
-    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
@@ -44,29 +41,12 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         SubscriptionGroup[]
     >([]);
 
-    const { showDialog, hideDialog } = useDialogProviderV1();
-
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
 
     const createAlertAndUpdateSubscriptionGroups = useMemo(() => {
         return handleCreateAlertClickGenerator(notify, t, (savedAlert) => {
-            showDialog({
-                type: DialogType.CUSTOM,
-                contents: (
-                    <Box textAlign="center">
-                        {t("message.redirecting-to-alert-in-10-seconds")}
-                    </Box>
-                ),
-                hideCancelButton: true,
-                hideOkButton: true,
-            });
-
-            // Wait 10 seconds so the initial anomalies task run completes
-            setTimeout(() => {
-                hideDialog();
-                navigate(getAlertsAlertPath(savedAlert.id));
-            }, 10000);
+            navigate(getAlertsAlertPath(savedAlert.id));
         });
     }, [navigate, notify, t]);
 

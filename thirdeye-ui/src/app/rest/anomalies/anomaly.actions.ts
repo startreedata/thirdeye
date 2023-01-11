@@ -13,15 +13,18 @@
  * the License.
  */
 import { useHTTPAction } from "../create-rest-action";
-import { Anomaly } from "../dto/anomaly.interfaces";
+import { Anomaly, AnomalyStats } from "../dto/anomaly.interfaces";
 import {
     getAnomalies as getAnomaliesRest,
     getAnomaly as getAnomalyRest,
+    getAnomalyStats as getAnomalyStatsRest,
 } from "./anomalies.rest";
 import {
     GetAnomalies,
     GetAnomaliesProps,
     GetAnomaly,
+    GetAnomalyStats,
+    GetAnomalyStatsProps,
 } from "./anomaly.interfaces";
 
 export const useGetAnomaly = (): GetAnomaly => {
@@ -51,4 +54,17 @@ export const useGetAnomalies = (): GetAnomalies => {
         status,
         errorMessages,
     };
+};
+
+export const useGetAnomalyStats = (): GetAnomalyStats => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<AnomalyStats>(getAnomalyStatsRest);
+
+    const getAnomalyStats = (
+        getAnomalyStatsParams: GetAnomalyStatsProps = {}
+    ): Promise<AnomalyStats | undefined> => {
+        return makeRequest(getAnomalyStatsParams);
+    };
+
+    return { anomalyStats: data, getAnomalyStats, status, errorMessages };
 };

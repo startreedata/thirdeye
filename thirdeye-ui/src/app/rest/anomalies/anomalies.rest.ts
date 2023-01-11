@@ -14,8 +14,15 @@
  */
 import axios from "axios";
 import { filterOutIgnoredAnomalies } from "../../utils/anomalies/anomalies.util";
-import { Anomaly, AnomalyFeedback } from "../dto/anomaly.interfaces";
-import { GetAnomaliesProps } from "./anomaly.interfaces";
+import type {
+    Anomaly,
+    AnomalyFeedback,
+    AnomalyStats,
+} from "../dto/anomaly.interfaces";
+import type {
+    GetAnomaliesProps,
+    GetAnomalyStatsProps,
+} from "./anomaly.interfaces";
 
 const BASE_URL_ANOMALIES = "/api/anomalies";
 
@@ -59,11 +66,32 @@ export const getAnomalies = async ({
         queryParams.set("enumerationItem.id", enumerationItemId.toString());
     }
 
-    const response = await axios.get(
+    const response = await axios.get<Anomaly[]>(
         `${BASE_URL_ANOMALIES}?${queryParams.toString()}`
     );
 
     return filterOutIgnoredAnomalies(response.data);
+};
+
+export const getAnomalyStats = async ({
+    startTime,
+    endTime,
+}: GetAnomalyStatsProps): Promise<AnomalyStats> => {
+    const queryParams = new URLSearchParams([]);
+
+    if (startTime) {
+        queryParams.set("startTime", `${startTime}`);
+    }
+
+    if (endTime) {
+        queryParams.set("endTime", `${endTime}`);
+    }
+
+    const response = await axios.get<AnomalyStats>(
+        `${BASE_URL_ANOMALIES}/stats?${queryParams.toString()}`
+    );
+
+    return response.data;
 };
 
 export const deleteAnomaly = async (id: number): Promise<Anomaly> => {
@@ -76,7 +104,7 @@ export const updateAnomalyFeedback = async (
     anomalyId: number,
     feedback: AnomalyFeedback
 ): Promise<AnomalyFeedback> => {
-    const response = await axios.post(
+    const response = await axios.post<AnomalyFeedback>(
         `${BASE_URL_ANOMALIES}/${anomalyId}/feedback`,
         feedback
     );

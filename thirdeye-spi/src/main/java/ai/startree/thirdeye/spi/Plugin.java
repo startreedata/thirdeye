@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi;
 
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
@@ -59,7 +60,7 @@ public interface Plugin {
     return Collections.emptyList();
   }
 
-  default AccessControl getAccessControl(Map<String,Object> config) {
+  default AccessControl getAccessControl(AccessControlConfiguration config) {
     return null;
   }
 }

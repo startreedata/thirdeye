@@ -64,7 +64,7 @@ public class CrudResourceTest {
     final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
     final DummyApi api = new DummyApi().setData("testData");
 
-    final Timestamp before = getCurrentTime();
+    final Timestamp before = new Timestamp(1671476530000L);
     List<DummyApi> response = (List<DummyApi>) resource.createMultiple(owner, singletonList(api)).getEntity();
 
     assertThat(response).isNotNull();

@@ -37,15 +37,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
@@ -79,12 +76,10 @@ public class ThirdEyeServerModule extends AbstractModule {
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
 
-    final AccessControlProvider accessControlProvider = new AccessControlProvider();
+    final AccessControlProvider accessControlProvider = new AccessControlProvider(
+        configuration.getAccessControlConfiguration());
     bind(AccessControlProvider.class).toInstance(accessControlProvider);
-    bind(AccessControl.class).toProvider(accessControlProvider);
-    bind(new TypeLiteral<Map<String,Object>>() {})
-        .annotatedWith(Names.named("AccessControlConfiguration"))
-        .toInstance(configuration.getAccessControlConfiguration());
+    bind(AccessControl.class).toInstance(accessControlProvider);
   }
 
   @Singleton

@@ -35,14 +35,12 @@ import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
@@ -69,7 +67,6 @@ public class PluginLoader {
   private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
   private final PostProcessorRegistry postProcessorRegistry;
   private final AccessControlProvider accessControlProvider;
-  private final Map<String,Object> accessControlConfiguration;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -83,8 +80,7 @@ public class PluginLoader {
       final BootstrapResourcesRegistry bootstrapResourcesRegistry,
       final PostProcessorRegistry postProcessorRegistry,
       final PluginLoaderConfiguration config,
-      final AccessControlProvider accessControlProvider,
-      @Named("AccessControlConfiguration") final Map<String,Object> accessControlConfiguration) {
+      final AccessControlProvider accessControlProvider) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
@@ -92,10 +88,7 @@ public class PluginLoader {
     this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.accessControlProvider = accessControlProvider;
-    this.accessControlConfiguration = accessControlConfiguration;
     pluginsDir = new File(config.getPluginsPath());
-
-    System.out.println(accessControlConfiguration);
   }
 
   public void loadPlugins() {
@@ -154,7 +147,8 @@ public class PluginLoader {
     for (EnumeratorFactory f : plugin.getEnumeratorFactories()) {
       detectionRegistry.addEnumeratorFactory(f);
     }
-    optional(plugin.getAccessControl(accessControlConfiguration)).ifPresent(accessControlProvider::set);
+    optional(plugin.getAccessControl(accessControlProvider.getConfig()))
+        .ifPresent(accessControlProvider::setAccessControl);
 
     log.info("Installed plugin: " + plugin.getClass().getName());
   }

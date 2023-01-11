@@ -14,14 +14,15 @@
 
 package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
-import com.google.inject.Provider;
 
-public class AccessControlProvider implements Provider<AccessControl> {
+/**
+ * AccessControlProvider serves as a mutable layer between Guice bindings and the access control implementation from plugins.
+ */
+public class AccessControlProvider implements AccessControl {
 
   public final static AccessControl alwaysAllow = (
       final String token,
@@ -35,16 +36,38 @@ public class AccessControlProvider implements Provider<AccessControl> {
       final AccessType accessType
   ) -> false;
 
+  private final AccessControlConfiguration config;
   private AccessControl accessControl = null;
 
-  public void set(AccessControl accessControl) {
+  public AccessControlProvider(AccessControlConfiguration config) {
+    this.config = config;
+  }
+
+  public void setAccessControl(AccessControl accessControl) {
     if (this.accessControl != null) {
       throw new RuntimeException("Access control source can only be set once!");
     }
     this.accessControl = accessControl;
   }
 
-  public AccessControl get() {
-    return optional(this.accessControl).orElse(alwaysAllow);
+  public AccessControl getAccessControl() {
+    if (!config.enabled) {
+      return alwaysAllow;
+    }
+
+    if (this.accessControl == null) {
+      throw new RuntimeException("Access control is enabled, but no provider has been configured!");
+    }
+    return this.accessControl;
+  }
+
+  public AccessControlConfiguration getConfig() {
+    return config;
+  }
+
+  @Override
+  public boolean hasAccess(final String token, final ResourceIdentifier identifier,
+      final AccessType accessType) {
+    return getAccessControl().hasAccess(token, identifier, accessType);
   }
 }

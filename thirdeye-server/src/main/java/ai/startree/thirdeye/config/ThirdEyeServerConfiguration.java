@@ -21,13 +21,12 @@ import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
+import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ThirdEyeServerConfiguration extends Configuration {
 
@@ -71,7 +70,7 @@ public class ThirdEyeServerConfiguration extends Configuration {
   private TimeConfiguration timeConfiguration = new TimeConfiguration();
 
   @JsonProperty("accessControl")
-  private Map<String, Object> accessControlConfiguration = new HashMap<>();
+  private AccessControlConfiguration accessControlConfiguration = new AccessControlConfiguration();
 
   private String phantomJsPath = "";
   private String failureFromAddress;
@@ -266,12 +265,12 @@ public class ThirdEyeServerConfiguration extends Configuration {
     return this;
   }
 
-  public Map<String, Object> getAccessControlConfiguration() {
+  public AccessControlConfiguration getAccessControlConfiguration() {
     return this.accessControlConfiguration;
   }
 
-  public ThirdEyeServerConfiguration setAccessControlConfiguration(Map<String, Object> values) {
-    this.accessControlConfiguration = values;
+  public ThirdEyeServerConfiguration setAccessControlConfiguration(AccessControlConfiguration config) {
+    this.accessControlConfiguration = config;
     return this;
   }
 }

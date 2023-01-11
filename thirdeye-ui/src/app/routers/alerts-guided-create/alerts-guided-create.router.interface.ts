@@ -18,7 +18,7 @@ export interface AlertsGuidedCreateRouterProps {
     useParentForNonWelcomeFlow?: boolean;
     sampleAlertsBottom?: boolean;
     hideSampleAlerts?: boolean;
-    hideSubscriptionGroup?: boolean;
+    showEmailOnlyForSubscriptionGroup?: boolean;
     hideCurrentlySelected?: boolean;
     createLabel: string;
     inProgressLabel: string;

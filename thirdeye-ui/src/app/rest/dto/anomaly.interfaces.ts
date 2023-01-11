@@ -85,3 +85,9 @@ export interface AnomalyMetadata {
     dataset?: { name: string };
     metric?: { name: string };
 }
+
+export interface AnomalyStats {
+    totalCount: number;
+    countWithFeedback: number;
+    feedbackStats: Record<AnomalyFeedbackType, number>;
+}

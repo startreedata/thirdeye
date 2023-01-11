@@ -22,23 +22,23 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlertFrequency } from "../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
-import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
-import { EmailListInput } from "../../../components/form-basics/email-list-input/email-list-input.component";
+import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
+import { OnlyEmails } from "../../../components/alert-wizard-v3/notification-configuration/only-emails/only-emails.component";
 import { InputSection } from "../../../components/form-basics/input-section/input-section.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
 } from "../../../platform/components";
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { generateGenericNameForAlert } from "../../../utils/alerts/alerts.util";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
+import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 import { SetupDetailsPageProps } from "./setup-details-page.interface";
 
 export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
     inProgressLabel,
     createLabel,
-    hideSubscriptionGroup,
+    showEmailOnlyForSubscriptionGroup,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -47,25 +47,21 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
         alert,
         onAlertPropertyChange,
         selectedAlgorithmOption,
-        emails,
-        setEmails,
         handleCreateAlertClick,
         isCreatingAlert,
-    } = useOutletContext<{
-        alert: EditableAlert;
-        onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
-        selectedAlgorithmOption: AvailableAlgorithmOption;
-        emails: string[];
-        setEmails: (emails: string[]) => void;
-        handleCreateAlertClick: (alert: EditableAlert) => void;
-        isCreatingAlert: boolean;
-    }>();
+        selectedSubscriptionGroups,
+        handleSubscriptionGroupChange,
+        newSubscriptionGroup,
+        onNewSubscriptionGroupChange,
+    } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const [
         shouldDisplayScheduleConfiguration,
         setShouldDisplayScheduleConfiguration,
     ] = useState(false);
-    const [isNotificationsOn, setIsNotificationsOn] = useState(false);
+    const [isNotificationsOn, setIsNotificationsOn] = useState(
+        selectedSubscriptionGroups.length > 0
+    );
 
     useEffect(() => {
         // On initial render, ensure a metric, dataset, and dataSource are set
@@ -171,50 +167,62 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                     </PageContentsCardV1>
                 </Grid>
 
-                {!hideSubscriptionGroup && (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <Grid container>
-                                <Grid item lg={3} md={5} sm={10} xs={10}>
-                                    <Box marginBottom={2}>
-                                        <Typography variant="h5">
-                                            {t("label.configure-notifications")}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            {t(
-                                                "message.select-who-to-notify-when-finding-anomalies"
-                                            )}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid item lg={9} md={7} sm={2} xs={2}>
-                                    <Switch
-                                        checked={isNotificationsOn}
-                                        color="primary"
-                                        name="checked"
-                                        onChange={() =>
-                                            setIsNotificationsOn(
-                                                !isNotificationsOn
-                                            )
-                                        }
-                                    />
-                                </Grid>
+                <Grid item xs={12}>
+                    <PageContentsCardV1>
+                        <Grid container>
+                            <Grid item lg={3} md={5} sm={10} xs={10}>
+                                <Box marginBottom={2}>
+                                    <Typography variant="h5">
+                                        {t("label.configure-notifications")}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {t(
+                                            "message.select-who-to-notify-when-finding-anomalies"
+                                        )}
+                                    </Typography>
+                                </Box>
+                            </Grid>
+                            <Grid item lg={9} md={7} sm={2} xs={2}>
+                                <Switch
+                                    checked={isNotificationsOn}
+                                    color="primary"
+                                    name="checked"
+                                    onChange={() =>
+                                        setIsNotificationsOn(!isNotificationsOn)
+                                    }
+                                />
+                            </Grid>
 
-                                {isNotificationsOn && (
-                                    <InputSection
-                                        inputComponent={
-                                            <EmailListInput
-                                                emails={emails}
-                                                onChange={setEmails}
-                                            />
+                            {isNotificationsOn &&
+                                showEmailOnlyForSubscriptionGroup && (
+                                    <OnlyEmails
+                                        subscriptionGroup={newSubscriptionGroup}
+                                        onSubscriptionGroupChange={
+                                            onNewSubscriptionGroupChange
                                         }
-                                        label={t("label.add-email")}
                                     />
                                 )}
-                            </Grid>
-                        </PageContentsCardV1>
-                    </Grid>
-                )}
+                            {isNotificationsOn &&
+                                !showEmailOnlyForSubscriptionGroup && (
+                                    <NotificationConfiguration
+                                        alert={alert}
+                                        initiallySelectedSubscriptionGroups={
+                                            selectedSubscriptionGroups
+                                        }
+                                        newSubscriptionGroup={
+                                            newSubscriptionGroup
+                                        }
+                                        onNewSubscriptionGroupChange={
+                                            onNewSubscriptionGroupChange
+                                        }
+                                        onSubscriptionGroupsChange={
+                                            handleSubscriptionGroupChange
+                                        }
+                                    />
+                                )}
+                        </Grid>
+                    </PageContentsCardV1>
+                </Grid>
             </PageContentsGridV1>
 
             <WizardBottomBar

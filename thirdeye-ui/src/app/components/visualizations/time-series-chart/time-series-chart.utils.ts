@@ -49,6 +49,8 @@ export function getMinMax(
     ): number[] | number => (seriesOptions ? d.x : d.x)
 ): [number, number] {
     const arrayOfArrayOfValues: number[][] = [];
+    let minSoFar = Infinity;
+    let maxSoFar = -Infinity;
 
     series.forEach((seriesOptions) => {
         const values: number[] = [];
@@ -64,14 +66,12 @@ export function getMinMax(
         arrayOfArrayOfValues.push(values);
     });
 
-    const flattened: number[] = arrayOfArrayOfValues.reduce(
-        (soFar: number[], values: number[]) => {
-            return soFar.concat(values);
-        },
-        []
-    );
+    arrayOfArrayOfValues.forEach((values: number[]) => {
+        minSoFar = Math.min(...values, minSoFar);
+        maxSoFar = Math.max(...values, maxSoFar);
+    });
 
-    return [Math.min(...flattened), Math.max(...flattened)];
+    return [minSoFar, maxSoFar];
 }
 
 /**

@@ -54,9 +54,11 @@ export const CreateAlertGuidedPage: FunctionComponent<AlertsCreateGuidedPageProp
         onAlertPropertyChange,
         onSubmit,
         isCreatingAlert,
-        emails,
-        setEmails,
+        newSubscriptionGroup,
+        onNewSubscriptionGroupChange,
         getAlertTemplates,
+        selectedSubscriptionGroups,
+        onSubscriptionGroupChange,
     }) => {
         const { t } = useTranslation();
         const { pathname } = useLocation();
@@ -170,12 +172,23 @@ export const CreateAlertGuidedPage: FunctionComponent<AlertsCreateGuidedPageProp
                         simpleOptions,
                         advancedOptions,
                         selectedAlgorithmOption,
-                        emails: emails ?? [],
-                        setEmails: setEmails ?? (() => null),
                         handleCreateAlertClick,
                         isCreatingAlert,
                         getAlertTemplates,
                         alertTemplates,
+
+                        /**
+                         * New Subscription group is used for the case when user
+                         * wants to create one single new subscription group
+                         * while creating an alert
+                         */
+                        newSubscriptionGroup,
+                        onNewSubscriptionGroupChange,
+
+                        selectedSubscriptionGroups:
+                            selectedSubscriptionGroups ?? [],
+                        handleSubscriptionGroupChange:
+                            onSubscriptionGroupChange ?? (() => null),
                     }}
                 />
             </>

@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
 
-export interface OnlyEmailsProps {
+export interface CreateSubscriptionGroupProps {
     subscriptionGroup: SubscriptionGroup;
-    onSubscriptionGroupChange: (subscriptionGroup: SubscriptionGroup) => void;
+    onNewSubscriptionGroupChange: (
+        subscriptionGroup: SubscriptionGroup
+    ) => void;
 }

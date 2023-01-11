@@ -26,6 +26,12 @@ export const CreateAlertNewUserPage: FunctionComponent = () => {
         setShowBottomBar,
         handleSubmitAlertClick,
         refreshAlertTemplates,
+
+        selectedSubscriptionGroups,
+        handleSubscriptionGroupChange,
+
+        newSubscriptionGroup,
+        onNewSubscriptionGroupChange,
     }: AlertEditPageOutletContextProps =
         useOutletContext<AlertEditPageOutletContextProps>();
 
@@ -54,8 +60,12 @@ export const CreateAlertNewUserPage: FunctionComponent = () => {
             alertTemplates={alertTemplateOptions}
             getAlertTemplates={refreshAlertTemplates}
             isCreatingAlert={false}
+            newSubscriptionGroup={newSubscriptionGroup}
+            selectedSubscriptionGroups={selectedSubscriptionGroups}
             onAlertPropertyChange={handleAlertPropertyChange}
+            onNewSubscriptionGroupChange={onNewSubscriptionGroupChange}
             onSubmit={handleOnSubmit}
+            onSubscriptionGroupChange={handleSubscriptionGroupChange}
         />
     );
 };

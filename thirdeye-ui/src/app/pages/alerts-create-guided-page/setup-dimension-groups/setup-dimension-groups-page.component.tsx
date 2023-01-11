@@ -21,7 +21,6 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
 import { generateTemplateProperties } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
 import { CohortsTable } from "../../../components/cohort-detector/cohorts-table/cohorts-table.component";
 import { DatasetDetails } from "../../../components/cohort-detector/dataset-details/dataset-details.component";
@@ -30,13 +29,13 @@ import {
     PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { CohortResult } from "../../../rest/dto/rca.interfaces";
 import { useGetCohort } from "../../../rest/rca/rca.actions";
 import { GetCohortParams } from "../../../rest/rca/rca.interfaces";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
+import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 
 export const SetupDimensionGroupsPage: FunctionComponent = () => {
     const navigate = useNavigate();
@@ -47,14 +46,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
         useGetCohort();
 
     const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
-        useOutletContext<{
-            alert: EditableAlert;
-            onAlertPropertyChange: (
-                contents: Partial<EditableAlert>,
-                isTotalChange?: boolean
-            ) => void;
-            selectedAlgorithmOption: AvailableAlgorithmOption;
-        }>();
+        useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const [selectedCohorts, setSelectedCohorts] = useState<CohortResult[]>([]);
 

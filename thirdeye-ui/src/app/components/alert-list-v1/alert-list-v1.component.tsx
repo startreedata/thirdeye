@@ -87,7 +87,9 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     ): ReactElement => (
         <AlertAccuracyColored
             alertStats={data.accuracyStatistics ?? null}
-            renderCustomText={(accuracyNumber) => `${100 * accuracyNumber}%`}
+            renderCustomText={({ accuracy, noAnomalyData }) =>
+                noAnomalyData ? t("message.no-data") : `${100 * accuracy}%`
+            }
             typographyProps={{ variant: "body2" }}
         />
     );
@@ -111,6 +113,20 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
 
         const { totalCount, countWithFeedback, feedbackStats } =
             data.accuracyStatistics;
+
+        // Inform the user if there are no anomalies logged for this alert
+        if (totalCount === 0) {
+            return (
+                <>
+                    {capitalize(
+                        t("message.no-children-present-for-this-parent", {
+                            parent: t("label.alert"),
+                            children: t("label.anomalies"),
+                        })
+                    )}
+                </>
+            );
+        }
 
         return (
             <>

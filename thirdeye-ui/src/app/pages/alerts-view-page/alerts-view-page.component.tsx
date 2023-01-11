@@ -31,6 +31,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { AlertAccuracyColored } from "../../components/alert-accuracy-colored/alert-accuracy-colored.component";
 import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
 import { EnumerationItemMerger } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.component";
 import { DetectionEvaluationForRender } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.interfaces";
@@ -65,7 +66,6 @@ import { Alert, AlertStats } from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
-    getAlertAccuracyData,
 } from "../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
@@ -347,20 +347,6 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    const overallAccuracySubtitle = useMemo<string | undefined>(() => {
-        if (!overallAlertStats) {
-            return undefined;
-        }
-
-        const [accuracyNumber] = getAlertAccuracyData(overallAlertStats);
-
-        return capitalize(
-            `${t("label.overall-entity", {
-                entity: t("label.accuracy"),
-            })}: ${100 * accuracyNumber}%`
-        );
-    }, [overallAlertStats]);
-
     return (
         <PageV1>
             <PageHeader
@@ -406,7 +392,26 @@ export const AlertsViewPage: FunctionComponent = () => {
                         ""
                     )
                 }
-                subtitle={overallAccuracySubtitle}
+                subtitle={
+                    <AlertAccuracyColored
+                        alertStats={overallAlertStats}
+                        renderCustomText={({ accuracy, noAnomalyData }) =>
+                            capitalize(
+                                noAnomalyData
+                                    ? t(
+                                          "message.no-children-present-for-this-parent",
+                                          {
+                                              children: t("label.anomalies"),
+                                              parent: t("label.alert"),
+                                          }
+                                      )
+                                    : `${t("label.overall-entity", {
+                                          entity: t("label.accuracy"),
+                                      })}: ${100 * accuracy}%`
+                            )
+                        }
+                    />
+                }
                 title={alert ? alert.name : ""}
             >
                 {getAlertStatus === ActionStatus.Working && (

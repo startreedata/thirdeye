@@ -46,6 +46,8 @@ public interface AlertMapper {
         .setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))
+        .setCreated(dto.getCreateTime())
+        .setUpdated(dto.getUpdateTime())
         ;
   }
 

@@ -241,7 +241,7 @@ export const filterAlerts = (
 export const omitNonUpdatableData = (
     alert: Alert | EditableAlert
 ): EditableAlert => {
-    const newAlert = omit(alert, "id");
+    const newAlert = omit(alert, ["id", "created", "updated"]);
 
     return newAlert as Alert;
 };

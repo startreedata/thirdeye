@@ -15,6 +15,8 @@ package ai.startree.thirdeye.spi.accessControl;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ResourceIdentifier {
 
   static public final String DEFAULT_NAME = "0";
@@ -34,9 +36,9 @@ public class ResourceIdentifier {
   public static ResourceIdentifier from(final String name, final String namespace,
       final String entityType) {
     return new ResourceIdentifier(
-        optional(name).orElse("").length() > 0 ? name : DEFAULT_NAME,
-        optional(namespace).orElse("").length() > 0 ? name : DEFAULT_NAMESPACE,
-        optional(entityType).orElse("").length() > 0 ? name : DEFAULT_ENTITY_TYPE
+        optional(name).filter(StringUtils::isNotEmpty).orElse(DEFAULT_NAME),
+        optional(namespace).filter(StringUtils::isNotEmpty).orElse(DEFAULT_NAMESPACE),
+        optional(entityType).filter(StringUtils::isNotEmpty).orElse(DEFAULT_ENTITY_TYPE)
     );
   }
 }

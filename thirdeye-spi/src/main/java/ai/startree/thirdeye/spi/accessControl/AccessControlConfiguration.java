@@ -18,5 +18,5 @@ import java.util.Map;
 
 public class AccessControlConfiguration {
   public boolean enabled;
-  public Map<String, Object> properties;
+  public Map<String, Object> plugins;
 }

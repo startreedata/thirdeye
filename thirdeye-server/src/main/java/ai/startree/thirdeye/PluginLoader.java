@@ -79,8 +79,8 @@ public class PluginLoader {
       final ContributorsFinderRunner contributorsFinderRunner,
       final BootstrapResourcesRegistry bootstrapResourcesRegistry,
       final PostProcessorRegistry postProcessorRegistry,
-      final PluginLoaderConfiguration config,
-      final AccessControlProvider accessControlProvider) {
+      final AccessControlProvider accessControlProvider,
+      final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
@@ -147,8 +147,10 @@ public class PluginLoader {
     for (EnumeratorFactory f : plugin.getEnumeratorFactories()) {
       detectionRegistry.addEnumeratorFactory(f);
     }
-    optional(plugin.getAccessControl(accessControlProvider.getConfig()))
-        .ifPresent(accessControlProvider::setAccessControl);
+    if (accessControlProvider.getConfig().enabled) {
+      optional(plugin.getAccessControl(accessControlProvider.getConfig()))
+          .ifPresent(accessControlProvider::setAccessControl);
+    }
 
     log.info("Installed plugin: " + plugin.getClass().getName());
   }

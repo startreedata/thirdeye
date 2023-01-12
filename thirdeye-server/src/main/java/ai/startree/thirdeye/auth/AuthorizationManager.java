@@ -51,27 +51,27 @@ public class AuthorizationManager {
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, dtoToId(entity), AccessType.WRITE);
+    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
     relatedEntities(entity).forEach(relatedId ->
         ensureHasAccess(principal, relatedId, AccessType.READ));
   }
 
   public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, dtoToId(entity), AccessType.WRITE);
+    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
   }
 
   public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
       final T before, final T after) {
-    ensureHasAccess(principal, dtoToId(before), AccessType.WRITE);
-    ensureHasAccess(principal, dtoToId(after), AccessType.WRITE);
+    ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
+    ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
     relatedEntities(after).forEach(related ->
         ensureHasAccess(principal, related, AccessType.READ));
   }
 
   public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, dtoToId(entity), AccessType.READ);
+    ensureHasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
   public void ensureCanEvaluate(final ThirdEyePrincipal principal, final AlertDTO entity) {
@@ -84,7 +84,7 @@ public class AuthorizationManager {
 
   public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
-    ensureHasAccess(principal, dtoToId(entity), accessType);
+    ensureHasAccess(principal, resourceId(entity), accessType);
   }
 
   public void ensureHasAccess(final ThirdEyePrincipal principal,
@@ -96,7 +96,7 @@ public class AuthorizationManager {
 
   public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
-    return hasAccess(principal, dtoToId(entity), accessType);
+    return hasAccess(principal, resourceId(entity), accessType);
   }
 
   public boolean hasAccess(final ThirdEyePrincipal principal,
@@ -104,7 +104,7 @@ public class AuthorizationManager {
     return accessControl.hasAccess(principal.authToken, identifier, accessType);
   }
 
-  static public <T extends AbstractDTO> ResourceIdentifier dtoToId(final T dto) {
+  static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
     return ResourceIdentifier.from(
         optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
         optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
@@ -116,7 +116,7 @@ public class AuthorizationManager {
     if (entity instanceof AlertDTO) {
       final AlertDTO alertDto = (AlertDTO) entity;
       final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(alertDto.getTemplate());
-      return Collections.singletonList(dtoToId(alertTemplateDTO));
+      return Collections.singletonList(resourceId(alertTemplateDTO));
     }
     return new ArrayList<>();
   }

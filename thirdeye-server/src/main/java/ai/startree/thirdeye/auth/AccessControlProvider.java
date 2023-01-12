@@ -14,13 +14,16 @@
 
 package ai.startree.thirdeye.auth;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 
 /**
- * AccessControlProvider serves as a mutable layer between Guice bindings and the access control implementation from plugins.
+ * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
+ * implementation from plugins.
  */
 public class AccessControlProvider implements AccessControl {
 
@@ -55,9 +58,8 @@ public class AccessControlProvider implements AccessControl {
       return alwaysAllow;
     }
 
-    if (this.accessControl == null) {
-      throw new RuntimeException("Access control is enabled, but no provider has been configured!");
-    }
+    checkState(this.accessControl != null,
+        "Access control is enabled, but no provider has been configured!");
     return this.accessControl;
   }
 

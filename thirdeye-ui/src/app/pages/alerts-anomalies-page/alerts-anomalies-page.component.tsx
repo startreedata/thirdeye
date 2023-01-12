@@ -13,12 +13,7 @@
  * the License.
  */
 import { Box, FormControlLabel, Grid, Switch } from "@material-ui/core";
-import React, {
-    FunctionComponent,
-    useCallback,
-    useEffect,
-    useMemo,
-} from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
@@ -122,24 +117,19 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         });
     };
 
-    const getFilteredUiAnomalies = useCallback(
-        (anomaliesProp: typeof anomalies): UiAnomaly[] | null => {
-            if (!anomaliesProp) {
-                return null;
-            }
+    const uiAnomalies = useMemo(() => {
+        if (!anomalies) {
+            return null;
+        }
 
-            // All anomalies being fetched, and then filtered here at UI level
-            const filteredAnomalies = filterAnomaliesByFunctions(
-                anomaliesProp,
-                filterIgnoredAnomalies ? [(a) => !isAnomalyIgnored(a)] : []
-            );
+        // All anomalies being fetched, and then filtered here at UI level
+        const filteredAnomalies = filterAnomaliesByFunctions(
+            anomalies,
+            filterIgnoredAnomalies ? [(a) => !isAnomalyIgnored(a)] : []
+        );
 
-            return getUiAnomalies(filteredAnomalies);
-        },
-        [filterIgnoredAnomalies]
-    );
-
-    const uiAnomalies = getFilteredUiAnomalies(anomalies);
+        return getUiAnomalies(filteredAnomalies);
+    }, [anomalies, filterIgnoredAnomalies]);
 
     useEffect(() => {
         if (enumerationItemIdStr) {

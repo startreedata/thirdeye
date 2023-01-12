@@ -132,7 +132,7 @@ export const HomePage: FunctionComponent = () => {
                 contents: (
                     <Box textAlign="center">
                         <Typography color="primary" variant="h5">
-                            {t("label.congratulation-!")}
+                            {t("label.congratulations-!")}
                         </Typography>
                         <Box py={1}>
                             <SetupCompleteLogo />
@@ -141,9 +141,7 @@ export const HomePage: FunctionComponent = () => {
                             {t("message.the-setup-is-completed")}
                         </Typography>
                         <Typography color="textSecondary" variant="subtitle1">
-                            {t(
-                                "message.now-you-can-start-using-thirdeye-as-a-professional"
-                            )}
+                            {t("message.you-can-now-start-using-thirdeye")}
                         </Typography>
                     </Box>
                 ),

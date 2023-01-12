@@ -49,6 +49,7 @@
         "prettier-fix": "prettier . --write",
         "lint-check": "npm run license-header-check && npm run eslint-check && npm run stylelint-check && npm run prettier-check",
         "lint-fix": "npm run license-header-fix && npm run eslint-fix && npm run stylelint-fix && npm run prettier-fix",
+        "ci-check": "npm run lint-check && npm run build && npm run test",
         "release": "semantic-release"
     },
     "dependencies": {

@@ -33,6 +33,7 @@ This is the UI project for StarTree ThirdEye.
     -   [`prettier-fix`](#prettier-fix)
     -   [`lint-check`](#lint-check)
     -   [`lint-fix`](#lint-fix)
+    -   [`ci-check`](#ci-check)
 -   [Contributing](#contributing)
 
 ## Getting started
@@ -288,3 +289,11 @@ $ npm run lint-fix
 ## Contributing
 
 [Coding standards, conventions and other things.](./CONTRIBUTING.md)
+
+### `ci-check`
+
+Run all the scripts that will be executed as part of pull request validation for the project
+
+```console
+$ npm run ci-check
+```

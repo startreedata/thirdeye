@@ -17,7 +17,8 @@ import { differenceBy, isEmpty, some, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-whizard.utils";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -29,10 +30,14 @@ import { updateAlert } from "../../rest/alerts/alerts.rest";
 import { Alert, EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
-import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
+import {
+    createSubscriptionGroup,
+    updateSubscriptionGroups,
+} from "../../rest/subscription-groups/subscription-groups.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
+import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditBasePage } from "./alerts-edit-base-page.component";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
@@ -61,6 +66,9 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
     } = useGetAlert();
     const params = useParams<AlertsUpdatePageParams>();
     const [loading, setLoading] = useState(true);
+
+    const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
+        useState<SubscriptionGroup>(createEmptySubscriptionGroup());
 
     useEffect(() => {
         // Validate id from URL
@@ -102,6 +110,10 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     setCurrentlySelectedSubscriptionGroups(
                         subGroupsAlertIsIn as SubscriptionGroup[]
                     );
+                    singleNewSubscriptionGroup.name = `${getAlertResult.value.name}_subscription_group`;
+                    setSingleNewSubscriptionGroup({
+                        ...singleNewSubscriptionGroup,
+                    });
                 }
             })
             .finally(() => {
@@ -143,6 +155,116 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
               );
     }, [getSubscriptionGroupsErrorMessages]);
 
+    const handleUpdatingSubscriptionGroups = async (
+        alert: Alert
+    ): Promise<void> => {
+        let copiedCurrentlySelectedSubscriptionGroups = [
+            ...currentlySelectedSubscriptionGroups,
+        ];
+
+        if (
+            validateSubscriptionGroup(singleNewSubscriptionGroup) &&
+            singleNewSubscriptionGroup.specs?.length > 0
+        ) {
+            try {
+                const newlyCreatedSubGroup = await createSubscriptionGroup(
+                    singleNewSubscriptionGroup
+                );
+                copiedCurrentlySelectedSubscriptionGroups = [
+                    ...copiedCurrentlySelectedSubscriptionGroups,
+                    newlyCreatedSubGroup,
+                ];
+            } catch (error) {
+                const errMessages = getErrorMessages(error);
+
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.experienced-error-creating-subscription-group-while-creating-alert"
+                    )
+                );
+                !isEmpty(errMessages) &&
+                    errMessages.map((err) =>
+                        notify(NotificationTypeV1.Error, err)
+                    );
+            }
+        }
+
+        // Find any subscription groups in the original selected list
+        // that does not exist in the currently selected list
+        const subscriptionGroupsRemoved = differenceBy(
+            originallySelectedSubscriptionGroups,
+            copiedCurrentlySelectedSubscriptionGroups,
+            "id"
+        );
+        const subscriptionGroupsAdded = differenceBy(
+            copiedCurrentlySelectedSubscriptionGroups,
+            originallySelectedSubscriptionGroups,
+            "id"
+        );
+
+        if (
+            isEmpty(subscriptionGroupsRemoved) &&
+            isEmpty(subscriptionGroupsAdded)
+        ) {
+            // Redirect to alerts detail path
+            navigate(getAlertsAlertPath(alert.id));
+
+            return;
+        }
+
+        // Add alert to subscription groups
+        const subscriptionGroupsToBeAdded = subscriptionGroupsAdded.map(
+            (subscriptionGroup) => ({
+                ...subscriptionGroup,
+                alerts: subscriptionGroup.alerts
+                    ? [...subscriptionGroup.alerts, alert] // Add to existing list
+                    : [alert], // Create new list
+            })
+        );
+
+        // Remove alert from subscription groups
+        const subscriptionGroupsToBeOmitted = subscriptionGroupsRemoved.map(
+            (subscriptionGroup) => ({
+                ...subscriptionGroup,
+                alerts: subscriptionGroup.alerts.filter(
+                    (subGroupAlert) => subGroupAlert.id !== alert.id // Remove alert from list
+                ),
+            })
+        );
+
+        const subscriptionGroupsToBeUpdated = [
+            ...subscriptionGroupsToBeAdded,
+            ...subscriptionGroupsToBeOmitted,
+        ];
+
+        try {
+            await updateSubscriptionGroups(subscriptionGroupsToBeUpdated);
+            notify(
+                NotificationTypeV1.Success,
+                t("message.update-success", {
+                    entity: t("label.subscription-groups"),
+                })
+            );
+        } catch (error) {
+            const errMessages = getErrorMessages(error);
+
+            isEmpty(errMessages)
+                ? notify(
+                      NotificationTypeV1.Error,
+                      t("message.update-error", {
+                          entity: t("label.subscription-groups"),
+                      })
+                  )
+                : errMessages.map((err) =>
+                      notify(NotificationTypeV1.Error, err)
+                  );
+        } finally {
+            // Redirect to alerts detail path
+            navigate(getAlertsAlertPath(alert.id));
+        }
+    };
+
     const handleUpdateAlertClick = (modifiedAlert: EditableAlert): void => {
         if (!modifiedAlert) {
             return;
@@ -154,81 +276,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     NotificationTypeV1.Success,
                     t("message.update-success", { entity: t("label.alert") })
                 );
-
-                // Find any subscription groups in the original selected list
-                // that does not exist in the currently selected list
-                const subscriptionGroupsRemoved = differenceBy(
-                    originallySelectedSubscriptionGroups,
-                    currentlySelectedSubscriptionGroups,
-                    "id"
-                );
-                const subscriptionGroupsAdded = differenceBy(
-                    currentlySelectedSubscriptionGroups,
-                    originallySelectedSubscriptionGroups,
-                    "id"
-                );
-
-                if (
-                    isEmpty(subscriptionGroupsRemoved) &&
-                    isEmpty(subscriptionGroupsAdded)
-                ) {
-                    // Redirect to alerts detail path
-                    navigate(getAlertsAlertPath(alert.id));
-
-                    return;
-                }
-
-                // Add alert to subscription groups
-                const subscriptionGroupsToBeAdded = subscriptionGroupsAdded.map(
-                    (subscriptionGroup) => ({
-                        ...subscriptionGroup,
-                        alerts: subscriptionGroup.alerts
-                            ? [...subscriptionGroup.alerts, alert] // Add to existing list
-                            : [alert], // Create new list
-                    })
-                );
-
-                // Remove alert from subscription groups
-                const subscriptionGroupsToBeOmitted =
-                    subscriptionGroupsRemoved.map((subscriptionGroup) => ({
-                        ...subscriptionGroup,
-                        alerts: subscriptionGroup.alerts.filter(
-                            (subGroupAlert) => subGroupAlert.id !== alert.id // Remove alert from list
-                        ),
-                    }));
-
-                const subscriptionGroupsToBeUpdated = [
-                    ...subscriptionGroupsToBeAdded,
-                    ...subscriptionGroupsToBeOmitted,
-                ];
-
-                updateSubscriptionGroups(subscriptionGroupsToBeUpdated)
-                    .then((): void => {
-                        notify(
-                            NotificationTypeV1.Success,
-                            t("message.update-success", {
-                                entity: t("label.subscription-groups"),
-                            })
-                        );
-                    })
-                    .catch((error: AxiosError): void => {
-                        const errMessages = getErrorMessages(error);
-
-                        isEmpty(errMessages)
-                            ? notify(
-                                  NotificationTypeV1.Error,
-                                  t("message.update-error", {
-                                      entity: t("label.subscription-groups"),
-                                  })
-                              )
-                            : errMessages.map((err) =>
-                                  notify(NotificationTypeV1.Error, err)
-                              );
-                    })
-                    .finally((): void => {
-                        // Redirect to alerts detail path
-                        navigate(getAlertsAlertPath(alert.id));
-                    });
+                handleUpdatingSubscriptionGroups(alert);
             })
             .catch((error: AxiosError): void => {
                 const errMessages = getErrorMessages(error);
@@ -246,26 +294,28 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             });
     };
 
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
-    if (!originalAlert) {
-        return <NoDataIndicator />;
-    }
-
     return (
-        <AlertsEditBasePage
-            pageTitle={t("label.update-entity", {
-                entity: t("label.alert"),
-            })}
-            selectedSubscriptionGroups={currentlySelectedSubscriptionGroups}
-            startingAlertConfiguration={originalAlert}
-            submitButtonLabel={t("label.update-entity", {
-                entity: t("label.alert"),
-            })}
-            onSubmit={handleUpdateAlertClick}
-            onSubscriptionGroupChange={setCurrentlySelectedSubscriptionGroups}
-        />
+        <LoadingErrorStateSwitch
+            isError={!originalAlert}
+            isLoading={loading}
+            loadingState={<AppLoadingIndicatorV1 />}
+        >
+            <AlertsEditBasePage
+                newSubscriptionGroup={singleNewSubscriptionGroup}
+                pageTitle={t("label.update-entity", {
+                    entity: t("label.alert"),
+                })}
+                selectedSubscriptionGroups={currentlySelectedSubscriptionGroups}
+                startingAlertConfiguration={originalAlert as EditableAlert}
+                submitButtonLabel={t("label.update-entity", {
+                    entity: t("label.alert"),
+                })}
+                onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
+                onSubmit={handleUpdateAlertClick}
+                onSubscriptionGroupChange={
+                    setCurrentlySelectedSubscriptionGroups
+                }
+            />
+        </LoadingErrorStateSwitch>
     );
 };

@@ -113,6 +113,13 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                                     width: 100,
                                     height: 30,
                                 }}
+                                renderCustomText={({ noAnomalyData }) =>
+                                    // Returning a null here will have the
+                                    // component render the default string
+                                    // The requirement here is to render nothing
+                                    // if `noAnomalyData` is true
+                                    noAnomalyData ? <>&nbsp;</> : null
+                                }
                             />
                         </Grid>
                         <Grid item sm={2} xs={12}>

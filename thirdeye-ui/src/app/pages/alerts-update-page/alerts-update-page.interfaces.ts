@@ -27,6 +27,9 @@ export interface AlertsEditPageProps {
     onSubmit: (alert: EditableAlert) => void;
     selectedSubscriptionGroups: SubscriptionGroup[];
     onSubscriptionGroupChange: (newGroups: SubscriptionGroup[]) => void;
+
+    newSubscriptionGroup: SubscriptionGroup;
+    onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
 }
 
 export interface AlertEditPageOutletContextProps {
@@ -45,4 +48,7 @@ export interface AlertEditPageOutletContextProps {
     setShowBottomBar: (flag: boolean) => void;
     handleSubmitAlertClick: (alert: EditableAlert) => void;
     refreshAlertTemplates: () => void;
+
+    newSubscriptionGroup: SubscriptionGroup;
+    onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
 }

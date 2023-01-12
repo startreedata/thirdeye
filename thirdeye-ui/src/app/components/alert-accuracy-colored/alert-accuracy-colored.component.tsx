@@ -14,6 +14,7 @@
  */
 
 import { Typography, useTheme } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { SkeletonV1 } from "../../platform/components";
@@ -39,16 +40,29 @@ export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> 
             );
         }
 
-        const [accuracyNumber, colorScheme] = getAlertAccuracyData(alertStats);
+        const { accuracy, colorScheme, noAnomalyData } =
+            getAlertAccuracyData(alertStats);
 
         const accuracyString = `${t("label.accuracy")}: ${(
-            100 * accuracyNumber
+            100 * accuracy
         ).toFixed(2)}%`;
         const color = theme.palette[colorScheme].main;
 
         return (
-            <Typography style={{ color }} variant="body1" {...typographyProps}>
-                {renderCustomText?.(accuracyNumber) || accuracyString}
+            <Typography
+                color="secondary"
+                style={{ ...(!noAnomalyData && { color }) }}
+                variant="body1"
+                {...typographyProps}
+            >
+                {renderCustomText?.({ accuracy, noAnomalyData }) ||
+                    (noAnomalyData
+                        ? capitalize(
+                              t("message.no-entity-data", {
+                                  entity: t("label.anomaly"),
+                              })
+                          )
+                        : accuracyString)}
             </Typography>
         );
     };

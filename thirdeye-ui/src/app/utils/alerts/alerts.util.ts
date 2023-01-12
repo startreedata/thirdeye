@@ -411,16 +411,25 @@ type AlertAccuracyColor = "success" | "warning" | "error";
 /**
  *
  * @param alertStat - instance of AlertStats
- * @returns `[accuracy, colorScheme]`
+ * @returns `{accuracy, colorScheme, noAnomalyData}`
  * @param accuracy - number between 0 to 1
  * @param colorScheme - "success" | "warning" | "error",
  */
 export const getAlertAccuracyData = (
     alertStat: AlertStats
-): [number, AlertAccuracyColor] => {
+): {
+    accuracy: number;
+    colorScheme: AlertAccuracyColor;
+    noAnomalyData: boolean;
+} => {
     // Default values
     let colorScheme: AlertAccuracyColor = "success";
-    let accuracy = 1;
+    let accuracy = 1; // Accuracy fraction, between 0 to 1
+    let noAnomalyData = false; // Whether there is any anomaly data at all
+
+    if (alertStat.totalCount === 0) {
+        noAnomalyData = true;
+    }
 
     // There's no point of calculating the accuracy if there is no feedback reported.
     // In which case, just return the default value of accuracy=100%
@@ -441,5 +450,5 @@ export const getAlertAccuracyData = (
         }
     }
 
-    return [accuracy, colorScheme];
+    return { accuracy, colorScheme, noAnomalyData };
 };

@@ -13,9 +13,15 @@
  * the License.
  */
 
-import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
-export interface OnlyEmailsProps {
-    subscriptionGroup: SubscriptionGroup;
-    onSubscriptionGroupChange: (subscriptionGroup: SubscriptionGroup) => void;
+export interface NotificationConfigurationProps {
+    alert: EditableAlert;
+    onSubscriptionGroupsChange: (newGroups: SubscriptionGroup[]) => void;
+    initiallySelectedSubscriptionGroups: SubscriptionGroup[];
+    newSubscriptionGroup: SubscriptionGroup;
+    onNewSubscriptionGroupChange: (
+        subscriptionGroup: SubscriptionGroup
+    ) => void;
 }

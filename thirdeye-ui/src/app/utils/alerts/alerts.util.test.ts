@@ -320,6 +320,8 @@ const mockAlert1 = {
         max: "850000",
         min: "250000",
     },
+    created: 123,
+    updated: 456,
 } as Alert;
 
 const mockAlert2 = {
@@ -328,10 +330,14 @@ const mockAlert2 = {
     owner: {
         id: 9,
     },
+    created: 123,
+    updated: 456,
 } as Alert;
 
 const mockAlert3 = {
     id: 10,
+    created: 123,
+    updated: 456,
 } as Alert;
 
 const mockAlerts = [mockAlert1, mockAlert2, mockAlert3];

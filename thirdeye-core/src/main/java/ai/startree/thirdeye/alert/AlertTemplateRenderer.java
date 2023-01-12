@@ -190,7 +190,7 @@ public class AlertTemplateRenderer {
       return res;
     }
     for (final TemplatePropertyMetadata p : propertiesMetadata) {
-      if (p.isDefaultIsNull()) {
+      if (optional(p.isDefaultIsNull()).orElse(false)) {
         res.put(p.getName(), null);
       } else if (p.getDefaultValue() != null) {
         res.put(p.getName(), p.getDefaultValue());

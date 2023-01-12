@@ -34,8 +34,7 @@ public class TemplatePropertyMetadata {
   /**
    * Used to set a defaultValue to null. (defaultValue=null is interpreted as no defaultValue).
    */
-  // FIXME cyril box the boolean
-  private boolean defaultIsNull = false;
+  private Boolean defaultIsNull;
 
   /**
    * Helps the UI build input fields.
@@ -51,8 +50,7 @@ public class TemplatePropertyMetadata {
   /**
    * Whether multiple options can be selected.
    */
-  // FIXME cyril box the boolean
-  private boolean isMultiselect = false;
+  private Boolean isMultiselect = false;
   /**
    * Helps the UI build input fields.
    */
@@ -76,11 +74,11 @@ public class TemplatePropertyMetadata {
     return this;
   }
 
-  public boolean isDefaultIsNull() {
+  public Boolean isDefaultIsNull() {
     return defaultIsNull;
   }
 
-  public TemplatePropertyMetadata setDefaultIsNull(final boolean defaultIsNull) {
+  public TemplatePropertyMetadata setDefaultIsNull(final Boolean defaultIsNull) {
     this.defaultIsNull = defaultIsNull;
     return this;
   }
@@ -130,11 +128,11 @@ public class TemplatePropertyMetadata {
     return this;
   }
 
-  public boolean isMultiselect() {
+  public Boolean isMultiselect() {
     return isMultiselect;
   }
 
-  public TemplatePropertyMetadata setMultiselect(final boolean multiselect) {
+  public TemplatePropertyMetadata setMultiselect(final Boolean multiselect) {
     isMultiselect = multiselect;
     return this;
   }

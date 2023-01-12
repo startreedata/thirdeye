@@ -17,4 +17,5 @@ export type AlertsAnomaliesParams = {
 };
 
 export const ENUMERATION_ITEM_QUERY_PARAM_KEY = "enumerationItem";
-export const SHOW_ALL_ANOMALIES_QUERY_PARAM_KEY = "showAllAnomalies";
+export const FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY =
+    "filterIgnoredAnomalies";

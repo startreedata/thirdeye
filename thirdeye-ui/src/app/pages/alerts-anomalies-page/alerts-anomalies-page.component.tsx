@@ -56,7 +56,7 @@ import {
 import {
     AlertsAnomaliesParams,
     ENUMERATION_ITEM_QUERY_PARAM_KEY,
-    SHOW_ALL_ANOMALIES_QUERY_PARAM_KEY,
+    FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY,
 } from "./alerts-anomalies-page.interfaces";
 
 export const AlertsAnomaliesPage: FunctionComponent = () => {
@@ -83,19 +83,23 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         status: getEnumerationItemStatus,
     } = useGetEnumerationItem();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [startTime, endTime, enumerationItemIdStr, showAllAnomalies] =
+    const [startTime, endTime, enumerationItemIdStr, filterIgnoredAnomalies] =
         useMemo(
             () => [
                 Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
                 Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
                 searchParams.get(ENUMERATION_ITEM_QUERY_PARAM_KEY),
-                searchParams.get(SHOW_ALL_ANOMALIES_QUERY_PARAM_KEY) === "true",
+                searchParams.get(FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY) ===
+                    "true",
             ],
             [searchParams]
         );
 
     const setShowIgnored = (newState: boolean): void => {
-        searchParams.set(SHOW_ALL_ANOMALIES_QUERY_PARAM_KEY, `${!!newState}`);
+        searchParams.set(
+            FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY,
+            `${!newState}`
+        );
         setSearchParams(searchParams);
     };
 
@@ -114,7 +118,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             startTime,
             endTime,
             enumerationItemId: Number(enumerationItemIdStr),
-            showAllAnomalies: true,
+            filterIgnoredAnomalies: false,
         });
     };
 
@@ -127,12 +131,12 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             // All anomalies being fetched, and then filtered here at UI level
             const filteredAnomalies = filterAnomaliesByFunctions(
                 anomaliesProp,
-                showAllAnomalies ? [] : [(a) => !isAnomalyIgnored(a)]
+                filterIgnoredAnomalies ? [(a) => !isAnomalyIgnored(a)] : []
             );
 
             return getUiAnomalies(filteredAnomalies);
         },
-        [showAllAnomalies]
+        [filterIgnoredAnomalies]
     );
 
     const uiAnomalies = getFilteredUiAnomalies(anomalies);
@@ -199,8 +203,8 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                         t("label.anomalies")
                     ).then(() => {
                         // Since the uiAnomaly data is a computed value from `anomalies` and will be
-                        // re-computed every time the `showAllAnomalies` is changed, the data is
-                        // being re-fetched to avoid having to complicate the local state
+                        // re-computed every time the `filterIgnoredAnomalies` is changed, the data
+                        // is being re-fetched to avoid having to complicate the local state
                         fetchData();
                     });
             },
@@ -253,7 +257,9 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                         <FormControlLabel
                                             control={
                                                 <Switch
-                                                    checked={showAllAnomalies}
+                                                    checked={
+                                                        !filterIgnoredAnomalies
+                                                    }
                                                     onChange={
                                                         handleToggleIgnoredAnomalies
                                                     }

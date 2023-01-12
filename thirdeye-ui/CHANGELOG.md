@@ -1,3 +1,16 @@
+## [2.4.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.3.0...thirdeye-ui-2.4.0) (2023-01-12)
+
+
+### Features
+
+* [TE-1182](https://cortexdata.atlassian.net/browse/TE-1182) removed `timeColumn` and `timeColumnFormat` from `templateProperties` ([d51dde3a4](https://github.com/startreedata/thirdeye/commit/d51dde3a45772ddedb4e1ff153dd0922e472129f))
+
+
+### Bug Fixes
+
+* [TE-1205](https://cortexdata.atlassian.net/browse/TE-1205) fix issue where a lot datapoints break `getMinMax` ([47077df18](https://github.com/startreedata/thirdeye/commit/47077df1856fd5a66553028b30f2c13dc25cf600))
+* [TE-1208](https://cortexdata.atlassian.net/browse/TE-1208) remove 10 second wait and background check for anomalies generated ([db699828c](https://github.com/startreedata/thirdeye/commit/db699828cc6b076df341462187a5cf58e16d30bd))
+
 ## [2.3.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.2.0...thirdeye-ui-2.3.0) (2023-01-11)
 
 

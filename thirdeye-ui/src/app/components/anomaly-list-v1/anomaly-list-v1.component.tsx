@@ -24,19 +24,21 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    DataGridColumnV1,
     DataGridSelectionModelV1,
     DataGridSortOrderV1,
     DataGridV1,
 } from "../../platform/components";
 import { linkRendererV1 } from "../../platform/utils";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import type { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsAlertPath,
     getAnomaliesAnomalyPath,
     getMetricsViewPath,
 } from "../../utils/routes/routes.util";
 import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filters.component";
-import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
+import type { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
+import { useAnomalyListV1Styles } from "./anomaly-list-v1.style";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     anomalies,
@@ -49,17 +51,45 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
         useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
     const theme = useTheme();
+    const styles = useAnomalyListV1Styles();
+
+    const addMutedStyle = useCallback(
+        (content: ReactNode, data: UiAnomaly): ReactNode => {
+            const { isIgnored } = data;
+
+            return (
+                <Typography
+                    variant="body2"
+                    {...(isIgnored && { className: styles.muted })}
+                >
+                    {content}
+                </Typography>
+            );
+        },
+        []
+    );
 
     const anomalyNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            return linkRendererV1(cellValue, getAnomaliesAnomalyPath(data.id));
+            const { isIgnored } = data;
+
+            return addMutedStyle(
+                linkRendererV1(
+                    `${cellValue}${isIgnored ? `(${t("label.ignored")})` : ""}`,
+                    getAnomaliesAnomalyPath(data.id)
+                ),
+                data
+            );
         },
         []
     );
 
     const alertNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            return linkRendererV1(cellValue, getAlertsAlertPath(data.alertId));
+            return addMutedStyle(
+                linkRendererV1(cellValue, getAlertsAlertPath(data.alertId)),
+                data
+            );
         },
         []
     );
@@ -68,22 +98,35 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
             // currently we don't have id with us3
             // but it will be good to have id to redirect
-            return data.metricId
-                ? linkRendererV1(cellValue, getMetricsViewPath(data.metricId))
-                : cellValue;
+            return addMutedStyle(
+                data.metricId
+                    ? linkRendererV1(
+                          cellValue,
+                          getMetricsViewPath(data.metricId)
+                      )
+                    : cellValue,
+                data
+            );
         },
+        []
+    );
+
+    const datasetRenderer = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => addMutedStyle(data.datasetName, data),
         []
     );
 
     const deviationRenderer = useCallback(
         (_: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            return (
+            return addMutedStyle(
                 <Typography
                     color={data.negativeDeviation ? "error" : undefined}
                     variant="body2"
                 >
                     {data.deviation}
-                </Typography>
+                </Typography>,
+                data
             );
         },
         []
@@ -91,32 +134,32 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     const currentRenderer = useCallback(
         (_: Record<string, unknown>, data: UiAnomaly): ReactNode =>
             // use formatted value to display
-            data.current,
+            addMutedStyle(data.current, data),
         []
     );
 
     const predicatedRenderer = useCallback(
         (_: Record<string, unknown>, data: UiAnomaly): ReactNode =>
             // use formatted value to display
-            data.predicted,
+            addMutedStyle(data.predicted, data),
         []
     );
 
     const durationRenderer = useCallback(
         // use formatted value to display
-        (_, data: UiAnomaly) => data.duration,
+        (_, data: UiAnomaly) => addMutedStyle(data.duration, data),
         []
     );
 
     const startTimeRenderer = useCallback(
         // use formatted value to display
-        (_, data: UiAnomaly) => data.startTime,
+        (_, data: UiAnomaly) => addMutedStyle(data.startTime, data),
         []
     );
 
     const endTimeRenderer = useCallback(
         // use formatted value to display
-        (_, data: UiAnomaly) => data.endTime,
+        (_, data: UiAnomaly) => addMutedStyle(data.endTime, data),
         []
     );
 
@@ -146,7 +189,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             onDelete(Array.from(selectedAnomaly.rowKeyValueMap.values()));
     };
 
-    const anomalyListColumns = useMemo(
+    const anomalyListColumns = useMemo<DataGridColumnV1<UiAnomaly>[]>(
         () => [
             {
                 key: "name",
@@ -178,6 +221,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                 header: t("label.dataset"),
                 sortable: true,
                 minWidth: 180,
+                customCellRenderer: datasetRenderer,
             },
             {
                 key: "duration",
@@ -262,15 +306,17 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             rowKey="id"
             searchFilterValue={searchFilterValue}
             toolbarComponent={
-                <Box display="flex">
-                    <Button
-                        data-testid="button-delete"
-                        disabled={isActionButtonDisable}
-                        variant="contained"
-                        onClick={handleAnomalyDelete}
-                    >
-                        {t("label.delete")}
-                    </Button>
+                <Box display="flex" gridGap={12}>
+                    <Box display="flex">
+                        <Button
+                            data-testid="button-delete"
+                            disabled={isActionButtonDisable}
+                            variant="contained"
+                            onClick={handleAnomalyDelete}
+                        >
+                            {t("label.delete")}
+                        </Button>
+                    </Box>
                     {toolbar}
                 </Box>
             }

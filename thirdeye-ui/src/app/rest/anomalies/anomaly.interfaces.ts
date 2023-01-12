@@ -33,6 +33,7 @@ export interface GetAnomaliesProps {
     dataset?: string;
     metric?: string;
     enumerationItemId?: number;
+    filterIgnoredAnomalies?: boolean;
 }
 
 export interface GetAnomalyStatsProps {

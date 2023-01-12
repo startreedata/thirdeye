@@ -12,27 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface UiAnomaly {
-    id: number;
-    name: string;
-    alertId: number;
-    alertName: string;
-    current: string;
-    currentVal: number;
-    predicted: string;
-    predictedVal: number;
-    deviation: string;
-    deviationVal: number;
-    negativeDeviation: boolean;
-    metricId: number;
-    metricName: string;
-    duration: string;
-    durationVal: number;
-    startTime: string;
-    startTimeVal: number;
-    endTime: string;
-    endTimeVal: number;
-    datasetName: string;
-    hasFeedback: boolean;
-    isIgnored: boolean;
-}
+import { makeStyles } from "@material-ui/core";
+
+export const useAnomalyListV1Styles = makeStyles(() => ({
+    muted: {
+        opacity: 0.5,
+        filter: "grayscale(0.35)",
+    },
+}));

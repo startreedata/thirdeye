@@ -238,6 +238,23 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             anomaly.enumerationItem &&
             getEnumerationItemRequest === ActionStatus.Error);
 
+    const getSubtitle = (): string | undefined => {
+        if (anomaly && anomaly.enumerationItem && enumerationItem) {
+            return generateNameForEnumerationItem(enumerationItem);
+        }
+
+        if (uiAnomaly?.isIgnored) {
+            return t(
+                "message.this-anomaly-was-ignored-due-to-the-system-sensibility"
+            );
+        }
+
+        return undefined;
+    };
+
+    const getAnomalyName = ({ name, isIgnored }: UiAnomaly): string =>
+        `${name}${isIgnored ? `(${t("label.ignored")})` : ""}`;
+
     return (
         <PageV1>
             <PageHeader
@@ -273,11 +290,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         </Button>
                     </PageHeaderActionsV1>
                 }
-                subtitle={
-                    anomaly && anomaly.enumerationItem && enumerationItem
-                        ? generateNameForEnumerationItem(enumerationItem)
-                        : undefined
-                }
+                subtitle={getSubtitle()}
             >
                 <PageHeaderTextV1>
                     {anomaly && uiAnomaly && (
@@ -290,7 +303,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             >
                                 {anomaly.alert.name}
                             </Link>
-                            : {uiAnomaly.name}
+                            : {getAnomalyName(uiAnomaly)}
                         </>
                     )}
                     <TooltipV1

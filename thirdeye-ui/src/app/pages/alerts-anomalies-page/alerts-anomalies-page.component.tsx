@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import { Box, FormControlLabel, Grid, Switch } from "@material-ui/core";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
@@ -27,12 +27,17 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlert } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
-import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
+import {
+    filterAnomaliesByFunctions,
+    getUiAnomalies,
+    isAnomalyIgnored,
+} from "../../utils/anomalies/anomalies.util";
 import {
     makeDeleteRequest,
     promptDeleteConfirmation,
@@ -46,6 +51,7 @@ import {
 import {
     AlertsAnomaliesParams,
     ENUMERATION_ITEM_QUERY_PARAM_KEY,
+    FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY,
 } from "./alerts-anomalies-page.interfaces";
 
 export const AlertsAnomaliesPage: FunctionComponent = () => {
@@ -60,6 +66,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         status: getAlertStatus,
     } = useGetAlert();
     const {
+        anomalies,
         getAnomalies,
         errorMessages: getAnomaliesErrorsMessages,
         status: anomaliesRequestStatus,
@@ -70,16 +77,32 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         errorMessages: getEnumerationItemErrorsMessages,
         status: getEnumerationItemStatus,
     } = useGetEnumerationItem();
-    const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
-    const [searchParams] = useSearchParams();
-    const [startTime, endTime, enumerationItemIdStr] = useMemo(
-        () => [
-            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
-            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
-            searchParams.get(ENUMERATION_ITEM_QUERY_PARAM_KEY),
-        ],
-        [searchParams]
-    );
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [startTime, endTime, enumerationItemIdStr, filterIgnoredAnomalies] =
+        useMemo(
+            () => [
+                Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+                Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+                searchParams.get(ENUMERATION_ITEM_QUERY_PARAM_KEY),
+                searchParams.get(FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY) ===
+                    "true",
+            ],
+            [searchParams]
+        );
+
+    const setShowIgnored = (newState: boolean): void => {
+        searchParams.set(
+            FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY,
+            `${!newState}`
+        );
+        setSearchParams(searchParams);
+    };
+
+    const handleToggleIgnoredAnomalies = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ): void => {
+        setShowIgnored(event.target.checked);
+    };
 
     const fetchData = (): void => {
         if (!alert || !startTime || !endTime) {
@@ -90,12 +113,23 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             startTime,
             endTime,
             enumerationItemId: Number(enumerationItemIdStr),
-        }).then((anomalies) => {
-            if (anomalies) {
-                setUiAnomalies(getUiAnomalies(anomalies));
-            }
+            filterIgnoredAnomalies: false,
         });
     };
+
+    const uiAnomalies = useMemo(() => {
+        if (!anomalies) {
+            return null;
+        }
+
+        // All anomalies being fetched, and then filtered here at UI level
+        const filteredAnomalies = filterAnomaliesByFunctions(
+            anomalies,
+            filterIgnoredAnomalies ? [(a) => !isAnomalyIgnored(a)] : []
+        );
+
+        return getUiAnomalies(filteredAnomalies);
+    }, [anomalies, filterIgnoredAnomalies]);
 
     useEffect(() => {
         if (enumerationItemIdStr) {
@@ -157,16 +191,11 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                         notify,
                         t("label.anomaly"),
                         t("label.anomalies")
-                    ).then((deletedAnomalies) => {
-                        setUiAnomalies(() => {
-                            return [...uiAnomalies].filter((candidate) => {
-                                return (
-                                    deletedAnomalies.findIndex(
-                                        (d) => d.id === candidate.id
-                                    ) === -1
-                                );
-                            });
-                        });
+                    ).then(() => {
+                        // Since the uiAnomaly data is a computed value from `anomalies` and will be
+                        // re-computed every time the `filterIgnoredAnomalies` is changed, the data
+                        // is being re-fetched to avoid having to complicate the local state
+                        fetchData();
                     });
             },
             t,
@@ -204,9 +233,33 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                 <Grid item xs={12}>
                     <PageContentsCardV1 disablePadding fullHeight>
                         <AnomalyListV1
-                            anomalies={uiAnomalies}
+                            anomalies={
+                                // This prop is set to null every time the API is called again to
+                                // trigger a UI loading state, since otherwise the new data just
+                                // replaces the old one abruptly
+                                anomaliesRequestStatus === ActionStatus.Working
+                                    ? null
+                                    : uiAnomalies
+                            }
                             toolbar={
-                                <AnomalyQuickFilters showTimeSelectorOnly />
+                                <>
+                                    <Box width="100%">
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={
+                                                        !filterIgnoredAnomalies
+                                                    }
+                                                    onChange={
+                                                        handleToggleIgnoredAnomalies
+                                                    }
+                                                />
+                                            }
+                                            label={t("message.show-ignored")}
+                                        />
+                                    </Box>
+                                    <AnomalyQuickFilters showTimeSelectorOnly />
+                                </>
                             }
                             onDelete={handleAnomalyDelete}
                         />

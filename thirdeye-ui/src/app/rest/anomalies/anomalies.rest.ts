@@ -39,6 +39,7 @@ export const getAnomalies = async ({
     dataset,
     metric,
     enumerationItemId,
+    filterIgnoredAnomalies = true,
 }: GetAnomaliesProps = {}): Promise<Anomaly[]> => {
     const queryParams = new URLSearchParams([["isChild", "false"]]);
 
@@ -70,7 +71,9 @@ export const getAnomalies = async ({
         `${BASE_URL_ANOMALIES}?${queryParams.toString()}`
     );
 
-    return filterOutIgnoredAnomalies(response.data);
+    return filterIgnoredAnomalies
+        ? filterOutIgnoredAnomalies(response.data)
+        : response.data;
 };
 
 export const getAnomalyStats = async ({

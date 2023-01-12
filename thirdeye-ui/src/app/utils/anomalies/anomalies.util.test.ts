@@ -237,6 +237,7 @@ const mockEmptyUiAnomaly = {
     endTimeVal: -1,
     datasetName: "label.no-data-marker",
     hasFeedback: false,
+    isIgnored: false,
 };
 
 const mockAnomaly1 = {
@@ -308,6 +309,7 @@ const mockUiAnomaly1 = {
     endTimeVal: 3,
     datasetName: "label.no-data-marker",
     hasFeedback: false,
+    isIgnored: false,
 };
 
 const mockUiAnomaly2 = {
@@ -332,6 +334,7 @@ const mockUiAnomaly2 = {
     endTimeVal: 9,
     datasetName: "label.no-data-marker",
     hasFeedback: false,
+    isIgnored: false,
 };
 
 const mockUiAnomaly3 = {
@@ -356,6 +359,7 @@ const mockUiAnomaly3 = {
     endTimeVal: 8,
     datasetName: "label.no-data-marker",
     hasFeedback: false,
+    isIgnored: false,
 };
 
 const mockUiAnomaly4 = {
@@ -380,6 +384,7 @@ const mockUiAnomaly4 = {
     endTimeVal: -1,
     datasetName: "label.no-data-marker",
     hasFeedback: false,
+    isIgnored: false,
 };
 
 // Make sure a positive current and negative predicted produces a positive deviation
@@ -405,6 +410,7 @@ const mockUiAnomaly5 = {
     endTimeVal: 110,
     datasetName: "label.no-data-marker",
     hasFeedback: false,
+    isIgnored: false,
 };
 
 const mockUiAnomalies = [

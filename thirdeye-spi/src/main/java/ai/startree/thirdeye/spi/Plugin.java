@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi;
 
+import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
@@ -22,6 +24,7 @@ import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFac
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
 import java.util.Collections;
+import java.util.Map;
 
 public interface Plugin {
 
@@ -55,5 +58,9 @@ public interface Plugin {
 
   default Iterable<EnumeratorFactory> getEnumeratorFactories() {
     return Collections.emptyList();
+  }
+
+  default AccessControl getAccessControl(AccessControlConfiguration config) {
+    return null;
   }
 }

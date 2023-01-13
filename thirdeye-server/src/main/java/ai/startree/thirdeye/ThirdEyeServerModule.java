@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.AUTH_BASIC;
 import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.auth.AccessControlModule;
+import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.ThirdEyeAuthenticatorDisabled;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -30,6 +30,7 @@ import ai.startree.thirdeye.detectionpipeline.ThirdEyeDetectionPipelineModule;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
+import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
@@ -50,6 +51,7 @@ public class ThirdEyeServerModule extends AbstractModule {
   private final ThirdEyeServerConfiguration configuration;
   private final DataSource dataSource;
   private final MetricRegistry metricRegistry;
+  private final AccessControlProvider accessControlProvider;
 
   public ThirdEyeServerModule(
       final ThirdEyeServerConfiguration configuration,
@@ -58,6 +60,9 @@ public class ThirdEyeServerModule extends AbstractModule {
     this.configuration = configuration;
     this.dataSource = dataSource;
     this.metricRegistry = metricRegistry;
+
+    this.accessControlProvider = new AccessControlProvider(
+        configuration.getAccessControlConfiguration());
   }
 
   @Override
@@ -71,8 +76,6 @@ public class ThirdEyeServerModule extends AbstractModule {
     install(new ThirdEyeDetectionPipelineModule(configuration.getDetectionPipelineConfiguration()));
     install(new ThirdEyeWorkerModule(configuration.getTaskDriverConfiguration()));
     install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
-    install(new AccessControlModule());
-
     bind(AuthConfiguration.class).toInstance(configuration.getAuthConfiguration());
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
@@ -148,5 +151,17 @@ public class ThirdEyeServerModule extends AbstractModule {
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BASIC)
         .buildAuthFilter();
+  }
+
+  @Singleton
+  @Provides
+  public AccessControlProvider getAccessControlProvider() {
+    return this.accessControlProvider;
+  }
+
+  @Singleton
+  @Provides
+  public AccessControl getAccessControl() {
+    return this.accessControlProvider;
   }
 }

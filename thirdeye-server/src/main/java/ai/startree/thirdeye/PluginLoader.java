@@ -16,6 +16,7 @@ package ai.startree.thirdeye;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
@@ -65,6 +66,7 @@ public class PluginLoader {
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
   private final PostProcessorRegistry postProcessorRegistry;
+  private final AccessControlProvider accessControlProvider;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -77,6 +79,7 @@ public class PluginLoader {
       final ContributorsFinderRunner contributorsFinderRunner,
       final BootstrapResourcesRegistry bootstrapResourcesRegistry,
       final PostProcessorRegistry postProcessorRegistry,
+      final AccessControlProvider accessControlProvider,
       final PluginLoaderConfiguration config) {
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
@@ -84,6 +87,7 @@ public class PluginLoader {
     this.contributorsFinderRunner = contributorsFinderRunner;
     this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
+    this.accessControlProvider = accessControlProvider;
     pluginsDir = new File(config.getPluginsPath());
   }
 
@@ -142,6 +146,10 @@ public class PluginLoader {
     }
     for (EnumeratorFactory f : plugin.getEnumeratorFactories()) {
       detectionRegistry.addEnumeratorFactory(f);
+    }
+    if (accessControlProvider.getConfig().enabled) {
+      optional(plugin.getAccessControl(accessControlProvider.getConfig()))
+          .ifPresent(accessControlProvider::setAccessControl);
     }
 
     log.info("Installed plugin: " + plugin.getClass().getName());

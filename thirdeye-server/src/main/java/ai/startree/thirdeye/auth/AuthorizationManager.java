@@ -13,7 +13,16 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
+import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAME;
+import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAMESPACE;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.datalayer.dao.SubEntities;
+import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.accessControl.AccessType;
+import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -21,6 +30,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -41,27 +51,27 @@ public class AuthorizationManager {
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, ResourceIdentifier.from(entity), AccessType.UPDATE);
+    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
     relatedEntities(entity).forEach(relatedId ->
         ensureHasAccess(principal, relatedId, AccessType.READ));
   }
 
   public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, ResourceIdentifier.from(entity), AccessType.UPDATE);
+    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
   }
 
   public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
       final T before, final T after) {
-    ensureHasAccess(principal, ResourceIdentifier.from(before), AccessType.UPDATE);
-    ensureHasAccess(principal, ResourceIdentifier.from(after), AccessType.UPDATE);
+    ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
+    ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
     relatedEntities(after).forEach(related ->
         ensureHasAccess(principal, related, AccessType.READ));
   }
 
   public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, ResourceIdentifier.from(entity), AccessType.READ);
+    ensureHasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
   public void ensureCanEvaluate(final ThirdEyePrincipal principal, final AlertDTO entity) {
@@ -72,6 +82,11 @@ public class AuthorizationManager {
     ensureCanCreate(principal, entity);
   }
 
+  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,
+      final T entity, final AccessType accessType) {
+    ensureHasAccess(principal, resourceId(entity), accessType);
+  }
+
   public void ensureHasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (!hasAccess(principal, identifier, accessType)) {
@@ -79,16 +94,29 @@ public class AuthorizationManager {
     }
   }
 
+  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
+      final T entity, final AccessType accessType) {
+    return hasAccess(principal, resourceId(entity), accessType);
+  }
+
   public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
-    return accessControl.hasAccess(principal, identifier, accessType);
+    return accessControl.hasAccess(principal.authToken, identifier, accessType);
+  }
+
+  static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
+    return ResourceIdentifier.from(
+        optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
+        optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
+        optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
+            .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE));
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof AlertDTO) {
       final AlertDTO alertDto = (AlertDTO) entity;
       final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(alertDto.getTemplate());
-      return Collections.singletonList(ResourceIdentifier.from(alertTemplateDTO));
+      return Collections.singletonList(resourceId(alertTemplateDTO));
     }
     return new ArrayList<>();
   }

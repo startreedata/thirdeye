@@ -11,8 +11,23 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
 
-public enum AccessType {
-  READ, UPDATE
+package ai.startree.thirdeye.spi.accessControl;
+
+import java.util.Map;
+
+/**
+ * Plugin specific configuration is provided as plugin name -> properties.
+ * Example server.yaml:
+ * ---
+ * accessControl:
+ *   enabled: true
+ *   plugins:
+ *     my-plugin:
+ *       prop1: val1
+ * ...
+ */
+public class AccessControlConfiguration {
+  public boolean enabled;
+  public Map<String, Map<String, Object>> plugins;
 }

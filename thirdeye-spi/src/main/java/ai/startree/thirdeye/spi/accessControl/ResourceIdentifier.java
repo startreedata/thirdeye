@@ -11,13 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
+package ai.startree.thirdeye.spi.accessControl;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.datalayer.dao.SubEntities;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 public class ResourceIdentifier {
 
@@ -29,18 +27,18 @@ public class ResourceIdentifier {
   public final String namespace;
   public final String entityType;
 
-  public ResourceIdentifier(final String name, final String namespace, final String entityType) {
+  private ResourceIdentifier(final String name, final String namespace, final String entityType) {
     this.name = name;
     this.namespace = namespace;
     this.entityType = entityType;
   }
 
-  static public <T extends AbstractDTO> ResourceIdentifier from(final T dto) {
+  public static ResourceIdentifier from(final String name, final String namespace,
+      final String entityType) {
     return new ResourceIdentifier(
-        optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
-        optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
-        optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
-            .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE)
+        optional(name).filter(StringUtils::isNotEmpty).orElse(DEFAULT_NAME),
+        optional(namespace).filter(StringUtils::isNotEmpty).orElse(DEFAULT_NAMESPACE),
+        optional(entityType).filter(StringUtils::isNotEmpty).orElse(DEFAULT_ENTITY_TYPE)
     );
   }
 }

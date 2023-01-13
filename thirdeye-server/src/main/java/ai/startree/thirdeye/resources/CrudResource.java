@@ -29,10 +29,9 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
-import ai.startree.thirdeye.auth.AccessType;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -214,9 +213,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
     final RequestCache cache = createRequestCache();
     return respondOk(results.stream()
-        .filter(dto -> authorizationManager.hasAccess(principal,
-            ResourceIdentifier.from(dto),
-            AccessType.READ))
+        .filter(dto -> authorizationManager.hasAccess(principal, dto, AccessType.READ))
         .map(dto -> toApi(dto, cache)));
   }
 

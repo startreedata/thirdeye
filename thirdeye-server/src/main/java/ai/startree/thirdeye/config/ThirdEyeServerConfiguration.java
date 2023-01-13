@@ -21,6 +21,7 @@ import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
+import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
@@ -67,6 +68,9 @@ public class ThirdEyeServerConfiguration extends Configuration {
 
   @JsonProperty("time")
   private TimeConfiguration timeConfiguration = new TimeConfiguration();
+
+  @JsonProperty("accessControl")
+  private AccessControlConfiguration accessControlConfiguration = new AccessControlConfiguration();
 
   private String phantomJsPath = "";
   private String failureFromAddress;
@@ -258,6 +262,15 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setDetectionPipelineConfiguration(
       final DetectionPipelineConfiguration detectionPipelineConfiguration) {
     this.detectionPipelineConfiguration = detectionPipelineConfiguration;
+    return this;
+  }
+
+  public AccessControlConfiguration getAccessControlConfiguration() {
+    return this.accessControlConfiguration;
+  }
+
+  public ThirdEyeServerConfiguration setAccessControlConfiguration(AccessControlConfiguration config) {
+    this.accessControlConfiguration = config;
     return this;
   }
 }

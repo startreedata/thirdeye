@@ -162,7 +162,7 @@ public class CommonProperties {
           continue;
         }
         // hand coded mapping because getting this exact behavior was not easy with MapStruct
-        // behaviour: don't erase what's existing - does not try to map every field
+        // behaviour: don't erase what's existing - don't try to map every field
         if (p.getDescription() == null) {
           p.setDescription(commonProperty.getDescription());
         }

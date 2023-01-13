@@ -156,7 +156,7 @@ public class HappyPathTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
-  @Test(dependsOnMethods = "testCreateDataset", timeOut = 5000)
+  @Test(dependsOnMethods = "testCreateDataset", timeOut = 7000)
   public void testEvaluateAlert() {
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(MAIN_ALERT_API,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);

@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
 public class CrudResourceTest {
 
   @Test
-  public void createUserInfoTest() {
+  public void createUserInfoTest() throws InterruptedException {
     final DummyManager manager = mock(DummyManager.class);// new DummyManager(dao);
     when(manager.save(any(DummyDto.class))).thenAnswer((Answer<Long>) invocationOnMock -> {
       ((DummyDto) invocationOnMock.getArgument(0)).setId(1L);
@@ -65,6 +65,8 @@ public class CrudResourceTest {
     final DummyApi api = new DummyApi().setData("testData");
 
     final Timestamp before = getCurrentTime();
+    // before < createTime is tested below - but time is not monotonic and can behave strangely in github ci VMs - sleeping 10 millis to avoid flackiness
+    Thread.sleep(10);
     List<DummyApi> response = (List<DummyApi>) resource.createMultiple(owner, singletonList(api)).getEntity();
 
     assertThat(response).isNotNull();

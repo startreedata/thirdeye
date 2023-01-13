@@ -51,6 +51,7 @@ public class ThirdEyeServerModule extends AbstractModule {
   private final ThirdEyeServerConfiguration configuration;
   private final DataSource dataSource;
   private final MetricRegistry metricRegistry;
+  private final AccessControlProvider accessControlProvider;
 
   public ThirdEyeServerModule(
       final ThirdEyeServerConfiguration configuration,
@@ -59,6 +60,9 @@ public class ThirdEyeServerModule extends AbstractModule {
     this.configuration = configuration;
     this.dataSource = dataSource;
     this.metricRegistry = metricRegistry;
+
+    this.accessControlProvider = new AccessControlProvider(
+        configuration.getAccessControlConfiguration());
   }
 
   @Override
@@ -75,11 +79,6 @@ public class ThirdEyeServerModule extends AbstractModule {
     bind(AuthConfiguration.class).toInstance(configuration.getAuthConfiguration());
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
-
-    final AccessControlProvider accessControlProvider = new AccessControlProvider(
-        configuration.getAccessControlConfiguration());
-    bind(AccessControlProvider.class).toInstance(accessControlProvider);
-    bind(AccessControl.class).toInstance(accessControlProvider);
   }
 
   @Singleton
@@ -152,5 +151,17 @@ public class ThirdEyeServerModule extends AbstractModule {
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BASIC)
         .buildAuthFilter();
+  }
+
+  @Singleton
+  @Provides
+  public AccessControlProvider getAccessControlProvider() {
+    return this.accessControlProvider;
+  }
+
+  @Singleton
+  @Provides
+  public AccessControl getAccessControl() {
+    return this.accessControlProvider;
   }
 }

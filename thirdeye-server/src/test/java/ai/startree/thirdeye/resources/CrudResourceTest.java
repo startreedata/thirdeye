@@ -74,8 +74,6 @@ public class CrudResourceTest {
     final DummyApi responseApi = response.get(0);
     assertThat(responseApi.getCreatedBy()).isEqualTo(emails.get(0));
     assertThat(responseApi.getUpdatedBy()).isEqualTo(emails.get(0));
-    System.out.println("Before time: " + before);
-    System.out.println("Create time: " + responseApi.getCreateTime());
     assertThat(responseApi.getCreateTime().after(before)).isTrue();
     assertThat(responseApi.getCreateTime()).isEqualTo(responseApi.getUpdateTime());
   }

@@ -23,8 +23,8 @@ import java.util.Map;
  * accessControl:
  *   enabled: true
  *   plugins:
- *     startree-platform-auth:
- *       endpoint: https://platform-auth.service
+ *     my-plugin:
+ *       prop1: val1
  * ...
  */
 public class AccessControlConfiguration {

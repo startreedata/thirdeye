@@ -74,7 +74,7 @@
     <guava.version>20.0</guava.version>
     <guice.version>4.2.3</guice.version>
     <hsqldb.version>2.7.0</hsqldb.version>
-    <jackson.version>2.10.5</jackson.version>
+    <jackson.version>2.14.1</jackson.version>
     <jetty.version>9.4.48.v20220622</jetty.version>
     <jodatime.version>2.7</jodatime.version>
     <json-schema-validator.version>2.2.14</json-schema-validator.version>

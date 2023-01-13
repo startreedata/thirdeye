@@ -84,6 +84,12 @@ public class CommonProperties {
       .add(new TemplatePropertyMetadata().setName("hoursOfDay")
           .setDescription(
               "A list of hours. Anomalies happening on these days are ignored if timeOfWeekIgnore is true. Example: `[0,1,2,23]`"))
+      .add(new TemplatePropertyMetadata().setName("impactComputationMethod")
+          .setDescription("Method to compute the impact.")
+          .setOptions(List.of("STANDARD_AREA", "ABSOLUTE_AREA")))
+      .add(new TemplatePropertyMetadata().setName("impactIgnore").setDescription("Whether to ignore anomalies that don't meet the impact threshold."))
+      .add(new TemplatePropertyMetadata().setName("impactThreshold").setDescription("Impact filter threshold."))
+      .add(new TemplatePropertyMetadata().setName("impactWindow").setDescription("Period to compute the impact. In ISO-8601 format. Example: `PT4H`"))
       .add(new TemplatePropertyMetadata().setName("lookback")
           .setDescription(
               "Historical time period to use to train the model. In ISO-8601 format. Example: `P21D`."))

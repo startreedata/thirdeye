@@ -16,7 +16,18 @@ package ai.startree.thirdeye.spi.accessControl;
 
 import java.util.Map;
 
+/**
+ * Plugin specific configuration is provided as plugin name -> properties.
+ * Example server.yaml:
+ * ---
+ * accessControl:
+ *   enabled: true
+ *   plugins:
+ *     startree-platform-auth:
+ *       endpoint: https://platform-auth.service
+ * ...
+ */
 public class AccessControlConfiguration {
   public boolean enabled;
-  public Map<String, Object> plugins;
+  public Map<String, Map<String, Object>> plugins;
 }

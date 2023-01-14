@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.util;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TEMPLATE_MISSING_PROPERTY;
-import static ai.startree.thirdeye.util.StringSubstitutorHelper.escapeRecursiveVariables;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -41,10 +40,10 @@ public class StringTemplateUtils {
 
   public static String renderTemplate(final String template, final Map<String, Object> newContext) {
     final Map<String, Object> contextMap = getDefaultContextMap();
-    contextMap.putAll(escapeRecursiveVariables(newContext));
+    contextMap.putAll(newContext);
 
     final StringSubstitutor sub = new StringSubstitutor(contextMap)
-        .setEnableSubstitutionInVariables(true)
+        .setDisableSubstitutionInValues(true)
         .setEnableUndefinedVariableException(true);
     try {
       return sub.replace(template);

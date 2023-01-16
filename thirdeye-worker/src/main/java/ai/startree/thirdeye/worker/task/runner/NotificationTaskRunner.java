@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.notification.NotificationDispatcher;
@@ -32,21 +33,15 @@ import ai.startree.thirdeye.worker.task.TaskRunner;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Function;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.annotation.Nullable;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,51 +84,31 @@ public class NotificationTaskRunner implements TaskRunner {
     this.notificationPayloadBuilder = notificationPayloadBuilder;
   }
 
-  private static long getLastTimeStamp(Collection<MergedAnomalyResultDTO> anomalies,
-      long startTime) {
-    long lastTimeStamp = startTime;
-    for (MergedAnomalyResultDTO anomaly : anomalies) {
-      lastTimeStamp = Math.max(anomaly.getCreatedTime(), lastTimeStamp);
+  private static Map<Long, Long> buildVectorClock(Collection<MergedAnomalyResultDTO> anomalies) {
+    final Map<Long, Long> alertIdToAnomalyCreateTimeMax = new HashMap<>();
+    for (final MergedAnomalyResultDTO a : anomalies) {
+      final Long alertId = a.getDetectionConfigId();
+      if (alertId == null) {
+        continue;
+      }
+      final long currentMax = alertIdToAnomalyCreateTimeMax.getOrDefault(alertId,
+          optional(a.getCreatedTime()).orElse(-1L));
+      final long newMax = Math.max(currentMax, a.getCreatedTime());
+      alertIdToAnomalyCreateTimeMax.put(alertId, newMax);
     }
-    return lastTimeStamp;
+    return alertIdToAnomalyCreateTimeMax;
   }
 
-  private static Map<Long, Long> makeVectorClock(Collection<MergedAnomalyResultDTO> anomalies) {
-    Multimap<Long, MergedAnomalyResultDTO> grouped = Multimaps
-        .index(anomalies, new Function<>() {
-          @Nullable
-          @Override
-          public Long apply(@Nullable MergedAnomalyResultDTO mergedAnomalyResultDTO) {
-            // Return functionId to support alerting of legacy anomalies
-            if (mergedAnomalyResultDTO.getDetectionConfigId() == null) {
-              return mergedAnomalyResultDTO.getFunctionId();
-            }
-
-            return mergedAnomalyResultDTO.getDetectionConfigId();
-          }
-        });
-    Map<Long, Long> detection2max = new HashMap<>();
-    for (Entry<Long, Collection<MergedAnomalyResultDTO>> entry : grouped.asMap().entrySet()) {
-      detection2max.put(entry.getKey(), getLastTimeStamp(entry.getValue(), -1));
+  private static Map<Long, Long> mergeVectorClock(final Map<Long, Long> a,
+      final Map<Long, Long> b) {
+    if (a == null) {
+      return b;
     }
-    return detection2max;
-  }
-
-  private static Map<Long, Long> mergeVectorClock(Map<Long, Long> a, Map<Long, Long> b) {
-    Set<Long> keySet = new HashSet<>();
-    if (a != null) {
-      keySet.addAll(a.keySet());
+    if (b == null) {
+      return a;
     }
-    if (b != null) {
-      keySet.addAll(b.keySet());
-    }
-
-    Map<Long, Long> result = new HashMap<>();
-    for (Long detectionId : keySet) {
-      long valA = MapUtils.getLongValue(a, detectionId, -1);
-      long valB = MapUtils.getLongValue(b, detectionId, -1);
-      result.put(detectionId, Math.max(valA, valB));
-    }
+    final Map<Long, Long> result = new HashMap<>(a);
+    b.forEach((key, value) -> result.merge(key, value, Math::max));
 
     return result;
   }
@@ -154,7 +129,7 @@ public class NotificationTaskRunner implements TaskRunner {
     if (!allAnomalies.isEmpty()) {
       subscriptionConfig.setVectorClocks(
           mergeVectorClock(subscriptionConfig.getVectorClocks(),
-              makeVectorClock(allAnomalies)));
+              buildVectorClock(allAnomalies)));
 
       LOG.info("Updating watermarks for subscription config : {}", subscriptionConfig.getId());
       subscriptionGroupManager.save(subscriptionConfig);

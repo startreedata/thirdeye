@@ -39,6 +39,9 @@ public class SubscriptionGroupDTO extends AbstractDTO {
 
   private Map<String, Object> alertSuppressors;
   private SubjectType subjectType = SubjectType.ALERT;
+  /**
+   * alertId to notification watermark. notification watermark = max createdTime of the anomalies notified
+   */
   private Map<Long, Long> vectorClocks;
   private Map<String, Object> properties;
   private Map<String, String> refLinks;

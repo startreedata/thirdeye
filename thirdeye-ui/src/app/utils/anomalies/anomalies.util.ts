@@ -189,6 +189,10 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         uiAnomaly.isIgnored = isAnomalyIgnored(anomaly);
     }
 
+    if (anomaly.enumerationItem?.id) {
+        uiAnomaly.enumerationId = anomaly.enumerationItem?.id;
+    }
+
     return uiAnomaly;
 };
 

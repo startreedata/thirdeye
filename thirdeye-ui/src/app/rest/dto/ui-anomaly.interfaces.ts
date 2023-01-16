@@ -35,4 +35,5 @@ export interface UiAnomaly {
     datasetName: string;
     hasFeedback: boolean;
     isIgnored: boolean;
+    enumerationId?: number;
 }

@@ -28,8 +28,11 @@ import {
     DataGridSelectionModelV1,
     DataGridSortOrderV1,
     DataGridV1,
+    SkeletonV1,
 } from "../../platform/components";
 import { linkRendererV1 } from "../../platform/utils";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import type { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
     getAlertsAlertPath,
@@ -46,12 +49,28 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     searchFilterValue,
     onSearchFilterValueChange,
     toolbar = <AnomalyQuickFilters />,
+    showEnumerationItem = false,
+    enumerationItems = [],
+    enumerationItemsStatus,
 }) => {
     const [selectedAnomaly, setSelectedAnomaly] =
         useState<DataGridSelectionModelV1<UiAnomaly>>();
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = useAnomalyListV1Styles();
+
+    const enumerationItemMap = useMemo<Record<number, EnumerationItem>>(
+        () =>
+            showEnumerationItem && enumerationItems
+                ? Object.assign(
+                      {},
+                      ...(enumerationItems || [])?.map((e) => ({
+                          [Number(e.id)]: e,
+                      }))
+                  )
+                : {},
+        [showEnumerationItem, enumerationItems]
+    );
 
     const addMutedStyle = useCallback(
         (content: ReactNode, data: UiAnomaly): ReactNode => {
@@ -163,6 +182,75 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
         []
     );
 
+    const enumerationItemRender = useCallback(
+        // use formatted value to display
+        (_, data: UiAnomaly) => {
+            const returnParsed = (v?: ReactNode): ReactNode =>
+                addMutedStyle(v || t("message.no-data"), data);
+
+            if (!(showEnumerationItem && data.enumerationId)) {
+                return returnParsed();
+            }
+
+            if (
+                enumerationItemsStatus &&
+                [ActionStatus.Initial, ActionStatus.Working].includes(
+                    enumerationItemsStatus
+                )
+            ) {
+                return <SkeletonV1 width={150} />;
+            }
+
+            if (
+                enumerationItemMap &&
+                data.enumerationId in enumerationItemMap &&
+                enumerationItemMap[data?.enumerationId]?.name
+            ) {
+                return returnParsed(
+                    enumerationItemMap[data?.enumerationId]?.name
+                );
+            }
+
+            return returnParsed();
+        },
+
+        [enumerationItemMap, enumerationItemsStatus]
+    );
+
+    const enumerationItemTooltip = useCallback(
+        (_, data: UiAnomaly) => {
+            if (!(showEnumerationItem && data.enumerationId)) {
+                return t("message.no-data");
+            }
+
+            if (
+                enumerationItemMap &&
+                data.enumerationId in enumerationItemMap &&
+                enumerationItemMap[data.enumerationId].name
+            ) {
+                const tooltipParams =
+                    enumerationItemMap[data?.enumerationId]?.params;
+
+                return Object.entries(tooltipParams)
+                    .map(([k, v]) => (
+                        <>
+                            {k}: &quot;{v.toString().trim()}&quot;
+                        </>
+                    ))
+                    .reduce((sum, val) => (
+                        <>
+                            {sum}
+                            <br />
+                            {val}
+                        </>
+                    ));
+            }
+
+            return t("message.no-data");
+        },
+        [enumerationItemMap, enumerationItemsStatus]
+    );
+
     const hasFeedbackRenderer = useCallback(
         // use formatted value to display
         (hasFeedback) => {
@@ -189,8 +277,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             onDelete(Array.from(selectedAnomaly.rowKeyValueMap.values()));
     };
 
-    const anomalyListColumns = useMemo<DataGridColumnV1<UiAnomaly>[]>(
-        () => [
+    const anomalyListColumns = useMemo<DataGridColumnV1<UiAnomaly>[]>(() => {
+        const columns: DataGridColumnV1<UiAnomaly>[] = [
             {
                 key: "name",
                 dataKey: "name",
@@ -279,19 +367,35 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                 minWidth: 150,
                 customCellRenderer: hasFeedbackRenderer,
             },
-        ],
-        [
-            anomalyNameRenderer,
-            alertNameRenderer,
-            deviationRenderer,
-            currentRenderer,
-            predicatedRenderer,
-            durationRenderer,
-            startTimeRenderer,
-            endTimeRenderer,
-            metricNameRenderer,
-        ]
-    );
+        ];
+
+        if (showEnumerationItem) {
+            columns.push({
+                key: "enumerationItem",
+                dataKey: "enumerationItem",
+                header: t("label.enumeration-item"),
+                sortable: true,
+                minWidth: 300,
+                customCellRenderer: enumerationItemRender,
+                customCellTooltipRenderer: enumerationItemTooltip,
+            });
+        }
+
+        return columns;
+    }, [
+        anomalyNameRenderer,
+        alertNameRenderer,
+        deviationRenderer,
+        currentRenderer,
+        predicatedRenderer,
+        durationRenderer,
+        startTimeRenderer,
+        endTimeRenderer,
+        metricNameRenderer,
+        enumerationItemRender,
+        enumerationItemTooltip,
+        showEnumerationItem,
+    ]);
 
     return (
         <DataGridV1<UiAnomaly>

@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.mapper;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -46,8 +45,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class ApiBeanMapper {
 
@@ -96,28 +93,7 @@ public abstract class ApiBeanMapper {
   }
 
   public static SubscriptionGroupApi toApi(final SubscriptionGroupDTO dto) {
-    final List<AlertApi> alertApis = optional(dto.getProperties())
-        .map(o1 -> o1.get("detectionConfigIds"))
-        .map(l -> ((List<Number>) l).stream()
-            .map(Number::longValue)
-            .map(o -> new AlertApi().setId(o))
-            .collect(Collectors.toList()))
-        .orElse(null);
-
-    final List<NotificationSpecApi> specs = optional(dto.getSpecs())
-        .map(l -> l.stream()
-            .map(ApiBeanMapper::toApi)
-            .collect(Collectors.toList())
-        )
-        .orElse(null);
-
-    return new SubscriptionGroupApi()
-        .setId(dto.getId())
-        .setName(dto.getName())
-        .setCron(dto.getCronExpression())
-        .setAlerts(alertApis)
-        .setSpecs(specs)
-        .setNotificationSchemes(toApi(dto.getNotificationSchemes()));
+    return SubscriptionGroupMapper.INSTANCE.toApi(dto);
   }
 
   public static SubscriptionGroupDTO toSubscriptionGroupDTO(final SubscriptionGroupApi api) {

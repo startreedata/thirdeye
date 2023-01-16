@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.mapper;
 
-import static ai.startree.thirdeye.mapper.SubscriptionGroupMapper.toAlertSuppressors;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -37,22 +36,12 @@ public interface SubscriptionGroupMapper {
   SubscriptionGroupMapper INSTANCE = Mappers.getMapper(SubscriptionGroupMapper.class);
   String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
 
-  @SuppressWarnings("unchecked")
-  static Map<String, Object> toAlertSuppressors(final TimeWindowSuppressorApi value) {
-    Map<String, Object> alertSuppressors = new HashMap<>();
-    if (value != null) {
-      alertSuppressors = new ObjectMapper().convertValue(value, Map.class);
-    }
-    return alertSuppressors;
-  }
-
-  static Map<Long, Long> toVectorClocks(List<Long> detectionIds) {
-    long currentTimestamp = 0L;
-    Map<Long, Long> vectorClocks = new HashMap<>();
-    for (long detectionConfigId : detectionIds) {
-      vectorClocks.put(detectionConfigId, currentTimestamp);
-    }
-    return vectorClocks;
+  private static List<Long> getAlertIds(final List<AlertApi> alerts) {
+    return optional(alerts)
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(AlertApi::getId)
+        .collect(Collectors.toList());
   }
 
   @Mapping(source = "alertSuppressors", target = "alertSuppressors", qualifiedByName = "alertSuppressors")
@@ -63,31 +52,49 @@ public interface SubscriptionGroupMapper {
   @Mapping(source = "cron", target = "cronExpression")
   SubscriptionGroupDTO toDto(SubscriptionGroupApi api);
 
-  @Mapping(target = "alertSuppressors", ignore = true)
+  @Mapping(target = "type", ignore = true)
+  @Mapping(target = "active", ignore = true)
+  @Mapping(source = "cronExpression", target = "cron")
+  @Mapping(source = "properties", target = "alerts", qualifiedByName = "toAlerts")
+  @Mapping(source = "alertSuppressors", target = "alertSuppressors",ignore = true)
   SubscriptionGroupApi toApi(SubscriptionGroupDTO dto);
 
+  @SuppressWarnings("unchecked")
   @Named("alertSuppressors")
   default Map<String, Object> mapAlertSuppressors(final TimeWindowSuppressorApi value) {
-    return toAlertSuppressors(value);
+    Map<String, Object> alertSuppressors = new HashMap<>();
+    if (value != null) {
+      alertSuppressors = new ObjectMapper().convertValue(value, Map.class);
+    }
+    return alertSuppressors;
   }
 
   @Named("properties")
   default Map<String, Object> mapProperties(final List<AlertApi> alerts) {
-    final List<Long> alertIds = optional(alerts)
-        .orElse(Collections.emptyList())
-        .stream()
-        .map(AlertApi::getId)
-        .collect(Collectors.toList());
+    final List<Long> alertIds = getAlertIds(alerts);
     return new HashMap<>(Map.of("detectionConfigIds", alertIds));
   }
 
   @Named("vectorClocks")
   default Map<Long, Long> mapVectorClocks(final List<AlertApi> alerts) {
-    final List<Long> alertIds = optional(alerts)
-        .orElse(Collections.emptyList())
-        .stream()
-        .map(AlertApi::getId)
-        .collect(Collectors.toList());
-    return toVectorClocks(alertIds);
+    final List<Long> alertIds = getAlertIds(alerts);
+    long currentTimestamp = 0L;
+    Map<Long, Long> vectorClocks = new HashMap<>();
+    for (long detectionConfigId : alertIds) {
+      vectorClocks.put(detectionConfigId, currentTimestamp);
+    }
+    return vectorClocks;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Named("toAlerts")
+  default List<AlertApi> fromProperties(final Map<String, Object> properties) {
+    return optional(properties)
+        .map(o1 -> o1.get("detectionConfigIds"))
+        .map(l -> ((List<Number>) l).stream()
+            .map(Number::longValue)
+            .map(o -> new AlertApi().setId(o))
+            .collect(Collectors.toList()))
+        .orElse(null);
   }
 }

@@ -39,7 +39,7 @@ const axisBottomTickLabelProps = {
 };
 
 export const ChartCore: FunctionComponent<ChartCoreProps> = ({
-    series,
+    series: allSeries,
     width,
     height,
     yMax,
@@ -59,14 +59,16 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     onMouseMove,
     onMouseEnter,
 }) => {
+    // `allSeries` will contain data with `enabled = false` as well
+    // Filter it out in the beginning so the rest of the component
+    // only has to care about interacting with the `enabled = true` data
+    const series = allSeries.filter((s) => s.enabled);
+
     const marginTop = top || margin.top;
     const marginLeft = left || margin.left;
     // Scales
     const dateScale = useMemo(() => {
-        const minMaxTimestamp = getMinMax(
-            series.filter((s) => s.enabled),
-            (d) => d.x
-        );
+        const minMaxTimestamp = getMinMax(series, (d) => d.x);
 
         return scaleTime<number>({
             range: [0, xMax],
@@ -78,18 +80,15 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     }, [xMax, series]);
 
     const dataScale = useMemo(() => {
-        const minMaxValues = getMinMax(
-            series.filter((s) => s.enabled),
-            (d, seriesOptions) => {
-                if (seriesOptions.type === SeriesType.AREA_CLOSED) {
-                    const dThreshold = d as ThresholdDataPoint;
+        const minMaxValues = getMinMax(series, (d, seriesOptions) => {
+            if (seriesOptions.type === SeriesType.AREA_CLOSED) {
+                const dThreshold = d as ThresholdDataPoint;
 
-                    return [dThreshold.y, dThreshold.y1];
-                } else {
-                    return [d.y];
-                }
+                return [dThreshold.y, dThreshold.y1];
+            } else {
+                return [d.y];
             }
-        );
+        });
 
         return scaleLinear<number>({
             range: [yMax, 0],
@@ -160,11 +159,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                     );
                 })}
             {series
-                .filter(
-                    (seriesData) =>
-                        seriesData.enabled &&
-                        seriesData.type !== SeriesType.CUSTOM
-                )
+                .filter((seriesData) => seriesData.type !== SeriesType.CUSTOM)
                 .map((seriesData: NormalizedSeries, idx: number) => {
                     const color =
                         seriesData.color ??

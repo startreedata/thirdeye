@@ -31,7 +31,6 @@ import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
-import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
@@ -47,16 +46,10 @@ import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class ApiBeanMapper {
-
-  private static final String DEFAULT_ALERTER_PIPELINE = "DEFAULT_ALERTER_PIPELINE";
 
   public static DataSourceApi toApi(final DataSourceDTO dto) {
     return DataSourceMapper.INSTANCE.toApi(dto);
@@ -128,77 +121,16 @@ public abstract class ApiBeanMapper {
   }
 
   public static SubscriptionGroupDTO toSubscriptionGroupDTO(final SubscriptionGroupApi api) {
-    final SubscriptionGroupDTO dto = new SubscriptionGroupDTO();
-    dto.setId(api.getId());
-    dto.setName(api.getName());
-    dto.setActive(optional(api.getActive()).orElse(true));
-
-    // TODO spyne implement translation of alert schemes, suppressors etc.
-
-    dto.setType(optional(api.getType()).orElse(DEFAULT_ALERTER_PIPELINE));
-    dto.setProperties(new HashMap<>());
-
-    final List<Long> alertIds = optional(api.getAlerts())
-        .orElse(Collections.emptyList())
-        .stream()
-        .map(AlertApi::getId)
-        .collect(Collectors.toList());
-
-    dto.getProperties().put("detectionConfigIds", alertIds);
-    dto.setCronExpression(api.getCron());
-
-    optional(api.getSpecs())
-        .map(l -> l.stream()
-            .map(ApiBeanMapper::toNotificationSpecDto)
-            .collect(Collectors.toList())
-        )
-        .ifPresent(dto::setSpecs);
-
-    optional(api.getNotificationSchemes())
-        .map(ApiBeanMapper::toNotificationSchemeDto)
-        .ifPresent(dto::setNotificationSchemes);
-
-    dto.setVectorClocks(toVectorClocks(alertIds));
-    dto.setAlertSuppressors(toAlertSuppressors(api.getAlertSuppressors()));
-    return dto;
-  }
-
-  private static Map<Long, Long> toVectorClocks(List<Long> detectionIds) {
-    long currentTimestamp = 0L;
-    Map<Long, Long> vectorClocks = new HashMap<>();
-    for (long detectionConfigId : detectionIds) {
-      vectorClocks.put(detectionConfigId, currentTimestamp);
-    }
-    return vectorClocks;
-  }
-
-  private static NotificationSpecDTO toNotificationSpecDto(final NotificationSpecApi api) {
-    return NotificationSpecMapper.INSTANCE.toBean(api);
+    return SubscriptionGroupMapper.INSTANCE.toDto(api);
   }
 
   private static NotificationSpecApi toApi(final NotificationSpecDTO dto) {
     return NotificationSpecMapper.INSTANCE.toApi(dto);
   }
 
-  public static NotificationSchemesDto toNotificationSchemeDto(
-      final NotificationSchemesApi notificationSchemesApi) {
-    return NotificationSchemeMapper.INSTANCE.toDto(notificationSchemesApi);
-  }
-
   public static NotificationSchemesApi toApi(
       NotificationSchemesDto notificationSchemesDto) {
     return NotificationSchemeMapper.INSTANCE.toApi(notificationSchemesDto);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static Map<String, Object> toAlertSuppressors(
-      final TimeWindowSuppressorApi timeWindowSuppressorApi) {
-    Map<String, Object> alertSuppressors = new HashMap<>();
-    if (timeWindowSuppressorApi != null) {
-      alertSuppressors = new ObjectMapper().convertValue(timeWindowSuppressorApi, Map.class);
-    }
-    //alertSuppressors.put(PROP_CLASS_NAME, DEFAULT_ALERT_SUPPRESSOR);
-    return alertSuppressors;
   }
 
   public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {

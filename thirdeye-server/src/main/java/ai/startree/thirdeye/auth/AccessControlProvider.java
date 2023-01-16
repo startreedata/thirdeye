@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -11,7 +11,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package ai.startree.thirdeye.auth;
 
 import static com.google.common.base.Preconditions.checkState;

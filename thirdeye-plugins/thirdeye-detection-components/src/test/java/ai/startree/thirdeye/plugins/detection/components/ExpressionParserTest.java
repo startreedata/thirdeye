@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.plugins.detection.components;
 
-import ai.startree.thirdeye.plugins.detection.components.ExpressionParser;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import java.util.Map;
 import org.testng.Assert;

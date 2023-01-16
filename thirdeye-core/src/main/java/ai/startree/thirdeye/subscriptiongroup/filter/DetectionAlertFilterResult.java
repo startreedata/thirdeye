@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.subscriptiongroup.filter;
 
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,18 +35,7 @@ public class DetectionAlertFilterResult {
    * Instantiates a new Detection alert filter result.
    */
   public DetectionAlertFilterResult() {
-    this.result = new HashMap<>();
-  }
-
-  /**
-   * Instantiates a new Detection alert filter result.
-   *
-   * @param result the result
-   */
-  public DetectionAlertFilterResult(
-      Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result) {
-    Preconditions.checkNotNull(result);
-    this.result = result;
+    result = new HashMap<>();
   }
 
   /**
@@ -65,8 +53,8 @@ public class DetectionAlertFilterResult {
    * @return the all anomalies
    */
   public List<MergedAnomalyResultDTO> getAllAnomalies() {
-    List<MergedAnomalyResultDTO> allAnomalies = new ArrayList<>();
-    for (Set<MergedAnomalyResultDTO> anomalies : result.values()) {
+    final List<MergedAnomalyResultDTO> allAnomalies = new ArrayList<>();
+    for (final Set<MergedAnomalyResultDTO> anomalies : result.values()) {
       allAnomalies.addAll(anomalies);
     }
     return allAnomalies;
@@ -79,12 +67,12 @@ public class DetectionAlertFilterResult {
    * @param anomalies the anomalies
    * @return the detection alert filter result
    */
-  public DetectionAlertFilterResult addMapping(DetectionAlertFilterNotification alertProp,
-      Set<MergedAnomalyResultDTO> anomalies) {
-    if (!this.result.containsKey(alertProp)) {
-      this.result.put(alertProp, new HashSet<MergedAnomalyResultDTO>());
+  public DetectionAlertFilterResult addMapping(final DetectionAlertFilterNotification alertProp,
+      final Set<MergedAnomalyResultDTO> anomalies) {
+    if (!result.containsKey(alertProp)) {
+      result.put(alertProp, new HashSet<>());
     }
-    this.result.get(alertProp).addAll(anomalies);
+    result.get(alertProp).addAll(anomalies);
     return this;
   }
 }

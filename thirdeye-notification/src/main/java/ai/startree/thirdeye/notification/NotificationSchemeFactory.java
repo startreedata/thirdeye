@@ -15,13 +15,11 @@ package ai.startree.thirdeye.notification;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilter;
 import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
-import ai.startree.thirdeye.subscriptiongroup.filter.ToAllRecipientsDetectionAlertFilter;
+import ai.startree.thirdeye.subscriptiongroup.filter.LegacySubscriptionGroupFilter;
 import ai.startree.thirdeye.subscriptiongroup.suppress.DetectionAlertSuppressor;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -41,13 +39,13 @@ public class NotificationSchemeFactory {
   private static final String PROP_CLASS_NAME = "className";
 
   private final MergedAnomalyResultManager mergedAnomalyResultManager;
-  private final AlertManager alertManager;
+  private final LegacySubscriptionGroupFilter legacySubscriptionGroupFilter;
 
   @Inject
   public NotificationSchemeFactory(final MergedAnomalyResultManager mergedAnomalyResultManager,
-      final AlertManager alertManager) {
+      final LegacySubscriptionGroupFilter legacySubscriptionGroupFilter) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
-    this.alertManager = alertManager;
+    this.legacySubscriptionGroupFilter = legacySubscriptionGroupFilter;
   }
 
   public Set<DetectionAlertSuppressor> loadAlertSuppressors(
@@ -78,18 +76,14 @@ public class NotificationSchemeFactory {
   }
 
   public DetectionAlertFilterResult getDetectionAlertFilterResult(
-      final SubscriptionGroupDTO subscriptionGroupDTO) throws Exception {
+      final SubscriptionGroupDTO subscriptionGroup) throws Exception {
     // Load all the anomalies along with their recipients
-    requireNonNull(subscriptionGroupDTO, "subscription Group is null");
-    final DetectionAlertFilter alertFilter = new ToAllRecipientsDetectionAlertFilter(
-        subscriptionGroupDTO,
-        System.currentTimeMillis(),
-        mergedAnomalyResultManager,
-        alertManager);
-    DetectionAlertFilterResult result = alertFilter.run();
+    requireNonNull(subscriptionGroup, "subscription Group is null");
+    DetectionAlertFilterResult result = legacySubscriptionGroupFilter.filter(subscriptionGroup,
+        System.currentTimeMillis());
 
     // Suppress alerts if any and get the filtered anomalies to be notified
-    final Set<DetectionAlertSuppressor> alertSuppressors = loadAlertSuppressors(subscriptionGroupDTO);
+    final Set<DetectionAlertSuppressor> alertSuppressors = loadAlertSuppressors(subscriptionGroup);
     for (final DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
       result = alertSuppressor.run(result);
     }

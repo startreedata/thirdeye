@@ -27,6 +27,7 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   private String type;
 
   private List<AlertApi> alerts;
+  private List<AlertAssociationApi> alertAssociations;
   private String cron;
 
   private Date created;
@@ -82,6 +83,16 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   public SubscriptionGroupApi setAlerts(
       final List<AlertApi> alerts) {
     this.alerts = alerts;
+    return this;
+  }
+
+  public List<AlertAssociationApi> getAlertAssociations() {
+    return alertAssociations;
+  }
+
+  public SubscriptionGroupApi setAlertAssociations(
+      final List<AlertAssociationApi> alertAssociations) {
+    this.alertAssociations = alertAssociations;
     return this;
   }
 

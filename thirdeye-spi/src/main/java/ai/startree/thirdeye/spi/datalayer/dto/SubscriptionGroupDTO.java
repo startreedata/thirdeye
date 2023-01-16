@@ -32,6 +32,7 @@ public class SubscriptionGroupDTO extends AbstractDTO {
    * Contains configs for all notification specs within the subscription group
    */
   private List<NotificationSpecDTO> specs;
+  private List<AlertAssociationDto> alertAssociations;
 
   @Deprecated
   private NotificationSchemesDto notificationSchemes;
@@ -162,6 +163,16 @@ public class SubscriptionGroupDTO extends AbstractDTO {
 
   public SubscriptionGroupDTO setSpecs(final List<NotificationSpecDTO> specs) {
     this.specs = specs;
+    return this;
+  }
+
+  public List<AlertAssociationDto> getAlertAssociations() {
+    return alertAssociations;
+  }
+
+  public SubscriptionGroupDTO setAlertAssociations(
+      final List<AlertAssociationDto> alertAssociations) {
+    this.alertAssociations = alertAssociations;
     return this;
   }
 

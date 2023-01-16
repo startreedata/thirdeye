@@ -30,7 +30,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {NotificationSpecMapper.class, NotificationSchemeMapper.class})
+@Mapper(uses = {
+    NotificationSpecMapper.class,
+    NotificationSchemeMapper.class,
+    AlertAssociationMapper.class
+})
 public interface SubscriptionGroupMapper {
 
   SubscriptionGroupMapper INSTANCE = Mappers.getMapper(SubscriptionGroupMapper.class);
@@ -56,7 +60,7 @@ public interface SubscriptionGroupMapper {
   @Mapping(target = "active", ignore = true)
   @Mapping(source = "cronExpression", target = "cron")
   @Mapping(source = "properties", target = "alerts", qualifiedByName = "toAlerts")
-  @Mapping(source = "alertSuppressors", target = "alertSuppressors",ignore = true)
+  @Mapping(target = "alertSuppressors", ignore = true)
   SubscriptionGroupApi toApi(SubscriptionGroupDTO dto);
 
   @SuppressWarnings("unchecked")

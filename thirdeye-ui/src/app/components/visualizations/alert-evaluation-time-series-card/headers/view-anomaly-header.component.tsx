@@ -14,7 +14,7 @@
  */
 import { CardContent, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { RCA_ANOMALY_TOUR_IDS } from "../../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_ANOMALY_TOUR_IDS } from "../../../../platform/components/app-walkthrough-v1/data/rca-anomaly-tour.data";
 import { DEFAULT_FEEDBACK } from "../../../../utils/alerts/alerts.util";
 import { AnomalyFeedback } from "../../../anomaly-feedback/anomaly-feedback.component";
 import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";

@@ -17,7 +17,7 @@ import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { RCA_ANOMALY_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_ANOMALY_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/data/rca-anomaly-tour.data";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card/anomaly-summary-card-deatil.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";

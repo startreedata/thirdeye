@@ -19,7 +19,7 @@ import {
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { RCA_INVESTIGATE_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/data/rca-investigate-tour.data";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { AnomalyDimensionAnalysisData } from "../../rest/dto/rca.interfaces";
 import { useGetAnomalyDimensionAnalysis } from "../../rest/rca/rca.actions";

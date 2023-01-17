@@ -24,7 +24,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { AxiosError } from "axios";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -35,7 +35,11 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
-import { RCA_INVESTIGATE_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { useAppTour } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import {
+    RcaInvestigateStepsProps,
+    RCA_INVESTIGATE_TOUR_IDS,
+} from "../../../platform/components/app-walkthrough-v1/data/rca-investigate-tour.data";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
@@ -148,6 +152,21 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
             hideOkButton: true,
         });
     };
+
+    const { setStepProps } =
+        useAppTour<RcaInvestigateStepsProps>("RCA_INVESTIGATE");
+
+    useEffect(() => {
+        setStepProps({
+            selectedTab: selectedTabIndex,
+            handleChangeTab: (v) => {
+                handleTabIndexChange(
+                    {},
+                    ["top-contributors", "heatmap", "events"].indexOf(v)
+                );
+            },
+        });
+    }, []);
 
     if (isLoading) {
         return (

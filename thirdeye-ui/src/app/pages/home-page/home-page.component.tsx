@@ -46,7 +46,6 @@ import {
     PageV1,
     useDialogProviderV1,
 } from "../../platform/components";
-import { HOMEPAGE_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
@@ -153,12 +152,7 @@ export const HomePage: FunctionComponent = () => {
                 title={t("message.kpis-monitor-and-outliers")}
             />
             <PageContentsGridV1>
-                <Grid
-                    item
-                    data-tour-id={HOMEPAGE_TOUR_IDS.KPI_SECTION}
-                    sm={12}
-                    xs={12}
-                >
+                <Grid item sm={12} xs={12}>
                     <Grid container alignItems="stretch">
                         <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
@@ -217,14 +211,7 @@ export const HomePage: FunctionComponent = () => {
                             </Typography>
                         </Grid>
 
-                        <Grid
-                            item
-                            data-tour-id={
-                                HOMEPAGE_TOUR_IDS.RECENT_ANOMALIES_DROPDOWN
-                            }
-                            sm={4}
-                            xs={12}
-                        >
+                        <Grid item sm={4} xs={12}>
                             <AnomalyRangeDropdown
                                 anomalyStartTime={anomalyStartTime}
                                 setAnomalyStartTime={setAnomalyStartTime}
@@ -234,11 +221,7 @@ export const HomePage: FunctionComponent = () => {
                 </Grid>
 
                 <Grid item sm={8} xs={12}>
-                    <Grid
-                        container
-                        alignItems="stretch"
-                        data-tour-id={HOMEPAGE_TOUR_IDS.RECENT_ANOMALIES_CHART}
-                    >
+                    <Grid container alignItems="stretch">
                         <Grid item sm={12} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <TrendingAnomalies
@@ -276,11 +259,7 @@ export const HomePage: FunctionComponent = () => {
                     </Grid>
                 </Grid>
 
-                <Grid
-                    item
-                    data-tour-id={HOMEPAGE_TOUR_IDS.LATEST_ANOMALIES_TABLE}
-                    xs={12}
-                >
+                <Grid item xs={12}>
                     <RecentAnomalies />
                 </Grid>
             </PageContentsGridV1>

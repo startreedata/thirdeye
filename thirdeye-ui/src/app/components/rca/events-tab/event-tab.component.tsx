@@ -30,7 +30,7 @@ import {
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
-import { RCA_INVESTIGATE_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/data/rca-investigate-tour.data";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
@@ -182,7 +182,10 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     ];
 
     return (
-        <CardContent>
+        <CardContent
+            data-tour-id={RCA_INVESTIGATE_TOUR_IDS.EVENTS_INTRO}
+            data-tour-observe-id={RCA_INVESTIGATE_TOUR_IDS.EVENTS_INTRO}
+        >
             {/* Loading Indicator when request is in flight */}
             {status === ActionStatus.Working && (
                 <SkeletonV1 preventDelay height={200} variant="rect" />
@@ -194,7 +197,6 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
                     hideToolbar
                     columns={eventColumns}
                     data={filteredEvents as Event[]}
-                    data-tour-id={RCA_INVESTIGATE_TOUR_IDS.EVENTS_INTRO}
                     rowKey="id"
                     scroll={DataGridScrollV1.Body}
                     searchDataKeys={searchDataKeys}

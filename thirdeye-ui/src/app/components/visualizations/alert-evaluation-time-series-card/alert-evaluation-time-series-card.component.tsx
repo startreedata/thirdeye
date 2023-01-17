@@ -17,7 +17,7 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { RCA_ANOMALY_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_ANOMALY_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/data/rca-anomaly-tour.data";
 import { generateChartOptionsForAlert } from "../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { Legend } from "../time-series-chart/legend/legend.component";

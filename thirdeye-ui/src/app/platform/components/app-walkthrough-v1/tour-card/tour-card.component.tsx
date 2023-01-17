@@ -28,7 +28,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { PopoverContentProps } from "@reactour/tour";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { ExtendedStepType } from "../app-walkthrough-v1.utils";
+import { ExtendedStepType } from "../data/tour-types.data";
 
 export const TourCard: FunctionComponent<
     Omit<PopoverContentProps, "steps"> & { steps: ExtendedStepType[] }
@@ -38,7 +38,6 @@ export const TourCard: FunctionComponent<
         setIsOpen(false);
         setCurrentStep(0);
     };
-    // TODO: Load based on location
 
     const currentStepData = steps?.[currentStep];
 

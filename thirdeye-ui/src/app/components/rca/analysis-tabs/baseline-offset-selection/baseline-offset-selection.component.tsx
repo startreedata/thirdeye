@@ -20,7 +20,7 @@ import {
     OFFSET_REGEX_EXTRACT,
     OFFSET_TO_HUMAN_READABLE,
 } from "../../../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import { RCA_INVESTIGATE_TOUR_IDS } from "../../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_INVESTIGATE_TOUR_IDS } from "../../../../platform/components/app-walkthrough-v1/data/rca-investigate-tour.data";
 import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.styles";
 import { BaselineOffsetSelectionProps } from "./baseline-offset-selection.interfaces";
 
@@ -74,6 +74,9 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
                 container
                 alignItems="center"
                 data-tour-id={RCA_INVESTIGATE_TOUR_IDS.HEATMAP_BASELINE_OFFSET}
+                data-tour-observe-id={
+                    RCA_INVESTIGATE_TOUR_IDS.HEATMAP_BASELINE_OFFSET
+                }
                 justifyContent="flex-end"
                 spacing={0}
             >

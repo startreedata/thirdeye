@@ -59,6 +59,7 @@
         "@material-ui/lab": "4.0.0-alpha.60",
         "@material-ui/pickers": "^3.2.10",
         "@reactour/tour": "^3.1.6",
+        "@reactour/utils": "^0.4.7",
         "@tippyjs/react": "^4.2.6",
         "@visx/visx": "^2.13.0",
         "axios": "^0.21.1",

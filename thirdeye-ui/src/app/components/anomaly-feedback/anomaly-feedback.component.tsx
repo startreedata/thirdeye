@@ -32,7 +32,7 @@ import {
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { RCA_ANOMALY_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
+import { RCA_ANOMALY_TOUR_IDS } from "../../platform/components/app-walkthrough-v1/data/rca-anomaly-tour.data";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { updateAnomalyFeedback } from "../../rest/anomalies/anomalies.rest";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";

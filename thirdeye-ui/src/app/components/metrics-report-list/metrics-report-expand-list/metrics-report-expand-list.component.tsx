@@ -23,26 +23,56 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
+    DataGridColumnV1,
     DataGridScrollV1,
     DataGridSortOrderV1,
     DataGridV1,
+    SkeletonV1,
 } from "../../../platform/components";
 import { linkRendererV1 } from "../../../platform/utils";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { UiAnomaly } from "../../../rest/dto/ui-anomaly.interfaces";
+import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
 import { getUiAnomalies } from "../../../utils/anomalies/anomalies.util";
 import { getAnomaliesAnomalyPath } from "../../../utils/routes/routes.util";
 import { MetricReportExpandListProps } from "./metrics-report-expand-list.interface";
 
 export const MetricReportExpandList: FunctionComponent<MetricReportExpandListProps> =
-    ({ anomalies }) => {
+    ({ anomalies, showEnumerationItem }) => {
         const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(
             getUiAnomalies(anomalies)
         );
         const { t } = useTranslation();
+        const {
+            enumerationItems,
+            getEnumerationItems,
+            status: enumerationItemsStatus,
+        } = useGetEnumerationItems();
 
         useEffect(() => {
             if (anomalies && anomalies.length > 0) {
                 setUiAnomalies(getUiAnomalies(anomalies));
+
+                if (showEnumerationItem) {
+                    const hasEnumerationList = anomalies.filter(
+                        (a) => a.enumerationItem
+                    );
+
+                    if (hasEnumerationList.length > 0) {
+                        const ids = Array.from(
+                            new Set(
+                                hasEnumerationList.map(
+                                    (a) => a.enumerationItem?.id as number
+                                )
+                            )
+                        );
+
+                        getEnumerationItems({
+                            ids,
+                        });
+                    }
+                }
             } else {
                 setUiAnomalies([]);
             }
@@ -101,8 +131,85 @@ export const MetricReportExpandList: FunctionComponent<MetricReportExpandListPro
             []
         );
 
-        const metricsReportExpandColumns = useMemo(
-            () => [
+        const enumerationItemMap = useMemo<Record<number, EnumerationItem>>(
+            () =>
+                showEnumerationItem && enumerationItems
+                    ? Object.assign(
+                          {},
+                          ...(enumerationItems || [])?.map((e) => ({
+                              [Number(e.id)]: e,
+                          }))
+                      )
+                    : {},
+            [showEnumerationItem, enumerationItems]
+        );
+
+        const enumerationItemRender = useCallback(
+            // use formatted value to display
+            (_, data: UiAnomaly) => {
+                if (!(showEnumerationItem && data.enumerationId)) {
+                    return t("message.no-data");
+                }
+
+                if (
+                    enumerationItemsStatus &&
+                    [ActionStatus.Initial, ActionStatus.Working].includes(
+                        enumerationItemsStatus
+                    )
+                ) {
+                    return <SkeletonV1 width={150} />;
+                }
+
+                if (
+                    enumerationItemMap &&
+                    data.enumerationId in enumerationItemMap &&
+                    enumerationItemMap[data?.enumerationId]?.name
+                ) {
+                    return enumerationItemMap[data?.enumerationId]?.name;
+                }
+
+                return t("message.no-data");
+            },
+
+            [enumerationItemMap, enumerationItemsStatus]
+        );
+
+        const enumerationItemTooltip = useCallback(
+            (_, data: UiAnomaly) => {
+                if (!(showEnumerationItem && data.enumerationId)) {
+                    return t("message.no-data");
+                }
+
+                if (
+                    enumerationItemMap &&
+                    data.enumerationId in enumerationItemMap &&
+                    enumerationItemMap[data.enumerationId].name
+                ) {
+                    const tooltipParams =
+                        enumerationItemMap[data?.enumerationId]?.params;
+
+                    return Object.entries(tooltipParams)
+                        .map(([k, v]) => (
+                            <>
+                                {k}: &quot;{v.toString().trim()}&quot;
+                            </>
+                        ))
+                        .reduce((sum, val) => (
+                            <>
+                                {sum}
+                                <br />
+                                {val}
+                            </>
+                        ));
+                }
+
+                return t("message.no-data");
+            },
+            [enumerationItemMap, enumerationItemsStatus]
+        );
+
+        const metricsReportExpandColumns = useMemo(() => {
+            const columns: DataGridColumnV1<UiAnomaly>[] = [
                 {
                     key: "name",
                     dataKey: "name",
@@ -151,15 +258,31 @@ export const MetricReportExpandList: FunctionComponent<MetricReportExpandListPro
                     minWidth: 150,
                     customCellRenderer: predicatedRenderer,
                 },
-            ],
-            [
-                deviationRenderer,
-                currentRenderer,
-                predicatedRenderer,
-                startTimeRenderer,
-                endTimeRenderer,
-            ]
-        );
+            ];
+
+            if (showEnumerationItem) {
+                columns.push({
+                    key: "enumerationItem",
+                    dataKey: "enumerationItem",
+                    header: t("label.enumeration-item"),
+                    sortable: true,
+                    minWidth: 300,
+                    customCellRenderer: enumerationItemRender,
+                    customCellTooltipRenderer: enumerationItemTooltip,
+                });
+            }
+
+            return columns;
+        }, [
+            deviationRenderer,
+            currentRenderer,
+            predicatedRenderer,
+            startTimeRenderer,
+            endTimeRenderer,
+            showEnumerationItem,
+            enumerationItemRender,
+            enumerationItemTooltip,
+        ]);
 
         return (
             <DataGridV1<UiAnomaly>

@@ -201,6 +201,7 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
                 <TableRow>
                     <TableCell colSpan={10}>
                         <MetricReportExpandList
+                            showEnumerationItem
                             anomalies={anomalyAlert.anomalies}
                         />
                     </TableCell>

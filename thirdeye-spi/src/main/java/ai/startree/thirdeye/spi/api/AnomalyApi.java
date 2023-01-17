@@ -225,10 +225,12 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
     return this;
   }
 
+  @Deprecated
   public AnomalyType getType() {
     return type;
   }
 
+  @Deprecated
   public AnomalyApi setType(final AnomalyType type) {
     this.type = type;
     return this;

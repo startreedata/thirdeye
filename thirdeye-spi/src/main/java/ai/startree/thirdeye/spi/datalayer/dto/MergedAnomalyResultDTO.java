@@ -288,6 +288,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     this.metricUrn = metricUrn;
   }
 
+  @Deprecated
   public AnomalyType getType() {
     // default type is deviation
     if (type == null) {
@@ -296,6 +297,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return type;
   }
 
+  @Deprecated
   public void setType(AnomalyType type) {
     this.type = type;
   }

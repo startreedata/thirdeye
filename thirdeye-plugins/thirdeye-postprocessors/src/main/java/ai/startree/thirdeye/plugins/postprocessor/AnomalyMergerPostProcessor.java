@@ -347,7 +347,6 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     to.setScore(from.getScore());
     to.setWeight(from.getWeight());
     to.setProperties(from.getProperties());
-    to.setType(from.getType());
     to.setSeverityLabel(from.getSeverityLabel());
     // FIXME CYRIL BEFORE MERGE NOT SURE IF THIS WORKS FINE ANYMORE
     optional(from.getEnumerationItem())

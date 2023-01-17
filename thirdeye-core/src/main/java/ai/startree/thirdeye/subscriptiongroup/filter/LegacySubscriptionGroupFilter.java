@@ -20,12 +20,13 @@ import static java.util.stream.Collectors.toMap;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The detection alert filter that sends the anomaly email to all recipients
@@ -63,63 +65,98 @@ public class LegacySubscriptionGroupFilter {
         && !anomaly.getFeedback().getFeedbackType().isUnresolved();
   }
 
-  public DetectionAlertFilterResult filter(final SubscriptionGroupDTO subscriptionGroup,
-      final long endTime) {
+  private static boolean shouldFilter(final long finalStartTime,
+      final MergedAnomalyResultDTO anomaly) {
+    return anomaly != null && !anomaly.isChild()
+        && !hasFeedback(anomaly)
+        && anomaly.getCreatedTime() > finalStartTime
+        && !isIgnore(anomaly)
+        && (anomaly.getAnomalyResultSource().equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION)
+        || anomaly.getAnomalyResultSource().equals(AnomalyResultSource.ANOMALY_REPLAY));
+  }
+
+  private static long findStartTime(final Map<Long, Long> vectorClocks, final long endTime,
+      final Long alertId) {
+    long startTime = vectorClocks.get(alertId);
+
+    // No point in fetching anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
+    if (startTime < endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME) {
+      startTime = endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME;
+    }
+    return startTime;
+  }
+
+  private static Map<Long, Long> newVectorClocks(final List<AlertAssociationDto> alertAssociations,
+      final Map<Long, Long> vectorClocks) {
+    final Map<Long, Long> vc = optional(vectorClocks).orElse(Map.of());
+    return alertAssociations.stream()
+        .map(AlertAssociationDto::getAlert)
+        .map(AbstractDTO::getId)
+        .collect(toMap(
+            id -> id,
+            id -> vc.getOrDefault(id, 0L),
+            (a, b) -> b)
+        );
+  }
+
+  private static AlertDTO fromId(final Long id) {
+    final AlertDTO alert = new AlertDTO();
+    alert.setId(id);
+    return alert;
+  }
+
+  /**
+   * Generate List of Alert Association objects from existing subscription group
+   *
+   * @return List of Alert Association objects
+   */
+  private List<AlertAssociationDto> generate(final SubscriptionGroupDTO subscriptionGroup) {
     final List<Long> alertIds = ConfigUtils.getLongs(subscriptionGroup.getProperties()
         .get(PROP_DETECTION_CONFIG_IDS));
 
-    final DetectionAlertFilterResult result = new DetectionAlertFilterResult();
-
-    // Fetch all the anomalies to be notified to the recipients
-    final Map<Long, Long> vectorClocks = newVectorClocks(alertIds,
-        subscriptionGroup.getVectorClocks());
-    final Set<MergedAnomalyResultDTO> anomalies = filter(vectorClocks, endTime);
-    return result.addMapping(new DetectionAlertFilterNotification(subscriptionGroup), anomalies);
+    return alertIds.stream()
+        .map(LegacySubscriptionGroupFilter::fromId)
+        .map(alert -> new AlertAssociationDto().setAlert(alert))
+        .collect(Collectors.toList());
   }
 
-  private Set<MergedAnomalyResultDTO> filter(final Map<Long, Long> vectorClocks,
+  public DetectionAlertFilterResult filter(final SubscriptionGroupDTO sg,
+      final long endTime) {
+    final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
+        .orElseGet(() -> generate(sg));
+
+    // Fetch all the anomalies to be notified to the recipients
+    final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
+    final Set<MergedAnomalyResultDTO> anomalies = findAnomalies(alertAssociations, vectorClocks, endTime);
+
+    final DetectionAlertFilterResult result = new DetectionAlertFilterResult();
+    return result.addMapping(new DetectionAlertFilterNotification(sg), anomalies);
+  }
+
+  private Set<MergedAnomalyResultDTO> findAnomalies(
+      final List<AlertAssociationDto> alertAssociations, final Map<Long, Long> vectorClocks,
       final long endTime) {
     // retrieve all candidate anomalies
     final Set<MergedAnomalyResultDTO> allAnomalies = new HashSet<>();
-    for (final Long detectionId : vectorClocks.keySet()) {
+    for (final AlertAssociationDto aa : alertAssociations) {
+      final long alertId = aa.getAlert().getId();
+
       // Ignore disabled detections
-      final AlertDTO detection = alertManager
-          .findById(detectionId);
-      if (detection == null || !detection.isActive()) {
-        continue;
+      final AlertDTO detection = alertManager.findById(alertId);
+
+      if (detection != null && detection.isActive()) {
+        final long startTime = findStartTime(vectorClocks, endTime, alertId);
+
+        final Collection<MergedAnomalyResultDTO> candidates = mergedAnomalyResultManager
+            .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, endTime, alertId);
+
+        final Collection<MergedAnomalyResultDTO> anomalies = candidates.stream()
+            .filter(anomaly -> shouldFilter(startTime, anomaly))
+            .collect(Collectors.toSet());
+
+        allAnomalies.addAll(anomalies);
       }
-
-      // No point in fetching anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
-      long startTime = vectorClocks.get(detectionId);
-      if (startTime < endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME) {
-        startTime = endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME;
-      }
-
-      final Collection<MergedAnomalyResultDTO> candidates = mergedAnomalyResultManager
-          .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, endTime, detectionId);
-
-      final long finalStartTime = startTime;
-      final Collection<MergedAnomalyResultDTO> anomalies =
-          Collections2.filter(candidates, anomaly -> anomaly != null && !anomaly.isChild()
-              && !hasFeedback(anomaly)
-              && anomaly.getCreatedTime() > finalStartTime
-              && !isIgnore(anomaly)
-              && (anomaly.getAnomalyResultSource()
-              .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION) ||
-              anomaly.getAnomalyResultSource()
-                  .equals(AnomalyResultSource.ANOMALY_REPLAY)));
-
-      allAnomalies.addAll(anomalies);
     }
     return allAnomalies;
-  }
-
-  private Map<Long, Long> newVectorClocks(final Collection<Long> alertIds,
-      final Map<Long, Long> vectorClocks) {
-    return alertIds.stream().collect(toMap(
-        id -> id,
-        id -> optional(vectorClocks).orElse(Map.of()).getOrDefault(id, 0L),
-        (a, b) -> b)
-    );
   }
 }

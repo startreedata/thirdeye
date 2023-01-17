@@ -16,6 +16,7 @@ package ai.startree.thirdeye.spi.detection;
 /**
  * The type of anomaly.
  */
+@Deprecated
 public enum AnomalyType {
   // Metric deviates from normal behavior. This is the default type.
   DEVIATION("Deviation");

@@ -19,10 +19,11 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.ArrayList;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AnomalyUtils {
 
-  public static boolean isIgnore(final MergedAnomalyResultDTO parent) {
+  public static boolean isIgnore(final @NonNull MergedAnomalyResultDTO parent) {
     return optional(parent.getAnomalyLabels())
         .map(labels -> labels.stream().anyMatch(AnomalyLabelDTO::isIgnore))
         .orElse(false);

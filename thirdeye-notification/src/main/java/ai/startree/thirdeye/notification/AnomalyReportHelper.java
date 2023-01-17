@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
-import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.collect.Multimap;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.MapUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -53,7 +51,7 @@ public class AnomalyReportHelper {
         .setAnomalyURL(getAnomalyURL(uiPublicUrl))
         .setBaselineVal(baselineVal)
         .setCurrentVal(getCurrentValue(anomaly))
-        .setLift(baselineVal.equals("-") ? "" : getFormattedLiftValue(anomaly, lift))
+        .setLift(baselineVal.equals("-") ? "" : formattedLiftValue(lift))
         .setPositiveLift(getLiftDirection(lift))
         .setSwi(String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, 0d))
         .setDimensions(getDimensionsList(anomaly.getDimensionMap()))
@@ -138,57 +136,9 @@ public class AnomalyReportHelper {
   /**
    * Returns a human readable lift value to be displayed in the notification templates
    */
-  public static String getFormattedLiftValue(MergedAnomalyResultDTO anomaly, double lift) {
-    String liftValue = String.format(Constants.NOTIFICATIONS_PERCENTAGE_FORMAT, lift * 100);
+  public static String formattedLiftValue(final double lift) {
 
-    // Fetch the lift value for a SLA anomaly
-    if (anomaly.getType().equals(AnomalyType.DATA_SLA)) {
-      liftValue = getFormattedSLALiftValue(anomaly);
-    }
-
-    return liftValue;
-  }
-
-  /**
-   * The lift value for an SLA anomaly is delay from the configured sla. (Ex: 2 days & 3 hours)
-   */
-  protected static String getFormattedSLALiftValue(MergedAnomalyResultDTO anomaly) {
-    if (!anomaly.getType().equals(AnomalyType.DATA_SLA)
-        || anomaly.getProperties() == null || anomaly.getProperties().isEmpty()
-        || !anomaly.getProperties().containsKey("sla")
-        || !anomaly.getProperties().containsKey("datasetLastRefreshTime")) {
-      return "";
-    }
-
-    long delayInMillis = anomaly.getEndTime() - Long
-        .parseLong(anomaly.getProperties().get("datasetLastRefreshTime"));
-    long days = TimeUnit.MILLISECONDS.toDays(delayInMillis);
-    long hours = TimeUnit.MILLISECONDS.toHours(delayInMillis) % TimeUnit.DAYS.toHours(1);
-    long minutes = TimeUnit.MILLISECONDS.toMinutes(delayInMillis) % TimeUnit.HOURS.toMinutes(1);
-
-    String liftValue;
-    if (days > 0) {
-      liftValue = String.format("%d days & %d hours", days, hours);
-    } else if (hours > 0) {
-      liftValue = String.format("%d hours & %d mins", hours, minutes);
-    } else {
-      liftValue = String.format("%d mins", minutes);
-    }
-
-    return liftValue;
-  }
-
-  /**
-   * The predicted value for an SLA anomaly is the configured sla. (Ex: 2_DAYS)
-   */
-  protected static String getSLAPredictedValue(MergedAnomalyResultDTO anomaly) {
-    if (!anomaly.getType().equals(AnomalyType.DATA_SLA)
-        || anomaly.getProperties() == null || anomaly.getProperties().isEmpty()
-        || !anomaly.getProperties().containsKey("sla")) {
-      return "-";
-    }
-
-    return anomaly.getProperties().get("sla");
+    return String.format(Constants.NOTIFICATIONS_PERCENTAGE_FORMAT, lift * 100);
   }
 
   /**
@@ -196,11 +146,6 @@ public class AnomalyReportHelper {
    */
   public static String getPredictedValue(MergedAnomalyResultDTO anomaly) {
     String predicted = ThirdEyeUtils.getRoundedValue(anomaly.getAvgBaselineVal());
-
-    // For SLA anomalies, we use the sla as the predicted value
-    if (anomaly.getType().equals(AnomalyType.DATA_SLA)) {
-      predicted = getSLAPredictedValue(anomaly);
-    }
 
     if (predicted.equalsIgnoreCase(String.valueOf(Double.NaN))) {
       predicted = "-";

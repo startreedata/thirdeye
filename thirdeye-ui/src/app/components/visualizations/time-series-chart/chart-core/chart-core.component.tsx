@@ -62,13 +62,13 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     // `allSeries` will contain data with `enabled = false` as well
     // Filter it out in the beginning so the rest of the component
     // only has to care about interacting with the `enabled = true` data
-    const series = allSeries.filter((s) => s.enabled);
+    const enabledTimeSeries = allSeries.filter((s) => s.enabled);
 
     const marginTop = top || margin.top;
     const marginLeft = left || margin.left;
     // Scales
     const dateScale = useMemo(() => {
-        const minMaxTimestamp = getMinMax(series, (d) => d.x);
+        const minMaxTimestamp = getMinMax(enabledTimeSeries, (d) => d.x);
 
         return scaleTime<number>({
             range: [0, xMax],
@@ -77,18 +77,21 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                 new Date(minMaxTimestamp[1]),
             ] as [Date, Date],
         });
-    }, [xMax, series]);
+    }, [xMax, enabledTimeSeries]);
 
     const dataScale = useMemo(() => {
-        const minMaxValues = getMinMax(series, (d, seriesOptions) => {
-            if (seriesOptions.type === SeriesType.AREA_CLOSED) {
-                const dThreshold = d as ThresholdDataPoint;
+        const minMaxValues = getMinMax(
+            enabledTimeSeries,
+            (d, seriesOptions) => {
+                if (seriesOptions.type === SeriesType.AREA_CLOSED) {
+                    const dThreshold = d as ThresholdDataPoint;
 
-                return [dThreshold.y, dThreshold.y1];
-            } else {
-                return [d.y];
+                    return [dThreshold.y, dThreshold.y1];
+                } else {
+                    return [d.y];
+                }
             }
-        });
+        );
 
         return scaleLinear<number>({
             range: [yMax, 0],
@@ -96,7 +99,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
             nice: true,
             clamp: true,
         });
-    }, [yMax, series]);
+    }, [yMax, enabledTimeSeries]);
 
     const xScaleToUse = xScale || dateScale;
     const yScaleToUse = yScale || dataScale;
@@ -124,7 +127,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
         return null;
     }
 
-    const afterChildren: ReactNode[] = series
+    const afterChildren: ReactNode[] = enabledTimeSeries
         .filter(
             (seriesData) =>
                 seriesData.type === SeriesType.CUSTOM &&
@@ -158,7 +161,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                         />
                     );
                 })}
-            {series
+            {enabledTimeSeries
                 .filter((seriesData) => seriesData.type !== SeriesType.CUSTOM)
                 .map((seriesData: NormalizedSeries, idx: number) => {
                     const color =

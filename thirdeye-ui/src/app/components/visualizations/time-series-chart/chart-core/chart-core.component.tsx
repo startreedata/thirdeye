@@ -39,7 +39,7 @@ const axisBottomTickLabelProps = {
 };
 
 export const ChartCore: FunctionComponent<ChartCoreProps> = ({
-    series,
+    series: allSeries,
     width,
     height,
     yMax,
@@ -59,14 +59,16 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
     onMouseMove,
     onMouseEnter,
 }) => {
+    // `allSeries` will contain data with `enabled = false` as well
+    // Filter it out in the beginning so the rest of the component
+    // only has to care about interacting with the `enabled = true` data
+    const enabledTimeSeries = allSeries.filter((s) => s.enabled);
+
     const marginTop = top || margin.top;
     const marginLeft = left || margin.left;
     // Scales
     const dateScale = useMemo(() => {
-        const minMaxTimestamp = getMinMax(
-            series.filter((s) => s.enabled),
-            (d) => d.x
-        );
+        const minMaxTimestamp = getMinMax(enabledTimeSeries, (d) => d.x);
 
         return scaleTime<number>({
             range: [0, xMax],
@@ -75,11 +77,11 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                 new Date(minMaxTimestamp[1]),
             ] as [Date, Date],
         });
-    }, [xMax, series]);
+    }, [xMax, enabledTimeSeries]);
 
     const dataScale = useMemo(() => {
         const minMaxValues = getMinMax(
-            series.filter((s) => s.enabled),
+            enabledTimeSeries,
             (d, seriesOptions) => {
                 if (seriesOptions.type === SeriesType.AREA_CLOSED) {
                     const dThreshold = d as ThresholdDataPoint;
@@ -97,7 +99,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
             nice: true,
             clamp: true,
         });
-    }, [yMax, series]);
+    }, [yMax, enabledTimeSeries]);
 
     const xScaleToUse = xScale || dateScale;
     const yScaleToUse = yScale || dataScale;
@@ -125,7 +127,7 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
         return null;
     }
 
-    const afterChildren: ReactNode[] = series
+    const afterChildren: ReactNode[] = enabledTimeSeries
         .filter(
             (seriesData) =>
                 seriesData.type === SeriesType.CUSTOM &&
@@ -159,12 +161,8 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
                         />
                     );
                 })}
-            {series
-                .filter(
-                    (seriesData) =>
-                        seriesData.enabled &&
-                        seriesData.type !== SeriesType.CUSTOM
-                )
+            {enabledTimeSeries
+                .filter((seriesData) => seriesData.type !== SeriesType.CUSTOM)
                 .map((seriesData: NormalizedSeries, idx: number) => {
                     const color =
                         seriesData.color ??

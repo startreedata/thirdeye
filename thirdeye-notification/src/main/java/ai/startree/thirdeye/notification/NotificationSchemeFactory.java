@@ -18,8 +18,8 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
 import ai.startree.thirdeye.subscriptiongroup.filter.LegacySubscriptionGroupFilter;
+import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.subscriptiongroup.suppress.DetectionAlertSuppressor;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -75,11 +75,11 @@ public class NotificationSchemeFactory {
     return detectionAlertSuppressors;
   }
 
-  public DetectionAlertFilterResult getDetectionAlertFilterResult(
+  public SubscriptionGroupFilterResult getDetectionAlertFilterResult(
       final SubscriptionGroupDTO subscriptionGroup) throws Exception {
     // Load all the anomalies along with their recipients
     requireNonNull(subscriptionGroup, "subscription Group is null");
-    DetectionAlertFilterResult result = legacySubscriptionGroupFilter.filter(subscriptionGroup,
+    SubscriptionGroupFilterResult result = legacySubscriptionGroupFilter.filter(subscriptionGroup,
         System.currentTimeMillis());
 
     // Suppress alerts if any and get the filtered anomalies to be notified

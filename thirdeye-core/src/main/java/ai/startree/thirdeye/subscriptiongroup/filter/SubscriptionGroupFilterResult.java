@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * The Detection alert filter result.
  */
-public class DetectionAlertFilterResult {
+public class SubscriptionGroupFilterResult {
 
   /**
    * The Result.
@@ -34,7 +34,7 @@ public class DetectionAlertFilterResult {
   /**
    * Instantiates a new Detection alert filter result.
    */
-  public DetectionAlertFilterResult() {
+  public SubscriptionGroupFilterResult() {
     result = new HashMap<>();
   }
 
@@ -67,7 +67,7 @@ public class DetectionAlertFilterResult {
    * @param anomalies the anomalies
    * @return the detection alert filter result
    */
-  public DetectionAlertFilterResult addMapping(final DetectionAlertFilterNotification alertProp,
+  public SubscriptionGroupFilterResult addMapping(final DetectionAlertFilterNotification alertProp,
       final Set<MergedAnomalyResultDTO> anomalies) {
     if (!result.containsKey(alertProp)) {
       result.put(alertProp, new HashSet<>());

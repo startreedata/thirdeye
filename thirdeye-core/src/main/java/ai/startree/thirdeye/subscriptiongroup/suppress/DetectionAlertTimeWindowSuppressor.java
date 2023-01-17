@@ -21,7 +21,7 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.spi.detection.annotation.AlertSuppressor;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
+import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import com.google.common.base.Preconditions;
 import java.util.Iterator;
 import java.util.List;
@@ -146,7 +146,7 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
   }
 
   @Override
-  public DetectionAlertFilterResult run(DetectionAlertFilterResult results) throws Exception {
+  public SubscriptionGroupFilterResult run(SubscriptionGroupFilterResult results) throws Exception {
     Preconditions.checkNotNull(results);
     for (Set<MergedAnomalyResultDTO> anomalies : results.getResult().values()) {
       filterOutSuppressedAnomalies(anomalies);

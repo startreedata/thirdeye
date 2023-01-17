@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.subscriptiongroup.suppress;
 
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
+import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 
 /**
  * The base alert suppressor whose purpose is to suppress the  actual  alert
@@ -30,6 +30,6 @@ public abstract class DetectionAlertSuppressor {
     this.config = config;
   }
 
-  public abstract DetectionAlertFilterResult run(DetectionAlertFilterResult result)
+  public abstract SubscriptionGroupFilterResult run(SubscriptionGroupFilterResult result)
       throws Exception;
 }

@@ -27,7 +27,7 @@ import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
+import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
@@ -129,7 +129,7 @@ public class InternalResource {
       subscriptionGroupManager.save(sg);
     }
 
-    final DetectionAlertFilterResult result = requireNonNull(notificationSchemeFactory
+    final SubscriptionGroupFilterResult result = requireNonNull(notificationSchemeFactory
         .getDetectionAlertFilterResult(sg), "DetectionAlertFilterResult is null");
 
     if (result.getAllAnomalies().size() == 0) {

@@ -24,7 +24,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterResult;
+import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
@@ -180,7 +180,7 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   private void executeInternal(final SubscriptionGroupDTO subscriptionGroup) throws Exception {
-    final DetectionAlertFilterResult result = requireNonNull(notificationSchemeFactory
+    final SubscriptionGroupFilterResult result = requireNonNull(notificationSchemeFactory
         .getDetectionAlertFilterResult(subscriptionGroup), "DetectionAlertFilterResult is null");
 
     if (result.getAllAnomalies().size() == 0) {
@@ -207,7 +207,7 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
-      final DetectionAlertFilterResult results) {
+      final SubscriptionGroupFilterResult results) {
     return results
         .getResult()
         .entrySet()

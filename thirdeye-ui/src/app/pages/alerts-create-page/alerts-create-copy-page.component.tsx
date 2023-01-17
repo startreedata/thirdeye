@@ -16,9 +16,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { useGetAlert } from "../../rest/alerts/alerts.actions";
-import type { Alert, EditableAlert } from "../../rest/dto/alert.interfaces";
+import type { EditableAlert } from "../../rest/dto/alert.interfaces";
 import type { AlertsViewPageParams } from "../alerts-view-page/alerts-view-page.interfaces";
 import { AlertsCreateBasePage } from "./alerts-create-base-page.component";
+import { createAlertCopy } from "./alerts-create-page.utils";
 
 export const AlertsCreateCopyPage: FunctionComponent = () => {
     const { id: alertId } = useParams<AlertsViewPageParams>();
@@ -29,19 +30,7 @@ export const AlertsCreateCopyPage: FunctionComponent = () => {
     useEffect(() => {
         getAlert(Number(alertId)).then((alert) => {
             if (alert) {
-                const keysToDelete: (keyof Alert)[] = [
-                    "id",
-                    "lastTimestamp",
-                    "active",
-                    "owner",
-                    "created",
-                    "updated",
-                ];
-
-                const editableVersion: EditableAlert = { ...alert };
-                keysToDelete.forEach((k) => {
-                    delete (editableVersion as Alert)[k];
-                });
+                const editableVersion = createAlertCopy(alert);
 
                 setAlertToCopy(editableVersion);
                 setIsLoading(false);

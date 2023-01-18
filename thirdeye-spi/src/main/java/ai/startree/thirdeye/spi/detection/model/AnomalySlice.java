@@ -13,10 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection.model;
 
-import static ai.startree.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
-
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -28,6 +25,7 @@ import java.util.Objects;
  * Selector for anomalies based on (optionally) detector id, start time, end time, and
  * dimension filters.
  */
+@Deprecated
 public class AnomalySlice {
 
   private final long detectionId;
@@ -36,10 +34,6 @@ public class AnomalySlice {
   private final Multimap<String, String> filters;
   private final List<String> detectionComponentNames;
   private final boolean isTaggedAsChild;
-
-  public AnomalySlice() {
-    this(-1, -1, -1, ArrayListMultimap.create(), new ArrayList<>(), false);
-  }
 
   private AnomalySlice(long detectionId, long start, long end, Multimap<String, String> filters,
       List<String> detectionComponentName, boolean isTaggedAsChild) {
@@ -57,12 +51,6 @@ public class AnomalySlice {
       detectionComponentName = new ArrayList<>();
     }
     this.detectionComponentNames = detectionComponentName;
-  }
-
-  public AnomalySlice(long start, long end, Multimap<String, String> filters) {
-    // Why is isTaggedAsChild false?
-    // Ideally, we want to fetch only the root anomalies as its children can be retrieved from the parent anomaly DTO.
-    this(-1, start, end, filters, new ArrayList<>(), false);
   }
 
   public long getDetectionId() {
@@ -87,36 +75,6 @@ public class AnomalySlice {
 
   public List<String> getDetectionCompNames() {
     return detectionComponentNames;
-  }
-
-  public AnomalySlice withDetectionId(long id) {
-    return new AnomalySlice(id, start, this.end, this.filters, this.detectionComponentNames,
-        this.isTaggedAsChild);
-  }
-
-  public AnomalySlice withStart(long start) {
-    return new AnomalySlice(this.detectionId, start, this.end, this.filters,
-        this.detectionComponentNames, this.isTaggedAsChild);
-  }
-
-  public AnomalySlice withEnd(long end) {
-    return new AnomalySlice(this.detectionId, this.start, end, this.filters,
-        this.detectionComponentNames, this.isTaggedAsChild);
-  }
-
-  public AnomalySlice withFilters(Multimap<String, String> filters) {
-    return new AnomalySlice(this.detectionId, this.start, this.end, filters,
-        this.detectionComponentNames, this.isTaggedAsChild);
-  }
-
-  public AnomalySlice withDetectionCompNames(List<String> detectionComponentNames) {
-    return new AnomalySlice(this.detectionId, this.start, this.end, this.filters,
-        detectionComponentNames, this.isTaggedAsChild);
-  }
-
-  public AnomalySlice withIsTaggedAsChild(boolean isTaggedAsChild) {
-    return new AnomalySlice(this.detectionId, this.start, this.end, this.filters,
-        this.detectionComponentNames, isTaggedAsChild);
   }
 
   /**
@@ -185,13 +143,9 @@ public class AnomalySlice {
       }
     }
 
-    // Entity Anomalies with detectorComponentName can act as both child (sub-entity) and non-child
-    // (root entity) anomaly. Therefore, when matching based on detectionComponentNames, we will not consider
-    // isTaggedAsChild filter as it can take either of the values (true or false).
+    // deprecated logic
     if (!this.detectionComponentNames.isEmpty()) {
-      return anomaly.getProperties().containsKey(GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME) &&
-          this.detectionComponentNames.contains(anomaly.getProperties().get(
-              GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME));
+      return false;
     } else {
       return isTaggedAsChild == anomaly.isChild();
     }

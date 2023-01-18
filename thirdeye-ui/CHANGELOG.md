@@ -1,3 +1,12 @@
+## [2.5.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.4.0...thirdeye-ui-2.5.0) (2023-01-18)
+
+
+### Features
+
+* [TE-1004](https://cortexdata.atlassian.net/browse/TE-1004) toggle showing/hiding ignored anomalies ([434d8abb0](https://github.com/startreedata/thirdeye/commit/434d8abb0bc8c4ebdd9a335c95462eb1691eddd6))
+* [TE-1211](https://cortexdata.atlassian.net/browse/TE-1211) deleting timestamp keys from copied alert ([4a9c82546](https://github.com/startreedata/thirdeye/commit/4a9c82546f4348688694d0981588ee3b88e32c4d))
+* [TE-1214](https://cortexdata.atlassian.net/browse/TE-1214) fixed chart legend toggling series for custom render ([2b93cf5ce](https://github.com/startreedata/thirdeye/commit/2b93cf5ce7848df10390b0a18bea64d7e6e5abb4))
+
 ## [2.4.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.3.0...thirdeye-ui-2.4.0) (2023-01-12)
 
 

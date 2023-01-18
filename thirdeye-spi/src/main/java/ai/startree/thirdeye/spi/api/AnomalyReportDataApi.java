@@ -369,10 +369,12 @@ public class AnomalyReportDataApi {
     return this;
   }
 
+  @Deprecated
   public String getAnomalyType() {
     return anomalyType;
   }
 
+  @Deprecated
   public AnomalyReportDataApi setAnomalyType(final String anomalyType) {
     this.anomalyType = anomalyType;
     return this;

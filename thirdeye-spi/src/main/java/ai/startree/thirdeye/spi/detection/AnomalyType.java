@@ -16,13 +16,10 @@ package ai.startree.thirdeye.spi.detection;
 /**
  * The type of anomaly.
  */
+@Deprecated
 public enum AnomalyType {
   // Metric deviates from normal behavior. This is the default type.
-  DEVIATION("Deviation"),
-  // There is a trend change for underline metric.
-  TREND_CHANGE("Trend Change"),
-  // The metric is not available within specified time.
-  DATA_SLA("SLA Violation");
+  DEVIATION("Deviation");
 
   private final String label;
 

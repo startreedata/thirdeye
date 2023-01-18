@@ -16,6 +16,7 @@ package ai.startree.thirdeye.spi.api;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
@@ -49,6 +50,8 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
 
   private List<AnomalyApi> children; // ids of the anomalies this anomaly merged from
   private Boolean isChild;
+  @Deprecated
+  @JsonIgnore
   private AnomalyType type;
   private AnomalySeverity severity;
 
@@ -222,10 +225,12 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
     return this;
   }
 
+  @Deprecated
   public AnomalyType getType() {
     return type;
   }
 
+  @Deprecated
   public AnomalyApi setType(final AnomalyType type) {
     this.type = type;
     return this;

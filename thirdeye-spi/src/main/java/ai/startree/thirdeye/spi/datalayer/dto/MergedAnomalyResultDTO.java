@@ -66,6 +66,8 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   private Long detectionConfigId;
   private Set<Long> childIds; // ids of the anomalies this anomaly merged from
   private boolean isChild;
+  @Deprecated
+  @JsonIgnore
   private AnomalyType type;
   private AnomalySeverity severityLabel = AnomalySeverity.DEFAULT;
   private String source; // expected format: [alert-name]/[node-name]
@@ -286,6 +288,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     this.metricUrn = metricUrn;
   }
 
+  @Deprecated
   public AnomalyType getType() {
     // default type is deviation
     if (type == null) {
@@ -294,6 +297,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return type;
   }
 
+  @Deprecated
   public void setType(AnomalyType type) {
     this.type = type;
   }

@@ -22,7 +22,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.postprocessor.merger.AnomalyKey;
 import ai.startree.thirdeye.plugins.postprocessor.merger.AnomalyTimelinesView;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
@@ -41,7 +40,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -229,30 +227,28 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected List<MergedAnomalyResultDTO> doMerge(
       final Collection<MergedAnomalyResultDTO> sortedAnomalies) {
     final List<MergedAnomalyResultDTO> anomaliesToUpdate = new ArrayList<>();
-    final Map<AnomalyKey, MergedAnomalyResultDTO> parents = new LinkedHashMap<>();
+    MergedAnomalyResultDTO parentCandidate = null;
     for (final MergedAnomalyResultDTO anomaly : sortedAnomalies) {
       // skip child anomalies. merge their parents instead
       if (anomaly.isChild()) {
         continue;
       }
-      // Prevent merging of grouped anomalies - custom hashmap key
-      final AnomalyKey key = AnomalyKey.create(anomaly);
-      final MergedAnomalyResultDTO parent = parents.get(key);
-      if (parent == null) {
-        parents.put(key, anomaly);
+      if (parentCandidate == null) {
+        parentCandidate = anomaly;
         continue;
       }
-      if (shouldMerge(parent, anomaly)) {
+      if (shouldMerge(parentCandidate, anomaly)) {
         // anomaly is merged into the existing parent
-        mergeIntoParent(parent, anomaly);
+        mergeIntoParent(parentCandidate, anomaly);
       } else {
-        parents.put(key, anomaly);
-        // previous parent may be overridden in map - make sure it is saved
-        anomaliesToUpdate.add(parent);
+        // by properties of the sort the current parentCandidate will not merge anymore
+        // put it in list of anomalies and make the current anomaly the new parentCandidate
+        anomaliesToUpdate.add(parentCandidate);
+        parentCandidate = anomaly;
       }
     }
-    // save all parents
-    anomaliesToUpdate.addAll(parents.values());
+    // add last parent candidate
+    anomaliesToUpdate.add(parentCandidate);
 
     return anomaliesToUpdate;
   }
@@ -270,11 +266,19 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   private boolean shouldMerge(final MergedAnomalyResultDTO parent,
       final MergedAnomalyResultDTO child) {
     requireNonNull(parent);
+    requireNonNull(child);
 
     final boolean parentIsIgnore = isIgnore(parent);
     final boolean childIsIgnore = isIgnore(child);
     if (parentIsIgnore != childIsIgnore) {
       // never merge anomalies with different ignore value
+      return false;
+    }
+
+    final String parentPatternKey = patternKey(parent);
+    final String childPatternKey = patternKey(child);
+    if (!parentPatternKey.equals(childPatternKey)) {
+      // never merge anomalies that don't go in the same direction
       return false;
     }
 
@@ -284,6 +288,14 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return childStartTime.minus(mergeMaxGap).isBefore(parent.getEndTime())
         && (child.getEndTime() <= parent.getEndTime()
         || childEndTime.minus(mergeMaxDuration).isBefore(parent.getStartTime()));
+  }
+
+  private static String patternKey(final MergedAnomalyResultDTO anomaly) {
+    String patternKey = "";
+    if (!Double.isNaN(anomaly.getAvgBaselineVal()) && !Double.isNaN(anomaly.getAvgCurrentVal())) {
+      patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
+    }
+    return patternKey;
   }
 
   private void mergeIntoParent(final MergedAnomalyResultDTO parent,
@@ -335,7 +347,6 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     to.setScore(from.getScore());
     to.setWeight(from.getWeight());
     to.setProperties(from.getProperties());
-    to.setType(from.getType());
     to.setSeverityLabel(from.getSeverityLabel());
     // FIXME CYRIL BEFORE MERGE NOT SURE IF THIS WORKS FINE ANYMORE
     optional(from.getEnumerationItem())

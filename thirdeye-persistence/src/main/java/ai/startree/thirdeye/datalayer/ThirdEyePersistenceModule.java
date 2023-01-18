@@ -26,7 +26,6 @@ import ai.startree.thirdeye.datalayer.bao.DetectionStatusManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EntityToEntityMappingManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EventManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.GroupedAnomalyResultsManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.JobManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MergedAnomalyResultManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
@@ -71,7 +70,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
-import ai.startree.thirdeye.spi.datalayer.bao.GroupedAnomalyResultsManager;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -148,8 +146,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(EventManager.class).to(EventManagerImpl.class).in(Scopes.SINGLETON);
     bind(DetectionStatusManager.class).to(DetectionStatusManagerImpl.class).in(Scopes.SINGLETON);
     bind(EntityToEntityMappingManager.class).to(EntityToEntityMappingManagerImpl.class)
-        .in(Scopes.SINGLETON);
-    bind(GroupedAnomalyResultsManager.class).to(GroupedAnomalyResultsManagerImpl.class)
         .in(Scopes.SINGLETON);
     bind(OnboardDatasetMetricManager.class).to(OnboardDatasetMetricManagerImpl.class).in(
         Scopes.SINGLETON);

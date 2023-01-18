@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -88,35 +87,6 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
     }
   }
 
-  /**
-   * Returns a dimension map according to the given dimension key.
-   *
-   * Assume that the given dimension key is [US,front_page,*,*,...] and the schema dimension names
-   * are
-   * [country,page_name,...], then this method return this dimension map: {country=US;
-   * page_name=front_page;}
-   *
-   * @param dimensionKey the dimension key to be used to covert to explored dimensions
-   * @param schemaDimensionNames the schema dimension names
-   * @return the key-value pair of dimension value and dimension name according to the given
-   *     dimension key.
-   */
-  public static DimensionMap fromDimensionKey(DimensionKey dimensionKey,
-      List<String> schemaDimensionNames) {
-    DimensionMap dimensionMap = new DimensionMap();
-    if (schemaDimensionNames != null && !schemaDimensionNames.isEmpty()) {
-      String[] dimensionValues = dimensionKey.getDimensionValues();
-      for (int i = 0; i < dimensionValues.length; ++i) {
-        String dimensionValue = dimensionValues[i].trim();
-        if (!dimensionValue.equals("") && !dimensionValue.equals("*")) {
-          String dimensionName = schemaDimensionNames.get(i);
-          dimensionMap.put(dimensionName, dimensionValue);
-        }
-      }
-    }
-    return dimensionMap;
-  }
-
   // Check if this dimension map contains filters configured in that
   public boolean contains(Map<String, String> that) {
     if (that == null || that.size() == 0) {
@@ -131,44 +101,6 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
     }
 
     return true;
-  }
-
-  /**
-   * Returns if this dimension map equals or is a child of the given dimension map, i.e., the given
-   * dimension map is
-   * a subset of this dimension map.
-   *
-   * @param that the given dimension map.
-   * @return true if this dimension map is a child of the given dimension map.
-   */
-  public boolean equalsOrChildOf(DimensionMap that) {
-    // A null dimension map equals to an empty dimension map, which is the root level of all dimensions
-    if (that == null) {
-      return true;
-    } else if (that.size() < this.size()) {
-      // parent dimension map must be a subset of this dimension map
-      for (Entry<String, String> parentDimensionEntry : that.entrySet()) {
-        String thisDimensionValue = this.get(parentDimensionEntry.getKey());
-        if (!parentDimensionEntry.getValue().equals(thisDimensionValue)) {
-          return false;
-        }
-      }
-      return true;
-    } else if (that.size() == this.size()) {
-      return this.equals(that);
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Returns Java's string representation for Map class, which is in the form of
-   * {key1=value1,key2=value2}.
-   *
-   * @return Java's string representation for Map class.
-   */
-  public String toJavaString() {
-    return sortedDimensionMap.toString();
   }
 
   /**

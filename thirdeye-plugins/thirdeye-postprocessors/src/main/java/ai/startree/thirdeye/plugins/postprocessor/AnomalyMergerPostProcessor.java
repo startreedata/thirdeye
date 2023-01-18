@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import static ai.startree.thirdeye.spi.Constants.GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME;
-import static ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
@@ -22,8 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.postprocessor.merger.AnomalyTimelinesView;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -36,7 +32,6 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -44,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -55,7 +49,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Merge anomalies.
- *
  * Note:
  * If used with dimension exploration, must be run inside each enumeration.
  * The current implementation should not be run after the forkjoin node, it would merge anomalies
@@ -305,7 +298,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
     // if this parent has no children, then add a copy of itself as a child
     if (children.isEmpty()) {
-      children.add(copyAnomalyInfo(parent, new MergedAnomalyResultDTO()));
+      children.add(copyAnomalyInfo(parent));
     }
     // Extend the end time to match the child anomaly end time.
     parent.setEndTime(Math.max(parent.getEndTime(), child.getEndTime()));
@@ -332,8 +325,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     }
   }
 
-  private static MergedAnomalyResultDTO copyAnomalyInfo(final MergedAnomalyResultDTO from,
-      final MergedAnomalyResultDTO to) {
+  private static MergedAnomalyResultDTO copyAnomalyInfo(final MergedAnomalyResultDTO from) {
+    final MergedAnomalyResultDTO to = new MergedAnomalyResultDTO();
     to.setStartTime(from.getStartTime());
     to.setEndTime(from.getEndTime());
     to.setMetric(from.getMetric());
@@ -369,104 +362,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       final String key = e.getKey();
       if (!parent.containsKey(key)) {
         parent.put(key, e.getValue());
-      } else {
-        // combine detectorComponentName
-        if (key.equals(GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME)) {
-          final String component = combineComponents(parent.get(
-              GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME), child.get(
-              GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME));
-          parent.put(GROUP_WRAPPER_PROP_DETECTOR_COMPONENT_NAME, component);
-        }
-        // combine time series snapshot of parent and child anomalies
-        if (key.equals(MergedAnomalyResultDTO.TIME_SERIES_SNAPSHOT_KEY)) {
-          try {
-            final AnomalyTimelinesView parentTimeSeries = AnomalyTimelinesView
-                .fromJsonString(parent.get(TIME_SERIES_SNAPSHOT_KEY));
-            final AnomalyTimelinesView childTimeSeries = AnomalyTimelinesView
-                .fromJsonString(child.get(TIME_SERIES_SNAPSHOT_KEY));
-            parent.put(TIME_SERIES_SNAPSHOT_KEY,
-                mergeTimeSeriesSnapshot(parentTimeSeries, childTimeSeries).toJsonString());
-          } catch (final Exception error) {
-            LOG.warn("Unable to merge time series, so skipping...", error);
-          }
-        }
       }
     }
-  }
-
-  /**
-   * A helper function to merge time series snapshot of two anomalies. This function assumes that
-   * the time series of
-   * both parent and child anomalies are aligned with the metric granularity boundary.
-   *
-   * @param parent time series snapshot of parent anomaly
-   * @param child time series snapshot of parent anaomaly
-   * @return merged time series snapshot based on timestamps
-   */
-  private static AnomalyTimelinesView mergeTimeSeriesSnapshot(final AnomalyTimelinesView parent,
-      final AnomalyTimelinesView child) {
-    final AnomalyTimelinesView mergedTimeSeriesSnapshot = new AnomalyTimelinesView();
-    int i = 0;
-    int j = 0;
-    while (i < parent.getTimeBuckets().size() && j < child.getTimeBuckets().size()) {
-      final long parentTime = parent.getTimeBuckets().get(i).getCurrentStart();
-      final long childTime = child.getTimeBuckets().get(j).getCurrentStart();
-      if (parentTime == childTime) {
-        // use the values in parent anomalies when the time series overlap
-        mergedTimeSeriesSnapshot.addTimeBuckets(parent.getTimeBuckets().get(i));
-        mergedTimeSeriesSnapshot.addCurrentValues(parent.getCurrentValues().get(i));
-        mergedTimeSeriesSnapshot.addBaselineValues(parent.getBaselineValues().get(i));
-        i++;
-        j++;
-      } else if (parentTime < childTime) {
-        mergedTimeSeriesSnapshot.addTimeBuckets(parent.getTimeBuckets().get(i));
-        mergedTimeSeriesSnapshot.addCurrentValues(parent.getCurrentValues().get(i));
-        mergedTimeSeriesSnapshot.addBaselineValues(parent.getBaselineValues().get(i));
-        i++;
-      } else {
-        mergedTimeSeriesSnapshot.addTimeBuckets(child.getTimeBuckets().get(j));
-        mergedTimeSeriesSnapshot.addCurrentValues(child.getCurrentValues().get(j));
-        mergedTimeSeriesSnapshot.addBaselineValues(child.getBaselineValues().get(j));
-        j++;
-      }
-    }
-    while (i < parent.getTimeBuckets().size()) {
-      mergedTimeSeriesSnapshot.addTimeBuckets(parent.getTimeBuckets().get(i));
-      mergedTimeSeriesSnapshot.addCurrentValues(parent.getCurrentValues().get(i));
-      mergedTimeSeriesSnapshot.addBaselineValues(parent.getBaselineValues().get(i));
-      i++;
-    }
-    while (j < child.getTimeBuckets().size()) {
-      mergedTimeSeriesSnapshot.addTimeBuckets(child.getTimeBuckets().get(j));
-      mergedTimeSeriesSnapshot.addCurrentValues(child.getCurrentValues().get(j));
-      mergedTimeSeriesSnapshot.addBaselineValues(child.getBaselineValues().get(j));
-      j++;
-    }
-    mergedTimeSeriesSnapshot.getSummary().putAll(parent.getSummary());
-    for (final String key : child.getSummary().keySet()) {
-      if (!mergedTimeSeriesSnapshot.getSummary().containsKey(key)) {
-        mergedTimeSeriesSnapshot.getSummary().put(key, child.getSummary().get(key));
-      }
-    }
-    return mergedTimeSeriesSnapshot;
-  }
-
-  /**
-   * Combine two components with comma separated.
-   * For example, will combine "component1" and "component2" into "component1, component2".
-   *
-   * @param component1 The first component.
-   * @param component2 The second component.
-   * @return The combined components.
-   */
-  private static String combineComponents(final String component1, final String component2) {
-    final List<String> components = new ArrayList<>();
-    components.addAll(Arrays.asList(component1.split(
-        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
-    components.addAll(Arrays.asList(component2.split(
-        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER)));
-    return components.stream().distinct().collect(Collectors.joining(
-        Constants.PROP_DETECTOR_COMPONENT_NAME_DELIMETER));
   }
 
   private static EnumerationItemDTO cloneEnumerationRef(final EnumerationItemDTO ei) {

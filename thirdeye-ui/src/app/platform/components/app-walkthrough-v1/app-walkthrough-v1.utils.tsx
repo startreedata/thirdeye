@@ -15,16 +15,16 @@
 import { TourProps, useTour } from "@reactour/tour";
 import { useEffect, useMemo } from "react";
 import create from "zustand";
-import { getRcaAnomalyTourSteps } from "./data/rca-anomaly-tour.data";
+import {
+    getRcaAnomalyTourSteps,
+    RcaAnomalyStepsProps,
+} from "./data/rca-anomaly-tour.data";
 import {
     getRcaInvestigateTourSteps,
     RcaInvestigateStepsProps,
 } from "./data/rca-investigate-tour.data";
-import {
-    CommonStepProps,
-    ExtendedStepType,
-    TOURS,
-} from "./data/tour-types.data";
+import { TOURS } from "./data/tour-ids.data";
+import { CommonStepProps, ExtendedStepType } from "./data/tour-utils.data";
 // import create from "zustand"
 
 export type SelectorType = "tour" | "tour-observe";
@@ -36,24 +36,48 @@ export const getTourSelector = (
 
 export type TourType = keyof typeof TOURS;
 
-export type StepPropsType = RcaInvestigateStepsProps;
+export type StepPropsType = RcaInvestigateStepsProps | RcaAnomalyStepsProps;
+
+// export type GetSpecificTourSteps = <T, K>(
+//     p: T & CommonStepProps
+// ) => ExtendedStepType<K>[];
 
 const tourStepsMap = {
-    [TOURS.RCA_ANOMALY]: getRcaAnomalyTourSteps,
-    [TOURS.RCA_INVESTIGATE]: getRcaInvestigateTourSteps,
-} as const;
+    [TOURS.RCA_ANOMALY as TourType]: getRcaAnomalyTourSteps,
+    [TOURS.RCA_INVESTIGATE as TourType]: getRcaInvestigateTourSteps,
+};
 
-export const getTourSteps = <T extends Partial<StepPropsType>>(
+console.log({
+    getRcaAnomalyTourSteps,
+    getRcaInvestigateTourSteps,
+    tourStepsMap,
+});
+
+export const getTourSteps = <T,>(
     tourType: TourType,
     stepProps: T & CommonStepProps
 ): ExtendedStepType[] => {
-    const getSelectedStep = tourStepsMap[tourType];
-    const selectedSteps = getSelectedStep(stepProps);
+    const getSelectedSteps = tourStepsMap?.[tourType];
+    const selectedSteps = getSelectedSteps?.(stepProps) || [];
+
+    console.log("Tour Steps", [tourStepsMap, tourType, tourStepsMap[tourType]]);
+
+    if (!(selectedSteps && selectedSteps.length)) {
+        console.log("No Steps found", [
+            tourStepsMap,
+            tourType,
+            tourStepsMap[tourType],
+        ]);
+
+        return [];
+    }
 
     // TODO: Remove if no better use is found
     stepProps && console.log({ stepProps });
 
-    return selectedSteps.map((s) => ({
+    console.log({ selectedSteps });
+
+    return (selectedSteps || []).map((s) => ({
         ...s,
         ...(s.selector && {
             selector: getTourSelector(s.selector as string),

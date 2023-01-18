@@ -22,7 +22,10 @@ import {
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { useAppTour } from "../../../platform/components/app-walkthrough-v1/app-walkthrough-v1.utils";
-import { RCA_INVESTIGATE_TOUR_IDS } from "../../../platform/components/app-walkthrough-v1/data/rca-investigate-tour.data";
+import {
+    RcaInvestigateStepsProps,
+    RCA_INVESTIGATE_TOUR_IDS,
+} from "../../../platform/components/app-walkthrough-v1/data/rca-investigate-tour.data";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
 import {
     createInvestigation,
@@ -130,7 +133,8 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                 .finally(() => setIsSaving(false));
         };
 
-        const { startTour } = useAppTour("RCA_INVESTIGATE");
+        const { startTour } =
+            useAppTour<RcaInvestigateStepsProps>("RCA_INVESTIGATE");
 
         const handleStartTour = (): void => {
             startTour();

@@ -28,7 +28,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { PopoverContentProps } from "@reactour/tour";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { ExtendedStepType } from "../data/tour-types.data";
+import { ExtendedStepType } from "../data/tour-utils.data";
 
 export const TourCard: FunctionComponent<
     Omit<PopoverContentProps, "steps"> & { steps: ExtendedStepType[] }

@@ -18,13 +18,10 @@ import { StepType, TourProps } from "@reactour/tour";
 import { Observables } from "@reactour/utils";
 import React, { ReactNode } from "react";
 import { getTourSelector } from "../app-walkthrough-v1.utils";
-import { RCA_ANOMALY_TOUR_IDS } from "./rca-anomaly-tour.data";
-import { RCA_INVESTIGATE_TOUR_IDS } from "./rca-investigate-tour.data";
-
-export const TOURS = {
-    RCA_ANOMALY: "RCA_ANOMALY",
-    RCA_INVESTIGATE: "RCA_INVESTIGATE",
-} as const;
+import {
+    RCA_ANOMALY_TOUR_IDS,
+    RCA_INVESTIGATE_TOUR_IDS,
+} from "./tour-ids.data";
 
 export type ValueOf<T> = T[keyof T];
 
@@ -92,12 +89,10 @@ export const getContentElement = (
     );
 };
 
-export const transformTourSteps =
-    <T, P = unknown>(
-        stepsList: (p: Partial<P> & CommonStepProps) => StepType[]
-    ): ((q: Parameters<typeof stepsList>[0]) => ExtendedStepType<T>[]) =>
-    (stepProps) =>
-        stepsList(stepProps).map<ExtendedStepType<T>>((step) => ({
-            ...step,
-            id: step.selector as StepId<T>,
-        }));
+export const transformTourSteps = <T,>(
+    stepsList: StepType[]
+): ExtendedStepType<T>[] =>
+    stepsList.map<ExtendedStepType<T>>((step) => ({
+        ...step,
+        id: step.selector as StepId<T>,
+    }));

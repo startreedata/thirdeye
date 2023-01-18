@@ -19,7 +19,6 @@ import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertSnapshotManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertTemplateManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.AnomalyFunctionManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DataSourceManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
@@ -65,7 +64,6 @@ import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertSnapshotManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyFunctionManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -138,7 +136,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(javax.sql.DataSource.class).toInstance(dataSource);
     bind(DataSource.class).toInstance(dataSource);
 
-    bind(AnomalyFunctionManager.class).to(AnomalyFunctionManagerImpl.class).in(Scopes.SINGLETON);
     bind(MergedAnomalyResultManager.class).to(MergedAnomalyResultManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(JobManager.class).to(JobManagerImpl.class).in(Scopes.SINGLETON);

@@ -20,15 +20,4 @@ public interface BaseComponent<T extends AbstractSpec> {
    * @param spec
    */
   void init(T spec);
-
-  /**
-   * Legacy interface to initialize the base component.
-   *
-   * @param spec
-   * @param dataFetcher
-   */
-  @Deprecated
-  default void init(T spec, InputDataFetcher dataFetcher) {
-    throw new UnsupportedOperationException();
-  }
 }

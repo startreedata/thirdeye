@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFunctionDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
@@ -298,21 +297,11 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
         .map(AnomalyFeedbackDTO::getId)
         .ifPresent(entity::setAnomalyFeedbackId);
 
-    optional(entity.getAnomalyFunction())
-        .map(AnomalyFunctionDTO::getId)
-        .ifPresent(entity::setFunctionId);
-
     return entity;
   }
 
   public MergedAnomalyResultDTO decorate(final MergedAnomalyResultDTO anomaly,
       final Set<Long> visitedAnomalyIds) {
-
-    if (anomaly.getFunctionId() != null) {
-      final AnomalyFunctionDTO anomalyFunctionDTO = genericPojoDao
-          .get(anomaly.getFunctionId(), AnomalyFunctionDTO.class);
-      anomaly.setAnomalyFunction(anomalyFunctionDTO);
-    }
 
     if (anomaly.getAnomalyFeedbackId() != null) {
       final AnomalyFeedbackDTO anomalyFeedbackDTO = genericPojoDao

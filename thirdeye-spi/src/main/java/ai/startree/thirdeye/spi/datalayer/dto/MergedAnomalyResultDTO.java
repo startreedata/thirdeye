@@ -120,10 +120,12 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     this.detectionConfigId = detectionConfigId;
   }
 
+  @Deprecated
   public Long getFunctionId() {
     return functionId;
   }
 
+  @Deprecated
   public void setFunctionId(Long functionId) {
     this.functionId = functionId;
   }

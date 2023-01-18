@@ -88,7 +88,9 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         <AlertAccuracyColored
             alertStats={data.accuracyStatistics ?? null}
             renderCustomText={({ accuracy, noAnomalyData }) =>
-                noAnomalyData ? t("message.no-data") : `${100 * accuracy}%`
+                noAnomalyData
+                    ? t("message.no-data")
+                    : `${(100 * accuracy).toFixed(2)}%`
             }
             typographyProps={{ variant: "body2" }}
         />

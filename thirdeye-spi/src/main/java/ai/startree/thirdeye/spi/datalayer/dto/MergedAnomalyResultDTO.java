@@ -38,7 +38,6 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     Comparable<MergedAnomalyResultDTO>, Serializable {
 
   public static final String ISSUE_TYPE_KEY = "issue_type";
-  public static final String TIME_SERIES_SNAPSHOT_KEY = "anomalyTimelinesView";
   private Long functionId;
   private Long anomalyFeedbackId;
   private String collection;
@@ -89,11 +88,6 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
 
   public MergedAnomalyResultDTO() {
     setCreatedTime(System.currentTimeMillis());
-  }
-
-  public MergedAnomalyResultDTO(AnomalyResult anomalyResult) {
-    setCreatedTime(System.currentTimeMillis());
-    populateFrom(anomalyResult);
   }
 
   public Set<Long> getChildIds() {
@@ -343,7 +337,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return Objects.equals(getId(), m.getId()) && Objects.equals(startTime, m.getStartTime())
         && Objects
         .equals(endTime, m.getEndTime()) && Objects.equals(collection, m.getCollection()) && Objects
-        .equals(metric, m.getMetric())  && Objects.equals(score, m.getScore())
+        .equals(metric, m.getMetric()) && Objects.equals(score, m.getScore())
         && Objects.equals(avgBaselineVal, m.getAvgBaselineVal())
         && Objects
         .equals(avgCurrentVal, m.getAvgCurrentVal()) && Objects
@@ -364,17 +358,6 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
       return diff;
     }
     return ObjectUtils.compare(getId(), o.getId());
-  }
-
-  public void populateFrom(AnomalyResult anomalyResult) {
-    setStartTime(anomalyResult.getStartTime());
-    setEndTime(anomalyResult.getEndTime());
-    setScore(anomalyResult.getScore());
-    setWeight(anomalyResult.getWeight());
-    setAvgCurrentVal(anomalyResult.getAvgCurrentVal());
-    setAvgBaselineVal(anomalyResult.getAvgBaselineVal());
-    setFeedback(anomalyResult.getFeedback());
-    setProperties(anomalyResult.getProperties());
   }
 
   @Deprecated

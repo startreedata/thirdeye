@@ -21,6 +21,9 @@ import { SpecificPropertiesRendererProps } from "./specific-properties-renderer.
 export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRendererProps> =
     ({ onAlertPropertyChange, alert, inputFieldConfig }) => {
         const { t } = useTranslation();
+        const existingValue =
+            alert.templateProperties[inputFieldConfig.templatePropertyName];
+
         const handlePropertyChange = (
             newValue: string,
             propertyName: string
@@ -41,7 +44,9 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
 
             return (
                 <Slider
-                    defaultValue={middlePoint}
+                    defaultValue={
+                        existingValue ? Number(existingValue) : middlePoint
+                    }
                     marks={[
                         {
                             value: sliderFieldConfig.min as number,
@@ -72,11 +77,7 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
         return (
             <TextField
                 fullWidth
-                defaultValue={
-                    alert.templateProperties[
-                        inputFieldConfig.templatePropertyName
-                    ] ?? undefined
-                }
+                defaultValue={existingValue ?? undefined}
                 type={inputFieldConfig.type}
                 variant="outlined"
                 onChange={(e) => {

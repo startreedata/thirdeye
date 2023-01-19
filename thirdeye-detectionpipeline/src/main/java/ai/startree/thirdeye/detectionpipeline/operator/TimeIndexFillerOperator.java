@@ -17,12 +17,12 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineUtils;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.TimeIndexFiller;
 import ai.startree.thirdeye.detectionpipeline.spec.TimeIndexFillerSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.IndexFiller;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class TimeIndexFillerOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getDataTableMap(inputMap);
+    final Map<String, DataTable> timeSeriesMap = DetectionPipelineUtils.getDataTableMap(inputMap);
     checkArgument(timeSeriesMap.size() == 1,
         OPERATOR_NAME + " must have exactly 1 DataTable in input");
     final DataTable dataTable = timeIndexFiller.fillIndex(detectionInterval,

@@ -16,12 +16,12 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineUtils;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
-import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.EventTrigger;
 import ai.startree.thirdeye.spi.detection.EventTriggerFactoryContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
@@ -51,7 +51,7 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Map<String, DataTable> timeSeriesMap = DetectionUtils.getDataTableMap(inputMap);
+    final Map<String, DataTable> timeSeriesMap = DetectionPipelineUtils.getDataTableMap(inputMap);
     for (String inputKey : timeSeriesMap.keySet()) {
       final DataFrame df = timeSeriesMap.get(inputKey).getDataFrame();
       for (int rowIdx = 0; rowIdx < df.size(); rowIdx++) {

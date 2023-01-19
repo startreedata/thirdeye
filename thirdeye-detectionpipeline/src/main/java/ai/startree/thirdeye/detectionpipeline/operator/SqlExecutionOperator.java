@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.spi.detection.DetectionUtils.getDataTableMap;
+import static ai.startree.thirdeye.detectionpipeline.DetectionPipelineUtils.getDataTableMap;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;

@@ -20,15 +20,16 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
-import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
@@ -80,6 +81,32 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
     detectionTaskCounter = metricRegistry.counter("detectionTaskCounter");
+  }
+
+  /**
+   * Renotify the anomaly by creating or updating the record in the subscription group notification
+   * table
+   *
+   * @param anomaly the anomaly to be notified.
+   */
+  public static void renotifyAnomaly(final MergedAnomalyResultDTO anomaly,
+      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
+    final List<AnomalySubscriptionGroupNotificationDTO> subscriptionGroupNotificationDTOs =
+        anomalySubscriptionGroupNotificationManager
+            .findByPredicate(Predicate.EQ("anomalyId", anomaly.getId()));
+    final AnomalySubscriptionGroupNotificationDTO anomalyNotificationDTO;
+    if (subscriptionGroupNotificationDTOs.isEmpty()) {
+      // create a new record if it is not existed yet.
+      anomalyNotificationDTO = new AnomalySubscriptionGroupNotificationDTO();
+      new AnomalySubscriptionGroupNotificationDTO();
+      anomalyNotificationDTO.setAnomalyId(anomaly.getId());
+      anomalyNotificationDTO.setDetectionConfigId(anomaly.getDetectionConfigId());
+    } else {
+      // update the existing record if the anomaly needs to be re-notified
+      anomalyNotificationDTO = subscriptionGroupNotificationDTOs.get(0);
+      anomalyNotificationDTO.setNotifiedSubscriptionGroupIds(Collections.emptyList());
+    }
+    anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
   }
 
   @Override
@@ -165,7 +192,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     for (final MergedAnomalyResultDTO anomaly : anomalies) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {
-        DetectionUtils.renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
+        renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
       }
     }
   }

@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
+import ai.startree.thirdeye.detectionpipeline.DetectionPipelineUtils;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
@@ -38,7 +39,6 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
-import ai.startree.thirdeye.spi.detection.DetectionUtils;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -136,7 +136,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   @Override
   public void execute() throws Exception {
-    final Map<String, DataTable> dataTableMap = DetectionUtils.getDataTableMap(inputMap);
+    final Map<String, DataTable> dataTableMap = DetectionPipelineUtils.getDataTableMap(inputMap);
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
 

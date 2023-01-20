@@ -296,7 +296,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
 
     return (
         <LoadingErrorStateSwitch
-            isError={!originalAlert}
+            isError={getAlertStatus === ActionStatus.Error}
             isLoading={loading}
             loadingState={<AppLoadingIndicatorV1 />}
         >

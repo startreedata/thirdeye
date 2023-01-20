@@ -47,6 +47,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     // Use state so we can remove anomalies locally without having to fetch again
     const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
     const {
+        anomalies: anomaliesRequestDataResponse,
         getAnomalies,
         status: getAnomaliesRequestStatus,
         errorMessages: anomaliesRequestErrors,
@@ -170,7 +171,8 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                     wrapInGrid
                     isError={getAnomaliesRequestStatus === ActionStatus.Error}
                     isLoading={
-                        getAnomaliesRequestStatus === ActionStatus.Working
+                        getAnomaliesRequestStatus === ActionStatus.Working ||
+                        getAnomaliesRequestStatus === ActionStatus.Initial
                     }
                 >
                     <EmptyStateSwitch
@@ -220,7 +222,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                                 </PageContentsCardV1>
                             </Grid>
                         }
-                        isEmpty={anomalies.length === 0}
+                        isEmpty={anomaliesRequestDataResponse?.length === 0}
                     >
                         <Outlet
                             context={{

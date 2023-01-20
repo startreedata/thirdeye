@@ -102,7 +102,10 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
             <LoadingErrorStateSwitch
                 wrapInGrid
                 isError={status === ActionStatus.Error}
-                isLoading={status === ActionStatus.Working}
+                isLoading={
+                    status === ActionStatus.Working ||
+                    status === ActionStatus.Initial
+                }
             >
                 <Grid container item xs={12}>
                     <EmptyStateSwitch

@@ -174,7 +174,10 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                         wrapInCard
                         wrapInGrid
                         isError={getTablesStatus === ActionStatus.Error}
-                        isLoading={getTablesStatus === ActionStatus.Working}
+                        isLoading={
+                            getTablesStatus === ActionStatus.Working ||
+                            getTablesStatus === ActionStatus.Initial
+                        }
                     >
                         <PageContentsCardV1>
                             <Box px={2} py={2}>

@@ -105,7 +105,10 @@ export const RecentFailures: FunctionComponent = () => {
                     <Typography variant="body1">
                         <LoadingErrorStateSwitch
                             isError={false}
-                            isLoading={status === ActionStatus.Working}
+                            isLoading={
+                                status === ActionStatus.Working ||
+                                status === ActionStatus.Initial
+                            }
                             loadingState={<SkeletonV1 animation="pulse" />}
                         >
                             {t("label.latest-errors-in-your-alerts")}
@@ -143,7 +146,10 @@ export const RecentFailures: FunctionComponent = () => {
                         </Box>
                     }
                     isError={status === ActionStatus.Error}
-                    isLoading={status === ActionStatus.Working}
+                    isLoading={
+                        status === ActionStatus.Working ||
+                        status === ActionStatus.Initial
+                    }
                     loadingState={
                         <>
                             <SkeletonV1 animation="pulse" />

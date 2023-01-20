@@ -247,7 +247,10 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                 wrapInCard
                 wrapInGrid
                 isError={false}
-                isLoading={alertTemplatesRequestStatus === ActionStatus.Working}
+                isLoading={
+                    alertTemplatesRequestStatus === ActionStatus.Working ||
+                    alertTemplatesRequestStatus === ActionStatus.Initial
+                }
             >
                 <Outlet
                     context={{

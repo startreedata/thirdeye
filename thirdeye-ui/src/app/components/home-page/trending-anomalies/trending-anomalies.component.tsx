@@ -169,7 +169,10 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
                 </Box>
             }
             isError={status === ActionStatus.Error}
-            isLoading={status === ActionStatus.Working}
+            isLoading={
+                status === ActionStatus.Working ||
+                status === ActionStatus.Initial
+            }
             loadingState={
                 <Box minHeight={195}>
                     <SkeletonV1 animation="pulse" />
@@ -223,8 +226,8 @@ export const TrendingAnomalies: FunctionComponent<TrendingAnomaliesProps> = ({
                             </Link>
                         )}
                     </Box>
-                    {/* Rendering `TimeSeriesChart` only when `timeseriesOptions` is defined helps 
-                    prevent an initialisation error where the component crashes when it initially 
+                    {/* Rendering `TimeSeriesChart` only when `timeseriesOptions` is defined helps
+                    prevent an initialisation error where the component crashes when it initially
                     renders with an empty timeseriesOptions */}
                     {timeseriesOptions && (
                         <Box height={195}>

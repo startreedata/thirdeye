@@ -132,7 +132,10 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                     wrapInCard
                     wrapInGrid
                     isError={status === ActionStatus.Error}
-                    isLoading={status === ActionStatus.Working}
+                    isLoading={
+                        status === ActionStatus.Working ||
+                        status === ActionStatus.Initial
+                    }
                 >
                     <EmptyStateSwitch
                         emptyState={

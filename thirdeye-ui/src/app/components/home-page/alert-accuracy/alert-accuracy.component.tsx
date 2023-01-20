@@ -79,7 +79,10 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
                         </NoDataIndicator>
                     }
                     isError={getAppAnalyticsStatus === ActionStatus.Error}
-                    isLoading={getAppAnalyticsStatus === ActionStatus.Working}
+                    isLoading={
+                        getAppAnalyticsStatus === ActionStatus.Working ||
+                        getAppAnalyticsStatus === ActionStatus.Initial
+                    }
                     loadingState={
                         <Box
                             className={classNames(classes?.noDataIndicator)}

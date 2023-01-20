@@ -42,6 +42,7 @@ public interface DatasetMapper {
         .setDimensions(api.getDimensions())
         .setRcaExcludedDimensions(api.getRcaExcludedDimensions())
         ;
+    dto.setNamespace(api.getNamespace());
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
       updateTimeGranularityOnDataset(dto, timeColumn);
@@ -61,6 +62,7 @@ public interface DatasetMapper {
         .setActive(dto.getActive())
         .setDimensions(dto.getDimensions())
         .setName(dto.getDataset())
+        .setNamespace(dto.getNamespace())
         .setDataSource(optional(dto.getDataSource())
             .map(datasourceName -> new DataSourceApi().setName(datasourceName))
             .orElse(null))

@@ -24,6 +24,7 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
 
   private Long id;
   private String name;
+  private String namespace;
   private Boolean active;
   private Boolean additive;
   private Templatable<List<String>> dimensions;
@@ -55,6 +56,15 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
 
   public DatasetApi setName(final String name) {
     this.name = name;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public DatasetApi setNamespace(final String namespace) {
+    this.namespace = namespace;
     return this;
   }
 
@@ -127,7 +137,8 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
     return rcaExcludedDimensions;
   }
 
-  public DatasetApi setRcaExcludedDimensions(final Templatable<List<String>> rcaExcludedDimensions) {
+  public DatasetApi setRcaExcludedDimensions(
+      final Templatable<List<String>> rcaExcludedDimensions) {
     this.rcaExcludedDimensions = rcaExcludedDimensions;
     return this;
   }

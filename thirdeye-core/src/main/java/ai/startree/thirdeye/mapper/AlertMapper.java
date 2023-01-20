@@ -36,6 +36,7 @@ public interface AlertMapper {
     return new AlertApi()
         .setId(dto.getId())
         .setName(dto.getName())
+        .setNamespace(dto.getNamespace())
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
         .setCron(dto.getCron())
@@ -55,6 +56,7 @@ public interface AlertMapper {
     final AlertDTO dto = new AlertDTO();
 
     dto.setName(api.getName());
+    dto.setNamespace(api.getNamespace());
     dto.setDescription(api.getDescription());
     dto.setActive(optional(api.getActive()).orElse(true));
     dto.setCron(api.getCron());

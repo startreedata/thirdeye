@@ -433,13 +433,12 @@ export const getAlertAccuracyData = (
 
     // There's no point of calculating the accuracy if there is no feedback reported.
     // In which case, just return the default value of accuracy=100%
-    if (alertStat.countWithFeedback && alertStat.countWithFeedback > 0) {
+    if (alertStat.totalCount && alertStat.totalCount > 0) {
         // Returns a decimal value with four digits of precision
         accuracy = Number(
             (
                 1 -
-                alertStat.feedbackStats.NOT_ANOMALY /
-                    alertStat.countWithFeedback
+                alertStat.feedbackStats.NOT_ANOMALY / alertStat.totalCount
             ).toFixed(4)
         );
 

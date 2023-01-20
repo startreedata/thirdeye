@@ -475,7 +475,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                                       )
                                     : `${t("label.overall-entity", {
                                           entity: t("label.accuracy"),
-                                      })}: ${100 * accuracy}%`
+                                      })}: ${(100 * accuracy).toFixed(2)}%`
                             )
                         }
                     />

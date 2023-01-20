@@ -18,6 +18,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { IframeVideoPlayerContainer } from "../../components/iframe-video-player-container/iframe-video-player-container.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -255,6 +256,24 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const getAnomalyName = ({ name, isIgnored }: UiAnomaly): string =>
         `${name}${isIgnored ? `(${t("label.ignored")})` : ""}`;
 
+    const onHowInvestigateClick = (): void => {
+        showDialog({
+            type: DialogType.CUSTOM,
+            width: "md",
+            contents: (
+                <IframeVideoPlayerContainer>
+                    <iframe
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        src={t("url.how-to-use-te-video")}
+                    />
+                </IframeVideoPlayerContainer>
+            ),
+            hideOkButton: true,
+            cancelButtonText: t("label.close"),
+        });
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -269,6 +288,13 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 ]}
                 customActions={
                     <PageHeaderActionsV1>
+                        <Button
+                            color="secondary"
+                            variant="contained"
+                            onClick={onHowInvestigateClick}
+                        >
+                            {t("label.how-to-investigate")}
+                        </Button>
                         <Button
                             color="primary"
                             component="button"

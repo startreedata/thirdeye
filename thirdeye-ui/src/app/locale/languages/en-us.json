@@ -181,6 +181,7 @@
         "hour": "Hour",
         "hour-lowercase": "hour",
         "hours-lowercase": "hours",
+        "how-to-investigate": "How to investigate?",
         "how-to-investigate-anomaly": "How to investigate an anomaly?",
         "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
         "id": "ID",
@@ -594,7 +595,7 @@
         "documentation-homepage": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye",
         "getting-started": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/",
         "how-to-investigate-anomaly": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/perform-root-cause-analysis",
-        "how-to-use-te-video": "https://drive.google.com/file/d/1vsiWz_GHH9E8S8ivsDrwr-B1YA_aSVBj/view",
+        "how-to-use-te-video": "https://drive.google.com/file/d/1FfAcemfssleq_mhzczqtw8mcbdDPtIyO/preview",
         "startree-te-demo": "https://www.youtube-nocookie.com/embed/XhaLcpiPUS0",
         "te-recipes": "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/"
     }

@@ -19,13 +19,16 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
 import {
     createInvestigation,
     updateInvestigation,
 } from "../../../rest/rca/rca.rest";
+import { IframeVideoPlayerContainer } from "../../iframe-video-player-container/iframe-video-player-container.component";
 import { InvestigationOptionsProps } from "./investigation-options.interfaces";
 import { ModifyInvestigationDialog } from "./modify-investigation-dialog/modify-investigation-dialog.component";
 
@@ -39,6 +42,7 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
     }) => {
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
+        const { showDialog } = useDialogProviderV1();
         const [
             isLocalInvestigationInSync,
             setIsLocalInvestigationDifferentInSync,
@@ -128,8 +132,33 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                 .finally(() => setIsSaving(false));
         };
 
+        const onHowDoIUseClick = (): void => {
+            showDialog({
+                type: DialogType.CUSTOM,
+                width: "md",
+                contents: (
+                    <IframeVideoPlayerContainer>
+                        <iframe
+                            allowFullScreen
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            src={t("url.how-to-use-te-video")}
+                        />
+                    </IframeVideoPlayerContainer>
+                ),
+                hideOkButton: true,
+                cancelButtonText: t("label.close"),
+            });
+        };
+
         return (
             <>
+                <Button
+                    color="secondary"
+                    variant="contained"
+                    onClick={onHowDoIUseClick}
+                >
+                    {t("label.how-to-investigate")}
+                </Button>
                 {investigationId === null && (
                     <Button
                         color="primary"

@@ -12,16 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box } from "@material-ui/core";
+import React, { FunctionComponent } from "react";
+import { useIframeVideoPlayerContainerStyles } from "./iframe-video-player-container.style";
 
-import { makeStyles } from "@material-ui/core";
-import { DimensionV1 } from "../../../platform/utils";
+export const IframeVideoPlayerContainer: FunctionComponent = ({ children }) => {
+    const styles = useIframeVideoPlayerContainerStyles();
 
-export const useLandingPageStyles = makeStyles(() => ({
-    introVideo: {
-        height: "100%",
-        width: "100%",
-        aspectRatio: "16 / 9",
-        borderRadius: DimensionV1.BorderRadiusDefault,
-        border: "none",
-    },
-}));
+    return <Box className={styles.introVideoContainer}>{children}</Box>;
+};

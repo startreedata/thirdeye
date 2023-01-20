@@ -17,6 +17,7 @@ import { Box, Grid, Typography } from "@material-ui/core";
 import { capitalize } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { IframeVideoPlayerContainer } from "../../../components/iframe-video-player-container/iframe-video-player-container.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WelcomeStepCard } from "../../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
 import { PageContentsCardV1, PageV1 } from "../../../platform/components";
@@ -26,13 +27,11 @@ import {
     getDataConfigurationCreatePath,
     getWelcomeCreateAlert,
 } from "../../../utils/routes/routes.util";
-import { useLandingPageStyles } from "./landing-page.style";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     const { status, datasets, getDatasets } = useGetDatasets();
-    const styles = useLandingPageStyles();
 
     const hasDatasets = !!(datasets && datasets.length > 0);
 
@@ -70,13 +69,14 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                 </Typography>
                             </Grid>
                             <Grid item sm={4} xs={12}>
-                                <iframe
-                                    allowFullScreen
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    className={styles.introVideo}
-                                    frameBorder="0"
-                                    src={t("url.startree-te-demo")}
-                                />
+                                <IframeVideoPlayerContainer>
+                                    <iframe
+                                        allowFullScreen
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        frameBorder="0"
+                                        src={t("url.startree-te-demo")}
+                                    />
+                                </IframeVideoPlayerContainer>
                             </Grid>
                         </Grid>
                         <Box clone pb={2} pt={4} textAlign="center">

@@ -53,7 +53,10 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                             </NoDataIndicator>
                         }
                         isError={status === ActionStatus.Error}
-                        isLoading={status === ActionStatus.Working}
+                        isLoading={
+                            status === ActionStatus.Working ||
+                            status === ActionStatus.Initial
+                        }
                         loadingState={
                             <Box
                                 className={classNames(classes?.noDataIndicator)}

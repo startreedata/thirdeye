@@ -67,7 +67,10 @@ export const RecentAnomalies: FunctionComponent = () => {
                     <Typography variant="body1">
                         <LoadingErrorStateSwitch
                             isError={false}
-                            isLoading={status === ActionStatus.Working}
+                            isLoading={
+                                status === ActionStatus.Working ||
+                                status === ActionStatus.Initial
+                            }
                             loadingState={<SkeletonV1 animation="pulse" />}
                         >
                             {capitalize(

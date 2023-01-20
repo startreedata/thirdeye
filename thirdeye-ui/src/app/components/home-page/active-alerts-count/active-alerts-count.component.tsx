@@ -64,7 +64,10 @@ export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
                         </NoDataIndicator>
                     }
                     isError={getAlertsStatus === ActionStatus.Error}
-                    isLoading={getAlertsStatus === ActionStatus.Working}
+                    isLoading={
+                        getAlertsStatus === ActionStatus.Working ||
+                        getAlertsStatus === ActionStatus.Initial
+                    }
                     loadingState={
                         <Box width={100}>
                             <Typography variant="h2">

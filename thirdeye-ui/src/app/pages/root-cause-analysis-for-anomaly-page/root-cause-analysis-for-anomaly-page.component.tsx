@@ -188,7 +188,10 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     enumerationItem={enumerationItem}
                     events={selectedEvents}
                     getEnumerationItemRequest={getEnumerationItemRequest}
-                    isLoading={getAnomalyRequestStatus === ActionStatus.Working}
+                    isLoading={
+                        getAnomalyRequestStatus === ActionStatus.Working ||
+                        getAnomalyRequestStatus === ActionStatus.Initial
+                    }
                     timeSeriesFiltersSet={chartTimeSeriesFilterSet}
                     onEventSelectionChange={handleEventSelectionChange}
                     onRemoveBtnClick={handleRemoveBtnClick}

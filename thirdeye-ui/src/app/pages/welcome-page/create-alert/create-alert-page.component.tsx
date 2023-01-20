@@ -199,7 +199,10 @@ export const CreateAlertPage: FunctionComponent = () => {
                 wrapInCard
                 wrapInGrid
                 isError={false}
-                isLoading={alertTemplatesRequestStatus === ActionStatus.Working}
+                isLoading={
+                    alertTemplatesRequestStatus === ActionStatus.Working ||
+                    alertTemplatesRequestStatus === ActionStatus.Initial
+                }
             >
                 <CreateAlertGuidedPage
                     alert={alert}

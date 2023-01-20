@@ -13,9 +13,17 @@
  * the License.
  */
 import type { ReactNode } from "react";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import type { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import type { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 
-export interface AnomalyListV1Props {
+interface EnumerationDataProps {
+    showEnumerationItem: boolean;
+    enumerationItems: EnumerationItem[] | null;
+    enumerationItemsStatus: ActionStatus;
+}
+
+export interface AnomalyListV1Props extends Partial<EnumerationDataProps> {
     anomalies: UiAnomaly[] | null;
     onDelete?: (uiAnomalies: UiAnomaly[]) => void;
     searchFilterValue?: string | null;

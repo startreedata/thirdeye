@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import type { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface MetricReportExpandListProps {
     anomalies: Anomaly[];
+    showEnumerationItem?: boolean;
 }

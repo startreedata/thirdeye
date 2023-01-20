@@ -28,10 +28,7 @@ import { isEmpty, isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import {
-    SkeletonV1,
-    useNotificationProviderV1,
-} from "../../../platform/components";
+import { useNotificationProviderV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAnomalyMetricBreakdown } from "../../../rest/rca/rca.actions";
 import { EMPTY_STRING_DISPLAY } from "../../../utils/anomalies/anomalies.util";
@@ -41,7 +38,8 @@ import {
     deserializeKeyValuePair,
     serializeKeyValuePair,
 } from "../../../utils/params/params.util";
-import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { Treemap } from "../../visualizations/treemap/treemap.component";
 import { TreemapData } from "../../visualizations/treemap/treemap.interfaces";
 import {
@@ -327,68 +325,63 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                     )}
                 </CardContent>
                 <CardContent>
-                    {/* Loading Indicator when requests are in flight */}
-                    {anomalyBreakdownReqStatus === ActionStatus.Working && (
-                        <SkeletonV1 preventDelay height={200} variant="rect" />
-                    )}
-
-                    {/* If breakdownComparisonData is not empty render treemaps */}
-                    {anomalyBreakdownReqStatus === ActionStatus.Done &&
-                        !isEmpty(breakdownComparisonData) &&
-                        React.Children.toArray(
-                            breakdownComparisonData &&
-                                breakdownComparisonData.map((data) => (
-                                    <>
-                                        <Divider />
-                                        <Treemap<
-                                            AnomalyBreakdownComparisonData &
-                                                DimensionDisplayData
-                                        >
-                                            colorChangeValueAccessor={
-                                                colorChangeValueAccessor
-                                            }
-                                            name={data.column}
-                                            shouldTruncateText={
-                                                shouldTruncateText
-                                            }
-                                            tooltipElement={
-                                                DimensionHeatmapTooltip
-                                            }
-                                            treemapData={formatTreemapData(
-                                                data,
-                                                data.column
-                                            )}
-                                            onDimensionClickHandler={(node) =>
-                                                handleNodeClick(
-                                                    node,
-                                                    data.column
-                                                )
-                                            }
-                                        />
-                                    </>
-                                ))
-                        )}
-
-                    {/* Indicate no data if breakdown data is missing and requests are complete */}
-                    {anomalyBreakdownReqStatus === ActionStatus.Done &&
-                        isEmpty(breakdownComparisonData) && (
-                            <Grid item xs={12}>
+                    <LoadingErrorStateSwitch
+                        isError={
+                            anomalyBreakdownReqStatus === ActionStatus.Error
+                        }
+                        isLoading={
+                            anomalyBreakdownReqStatus ===
+                                ActionStatus.Working ||
+                            anomalyBreakdownReqStatus === ActionStatus.Initial
+                        }
+                    >
+                        <EmptyStateSwitch
+                            emptyState={
                                 <Box pb={20} pt={20}>
                                     <Typography align="center" variant="body1">
                                         {t("message.no-data")}
                                     </Typography>
                                 </Box>
-                            </Grid>
-                        )}
-
-                    {/* Indicate no data if there was an error */}
-                    {anomalyBreakdownReqStatus === ActionStatus.Error && (
-                        <Grid item xs={12}>
-                            <Box pb={20} pt={20}>
-                                <NoDataIndicator />
-                            </Box>
-                        </Grid>
-                    )}
+                            }
+                            isEmpty={isEmpty(breakdownComparisonData)}
+                        >
+                            {React.Children.toArray(
+                                breakdownComparisonData &&
+                                    breakdownComparisonData.map((data) => (
+                                        <>
+                                            <Divider />
+                                            <Treemap<
+                                                AnomalyBreakdownComparisonData &
+                                                    DimensionDisplayData
+                                            >
+                                                colorChangeValueAccessor={
+                                                    colorChangeValueAccessor
+                                                }
+                                                name={data.column}
+                                                shouldTruncateText={
+                                                    shouldTruncateText
+                                                }
+                                                tooltipElement={
+                                                    DimensionHeatmapTooltip
+                                                }
+                                                treemapData={formatTreemapData(
+                                                    data,
+                                                    data.column
+                                                )}
+                                                onDimensionClickHandler={(
+                                                    node
+                                                ) =>
+                                                    handleNodeClick(
+                                                        node,
+                                                        data.column
+                                                    )
+                                                }
+                                            />
+                                        </>
+                                    ))
+                            )}
+                        </EmptyStateSwitch>
+                    </LoadingErrorStateSwitch>
                 </CardContent>
             </>
         );

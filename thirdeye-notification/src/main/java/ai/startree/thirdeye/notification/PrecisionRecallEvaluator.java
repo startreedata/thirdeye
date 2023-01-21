@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.notification;
 
-import ai.startree.thirdeye.notification.anomalyfilter.AlertFilterFactory;
 import ai.startree.thirdeye.notification.anomalyfilter.AnomalyFilter;
 import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -25,10 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Utility class to evaluate the performance of a list of merged anomalies
@@ -53,8 +49,6 @@ public class PrecisionRecallEvaluator {
   protected final AnomalyFilter anomalyFilter;
   private final AnomalyManager anomalyManager;
 
-  protected boolean useAlertFilterOnAnomaly = false;
-  protected AlertFilterFactory alertFilterFactory;
   protected int notifiedTrueAnomaly; // Anomaly is labeled as true and is notified
   protected int notifiedTrueAnomalyNewTrend; // Anomaly is labeled as TRUE_NEW_TREND and is notified
   protected int notifiedFalseAlarm;  // Anomaly is labeled as false and is notified
@@ -211,10 +205,6 @@ public class PrecisionRecallEvaluator {
 
     for (AnomalyDTO anomaly : anomalies) {
       AnomalyFilter anomalyFilterOfAnomaly = this.anomalyFilter;
-      if (useAlertFilterOnAnomaly) {
-        anomalyFilterOfAnomaly = this.alertFilterFactory
-            .fromSpec(anomaly.getAnomalyFunction().getAlertFilter());
-      }
       if (anomalyFilterOfAnomaly == null) {
         anomalyFilterOfAnomaly = new DummyAnomalyFilter();
       }
@@ -267,35 +257,5 @@ public class PrecisionRecallEvaluator {
         }
       }
     }
-  }
-
-  public Properties toProperties() {
-    Properties evals = new Properties();
-    evals.put(RESPONSE_RATE, getResponseRate());
-    evals.put(PRECISION, getPrecision());
-    evals.put(WEIGHTED_PRECISION, getWeightedPrecision());
-    evals.put(RECALL, getRecall());
-    evals.put(TOTALALERTS, getTotalAlerts());
-    evals.put(TOTALRESPONSES, getTotalResponses());
-    evals.put(TRUEANOMALIES, getTrueAnomalies());
-    evals.put(FALSEALARM, getFalseAlarm());
-    evals.put(NEWTREND, getTrueAnomalyNewTrend());
-    evals.put(USER_REPORT, getUserReportAnomaly());
-    return evals;
-  }
-
-  public Map<String, Number> toNumberMap() {
-    Map<String, Number> evals = new HashMap<>();
-    evals.put(RESPONSE_RATE, getResponseRate());
-    evals.put(PRECISION, getPrecisionInResponse());
-    evals.put(WEIGHTED_PRECISION, getWeightedPrecision());
-    evals.put(RECALL, getRecall());
-    evals.put(TOTALALERTS, getTotalAlerts());
-    evals.put(TOTALRESPONSES, getTotalResponses());
-    evals.put(TRUEANOMALIES, getTrueAnomalies());
-    evals.put(FALSEALARM, getFalseAlarm());
-    evals.put(NEWTREND, getTrueAnomalyNewTrend());
-    evals.put(USER_REPORT, getUserReportAnomaly());
-    return evals;
   }
 }

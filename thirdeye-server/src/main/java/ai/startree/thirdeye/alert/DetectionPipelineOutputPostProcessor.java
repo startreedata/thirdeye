@@ -20,8 +20,8 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
@@ -71,7 +71,7 @@ public class DetectionPipelineOutputPostProcessor {
       }
 
       @Override
-      public List<MergedAnomalyResultDTO> getAnomalies() {
+      public List<AnomalyDTO> getAnomalies() {
         return delegate.getAnomalies();
       }
 

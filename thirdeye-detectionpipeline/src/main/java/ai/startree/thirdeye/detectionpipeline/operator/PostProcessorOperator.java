@@ -20,8 +20,8 @@ import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.HashMap;
@@ -109,12 +109,12 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
   }
 
   private void enrichAnomalyLabels(final OperatorResult result) {
-    final List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
+    final List<AnomalyDTO> anomalies = result.getAnomalies();
     if (anomalies == null) {
       return;
     }
 
-    for (final MergedAnomalyResultDTO anomaly : anomalies) {
+    for (final AnomalyDTO anomaly : anomalies) {
       final @Nullable List<AnomalyLabelDTO> anomalyLabels = anomaly.getAnomalyLabels();
       if (anomalyLabels == null) {
         continue;

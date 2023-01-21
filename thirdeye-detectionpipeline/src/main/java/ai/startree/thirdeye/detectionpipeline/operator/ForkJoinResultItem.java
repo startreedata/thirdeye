@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
@@ -62,7 +62,7 @@ public class ForkJoinResultItem {
    */
   private OperatorResult conditionalClone(final OperatorResult src) {
     final long lastTimestamp = src.getLastTimestamp();
-    final List<MergedAnomalyResultDTO> anomalies = src.getAnomalies();
+    final List<AnomalyDTO> anomalies = src.getAnomalies();
     final TimeSeries timeSeries = detectionPipelineContext.isPreserveOutputDataFrames()
         ? src.getTimeseries()
         : null;
@@ -75,7 +75,7 @@ public class ForkJoinResultItem {
       }
 
       @Override
-      public @Nullable List<MergedAnomalyResultDTO> getAnomalies() {
+      public @Nullable List<AnomalyDTO> getAnomalies() {
         return anomalies;
       }
 

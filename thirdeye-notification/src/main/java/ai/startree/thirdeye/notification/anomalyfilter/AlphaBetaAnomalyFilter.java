@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.notification.anomalyfilter;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import com.google.common.base.MoreObjects;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +88,7 @@ public class AlphaBetaAnomalyFilter extends BaseAnomalyFilter {
   }
 
   @Override
-  public boolean isQualified(MergedAnomalyResultDTO anomaly) {
+  public boolean isQualified(AnomalyDTO anomaly) {
     double lengthInHour =
         (double) (anomaly.getEndTime() - anomaly.getStartTime()) / 36_00_000d;
     // In ThirdEye, the absolute value of weight is the severity

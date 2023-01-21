@@ -25,8 +25,8 @@ import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.Date;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,7 +53,7 @@ public interface AnomalyMapper {
   @Mapping(source = "alert.id", target = "detectionConfigId")
   @Mapping(source = "metadata.metric.name", target = "metric")
   @Mapping(source = "metadata.dataset.name", target = "collection")
-  MergedAnomalyResultDTO toDto(AnomalyApi api);
+  AnomalyDTO toDto(AnomalyApi api);
 
   default long map(@Nullable final Date value) {
     if (value == null) {
@@ -62,7 +62,7 @@ public interface AnomalyMapper {
     return value.getTime();
   }
 
-  default AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
+  default AnomalyApi toApi(final AnomalyDTO dto) {
     if (dto == null) {
       return null;
     }
@@ -120,7 +120,7 @@ public interface AnomalyMapper {
     return anomalyApi;
   }
 
-  private static AnomalyFeedbackApi toAnomalyFeedbackApi(final MergedAnomalyResultDTO dto) {
+  private static AnomalyFeedbackApi toAnomalyFeedbackApi(final AnomalyDTO dto) {
     if (dto.getFeedback() != null) {
       return ApiBeanMapper.toApi((AnomalyFeedbackDTO) dto.getFeedback());
     } else if (dto.getAnomalyFeedbackId() != null) {

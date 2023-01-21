@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.List;
 
 public interface Grouper<T extends AbstractSpec> extends BaseComponent<T> {
@@ -23,5 +23,5 @@ public interface Grouper<T extends AbstractSpec> extends BaseComponent<T> {
    *
    * @return list of anomalies, with grouped dimensions
    */
-  List<MergedAnomalyResultDTO> group(List<MergedAnomalyResultDTO> anomalies);
+  List<AnomalyDTO> group(List<AnomalyDTO> anomalies);
 }

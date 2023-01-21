@@ -26,9 +26,9 @@ import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -158,15 +158,15 @@ public class RcaRelatedResource {
         .plus(lookaroundPeriod)
         .getMillis(), anomalyInterval.getEnd().getMillis());
 
-    final List<MergedAnomalyResultDTO> anomalies = anomalyDAO
+    final List<AnomalyDTO> anomalies = anomalyDAO
         .findByTime(startWithLookback, endWithLookahead)
         .stream()
         // todo cyril - filter at the db level - not in the app
         .filter(dto -> !dto.isChild())
         .collect(Collectors.toList());
 
-    final Comparator<MergedAnomalyResultDTO> comparator = Comparator.comparingDouble(
-        (ToDoubleFunction<MergedAnomalyResultDTO>) dto -> scoring.score(anomalyInterval,
+    final Comparator<AnomalyDTO> comparator = Comparator.comparingDouble(
+        (ToDoubleFunction<AnomalyDTO>) dto -> scoring.score(anomalyInterval,
             new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
             lookaroundPeriod)
     ).reversed();

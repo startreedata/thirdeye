@@ -23,9 +23,9 @@ import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorRe
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
@@ -92,21 +92,21 @@ public class ColdStartPostProcessorTest {
     postProcessor.postProcess(UTC_DETECTION_INTERVAL, resultMap);
 
     assertThat(resultMap).hasSize(2);
-    final List<MergedAnomalyResultDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
+    final List<AnomalyDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
     assertThat(res1Anomalies).hasSize(2);
-    final MergedAnomalyResultDTO firstAnomaly = res1Anomalies.get(0);
+    final AnomalyDTO firstAnomaly = res1Anomalies.get(0);
     // first anomaly is in cold start zone
     assertThat(firstAnomaly.getAnomalyLabels()).hasSize(1);
     final AnomalyLabelDTO label = firstAnomaly.getAnomalyLabels().get(0);
     assertThat(label.getName()).isEqualTo(labelName(Period.days(28)));
     assertThat(label.isIgnore()).isTrue();
     // second anomaly is out of cold start zone
-    final MergedAnomalyResultDTO secondAnomaly = res1Anomalies.get(1);
+    final AnomalyDTO secondAnomaly = res1Anomalies.get(1);
     assertThat(secondAnomaly.getAnomalyLabels()).isNull();
 
-    final List<MergedAnomalyResultDTO> res2Anomalies = resultMap.get(RES_2_KEY).getAnomalies();
+    final List<AnomalyDTO> res2Anomalies = resultMap.get(RES_2_KEY).getAnomalies();
     assertThat(res2Anomalies).hasSize(1);
-    final MergedAnomalyResultDTO res2SingleAnomaly = res2Anomalies.get(0);
+    final AnomalyDTO res2SingleAnomaly = res2Anomalies.get(0);
     // first anomaly is in cold start zone
     assertThat(res2SingleAnomaly.getAnomalyLabels()).hasSize(1);
     final AnomalyLabelDTO res2Label = res2SingleAnomaly.getAnomalyLabels().get(0);
@@ -125,8 +125,8 @@ public class ColdStartPostProcessorTest {
     final Map<String, OperatorResult> resultMap = Map.of(RES_1_KEY, res1);
     postProcessor.postProcess(UTC_DETECTION_INTERVAL, resultMap);
 
-    final List<MergedAnomalyResultDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
-    final MergedAnomalyResultDTO firstAnomaly = res1Anomalies.get(0);
+    final List<AnomalyDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
+    final AnomalyDTO firstAnomaly = res1Anomalies.get(0);
     final AnomalyLabelDTO label = firstAnomaly.getAnomalyLabels().get(0);
     assertThat(label.isIgnore()).isFalse();
   }
@@ -140,7 +140,7 @@ public class ColdStartPostProcessorTest {
 
     final List<AnomalyLabelDTO> anomalyLabels = new ArrayList<>();
     anomalyLabels.add(new AnomalyLabelDTO().setName("existingLabel"));
-    final MergedAnomalyResultDTO anomalyWithExistingLabel = anomalyJan3Jan5().setAnomalyLabels(
+    final AnomalyDTO anomalyWithExistingLabel = anomalyJan3Jan5().setAnomalyLabels(
         anomalyLabels);
 
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
@@ -149,8 +149,8 @@ public class ColdStartPostProcessorTest {
     final Map<String, OperatorResult> resultMap = Map.of(RES_1_KEY, res1);
     postProcessor.postProcess(UTC_DETECTION_INTERVAL, resultMap);
 
-    final List<MergedAnomalyResultDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
-    final MergedAnomalyResultDTO firstAnomaly = res1Anomalies.get(0);
+    final List<AnomalyDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
+    final AnomalyDTO firstAnomaly = res1Anomalies.get(0);
     final List<AnomalyLabelDTO> labels = firstAnomaly.getAnomalyLabels();
     assertThat(labels).hasSize(2);
     final AnomalyLabelDTO label1 = labels.get(0);
@@ -170,16 +170,16 @@ public class ColdStartPostProcessorTest {
     // not failing is ok for test
   }
 
-  private MergedAnomalyResultDTO anomalyJan3Jan5() {
-    return new MergedAnomalyResultDTO().setStartTime(JANUARY_3_2022).setEndTime(JANUARY_5_2022);
+  private AnomalyDTO anomalyJan3Jan5() {
+    return new AnomalyDTO().setStartTime(JANUARY_3_2022).setEndTime(JANUARY_5_2022);
   }
 
-  private MergedAnomalyResultDTO anomalyJan27Jan31() {
-    return new MergedAnomalyResultDTO().setStartTime(JANUARY_27_2022).setEndTime(JANUARY_31_2022);
+  private AnomalyDTO anomalyJan27Jan31() {
+    return new AnomalyDTO().setStartTime(JANUARY_27_2022).setEndTime(JANUARY_31_2022);
   }
 
-  private MergedAnomalyResultDTO anomalyFeb2Feb3() {
-    return new MergedAnomalyResultDTO().setStartTime(FEBRUARY_2_2022).setEndTime(FEBRUARY_3_2022);
+  private AnomalyDTO anomalyFeb2Feb3() {
+    return new AnomalyDTO().setStartTime(FEBRUARY_2_2022).setEndTime(FEBRUARY_3_2022);
   }
 
   private static final class FutureMinTime implements Future<Long> {

@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.spi.Constants.NOTIFICATIONS_PERCENTAGE_FORMAT
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import ai.startree.thirdeye.util.ThirdEyeUtils;
@@ -35,7 +35,7 @@ import org.joda.time.DateTimeZone;
 
 public class AnomalyReportHelper {
 
-  public static AnomalyReportDataApi buildAnomalyReportEntity(final MergedAnomalyResultDTO anomaly,
+  public static AnomalyReportDataApi buildAnomalyReportEntity(final AnomalyDTO anomaly,
       final String feedbackVal,
       final String alertName,
       final String alertDescription,
@@ -124,11 +124,11 @@ public class AnomalyReportHelper {
   /**
    * Retrieve the issue type of an anomaly
    */
-  public static String getIssueType(MergedAnomalyResultDTO anomalyResultDTO) {
+  public static String getIssueType(AnomalyDTO anomalyResultDTO) {
     Map<String, String> properties = anomalyResultDTO.getProperties();
     if (MapUtils.isNotEmpty(properties) && properties
-        .containsKey(MergedAnomalyResultDTO.ISSUE_TYPE_KEY)) {
-      return properties.get(MergedAnomalyResultDTO.ISSUE_TYPE_KEY);
+        .containsKey(AnomalyDTO.ISSUE_TYPE_KEY)) {
+      return properties.get(AnomalyDTO.ISSUE_TYPE_KEY);
     }
     return null;
   }
@@ -144,7 +144,7 @@ public class AnomalyReportHelper {
   /**
    * Retrieve the predicted value for the anomaly
    */
-  public static String getPredictedValue(MergedAnomalyResultDTO anomaly) {
+  public static String getPredictedValue(AnomalyDTO anomaly) {
     String predicted = ThirdEyeUtils.getRoundedValue(anomaly.getAvgBaselineVal());
 
     if (predicted.equalsIgnoreCase(String.valueOf(Double.NaN))) {
@@ -156,7 +156,7 @@ public class AnomalyReportHelper {
   /**
    * Retrieve the current value for the anomaly
    */
-  public static String getCurrentValue(MergedAnomalyResultDTO anomaly) {
+  public static String getCurrentValue(AnomalyDTO anomaly) {
     String current = ThirdEyeUtils.getRoundedValue(anomaly.getAvgCurrentVal());
 
     if (current.equalsIgnoreCase(String.valueOf(Double.NaN))) {

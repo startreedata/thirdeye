@@ -29,7 +29,7 @@ public class RcaInvestigationDTO extends AbstractDTO {
   private String name;
   private String text;
   private Map<String, Object> uiMetadata;
-  private MergedAnomalyResultDTO anomaly;
+  private AnomalyDTO anomaly;
 
   // below is legacy - may be used in the future
   private String compareMode;
@@ -55,11 +55,11 @@ public class RcaInvestigationDTO extends AbstractDTO {
     return this;
   }
 
-  public MergedAnomalyResultDTO getAnomaly() {
+  public AnomalyDTO getAnomaly() {
     return anomaly;
   }
 
-  public RcaInvestigationDTO setAnomaly(final MergedAnomalyResultDTO anomaly) {
+  public RcaInvestigationDTO setAnomaly(final AnomalyDTO anomaly) {
     this.anomaly = anomaly;
     return this;
   }

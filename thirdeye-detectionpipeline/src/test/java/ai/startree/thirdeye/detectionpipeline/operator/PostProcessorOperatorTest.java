@@ -34,8 +34,8 @@ import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
@@ -151,7 +151,7 @@ public class PostProcessorOperatorTest {
   }
 
   private void assertLabelsAreCorrect(final OperatorResult r) {
-    for (final MergedAnomalyResultDTO anomaly : r.getAnomalies()) {
+    for (final AnomalyDTO anomaly : r.getAnomalies()) {
       assertThat(anomaly.getAnomalyLabels().size()).isEqualTo(1);
       final AnomalyLabelDTO label = anomaly.getAnomalyLabels().get(0);
       assertThat(label.getName()).isEqualTo(TEST_POST_PROCESSOR_LABEL_NAME);
@@ -168,17 +168,17 @@ public class PostProcessorOperatorTest {
    * @param anomalies the list of anomalies generated
    * @return the detection result contains the list of anomalies and the time series
    */
-  private static AnomalyDetectorOperatorResult from(final List<MergedAnomalyResultDTO> anomalies) {
+  private static AnomalyDetectorOperatorResult from(final List<AnomalyDTO> anomalies) {
     // timeseries is not used by the TestPostProcessor
     return new Builder().setAnomalies(anomalies).setTimeseries(null).build();
   }
 
   private static AnomalyDetectorOperatorResult detectionResWith1Anomaly() {
-    return from(List.of(new MergedAnomalyResultDTO()));
+    return from(List.of(new AnomalyDTO()));
   }
 
   private static AnomalyDetectorOperatorResult detectionResWith2Anomalies() {
-    return from(List.of(new MergedAnomalyResultDTO(), new MergedAnomalyResultDTO()));
+    return from(List.of(new AnomalyDTO(), new AnomalyDTO()));
   }
 
   private static AnomalyDetectorOperatorResult detectionResWith0Anomaly() {
@@ -220,7 +220,7 @@ public class PostProcessorOperatorTest {
       for (final OperatorResult r : resultMap.values()) {
         if (r instanceof AnomalyDetectorOperatorResult) {
           final AnomalyDetectorOperatorResult detectionResult = (AnomalyDetectorOperatorResult) r;
-          for (final MergedAnomalyResultDTO anomaly : detectionResult.getAnomalies()) {
+          for (final AnomalyDTO anomaly : detectionResult.getAnomalies()) {
             // override existing labels - don't do this in real implementation - ok for tests
             final AnomalyLabelDTO anomalyLabel = new AnomalyLabelDTO().setIgnore(true)
                 .setName(labelName)

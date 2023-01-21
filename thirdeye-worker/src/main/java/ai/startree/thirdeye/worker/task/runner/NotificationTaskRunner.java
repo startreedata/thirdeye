@@ -22,7 +22,7 @@ import ai.startree.thirdeye.notification.NotificationSchemeFactory;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
@@ -84,9 +84,9 @@ public class NotificationTaskRunner implements TaskRunner {
     this.notificationPayloadBuilder = notificationPayloadBuilder;
   }
 
-  private static Map<Long, Long> buildVectorClock(Collection<MergedAnomalyResultDTO> anomalies) {
+  private static Map<Long, Long> buildVectorClock(Collection<AnomalyDTO> anomalies) {
     final Map<Long, Long> alertIdToAnomalyCreateTimeMax = new HashMap<>();
-    for (final MergedAnomalyResultDTO a : anomalies) {
+    for (final AnomalyDTO a : anomalies) {
       final Long alertId = a.getDetectionConfigId();
       if (alertId == null) {
         continue;
@@ -125,7 +125,7 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   private void updateSubscriptionWatermarks(final SubscriptionGroupDTO subscriptionConfig,
-      final List<MergedAnomalyResultDTO> allAnomalies) {
+      final List<AnomalyDTO> allAnomalies) {
     if (!allAnomalies.isEmpty()) {
       subscriptionConfig.setVectorClocks(
           mergeVectorClock(subscriptionConfig.getVectorClocks(),
@@ -165,7 +165,7 @@ public class NotificationTaskRunner implements TaskRunner {
     }
 
     /* Dispatch notifications */
-    final Set<MergedAnomalyResultDTO> anomalies = getAnomalies(subscriptionGroup, result);
+    final Set<AnomalyDTO> anomalies = getAnomalies(subscriptionGroup, result);
     final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
         subscriptionGroup,
         anomalies);
@@ -174,14 +174,14 @@ public class NotificationTaskRunner implements TaskRunner {
     notificationDispatcher.dispatch(subscriptionGroup, payload);
 
     /* Record watermarks and update entities */
-    for (final MergedAnomalyResultDTO anomaly : result.getAllAnomalies()) {
+    for (final AnomalyDTO anomaly : result.getAllAnomalies()) {
       anomaly.setNotified(true);
       mergedAnomalyResultManager.update(anomaly);
     }
     updateSubscriptionWatermarks(subscriptionGroup, result.getAllAnomalies());
   }
 
-  public Set<MergedAnomalyResultDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
+  public Set<AnomalyDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
       final SubscriptionGroupFilterResult results) {
     return results
         .getResult()

@@ -26,9 +26,9 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificati
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.task.TaskInfo;
@@ -89,7 +89,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
    *
    * @param anomaly the anomaly to be notified.
    */
-  public static void renotifyAnomaly(final MergedAnomalyResultDTO anomaly,
+  public static void renotifyAnomaly(final AnomalyDTO anomaly,
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
     final List<AnomalySubscriptionGroupNotificationDTO> subscriptionGroupNotificationDTOs =
         anomalySubscriptionGroupNotificationManager
@@ -176,20 +176,20 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final OperatorResult result) {
-    final List<MergedAnomalyResultDTO> anomalies = result.getAnomalies();
+    final List<AnomalyDTO> anomalies = result.getAnomalies();
     if (anomalies == null) {
       return;
     }
-    for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : anomalies) {
-      final Long id = anomalyDao.save(mergedAnomalyResultDTO);
+    for (final AnomalyDTO anomalyDTO : anomalies) {
+      final Long id = anomalyDao.save(anomalyDTO);
       if (id == null) {
-        LOG.error("Failed to store anomaly: {}", mergedAnomalyResultDTO);
+        LOG.error("Failed to store anomaly: {}", anomalyDTO);
       }
     }
 
     // re-notify the anomalies if any
     // note cyril - dead code - renotify is always false
-    for (final MergedAnomalyResultDTO anomaly : anomalies) {
+    for (final AnomalyDTO anomaly : anomalies) {
       // if an anomaly should be re-notified, update the notification lookup table in the database
       if (anomaly.isRenotify()) {
         renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);

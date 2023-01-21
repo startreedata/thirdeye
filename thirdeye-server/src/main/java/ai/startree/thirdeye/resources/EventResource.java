@@ -25,8 +25,8 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
@@ -115,7 +115,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("anomalyId") long anomalyId
   ) {
-    final MergedAnomalyResultDTO anomalyDto = ensureExists(mergedAnomalyResultManager.findById(
+    final AnomalyDTO anomalyDto = ensureExists(mergedAnomalyResultManager.findById(
         anomalyId));
     final EventDTO eventDTO = new EventDTO()
         .setName("Anomaly " + anomalyId)

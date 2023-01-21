@@ -20,7 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -53,7 +53,7 @@ public class AlertDeleter {
   }
 
   public void deleteAssociatedAnomalies(final Long alertId) {
-    final List<MergedAnomalyResultDTO> anomalies = mergedAnomalyResultManager.findByPredicate(
+    final List<AnomalyDTO> anomalies = mergedAnomalyResultManager.findByPredicate(
         Predicate.EQ("detectionConfigId", alertId));
     anomalies.forEach(mergedAnomalyResultManager::delete);
   }

@@ -34,8 +34,8 @@ import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult,
-    Comparable<MergedAnomalyResultDTO>, Serializable {
+public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
+    Comparable<AnomalyDTO>, Serializable {
 
   public static final String ISSUE_TYPE_KEY = "issue_type";
   private Long functionId;
@@ -83,7 +83,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   @JsonIgnore
   private AnomalyFunctionDTO anomalyFunction;
   @JsonIgnore
-  private Set<MergedAnomalyResultDTO> children = new HashSet<>();
+  private Set<AnomalyDTO> children = new HashSet<>();
   // flag to be set when severity changes but not to be persisted
   @JsonIgnore
   private boolean renotify = false;
@@ -91,7 +91,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   private EnumerationItemDTO enumerationItem;
   private List<AnomalyLabelDTO> anomalyLabels;
 
-  public MergedAnomalyResultDTO() {
+  public AnomalyDTO() {
     setCreatedTime(System.currentTimeMillis());
   }
 
@@ -141,7 +141,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return collection;
   }
 
-  public MergedAnomalyResultDTO setCollection(final String collection) {
+  public AnomalyDTO setCollection(final String collection) {
     this.collection = collection;
     return this;
   }
@@ -150,7 +150,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return metric;
   }
 
-  public MergedAnomalyResultDTO setMetric(final String metric) {
+  public AnomalyDTO setMetric(final String metric) {
     this.metric = metric;
     return this;
   }
@@ -159,7 +159,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return startTime;
   }
 
-  public MergedAnomalyResultDTO setStartTime(long startTime) {
+  public AnomalyDTO setStartTime(long startTime) {
     this.startTime = startTime;
     return this;
   }
@@ -168,7 +168,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return endTime;
   }
 
-  public MergedAnomalyResultDTO setEndTime(long endTime) {
+  public AnomalyDTO setEndTime(long endTime) {
     this.endTime = endTime;
     return this;
   }
@@ -327,7 +327,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return anomalyLabels;
   }
 
-  public MergedAnomalyResultDTO setAnomalyLabels(
+  public AnomalyDTO setAnomalyLabels(
       final List<AnomalyLabelDTO> anomalyLabels) {
     this.anomalyLabels = anomalyLabels;
     return this;
@@ -343,10 +343,10 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof MergedAnomalyResultDTO)) {
+    if (!(o instanceof AnomalyDTO)) {
       return false;
     }
-    MergedAnomalyResultDTO m = (MergedAnomalyResultDTO) o;
+    AnomalyDTO m = (AnomalyDTO) o;
     return Objects.equals(getId(), m.getId()) && Objects.equals(startTime, m.getStartTime())
         && Objects
         .equals(endTime, m.getEndTime()) && Objects.equals(collection, m.getCollection()) && Objects
@@ -363,7 +363,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
   }
 
   @Override
-  public int compareTo(MergedAnomalyResultDTO o) {
+  public int compareTo(AnomalyDTO o) {
     // compare by -startTime, id
     int diff = -ObjectUtils.compare(startTime, o.getStartTime()); // inverted to sort by
     // decreasing time
@@ -405,11 +405,11 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     this.anomalyFunction = anomalyFunction;
   }
 
-  public Set<MergedAnomalyResultDTO> getChildren() {
+  public Set<AnomalyDTO> getChildren() {
     return children;
   }
 
-  public void setChildren(Set<MergedAnomalyResultDTO> children) {
+  public void setChildren(Set<AnomalyDTO> children) {
     this.children = children;
   }
 
@@ -425,7 +425,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return source;
   }
 
-  public MergedAnomalyResultDTO setSource(final String source) {
+  public AnomalyDTO setSource(final String source) {
     this.source = source;
     return this;
   }
@@ -434,7 +434,7 @@ public class MergedAnomalyResultDTO extends AbstractDTO implements AnomalyResult
     return enumerationItem;
   }
 
-  public MergedAnomalyResultDTO setEnumerationItem(
+  public AnomalyDTO setEnumerationItem(
       final EnumerationItemDTO enumerationItem) {
     this.enumerationItem = enumerationItem;
     return this;

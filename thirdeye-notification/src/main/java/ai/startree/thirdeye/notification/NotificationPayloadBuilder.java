@@ -16,7 +16,7 @@ package ai.startree.thirdeye.notification;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,7 +41,7 @@ public class NotificationPayloadBuilder {
 
   public NotificationPayloadApi buildNotificationPayload(
       final SubscriptionGroupDTO subscriptionGroup,
-      final Set<MergedAnomalyResultDTO> anomalies) {
+      final Set<AnomalyDTO> anomalies) {
     final NotificationReportApi report = notificationReportBuilder.buildNotificationReportApi(
         subscriptionGroup,
         anomalies);

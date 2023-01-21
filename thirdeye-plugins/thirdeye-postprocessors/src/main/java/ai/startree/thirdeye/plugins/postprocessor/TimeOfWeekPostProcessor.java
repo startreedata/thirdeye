@@ -18,8 +18,8 @@ import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
@@ -102,12 +102,12 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor {
 
   private void postProcessResult(@NonNull final OperatorResult operatorResult,
       final Chronology chronology) {
-    final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
+    final List<AnomalyDTO> anomalies = operatorResult.getAnomalies();
     if (anomalies == null) {
       return;
     }
 
-    for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
+    for (final AnomalyDTO anomalyResultDTO : anomalies) {
       // labeling is just based on the startTime - this may be counter-intuitive for anomalies with length > 1 granularity bucket
       final DateTime startTime = new DateTime(anomalyResultDTO.getStartTime(), chronology);
       final int anomalyDayOfWeek = startTime.getDayOfWeek();

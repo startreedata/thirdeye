@@ -18,9 +18,9 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
@@ -94,12 +94,12 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
 
   private void postProcessResult(final OperatorResult operatorResult,
       final DateTime endOfColdStart) {
-    final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
+    final List<AnomalyDTO> anomalies = operatorResult.getAnomalies();
     if (anomalies == null) {
       return;
     }
 
-    for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
+    for (final AnomalyDTO anomalyResultDTO : anomalies) {
       if (anomalyResultDTO.getStartTime() <= endOfColdStart.getMillis()) {
         final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore).setName(labelName);
         addLabel(anomalyResultDTO, newLabel);

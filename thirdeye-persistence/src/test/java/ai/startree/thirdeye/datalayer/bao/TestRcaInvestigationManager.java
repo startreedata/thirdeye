@@ -15,7 +15,7 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class TestRcaInvestigationManager {
     RcaInvestigationDTO investigationDTO = new RcaInvestigationDTO();
     investigationDTO.setName(INVESTIGATION_NAME);
     investigationDTO.setText(INVESTIGATION_DESCRIPTION);
-    investigationDTO.setAnomaly((MergedAnomalyResultDTO) new MergedAnomalyResultDTO().setId(
+    investigationDTO.setAnomaly((AnomalyDTO) new AnomalyDTO().setId(
         INVESTIGATION_ANOMALY_ID));
     investigationDTO.setUiMetadata(INVESTIGATION_UI_METADATA);
     return investigationDTO;
@@ -71,7 +71,7 @@ public class TestRcaInvestigationManager {
 
   private static RcaInvestigationDTO makeAnomaly(long anomalyId) {
     RcaInvestigationDTO session = makeDefault();
-    session.setAnomaly((MergedAnomalyResultDTO) new MergedAnomalyResultDTO().setId(anomalyId));
+    session.setAnomaly((AnomalyDTO) new AnomalyDTO().setId(anomalyId));
     return session;
   }
 

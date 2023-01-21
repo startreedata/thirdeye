@@ -16,7 +16,7 @@ package ai.startree.thirdeye.spi.detection.health;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
@@ -220,7 +220,7 @@ public class DetectionHealth {
 
     private AnomalyCoverageStatus buildAnomalyCoverageStatus() {
       // fetch anomalies
-      List<MergedAnomalyResultDTO> anomalies = this.anomalyDAO.findByPredicate(
+      List<AnomalyDTO> anomalies = this.anomalyDAO.findByPredicate(
           Predicate.AND(Predicate.LT(COL_NAME_START_TIME, this.endTime),
               Predicate.GT(COL_NAME_END_TIME, this.startTime),
               Predicate.EQ(COL_NAME_DETECTION_CONFIG_ID, detectionConfigId)));
@@ -230,10 +230,10 @@ public class DetectionHealth {
       // the anomalies can come from different sub-dimensions, merge the anomaly range if possible
       List<Interval> intervals = new ArrayList<>();
       if (!anomalies.isEmpty()) {
-        anomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
+        anomalies.sort(Comparator.comparingLong(AnomalyDTO::getStartTime));
         long start = Math.max(anomalies.stream().findFirst().get().getStartTime(), this.startTime);
         long end = anomalies.stream().findFirst().get().getEndTime();
-        for (MergedAnomalyResultDTO anomaly : anomalies) {
+        for (AnomalyDTO anomaly : anomalies) {
           if (anomaly.getStartTime() <= end) {
             end = Math.max(end, anomaly.getEndTime());
           } else {

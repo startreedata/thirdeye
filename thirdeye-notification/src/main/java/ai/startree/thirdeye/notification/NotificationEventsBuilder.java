@@ -22,8 +22,8 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import ai.startree.thirdeye.spi.events.EventType;
 import com.google.inject.Inject;
@@ -93,12 +93,12 @@ public class NotificationEventsBuilder {
     DateTime windowEnd = new DateTime(0, dateTimeZone);
 
     for (final AnomalyResult anomalyResult : anomalies) {
-      if (!(anomalyResult instanceof MergedAnomalyResultDTO)) {
+      if (!(anomalyResult instanceof AnomalyDTO)) {
         LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
             anomalyResult);
         continue;
       }
-      final MergedAnomalyResultDTO anomaly = (MergedAnomalyResultDTO) anomalyResult;
+      final AnomalyDTO anomaly = (AnomalyDTO) anomalyResult;
 
       final DateTime anomalyStartTime = new DateTime(anomaly.getStartTime(), dateTimeZone);
       final DateTime anomalyEndTime = new DateTime(anomaly.getEndTime(), dateTimeZone);

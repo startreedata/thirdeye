@@ -20,8 +20,8 @@ import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
@@ -48,7 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAnomalyResultDTO>
+public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     implements MergedAnomalyResultManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(MergedAnomalyResultManagerImpl.class);
@@ -66,7 +66,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   @Inject
   public MergedAnomalyResultManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
-    super(MergedAnomalyResultDTO.class, genericPojoDao);
+    super(AnomalyDTO.class, genericPojoDao);
     metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
@@ -82,75 +82,75 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public Long save(final MergedAnomalyResultDTO mergedAnomalyResultDTO) {
-    if (mergedAnomalyResultDTO.getId() != null) {
-      update(mergedAnomalyResultDTO);
-      return mergedAnomalyResultDTO.getId();
+  public Long save(final AnomalyDTO anomalyDTO) {
+    if (anomalyDTO.getId() != null) {
+      update(anomalyDTO);
+      return anomalyDTO.getId();
     }
-    return saveAnomaly(mergedAnomalyResultDTO, new HashSet<>());
+    return saveAnomaly(anomalyDTO, new HashSet<>());
   }
 
   @Override
-  public int update(final MergedAnomalyResultDTO mergedAnomalyResultDTO) {
-    if (mergedAnomalyResultDTO.getId() == null) {
-      final Long id = save(mergedAnomalyResultDTO);
+  public int update(final AnomalyDTO anomalyDTO) {
+    if (anomalyDTO.getId() == null) {
+      final Long id = save(anomalyDTO);
       if (id > 0) {
         return 1;
       } else {
         return 0;
       }
     } else {
-      return updateAnomaly(mergedAnomalyResultDTO, new HashSet<>());
+      return updateAnomaly(anomalyDTO, new HashSet<>());
     }
   }
 
-  private Long saveAnomaly(final MergedAnomalyResultDTO mergedAnomalyResultDTO,
-      final Set<MergedAnomalyResultDTO> visitedAnomalies) {
-    Preconditions.checkNotNull(mergedAnomalyResultDTO);
+  private Long saveAnomaly(final AnomalyDTO anomalyDTO,
+      final Set<AnomalyDTO> visitedAnomalies) {
+    Preconditions.checkNotNull(anomalyDTO);
     Preconditions.checkNotNull(visitedAnomalies);
 
-    visitedAnomalies.add(mergedAnomalyResultDTO);
+    visitedAnomalies.add(anomalyDTO);
 
-    if (mergedAnomalyResultDTO.getId() != null) {
-      updateAnomaly(mergedAnomalyResultDTO, visitedAnomalies);
-      return mergedAnomalyResultDTO.getId();
+    if (anomalyDTO.getId() != null) {
+      updateAnomaly(anomalyDTO, visitedAnomalies);
+      return anomalyDTO.getId();
     }
 
-    final MergedAnomalyResultDTO mergeAnomalyBean = convertMergeAnomalyDTO2Bean(
-        mergedAnomalyResultDTO);
-    final Set<Long> childAnomalyIds = saveChildAnomalies(mergedAnomalyResultDTO, visitedAnomalies);
+    final AnomalyDTO mergeAnomalyBean = convertMergeAnomalyDTO2Bean(
+        anomalyDTO);
+    final Set<Long> childAnomalyIds = saveChildAnomalies(anomalyDTO, visitedAnomalies);
     mergeAnomalyBean.setChildIds(childAnomalyIds);
 
     final Long id = genericPojoDao.put(mergeAnomalyBean);
-    mergedAnomalyResultDTO.setId(id);
+    anomalyDTO.setId(id);
     return id;
   }
 
-  private int updateAnomaly(final MergedAnomalyResultDTO mergedAnomalyResultDTO,
-      final Set<MergedAnomalyResultDTO> visitedAnomalies) {
-    checkArgument(mergedAnomalyResultDTO.getId() != null,
+  private int updateAnomaly(final AnomalyDTO anomalyDTO,
+      final Set<AnomalyDTO> visitedAnomalies) {
+    checkArgument(anomalyDTO.getId() != null,
         "Anomaly id is null. Anomaly id should not be null for an update");
 
-    visitedAnomalies.add(mergedAnomalyResultDTO);
+    visitedAnomalies.add(anomalyDTO);
 
-    final MergedAnomalyResultDTO mergeAnomalyBean = convertMergeAnomalyDTO2Bean(
-        mergedAnomalyResultDTO);
-    final Set<Long> childAnomalyIds = saveChildAnomalies(mergedAnomalyResultDTO, visitedAnomalies);
+    final AnomalyDTO mergeAnomalyBean = convertMergeAnomalyDTO2Bean(
+        anomalyDTO);
+    final Set<Long> childAnomalyIds = saveChildAnomalies(anomalyDTO, visitedAnomalies);
     mergeAnomalyBean.setChildIds(childAnomalyIds);
 
     return genericPojoDao.update(mergeAnomalyBean);
   }
 
-  private Set<Long> saveChildAnomalies(final MergedAnomalyResultDTO parentAnomaly,
-      final Set<MergedAnomalyResultDTO> visitedAnomalies) {
+  private Set<Long> saveChildAnomalies(final AnomalyDTO parentAnomaly,
+      final Set<AnomalyDTO> visitedAnomalies) {
     final Set<Long> childIds = new HashSet<>();
-    final Set<MergedAnomalyResultDTO> childAnomalies = parentAnomaly.getChildren();
+    final Set<AnomalyDTO> childAnomalies = parentAnomaly.getChildren();
     if (childAnomalies == null || childAnomalies.isEmpty()) {
       // No child anomalies to save
       return childIds;
     }
 
-    for (final MergedAnomalyResultDTO child : childAnomalies) {
+    for (final AnomalyDTO child : childAnomalies) {
       if (child.getId() == null) {
         // Prevent cycles
         if (visitedAnomalies.contains(child)) {
@@ -165,8 +165,8 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public MergedAnomalyResultDTO findById(final Long id) {
-    final MergedAnomalyResultDTO anomaly = genericPojoDao.get(id, MergedAnomalyResultDTO.class);
+  public AnomalyDTO findById(final Long id) {
+    final AnomalyDTO anomaly = genericPojoDao.get(id, AnomalyDTO.class);
     if (anomaly == null) {
       return null;
     }
@@ -174,9 +174,9 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findByIds(final List<Long> idList) {
-    final List<MergedAnomalyResultDTO> mergedAnomalyResultBeanList =
-        genericPojoDao.get(idList, MergedAnomalyResultDTO.class);
+  public List<AnomalyDTO> findByIds(final List<Long> idList) {
+    final List<AnomalyDTO> mergedAnomalyResultBeanList =
+        genericPojoDao.get(idList, AnomalyDTO.class);
     if (CollectionUtils.isNotEmpty(mergedAnomalyResultBeanList)) {
       return convertMergedAnomalyBean2DTO(mergedAnomalyResultBeanList);
     } else {
@@ -190,7 +190,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
    * @return filtered list of anomalies
    */
   @Override
-  public List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(
+  public List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(
       final long startTime,
       final long endTime,
       final long alertId,
@@ -204,13 +204,13 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       predicates.add(Predicate.EQ("enumerationItemId", enumerationItemId));
     }
 
-    final List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(Predicate.AND(predicates.toArray(new Predicate[0])), MergedAnomalyResultDTO.class);
+    final List<AnomalyDTO> list = genericPojoDao
+        .get(Predicate.AND(predicates.toArray(new Predicate[0])), AnomalyDTO.class);
     return convertMergedAnomalyBean2DTO(list);
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findByCreatedTimeInRangeAndDetectionConfigId(
+  public List<AnomalyDTO> findByCreatedTimeInRangeAndDetectionConfigId(
       final long startTime,
       final long endTime, final long alertId) {
     final Predicate predicate =
@@ -218,37 +218,37 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
             Predicate.GE("createTime", new Timestamp(startTime)),
             Predicate.LT("createTime", new Timestamp(endTime)),
             Predicate.EQ("detectionConfigId", alertId));
-    final List<MergedAnomalyResultDTO> list = genericPojoDao
-        .get(predicate, MergedAnomalyResultDTO.class);
+    final List<AnomalyDTO> list = genericPojoDao
+        .get(predicate, AnomalyDTO.class);
     return convertMergedAnomalyBean2DTO(list);
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findByFunctionId(final Long functionId) {
+  public List<AnomalyDTO> findByFunctionId(final Long functionId) {
     final Map<String, Object> filterParams = new HashMap<>();
     filterParams.put("functionId", functionId);
 
-    final List<MergedAnomalyResultDTO> list = genericPojoDao.executeParameterizedSQL(
+    final List<AnomalyDTO> list = genericPojoDao.executeParameterizedSQL(
         FIND_BY_FUNCTION_ID,
         filterParams,
-        MergedAnomalyResultDTO.class);
+        AnomalyDTO.class);
     return convertMergedAnomalyBean2DTO(list);
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findByTime(final long startTime, final long endTime) {
+  public List<AnomalyDTO> findByTime(final long startTime, final long endTime) {
     final Map<String, Object> filterParams = new HashMap<>();
     filterParams.put("startTime", startTime);
     filterParams.put("endTime", endTime);
 
-    final List<MergedAnomalyResultDTO> list =
+    final List<AnomalyDTO> list =
         genericPojoDao
-            .executeParameterizedSQL(FIND_BY_TIME, filterParams, MergedAnomalyResultDTO.class);
+            .executeParameterizedSQL(FIND_BY_TIME, filterParams, AnomalyDTO.class);
     return convertMergedAnomalyBean2DTO(list);
   }
 
   @Override
-  public void updateAnomalyFeedback(final MergedAnomalyResultDTO entity) {
+  public void updateAnomalyFeedback(final AnomalyDTO entity) {
     final AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
     if (feedbackDTO != null) {
       if (feedbackDTO.getId() == null) {
@@ -264,7 +264,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
       }
       entity.setAnomalyFeedbackId(feedbackDTO.getId());
     }
-    for (final MergedAnomalyResultDTO child : entity.getChildren()) {
+    for (final AnomalyDTO child : entity.getChildren()) {
       child.setFeedback(feedbackDTO);
       updateAnomalyFeedback(child);
     }
@@ -272,12 +272,12 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public MergedAnomalyResultDTO findParent(final MergedAnomalyResultDTO entity) {
-    final List<MergedAnomalyResultDTO> candidates = genericPojoDao.get(Predicate.AND(
+  public AnomalyDTO findParent(final AnomalyDTO entity) {
+    final List<AnomalyDTO> candidates = genericPojoDao.get(Predicate.AND(
         Predicate.EQ("detectionConfigId", entity.getDetectionConfigId()),
         Predicate.LE("startTime", entity.getStartTime()),
-        Predicate.GE("endTime", entity.getEndTime())), MergedAnomalyResultDTO.class);
-    for (final MergedAnomalyResultDTO candidate : candidates) {
+        Predicate.GE("endTime", entity.getEndTime())), AnomalyDTO.class);
+    for (final AnomalyDTO candidate : candidates) {
       if (candidate.getChildIds() != null && !candidate.getChildIds().isEmpty()) {
         for (final Long id : candidate.getChildIds()) {
           if (entity.getId().equals(id)) {
@@ -291,7 +291,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public MergedAnomalyResultDTO convertMergeAnomalyDTO2Bean(final MergedAnomalyResultDTO entity) {
+  public AnomalyDTO convertMergeAnomalyDTO2Bean(final AnomalyDTO entity) {
     optional(entity.getFeedback())
         .map(feedback -> (AnomalyFeedbackDTO) feedback)
         .map(AnomalyFeedbackDTO::getId)
@@ -300,7 +300,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     return entity;
   }
 
-  public MergedAnomalyResultDTO decorate(final MergedAnomalyResultDTO anomaly,
+  public AnomalyDTO decorate(final AnomalyDTO anomaly,
       final Set<Long> visitedAnomalyIds) {
 
     if (anomaly.getAnomalyFeedbackId() != null) {
@@ -316,18 +316,18 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
     return anomaly;
   }
 
-  private Set<MergedAnomalyResultDTO> getChildAnomalies(
-      final MergedAnomalyResultDTO mergedAnomalyResultDTO, final Set<Long> visitedAnomalyIds) {
-    final Set<MergedAnomalyResultDTO> children = new HashSet<>();
-    if (mergedAnomalyResultDTO.getChildIds() != null) {
-      for (final Long id : mergedAnomalyResultDTO.getChildIds()) {
+  private Set<AnomalyDTO> getChildAnomalies(
+      final AnomalyDTO anomalyDTO, final Set<Long> visitedAnomalyIds) {
+    final Set<AnomalyDTO> children = new HashSet<>();
+    if (anomalyDTO.getChildIds() != null) {
+      for (final Long id : anomalyDTO.getChildIds()) {
         if (id == null || visitedAnomalyIds.contains(id)) {
           continue;
         }
 
-        final MergedAnomalyResultDTO childBean = genericPojoDao.get(id,
-            MergedAnomalyResultDTO.class);
-        final MergedAnomalyResultDTO child = decorate(childBean, visitedAnomalyIds);
+        final AnomalyDTO childBean = genericPojoDao.get(id,
+            AnomalyDTO.class);
+        final AnomalyDTO child = decorate(childBean, visitedAnomalyIds);
         children.add(child);
       }
     }
@@ -335,33 +335,33 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> convertMergedAnomalyBean2DTO(
-      final List<MergedAnomalyResultDTO> mergedAnomalyResultBeanList) {
-    final List<Future<MergedAnomalyResultDTO>> mergedAnomalyResultDTOFutureList = new ArrayList<>(
+  public List<AnomalyDTO> convertMergedAnomalyBean2DTO(
+      final List<AnomalyDTO> mergedAnomalyResultBeanList) {
+    final List<Future<AnomalyDTO>> mergedAnomalyResultDTOFutureList = new ArrayList<>(
         mergedAnomalyResultBeanList.size());
-    for (final MergedAnomalyResultDTO mergedAnomalyResultDTO : mergedAnomalyResultBeanList) {
-      final Future<MergedAnomalyResultDTO> future =
-          EXECUTOR_SERVICE.submit(() -> decorate(mergedAnomalyResultDTO,
+    for (final AnomalyDTO anomalyDTO : mergedAnomalyResultBeanList) {
+      final Future<AnomalyDTO> future =
+          EXECUTOR_SERVICE.submit(() -> decorate(anomalyDTO,
               new HashSet<>()));
       mergedAnomalyResultDTOFutureList.add(future);
     }
 
-    final List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList = new ArrayList<>(
+    final List<AnomalyDTO> anomalyDTOList = new ArrayList<>(
         mergedAnomalyResultBeanList.size());
     for (final Future future : mergedAnomalyResultDTOFutureList) {
       try {
-        mergedAnomalyResultDTOList.add((MergedAnomalyResultDTO) future.get(60, TimeUnit.SECONDS));
+        anomalyDTOList.add((AnomalyDTO) future.get(60, TimeUnit.SECONDS));
       } catch (final InterruptedException | TimeoutException | ExecutionException e) {
         LOG.warn("Failed to convert MergedAnomalyResultDTO from bean: {}", e.toString());
       }
     }
 
-    return mergedAnomalyResultDTOList;
+    return anomalyDTOList;
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findByPredicate(final Predicate predicate) {
-    final List<MergedAnomalyResultDTO> beanList = new ArrayList<>(super.findByPredicate(predicate));
+  public List<AnomalyDTO> findByPredicate(final Predicate predicate) {
+    final List<AnomalyDTO> beanList = new ArrayList<>(super.findByPredicate(predicate));
     return convertMergedAnomalyBean2DTO(beanList);
   }
 
@@ -375,7 +375,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<MergedAn
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback(final DaoFilter filters) {
+  public List<AnomalyDTO> findParentAnomaliesWithFeedback(final DaoFilter filters) {
     Predicate predicate = Predicate.AND(
         Predicate.NEQ("anomalyFeedbackId", 0),
         Predicate.EQ("child", false)

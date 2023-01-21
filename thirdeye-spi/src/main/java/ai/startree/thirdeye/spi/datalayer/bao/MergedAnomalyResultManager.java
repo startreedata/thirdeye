@@ -14,40 +14,40 @@
 package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.List;
 
-public interface MergedAnomalyResultManager extends AbstractManager<MergedAnomalyResultDTO> {
+public interface MergedAnomalyResultManager extends AbstractManager<AnomalyDTO> {
 
-  MergedAnomalyResultDTO findById(Long id);
+  AnomalyDTO findById(Long id);
 
-  List<MergedAnomalyResultDTO> findByFunctionId(Long functionId);
+  List<AnomalyDTO> findByFunctionId(Long functionId);
 
   /**
    * TODO spyne Refactor. Have a AnomalyFilter object to handle these. Else we'll keep adding params and methods.
    * @return filtered list of anomalies
    */
-  List<MergedAnomalyResultDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
+  List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
       long endTime,
       long alertId,
       final Long enumerationItemId);
 
-  List<MergedAnomalyResultDTO> findByCreatedTimeInRangeAndDetectionConfigId(long startTime,
+  List<AnomalyDTO> findByCreatedTimeInRangeAndDetectionConfigId(long startTime,
       long endTime,
       long alertId);
 
-  List<MergedAnomalyResultDTO> findByTime(long startTime, long endTime);
+  List<AnomalyDTO> findByTime(long startTime, long endTime);
 
-  MergedAnomalyResultDTO findParent(MergedAnomalyResultDTO entity);
+  AnomalyDTO findParent(AnomalyDTO entity);
 
-  void updateAnomalyFeedback(MergedAnomalyResultDTO entity);
+  void updateAnomalyFeedback(AnomalyDTO entity);
 
-  MergedAnomalyResultDTO convertMergeAnomalyDTO2Bean(MergedAnomalyResultDTO entity);
+  AnomalyDTO convertMergeAnomalyDTO2Bean(AnomalyDTO entity);
 
-  List<MergedAnomalyResultDTO> convertMergedAnomalyBean2DTO(
-      List<MergedAnomalyResultDTO> mergedAnomalyResultDTOList);
+  List<AnomalyDTO> convertMergedAnomalyBean2DTO(
+      List<AnomalyDTO> anomalyDTOList);
 
   long countParentAnomalies(DaoFilter filter);
 
-  List<MergedAnomalyResultDTO> findParentAnomaliesWithFeedback(DaoFilter filter);
+  List<AnomalyDTO> findParentAnomaliesWithFeedback(DaoFilter filter);
 }

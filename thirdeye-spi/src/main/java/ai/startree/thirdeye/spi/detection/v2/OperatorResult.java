@@ -15,8 +15,8 @@ package ai.startree.thirdeye.spi.detection.v2;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public interface OperatorResult {
         .orElse(-1L);
   }
 
-  default @Nullable List<MergedAnomalyResultDTO> getAnomalies() {
+  default @Nullable List<AnomalyDTO> getAnomalies() {
     return null;
   }
 

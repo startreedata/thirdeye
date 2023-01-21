@@ -27,7 +27,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
@@ -146,7 +146,7 @@ public class AppAnalyticsService {
 
   private List<AnomalyFeedback> getAnomalyFeedbacks(final DaoFilter filter) {
     return anomalyManager.findParentAnomaliesWithFeedback(filter).stream()
-        .map(MergedAnomalyResultDTO::getFeedback)
+        .map(AnomalyDTO::getFeedback)
         .collect(Collectors.toList());
   }
 

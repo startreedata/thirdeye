@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.notification.anomalyfilter;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,7 +78,7 @@ public class WeightThresholdAnomalyFilter extends BaseAnomalyFilter {
   // Check if the weight of the given MergedAnomalyResultDTO is greater or equal to the up threshold
   // or is less or equal to the down threshold.
   @Override
-  public boolean isQualified(MergedAnomalyResultDTO anomaly) {
+  public boolean isQualified(AnomalyDTO anomaly) {
     double weight = anomaly.getWeight();
     return (weight >= upThreshold) || (weight <= -1 * downThreshold);
   }

@@ -17,7 +17,7 @@ import ai.startree.thirdeye.notification.anomalyfilter.AlertFilterFactory;
 import ai.startree.thirdeye.notification.anomalyfilter.AnomalyFilter;
 import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
@@ -74,7 +74,7 @@ public class PrecisionRecallEvaluator {
    * @param anomalyFilter the alert filter to be evaluated
    * @param mergedAnomalyResultManager
    */
-  public PrecisionRecallEvaluator(List<MergedAnomalyResultDTO> anomalies,
+  public PrecisionRecallEvaluator(List<AnomalyDTO> anomalies,
       final AnomalyFilter anomalyFilter,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
     this.mergedAnomalyResultManager = mergedAnomalyResultManager;
@@ -102,15 +102,15 @@ public class PrecisionRecallEvaluator {
    * @param anomalyFilter alert filter to evaluate system detected anoamlies isQualified
    */
   private static Boolean isUserReportAnomalyIsQualified(AnomalyFilter anomalyFilter,
-      MergedAnomalyResultDTO userReportAnomaly,
+      AnomalyDTO userReportAnomaly,
       final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    List<MergedAnomalyResultDTO> systemAnomalies = mergedAnomalyResultManager
+    List<AnomalyDTO> systemAnomalies = mergedAnomalyResultManager
         .findByFunctionId(userReportAnomaly.getAnomalyFunction().getId());
     long startTime = userReportAnomaly.getStartTime();
     long endTime = userReportAnomaly.getEndTime();
     long qualifiedRegion = 0;
-    systemAnomalies.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
-    for (MergedAnomalyResultDTO anomalyResult : systemAnomalies) {
+    systemAnomalies.sort(Comparator.comparingLong(AnomalyDTO::getStartTime));
+    for (AnomalyDTO anomalyResult : systemAnomalies) {
       if (anomalyResult.getAnomalyResultSource()
           .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION)
           && anomalyResult.getEndTime() >= startTime && anomalyResult.getStartTime() <= endTime &&
@@ -197,7 +197,7 @@ public class PrecisionRecallEvaluator {
     return notifiedFalseAlarm;
   }
 
-  public void init(List<MergedAnomalyResultDTO> anomalies) {
+  public void init(List<AnomalyDTO> anomalies) {
     if (anomalies == null || anomalies.isEmpty()) {
       return;
     }
@@ -209,7 +209,7 @@ public class PrecisionRecallEvaluator {
     this.userReportTrueAnomaly = 0;
     this.userReportTrueAnomalyNewTrend = 0;
 
-    for (MergedAnomalyResultDTO anomaly : anomalies) {
+    for (AnomalyDTO anomaly : anomalies) {
       AnomalyFilter anomalyFilterOfAnomaly = this.anomalyFilter;
       if (useAlertFilterOnAnomaly) {
         anomalyFilterOfAnomaly = this.alertFilterFactory

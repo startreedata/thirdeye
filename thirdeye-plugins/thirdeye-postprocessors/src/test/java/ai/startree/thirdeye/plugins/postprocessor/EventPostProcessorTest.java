@@ -24,8 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
@@ -61,17 +61,17 @@ public class EventPostProcessorTest {
       .addSeries(COL_VALUE, 0, 0, 0, 0);
   private static final TimeSeries TEST_TIMESERIES = TimeSeries.fromDataFrame(TEST_DF);
 
-  private MergedAnomalyResultDTO january1Anomaly;
-  private MergedAnomalyResultDTO january2Anomaly;
-  private MergedAnomalyResultDTO january4Anomaly;
+  private AnomalyDTO january1Anomaly;
+  private AnomalyDTO january2Anomaly;
+  private AnomalyDTO january4Anomaly;
 
   @BeforeMethod
   public void initAnomalies() {
-    january1Anomaly = new MergedAnomalyResultDTO().setStartTime(JANUARY_1_2022)
+    january1Anomaly = new AnomalyDTO().setStartTime(JANUARY_1_2022)
         .setEndTime(JANUARY_2_2022);
-    january2Anomaly = new MergedAnomalyResultDTO().setStartTime(JANUARY_2_2022)
+    january2Anomaly = new AnomalyDTO().setStartTime(JANUARY_2_2022)
         .setEndTime(JANUARY_3_2022);
-    january4Anomaly = new MergedAnomalyResultDTO().setStartTime(JANUARY_4_2022)
+    january4Anomaly = new AnomalyDTO().setStartTime(JANUARY_4_2022)
         .setEndTime(JANUARY_5_2022);
   }
 
@@ -80,7 +80,7 @@ public class EventPostProcessorTest {
     final EventPostProcessorSpec spec = new EventPostProcessorSpec();
     final EventPostProcessor postProcessor = new EventPostProcessor(spec);
 
-    final List<MergedAnomalyResultDTO> inputAnomalies = List.of(this.january1Anomaly,
+    final List<AnomalyDTO> inputAnomalies = List.of(this.january1Anomaly,
         january2Anomaly, january4Anomaly);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(inputAnomalies)
@@ -91,7 +91,7 @@ public class EventPostProcessorTest {
         resultMap);
     assertThat(outputMap).hasSize(1);
     final OperatorResult res1Out = outputMap.get(RES_1_KEY);
-    final List<MergedAnomalyResultDTO> res1Anomalies = res1Out.getAnomalies();
+    final List<AnomalyDTO> res1Anomalies = res1Out.getAnomalies();
     assertThat(res1Anomalies).isEqualTo(inputAnomalies);
   }
 
@@ -99,7 +99,7 @@ public class EventPostProcessorTest {
   public void testPostProcessNoEventsInDataFrame() throws Exception {
     final EventPostProcessorSpec spec = new EventPostProcessorSpec();
     final EventPostProcessor postProcessor = new EventPostProcessor(spec);
-    final List<MergedAnomalyResultDTO> inputAnomalies = List.of(this.january1Anomaly,
+    final List<AnomalyDTO> inputAnomalies = List.of(this.january1Anomaly,
         january2Anomaly, january4Anomaly);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(inputAnomalies)
@@ -112,7 +112,7 @@ public class EventPostProcessorTest {
         resultMap);
     assertThat(outputMap).hasSize(1);
     final OperatorResult res1Out = outputMap.get(RES_1_KEY);
-    final List<MergedAnomalyResultDTO> res1Anomalies = res1Out.getAnomalies();
+    final List<AnomalyDTO> res1Anomalies = res1Out.getAnomalies();
     assertThat(res1Anomalies).isEqualTo(inputAnomalies);
   }
 
@@ -157,7 +157,7 @@ public class EventPostProcessorTest {
     }
     spec.setIgnore(isIgnore);
     final EventPostProcessor postProcessor = new EventPostProcessor(spec);
-    final List<MergedAnomalyResultDTO> inputAnomalies = List.of(this.january1Anomaly,
+    final List<AnomalyDTO> inputAnomalies = List.of(this.january1Anomaly,
         january2Anomaly, january4Anomaly);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
         .setAnomalies(inputAnomalies)
@@ -175,7 +175,7 @@ public class EventPostProcessorTest {
         resultMap);
     assertThat(outputMap).hasSize(1);
     final OperatorResult res1Out = outputMap.get(RES_1_KEY);
-    final List<MergedAnomalyResultDTO> res1Anomalies = res1Out.getAnomalies();
+    final List<AnomalyDTO> res1Anomalies = res1Out.getAnomalies();
     assertThat(res1Anomalies).isNotNull();
     assertThat(res1Anomalies).hasSize(3);
     for (int i = 0; i < 3; i++) {

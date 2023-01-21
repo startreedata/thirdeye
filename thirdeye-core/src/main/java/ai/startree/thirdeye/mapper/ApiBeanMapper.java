@@ -32,13 +32,13 @@ import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
@@ -109,11 +109,11 @@ public abstract class ApiBeanMapper {
     return NotificationSchemeMapper.INSTANCE.toApi(notificationSchemesDto);
   }
 
-  public static AnomalyApi toApi(final MergedAnomalyResultDTO dto) {
+  public static AnomalyApi toApi(final AnomalyDTO dto) {
     return AnomalyMapper.INSTANCE.toApi(dto);
   }
 
-  public static MergedAnomalyResultDTO toDto(final AnomalyApi api) {
+  public static AnomalyDTO toDto(final AnomalyApi api) {
     return AnomalyMapper.INSTANCE.toDto(api);
   }
 

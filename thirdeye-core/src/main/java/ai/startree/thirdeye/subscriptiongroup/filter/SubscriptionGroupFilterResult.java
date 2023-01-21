@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.subscriptiongroup.filter;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +29,7 @@ public class SubscriptionGroupFilterResult {
   /**
    * The Result.
    */
-  private final Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> result;
+  private final Map<DetectionAlertFilterNotification, Set<AnomalyDTO>> result;
 
   /**
    * Instantiates a new Detection alert filter result.
@@ -43,7 +43,7 @@ public class SubscriptionGroupFilterResult {
    *
    * @return the result
    */
-  public Map<DetectionAlertFilterNotification, Set<MergedAnomalyResultDTO>> getResult() {
+  public Map<DetectionAlertFilterNotification, Set<AnomalyDTO>> getResult() {
     return result;
   }
 
@@ -52,9 +52,9 @@ public class SubscriptionGroupFilterResult {
    *
    * @return the all anomalies
    */
-  public List<MergedAnomalyResultDTO> getAllAnomalies() {
-    final List<MergedAnomalyResultDTO> allAnomalies = new ArrayList<>();
-    for (final Set<MergedAnomalyResultDTO> anomalies : result.values()) {
+  public List<AnomalyDTO> getAllAnomalies() {
+    final List<AnomalyDTO> allAnomalies = new ArrayList<>();
+    for (final Set<AnomalyDTO> anomalies : result.values()) {
       allAnomalies.addAll(anomalies);
     }
     return allAnomalies;
@@ -68,7 +68,7 @@ public class SubscriptionGroupFilterResult {
    * @return the detection alert filter result
    */
   public SubscriptionGroupFilterResult addMapping(final DetectionAlertFilterNotification alertProp,
-      final Set<MergedAnomalyResultDTO> anomalies) {
+      final Set<AnomalyDTO> anomalies) {
     if (!result.containsKey(alertProp)) {
       result.put(alertProp, new HashSet<>());
     }

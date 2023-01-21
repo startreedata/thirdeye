@@ -24,8 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -60,17 +60,17 @@ public class ThresholdPostProcessorTest {
       .addSeries(COL_VALUE, 0, 0, 0, 0);
   private static final TimeSeries TEST_TIMESERIES = TimeSeries.fromDataFrame(TEST_DF);
 
-  private MergedAnomalyResultDTO january1Anomaly;
-  private MergedAnomalyResultDTO january2Anomaly;
-  private MergedAnomalyResultDTO january4Anomaly;
+  private AnomalyDTO january1Anomaly;
+  private AnomalyDTO january2Anomaly;
+  private AnomalyDTO january4Anomaly;
 
   @BeforeMethod
   public void initAnomalies() {
-    january1Anomaly = new MergedAnomalyResultDTO().setStartTime(JANUARY_1_2022)
+    january1Anomaly = new AnomalyDTO().setStartTime(JANUARY_1_2022)
         .setEndTime(JANUARY_2_2022);
-    january2Anomaly = new MergedAnomalyResultDTO().setStartTime(JANUARY_2_2022)
+    january2Anomaly = new AnomalyDTO().setStartTime(JANUARY_2_2022)
         .setEndTime(JANUARY_3_2022);
-    january4Anomaly = new MergedAnomalyResultDTO().setStartTime(JANUARY_4_2022)
+    january4Anomaly = new AnomalyDTO().setStartTime(JANUARY_4_2022)
         .setEndTime(JANUARY_5_2022);
   }
 
@@ -97,7 +97,7 @@ public class ThresholdPostProcessorTest {
 
     final ThresholdPostProcessor postProcessor = new ThresholdPostProcessor(spec);
 
-    final List<MergedAnomalyResultDTO> anomalies = List.of(january1Anomaly,
+    final List<AnomalyDTO> anomalies = List.of(january1Anomaly,
         january2Anomaly,
         january4Anomaly);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
@@ -112,11 +112,11 @@ public class ThresholdPostProcessorTest {
 
     assertThat(resultMap.size()).isEqualTo(1);
     final OperatorResult outputResult = outputResultMap.get(RES_1_KEY);
-    final List<MergedAnomalyResultDTO> outputAnomalies = outputResult.getAnomalies();
+    final List<AnomalyDTO> outputAnomalies = outputResult.getAnomalies();
     assertThat(outputAnomalies).hasSize(3);
 
     for (int i = 0; i < outputAnomalies.size(); i++) {
-      final MergedAnomalyResultDTO anomaly = outputAnomalies.get(i);
+      final AnomalyDTO anomaly = outputAnomalies.get(i);
       final boolean isLabeled = expectedIsLabelled.get(i);
       if (isLabeled) {
         final List<AnomalyLabelDTO> anomalyLabels = anomaly.getAnomalyLabels();
@@ -186,7 +186,7 @@ public class ThresholdPostProcessorTest {
 
     final ThresholdPostProcessor postProcessor = new ThresholdPostProcessor(spec);
 
-    final List<MergedAnomalyResultDTO> anomalies = List.of(january1Anomaly,
+    final List<AnomalyDTO> anomalies = List.of(january1Anomaly,
         january2Anomaly,
         january4Anomaly);
     final OperatorResult res1 = AnomalyDetectorOperatorResult.builder()
@@ -202,11 +202,11 @@ public class ThresholdPostProcessorTest {
 
     assertThat(resultMap.size()).isEqualTo(1);
     final OperatorResult outputResult = outputResultMap.get(RES_1_KEY);
-    final List<MergedAnomalyResultDTO> outputAnomalies = outputResult.getAnomalies();
+    final List<AnomalyDTO> outputAnomalies = outputResult.getAnomalies();
     assertThat(outputAnomalies).hasSize(3);
 
     for (int i = 0; i < outputAnomalies.size(); i++) {
-      final MergedAnomalyResultDTO anomaly = outputAnomalies.get(i);
+      final AnomalyDTO anomaly = outputAnomalies.get(i);
       final boolean isLabeled = expectedIsLabelled.get(i);
       if (isLabeled) {
         final List<AnomalyLabelDTO> anomalyLabels = anomaly.getAnomalyLabels();

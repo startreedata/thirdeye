@@ -40,6 +40,7 @@ import ai.startree.thirdeye.datalayer.entity.TaskIndex;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
@@ -49,7 +50,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
@@ -87,7 +87,7 @@ public class SubEntities {
         .put(EnumerationItemDTO.class, EnumerationItemIndex.class)
         .put(EventDTO.class, EventIndex.class)
         .put(JobDTO.class, JobIndex.class)
-        .put(MergedAnomalyResultDTO.class, MergedAnomalyResultIndex.class)
+        .put(AnomalyDTO.class, MergedAnomalyResultIndex.class)
         .put(MetricConfigDTO.class, MetricConfigIndex.class)
         .put(OnboardDatasetMetricDTO.class, OnboardDatasetMetricIndex.class)
         .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
@@ -113,7 +113,7 @@ public class SubEntities {
         .put(EnumerationItemDTO.class, SubEntityType.ENUMERATION_ITEM)
         .put(EventDTO.class, SubEntityType.EVENT)
         .put(JobDTO.class, SubEntityType.JOB)
-        .put(MergedAnomalyResultDTO.class, SubEntityType.ANOMALY)
+        .put(AnomalyDTO.class, SubEntityType.ANOMALY)
         .put(MetricConfigDTO.class, SubEntityType.METRIC)
         .put(OnboardDatasetMetricDTO.class, SubEntityType.ONBOARD_DATASET_METRIC)
         .put(OnlineDetectionDataDTO.class, SubEntityType.ONLINE_DETECTION_DATA)

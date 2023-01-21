@@ -25,8 +25,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.datastructures.Interval1D;
 import ai.startree.thirdeye.datastructures.IntervalSearchTree;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
@@ -91,12 +91,12 @@ public class EventPostProcessor implements AnomalyPostProcessor {
 
   private void postProcessResult(final OperatorResult operatorResult,
       final IntervalSearchTree<String> eventsSearchTree) {
-    final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
+    final List<AnomalyDTO> anomalies = operatorResult.getAnomalies();
     if (anomalies == null) {
       return;
     }
 
-    for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
+    for (final AnomalyDTO anomalyResultDTO : anomalies) {
       final Interval1D searchInterval = Interval1D.of(anomalyResultDTO.getStartTime(),
           anomalyResultDTO.getEndTime());
       final Entry<Interval1D, Set<String>> match = eventsSearchTree.search(searchInterval);

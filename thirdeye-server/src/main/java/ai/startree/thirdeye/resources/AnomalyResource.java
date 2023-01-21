@@ -27,8 +27,8 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
@@ -57,7 +57,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
-public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResultDTO> {
+public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
 
   public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("alert.id", "detectionConfigId")
@@ -92,18 +92,18 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
   }
 
   @Override
-  protected MergedAnomalyResultDTO createDto(final ThirdEyePrincipal principal,
+  protected AnomalyDTO createDto(final ThirdEyePrincipal principal,
       final AnomalyApi api) {
     return toDto(api);
   }
 
   @Override
-  protected MergedAnomalyResultDTO toDto(final AnomalyApi api) {
+  protected AnomalyDTO toDto(final AnomalyApi api) {
     return ApiBeanMapper.toDto(api);
   }
 
   @Override
-  protected AnomalyApi toApi(final MergedAnomalyResultDTO dto, RequestCache cache) {
+  protected AnomalyApi toApi(final AnomalyDTO dto, RequestCache cache) {
     final AnomalyApi anomalyApi = ApiBeanMapper.toApi(dto);
     optional(anomalyApi.getAlert())
         .filter(alertApi -> alertApi.getId() != null)
@@ -120,7 +120,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, MergedAnomalyResul
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id,
       AnomalyFeedbackApi api) {
-    final MergedAnomalyResultDTO dto = get(id);
+    final AnomalyDTO dto = get(id);
 
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
     dto.setFeedback(feedbackDTO);

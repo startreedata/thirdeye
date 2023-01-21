@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.notification.anomalyfilter;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class DummyAnomalyFilter extends BaseAnomalyFilter {
   }
 
   @Override
-  public boolean isQualified(MergedAnomalyResultDTO anomaly) {
+  public boolean isQualified(AnomalyDTO anomaly) {
     return true;
   }
 

@@ -21,9 +21,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
@@ -59,7 +59,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyMergerPostProcessor.class);
   private static final String NAME = "ANOMALY_MERGER";
-  private static final Comparator<MergedAnomalyResultDTO> COMPARATOR = (o1, o2) -> {
+  private static final Comparator<AnomalyDTO> COMPARATOR = (o1, o2) -> {
     // smallest startTime is smaller
     int res = Long.compare(o1.getStartTime(), o2.getStartTime());
     if (res != 0) {
@@ -130,12 +130,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   private void postProcessResult(final OperatorResult operatorResult) {
-    final List<MergedAnomalyResultDTO> operatorAnomalies = operatorResult.getAnomalies();
+    final List<AnomalyDTO> operatorAnomalies = operatorResult.getAnomalies();
     if (operatorAnomalies == null) {
       return;
     }
 
-    final List<MergedAnomalyResultDTO> mergedAnomalies = merge(operatorAnomalies);
+    final List<AnomalyDTO> mergedAnomalies = merge(operatorAnomalies);
     // fixme cyril hack - operatorResult is not mutable - exploit list mutability to update the anomalies
     //  could silently bug if a protective copy is returned by an OperatorResult implementation
     // ensure no protective copy is done comparing references
@@ -144,26 +144,26 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     operatorAnomalies.addAll(mergedAnomalies);
   }
 
-  protected List<MergedAnomalyResultDTO> merge(
-      final List<MergedAnomalyResultDTO> operatorAnomalies) {
+  protected List<AnomalyDTO> merge(
+      final List<AnomalyDTO> operatorAnomalies) {
     if (operatorAnomalies.isEmpty()) {
       return emptyList();
     }
-    final List<MergedAnomalyResultDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(
+    final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(
         operatorAnomalies);
-    final List<MergedAnomalyResultDTO> allAnomalies = combineAndSort(operatorAnomalies,
+    final List<AnomalyDTO> allAnomalies = combineAndSort(operatorAnomalies,
         persistenceAnomalies);
 
     return doMerge(allAnomalies);
   }
 
-  private List<MergedAnomalyResultDTO> retrieveRelevantAnomaliesFromDatabase(
-      final List<MergedAnomalyResultDTO> anomalies) {
+  private List<AnomalyDTO> retrieveRelevantAnomaliesFromDatabase(
+      final List<AnomalyDTO> anomalies) {
     if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
       return emptyList();
     } else if (usage.equals(DetectionPipelineUsage.DETECTION)) {
       final long minTime = anomalies.stream()
-          .map(MergedAnomalyResultDTO::getStartTime)
+          .map(AnomalyDTO::getStartTime)
           .mapToLong(e -> e)
           .min()
           .orElseThrow(() -> new RuntimeException(String.format(
@@ -171,7 +171,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
               alertId)));
 
       final long maxTime = anomalies.stream()
-          .map(MergedAnomalyResultDTO::getEndTime)
+          .map(AnomalyDTO::getEndTime)
           .mapToLong(e -> e)
           .max()
           .orElseThrow(() -> new RuntimeException(String.format(
@@ -201,10 +201,10 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   @VisibleForTesting
-  protected static List<MergedAnomalyResultDTO> combineAndSort(
-      final List<MergedAnomalyResultDTO> anomalies,
-      final List<MergedAnomalyResultDTO> existingAnomalies) {
-    final List<MergedAnomalyResultDTO> generatedAndExistingAnomalies = new ArrayList<>();
+  protected static List<AnomalyDTO> combineAndSort(
+      final List<AnomalyDTO> anomalies,
+      final List<AnomalyDTO> existingAnomalies) {
+    final List<AnomalyDTO> generatedAndExistingAnomalies = new ArrayList<>();
     generatedAndExistingAnomalies.addAll(anomalies);
     generatedAndExistingAnomalies.addAll(existingAnomalies);
 
@@ -217,11 +217,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
    * Expect anomalies to be sorted with {@link #COMPARATOR}.
    */
   @VisibleForTesting
-  protected List<MergedAnomalyResultDTO> doMerge(
-      final Collection<MergedAnomalyResultDTO> sortedAnomalies) {
-    final List<MergedAnomalyResultDTO> anomaliesToUpdate = new ArrayList<>();
-    MergedAnomalyResultDTO parentCandidate = null;
-    for (final MergedAnomalyResultDTO anomaly : sortedAnomalies) {
+  protected List<AnomalyDTO> doMerge(
+      final Collection<AnomalyDTO> sortedAnomalies) {
+    final List<AnomalyDTO> anomaliesToUpdate = new ArrayList<>();
+    AnomalyDTO parentCandidate = null;
+    for (final AnomalyDTO anomaly : sortedAnomalies) {
       // skip child anomalies. merge their parents instead
       if (anomaly.isChild()) {
         continue;
@@ -256,8 +256,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
    * @param child child anomaly
    * @return whether they should be merged
    */
-  private boolean shouldMerge(final MergedAnomalyResultDTO parent,
-      final MergedAnomalyResultDTO child) {
+  private boolean shouldMerge(final AnomalyDTO parent,
+      final AnomalyDTO child) {
     requireNonNull(parent);
     requireNonNull(child);
 
@@ -283,7 +283,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         || childEndTime.minus(mergeMaxDuration).isBefore(parent.getStartTime()));
   }
 
-  private static String patternKey(final MergedAnomalyResultDTO anomaly) {
+  private static String patternKey(final AnomalyDTO anomaly) {
     String patternKey = "";
     if (!Double.isNaN(anomaly.getAvgBaselineVal()) && !Double.isNaN(anomaly.getAvgCurrentVal())) {
       patternKey = (anomaly.getAvgCurrentVal() > anomaly.getAvgBaselineVal()) ? "UP" : "DOWN";
@@ -291,10 +291,10 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return patternKey;
   }
 
-  private void mergeIntoParent(final MergedAnomalyResultDTO parent,
-      final MergedAnomalyResultDTO child) {
+  private void mergeIntoParent(final AnomalyDTO parent,
+      final AnomalyDTO child) {
     // fully merge into existing
-    final Set<MergedAnomalyResultDTO> children = parent.getChildren();
+    final Set<AnomalyDTO> children = parent.getChildren();
 
     // if this parent has no children, then add a copy of itself as a child
     if (children.isEmpty()) {
@@ -325,8 +325,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     }
   }
 
-  private static MergedAnomalyResultDTO copyAnomalyInfo(final MergedAnomalyResultDTO from) {
-    final MergedAnomalyResultDTO to = new MergedAnomalyResultDTO();
+  private static AnomalyDTO copyAnomalyInfo(final AnomalyDTO from) {
+    final AnomalyDTO to = new AnomalyDTO();
     to.setStartTime(from.getStartTime());
     to.setEndTime(from.getEndTime());
     to.setMetric(from.getMetric());

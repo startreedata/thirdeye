@@ -23,8 +23,8 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.ArrayList;
@@ -98,7 +98,7 @@ public abstract class AlertEvaluatorResponseMapper {
       final OperatorResult operatorResult) {
     final DetectionEvaluationApi api = new DetectionEvaluationApi();
     final List<AnomalyApi> anomalyApis = new ArrayList<>();
-    for (final MergedAnomalyResultDTO anomalyDto : operatorResult.getAnomalies()) {
+    for (final AnomalyDTO anomalyDto : operatorResult.getAnomalies()) {
       anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
     }
     api.setAnomalies(anomalyApis);

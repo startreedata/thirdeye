@@ -33,8 +33,8 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResult;
@@ -86,14 +86,14 @@ public class NotificationReportBuilder {
       final SubscriptionGroupDTO notificationConfig,
       final Collection<? extends AnomalyResult> anomalies) {
 
-    final List<MergedAnomalyResultDTO> mergedAnomalyResults = new ArrayList<>();
+    final List<AnomalyDTO> mergedAnomalyResults = new ArrayList<>();
 
     // Calculate start and end time of the anomalies
     DateTime startTime = DateTime.now(dateTimeZone);
     DateTime endTime = new DateTime(0L, dateTimeZone);
     for (final AnomalyResult anomalyResult : anomalies) {
-      if (anomalyResult instanceof MergedAnomalyResultDTO) {
-        final MergedAnomalyResultDTO mergedAnomaly = (MergedAnomalyResultDTO) anomalyResult;
+      if (anomalyResult instanceof AnomalyDTO) {
+        final AnomalyDTO mergedAnomaly = (AnomalyDTO) anomalyResult;
         mergedAnomalyResults.add(mergedAnomaly);
       }
       if (anomalyResult.getStartTime() < startTime.getMillis()) {
@@ -136,11 +136,11 @@ public class NotificationReportBuilder {
   }
 
   public List<AnomalyReportApi> buildAnomalyReports(
-      final Set<MergedAnomalyResultDTO> anomalies) {
+      final Set<AnomalyDTO> anomalies) {
     requireNonNull(anomalies, "anomalies is null");
     checkArgument(anomalies.size() > 0, "anomalies is empty");
 
-    final List<MergedAnomalyResultDTO> sortedAnomalyResults = new ArrayList<>(anomalies);
+    final List<AnomalyDTO> sortedAnomalyResults = new ArrayList<>(anomalies);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));
 
     return sortedAnomalyResults.stream()
@@ -148,14 +148,14 @@ public class NotificationReportBuilder {
         .collect(Collectors.toList());
   }
 
-  private AnomalyReportApi toAnomalyReportApi(final MergedAnomalyResultDTO anomaly) {
+  private AnomalyReportApi toAnomalyReportApi(final AnomalyDTO anomaly) {
     return new AnomalyReportApi()
         .setAnomaly(toAnomalyApi(anomaly))
         .setData(toAnomalyReportDataApi(anomaly))
         .setUrl(getDashboardUrl(anomaly.getId()));
   }
 
-  private AnomalyReportDataApi toAnomalyReportDataApi(final MergedAnomalyResultDTO anomaly) {
+  private AnomalyReportDataApi toAnomalyReportDataApi(final AnomalyDTO anomaly) {
     final AnomalyFeedback feedback = anomaly.getFeedback();
     final String feedbackVal = getFeedbackValue(feedback);
 
@@ -179,7 +179,7 @@ public class NotificationReportBuilder {
         uiConfiguration.getExternalUrl());
   }
 
-  private AnomalyApi toAnomalyApi(final MergedAnomalyResultDTO anomaly) {
+  private AnomalyApi toAnomalyApi(final AnomalyDTO anomaly) {
     final AnomalyApi anomalyApi = ApiBeanMapper.toApi(anomaly);
 
     optional(anomaly.getEnumerationItem())

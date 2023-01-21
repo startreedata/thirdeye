@@ -19,8 +19,8 @@ import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.google.inject.Injector;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 
 public class TestMergedAnomalyResultManager {
 
-  private MergedAnomalyResultDTO mergedResult = null;
+  private AnomalyDTO mergedResult = null;
 
   private AlertManager detectionConfigDAO;
   private MergedAnomalyResultManager mergedAnomalyResultDAO;
@@ -57,7 +57,7 @@ public class TestMergedAnomalyResultManager {
 
   @Test(dependsOnMethods = {"testSaveChildren"})
   public void testFeedback() {
-    MergedAnomalyResultDTO anomalyMergedResult = mergedAnomalyResultDAO
+    AnomalyDTO anomalyMergedResult = mergedAnomalyResultDAO
         .findById(mergedResult.getId());
     AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
         .setComment("this is a good find")
@@ -67,21 +67,21 @@ public class TestMergedAnomalyResultManager {
     mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyMergedResult);
 
     //verify feedback
-    MergedAnomalyResultDTO mergedResult1 = mergedAnomalyResultDAO.findById(mergedResult.getId());
+    AnomalyDTO mergedResult1 = mergedAnomalyResultDAO.findById(mergedResult.getId());
     Assert.assertEquals(mergedResult1.getFeedback().getFeedbackType(), AnomalyFeedbackType.ANOMALY);
   }
 
   @Test
   public void testSaveChildren() {
-    mergedResult = new MergedAnomalyResultDTO();
+    mergedResult = new AnomalyDTO();
     mergedResult.setStartTime(1000);
     mergedResult.setEndTime(2000);
 
-    MergedAnomalyResultDTO child1 = new MergedAnomalyResultDTO();
+    AnomalyDTO child1 = new AnomalyDTO();
     child1.setStartTime(1000);
     child1.setEndTime(1500);
 
-    MergedAnomalyResultDTO child2 = new MergedAnomalyResultDTO();
+    AnomalyDTO child2 = new AnomalyDTO();
     child2.setStartTime(1500);
     child2.setEndTime(2000);
 
@@ -97,19 +97,19 @@ public class TestMergedAnomalyResultManager {
   @Test
   public void testFindByStartEndTimeInRangeAndDetectionConfigId() {
     long detectionConfigId = detectionConfigDAO.save(mockDetectionConfig());
-    List<MergedAnomalyResultDTO> anomalies = mockAnomalies(detectionConfigId);
-    for (MergedAnomalyResultDTO anomaly : anomalies) {
+    List<AnomalyDTO> anomalies = mockAnomalies(detectionConfigId);
+    for (AnomalyDTO anomaly : anomalies) {
       this.mergedAnomalyResultDAO.save(anomaly);
     }
-    List<MergedAnomalyResultDTO> fetchedAnomalies = mergedAnomalyResultDAO
+    List<AnomalyDTO> fetchedAnomalies = mergedAnomalyResultDAO
         .findByStartEndTimeInRangeAndDetectionConfigId(
             new DateTime(2019, 1, 1, 0, 0).getMillis(),
             new DateTime(2019, 1, 3, 0, 0).getMillis(),
             detectionConfigId, null);
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
     for (int i = 0; i < anomalies.size(); i++) {
-      MergedAnomalyResultDTO actual = fetchedAnomalies.get(i);
-      MergedAnomalyResultDTO expected = anomalies.get(i);
+      AnomalyDTO actual = fetchedAnomalies.get(i);
+      AnomalyDTO expected = anomalies.get(i);
       Assert.assertNotNull(actual.getId());
       Assert.assertEquals(actual.getDetectionConfigId(), expected.getDetectionConfigId());
     }
@@ -123,19 +123,19 @@ public class TestMergedAnomalyResultManager {
   @Test
   public void testFindByStartTimeInRangeAndDetectionConfigId() {
     long detectionConfigId = detectionConfigDAO.save(mockDetectionConfig());
-    List<MergedAnomalyResultDTO> anomalies = mockAnomalies(detectionConfigId);
-    for (MergedAnomalyResultDTO anomaly : anomalies) {
+    List<AnomalyDTO> anomalies = mockAnomalies(detectionConfigId);
+    for (AnomalyDTO anomaly : anomalies) {
       this.mergedAnomalyResultDAO.save(anomaly);
     }
-    List<MergedAnomalyResultDTO> fetchedAnomalies = mergedAnomalyResultDAO
+    List<AnomalyDTO> fetchedAnomalies = mergedAnomalyResultDAO
         .findByStartEndTimeInRangeAndDetectionConfigId(
             new DateTime(2019, 1, 1, 0, 0).getMillis(),
             new DateTime(2019, 1, 3, 0, 0).getMillis(),
             detectionConfigId, null);
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
     for (int i = 0; i < anomalies.size(); i++) {
-      MergedAnomalyResultDTO actual = fetchedAnomalies.get(i);
-      MergedAnomalyResultDTO expected = anomalies.get(i);
+      AnomalyDTO actual = fetchedAnomalies.get(i);
+      AnomalyDTO expected = anomalies.get(i);
       Assert.assertNotNull(actual.getId());
       Assert.assertEquals(actual.getDetectionConfigId(), expected.getDetectionConfigId());
     }
@@ -148,15 +148,15 @@ public class TestMergedAnomalyResultManager {
 
   @Test
   public void testSaveChildrenIndependently() {
-    MergedAnomalyResultDTO parent = new MergedAnomalyResultDTO();
+    AnomalyDTO parent = new AnomalyDTO();
     parent.setStartTime(1000);
     parent.setEndTime(2000);
 
-    MergedAnomalyResultDTO child1 = new MergedAnomalyResultDTO();
+    AnomalyDTO child1 = new AnomalyDTO();
     child1.setStartTime(1000);
     child1.setEndTime(1500);
 
-    MergedAnomalyResultDTO child2 = new MergedAnomalyResultDTO();
+    AnomalyDTO child2 = new AnomalyDTO();
     child2.setStartTime(1500);
     child2.setEndTime(2000);
 
@@ -172,19 +172,19 @@ public class TestMergedAnomalyResultManager {
 
   @Test
   public void testSaveAndLoadHierarchicalAnomalies() {
-    MergedAnomalyResultDTO parent = new MergedAnomalyResultDTO();
+    AnomalyDTO parent = new AnomalyDTO();
     parent.setStartTime(1000);
     parent.setEndTime(2000);
 
-    MergedAnomalyResultDTO child1 = new MergedAnomalyResultDTO();
+    AnomalyDTO child1 = new AnomalyDTO();
     child1.setStartTime(1000);
     child1.setEndTime(1500);
 
-    MergedAnomalyResultDTO child2 = new MergedAnomalyResultDTO();
+    AnomalyDTO child2 = new AnomalyDTO();
     child2.setStartTime(1500);
     child2.setEndTime(2000);
 
-    MergedAnomalyResultDTO child3 = new MergedAnomalyResultDTO();
+    AnomalyDTO child3 = new AnomalyDTO();
     child3.setStartTime(1600);
     child3.setEndTime(1800);
 
@@ -193,7 +193,7 @@ public class TestMergedAnomalyResultManager {
 
     long parentId = this.mergedAnomalyResultDAO.save(parent);
 
-    MergedAnomalyResultDTO read = this.mergedAnomalyResultDAO.findById(parentId);
+    AnomalyDTO read = this.mergedAnomalyResultDAO.findById(parentId);
 
     assertThat(read).isNotSameAs(parent);
     Assert.assertEquals(read.getStartTime(), 1000);
@@ -201,8 +201,8 @@ public class TestMergedAnomalyResultManager {
     Assert.assertFalse(read.isChild());
     Assert.assertFalse(read.getChildren().isEmpty());
 
-    List<MergedAnomalyResultDTO> readChildren = new ArrayList<>(read.getChildren());
-    readChildren.sort(Comparator.comparingLong(MergedAnomalyResultDTO::getStartTime));
+    List<AnomalyDTO> readChildren = new ArrayList<>(read.getChildren());
+    readChildren.sort(Comparator.comparingLong(AnomalyDTO::getStartTime));
 
     assertThat(readChildren.get(0)).isNotSameAs(child1);
     Assert.assertTrue(readChildren.get(0).isChild());
@@ -220,19 +220,19 @@ public class TestMergedAnomalyResultManager {
 
   @Test
   public void testUpdateToAnomalyHierarchy() {
-    MergedAnomalyResultDTO parent = new MergedAnomalyResultDTO();
+    AnomalyDTO parent = new AnomalyDTO();
     parent.setStartTime(1000);
     parent.setEndTime(2000);
 
-    MergedAnomalyResultDTO child1 = new MergedAnomalyResultDTO();
+    AnomalyDTO child1 = new AnomalyDTO();
     child1.setStartTime(1000);
     child1.setEndTime(1500);
 
-    MergedAnomalyResultDTO child2 = new MergedAnomalyResultDTO();
+    AnomalyDTO child2 = new AnomalyDTO();
     child2.setStartTime(1500);
     child2.setEndTime(2000);
 
-    MergedAnomalyResultDTO child3 = new MergedAnomalyResultDTO();
+    AnomalyDTO child3 = new AnomalyDTO();
     child3.setStartTime(1600);
     child3.setEndTime(1800);
 
@@ -245,7 +245,7 @@ public class TestMergedAnomalyResultManager {
 
     this.mergedAnomalyResultDAO.save(parent);
 
-    MergedAnomalyResultDTO read = this.mergedAnomalyResultDAO.findById(parent.getId());
+    AnomalyDTO read = this.mergedAnomalyResultDAO.findById(parent.getId());
     Assert.assertFalse(read.getChildren().isEmpty());
     Assert.assertEquals(read.getChildren().iterator().next().getStartTime(), 1000);
     Assert.assertFalse(read.getChildren().iterator().next().getChildren().isEmpty());
@@ -261,22 +261,22 @@ public class TestMergedAnomalyResultManager {
 
   @Test
   public void testFindParent() {
-    MergedAnomalyResultDTO top = new MergedAnomalyResultDTO();
+    AnomalyDTO top = new AnomalyDTO();
     top.setDetectionConfigId(1L);
     top.setStartTime(1000);
     top.setEndTime(3000);
 
-    MergedAnomalyResultDTO child1 = new MergedAnomalyResultDTO();
+    AnomalyDTO child1 = new AnomalyDTO();
     child1.setDetectionConfigId(1L);
     child1.setStartTime(1000);
     child1.setEndTime(2000);
 
-    MergedAnomalyResultDTO child2 = new MergedAnomalyResultDTO();
+    AnomalyDTO child2 = new AnomalyDTO();
     child2.setDetectionConfigId(1L);
     child2.setStartTime(1200);
     child2.setEndTime(1800);
 
-    MergedAnomalyResultDTO child3 = new MergedAnomalyResultDTO();
+    AnomalyDTO child3 = new AnomalyDTO();
     child3.setDetectionConfigId(1L);
     child3.setStartTime(1500);
     child3.setEndTime(3000);
@@ -285,10 +285,10 @@ public class TestMergedAnomalyResultManager {
     top.setChildren(new HashSet<>(Arrays.asList(child1, child3)));
 
     long topId = this.mergedAnomalyResultDAO.save(top);
-    MergedAnomalyResultDTO topNode = this.mergedAnomalyResultDAO.findById(topId);
-    MergedAnomalyResultDTO parent = null;
-    MergedAnomalyResultDTO leafNode = null;
-    for (MergedAnomalyResultDTO intermediate : topNode.getChildren()) {
+    AnomalyDTO topNode = this.mergedAnomalyResultDAO.findById(topId);
+    AnomalyDTO parent = null;
+    AnomalyDTO leafNode = null;
+    for (AnomalyDTO intermediate : topNode.getChildren()) {
       if (!intermediate.getChildren().isEmpty()) {
         parent = intermediate;
         leafNode = intermediate.getChildren().iterator().next();
@@ -304,13 +304,13 @@ public class TestMergedAnomalyResultManager {
     return detectionConfig;
   }
 
-  public static List<MergedAnomalyResultDTO> mockAnomalies(long detectionConfigId) {
-    MergedAnomalyResultDTO anomaly1 = new MergedAnomalyResultDTO();
+  public static List<AnomalyDTO> mockAnomalies(long detectionConfigId) {
+    AnomalyDTO anomaly1 = new AnomalyDTO();
     anomaly1.setMetric("metric");
     anomaly1.setDetectionConfigId(detectionConfigId);
     anomaly1.setStartTime(new DateTime(2019, 1, 1, 0, 0).getMillis());
     anomaly1.setEndTime(new DateTime(2019, 1, 1, 12, 0).getMillis());
-    MergedAnomalyResultDTO anomaly2 = new MergedAnomalyResultDTO();
+    AnomalyDTO anomaly2 = new AnomalyDTO();
     anomaly2.setMetric("metric");
     anomaly2.setDetectionConfigId(detectionConfigId);
     anomaly2.setStartTime(new DateTime(2019, 1, 2, 10, 0).getMillis());

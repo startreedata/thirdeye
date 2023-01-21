@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.datalayer.mapper;
 
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -26,5 +26,5 @@ public interface MergedAnomalyIndexMapper {
 
   @Mapping(source = "enumerationItem.id", target = "enumerationItemId")
   @Mapping(target = "dimensions", ignore = true)
-  MergedAnomalyResultIndex toMergedAnomalyResultIndex(MergedAnomalyResultDTO dto);
+  MergedAnomalyResultIndex toMergedAnomalyResultIndex(AnomalyDTO dto);
 }

@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Collections;
@@ -29,12 +29,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 // todo cyril most of the interface should be moved down to OperatorResult
 public class AnomalyDetectorOperatorResult implements OperatorResult {
 
-  private final List<MergedAnomalyResultDTO> anomalies;
+  private final List<AnomalyDTO> anomalies;
   private final TimeSeries timeseries;
   private final Map<String, List> rawData;
   private final EnumerationItemDTO enumerationItem;
 
-  private AnomalyDetectorOperatorResult(final List<MergedAnomalyResultDTO> anomalies,
+  private AnomalyDetectorOperatorResult(final List<AnomalyDTO> anomalies,
       final TimeSeries timeseries,
       final Map<String, List> rawData,
       final EnumerationItemDTO enumerationItem) {
@@ -49,7 +49,7 @@ public class AnomalyDetectorOperatorResult implements OperatorResult {
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> getAnomalies() {
+  public List<AnomalyDTO> getAnomalies() {
     return anomalies;
   }
 
@@ -74,12 +74,12 @@ public class AnomalyDetectorOperatorResult implements OperatorResult {
 
   public static class Builder {
 
-    private List<MergedAnomalyResultDTO> anomalies;
+    private List<AnomalyDTO> anomalies;
     private TimeSeries timeseries;
     private Map<String, List> rawData = Collections.emptyMap();
     private EnumerationItemDTO enumerationItem;
 
-    public Builder setAnomalies(final List<MergedAnomalyResultDTO> anomalies) {
+    public Builder setAnomalies(final List<AnomalyDTO> anomalies) {
       this.anomalies = anomalies;
       return this;
     }

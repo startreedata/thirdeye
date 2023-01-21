@@ -32,8 +32,8 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
@@ -153,7 +153,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private OperatorResult buildDetectionResult(
       final AnomalyDetectorResult detectorV2Result) {
 
-    final List<MergedAnomalyResultDTO> anomalies = buildAnomaliesFromDetectorDf(
+    final List<AnomalyDTO> anomalies = buildAnomaliesFromDetectorDf(
         detectorV2Result.getDataFrame());
     final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
         .sortedBy(COL_TIME));
@@ -163,12 +163,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         .build();
   }
 
-  private List<MergedAnomalyResultDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {
+  private List<AnomalyDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {
     if (df.isEmpty()) {
       return Collections.emptyList();
     }
 
-    final List<MergedAnomalyResultDTO> anomalies = new ArrayList<>();
+    final List<AnomalyDTO> anomalies = new ArrayList<>();
     final LongSeries timeMillisSeries = df.getLongs(Constants.COL_TIME);
     final BooleanSeries isAnomalySeries = df.getBooleans(Constants.COL_ANOMALY);
     final DoubleSeries currentSeries = df.getDoubles(Constants.COL_CURRENT);
@@ -176,7 +176,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
     for (int i = 0; i < df.size(); i++) {
       if (!isAnomalySeries.isNull(i) && BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
-        final MergedAnomalyResultDTO anomaly = newAnomaly();
+        final AnomalyDTO anomaly = newAnomaly();
         final long startTimeMillis = timeMillisSeries.get(i);
         anomaly.setStartTime(startTimeMillis);
         if (i < df.size() - 1) {
@@ -200,8 +200,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   }
 
   @NonNull
-  private MergedAnomalyResultDTO newAnomaly() {
-    final MergedAnomalyResultDTO anomaly = new MergedAnomalyResultDTO();
+  private AnomalyDTO newAnomaly() {
+    final AnomalyDTO anomaly = new AnomalyDTO();
     anomaly.setDetectionConfigId(alertId);
     anomaly.setEnumerationItem(enumerationItemRef);
     anomalyMetric.ifPresent(anomaly::setMetric);

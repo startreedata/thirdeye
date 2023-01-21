@@ -15,21 +15,21 @@ package ai.startree.thirdeye.spi.util;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import java.util.ArrayList;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AnomalyUtils {
 
-  public static boolean isIgnore(final @NonNull MergedAnomalyResultDTO parent) {
+  public static boolean isIgnore(final @NonNull AnomalyDTO parent) {
     return optional(parent.getAnomalyLabels())
         .map(labels -> labels.stream().anyMatch(AnomalyLabelDTO::isIgnore))
         .orElse(false);
   }
 
-  public static void addLabel(final MergedAnomalyResultDTO anomalyResultDTO,
+  public static void addLabel(final AnomalyDTO anomalyResultDTO,
       final AnomalyLabelDTO newLabel) {
     final List<AnomalyLabelDTO> labels = optional(anomalyResultDTO.getAnomalyLabels()).orElse(
         new ArrayList<>());

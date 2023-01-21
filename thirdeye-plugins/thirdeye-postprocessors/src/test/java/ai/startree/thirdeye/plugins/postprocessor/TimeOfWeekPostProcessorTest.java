@@ -18,8 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
 import java.util.Map;
@@ -59,22 +59,22 @@ public class TimeOfWeekPostProcessorTest {
         resultMap);
     assertThat(outputMap).hasSize(2);
     final OperatorResult res1Out = outputMap.get(RES_1_KEY);
-    final List<MergedAnomalyResultDTO> res1Anomalies = res1Out.getAnomalies();
+    final List<AnomalyDTO> res1Anomalies = res1Out.getAnomalies();
     assertThat(res1Anomalies).hasSize(2);
-    final MergedAnomalyResultDTO anomaly0 = res1Anomalies.get(0);
+    final AnomalyDTO anomaly0 = res1Anomalies.get(0);
     final List<AnomalyLabelDTO> labels0 = anomaly0.getAnomalyLabels();
     assertThat(labels0).hasSize(1);
     final AnomalyLabelDTO anomaly0Label0 = labels0.get(0);
     assertThat(anomaly0Label0.isIgnore()).isTrue();
     assertThat(anomaly0Label0.getName()).isEqualTo(labelName(daysOfWeek, null, null));
 
-    final MergedAnomalyResultDTO anomaly1 = res1Anomalies.get(1);
+    final AnomalyDTO anomaly1 = res1Anomalies.get(1);
     assertThat(anomaly1.getAnomalyLabels()).isNull();
 
     final OperatorResult res2Out = outputMap.get(RES_2_KEY);
-    final List<MergedAnomalyResultDTO> res2Anomalies = res2Out.getAnomalies();
+    final List<AnomalyDTO> res2Anomalies = res2Out.getAnomalies();
     assertThat(res2Anomalies).hasSize(1);
-    final MergedAnomalyResultDTO res2anomaly0 = res2Anomalies.get(0);
+    final AnomalyDTO res2anomaly0 = res2Anomalies.get(0);
     assertThat(res2anomaly0.getAnomalyLabels()).hasSize(1);
     final AnomalyLabelDTO res2Label0 = res2anomaly0.getAnomalyLabels().get(0);
     assertThat(res2Label0.isIgnore()).isTrue();
@@ -95,7 +95,7 @@ public class TimeOfWeekPostProcessorTest {
 
     final Map<String, OperatorResult> outputMap = postProcessor.postProcess(UTC_DETECTION_INTERVAL,
         resultMap);
-    final List<MergedAnomalyResultDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
+    final List<AnomalyDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
     final AnomalyLabelDTO labelOfAnomaly0 = anomalies.get(0).getAnomalyLabels().get(0);
     assertThat(labelOfAnomaly0.isIgnore()).isTrue();
     assertThat(labelOfAnomaly0.getName()).isEqualTo(labelName(null, hourOfDay, null));
@@ -117,7 +117,7 @@ public class TimeOfWeekPostProcessorTest {
 
     final Map<String, OperatorResult> outputMap = postProcessor.postProcess(UTC_DETECTION_INTERVAL,
         resultMap);
-    final List<MergedAnomalyResultDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
+    final List<AnomalyDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
     final AnomalyLabelDTO labelOfAnomaly0 = anomalies.get(0).getAnomalyLabels().get(0);
     assertThat(labelOfAnomaly0.isIgnore()).isTrue();
     assertThat(labelOfAnomaly0.getName()).isEqualTo(labelName(null, null, dayHoursOfWeek));
@@ -139,7 +139,7 @@ public class TimeOfWeekPostProcessorTest {
 
     final Map<String, OperatorResult> outputMap = postProcessor.postProcess(UTC_DETECTION_INTERVAL,
         resultMap);
-    final List<MergedAnomalyResultDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
+    final List<AnomalyDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
     final AnomalyLabelDTO labelOfAnomaly0 = anomalies.get(0).getAnomalyLabels().get(0);
     assertThat(labelOfAnomaly0.isIgnore()).isFalse();
     assertThat(labelOfAnomaly0.getName()).isEqualTo(labelName(null, hourOfDay, null));
@@ -159,7 +159,7 @@ public class TimeOfWeekPostProcessorTest {
 
     final Map<String, OperatorResult> outputMap = postProcessor.postProcess(UTC_DETECTION_INTERVAL,
         resultMap);
-    final List<MergedAnomalyResultDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
+    final List<AnomalyDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
     assertThat(anomalies.get(0).getAnomalyLabels()).isNull();
     assertThat(anomalies.get(1).getAnomalyLabels()).isNull();
   }
@@ -179,7 +179,7 @@ public class TimeOfWeekPostProcessorTest {
     final Map<String, OperatorResult> outputMap = postProcessor.postProcess(
         new Interval(0L, 0L, PARIS_TIMEZONE),
         resultMap);
-    final List<MergedAnomalyResultDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
+    final List<AnomalyDTO> anomalies = outputMap.get(RES_1_KEY).getAnomalies();
     final AnomalyLabelDTO anomalyLabel0 = anomalies.get(0).getAnomalyLabels().get(0);
     assertThat(anomalyLabel0.isIgnore()).isTrue();
     assertThat(anomalyLabel0.getName()).isEqualTo(labelName(null, hourOfDay, null));
@@ -205,45 +205,45 @@ public class TimeOfWeekPostProcessorTest {
     assertThatThrownBy(() -> new TimeOfWeekPostProcessor(spec)).isInstanceOf(IllegalArgumentException.class);
   }
 
-  private MergedAnomalyResultDTO saturdayHour2InParisTimezone() {
+  private AnomalyDTO saturdayHour2InParisTimezone() {
     final DateTime hour2Anomaly = new DateTime(2022, 9, 3, 2, 0, PARIS_TIMEZONE);
     final DateTime hour3Anomaly = new DateTime(2022, 9, 3, 3, 0, PARIS_TIMEZONE);
-    return new MergedAnomalyResultDTO().setStartTime(hour2Anomaly.getMillis())
+    return new AnomalyDTO().setStartTime(hour2Anomaly.getMillis())
         .setEndTime(hour3Anomaly.getMillis());
   }
 
-  private MergedAnomalyResultDTO saturdayHour2Anomaly() {
+  private AnomalyDTO saturdayHour2Anomaly() {
     final DateTime hour2Anomaly = new DateTime(2022, 9, 3, 2, 0, DateTimeZone.UTC);
     final DateTime hour3Anomaly = new DateTime(2022, 9, 3, 3, 0, DateTimeZone.UTC);
-    return new MergedAnomalyResultDTO().setStartTime(hour2Anomaly.getMillis())
+    return new AnomalyDTO().setStartTime(hour2Anomaly.getMillis())
         .setEndTime(hour3Anomaly.getMillis());
   }
 
-  private MergedAnomalyResultDTO saturdayHour5Anomaly() {
+  private AnomalyDTO saturdayHour5Anomaly() {
     final DateTime hour5Anomaly = new DateTime(2022, 9, 3, 5, 0, DateTimeZone.UTC);
     final DateTime hour6Anomaly = new DateTime(2022, 9, 3, 6, 0, DateTimeZone.UTC);
-    return new MergedAnomalyResultDTO().setStartTime(hour5Anomaly.getMillis())
+    return new AnomalyDTO().setStartTime(hour5Anomaly.getMillis())
         .setEndTime(hour6Anomaly.getMillis());
   }
 
-  private MergedAnomalyResultDTO saturdayAnomaly() {
+  private AnomalyDTO saturdayAnomaly() {
     final DateTime sundayStart = new DateTime(2022, 9, 3, 0, 0, DateTimeZone.UTC);
     final DateTime mondayEnd = new DateTime(2022, 9, 4, 0, 0, DateTimeZone.UTC);
-    return new MergedAnomalyResultDTO().setStartTime(sundayStart.getMillis())
+    return new AnomalyDTO().setStartTime(sundayStart.getMillis())
         .setEndTime(mondayEnd.getMillis());
   }
 
-  private MergedAnomalyResultDTO sundayAnomaly() {
+  private AnomalyDTO sundayAnomaly() {
     final DateTime sundayStart = new DateTime(2022, 9, 4, 0, 0, DateTimeZone.UTC);
     final DateTime mondayEnd = new DateTime(2022, 9, 5, 0, 0, DateTimeZone.UTC);
-    return new MergedAnomalyResultDTO().setStartTime(sundayStart.getMillis())
+    return new AnomalyDTO().setStartTime(sundayStart.getMillis())
         .setEndTime(mondayEnd.getMillis());
   }
 
-  private MergedAnomalyResultDTO mondayAnomaly() {
+  private AnomalyDTO mondayAnomaly() {
     final DateTime sundayStart = new DateTime(2022, 9, 5, 0, 0, DateTimeZone.UTC);
     final DateTime mondayEnd = new DateTime(2022, 9, 6, 0, 0, DateTimeZone.UTC);
-    return new MergedAnomalyResultDTO().setStartTime(sundayStart.getMillis())
+    return new AnomalyDTO().setStartTime(sundayStart.getMillis())
         .setEndTime(mondayEnd.getMillis());
   }
 }

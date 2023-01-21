@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.notification.anomalyfilter;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Properties;
@@ -117,7 +117,7 @@ public abstract class BaseAnomalyFilter implements AnomalyFilter {
    * @param anomalyResult Merged anomaly result
    * @return probability to be true anomaly
    */
-  public double getProbability(MergedAnomalyResultDTO anomalyResult) {
+  public double getProbability(AnomalyDTO anomalyResult) {
     return Double.NaN;
   }
 }

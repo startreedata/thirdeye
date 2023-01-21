@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection.model;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class AnomalySlice {
     return true;
   }
 
-  public boolean match(MergedAnomalyResultDTO anomaly) {
+  public boolean match(AnomalyDTO anomaly) {
     if (anomaly == null) {
       return false;
     }

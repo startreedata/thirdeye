@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class CombinerResult implements OperatorResult {
   }
 
   @Override
-  public List<MergedAnomalyResultDTO> getAnomalies() {
+  public List<AnomalyDTO> getAnomalies() {
     // flatten anomalies of all OperatorResult
     return results.values()
         .stream()

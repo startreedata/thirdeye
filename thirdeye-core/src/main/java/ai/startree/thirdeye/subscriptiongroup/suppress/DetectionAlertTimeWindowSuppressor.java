@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.subscriptiongroup.suppress;
 
 import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
@@ -87,7 +87,7 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
    * Check if the anomaly needs to be suppressed. An anomaly is suppressed if the startTime
    * of the anomaly falls in the suppression time window and is within the user's expected range.
    */
-  private boolean isAnomalySuppressed(MergedAnomalyResultDTO anomaly,
+  private boolean isAnomalySuppressed(AnomalyDTO anomaly,
       Map<String, Object> suppressWindowProps) {
     boolean shouldSuppress = false;
     try {
@@ -112,8 +112,8 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
     return shouldSuppress;
   }
 
-  private void filterOutSuppressedAnomalies(final Set<MergedAnomalyResultDTO> anomalies) {
-    Iterator<MergedAnomalyResultDTO> anomaliesIt = anomalies.iterator();
+  private void filterOutSuppressedAnomalies(final Set<AnomalyDTO> anomalies) {
+    Iterator<AnomalyDTO> anomaliesIt = anomalies.iterator();
 
     List<Map<String, Object>> suppressWindowPropsList
         = ConfigUtils.getList(
@@ -121,7 +121,7 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
             .get(TIME_WINDOWS_KEY));
 
     while (anomaliesIt.hasNext()) {
-      MergedAnomalyResultDTO anomaly = anomaliesIt.next();
+      AnomalyDTO anomaly = anomaliesIt.next();
       for (Map<String, Object> suppressWindowProps : suppressWindowPropsList) {
         if (isAnomalySuppressed(anomaly, suppressWindowProps)) {
           LOG.info("Suppressing anomaly id {} with suppress properties {}. Anomaly Details = {}",
@@ -148,7 +148,7 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
   @Override
   public SubscriptionGroupFilterResult run(SubscriptionGroupFilterResult results) throws Exception {
     Preconditions.checkNotNull(results);
-    for (Set<MergedAnomalyResultDTO> anomalies : results.getResult().values()) {
+    for (Set<AnomalyDTO> anomalies : results.getResult().values()) {
       filterOutSuppressedAnomalies(anomalies);
     }
 

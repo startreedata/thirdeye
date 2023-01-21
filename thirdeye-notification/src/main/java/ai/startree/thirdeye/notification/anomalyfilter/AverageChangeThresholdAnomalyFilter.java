@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.notification.anomalyfilter;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +44,7 @@ public class AverageChangeThresholdAnomalyFilter extends BaseAnomalyFilter {
   }
 
   @Override
-  public boolean isQualified(MergedAnomalyResultDTO anomaly) {
+  public boolean isQualified(AnomalyDTO anomaly) {
     double averageCurrent = anomaly.getAvgCurrentVal();
     double averageBaseline = anomaly.getAvgBaselineVal();
     double diff = averageCurrent - averageBaseline;

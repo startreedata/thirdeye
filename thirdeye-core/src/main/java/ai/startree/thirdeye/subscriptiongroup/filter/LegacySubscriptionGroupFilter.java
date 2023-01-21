@@ -24,7 +24,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
@@ -64,13 +64,13 @@ public class LegacySubscriptionGroupFilter {
    * @param anomaly anomaly
    * @return {@code true} if feedback exists and is TRUE or FALSE, {@code false} otherwise
    */
-  private static boolean hasFeedback(final MergedAnomalyResultDTO anomaly) {
+  private static boolean hasFeedback(final AnomalyDTO anomaly) {
     return anomaly.getFeedback() != null
         && !anomaly.getFeedback().getFeedbackType().isUnresolved();
   }
 
   private static boolean shouldFilter(final long startTime,
-      final MergedAnomalyResultDTO anomaly) {
+      final AnomalyDTO anomaly) {
     return anomaly != null
         && !anomaly.isChild()
         && !hasFeedback(anomaly)
@@ -130,7 +130,7 @@ public class LegacySubscriptionGroupFilter {
 
     // Fetch all the anomalies to be notified to the recipients
     final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
-    final Set<MergedAnomalyResultDTO> anomalies = findAnomalies(alertAssociations,
+    final Set<AnomalyDTO> anomalies = findAnomalies(alertAssociations,
         vectorClocks,
         endTime);
 
@@ -138,7 +138,7 @@ public class LegacySubscriptionGroupFilter {
         .addMapping(new DetectionAlertFilterNotification(sg), anomalies);
   }
 
-  private Set<MergedAnomalyResultDTO> findAnomalies(
+  private Set<AnomalyDTO> findAnomalies(
       final List<AlertAssociationDto> alertAssociations,
       final Map<Long, Long> vectorClocks,
       final long endTime) {
@@ -150,7 +150,7 @@ public class LegacySubscriptionGroupFilter {
         .collect(toSet());
   }
 
-  private Set<MergedAnomalyResultDTO> findAnomaliesForAlertAssociation(
+  private Set<AnomalyDTO> findAnomaliesForAlertAssociation(
       final AlertAssociationDto aa,
       final Map<Long, Long> vectorClocks,
       final long endTime) {
@@ -163,7 +163,7 @@ public class LegacySubscriptionGroupFilter {
 
     final long startTime = findStartTime(vectorClocks, endTime, alertId);
 
-    final Collection<MergedAnomalyResultDTO> candidates = mergedAnomalyResultManager
+    final Collection<AnomalyDTO> candidates = mergedAnomalyResultManager
         .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, endTime, alertId);
 
     return candidates.stream()

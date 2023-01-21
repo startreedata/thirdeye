@@ -23,8 +23,8 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
@@ -109,7 +109,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
 
   private void postProcessResult(final OperatorResult operatorResult,
       @Nullable OperatorResult thresholdSideInput) {
-    final List<MergedAnomalyResultDTO> anomalies = operatorResult.getAnomalies();
+    final List<AnomalyDTO> anomalies = operatorResult.getAnomalies();
     if (anomalies == null) {
       return;
     }
@@ -133,7 +133,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
 
     final Set<Long> timestampOutOfThresholds = timestampOutOfThresholds(df);
 
-    for (final MergedAnomalyResultDTO anomalyResultDTO : anomalies) {
+    for (final AnomalyDTO anomalyResultDTO : anomalies) {
       if (timestampOutOfThresholds.contains(anomalyResultDTO.getStartTime())) {
         final AnomalyLabelDTO newLabel = new AnomalyLabelDTO().setIgnore(ignore).setName(labelName);
         addLabel(anomalyResultDTO, newLabel);

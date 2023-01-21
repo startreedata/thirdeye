@@ -24,8 +24,8 @@ import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
@@ -70,13 +70,13 @@ public class RcaRelatedResource {
   private static final String DEFAULT_SCORING = "TRIANGULAR";
   private final RcaInfoFetcher rcaInfoFetcher;
   private final EventManager eventDAO;
-  private final MergedAnomalyResultManager anomalyDAO;
+  private final AnomalyManager anomalyDAO;
 
   @Inject
   public RcaRelatedResource(
       final RcaInfoFetcher rcaInfoFetcher,
       final EventManager eventDAO,
-      final MergedAnomalyResultManager anomalyDAO) {
+      final AnomalyManager anomalyDAO) {
     this.rcaInfoFetcher = rcaInfoFetcher;
     this.eventDAO = eventDAO;
     this.anomalyDAO = anomalyDAO;

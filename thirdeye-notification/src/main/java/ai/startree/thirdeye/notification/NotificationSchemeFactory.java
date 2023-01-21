@@ -15,7 +15,7 @@ package ai.startree.thirdeye.notification;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.subscriptiongroup.filter.LegacySubscriptionGroupFilter;
@@ -38,13 +38,13 @@ public class NotificationSchemeFactory {
 
   private static final String PROP_CLASS_NAME = "className";
 
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
   private final LegacySubscriptionGroupFilter legacySubscriptionGroupFilter;
 
   @Inject
-  public NotificationSchemeFactory(final MergedAnomalyResultManager mergedAnomalyResultManager,
+  public NotificationSchemeFactory(final AnomalyManager anomalyManager,
       final LegacySubscriptionGroupFilter legacySubscriptionGroupFilter) {
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.anomalyManager = anomalyManager;
     this.legacySubscriptionGroupFilter = legacySubscriptionGroupFilter;
   }
 
@@ -66,10 +66,10 @@ public class NotificationSchemeFactory {
       final Constructor<?> constructor = Class
           .forName(ConfigUtils.getMap(alertSuppressors.get(alertSuppressor))
               .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(SubscriptionGroupDTO.class, MergedAnomalyResultManager.class);
+          .getConstructor(SubscriptionGroupDTO.class, AnomalyManager.class);
       detectionAlertSuppressors
           .add((DetectionAlertSuppressor) constructor.newInstance(subscriptionGroup,
-              mergedAnomalyResultManager));
+              anomalyManager));
     }
 
     return detectionAlertSuppressors;

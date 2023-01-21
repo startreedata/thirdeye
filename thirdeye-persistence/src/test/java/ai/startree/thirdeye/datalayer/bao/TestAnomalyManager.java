@@ -17,7 +17,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
@@ -35,18 +35,18 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class TestMergedAnomalyResultManager {
+public class TestAnomalyManager {
 
   private AnomalyDTO mergedResult = null;
 
   private AlertManager detectionConfigDAO;
-  private MergedAnomalyResultManager mergedAnomalyResultDAO;
+  private AnomalyManager mergedAnomalyResultDAO;
 
   @BeforeClass
   void beforeClass() {
     final Injector injector = MySqlTestDatabase.sharedInjector();
     detectionConfigDAO = injector.getInstance(AlertManager.class);
-    mergedAnomalyResultDAO = injector.getInstance(MergedAnomalyResultManager.class);
+    mergedAnomalyResultDAO = injector.getInstance(AnomalyManager.class);
   }
 
   @AfterClass(alwaysRun = true)

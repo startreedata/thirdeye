@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -45,7 +45,7 @@ public class AnomalyMergerPostProcessorTest {
   private static final long JANUARY_1_2021_02H = 1609466400_000L;
   private static final long JANUARY_1_2021_03H = 1609470000000L;
   private static long ANOMALY_ID = 1000L;
-  private MergedAnomalyResultManager mergedAnomalyResultManager;
+  private AnomalyManager anomalyManager;
   private AnomalyMergerPostProcessorSpec detectionSpec;
   private AnomalyMergerPostProcessor detectionMerger;
 
@@ -79,9 +79,9 @@ public class AnomalyMergerPostProcessorTest {
 
   @BeforeMethod
   public void setUp() {
-    mergedAnomalyResultManager = mock(MergedAnomalyResultManager.class);
+    anomalyManager = mock(AnomalyManager.class);
     detectionSpec = new AnomalyMergerPostProcessorSpec().setMergedAnomalyResultManager(
-        mergedAnomalyResultManager).setAlertId(ALERT_ID).setUsage(DetectionPipelineUsage.DETECTION);
+        anomalyManager).setAlertId(ALERT_ID).setUsage(DetectionPipelineUsage.DETECTION);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     detectionMerger.setChronology(ISOChronology.getInstanceUTC());
   }
@@ -121,7 +121,7 @@ public class AnomalyMergerPostProcessorTest {
 
   @Test
   public void testSingleAnomalyNoMerge() {
-    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(), anyLong(), isNull())).thenAnswer(i -> emptyList());
     final AnomalyDTO newAnomaly = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final List<AnomalyDTO> output = detectionMerger.merge(singletonList(newAnomaly));
@@ -132,7 +132,7 @@ public class AnomalyMergerPostProcessorTest {
   public void testSingleAnomalyMergeWithExisting() {
     final AnomalyDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
-    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
 
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
@@ -148,7 +148,7 @@ public class AnomalyMergerPostProcessorTest {
     // existing anomaly is pattern UP
     existingAnomaly.setAvgBaselineVal(0);
     existingAnomaly.setAvgCurrentVal(10);
-    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
 
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
@@ -165,7 +165,7 @@ public class AnomalyMergerPostProcessorTest {
   public void testSingleAnomalyNoMergeWithExistingIfUsageIsEvaluate() {
     final AnomalyDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
-    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
 
     detectionSpec.setUsage(DetectionPipelineUsage.EVALUATION);
@@ -448,7 +448,7 @@ public class AnomalyMergerPostProcessorTest {
     final EnumerationItemDTO ei1 = newEnumerationItemRef(enumerationItemId);
     final AnomalyDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H).setEnumerationItem(ei1);
-    when(mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
         anyLong(), anyLong(), eq(enumerationItemId))).thenAnswer(
         i -> singletonList(existingAnomaly));
     final EnumerationItemDTO enumerationDTO = (EnumerationItemDTO) new EnumerationItemDTO().setId(

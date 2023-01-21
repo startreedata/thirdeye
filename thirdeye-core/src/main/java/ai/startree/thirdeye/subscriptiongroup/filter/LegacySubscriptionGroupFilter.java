@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -48,13 +48,13 @@ public class LegacySubscriptionGroupFilter {
       AnomalyResultSource.ANOMALY_REPLAY
   );
 
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
 
   @Inject
-  public LegacySubscriptionGroupFilter(final MergedAnomalyResultManager mergedAnomalyResultManager,
+  public LegacySubscriptionGroupFilter(final AnomalyManager anomalyManager,
       final AlertManager alertManager) {
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
   }
 
@@ -163,7 +163,7 @@ public class LegacySubscriptionGroupFilter {
 
     final long startTime = findStartTime(vectorClocks, endTime, alertId);
 
-    final Collection<AnomalyDTO> candidates = mergedAnomalyResultManager
+    final Collection<AnomalyDTO> candidates = anomalyManager
         .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, endTime, alertId);
 
     return candidates.stream()

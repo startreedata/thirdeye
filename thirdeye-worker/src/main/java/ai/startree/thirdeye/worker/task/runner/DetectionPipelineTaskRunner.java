@@ -22,8 +22,8 @@ import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -59,7 +59,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AlertManager alertManager;
   private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
   private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
-  private final MergedAnomalyResultManager anomalyDao;
+  private final AnomalyManager anomalyDao;
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
 
@@ -68,7 +68,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
       final MetricRegistry metricRegistry,
       final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
-      final MergedAnomalyResultManager anomalyDao,
+      final AnomalyManager anomalyDao,
       final PlanExecutor planExecutor,
       final AlertTemplateRenderer alertTemplateRenderer) {
     this.alertManager = alertManager;

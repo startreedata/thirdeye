@@ -24,9 +24,9 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -56,7 +56,7 @@ public class RcaInfoFetcher {
   public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
   public static final EventContextDto EMPTY_CONTEXT_DTO = new EventContextDto();
-  private final MergedAnomalyResultManager mergedAnomalyDAO;
+  private final AnomalyManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
   private final DatasetConfigManager datasetDAO;
   private final MetricConfigManager metricDAO;
@@ -64,7 +64,7 @@ public class RcaInfoFetcher {
   private final EnumerationItemManager enumerationItemManager;
 
   @Inject
-  public RcaInfoFetcher(final MergedAnomalyResultManager mergedAnomalyDAO,
+  public RcaInfoFetcher(final AnomalyManager mergedAnomalyDAO,
       final AlertManager alertDAO,
       final DatasetConfigManager datasetDAO,
       final MetricConfigManager metricDAO,

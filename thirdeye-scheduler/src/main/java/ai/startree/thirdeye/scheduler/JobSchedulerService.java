@@ -15,8 +15,8 @@ package ai.startree.thirdeye.scheduler;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
@@ -35,13 +35,13 @@ public class JobSchedulerService {
 
   private final TaskManager taskManager;
   private final AlertManager alertManager;
-  private final MergedAnomalyResultManager anomalyManager;
+  private final AnomalyManager anomalyManager;
   private final AnomalySubscriptionGroupNotificationManager notificationManager;
 
   @Inject
   public JobSchedulerService(final TaskManager taskManager,
       final AlertManager alertManager,
-      final MergedAnomalyResultManager anomalyManager,
+      final AnomalyManager anomalyManager,
       final AnomalySubscriptionGroupNotificationManager notificationManager) {
     this.taskManager = taskManager;
     this.alertManager = alertManager;

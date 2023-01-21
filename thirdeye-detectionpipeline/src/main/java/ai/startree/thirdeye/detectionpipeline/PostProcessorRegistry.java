@@ -18,8 +18,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
@@ -42,11 +42,11 @@ public class PostProcessorRegistry {
   private final Map<String, AnomalyPostProcessorFactory> anomalyPostProcessorFactoryMap = new HashMap<>();
   private final DatasetConfigManager datasetDao;
   private final MinMaxTimeLoader minMaxTimeLoader;
-  private final MergedAnomalyResultManager anomalyDao;
+  private final AnomalyManager anomalyDao;
 
   @Inject
   public PostProcessorRegistry(final DatasetConfigManager datasetDao,
-      final MinMaxTimeLoader minMaxTimeLoader, final MergedAnomalyResultManager anomalyDao) {
+      final MinMaxTimeLoader minMaxTimeLoader, final AnomalyManager anomalyDao) {
     this.datasetDao = datasetDao;
     this.minMaxTimeLoader = minMaxTimeLoader;
     this.anomalyDao = anomalyDao;

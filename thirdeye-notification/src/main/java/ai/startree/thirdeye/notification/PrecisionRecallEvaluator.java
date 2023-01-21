@@ -16,7 +16,7 @@ package ai.startree.thirdeye.notification;
 import ai.startree.thirdeye.notification.anomalyfilter.AlertFilterFactory;
 import ai.startree.thirdeye.notification.anomalyfilter.AnomalyFilter;
 import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
@@ -51,7 +51,7 @@ public class PrecisionRecallEvaluator {
   public static final Double WEIGHT_OF_NULL_LABEL = 0.5;
 
   protected final AnomalyFilter anomalyFilter;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
 
   protected boolean useAlertFilterOnAnomaly = false;
   protected AlertFilterFactory alertFilterFactory;
@@ -72,12 +72,12 @@ public class PrecisionRecallEvaluator {
    * performance statistics for this alert filter
    *  @param anomalies the list of anomalies as data for alert filter
    * @param anomalyFilter the alert filter to be evaluated
-   * @param mergedAnomalyResultManager
+   * @param anomalyManager
    */
   public PrecisionRecallEvaluator(List<AnomalyDTO> anomalies,
       final AnomalyFilter anomalyFilter,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+      final AnomalyManager anomalyManager) {
+    this.anomalyManager = anomalyManager;
     this.anomalyFilter = anomalyFilter;
     this.isProjected = true;
     init(anomalies);
@@ -98,13 +98,13 @@ public class PrecisionRecallEvaluator {
    * reach more than 50% of user report region,
    * return user report anomaly as qualified, otherwise return false
    *
-   * @param mergedAnomalyResultManager
+   * @param anomalyManager
    * @param anomalyFilter alert filter to evaluate system detected anoamlies isQualified
    */
   private static Boolean isUserReportAnomalyIsQualified(AnomalyFilter anomalyFilter,
       AnomalyDTO userReportAnomaly,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    List<AnomalyDTO> systemAnomalies = mergedAnomalyResultManager
+      final AnomalyManager anomalyManager) {
+    List<AnomalyDTO> systemAnomalies = anomalyManager
         .findByFunctionId(userReportAnomaly.getAnomalyFunction().getId());
     long startTime = userReportAnomaly.getStartTime();
     long endTime = userReportAnomaly.getEndTime();
@@ -242,7 +242,7 @@ public class PrecisionRecallEvaluator {
           }
         } else {
           if (isUserReportAnomalyIsQualified(anomalyFilterOfAnomaly, anomaly,
-              mergedAnomalyResultManager)) {
+              anomalyManager)) {
             notifiedTrueAnomaly++;
           } else {
             userReportTrueAnomaly++;

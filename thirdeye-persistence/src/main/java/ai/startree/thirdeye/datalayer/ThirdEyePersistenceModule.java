@@ -19,6 +19,7 @@ import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertSnapshotManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertTemplateManagerImpl;
+import ai.startree.thirdeye.datalayer.bao.AnomalyManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DataSourceManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
@@ -27,7 +28,6 @@ import ai.startree.thirdeye.datalayer.bao.EntityToEntityMappingManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EventManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.JobManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.MergedAnomalyResultManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OnboardDatasetMetricManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OnlineDetectionDataManagerImpl;
@@ -63,6 +63,7 @@ import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertSnapshotManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -71,7 +72,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.EntityToEntityMappingManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
@@ -134,7 +134,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(javax.sql.DataSource.class).toInstance(dataSource);
     bind(DataSource.class).toInstance(dataSource);
 
-    bind(MergedAnomalyResultManager.class).to(MergedAnomalyResultManagerImpl.class).in(
+    bind(AnomalyManager.class).to(AnomalyManagerImpl.class).in(
         Scopes.SINGLETON);
     bind(JobManager.class).to(JobManagerImpl.class).in(Scopes.SINGLETON);
     bind(TaskManager.class).to(TaskManagerImpl.class).in(Scopes.SINGLETON);

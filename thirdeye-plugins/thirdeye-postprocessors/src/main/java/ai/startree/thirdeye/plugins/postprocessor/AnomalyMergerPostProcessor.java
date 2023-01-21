@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -93,7 +93,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   private final @Nullable Long alertId;
   private final @Nullable EnumerationItemDTO enumerationItem;
   private final DetectionPipelineUsage usage;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
 
   // obtained at runtime
   private Chronology chronology;
@@ -105,7 +105,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     this.usage = spec.getUsage();
     this.enumerationItem = spec.getEnumerationItemDTO();
 
-    this.mergedAnomalyResultManager = spec.getMergedAnomalyResultManager();
+    this.anomalyManager = spec.getMergedAnomalyResultManager();
   }
 
   @Override
@@ -190,7 +190,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         enumerationItemId = requireNonNull(enumerationItem.getId(),
             "Enumeration item id is null. Cannot ensure enumeration item exists in persistence layer before merging anomalies by enumeration.");
       }
-      return mergedAnomalyResultManager.findByStartEndTimeInRangeAndDetectionConfigId(
+      return anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(
           mergeLowerBound,
           mergeUpperBound,
           alertId,

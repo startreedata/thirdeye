@@ -17,7 +17,7 @@ import static java.util.Collections.singleton;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -32,15 +32,15 @@ public class AlertDeleter {
 
   private final AlertManager alertManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
 
   @Inject
   public AlertDeleter(final AlertManager alertManager,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+      final AnomalyManager anomalyManager) {
     this.alertManager = alertManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.anomalyManager = anomalyManager;
   }
 
   public void delete(final AlertDTO dto) {
@@ -53,9 +53,9 @@ public class AlertDeleter {
   }
 
   public void deleteAssociatedAnomalies(final Long alertId) {
-    final List<AnomalyDTO> anomalies = mergedAnomalyResultManager.findByPredicate(
+    final List<AnomalyDTO> anomalies = anomalyManager.findByPredicate(
         Predicate.EQ("detectionConfigId", alertId));
-    anomalies.forEach(mergedAnomalyResultManager::delete);
+    anomalies.forEach(anomalyManager::delete);
   }
 
   @SuppressWarnings("unchecked")

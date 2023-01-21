@@ -24,7 +24,7 @@ import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -56,7 +56,7 @@ public class AppAnalyticsService {
 
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
-  private final MergedAnomalyResultManager anomalyManager;
+  private final AnomalyManager anomalyManager;
 
   public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
       Suppliers.memoizeWithExpiration(this::getAllAnomalyFeedbacks, 5, TimeUnit.MINUTES)::get;
@@ -66,7 +66,7 @@ public class AppAnalyticsService {
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
-      final MergedAnomalyResultManager anomalyManager,
+      final AnomalyManager anomalyManager,
       final MetricRegistry metricRegistry) {
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;

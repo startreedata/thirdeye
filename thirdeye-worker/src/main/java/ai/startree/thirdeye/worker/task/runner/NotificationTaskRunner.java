@@ -20,7 +20,7 @@ import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationSchemeFactory;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -57,7 +57,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
@@ -69,13 +69,13 @@ public class NotificationTaskRunner implements TaskRunner {
   public NotificationTaskRunner(
       final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AnomalyManager anomalyManager,
       final MetricRegistry metricRegistry,
       final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder) {
     this.notificationSchemeFactory = notificationSchemeFactory;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.anomalyManager = anomalyManager;
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
@@ -176,7 +176,7 @@ public class NotificationTaskRunner implements TaskRunner {
     /* Record watermarks and update entities */
     for (final AnomalyDTO anomaly : result.getAllAnomalies()) {
       anomaly.setNotified(true);
-      mergedAnomalyResultManager.update(anomaly);
+      anomalyManager.update(anomaly);
     }
     updateSubscriptionWatermarks(subscriptionGroup, result.getAllAnomalies());
   }

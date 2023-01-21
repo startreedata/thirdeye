@@ -17,7 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.List;
 
-public interface MergedAnomalyResultManager extends AbstractManager<AnomalyDTO> {
+public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   AnomalyDTO findById(Long id);
 

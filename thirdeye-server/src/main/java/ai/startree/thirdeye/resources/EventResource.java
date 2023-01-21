@@ -23,8 +23,8 @@ import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.EventApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.common.collect.ImmutableMap;
@@ -59,19 +59,19 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
       .build();
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
   private final HolidayEventsLoader holidayEventsLoader;
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
 
   @Inject
   public EventResource(
       final EventManager eventManager,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final HolidayEventsLoader holidayEventsLoader,
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AnomalyManager anomalyManager,
       final AuthorizationManager authorizationManager) {
     super(eventManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.holidayEventsLoader = holidayEventsLoader;
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.anomalyManager = anomalyManager;
   }
 
   @Override
@@ -115,7 +115,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("anomalyId") long anomalyId
   ) {
-    final AnomalyDTO anomalyDto = ensureExists(mergedAnomalyResultManager.findById(
+    final AnomalyDTO anomalyDto = ensureExists(anomalyManager.findById(
         anomalyId));
     final EventDTO eventDTO = new EventDTO()
         .setName("Anomaly " + anomalyId)

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.subscriptiongroup.suppress;
 
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -57,12 +57,12 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
 
   // The acceptable deviation from the dropped/risen value during the suppression period (ex: 0.1 for +/- 10%)
   static final String ACCEPTABLE_DEVIATION_KEY = "acceptableDeviation";
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
 
   public DetectionAlertTimeWindowSuppressor(SubscriptionGroupDTO config,
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
+      final AnomalyManager anomalyManager) {
     super(config);
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    this.anomalyManager = anomalyManager;
   }
 
   private boolean isAnomalySuppressedByThreshold(double anomalyWeight,
@@ -139,7 +139,7 @@ public class DetectionAlertTimeWindowSuppressor extends DetectionAlertSuppressor
               .setComment("Suppressed anomaly. Auto-labeling as true anomaly.");
 
           anomaly.setFeedback(feedback);
-          mergedAnomalyResultManager.updateAnomalyFeedback(anomaly);
+          anomalyManager.updateAnomalyFeedback(anomaly);
         }
       }
     }

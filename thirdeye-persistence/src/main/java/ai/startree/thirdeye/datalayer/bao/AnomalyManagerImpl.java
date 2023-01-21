@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import com.codahale.metrics.CachedGauge;
@@ -48,10 +48,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<AnomalyDTO>
-    implements MergedAnomalyResultManager {
+public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
+    implements AnomalyManager {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MergedAnomalyResultManagerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AnomalyManagerImpl.class);
 
   private static final String FIND_BY_TIME =
       "where (startTime < :endTime and endTime > :startTime) "
@@ -64,7 +64,7 @@ public class MergedAnomalyResultManagerImpl extends AbstractManagerImpl<AnomalyD
       new ThreadFactoryBuilder().setNameFormat("anomaly-manager-%d").build());
 
   @Inject
-  public MergedAnomalyResultManagerImpl(final GenericPojoDao genericPojoDao,
+  public AnomalyManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(AnomalyDTO.class, genericPojoDao);
     metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {

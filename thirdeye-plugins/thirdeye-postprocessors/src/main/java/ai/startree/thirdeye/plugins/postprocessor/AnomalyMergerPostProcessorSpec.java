@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 
@@ -41,7 +41,7 @@ public class AnomalyMergerPostProcessorSpec {
   /**
    * Set by the detection pipeline at runtime.
    */
-  private MergedAnomalyResultManager mergedAnomalyResultManager;
+  private AnomalyManager anomalyManager;
 
   /**
    * Set by the detection pipeline at runtime.
@@ -75,13 +75,13 @@ public class AnomalyMergerPostProcessorSpec {
     return this;
   }
 
-  public MergedAnomalyResultManager getMergedAnomalyResultManager() {
-    return mergedAnomalyResultManager;
+  public AnomalyManager getMergedAnomalyResultManager() {
+    return anomalyManager;
   }
 
   public AnomalyMergerPostProcessorSpec setMergedAnomalyResultManager(
-      final MergedAnomalyResultManager mergedAnomalyResultManager) {
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+      final AnomalyManager anomalyManager) {
+    this.anomalyManager = anomalyManager;
     return this;
   }
 

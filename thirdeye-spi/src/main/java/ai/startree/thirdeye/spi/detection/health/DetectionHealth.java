@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.spi.detection.health;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -100,7 +100,7 @@ public class DetectionHealth {
     private final long startTime;
     private final long endTime;
     private final long detectionConfigId;
-    private MergedAnomalyResultManager anomalyDAO;
+    private AnomalyManager anomalyDAO;
     private TaskManager taskDAO;
     // the number of task DTO returned in the detectionHealth
     private long taskLimit;
@@ -143,7 +143,7 @@ public class DetectionHealth {
      * @param anomalyDAO the anomaly dao
      * @return the builder
      */
-    public Builder addAnomalyCoverageStatus(MergedAnomalyResultManager anomalyDAO) {
+    public Builder addAnomalyCoverageStatus(AnomalyManager anomalyDAO) {
       this.anomalyDAO = anomalyDAO;
       return this;
     }

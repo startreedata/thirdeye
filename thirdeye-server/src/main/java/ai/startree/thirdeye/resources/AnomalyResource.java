@@ -26,7 +26,7 @@ import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MergedAnomalyResultManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import com.codahale.metrics.annotation.Timed;
@@ -69,18 +69,18 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
       .put("enumerationItem.id", "enumerationItemId")
       .put("feedback.id", "anomalyFeedbackId")
       .build();
-  private final MergedAnomalyResultManager mergedAnomalyResultManager;
+  private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
   private final AppAnalyticsService analyticsService;
 
   @Inject
   public AnomalyResource(
-      final MergedAnomalyResultManager mergedAnomalyResultManager,
+      final AnomalyManager anomalyManager,
       final AlertManager alertManager,
       final AppAnalyticsService analyticsService,
       final AuthorizationManager authorizationManager) {
-    super(mergedAnomalyResultManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
-    this.mergedAnomalyResultManager = mergedAnomalyResultManager;
+    super(anomalyManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
+    this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
     this.analyticsService = analyticsService;
   }
@@ -124,13 +124,13 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
 
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
     dto.setFeedback(feedbackDTO);
-    mergedAnomalyResultManager.updateAnomalyFeedback(dto);
+    anomalyManager.updateAnomalyFeedback(dto);
 
     if (dto.isChild()) {
-      optional(mergedAnomalyResultManager.findParent(dto))
+      optional(anomalyManager.findParent(dto))
           .ifPresent(p -> {
             p.setFeedback(feedbackDTO);
-            mergedAnomalyResultManager.updateAnomalyFeedback(p);
+            anomalyManager.updateAnomalyFeedback(p);
           });
     }
 

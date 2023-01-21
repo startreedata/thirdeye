@@ -24,3 +24,12 @@ CREATE DATABASE IF NOT EXISTS thirdeye_test
 -- Create thirdeye user
 CREATE USER IF NOT EXISTS 'uthirdeye'@'%' IDENTIFIED BY 'pass';
 GRANT ALL PRIVILEGES ON thirdeye_test.* TO 'uthirdeye'@'%';
+
+-- Create debug user
+-- CREATE USER IF NOT EXISTS 'tedebug'@'%' IDENTIFIED BY 'pass';
+
+-- Grant SELECT ONLY privileges
+-- GRANT SELECT ON thirdeye.* TO 'tedebug'@'%';
+
+-- Grant edit delete privileges
+-- GRANT INSERT, UPDATE, DELETE ON thirdeye.* TO 'tedebug'@'%';

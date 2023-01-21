@@ -43,27 +43,30 @@ public class TestGenericPojoDao {
     dao.deleteByPredicate(Predicate.NEQ(NAME, "null"), DataSourceDTO.class);
   }
 
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void testSaveEntityWithId() {
+    dao.create((new DataSourceDTO()).setId(12345L));
+  }
+
   @Test
   public void saveEntityTest() {
-    assertThat(dao.create((new DataSourceDTO()).setId(12345L))).isEqualTo(null);
-
-    DataSourceDTO dto1 = new DataSourceDTO()
+    final DataSourceDTO dto1 = new DataSourceDTO()
         .setName(TEST_NAMES.get(0))
         .setType(TEST_TYPES.get(0));
-    DataSourceDTO dto2 = new DataSourceDTO()
+    final DataSourceDTO dto2 = new DataSourceDTO()
         .setName(TEST_NAMES.get(1))
         .setType(TEST_TYPES.get(0));
-    Long id1 = dao.create(dto1);
-    Long id2 = dao.create(dto2);
+    final Long id1 = dao.create(dto1);
+    final Long id2 = dao.create(dto2);
 
     assertThat(dao.get(id1, DataSourceDTO.class).getName()).isEqualTo(TEST_NAMES.get(0));
     assertThat(dao.get(id2, DataSourceDTO.class).getName()).isEqualTo(TEST_NAMES.get(1));
 
     // On insertion of duplicate entry (same name), it should not be inserted
-    DataSourceDTO dto3 = new DataSourceDTO()
+    final DataSourceDTO dto3 = new DataSourceDTO()
         .setName(dto1.getName())
         .setType(dto1.getType());
-    Long id3 = dao.create(dto3);
+    final Long id3 = dao.create(dto3);
     // should return a null id
     assertThat(id3).isNull();
     // generic table must also have only 2 entries
@@ -72,26 +75,26 @@ public class TestGenericPojoDao {
 
   @Test(dependsOnMethods = "saveEntityTest", timeOut = 60000L)
   public void updateEntityTest() {
-    List<DataSourceDTO> dtos = dao.get(Predicate.EQ(TYPE, TEST_TYPES.get(0)), DataSourceDTO.class);
+    final List<DataSourceDTO> dtos = dao.get(Predicate.EQ(TYPE, TEST_TYPES.get(0)), DataSourceDTO.class);
     assertThat(dtos.size()).isEqualTo(2);
-    DataSourceDTO dto = dtos.get(0);
+    final DataSourceDTO dto = dtos.get(0);
     dto.setType(TEST_TYPES.get(1));
-    long idBeforeUpdate = dto.getId();
-    int rowsUpdated = dao.update(dto, Predicate.EQ(VERSION, 1));
+    final long idBeforeUpdate = dto.getId();
+    final int rowsUpdated = dao.update(dto, Predicate.EQ(VERSION, 1));
     // only 1 row must be updated
     assertThat(rowsUpdated).isEqualTo(1);
-    List<DataSourceDTO> dtoAfterUpdate = dao.get(Predicate.EQ(TYPE, TEST_TYPES.get(1)), DataSourceDTO.class);
+    final List<DataSourceDTO> dtoAfterUpdate = dao.get(Predicate.EQ(TYPE, TEST_TYPES.get(1)),
+        DataSourceDTO.class);
     assertThat(dtoAfterUpdate.size()).isEqualTo(1);
     assertThat(dtoAfterUpdate.get(0).getId()).isEqualTo(idBeforeUpdate);
   }
 
   @Test(dependsOnMethods = "updateEntityTest", timeOut = 60000L)
   public void deleteEntityTest() {
-    int deletedEntries = dao.deleteByPredicate(
+    final int deletedEntries = dao.deleteByPredicate(
         Predicate.IN(NAME, TEST_NAMES.toArray()),
         DataSourceDTO.class);
     assertThat(deletedEntries).isEqualTo(2);
     assertThat(dao.getAll(DataSourceDTO.class).size()).isEqualTo(0);
   }
-
 }

@@ -11,7 +11,7 @@ GET http://localhost:8080/api/anomalies?metadata.metric.name=nonexistentmetric
 
 ###
 
-GET http://localhost:8080/api/anomalies?metadata.dataset.name=us_monthly_air_passengers_simplified
+GET http://localhost:8080/api/anomalies?metadata.dataset.name=pageviews
 
 ###
 

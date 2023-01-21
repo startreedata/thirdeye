@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.datalayer.dao.SubEntities.BEAN_INDEX_MAP;
 import static ai.startree.thirdeye.datalayer.mapper.DtoIndexMapper.toAbstractIndexEntity;
 import static ai.startree.thirdeye.datalayer.mapper.GenericJsonEntityDtoMapper.toDto;
 import static ai.startree.thirdeye.datalayer.mapper.GenericJsonEntityDtoMapper.toGenericJsonEntity;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -83,22 +84,26 @@ public class GenericPojoDao {
   }
 
   public <E extends AbstractDTO> Long create(final E pojo) {
-    if (pojo.getId() != null) {
-      return null;
+    requireNonNull(pojo, "entity is null");
+    checkArgument(pojo.getId() == null, "id must be null for create flow.");
+
+    /* Populate createTime before DB insert if not present already */
+    if (pojo.getCreateTime() == null) {
+      pojo.setCreateTime(new Timestamp(System.currentTimeMillis()));
     }
     try {
       return transactionService.executeTransaction((connection) -> {
-        final GenericJsonEntity genericJsonEntity = toGenericJsonEntity(pojo);
+        final GenericJsonEntity e = toGenericJsonEntity(pojo);
         final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(pojo.getClass());
-        final Long generatedKey = databaseService.save(genericJsonEntity, connection);
+        final Long generatedKey = databaseService.save(e, connection);
         pojo.setId(generatedKey);
         if (indexClass != null) {
           final AbstractIndexEntity abstractIndexEntity = toAbstractIndexEntity(
               pojo,
               indexClass,
-              genericJsonEntity.getJsonVal());
+              e.getJsonVal());
           abstractIndexEntity.setVersion(1);
-          abstractIndexEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+          abstractIndexEntity.setCreateTime(pojo.getCreateTime());
           return databaseService.save(abstractIndexEntity, connection);
         } else {
           return pojo.getId();

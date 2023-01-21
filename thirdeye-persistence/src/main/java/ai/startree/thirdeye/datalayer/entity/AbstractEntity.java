@@ -24,46 +24,44 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public abstract class AbstractEntity {
 
   protected Long id;
-
   protected Timestamp createTime;
-
   protected Timestamp updateTime;
-
   protected int version;
 
-  protected AbstractEntity() {
-  }
-  
   public Long getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public AbstractEntity setId(final Long id) {
     this.id = id;
+    return this;
   }
 
   public Timestamp getCreateTime() {
     return createTime;
   }
 
-  public void setCreateTime(Timestamp createTime) {
+  public AbstractEntity setCreateTime(final Timestamp createTime) {
     this.createTime = createTime;
+    return this;
   }
 
   public Timestamp getUpdateTime() {
     return updateTime;
   }
 
-  public void setUpdateTime(Timestamp updateTime) {
+  public AbstractEntity setUpdateTime(final Timestamp updateTime) {
     this.updateTime = updateTime;
+    return this;
   }
 
   public int getVersion() {
     return version;
   }
 
-  public void setVersion(int version) {
+  public AbstractEntity setVersion(final int version) {
     this.version = version;
+    return this;
   }
 
   @Override

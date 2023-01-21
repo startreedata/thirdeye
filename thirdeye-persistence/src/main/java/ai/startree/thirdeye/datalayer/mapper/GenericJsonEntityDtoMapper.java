@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.Timestamp;
 
 public class GenericJsonEntityDtoMapper {
 
@@ -33,26 +32,31 @@ public class GenericJsonEntityDtoMapper {
 
   public static <E extends AbstractDTO> GenericJsonEntity toGenericJsonEntity(final E pojo)
       throws JsonProcessingException {
-    final GenericJsonEntity ret = new GenericJsonEntity();
     final int version = pojo.getVersion() == 0 ? 1 : pojo.getVersion();
-    ret.setId(pojo.getId());
-    ret.setCreateTime(new Timestamp(System.currentTimeMillis()));
-    ret.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-    ret.setVersion(version);
-    ret.setType(SubEntities.getType(pojo.getClass()));
     final String jsonVal = toJsonString(pojo);
-    ret.setJsonVal(jsonVal);
-    return ret;
+
+    final GenericJsonEntity entity = new GenericJsonEntity()
+        .setType(SubEntities.getType(pojo.getClass()))
+        .setJsonVal(jsonVal);
+
+    entity
+        .setId(pojo.getId())
+        .setCreateTime(pojo.getCreateTime())
+        .setUpdateTime(pojo.getUpdateTime())
+        .setVersion(version);
+
+    return entity;
   }
 
-  public static <E extends AbstractDTO> E toDto(final GenericJsonEntity entity,
-      final Class<E> beanClass)
+  public static <DtoT extends AbstractDTO> DtoT toDto(final GenericJsonEntity entity,
+      final Class<DtoT> beanClass)
       throws JsonProcessingException {
-    E e = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
-    e.setId(entity.getId());
-    e.setVersion(entity.getVersion());
-    e.setCreateTime(entity.getCreateTime());
-    e.setUpdateTime(entity.getUpdateTime());
-    return e;
+    DtoT dto = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+    dto
+        .setId(entity.getId())
+        .setVersion(entity.getVersion())
+        .setCreateTime(entity.getCreateTime())
+        .setUpdateTime(entity.getUpdateTime());
+    return dto;
   }
 }

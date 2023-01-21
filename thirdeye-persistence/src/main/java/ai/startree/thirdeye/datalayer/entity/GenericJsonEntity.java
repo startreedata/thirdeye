@@ -16,22 +16,23 @@ package ai.startree.thirdeye.datalayer.entity;
 public class GenericJsonEntity extends AbstractEntity {
 
   protected String jsonVal;
-
   protected String type;
 
   public String getJsonVal() {
     return jsonVal;
   }
 
-  public void setJsonVal(String jsonVal) {
+  public GenericJsonEntity setJsonVal(final String jsonVal) {
     this.jsonVal = jsonVal;
+    return this;
   }
 
   public String getType() {
     return type;
   }
 
-  public void setType(String type) {
+  public GenericJsonEntity setType(final String type) {
     this.type = type;
+    return this;
   }
 }

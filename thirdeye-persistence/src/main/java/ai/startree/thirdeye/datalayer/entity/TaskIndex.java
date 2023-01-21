@@ -75,14 +75,6 @@ public class TaskIndex extends AbstractIndexEntity {
     this.type = type;
   }
 
-  public int getVersion() {
-    return version;
-  }
-
-  public void setVersion(int version) {
-    this.version = version;
-  }
-
   public long getWorkerId() {
     return workerId;
   }

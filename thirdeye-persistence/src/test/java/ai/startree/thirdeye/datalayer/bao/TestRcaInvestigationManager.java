@@ -33,6 +33,7 @@ public class TestRcaInvestigationManager {
   public static final String INVESTIGATION_DESCRIPTION = "this is a test investigation";
   public static final Map<String, Object> INVESTIGATION_UI_METADATA = Map.of("k1", "v1");
   public static final Long INVESTIGATION_ANOMALY_ID = 123L;
+  private static final long OFFSET_10Y_MS = 10 * 365 * 24 * 60 * 60 * 1000L;
   private RcaInvestigationManager sessionDAO;
 
   private static RcaInvestigationDTO makeDefault() {
@@ -174,13 +175,16 @@ public class TestRcaInvestigationManager {
 
   @Test
   public void testFindByCreatedRange() {
-    this.sessionDAO.save(makeCreated(800));
-    this.sessionDAO.save(makeCreated(900));
-    this.sessionDAO.save(makeCreated(1000));
+    this.sessionDAO.save(makeCreated(800 + OFFSET_10Y_MS));
+    this.sessionDAO.save(makeCreated(900 + OFFSET_10Y_MS));
+    this.sessionDAO.save(makeCreated(1000 + OFFSET_10Y_MS));
 
-    List<RcaInvestigationDTO> sessionsBefore = this.sessionDAO.findByCreatedRange(700, 800);
-    List<RcaInvestigationDTO> sessionsMid = this.sessionDAO.findByCreatedRange(800, 1000);
-    List<RcaInvestigationDTO> sessionsEnd = this.sessionDAO.findByCreatedRange(1000, 1500);
+    List<RcaInvestigationDTO> sessionsBefore = this.sessionDAO.findByCreatedRange(
+        700 + OFFSET_10Y_MS, 800 + OFFSET_10Y_MS);
+    List<RcaInvestigationDTO> sessionsMid = this.sessionDAO.findByCreatedRange(800 + OFFSET_10Y_MS,
+        1000 + OFFSET_10Y_MS);
+    List<RcaInvestigationDTO> sessionsEnd = this.sessionDAO.findByCreatedRange(1000 + OFFSET_10Y_MS,
+        1500 + OFFSET_10Y_MS);
 
     Assert.assertEquals(sessionsBefore.size(), 0);
     Assert.assertEquals(sessionsMid.size(), 2);
@@ -189,13 +193,13 @@ public class TestRcaInvestigationManager {
 
   @Test
   public void testFindByUpdatedRange() {
-    this.sessionDAO.save(makeUpdated(800));
-    this.sessionDAO.save(makeUpdated(900));
-    this.sessionDAO.save(makeUpdated(1000));
+    this.sessionDAO.save(makeUpdated(800 + OFFSET_10Y_MS));
+    this.sessionDAO.save(makeUpdated(900 + OFFSET_10Y_MS));
+    this.sessionDAO.save(makeUpdated(1000 + OFFSET_10Y_MS));
 
-    List<RcaInvestigationDTO> sessionsBefore = this.sessionDAO.findByUpdatedRange(700, 800);
-    List<RcaInvestigationDTO> sessionsMid = this.sessionDAO.findByUpdatedRange(800, 1000);
-    List<RcaInvestigationDTO> sessionsEnd = this.sessionDAO.findByUpdatedRange(1000, 1500);
+    List<RcaInvestigationDTO> sessionsBefore = this.sessionDAO.findByUpdatedRange(700 + OFFSET_10Y_MS, 800 + OFFSET_10Y_MS);
+    List<RcaInvestigationDTO> sessionsMid = this.sessionDAO.findByUpdatedRange(800 + OFFSET_10Y_MS, 1000 + OFFSET_10Y_MS);
+    List<RcaInvestigationDTO> sessionsEnd = this.sessionDAO.findByUpdatedRange(1000 + OFFSET_10Y_MS, 1500 + OFFSET_10Y_MS);
 
     Assert.assertEquals(sessionsBefore.size(), 0);
     Assert.assertEquals(sessionsMid.size(), 2);

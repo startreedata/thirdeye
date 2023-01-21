@@ -52,14 +52,15 @@ public class DatabaseService {
     dbReadDuration = metricRegistry.histogram("dbReadDuration");
   }
 
-
-  public <E extends AbstractEntity> E find(final Long id, final Class<E> clazz, final Connection connection)
+  public <E extends AbstractEntity> E find(final Long id, final Class<E> clazz,
+      final Connection connection)
       throws Exception {
     return findAll(Predicate.EQ(getIdColumnName(clazz), id), null, null, clazz, connection)
         .stream().findFirst().orElse(null);
   }
 
-  public <E extends AbstractEntity> List<E> findAll(final Predicate predicate, final Long limit, final Long offset, final Class<E> clazz, final Connection connection)
+  public <E extends AbstractEntity> List<E> findAll(final Predicate predicate, final Long limit,
+      final Long offset, final Class<E> clazz, final Connection connection)
       throws Exception {
     final long tStart = System.nanoTime();
     try {
@@ -103,18 +104,18 @@ public class DatabaseService {
     }
   }
 
-
-  public <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate, final Connection connection)
+  public <E extends AbstractEntity> Integer update(final E entity, final Predicate predicate,
+      final Connection connection)
       throws Exception {
     final E dbEntity = (E) find(entity.getId(), entity.getClass(), connection);
     final Predicate finalPredicate;
     final String idCol = getIdColumnName(entity.getClass());
-    if(predicate == null) {
+    if (predicate == null) {
       finalPredicate = Predicate.EQ(idCol, entity.getId());
     } else {
       finalPredicate = Predicate.AND(predicate, Predicate.EQ(idCol, entity.getId()));
     }
-    if(dbEntity != null) {
+    if (dbEntity != null) {
       final long tStart = System.nanoTime();
       entity.setCreateTime(dbEntity.getCreateTime());
       try {
@@ -149,7 +150,8 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractEntity> Long count(final Predicate predicate, final Class<E> clazz, final Connection connection)
+  public <E extends AbstractEntity> Long count(final Predicate predicate, final Class<E> clazz,
+      final Connection connection)
       throws Exception {
     final long tStart = System.nanoTime();
     try {
@@ -177,19 +179,18 @@ public class DatabaseService {
       final Connection connection) throws Exception {
     final long tStart = System.nanoTime();
     try {
-        try (final PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
-            .createStatementFromSQL(connection,
-                parameterizedSQL,
-                parameterMap,
-                clazz)) {
-          try (final ResultSet rs = findMatchingIdsStatement.executeQuery()) {
-            return genericResultSetMapper.mapAll(rs, clazz);
-          }
+      try (final PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
+          .createStatementFromSQL(connection,
+              parameterizedSQL,
+              parameterMap,
+              clazz)) {
+        try (final ResultSet rs = findMatchingIdsStatement.executeQuery()) {
+          return genericResultSetMapper.mapAll(rs, clazz);
         }
+      }
     } finally {
       dbReadCallCounter.inc();
       dbReadDuration.update(System.nanoTime() - tStart);
     }
   }
-
 }

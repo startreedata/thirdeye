@@ -78,7 +78,7 @@ public interface AnomalyMapper {
         .setId(dto.getId())
         .setStartTime(new Date(dto.getStartTime()))
         .setEndTime(new Date(dto.getEndTime()))
-        .setCreated(new Date(dto.getCreatedTime()))
+        .setCreated(dto.getCreateTime())
         .setAvgCurrentVal(dto.getAvgCurrentVal())
         .setAvgBaselineVal(dto.getAvgBaselineVal())
         .setScore(dto.getScore())

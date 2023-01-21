@@ -43,6 +43,7 @@ import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -202,6 +203,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   @NonNull
   private AnomalyDTO newAnomaly() {
     final AnomalyDTO anomaly = new AnomalyDTO();
+    anomaly.setCreateTime(new Timestamp(System.currentTimeMillis()));
     anomaly.setDetectionConfigId(alertId);
     anomaly.setEnumerationItem(enumerationItemRef);
     anomalyMetric.ifPresent(anomaly::setMetric);

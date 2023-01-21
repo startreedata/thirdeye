@@ -69,12 +69,11 @@ public class LegacySubscriptionGroupFilter {
         && !anomaly.getFeedback().getFeedbackType().isUnresolved();
   }
 
-  private static boolean shouldFilter(final long startTime,
-      final AnomalyDTO anomaly) {
+  private static boolean shouldFilter(final AnomalyDTO anomaly, final long startTime) {
     return anomaly != null
         && !anomaly.isChild()
         && !hasFeedback(anomaly)
-        && anomaly.getCreatedTime() > startTime
+        && anomaly.getCreateTime().getTime() > startTime
         && !isIgnore(anomaly)
         && ANOMALY_RESULT_SOURCES.contains(anomaly.getAnomalyResultSource());
   }
@@ -167,7 +166,7 @@ public class LegacySubscriptionGroupFilter {
         .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, endTime, alertId);
 
     return candidates.stream()
-        .filter(anomaly -> shouldFilter(startTime, anomaly))
+        .filter(anomaly -> shouldFilter(anomaly, startTime))
         .collect(toSet());
   }
 }

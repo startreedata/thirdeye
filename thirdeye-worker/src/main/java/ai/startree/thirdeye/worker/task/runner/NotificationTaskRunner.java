@@ -35,6 +35,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,9 +92,9 @@ public class NotificationTaskRunner implements TaskRunner {
       if (alertId == null) {
         continue;
       }
-      final long currentMax = alertIdToAnomalyCreateTimeMax.getOrDefault(alertId,
-          optional(a.getCreatedTime()).orElse(-1L));
-      final long newMax = Math.max(currentMax, a.getCreatedTime());
+      final long createTime = optional(a.getCreateTime()).map(Timestamp::getTime).orElse(-1L);
+      final long currentMax = alertIdToAnomalyCreateTimeMax.getOrDefault(alertId, createTime);
+      final long newMax = Math.max(currentMax, createTime);
       alertIdToAnomalyCreateTimeMax.put(alertId, newMax);
     }
     return alertIdToAnomalyCreateTimeMax;

@@ -57,11 +57,6 @@ public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
   // Being used as identifying if two merged anomalies have same anomaly detection properties, thus can be mergeable
   private Map<String, String> properties = new HashMap<>();
 
-  /**
-   * use createTime
-   */
-  @Deprecated()
-  private Long createdTime;
   private boolean notified;
   private String message;
   @Deprecated
@@ -90,10 +85,6 @@ public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
 
   private EnumerationItemDTO enumerationItem;
   private List<AnomalyLabelDTO> anomalyLabels;
-
-  public AnomalyDTO() {
-    setCreatedTime(System.currentTimeMillis());
-  }
 
   public Set<Long> getChildIds() {
     return childIds;
@@ -225,22 +216,6 @@ public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
 
   public void setProperties(Map<String, String> properties) {
     this.properties = properties;
-  }
-
-  /**
-   * use createTime
-   */
-  @Deprecated()
-  public Long getCreatedTime() {
-    return createdTime;
-  }
-
-  /**
-   * use createTime
-   */
-  @Deprecated
-  public void setCreatedTime(Long createdTime) {
-    this.createdTime = createdTime;
   }
 
   public boolean isNotified() {

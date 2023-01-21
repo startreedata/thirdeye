@@ -125,7 +125,7 @@ public class SubEntities {
         .build();
   }
 
-  static String getType(final Class<? extends AbstractDTO> pojoClass) {
+  public static String getType(final Class<? extends AbstractDTO> pojoClass) {
     final SubEntityType subEntityType = BEAN_TYPE_MAP.get(pojoClass);
     return requireNonNull(subEntityType, "entity type not found!").toString();
   }

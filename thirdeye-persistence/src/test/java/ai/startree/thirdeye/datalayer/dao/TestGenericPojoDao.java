@@ -45,7 +45,7 @@ public class TestGenericPojoDao {
 
   @Test
   public void saveEntityTest() {
-    assertThat(dao.put((new DataSourceDTO()).setId(12345L))).isEqualTo(null);
+    assertThat(dao.create((new DataSourceDTO()).setId(12345L))).isEqualTo(null);
 
     DataSourceDTO dto1 = new DataSourceDTO()
         .setName(TEST_NAMES.get(0))
@@ -53,8 +53,8 @@ public class TestGenericPojoDao {
     DataSourceDTO dto2 = new DataSourceDTO()
         .setName(TEST_NAMES.get(1))
         .setType(TEST_TYPES.get(0));
-    Long id1 = dao.put(dto1);
-    Long id2 = dao.put(dto2);
+    Long id1 = dao.create(dto1);
+    Long id2 = dao.create(dto2);
 
     assertThat(dao.get(id1, DataSourceDTO.class).getName()).isEqualTo(TEST_NAMES.get(0));
     assertThat(dao.get(id2, DataSourceDTO.class).getName()).isEqualTo(TEST_NAMES.get(1));
@@ -63,7 +63,7 @@ public class TestGenericPojoDao {
     DataSourceDTO dto3 = new DataSourceDTO()
         .setName(dto1.getName())
         .setType(dto1.getType());
-    Long id3 = dao.put(dto3);
+    Long id3 = dao.create(dto3);
     // should return a null id
     assertThat(id3).isNull();
     // generic table must also have only 2 entries

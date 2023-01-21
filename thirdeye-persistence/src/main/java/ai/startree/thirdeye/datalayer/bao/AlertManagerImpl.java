@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
@@ -63,7 +62,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
       return alertDTO.getId();
     }
 
-    final Long id = genericPojoDao.put(alertDTO);
+    final Long id = genericPojoDao.create(alertDTO);
     alertDTO.setId(id);
     return id;
   }

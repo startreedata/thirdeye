@@ -38,16 +38,6 @@ public class GenericResultSetMapper {
     this.entityMappingHolder = entityMappingHolder;
   }
 
-  public <E extends AbstractEntity> E mapSingle(final ResultSet rs,
-      final Class<? extends AbstractEntity> entityClass)
-      throws Exception {
-    final List<E> resultMapList = (List<E>) toEntityList(rs, entityClass);
-    if (resultMapList.size() > 0) {
-      return resultMapList.get(0);
-    }
-    return null;
-  }
-
   public <E extends AbstractEntity> List<E> mapAll(final ResultSet rs,
       final Class<E> entityClass) throws Exception {
     return toEntityList(rs, entityClass);

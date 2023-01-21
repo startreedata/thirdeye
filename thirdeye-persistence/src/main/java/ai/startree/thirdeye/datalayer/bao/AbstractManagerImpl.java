@@ -43,7 +43,7 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
       update(entity);
       return entity.getId();
     }
-    final Long id = genericPojoDao.put(entity);
+    final Long id = genericPojoDao.create(entity);
     entity.setId(id);
     return id;
   }

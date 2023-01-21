@@ -121,7 +121,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final Set<Long> childAnomalyIds = saveChildAnomalies(anomalyDTO, visitedAnomalies);
     mergeAnomalyBean.setChildIds(childAnomalyIds);
 
-    final Long id = genericPojoDao.put(mergeAnomalyBean);
+    final Long id = genericPojoDao.create(mergeAnomalyBean);
     anomalyDTO.setId(id);
     return id;
   }
@@ -252,7 +252,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
     if (feedbackDTO != null) {
       if (feedbackDTO.getId() == null) {
-        final Long feedbackId = genericPojoDao.put(feedbackDTO);
+        final Long feedbackId = genericPojoDao.create(feedbackDTO);
         feedbackDTO.setId(feedbackId);
       } else {
         final AnomalyFeedbackDTO existingFeedback = genericPojoDao

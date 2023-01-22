@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.bao;
 
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.List;
@@ -24,7 +25,8 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
   List<AnomalyDTO> findByFunctionId(Long functionId);
 
   /**
-   * TODO spyne Refactor. Have a AnomalyFilter object to handle these. Else we'll keep adding params and methods.
+   * TODO spyne Refactor. Use filter(AnomalyFilter) object to handle these. Else we'll keep adding params and methods.
+   *
    * @return filtered list of anomalies
    */
   List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
@@ -32,6 +34,11 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
       long alertId,
       final Long enumerationItemId);
 
+  /**
+   * TODO spyne Refactor. Use filter(AnomalyFilter) object to handle these. Else we'll keep adding params and methods.
+   *
+   * @return filtered list of anomalies
+   */
   List<AnomalyDTO> findByCreatedTimeInRangeAndDetectionConfigId(long startTime,
       long endTime,
       long alertId);
@@ -44,10 +51,10 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   AnomalyDTO convertMergeAnomalyDTO2Bean(AnomalyDTO entity);
 
-  List<AnomalyDTO> convertMergedAnomalyBean2DTO(
-      List<AnomalyDTO> anomalyDTOList);
+  List<AnomalyDTO> decorate(List<AnomalyDTO> anomalyDTOList);
 
   long countParentAnomalies(DaoFilter filter);
 
+  List<AnomalyDTO> filter(AnomalyFilter anomalyFilter);
   List<AnomalyDTO> findParentAnomaliesWithFeedback(DaoFilter filter);
 }

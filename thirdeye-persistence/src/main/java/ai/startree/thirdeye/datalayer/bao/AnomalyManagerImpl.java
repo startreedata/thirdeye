@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.joda.time.base.AbstractInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,7 +180,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final List<AnomalyDTO> mergedAnomalyResultBeanList =
         genericPojoDao.get(idList, AnomalyDTO.class);
     if (CollectionUtils.isNotEmpty(mergedAnomalyResultBeanList)) {
-      return convertMergedAnomalyBean2DTO(mergedAnomalyResultBeanList);
+      return decorate(mergedAnomalyResultBeanList);
     } else {
       return Collections.emptyList();
     }
@@ -206,7 +208,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
 
     final List<AnomalyDTO> list = genericPojoDao
         .get(Predicate.AND(predicates.toArray(new Predicate[0])), AnomalyDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
+    return decorate(list);
   }
 
   @Override
@@ -220,7 +222,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
             Predicate.EQ("detectionConfigId", alertId));
     final List<AnomalyDTO> list = genericPojoDao
         .get(predicate, AnomalyDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
+    return decorate(list);
   }
 
   @Override
@@ -232,7 +234,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         FIND_BY_FUNCTION_ID,
         filterParams,
         AnomalyDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
+    return decorate(list);
   }
 
   @Override
@@ -244,7 +246,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final List<AnomalyDTO> list =
         genericPojoDao
             .executeParameterizedSQL(FIND_BY_TIME, filterParams, AnomalyDTO.class);
-    return convertMergedAnomalyBean2DTO(list);
+    return decorate(list);
   }
 
   @Override
@@ -335,40 +337,33 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   }
 
   @Override
-  public List<AnomalyDTO> convertMergedAnomalyBean2DTO(
-      final List<AnomalyDTO> mergedAnomalyResultBeanList) {
-    final List<Future<AnomalyDTO>> mergedAnomalyResultDTOFutureList = new ArrayList<>(
-        mergedAnomalyResultBeanList.size());
-    for (final AnomalyDTO anomalyDTO : mergedAnomalyResultBeanList) {
-      final Future<AnomalyDTO> future =
-          EXECUTOR_SERVICE.submit(() -> decorate(anomalyDTO,
-              new HashSet<>()));
-      mergedAnomalyResultDTOFutureList.add(future);
-    }
+  public List<AnomalyDTO> decorate(final List<AnomalyDTO> l) {
+    final List<Future<AnomalyDTO>> fList = l.stream()
+        .map(anomalyDTO -> EXECUTOR_SERVICE.submit(() -> decorate(anomalyDTO, new HashSet<>())))
+        .collect(Collectors.toList());
 
-    final List<AnomalyDTO> anomalyDTOList = new ArrayList<>(
-        mergedAnomalyResultBeanList.size());
-    for (final Future future : mergedAnomalyResultDTOFutureList) {
+    final List<AnomalyDTO> outList = new ArrayList<>(l.size());
+    for (final Future<AnomalyDTO> f : fList) {
       try {
-        anomalyDTOList.add((AnomalyDTO) future.get(60, TimeUnit.SECONDS));
+        outList.add(f.get(60, TimeUnit.SECONDS));
       } catch (final InterruptedException | TimeoutException | ExecutionException e) {
         LOG.warn("Failed to convert MergedAnomalyResultDTO from bean: {}", e.toString());
       }
     }
 
-    return anomalyDTOList;
+    return outList;
   }
 
   @Override
   public List<AnomalyDTO> findByPredicate(final Predicate predicate) {
     final List<AnomalyDTO> beanList = new ArrayList<>(super.findByPredicate(predicate));
-    return convertMergedAnomalyBean2DTO(beanList);
+    return decorate(beanList);
   }
 
   @Override
   public long countParentAnomalies(final DaoFilter filter) {
     Predicate predicate = Predicate.EQ("child", false);
-    if(filter != null && filter.getPredicate() != null) {
+    if (filter != null && filter.getPredicate() != null) {
       predicate = Predicate.AND(predicate, filter.getPredicate());
     }
     return count(predicate);
@@ -386,5 +381,30 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return findByPredicate(predicate).stream()
         .map(anomaly -> decorate(anomaly, new HashSet<>()))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<AnomalyDTO> filter(final AnomalyFilter af) {
+    final List<Predicate> predicates = new ArrayList<>();
+
+    optional(af.getCreateTimeWindow())
+        .map(AbstractInterval::getStartMillis)
+        .map(Timestamp::new)
+        .map(ts -> Predicate.GE("createTime", ts))
+        .ifPresent(predicates::add);
+
+    optional(af.getCreateTimeWindow())
+        .map(AbstractInterval::getEndMillis)
+        .map(Timestamp::new)
+        .map(ts -> Predicate.LT("createTime", ts))
+        .ifPresent(predicates::add);
+
+    optional(af.getAlertId())
+        .map(alertId -> Predicate.EQ("detectionConfigId", alertId))
+        .ifPresent(predicates::add);
+
+    final Predicate predicate = Predicate.AND(predicates.toArray(new Predicate[]{}));
+    final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate));
+    return decorate(list);
   }
 }

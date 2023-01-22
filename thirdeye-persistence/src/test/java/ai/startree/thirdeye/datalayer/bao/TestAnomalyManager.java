@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer.bao;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -33,7 +34,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -41,8 +44,11 @@ import org.testng.annotations.Test;
 
 public class TestAnomalyManager {
 
-  private AnomalyDTO mergedResult = null;
+  private static final long START_TIME = 1000 * ((long) (System.currentTimeMillis() / 1000.0));
+  private static final long END_TIME = START_TIME + 60_000L;
+  private static final long CREATED_TIME = END_TIME + 60_000L;
 
+  private AnomalyDTO mergedResult = null;
   private AlertManager detectionConfigDAO;
   private AnomalyManager mergedAnomalyResultDAO;
 
@@ -380,5 +386,35 @@ public class TestAnomalyManager {
     }
     Assert.assertNotNull(parent);
     Assert.assertEquals(parent, mergedAnomalyResultDAO.findParent(leafNode));
+  }
+
+  @Test
+  public void testFilterWithAnomalyFilter() throws InterruptedException {
+    final AnomalyDTO a1 = anomalyWithCreateTime(1000);
+    Thread.sleep(100);
+    final AnomalyDTO a2 = anomalyWithCreateTime(2000);
+    Thread.sleep(100);
+    final AnomalyDTO a3 = anomalyWithCreateTime(3000);
+    Thread.sleep(100);
+    final AnomalyDTO a4 = anomalyWithCreateTime(4000);
+
+    final List<AnomalyDTO> filtered = mergedAnomalyResultDAO.filter(new AnomalyFilter()
+        .setCreateTimeWindow(new Interval(
+                a2.getCreateTime().getTime(),
+                a4.getCreateTime().getTime())));
+
+    assertThat(new HashSet<>(filtered)).isEqualTo(Set.of(a2, a3));
+  }
+
+  private AnomalyDTO anomalyWithCreateTime(final long createTimeOffset) {
+    final AnomalyDTO anomaly = new AnomalyDTO()
+        .setStartTime(START_TIME)
+        .setEndTime(END_TIME);
+    anomaly.setCreateTime(new Timestamp(CREATED_TIME + createTimeOffset));
+    anomaly.setDetectionConfigId(1234L);
+
+    final long id = mergedAnomalyResultDAO.save(anomaly);
+    assertThat(id).isNotNull();
+    return anomaly;
   }
 }

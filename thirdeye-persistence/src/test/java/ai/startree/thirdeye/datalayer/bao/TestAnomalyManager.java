@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 
 public class TestAnomalyManager {
 
-  private static final long START_TIME = 1000 * ((long) (System.currentTimeMillis() / 1000.0));
+  private static final long START_TIME = System.currentTimeMillis();
   private static final long END_TIME = START_TIME + 60_000L;
   private static final long CREATED_TIME = END_TIME + 60_000L;
 

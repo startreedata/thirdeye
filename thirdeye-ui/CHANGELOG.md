@@ -1,3 +1,17 @@
+## [2.6.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.5.0...thirdeye-ui-2.6.0) (2023-01-22)
+
+
+### Features
+
+* [TE-1203](https://cortexdata.atlassian.net/browse/TE-1203) added enumeration items to anomalies list table and metrics report table ([fda14f085](https://github.com/startreedata/thirdeye/commit/fda14f085b01ffea9b138c91a835ff3b3d58c424))
+* [TE-1220](https://cortexdata.atlassian.net/browse/TE-1220) link to rca demo video in rca and anomaly details page ([13b288229](https://github.com/startreedata/thirdeye/commit/13b2882296d6ffc3d9e785e2d44748b871e0c4c5))
+* [TE-1240](https://cortexdata.atlassian.net/browse/TE-1240) using total anomaly count to calculate alert accuracy ([80e387aa3](https://github.com/startreedata/thirdeye/commit/80e387aa34f19d5cf407e0e13a7aa173efdddec7))
+
+
+### Bug Fixes
+
+* [TE-1228](https://cortexdata.atlassian.net/browse/TE-1228) use existing value for sensitivity if it exists for the slider in new user flow ([29b045587](https://github.com/startreedata/thirdeye/commit/29b04558753d54c489255485e6ee3f3ff208cb21))
+
 ## [2.5.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.4.0...thirdeye-ui-2.5.0) (2023-01-18)
 
 

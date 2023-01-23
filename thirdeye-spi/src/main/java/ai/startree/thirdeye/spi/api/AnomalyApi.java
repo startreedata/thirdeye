@@ -26,6 +26,7 @@ import java.util.List;
 public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
 
   private Long id;
+  private String namespace;
   private Date startTime;
   private Date endTime;
 
@@ -67,6 +68,15 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
 
   public AnomalyApi setId(final Long id) {
     this.id = id;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public AnomalyApi setNamespace(final String namespace) {
+    this.namespace = namespace;
     return this;
   }
 

@@ -444,6 +444,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   private static AnomalyDTO copyAnomalyInfo(final AnomalyDTO from) {
     final AnomalyDTO to = new AnomalyDTO();
+    to.setNamespace(from.getNamespace());
     to.setStartTime(from.getStartTime());
     to.setEndTime(from.getEndTime());
     to.setMetric(from.getMetric());

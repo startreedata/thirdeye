@@ -27,6 +27,7 @@ public class DetectionPipelineContext {
   private EnumerationItemDTO enumerationItem;
   private DetectionPipelineUsage usage;
   private Long alertId;
+  private String namespace;
 
   public ApplicationContext getApplicationContext() {
     return applicationContext;
@@ -82,6 +83,15 @@ public class DetectionPipelineContext {
 
   public DetectionPipelineContext setAlertId(final Long alertId) {
     this.alertId = alertId;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public DetectionPipelineContext setNamespace(final String namespace) {
+    this.namespace = namespace;
     return this;
   }
 }

@@ -90,6 +90,7 @@ public class AlertEvaluator {
 
       final DetectionPipelineContext context = new DetectionPipelineContext()
           .setAlertId(request.getAlert().getId())
+          .setNamespace(request.getAlert().getNamespace())
           .setUsage(DetectionPipelineUsage.EVALUATION)
           .setDetectionInterval(detectionInterval);
 

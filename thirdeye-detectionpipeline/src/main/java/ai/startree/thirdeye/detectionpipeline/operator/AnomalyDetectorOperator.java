@@ -63,6 +63,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   // anomaly metadata
   private Long alertId;
+  private String namespace;
   private EnumerationItemDTO enumerationItemRef;
   private Optional<String> anomalyMetric;
   private Optional<String> anomalyDataset;
@@ -85,6 +86,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
         .getDetectionPipelineContext();
     alertId = detectionPipelineContext.getAlertId();
+    namespace = detectionPipelineContext.getNamespace();
     enumerationItemRef = prepareEnumerationItemRef(detectionPipelineContext);
     anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
         .map(Templatable::value)
@@ -205,6 +207,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final AnomalyDTO anomaly = new AnomalyDTO();
     anomaly.setCreateTime(new Timestamp(System.currentTimeMillis()));
     anomaly.setDetectionConfigId(alertId);
+    anomaly.setNamespace(namespace);
     anomaly.setEnumerationItem(enumerationItemRef);
     anomalyMetric.ifPresent(anomaly::setMetric);
     anomalyDataset.ifPresent(anomaly::setCollection);

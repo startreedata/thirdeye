@@ -42,6 +42,7 @@ public interface DataSourceMapper {
                 .collect(Collectors.toList()))
             .orElse(null));
     dto.setId(api.getId());
+    dto.setNamespace(api.getNamespace());
     return dto;
   }
 
@@ -52,6 +53,7 @@ public interface DataSourceMapper {
     return new DataSourceApi()
         .setId(dto.getId())
         .setName(dto.getName())
+        .setNamespace(dto.getNamespace())
         .setType(dto.getType())
         .setProperties(optional(dto.getProperties()).filter(p -> !p.isEmpty()).orElse(null))
         .setMetaList(optional(dto.getMetaList()).filter(l -> !l.isEmpty())

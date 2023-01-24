@@ -31,7 +31,7 @@ import {
 } from "./date-time.util";
 
 const systemLocale = Settings.defaultLocale;
-const systemZoneName = Settings.defaultZoneName;
+const systemZoneName = Settings.defaultZone;
 
 jest.mock("../number/number.util", () => ({
     formatNumberV1: jest.fn().mockImplementation((num) => num.toString()),
@@ -46,13 +46,13 @@ describe("Date Time Util", () => {
         // Explicitly set locale and time zone to make sure date time manipulations and literal
         // results are consistent regardless of where tests are run
         Settings.defaultLocale = "en-US";
-        Settings.defaultZoneName = "America/Los_Angeles";
+        Settings.defaultZone = "America/Los_Angeles";
     });
 
     afterAll(() => {
         // Restore locale and time zone
         Settings.defaultLocale = systemLocale;
-        Settings.defaultZoneName = systemZoneName;
+        Settings.defaultZone = systemZoneName;
     });
 
     it("formatDurationV1 should return empty string for invalid start and end time", () => {

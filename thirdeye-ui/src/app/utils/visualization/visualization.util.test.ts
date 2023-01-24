@@ -24,7 +24,7 @@ import {
 } from "./visualization.util";
 
 const systemLocale = Settings.defaultLocale;
-const systemZoneName = Settings.defaultZoneName;
+const systemZoneName = Settings.defaultZone;
 
 jest.mock("../../platform/utils", () => ({
     formatLargeNumberV1: jest.fn().mockImplementation((num) => num.toString()),
@@ -47,13 +47,13 @@ describe("Visualization Util", () => {
         // Explicitly set locale and time zone to make sure date time manipulations and literal
         // results are consistent regardless of where tests are run
         Settings.defaultLocale = "en-US";
-        Settings.defaultZoneName = "America/Los_Angeles";
+        Settings.defaultZone = "America/Los_Angeles";
     });
 
     afterAll(() => {
         // Restore locale and time zone
         Settings.defaultLocale = systemLocale;
-        Settings.defaultZoneName = systemZoneName;
+        Settings.defaultZone = systemZoneName;
     });
 
     it("formatLargeNumberForVisualization should return empty string for invalid number", () => {

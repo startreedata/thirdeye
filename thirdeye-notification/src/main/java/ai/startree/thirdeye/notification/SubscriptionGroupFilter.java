@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.subscriptiongroup.filter;
+package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -29,6 +29,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
+import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterNotification;
+import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
@@ -42,7 +44,7 @@ import org.joda.time.Interval;
  * The Subscription Group filter collects all anomalies and returns back a Result
  */
 @Singleton
-public class LegacySubscriptionGroupFilter {
+public class SubscriptionGroupFilter {
 
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final Set<AnomalyResultSource> ANOMALY_RESULT_SOURCES = Set.of(
@@ -54,7 +56,7 @@ public class LegacySubscriptionGroupFilter {
   private final AlertManager alertManager;
 
   @Inject
-  public LegacySubscriptionGroupFilter(final AnomalyManager anomalyManager,
+  public SubscriptionGroupFilter(final AnomalyManager anomalyManager,
       final AlertManager alertManager) {
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
@@ -120,7 +122,7 @@ public class LegacySubscriptionGroupFilter {
         .get(PROP_DETECTION_CONFIG_IDS));
 
     return alertIds.stream()
-        .map(LegacySubscriptionGroupFilter::fromId)
+        .map(SubscriptionGroupFilter::fromId)
         .map(alert -> new AlertAssociationDto().setAlert(alert))
         .collect(Collectors.toList());
   }
@@ -164,9 +166,15 @@ public class LegacySubscriptionGroupFilter {
 
     final long startTime = findStartTime(vectorClocks, endTime, alertId);
 
-    final Collection<AnomalyDTO> candidates = anomalyManager.filter(new AnomalyFilter()
+    final AnomalyFilter anomalyFilter = new AnomalyFilter()
         .setCreateTimeWindow(new Interval(startTime + 1, endTime))
-        .setAlertId(alertId));
+        .setAlertId(alertId);
+
+    optional(aa.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .ifPresent(anomalyFilter::setEnumerationItemId);
+
+    final Collection<AnomalyDTO> candidates = anomalyManager.filter(anomalyFilter);
 
     return candidates.stream()
         .filter(anomaly -> shouldFilter(anomaly, startTime))

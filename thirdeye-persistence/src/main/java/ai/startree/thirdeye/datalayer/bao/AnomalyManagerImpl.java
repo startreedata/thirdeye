@@ -212,20 +212,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   }
 
   @Override
-  public List<AnomalyDTO> findByCreatedTimeInRangeAndDetectionConfigId(
-      final long startTime,
-      final long endTime, final long alertId) {
-    final Predicate predicate =
-        Predicate.AND(
-            Predicate.GE("createTime", new Timestamp(startTime)),
-            Predicate.LT("createTime", new Timestamp(endTime)),
-            Predicate.EQ("detectionConfigId", alertId));
-    final List<AnomalyDTO> list = genericPojoDao
-        .get(predicate, AnomalyDTO.class);
-    return decorate(list);
-  }
-
-  @Override
   public List<AnomalyDTO> findByFunctionId(final Long functionId) {
     final Map<String, Object> filterParams = new HashMap<>();
     filterParams.put("functionId", functionId);

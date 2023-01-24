@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.joda.time.Interval;
 
 /**
  * The Subscription Group filter collects all anomalies and returns back a Result
@@ -162,8 +164,9 @@ public class LegacySubscriptionGroupFilter {
 
     final long startTime = findStartTime(vectorClocks, endTime, alertId);
 
-    final Collection<AnomalyDTO> candidates = anomalyManager
-        .findByCreatedTimeInRangeAndDetectionConfigId(startTime + 1, endTime, alertId);
+    final Collection<AnomalyDTO> candidates = anomalyManager.filter(new AnomalyFilter()
+        .setCreateTimeWindow(new Interval(startTime + 1, endTime))
+        .setAlertId(alertId));
 
     return candidates.stream()
         .filter(anomaly -> shouldFilter(anomaly, startTime))

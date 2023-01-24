@@ -13,12 +13,14 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
@@ -29,6 +31,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -81,6 +84,20 @@ public class TestAnomalyManager {
     final SimpleDateFormat df = new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz");
     final Date date = df.parse(dateStr);
     return date.getTime();
+  }
+
+  private static Set<Long> collectIds(final Collection<AnomalyDTO> anomalies) {
+    return anomalies.stream()
+        .map(AbstractDTO::getId)
+        .collect(toSet());
+  }
+
+  private static AnomalyDTO anomalyWithCreateTime(final long createTimeOffset) {
+    final AnomalyDTO anomaly = new AnomalyDTO()
+        .setStartTime(START_TIME)
+        .setEndTime(END_TIME);
+    anomaly.setCreateTime(new Timestamp(CREATED_TIME + createTimeOffset));
+    return anomaly;
   }
 
   @BeforeClass
@@ -390,29 +407,43 @@ public class TestAnomalyManager {
 
   @Test
   public void testFilterWithAnomalyFilter() throws InterruptedException {
-    final AnomalyDTO a1 = anomalyWithCreateTime(1000);
-    Thread.sleep(100);
-    final AnomalyDTO a2 = anomalyWithCreateTime(2000);
-    Thread.sleep(100);
-    final AnomalyDTO a3 = anomalyWithCreateTime(3000);
-    Thread.sleep(100);
-    final AnomalyDTO a4 = anomalyWithCreateTime(4000);
+    final long alertId = 1234L;
+    final long alertId2 = 5678L;
 
-    final List<AnomalyDTO> filtered = mergedAnomalyResultDAO.filter(new AnomalyFilter()
+    final AnomalyDTO a1 = persist(anomalyWithCreateTime(1000)
+        .setDetectionConfigId(alertId));
+    Thread.sleep(100);
+
+    final AnomalyDTO a2 = persist(anomalyWithCreateTime(2000)
+        .setDetectionConfigId(alertId));
+    Thread.sleep(100);
+
+    final AnomalyDTO a3 = persist(anomalyWithCreateTime(3000)
+        .setDetectionConfigId(alertId2));
+    Thread.sleep(100);
+
+    final AnomalyDTO a4 = persist(anomalyWithCreateTime(4000)
+        .setDetectionConfigId(alertId));
+
+    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
         .setCreateTimeWindow(new Interval(
-                a2.getCreateTime().getTime(),
-                a4.getCreateTime().getTime())));
+            a2.getCreateTime().getTime(),
+            a4.getCreateTime().getTime()))))
+    ).isEqualTo(collectIds(Set.of(a2, a3)));
 
-    assertThat(new HashSet<>(filtered)).isEqualTo(Set.of(a2, a3));
+    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+        .setCreateTimeWindow(new Interval(
+            a2.getCreateTime().getTime(),
+            a4.getCreateTime().getTime()))
+        .setAlertId(alertId)))
+    ).isEqualTo(collectIds(Set.of(a2)));
+
+    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+        .setAlertId(alertId2))))
+        .isEqualTo(collectIds(Set.of(a3)));
   }
 
-  private AnomalyDTO anomalyWithCreateTime(final long createTimeOffset) {
-    final AnomalyDTO anomaly = new AnomalyDTO()
-        .setStartTime(START_TIME)
-        .setEndTime(END_TIME);
-    anomaly.setCreateTime(new Timestamp(CREATED_TIME + createTimeOffset));
-    anomaly.setDetectionConfigId(1234L);
-
+  private AnomalyDTO persist(final AnomalyDTO anomaly) {
     final long id = mergedAnomalyResultDAO.save(anomaly);
     assertThat(id).isNotNull();
     return anomaly;

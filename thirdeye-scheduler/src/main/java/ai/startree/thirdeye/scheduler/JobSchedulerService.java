@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -28,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.Interval;
 import org.quartz.JobKey;
 
 @Singleton
@@ -107,8 +109,9 @@ public class JobSchedulerService {
     for (Map.Entry<Long, Long> e : vectorClocks.entrySet()) {
       long configId = e.getKey();
       long lastNotifiedTime = e.getValue();
-      if (anomalyManager.findByCreatedTimeInRangeAndDetectionConfigId(lastNotifiedTime,
-              System.currentTimeMillis(), configId)
+      if (anomalyManager.filter(new AnomalyFilter()
+              .setCreateTimeWindow(new Interval(lastNotifiedTime, System.currentTimeMillis()))
+              .setAlertId(configId))
           .stream().anyMatch(x -> !x.isChild())) {
         return true;
       }

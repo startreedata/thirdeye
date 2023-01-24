@@ -34,15 +34,6 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
       long alertId,
       final Long enumerationItemId);
 
-  /**
-   * TODO spyne Refactor. Use filter(AnomalyFilter) object to handle these. Else we'll keep adding params and methods.
-   *
-   * @return filtered list of anomalies
-   */
-  List<AnomalyDTO> findByCreatedTimeInRangeAndDetectionConfigId(long startTime,
-      long endTime,
-      long alertId);
-
   List<AnomalyDTO> findByTime(long startTime, long endTime);
 
   AnomalyDTO findParent(AnomalyDTO entity);

@@ -106,8 +106,9 @@ public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
     return detectionConfigId;
   }
 
-  public void setDetectionConfigId(Long detectionConfigId) {
+  public AnomalyDTO setDetectionConfigId(final Long detectionConfigId) {
     this.detectionConfigId = detectionConfigId;
+    return this;
   }
 
   @Deprecated

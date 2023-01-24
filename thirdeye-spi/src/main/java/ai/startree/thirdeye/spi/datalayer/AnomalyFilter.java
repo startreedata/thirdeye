@@ -20,6 +20,7 @@ public class AnomalyFilter {
 
   private Interval createTimeWindow;
   private Long alertId;
+  private Long enumerationItemId;
 
   public Interval getCreateTimeWindow() {
     return createTimeWindow;
@@ -36,6 +37,15 @@ public class AnomalyFilter {
 
   public AnomalyFilter setAlertId(final Long alertId) {
     this.alertId = alertId;
+    return this;
+  }
+
+  public Long getEnumerationItemId() {
+    return enumerationItemId;
+  }
+
+  public AnomalyFilter setEnumerationItemId(final Long enumerationItemId) {
+    this.enumerationItemId = enumerationItemId;
     return this;
   }
 }

@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.google.inject.Injector;
 import java.sql.Timestamp;
@@ -409,21 +410,27 @@ public class TestAnomalyManager {
   public void testFilterWithAnomalyFilter() throws InterruptedException {
     final long alertId = 1234L;
     final long alertId2 = 5678L;
+    final EnumerationItemDTO ei = enumerationItem(123_123);
 
     final AnomalyDTO a1 = persist(anomalyWithCreateTime(1000)
-        .setDetectionConfigId(alertId));
+        .setDetectionConfigId(alertId)
+        .setEnumerationItem(ei)
+    );
     Thread.sleep(100);
 
     final AnomalyDTO a2 = persist(anomalyWithCreateTime(2000)
-        .setDetectionConfigId(alertId));
+        .setDetectionConfigId(alertId)
+    );
     Thread.sleep(100);
 
     final AnomalyDTO a3 = persist(anomalyWithCreateTime(3000)
-        .setDetectionConfigId(alertId2));
+        .setDetectionConfigId(alertId2)
+    );
     Thread.sleep(100);
 
     final AnomalyDTO a4 = persist(anomalyWithCreateTime(4000)
-        .setDetectionConfigId(alertId));
+        .setDetectionConfigId(alertId)
+    );
 
     assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
         .setCreateTimeWindow(new Interval(
@@ -441,6 +448,14 @@ public class TestAnomalyManager {
     assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
         .setAlertId(alertId2))))
         .isEqualTo(collectIds(Set.of(a3)));
+
+    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+        .setEnumerationItemId(ei.getId()))))
+        .isEqualTo(collectIds(Set.of(a1)));
+  }
+
+  private static EnumerationItemDTO enumerationItem(final long id) {
+    return (EnumerationItemDTO) new EnumerationItemDTO().setId(id);
   }
 
   private AnomalyDTO persist(final AnomalyDTO anomaly) {

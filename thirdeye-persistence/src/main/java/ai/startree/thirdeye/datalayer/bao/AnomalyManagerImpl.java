@@ -386,7 +386,11 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         .ifPresent(predicates::add);
 
     optional(af.getAlertId())
-        .map(alertId -> Predicate.EQ("detectionConfigId", alertId))
+        .map(id -> Predicate.EQ("detectionConfigId", id))
+        .ifPresent(predicates::add);
+
+    optional(af.getEnumerationItemId())
+        .map(id -> Predicate.EQ("enumerationItemId", id))
         .ifPresent(predicates::add);
 
     final Predicate predicate = Predicate.AND(predicates.toArray(new Predicate[]{}));

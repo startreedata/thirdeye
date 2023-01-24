@@ -27,7 +27,7 @@ import {
 } from "./time-range.util";
 
 const systemLocale = Settings.defaultLocale;
-const systemZoneName = Settings.defaultZoneName;
+const systemZoneName = Settings.defaultZone;
 
 jest.mock("i18next", () => ({
     t: jest.fn().mockImplementation((key) => key),
@@ -44,7 +44,7 @@ describe("Time Range Util", () => {
         // Explicitly set locale and time zone to make sure date time manipulations and literal
         // results are consistent regardless of where tests are run
         Settings.defaultLocale = "en-US";
-        Settings.defaultZoneName = "America/Los_Angeles";
+        Settings.defaultZone = "America/Los_Angeles";
 
         jest.spyOn(DateTime, "local").mockReturnValue(
             DateTime.fromMillis(1577865600000) // January 1, 2020, 12:00:00 AM
@@ -54,7 +54,7 @@ describe("Time Range Util", () => {
     afterAll(() => {
         // Restore locale and time zone
         Settings.defaultLocale = systemLocale;
-        Settings.defaultZoneName = systemZoneName;
+        Settings.defaultZone = systemZoneName;
     });
 
     it("createTimeRangeDuration should create appropriate time range duration", () => {

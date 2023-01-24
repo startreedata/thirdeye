@@ -129,12 +129,19 @@ export const formatDurationV1 = (
 // Returns formatted string representation of date and time
 // For example:
 // MMM DD, YYYY, HH:MM AM/PM
-export const formatDateAndTimeV1 = (date: number): string => {
+export const formatDateAndTimeV1 = (
+    date: number,
+    timezoneOverride?: string
+): string => {
     if (isNil(date)) {
         return "";
     }
 
-    const dateTime = DateTime.fromMillis(date);
+    let dateTime = DateTime.fromMillis(date);
+
+    if (timezoneOverride) {
+        dateTime = dateTime.setZone(timezoneOverride);
+    }
 
     return dateTime.toLocaleString({
         month: "short",

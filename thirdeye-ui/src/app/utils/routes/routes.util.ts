@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { DateTime, DurationUnit } from "luxon";
+import { DateTime } from "luxon";
+import { DateTimeUnit } from "luxon/src/datetime";
 import { ENUMERATION_ITEM_QUERY_PARAM_KEY } from "../../pages/alerts-anomalies-page/alerts-anomalies-page.interfaces";
 import {
     getRecognizedQuery,
@@ -572,7 +573,7 @@ export const createPathWithRecognizedQueryString = (
 export const generateDateRangeMonthsFromNow = (
     monthsAgo: number,
     nowOverride?: DateTime,
-    roundNowTime?: DurationUnit
+    roundNowTime?: DateTimeUnit
 ): [number, number] => {
     const now = nowOverride || DateTime.local();
     const roundedNow = now.endOf(roundNowTime || "hour");
@@ -592,11 +593,11 @@ export const generateDateRangeMonthsFromNow = (
 export const generateDateRangeDaysFromNow = (
     daysAgo: number,
     nowOverride?: DateTime,
-    roundNowTime?: DurationUnit
+    roundNowTime?: DateTimeUnit
 ): [number, number] => {
     const now = nowOverride || DateTime.local();
     const roundedNow = now.endOf(roundNowTime || "hour");
-    const xDaysAgo = now.minus({ days: daysAgo }).startOf("days");
+    const xDaysAgo = now.minus({ days: daysAgo }).startOf("day");
 
     return [xDaysAgo.toMillis(), roundedNow.toMillis()];
 };

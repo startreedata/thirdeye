@@ -24,6 +24,7 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
     series,
     xValue,
     colorScale,
+    timezoneOverride,
 }) => {
     const timeSeriesChartTooltipClasses = useTooltipStyles();
     const dataPointForXValue: [DataPoint, NormalizedSeries][] =
@@ -41,7 +42,7 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
                 >
                     <Grid item>
                         <Typography variant="overline">
-                            {formatDateAndTimeV1(xValue)}
+                            {formatDateAndTimeV1(xValue, timezoneOverride)}
                         </Typography>
                     </Grid>
                 </Grid>

@@ -17,6 +17,7 @@ import { LinearGradient } from "@visx/gradient";
 import { Group } from "@visx/group";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { AreaClosed, Bar, LinePath } from "@visx/shape";
+import { DateTime } from "luxon";
 import React, { FunctionComponent, ReactNode, useMemo } from "react";
 import {
     determineGranularity,
@@ -31,6 +32,10 @@ import {
 } from "../time-series-chart.interfaces";
 import { getMinMax } from "../time-series-chart.utils";
 import { ChartCoreProps } from "./chart-core.interfaces";
+import {
+    generateTicksForDateRange,
+    tickFormat,
+} from "./tick-calculator/chart-time-axis.utils";
 
 const axisBottomTickLabelProps = {
     textAnchor: "middle" as const,
@@ -297,12 +302,27 @@ export const ChartCore: FunctionComponent<ChartCoreProps> = ({
             {afterChildren}
             {showXAxis && (
                 <AxisBottom
-                    numTicks={width > 520 ? 10 : 5}
+                    numTicks={width > 520 ? undefined : 5}
                     scale={xScaleToUse}
                     tickFormat={
-                        xAxisOptions ? xAxisOptions.tickFormatter : undefined
+                        xAxisOptions?.tickFormatter ??
+                        ((d: Date) => {
+                            let parsed = DateTime.fromJSDate(d);
+
+                            if (xAxisOptions?.timezone) {
+                                parsed = parsed.setZone(xAxisOptions.timezone);
+                            }
+
+                            return tickFormat(parsed);
+                        })
                     }
                     tickLabelProps={() => axisBottomTickLabelProps}
+                    tickValues={generateTicksForDateRange(
+                        xScaleToUse.domain()[0],
+                        xScaleToUse.domain()[1],
+                        width > 520 ? 10 : 5,
+                        xAxisOptions?.timezone
+                    )}
                     top={yMax}
                 />
             )}

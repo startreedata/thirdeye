@@ -104,10 +104,13 @@ export const ChartBrush: FunctionComponent<ChartBrushProps> = ({
         top,
         xScale: dateScale,
         yScale: dataScale,
+        xAxisOptions,
     };
 
     if (xAxisOptions && xAxisOptions.plotBands) {
-        chartOptions.xAxisOptions = { ...xAxisOptions };
+        chartOptions.xAxisOptions = chartOptions.xAxisOptions ?? {
+            ...xAxisOptions,
+        };
         chartOptions.xAxisOptions.plotBands = xAxisOptions.plotBands.map(
             (plotBand) => {
                 const clone = { ...plotBand };

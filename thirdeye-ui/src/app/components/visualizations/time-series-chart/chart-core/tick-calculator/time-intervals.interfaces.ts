@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,20 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxisScale } from "@visx/axis";
-import { NormalizedSeries } from "../time-series-chart.interfaces";
 
-export interface TooltipMarkersProps {
-    chartHeight: number;
-    xScale: AxisScale<number>;
-    yScale: AxisScale<number>;
-    series: NormalizedSeries[];
-    xValue: number;
-    colorScale: (name: string) => string;
-}
-export interface TooltipPopoverProps {
-    xValue: number;
-    series: NormalizedSeries[];
-    colorScale: (name: string) => string;
-    timezoneOverride?: string;
+import { DateTime } from "luxon";
+
+export interface TimeInterval {
+    (d: DateTime): DateTime;
+    floor: (d: DateTime) => DateTime;
+    ceil: (d: DateTime) => DateTime;
+    offset: (d: DateTime, step: number) => DateTime;
+    range: (start: DateTime, stop: DateTime, step?: number) => DateTime[];
+    filter: (testFunc: (date: DateTime) => boolean) => TimeInterval;
+    count: (start: DateTime, end: DateTime) => number;
+    every: (step: number) => TimeInterval;
 }

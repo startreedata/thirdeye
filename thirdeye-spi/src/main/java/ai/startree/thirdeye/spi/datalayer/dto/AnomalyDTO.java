@@ -223,16 +223,18 @@ public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
     return notified;
   }
 
-  public void setNotified(boolean notified) {
+  public AnomalyDTO setNotified(boolean notified) {
     this.notified = notified;
+    return this;
   }
 
   public String getMessage() {
     return message;
   }
 
-  public void setMessage(String message) {
+  public AnomalyDTO setMessage(String message) {
     this.message = message;
+    return this;
   }
 
   // TODO: Remove this method after old merged anomalies are cleaned up
@@ -251,16 +253,18 @@ public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
     return impactToGlobal;
   }
 
-  public void setImpactToGlobal(double impactToGlobal) {
+  public AnomalyDTO setImpactToGlobal(double impactToGlobal) {
     this.impactToGlobal = impactToGlobal;
+    return this;
   }
 
   public AnomalyResultSource getAnomalyResultSource() {
     return anomalyResultSource;
   }
 
-  public void setAnomalyResultSource(AnomalyResultSource anomalyResultSource) {
+  public AnomalyDTO setAnomalyResultSource(AnomalyResultSource anomalyResultSource) {
     this.anomalyResultSource = anomalyResultSource;
+    return this;
   }
 
   @Deprecated

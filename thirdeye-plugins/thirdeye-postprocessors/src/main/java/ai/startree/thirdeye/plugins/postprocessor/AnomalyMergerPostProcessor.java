@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import static ai.startree.thirdeye.spi.rca.Stats.computeValueChangePercentage;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
@@ -52,13 +53,15 @@ import org.slf4j.LoggerFactory;
  * Note:
  * If used with dimension exploration, must be run inside each enumeration.
  * The current implementation should not be run after the forkjoin node, it would merge anomalies
- * from different enumerations. Merge after dx can be implemented by adding enumerationItem to the
- * anomaly key.
+ * from different enumerations.
+ * The algorithm assumes all operatorResult anomalies are of unit size (detection granularity size).
  */
 public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyMergerPostProcessor.class);
   private static final String NAME = "ANOMALY_MERGER";
+  private static final double DEFAULT_RENOTIFY_PERCENTAGE_THRESHOLD = -1;
+  private static final double DEFAULT_RENOTIFY_ABSOLUTE_THRESHOLD = -1;
   private static final Comparator<AnomalyDTO> COMPARATOR = (o1, o2) -> {
     // smallest startTime is smaller
     int res = Long.compare(o1.getStartTime(), o2.getStartTime());
@@ -80,7 +83,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       return -1;
     }
 
-    // more children
+    // more children first
     return -1 * Integer.compare(o1.getChildren().size(), o2.getChildren().size());
   };
   @VisibleForTesting
@@ -94,6 +97,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   private final @Nullable EnumerationItemDTO enumerationItem;
   private final DetectionPipelineUsage usage;
   private final AnomalyManager anomalyManager;
+  private double reNotifyPercentageThreshold;
+  private double reNotifyAbsoluteThreshold;
 
   // obtained at runtime
   private Chronology chronology;
@@ -104,8 +109,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     this.alertId = spec.getAlertId();
     this.usage = spec.getUsage();
     this.enumerationItem = spec.getEnumerationItemDTO();
+    this.reNotifyPercentageThreshold = optional(spec.getReNotifyPercentageThreshold()).orElse(
+        DEFAULT_RENOTIFY_PERCENTAGE_THRESHOLD);
+    this.reNotifyAbsoluteThreshold = optional(spec.getReNotifyAbsoluteThreshold()).orElse(
+        DEFAULT_RENOTIFY_ABSOLUTE_THRESHOLD);
 
-    this.anomalyManager = spec.getMergedAnomalyResultManager();
+    this.anomalyManager = spec.getAnomalyManager();
   }
 
   @Override
@@ -221,7 +230,27 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       final Collection<AnomalyDTO> sortedAnomalies) {
     final List<AnomalyDTO> anomaliesToUpdate = new ArrayList<>();
     AnomalyDTO parentCandidate = null;
+    AnomalyDTO previousAnomaly = null;
+    // sorted anomalies look like [parentWithChild, child, replay, child, replay, parentWithNoChild, replay, replayNew]
+    // TODO implement rule 4. anomaly that don't exist anymore
     for (final AnomalyDTO anomaly : sortedAnomalies) {
+      if (previousAnomaly != null && previousAnomaly.getId() != null && anomaly.getId() == null) {
+        // apply replay checks
+        if (startEndEquals(previousAnomaly, anomaly)) {
+          if (currentValueHasChanged(previousAnomaly, anomaly)) {
+            addOutdatedLabel(previousAnomaly);
+            anomaliesToUpdate.add(previousAnomaly);
+            addNewLabel(anomaly);
+          } else {
+            // update the existing anomaly with minor changes - drop the new anomaly
+            updateAnomalyWithNewValues(previousAnomaly, anomaly);
+            anomaliesToUpdate.add(previousAnomaly);
+            continue;
+          }
+        }
+      }
+      previousAnomaly = anomaly;
+
       // skip child anomalies. merge their parents instead
       if (anomaly.isChild()) {
         continue;
@@ -244,6 +273,40 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     anomaliesToUpdate.add(parentCandidate);
 
     return anomaliesToUpdate;
+  }
+
+  private void addNewLabel(final AnomalyDTO anomaly) {
+    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
+        new ArrayList<>());
+    anomaly.setAnomalyLabels(labels);
+    labels.removeIf(l -> l.getName().equals("OUTDATED_AFTER_REPLAY"));
+    labels.add(new AnomalyLabelDTO().setName("NEW_AFTER_REPLAY").setIgnore(false));
+  }
+
+  private void addOutdatedLabel(final AnomalyDTO anomaly) {
+    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
+        new ArrayList<>());
+    anomaly.setAnomalyLabels(labels);
+    labels.removeIf(l -> l.getName().equals("NEW_AFTER_REPLAY"));
+    labels.add(new AnomalyLabelDTO().setName("OUTDATED_AFTER_REPLAY").setIgnore(true));
+  }
+
+  private boolean currentValueHasChanged(final AnomalyDTO existingA, final AnomalyDTO newA) {
+    final double existingCurrentVal = existingA.getAvgCurrentVal();
+    final double newCurrentVal = newA.getAvgCurrentVal();
+    final boolean percentageHasChanged = reNotifyPercentageThreshold > 0
+        && computeValueChangePercentage(existingCurrentVal, newCurrentVal)
+        > reNotifyPercentageThreshold;
+
+    final boolean absoluteHasChanged = reNotifyAbsoluteThreshold > 0
+        && Math.abs(existingCurrentVal - newCurrentVal) > reNotifyAbsoluteThreshold;
+
+    return percentageHasChanged && absoluteHasChanged;
+  }
+
+  private boolean startEndEquals(final AnomalyDTO existingA, final AnomalyDTO newA) {
+    return existingA.getStartTime() == newA.getStartTime()
+        && existingA.getEndTime() == newA.getEndTime();
   }
 
   /**
@@ -345,7 +408,15 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     optional(from.getEnumerationItem())
         .map(AnomalyMergerPostProcessor::cloneEnumerationRef)
         .ifPresent(to::setEnumerationItem);
+    // child and id not set on purpose
     return to;
+  }
+
+
+  private void updateAnomalyWithNewValues(final AnomalyDTO currentA, final AnomalyDTO newA) {
+    currentA.setAvgBaselineVal(newA.getAvgBaselineVal());
+    currentA.setAvgCurrentVal(newA.getAvgCurrentVal());
+    currentA.setScore(newA.getScore());
   }
 
   /**
@@ -407,7 +478,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         final PostProcessingContext context) {
       final AnomalyMergerPostProcessorSpec spec = new ObjectMapper().convertValue(params,
           AnomalyMergerPostProcessorSpec.class);
-      spec.setMergedAnomalyResultManager(context.getMergedAnomalyResultManager());
+      spec.setAnomalyManager(context.getMergedAnomalyResultManager());
       spec.setAlertId(context.getAlertId());
       spec.setUsage(context.getUsage());
       spec.setEnumerationItemDTO(context.getEnumerationItemDTO());

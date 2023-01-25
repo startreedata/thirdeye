@@ -100,7 +100,7 @@ public class RcaRelatedResource {
     final Interval anomalyInterval = new Interval(
         rcaInfo.getAnomaly().getStartTime(),
         rcaInfo.getAnomaly().getEndTime(),
-        rcaInfo.getTimezone()
+        rcaInfo.getChronology()
     );
     final long startWithLookback = anomalyInterval.getStart()
         .minus(lookaroundPeriod)
@@ -149,7 +149,7 @@ public class RcaRelatedResource {
     final Interval anomalyInterval = new Interval(
         rcaInfo.getAnomaly().getStartTime(),
         rcaInfo.getAnomaly().getEndTime(),
-        rcaInfo.getTimezone()
+        rcaInfo.getChronology()
     );
     final long startWithLookback = anomalyInterval.getStart()
         .minus(lookaroundPeriod)

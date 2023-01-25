@@ -15,9 +15,9 @@ package ai.startree.thirdeye.spi.detection;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_PARAMS_COMPONENTS;
 
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serializable;
@@ -27,15 +27,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Base class for component specs
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
   public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
-  // do not use timezone. Use the timezone from the detection interval. // todo remove this field - ensure it's removed from the UI first
-  @Deprecated
-  private String timezone = Constants.DEFAULT_TIMEZONE_STRING;
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;
   /**
@@ -60,17 +58,6 @@ public abstract class AbstractSpec implements Serializable {
     } catch (JsonProcessingException e) {
       throw new ThirdEyeException(e, ERR_INVALID_PARAMS_COMPONENTS, properties, specClass);
     }
-  }
-
-  @Deprecated
-  public String getTimezone() {
-    return timezone;
-  }
-
-  @Deprecated
-  public AbstractSpec setTimezone(final String timezone) {
-    this.timezone = timezone;
-    return this;
   }
 
   public String getTimestamp() {

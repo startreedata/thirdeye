@@ -17,15 +17,14 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.joda.time.DateTimeZone;
+import org.joda.time.Chronology;
+import org.joda.time.chrono.ISOChronology;
 
 public interface Constants {
   Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
-  // fixme cyril prefer chronology to timezone
-  DateTimeZone DEFAULT_TIMEZONE = DateTimeZone.UTC;
+  Chronology DEFAULT_CHRONOLOGY = ISOChronology.getInstanceUTC();
   String CRON_TIMEZONE = "UTC";
-  String DEFAULT_TIMEZONE_STRING = DEFAULT_TIMEZONE.toString();
   // tz database names that are equivalent to UTC
   Set<String> UTC_LIKE_TIMEZONES = Set.of("Etc/GMT",
       "Etc/GMT+0",

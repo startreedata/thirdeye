@@ -68,8 +68,10 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.SqlBasicVisitor;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.Chronology;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.joda.time.chrono.ISOChronology;
 
 @Singleton
 public class CohortComputation {
@@ -89,11 +91,13 @@ public class CohortComputation {
     this.metricConfigManager = metricConfigManager;
   }
 
-  public static DateTimeZone toDateTimeZone(final String timezone) {
+  public static Chronology toChronology(final String timezone) {
     return optional(timezone)
         .filter(StringUtils::isNotEmpty)
         .map(DateTimeZone::forID)
-        .orElse(Constants.DEFAULT_TIMEZONE);
+        .map(ISOChronology::getInstance)
+        .map(e -> (Chronology) e)
+        .orElse(Constants.DEFAULT_CHRONOLOGY);
   }
 
   private static QueryProjection selectable(final MetricConfigDTO metric) {
@@ -146,7 +150,7 @@ public class CohortComputation {
     final Interval currentInterval = new Interval(
         request.getStart(),
         request.getEnd(),
-        toDateTimeZone(request.getTimezone()));
+        toChronology(request.getTimezone()));
 
     final MetricConfigDTO metric = getMetric(request.getMetric());
     final DatasetConfigDTO dataset = ensureExists(datasetConfigManager.findByName(metric.getDataset())

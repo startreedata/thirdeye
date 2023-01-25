@@ -18,7 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.joda.time.DateTimeZone;
+import org.joda.time.Chronology;
 
 public class RcaInfo {
 
@@ -26,7 +26,7 @@ public class RcaInfo {
   private final @NonNull MetricConfigDTO metric;
   private final @NonNull DatasetConfigDTO dataset;
   // avoid passing the whole AlertMetadataDTO
-  private final @NonNull DateTimeZone timezone;
+  private final @NonNull Chronology chronology;
 
   private final @NonNull EventContextDto eventContext;
 
@@ -34,11 +34,11 @@ public class RcaInfo {
       final @NonNull AnomalyDTO anomaly,
       final @NonNull MetricConfigDTO metric,
       final @NonNull DatasetConfigDTO dataset,
-      final @NonNull DateTimeZone timezone, @NonNull final EventContextDto eventContext) {
+      final @NonNull Chronology chronology, @NonNull final EventContextDto eventContext) {
     this.anomaly = anomaly;
     this.metric = metric;
     this.dataset = dataset;
-    this.timezone = timezone;
+    this.chronology = chronology;
     this.eventContext = eventContext;
   }
 
@@ -55,8 +55,8 @@ public class RcaInfo {
     return dataset;
   }
 
-  public @NonNull DateTimeZone getTimezone() {
-    return timezone;
+  public @NonNull Chronology getChronology() {
+    return chronology;
   }
 
   public @NonNull EventContextDto getEventContext() {

@@ -134,9 +134,20 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         const deviation =
             (anomaly.avgCurrentVal - anomaly.avgBaselineVal) /
             Math.abs(anomaly.avgBaselineVal);
-        uiAnomaly.deviation = isNaN(deviation)
-            ? i18n.t("label.no-data-marker")
-            : formatPercentageV1(deviation);
+
+        if (isNaN(deviation)) {
+            uiAnomaly.deviation = i18n.t("label.no-data-marker");
+        } else if (deviation === Infinity) {
+            uiAnomaly.deviation = "Large(Infinite)";
+        } else {
+            uiAnomaly.deviation = formatPercentageV1(
+                deviation,
+                2,
+                true,
+                deviation > 10 ** 5
+            );
+        }
+
         uiAnomaly.deviationVal = deviation;
         uiAnomaly.negativeDeviation = deviation < 0;
     }

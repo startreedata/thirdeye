@@ -83,10 +83,12 @@ export const formatLargeNumberV1 = (
 // 0.1 -> 10%
 // 0.01234 -> 1.23%
 // 0.01237 -> 1.24%
+// 123456 -> 1e7% (if exponential = true)
 export const formatPercentageV1 = (
     num: number,
     mantissa: number = MANTISSA_DEFAULT,
-    optionalMantissa: boolean = OPTIONAL_MANTISSA_DEFAULT
+    optionalMantissa: boolean = OPTIONAL_MANTISSA_DEFAULT,
+    exponential = false // Show number in exponential notation
 ): string => {
     if (isNil(num)) {
         return "";
@@ -95,8 +97,9 @@ export const formatPercentageV1 = (
     return numbro(num).format({
         output: "percent",
         thousandSeparated: true,
-        mantissa: mantissa,
-        optionalMantissa: optionalMantissa,
+        mantissa,
+        optionalMantissa,
+        exponential,
     });
 };
 

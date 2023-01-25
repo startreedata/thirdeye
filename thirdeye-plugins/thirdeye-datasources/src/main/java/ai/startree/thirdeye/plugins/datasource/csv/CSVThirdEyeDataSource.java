@@ -134,7 +134,6 @@ public class CSVThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
-    // fixme cyril implement this
     LOG.error(
         "fetchDataTable not implemented in CSVThirdEyeDataSource but returns an empty Df for e2e tests.");
     DataFrame dataFrame = new DataFrame()

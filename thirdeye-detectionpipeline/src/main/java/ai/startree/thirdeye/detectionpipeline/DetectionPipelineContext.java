@@ -25,8 +25,6 @@ public class DetectionPipelineContext {
   private Interval detectionInterval;
   private List<Predicate> predicates;
   private EnumerationItemDTO enumerationItem;
-  // fixme cyril can be removed in favor of usage
-  private boolean preserveOutputDataFrames = false;
   private DetectionPipelineUsage usage;
   private Long alertId;
 
@@ -65,16 +63,6 @@ public class DetectionPipelineContext {
   public DetectionPipelineContext setEnumerationItem(
       final EnumerationItemDTO enumerationItem) {
     this.enumerationItem = enumerationItem;
-    return this;
-  }
-
-  public boolean isPreserveOutputDataFrames() {
-    return preserveOutputDataFrames;
-  }
-
-  public DetectionPipelineContext setPreserveOutputDataFrames(
-      final boolean preserveOutputDataFrames) {
-    this.preserveOutputDataFrames = preserveOutputDataFrames;
     return this;
   }
 

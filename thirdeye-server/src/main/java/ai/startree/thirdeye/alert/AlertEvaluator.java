@@ -91,7 +91,6 @@ public class AlertEvaluator {
       final DetectionPipelineContext context = new DetectionPipelineContext()
           .setAlertId(request.getAlert().getId())
           .setUsage(DetectionPipelineUsage.EVALUATION)
-          .setPreserveOutputDataFrames(true)
           .setDetectionInterval(detectionInterval);
 
       // inject custom evaluation context

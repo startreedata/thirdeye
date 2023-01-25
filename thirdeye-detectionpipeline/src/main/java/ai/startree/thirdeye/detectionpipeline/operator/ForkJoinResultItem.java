@@ -16,6 +16,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
@@ -63,9 +64,16 @@ public class ForkJoinResultItem {
   private OperatorResult conditionalClone(final OperatorResult src) {
     final long lastTimestamp = src.getLastTimestamp();
     final List<AnomalyDTO> anomalies = src.getAnomalies();
-    final TimeSeries timeSeries = detectionPipelineContext.isPreserveOutputDataFrames()
-        ? src.getTimeseries()
-        : null;
+    // below is written this way to ensure it breaks if a new DetectionPipelineUsage value is added
+    final TimeSeries timeSeries;
+    if (detectionPipelineContext.getUsage().equals(DetectionPipelineUsage.EVALUATION)) {
+      timeSeries = src.getTimeseries();
+    } else if (detectionPipelineContext.getUsage().equals(DetectionPipelineUsage.DETECTION)) {
+      // allows garbage collection
+      timeSeries = null;
+    } else {
+      throw new UnsupportedOperationException("Unsupported detection pipeline usage: " + detectionPipelineContext.getUsage());
+    }
     final Map<String, List> rawData = src.getRawData();
 
     return new OperatorResult() {

@@ -88,16 +88,18 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     return childIds;
   }
 
-  public void setChildIds(Set<Long> childIds) {
+  public AnomalyDTO setChildIds(Set<Long> childIds) {
     this.childIds = childIds;
+    return this;
   }
 
   public boolean isChild() {
     return isChild;
   }
 
-  public void setChild(boolean child) {
+  public AnomalyDTO setChild(boolean child) {
     isChild = child;
+    return this;
   }
 
   public Long getDetectionConfigId() {
@@ -123,8 +125,9 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     return anomalyFeedbackId;
   }
 
-  public void setAnomalyFeedbackId(Long anomalyFeedbackId) {
+  public AnomalyDTO setAnomalyFeedbackId(Long anomalyFeedbackId) {
     this.anomalyFeedbackId = anomalyFeedbackId;
+    return this;
   }
 
   public String getCollection() {
@@ -181,40 +184,45 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     return this.avgCurrentVal;
   }
 
-  public void setAvgCurrentVal(double val) {
+  public AnomalyDTO setAvgCurrentVal(double val) {
     this.avgCurrentVal = val;
+    return this;
   }
 
   public double getAvgBaselineVal() {
     return this.avgBaselineVal;
   }
 
-  public void setAvgBaselineVal(double val) {
+  public AnomalyDTO setAvgBaselineVal(double val) {
     this.avgBaselineVal = val;
+    return this;
   }
 
   public double getScore() {
     return score;
   }
 
-  public void setScore(double score) {
+  public AnomalyDTO setScore(double score) {
     this.score = score;
+    return this;
   }
 
   public double getWeight() {
     return weight;
   }
 
-  public void setWeight(double weight) {
+  public AnomalyDTO setWeight(double weight) {
     this.weight = weight;
+    return this;
   }
 
   public Map<String, String> getProperties() {
     return properties;
   }
 
-  public void setProperties(Map<String, String> properties) {
+  public AnomalyDTO setProperties(Map<String, String> properties) {
     this.properties = properties;
+    return this;
   }
 
   public boolean isNotified() {
@@ -297,8 +305,9 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     return severityLabel;
   }
 
-  public void setSeverityLabel(AnomalySeverity severityLabel) {
+  public AnomalyDTO setSeverityLabel(AnomalySeverity severityLabel) {
     this.severityLabel = severityLabel;
+    return this;
   }
 
   public List<AnomalyLabelDTO> getAnomalyLabels() {

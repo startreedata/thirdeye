@@ -37,7 +37,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
-import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -84,23 +83,20 @@ public class NotificationReportBuilder {
 
   public NotificationReportApi buildNotificationReportApi(
       final SubscriptionGroupDTO notificationConfig,
-      final Collection<? extends AnomalyResult> anomalies) {
+      final Collection<AnomalyDTO> anomalies) {
 
     final List<AnomalyDTO> mergedAnomalyResults = new ArrayList<>();
 
     // Calculate start and end time of the anomalies
     DateTime startTime = DateTime.now(dateTimeZone);
     DateTime endTime = new DateTime(0L, dateTimeZone);
-    for (final AnomalyResult anomalyResult : anomalies) {
-      if (anomalyResult instanceof AnomalyDTO) {
-        final AnomalyDTO mergedAnomaly = (AnomalyDTO) anomalyResult;
-        mergedAnomalyResults.add(mergedAnomaly);
+    for (final AnomalyDTO anomaly : anomalies) {
+      mergedAnomalyResults.add(anomaly);
+      if (anomaly.getStartTime() < startTime.getMillis()) {
+        startTime = new DateTime(anomaly.getStartTime(), dateTimeZone);
       }
-      if (anomalyResult.getStartTime() < startTime.getMillis()) {
-        startTime = new DateTime(anomalyResult.getStartTime(), dateTimeZone);
-      }
-      if (anomalyResult.getEndTime() > endTime.getMillis()) {
-        endTime = new DateTime(anomalyResult.getEndTime(), dateTimeZone);
+      if (anomaly.getEndTime() > endTime.getMillis()) {
+        endTime = new DateTime(anomaly.getEndTime(), dateTimeZone);
       }
     }
 

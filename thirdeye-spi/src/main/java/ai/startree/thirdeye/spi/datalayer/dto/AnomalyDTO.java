@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
-import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
 import ai.startree.thirdeye.spi.detection.AnomalyType;
@@ -34,8 +33,7 @@ import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
-    Comparable<AnomalyDTO>, Serializable {
+public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, Serializable {
 
   public static final String ISSUE_TYPE_KEY = "issue_type";
   private Long functionId;
@@ -359,12 +357,10 @@ public class AnomalyDTO extends AbstractDTO implements AnomalyResult,
     return ArrayListMultimap.create();
   }
 
-  @Override
   public AnomalyFeedback getFeedback() {
     return this.feedback;
   }
 
-  @Override
   public void setFeedback(AnomalyFeedback anomalyFeedback) {
     if (anomalyFeedback == null) {
       this.feedback = null;

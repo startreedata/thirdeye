@@ -73,7 +73,7 @@ public class HeatmapCalculator {
     final Interval currentInterval = new Interval(rcaInfo.getAnomaly()
         .getStartTime(),
         rcaInfo.getAnomaly().getEndTime(),
-        rcaInfo.getTimezone());
+        rcaInfo.getChronology());
 
     final Period baselineOffsetPeriod = isoPeriod(baselineOffset);
     final Interval baselineInterval = new Interval(currentInterval.getStart()

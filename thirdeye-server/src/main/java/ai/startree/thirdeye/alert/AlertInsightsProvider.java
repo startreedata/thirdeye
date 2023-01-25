@@ -42,10 +42,12 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.WebApplicationException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.chrono.ISOChronology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,11 +192,13 @@ public class AlertInsightsProvider {
       // cannot compute
       return;
     }
-    final DateTimeZone timeZone = optional(metadata.getTimezone()).map(DateTimeZone::forID)
-        .orElse(Constants.DEFAULT_TIMEZONE);
-    final Interval datasetInterval = new Interval(datasetStartTime, datasetEndTime, timeZone);
+    final Chronology chronology = optional(metadata.getTimezone()).map(DateTimeZone::forID)
+        .map(ISOChronology::getInstance)
+        .map(e -> (Chronology) e)
+        .orElse(Constants.DEFAULT_CHRONOLOGY);
+    final Interval datasetInterval = new Interval(datasetStartTime, datasetEndTime, chronology);
     final Period granularity = isoPeriod(metadata.getGranularity());
-    // compute default chart interval todo cyril read user metadata default timeframe setting here once implemented
+    // compute default chart interval
     final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity);
     insights.setDefaultStartTime(defaultInterval.getStartMillis());
     insights.setDefaultEndTime(defaultInterval.getEndMillis());

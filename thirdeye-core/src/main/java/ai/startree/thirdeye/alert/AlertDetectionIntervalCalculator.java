@@ -29,10 +29,12 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.ISOPeriodFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,10 +96,10 @@ public class AlertDetectionIntervalCalculator {
   @VisibleForTesting
   protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
-    final DateTimeZone dateTimeZone = optional(getDateTimeZone(templateWithProperties))
-        .orElse(Constants.DEFAULT_TIMEZONE);
-    final DateTime taskStart = new DateTime(taskStartMillis, dateTimeZone);
-    final DateTime taskEnd = new DateTime(taskEndMillis, dateTimeZone);
+    final Chronology chronology = optional(getDateTimeZone(templateWithProperties))
+        .orElse(Constants.DEFAULT_CHRONOLOGY);
+    final DateTime taskStart = new DateTime(taskStartMillis, chronology);
+    final DateTime taskEnd = new DateTime(taskEndMillis, chronology);
 
     DateTime correctedStart = taskStart;
     DateTime correctedEnd = taskEnd;
@@ -150,12 +152,13 @@ public class AlertDetectionIntervalCalculator {
 
   // todo cyril move below to a utils class
   @Nullable
-  public static DateTimeZone getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
+  public static Chronology getDateTimeZone(final AlertTemplateDTO templateWithProperties) {
     return optional(templateWithProperties.getMetadata())
         .map(AlertMetadataDTO::getTimezone)
         // templates can have an empty string as default property
         .filter(StringUtils::isNotEmpty)
         .map(DateTimeZone::forID)
+        .map(ISOChronology::getInstance)
         .orElse(null);
   }
 

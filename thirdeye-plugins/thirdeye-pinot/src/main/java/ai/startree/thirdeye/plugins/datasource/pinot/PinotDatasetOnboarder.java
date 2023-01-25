@@ -13,8 +13,9 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
+
 import ai.startree.thirdeye.plugins.datasource.pinot.restclient.PinotControllerRestClient;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -82,7 +83,7 @@ public class PinotDatasetOnboarder {
         .setTimeDuration(columnSize)
         .setTimeUnit(columnUnit)
         .setTimeFormat(timeFormatStr)
-        .setTimezone(Constants.DEFAULT_TIMEZONE_STRING);
+        .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
     // set the data granularity of epoch timestamp dataset to minute-level
     if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
         .getTimeUnit()

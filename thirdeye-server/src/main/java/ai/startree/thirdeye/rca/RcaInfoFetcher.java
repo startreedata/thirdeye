@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.Chronology;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -167,7 +168,7 @@ public class RcaInfoFetcher {
     addCustomFields(metricConfigDTO, metadataMetricDTO);
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
-    final DateTimeZone timeZone = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_TIMEZONE);
+    final Chronology chronology = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_CHRONOLOGY);
     EventContextDto eventContext = alertMetadataDto.getEventContext();
     if (eventContext == null || eventContext.equals(EMPTY_CONTEXT_DTO)) {
       // fixme suvodeep cyril findFromAlert is a quick hack for a client - to remove once templates are updated
@@ -175,7 +176,7 @@ public class RcaInfoFetcher {
           EMPTY_CONTEXT_DTO);
     }
 
-    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, timeZone, eventContext);
+    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, chronology, eventContext);
   }
 
   @SuppressWarnings("unchecked")

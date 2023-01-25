@@ -112,7 +112,7 @@ public class RcaDimensionAnalysisResource {
       final Interval currentInterval = new Interval(
           rcaInfo.getAnomaly().getStartTime(),
           rcaInfo.getAnomaly().getEndTime(),
-          rcaInfo.getTimezone());
+          rcaInfo.getChronology());
 
       Period baselineOffsetPeriod = isoPeriod(baselineOffset);
       final Interval baselineInterval = new Interval(

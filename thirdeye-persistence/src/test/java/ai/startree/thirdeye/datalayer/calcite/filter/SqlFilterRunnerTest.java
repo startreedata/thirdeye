@@ -151,7 +151,7 @@ public class SqlFilterRunnerTest {
 
   @Test()
   @Ignore
-  // fixme cyril breaks because if the left MULTISET contains strings with different length - looks like a Calcite issue
+  // fixme cyril breaks if the left MULTISET contains strings with different length - looks like a Calcite issue
   // see discussion https://lists.apache.org/thread/dfhmklr15gp7dm2wd09xhvb5ntb895zm
   public void testApplyFilterWithSetOfPossibleValuesBroken() {
     final String sqlFiler = "(MULTISET['dev', 'abcde'] MULTISET INTERSECT dimensionMap['environment']) is not empty";

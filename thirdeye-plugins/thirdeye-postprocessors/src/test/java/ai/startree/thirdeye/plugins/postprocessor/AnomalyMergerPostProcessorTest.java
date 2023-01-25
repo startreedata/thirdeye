@@ -43,7 +43,10 @@ public class AnomalyMergerPostProcessorTest {
   public static final long ALERT_ID = 1L;
   private static final long JANUARY_1_2021_01H = 1609462800_000L;
   private static final long JANUARY_1_2021_02H = 1609466400_000L;
-  private static final long JANUARY_1_2021_03H = 1609470000000L;
+  private static final long JANUARY_1_2021_03H = 1609470000_000L;
+  private static final long JANUARY_1_2021_04H = 1609473600_000L;
+  private static final long JANUARY_1_2021_05H = 1609477200_000L;
+  private static final long JANUARY_1_2021_06H = 1609480800_000L;
   private static long ANOMALY_ID = 1000L;
   private AnomalyManager anomalyManager;
   private AnomalyMergerPostProcessorSpec detectionSpec;
@@ -80,7 +83,7 @@ public class AnomalyMergerPostProcessorTest {
   @BeforeMethod
   public void setUp() {
     anomalyManager = mock(AnomalyManager.class);
-    detectionSpec = new AnomalyMergerPostProcessorSpec().setMergedAnomalyResultManager(
+    detectionSpec = new AnomalyMergerPostProcessorSpec().setAnomalyManager(
         anomalyManager).setAlertId(ALERT_ID).setUsage(DetectionPipelineUsage.DETECTION);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     detectionMerger.setChronology(ISOChronology.getInstanceUTC());
@@ -178,13 +181,10 @@ public class AnomalyMergerPostProcessorTest {
 
   @Test
   public void testMergeAllNewAndExistingAnomalies() {
-    final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
-    final AnomalyDTO new2 = newAnomaly(JANUARY_1_2021_01H,
-        plusMin(JANUARY_1_2021_01H, 10));
-    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
-    final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_01H,
-        plusMin(JANUARY_1_2021_01H, 10));
+    final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
+    final AnomalyDTO new2 = newAnomaly(JANUARY_1_2021_04H,JANUARY_1_2021_05H);
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
     final List<AnomalyDTO> sorted = AnomalyMergerPostProcessor.combineAndSort(
         List.of(new1, new2), List.of(existing1, existing2));
     final List<AnomalyDTO> merged = detectionMerger.doMerge(sorted);
@@ -456,9 +456,8 @@ public class AnomalyMergerPostProcessorTest {
     detectionSpec.setEnumerationItemDTO(enumerationDTO);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final List<AnomalyDTO> output = detectionMerger.merge(
-        List.of(newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setEnumerationItem(ei1),
-            newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(
-                ei1)));
+        List.of(newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H).setEnumerationItem(ei1),
+            newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H).setEnumerationItem(ei1)));
 
     assertThat(output).isEqualTo(List.of(existingAnomaly));
   }

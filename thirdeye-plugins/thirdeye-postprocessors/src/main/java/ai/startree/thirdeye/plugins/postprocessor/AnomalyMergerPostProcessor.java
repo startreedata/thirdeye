@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -90,6 +91,10 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected static final Period DEFAULT_MERGE_MAX_GAP = Period.hours(2);
   @VisibleForTesting
   protected static final Period DEFAULT_ANOMALY_MAX_DURATION = Period.days(7);
+  @VisibleForTesting
+  protected static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";
+  @VisibleForTesting
+  protected static final String OUTDATED_AFTER_REPLAY_LABEL_NAME = "OUTDATED_AFTER_REPLAY";
 
   private final Period mergeMaxGap;
   private final Period mergeMaxDuration;
@@ -223,16 +228,17 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   /**
-   * Expect anomalies to be sorted with {@link #COMPARATOR}.
+   * Pre-condition: anomalies are sorted with {@link #COMPARATOR}.
    */
   @VisibleForTesting
   protected List<AnomalyDTO> doMerge(
       final Collection<AnomalyDTO> sortedAnomalies) {
-    final List<AnomalyDTO> anomaliesToUpdate = new ArrayList<>();
+    // use a set that maintains order
+    final Set<AnomalyDTO> anomaliesToUpdate = new LinkedHashSet<>();
     AnomalyDTO parentCandidate = null;
     AnomalyDTO previousAnomaly = null;
     // sorted anomalies look like [parentWithChild, child, replay, child, replay, parentWithNoChild, replay, replayNew]
-    // TODO implement rule 4. anomaly that don't exist anymore
+    // TODO CYRIL implement rule 4. anomaly that don't exist anymore - requires a rewrite at upper levels
     for (final AnomalyDTO anomaly : sortedAnomalies) {
       if (previousAnomaly != null && previousAnomaly.getId() != null && anomaly.getId() == null) {
         // apply replay checks
@@ -272,23 +278,23 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     // add last parent candidate
     anomaliesToUpdate.add(parentCandidate);
 
-    return anomaliesToUpdate;
+    return new ArrayList<>(anomaliesToUpdate);
   }
 
   private void addNewLabel(final AnomalyDTO anomaly) {
     final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
         new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals("OUTDATED_AFTER_REPLAY"));
-    labels.add(new AnomalyLabelDTO().setName("NEW_AFTER_REPLAY").setIgnore(false));
+    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME));
+    labels.add(new AnomalyLabelDTO().setName(NEW_AFTER_REPLAY_LABEL_NAME).setIgnore(false));
   }
 
   private void addOutdatedLabel(final AnomalyDTO anomaly) {
     final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
         new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals("NEW_AFTER_REPLAY"));
-    labels.add(new AnomalyLabelDTO().setName("OUTDATED_AFTER_REPLAY").setIgnore(true));
+    labels.removeIf(l -> l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME));
+    labels.add(new AnomalyLabelDTO().setName(OUTDATED_AFTER_REPLAY_LABEL_NAME).setIgnore(true));
   }
 
   private boolean currentValueHasChanged(final AnomalyDTO existingA, final AnomalyDTO newA) {
@@ -411,7 +417,6 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     // child and id not set on purpose
     return to;
   }
-
 
   private void updateAnomalyWithNewValues(final AnomalyDTO currentA, final AnomalyDTO newA) {
     currentA.setAvgBaselineVal(newA.getAvgBaselineVal());

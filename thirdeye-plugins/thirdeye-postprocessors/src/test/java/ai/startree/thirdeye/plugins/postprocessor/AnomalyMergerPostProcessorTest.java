@@ -458,5 +458,128 @@ public class AnomalyMergerPostProcessorTest {
 
     assertThat(output).isEqualTo(List.of(existingAnomaly));
   }
+
+  // tests below check the replay merging rules - see https://docs.google.com/document/d/1bSbv4XhTQsdGR1XVM_dYL1cK9Q6JlntvzNYmmMiXQRI/edit#
+  @Test
+  public void testReplayRule2PipelineAnomalyIsNewInTheMiddleNotMerged() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_05H, JANUARY_1_2021_06H);
+    final List<AnomalyDTO> existingAnomalies = List.of(e1, e2);
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
+    final List<AnomalyDTO> output = detectionMerger.merge(List.of(n1));
+
+    assertThat(output).isEqualTo(List.of(e1, n1, e2));
+  }
+
+  @Test
+  public void testReplayRule2PipelineAnomalyIsNewLeftMostNotMerged() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_05H, JANUARY_1_2021_06H);
+    final List<AnomalyDTO> existingAnomalies = List.of(e1, e2);
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final List<AnomalyDTO> output = detectionMerger.merge(List.of(n1));
+
+    assertThat(output).isEqualTo(List.of(n1, e1, e2));
+  }
+
+  @Test
+  public void testReplayRule2PipelineAnomalyIsNewRightMostNotMerged() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
+    final List<AnomalyDTO> existingAnomalies = List.of(e1, e2);
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_05H, JANUARY_1_2021_06H);
+    final List<AnomalyDTO> output = detectionMerger.merge(List.of(n1));
+
+    assertThat(output).isEqualTo(List.of(e1, e2, n1));
+  }
+
+  @Test
+  public void testReplayRule2PipelineAnomalyIsNewRightMostAndMerged() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
+    final List<AnomalyDTO> existingAnomalies = List.of(e1, e2);
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
+    final List<AnomalyDTO> output = detectionMerger.merge(List.of(n1));
+
+    assertThat(output).isEqualTo(List.of(e1, e2));
+    assertThat(e2.getChildren().size()).isEqualTo(2);
+    // the other anomaly is a copy of e2 - not tested here
+    assertThat(e2.getChildren().contains(n1)).isTrue();
+  }
+
+  @Test
+  public void testReplayRule2PipelineAnomalyIsNewAndBecomesAParent() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
+    final List<AnomalyDTO> existingAnomalies = List.of(e1, e2);
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
+    final List<AnomalyDTO> output = detectionMerger.merge(List.of(n1));
+
+    assertThat(output).isEqualTo(List.of(e1, n1));
+    assertThat(n1.getChildren().size()).isEqualTo(2);
+    // the other anomaly is a copy of n1 - not tested here
+    assertThat(n1.getChildren().contains(e2)).isTrue();
+  }
+
+  @Test
+  public void testReplayRule3PipelineAnomalyMatchesExistingChild() {
+  }
+
+  @Test
+  public void testReplayRule3PipelineAnomalyMatchesExistingAnomalyWithNoChild() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
+    final List<AnomalyDTO> existingAnomalies = List.of(e1, e2);
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
+    final List<AnomalyDTO> output = detectionMerger.merge(List.of(n1));
+
+    assertThat(output).isEqualTo(List.of(e1, e2));
+    assertThat(e2.getAnomalyLabels()).isNull();
+    // todo I AM HERE test the value change
+    assert false;
+  }
+
+  // existing labels not overriden + not duplicated?
+  // - what if there are already outdated where outdated exist --> skip them?
+
+  @Test
+  public void testReplayRule3BisPipelineAnomalyMatchesExistingChildBelowRenotifyThreshold() {}
+
+  @Test
+  public void testReplayRule3BisPipelineAnomalyMatchesExistingChildAboveRenotifyThreshold() {}
+
+  @Test
+  public void testReplayRule3BisPipelineAnomalyMatchesExistingAnomalyWithNoChildBelowRenotifyThreshold() {}
+
+  @Test
+  public void testReplayRule3BisPipelineAnomalyMatchesExistingAnomalyWithNoChildAboveRenotifyThreshold() {}
+
+  // not implemented: what if a parent now contains an anomaly to ignore - recompute the merge? no, as long as there is one anomaly, we consider this is still an anomaly and the merge is not a big issue
+  // rule 4 not implemented
+
 }
 

@@ -136,7 +136,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     }
 
     final List<AnomalyDTO> mergedAnomalies = merge(operatorAnomalies);
-    // fixme cyril hack - operatorResult is not mutable - exploit list mutability to update the anomalies
+    // hack - operatorResult is not mutable - exploit list mutability to update the anomalies
     //  could silently bug if a protective copy is returned by an OperatorResult implementation
     // ensure no protective copy is done comparing references
     checkArgument(operatorAnomalies == operatorResult.getAnomalies());

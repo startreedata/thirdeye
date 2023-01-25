@@ -95,12 +95,9 @@ public class AnomalyMergerPostProcessorTest {
         emptyList());
 
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
-    final AnomalyDTO new2 = newAnomaly(JANUARY_1_2021_01H,
-        plusMin(JANUARY_1_2021_01H, 10));
-    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
-    final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_01H,
-        plusMin(JANUARY_1_2021_01H, 10));
+    final AnomalyDTO new2 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
 
     assertThat(
         AnomalyMergerPostProcessor.combineAndSort(emptyList(), singletonList(existing1))).isEqualTo(

@@ -142,6 +142,7 @@ export const getCohorts = async ({
     resultSize,
     aggregationFunction,
     dataset,
+    roundOffThreshold,
 }: GetCohortParams): Promise<CohortDetectionResponse> => {
     const requestPayload: CohortRequestParams = {
         start,
@@ -172,6 +173,10 @@ export const getCohorts = async ({
 
     if (query && query.length > 0) {
         requestPayload.where = query;
+    }
+
+    if (roundOffThreshold) {
+        requestPayload.roundOffThreshold = roundOffThreshold;
     }
 
     const response = await axios.post(

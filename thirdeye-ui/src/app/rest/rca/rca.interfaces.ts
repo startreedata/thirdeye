@@ -70,6 +70,7 @@ export interface GetCohortParams {
     threshold?: number;
     percentage?: number;
     resultSize?: number;
+    roundOffThreshold?: boolean;
     aggregationFunction: MetricAggFunction;
     dataset: Dataset;
 }
@@ -94,4 +95,5 @@ export interface CohortRequestParams {
     resultSize?: number;
     generateEnumerationItems?: boolean;
     enumerationItemParamKey?: string;
+    roundOffThreshold?: boolean;
 }

@@ -76,7 +76,13 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
     const handleSearchButtonClick = (
         getCohortsParams: GetCohortParams
     ): void => {
-        getCohorts(getCohortsParams);
+        const params = { ...getCohortsParams };
+
+        if (params.aggregationFunction === MetricAggFunction.COUNT) {
+            params.roundOffThreshold = true;
+        }
+
+        getCohorts(params);
     };
 
     const handleCohortsSelectionChange = (cohorts: CohortResult[]): void => {

@@ -119,6 +119,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
+            mock(AlertManager.class),
             alertTemplateRenderer,
             accessControl
         )
@@ -142,6 +143,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
+            alertManager,
             alertTemplateRenderer,
             AccessControlProvider.alwaysDeny
         )
@@ -158,6 +160,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
+            mock(AlertManager.class),
             mock(AlertTemplateRenderer.class),
             AccessControlProvider.alwaysDeny
         )
@@ -187,6 +190,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
+            mock(AlertManager.class),
             alertTemplateRenderer,
             accessControl
         )
@@ -214,6 +218,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
+            mock(AlertManager.class),
             alertTemplateRenderer,
             AccessControlProvider.alwaysDeny
         )
@@ -239,6 +244,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(
+            mock(AlertManager.class),
             alertTemplateRenderer,
             AccessControlProvider.alwaysDeny
         )

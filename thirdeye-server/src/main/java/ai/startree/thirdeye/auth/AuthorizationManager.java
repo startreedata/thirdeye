@@ -23,9 +23,11 @@ import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,12 +41,15 @@ public class AuthorizationManager {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
+  private final AlertManager alertManager;
 
   @Inject
   public AuthorizationManager(
+      final AlertManager alertManager,
       final AlertTemplateRenderer alertTemplateRenderer,
       final AccessControl accessControl
   ) {
+    this.alertManager = alertManager;
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.accessControl = accessControl;
   }
@@ -104,12 +109,23 @@ public class AuthorizationManager {
     return accessControl.hasAccess(principal.authToken, identifier, accessType);
   }
 
-  static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
+  public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
     return ResourceIdentifier.from(
         optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
-        optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
+        namespaceFor(dto),
         optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
             .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE));
+  }
+
+  private String namespaceFor(final AbstractDTO dto) {
+    if (dto instanceof AnomalyDTO) {
+      final Long alertID = ((AnomalyDTO) dto).getDetectionConfigId();
+      return optional(alertManager.findById(alertID))
+          .map(AbstractDTO::getNamespace)
+          .orElse(DEFAULT_NAMESPACE);
+    } else {
+      return optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE);
+    }
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {

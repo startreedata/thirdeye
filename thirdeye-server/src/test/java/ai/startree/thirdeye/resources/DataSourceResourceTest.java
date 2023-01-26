@@ -26,6 +26,7 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import javax.ws.rs.core.Response;
@@ -48,6 +49,7 @@ public class DataSourceResourceTest {
         dataSourceCache,
         mock(DataSourceOnboarder.class),
         new AuthorizationManager(
+            mock(AlertManager.class),
             mock(AlertTemplateRenderer.class),
             AccessControlProvider.alwaysAllow
         )

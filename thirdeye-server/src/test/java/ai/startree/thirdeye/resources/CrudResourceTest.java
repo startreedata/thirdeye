@@ -31,6 +31,7 @@ import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
@@ -364,7 +365,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
     final ImmutableMap<String, String> apiToBeanMap,
     final AccessControl accessControl) {
     super(dtoManager, apiToBeanMap, new AuthorizationManager(
-        mock(AlertTemplateRenderer.class), accessControl));
+        mock(AlertManager.class), mock(AlertTemplateRenderer.class), accessControl));
   }
 
   @Override

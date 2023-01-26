@@ -21,7 +21,8 @@ import io.dropwizard.auth.basic.BasicCredentials;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-public class ThirdEyeBasicAuthenticator implements Authenticator<BasicCredentials, ThirdEyePrincipal> {
+public class ThirdEyeBasicAuthenticator implements
+    Authenticator<BasicCredentials, ThirdEyePrincipal> {
 
   private final BasicAuthConfiguration configuration;
 
@@ -37,7 +38,9 @@ public class ThirdEyeBasicAuthenticator implements Authenticator<BasicCredential
         .setUsername(basicCredentials.getUsername())
         .setPassword(basicCredentials.getPassword());
     if (configuration.getUsers().contains(user)) {
-      return Optional.of(new ThirdEyePrincipal(basicCredentials.getUsername(), ""));
+      final String startreeToken =
+          "st-" + basicCredentials.getUsername() + "-" + basicCredentials.getPassword();
+      return Optional.of(new ThirdEyePrincipal(basicCredentials.getUsername(), startreeToken));
     }
     return Optional.empty();
   }

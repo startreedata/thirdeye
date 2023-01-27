@@ -44,6 +44,9 @@ public class AnomalyMergerPostProcessorTest {
   private static final long JANUARY_1_2021_01H = 1609462800_000L;
   private static final long JANUARY_1_2021_02H = 1609466400_000L;
   private static final long JANUARY_1_2021_03H = 1609470000000L;
+  private static final long JANUARY_1_2021_04H = 1609473600_000L;
+  private static final long JANUARY_1_2021_05H = 1609477200_000L;
+  private static final long JANUARY_1_2021_06H = 1609480800_000L;
   private static long ANOMALY_ID = 1000L;
   private AnomalyManager anomalyManager;
   private AnomalyMergerPostProcessorSpec detectionSpec;
@@ -138,7 +141,10 @@ public class AnomalyMergerPostProcessorTest {
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
     final List<AnomalyDTO> output = detectionMerger.merge(List.of(new1));
     assertThat(output).isEqualTo(List.of(existingAnomaly));
-    assertThat(existingAnomaly.getChildren().size()).isEqualTo(2);
+    // ensure children is not used anymore
+    assertThat(existingAnomaly.getChildren().size()).isEqualTo(0);
+    assertThat(existingAnomaly.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
+    assertThat(existingAnomaly.getEndTime()).isEqualTo(JANUARY_1_2021_03H);
   }
 
   @Test
@@ -177,20 +183,20 @@ public class AnomalyMergerPostProcessorTest {
   }
 
   @Test
-  public void testMergeAllNewAndExistingAnomalies() {
-    final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
-    final AnomalyDTO new2 = newAnomaly(JANUARY_1_2021_01H,
-        plusMin(JANUARY_1_2021_01H, 10));
-    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
-    final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_01H,
-        plusMin(JANUARY_1_2021_01H, 10));
-    final List<AnomalyDTO> sorted = AnomalyMergerPostProcessor.combineAndSort(
-        List.of(new1, new2), List.of(existing1, existing2));
+  public void testMergeAllNewInExistingAnomaly() {
+    final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
+    final AnomalyDTO new2 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_03H);
+    final List<AnomalyDTO> sorted = AnomalyMergerPostProcessor.combineAndSort(List.of(new1, new2),
+        List.of(existing1));
     final List<AnomalyDTO> merged = detectionMerger.doMerge(sorted);
     assertThat(merged.size()).isEqualTo(1);
 
     assertThat(isSameAnomaly(merged.get(0), existing1)).isTrue();
+    // ensure children is not used anymore
+    assertThat(existing1.getChildren().size()).isEqualTo(0);
+    assertThat(existing1.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
+    assertThat(existing1.getEndTime()).isEqualTo(JANUARY_1_2021_05H);
   }
 
   @Test
@@ -234,25 +240,19 @@ public class AnomalyMergerPostProcessorTest {
   }
 
   @Test
-  public void testMergeNewInExisting() {
-    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
-    final long expectedId = existing1.getId();
-    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
-        .getMillis();
-    final AnomalyDTO new1 = newAnomaly(
-        new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(1)).getMillis(),
-        newEndTime);
+  public void testMergeSingleNewWithGapInExisting() {
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
     final List<AnomalyDTO> sorted = AnomalyMergerPostProcessor.combineAndSort(
         List.of(new1), List.of(existing1));
     final List<AnomalyDTO> merged = detectionMerger.doMerge(sorted);
 
     assertThat(merged.size()).isEqualTo(1);
-    AnomalyDTO parent = merged.get(0);
-    assertThat(parent.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
-    assertThat(parent.getEndTime()).isEqualTo(newEndTime);
-    assertThat(parent.getId()).isEqualTo(expectedId);
-    assertThat(parent.getChildren().size()).isEqualTo(2);
+    assertThat(merged.get(0)).isEqualTo(existing1);
+    assertThat(existing1.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
+    assertThat(existing1.getEndTime()).isEqualTo(JANUARY_1_2021_04H);
+    // ensure children is not used anymore
+    assertThat(existing1.getChildren().size()).isEqualTo(0);
   }
 
   @Test
@@ -366,28 +366,26 @@ public class AnomalyMergerPostProcessorTest {
 
   @Test
   public void testMergeExistingInNew() {
+    // FIXME cyril this case is a replay case - it should not happen in the normal cron job case - replay behaviour not defined yet
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
-    final long newEndTime = new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(2))
-        .getMillis();
-    final AnomalyDTO existing1 = existingAnomaly(
-        new DateTime(JANUARY_1_2021_02H, DateTimeZone.UTC).plus(Period.hours(1)).getMillis(),
-        newEndTime);
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
     final List<AnomalyDTO> sorted = AnomalyMergerPostProcessor.combineAndSort(
         List.of(new1), List.of(existing1));
     final List<AnomalyDTO> merged = detectionMerger.doMerge(sorted);
 
     assertThat(merged.size()).isEqualTo(1);
-    AnomalyDTO parent = merged.get(0);
-    assertThat(parent.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
-    assertThat(parent.getEndTime()).isEqualTo(newEndTime);
-    assertThat(parent.getId()).isEqualTo(null);
-    assertThat(parent.getChildren().size()).isEqualTo(2);
+    assertThat(merged.get(0)).isEqualTo(new1);
+    assertThat(new1.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
+    assertThat(new1.getEndTime()).isEqualTo(JANUARY_1_2021_04H);
+    assertThat(new1.getId()).isEqualTo(null);
+    // ensure children is not used anymore
+    assertThat(new1.getChildren().size()).isEqualTo(0);
   }
 
   @Test
   public void testMergeNewIncludedInExisting() {
-    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
+    // FIXME CYRIL this test is either considering a granularity change, either it is a replay test - replay behaviour not defined yet
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final long expectedId = existing1.getId();
     final AnomalyDTO new1 = newAnomaly(
         new DateTime(JANUARY_1_2021_01H, DateTimeZone.UTC).plus(Period.minutes(10)).getMillis(),
@@ -398,15 +396,17 @@ public class AnomalyMergerPostProcessorTest {
     final List<AnomalyDTO> merged = detectionMerger.doMerge(sorted);
 
     assertThat(merged.size()).isEqualTo(1);
-    AnomalyDTO parent = merged.get(0);
-    assertThat(parent.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
-    assertThat(parent.getEndTime()).isEqualTo(JANUARY_1_2021_02H);
-    assertThat(parent.getId()).isEqualTo(expectedId);
-    assertThat(parent.getChildren().size()).isEqualTo(2);
+    assertThat(merged.get(0)).isEqualTo(existing1);
+    assertThat(existing1.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
+    assertThat(existing1.getEndTime()).isEqualTo(JANUARY_1_2021_02H);
+    assertThat(existing1.getId()).isEqualTo(expectedId);
+    // ensure children is not used anymore
+    assertThat(existing1.getChildren().size()).isEqualTo(0);
   }
 
   @Test
   public void testMergeExistingIncludedInNew() {
+    // FIXME CYRIL this test is either considering a granularity change, either it is a replay test - replay behaviour not defined yet
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final AnomalyDTO existing1 = existingAnomaly(
         new DateTime(JANUARY_1_2021_01H, DateTimeZone.UTC).plus(Period.minutes(10)).getMillis(),
@@ -416,11 +416,12 @@ public class AnomalyMergerPostProcessorTest {
     final List<AnomalyDTO> merged = detectionMerger.doMerge(sorted);
 
     assertThat(merged.size()).isEqualTo(1);
-    AnomalyDTO parent = merged.get(0);
-    assertThat(parent.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
-    assertThat(parent.getEndTime()).isEqualTo(JANUARY_1_2021_02H);
-    assertThat(parent.getId()).isEqualTo(null);
-    assertThat(parent.getChildren().size()).isEqualTo(2);
+    assertThat(merged.get(0)).isEqualTo(new1);
+    assertThat(new1.getStartTime()).isEqualTo(JANUARY_1_2021_01H);
+    assertThat(new1.getEndTime()).isEqualTo(JANUARY_1_2021_02H);
+    assertThat(new1.getId()).isEqualTo(null);
+    // ensure children is not used anymore
+    assertThat(new1.getChildren().size()).isEqualTo(0);
   }
 
   @Test
@@ -438,7 +439,9 @@ public class AnomalyMergerPostProcessorTest {
 
     assertThat(merged.size()).isEqualTo(2);
     assertThat(merged.get(0)).isEqualTo(existing1);
+    assertThat(existing1.getId()).isNotNull();
     assertThat(merged.get(1)).isEqualTo(new1);
+    assertThat(new1.getId()).isNull();
   }
 
   // note: there is no need to test for multiple enumerationItems - merger is run for each enumeration independently
@@ -460,7 +463,10 @@ public class AnomalyMergerPostProcessorTest {
             newAnomaly(JANUARY_1_2021_01H, plusMin(JANUARY_1_2021_01H, 10)).setEnumerationItem(
                 ei1)));
 
-    assertThat(output).isEqualTo(List.of(existingAnomaly));
+    assertThat(output.size()).isEqualTo(1);
+    assertThat(output.get(0)).isEqualTo(existingAnomaly);
+    // ensure children is not used anymore
+    assertThat(existingAnomaly.getChildren().size()).isEqualTo(0);
   }
 }
 

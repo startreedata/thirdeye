@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.plugins.postprocessor;
 
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
@@ -291,15 +290,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return patternKey;
   }
 
-  private void mergeIntoParent(final AnomalyDTO parent,
-      final AnomalyDTO child) {
-    // fully merge into existing
-    final Set<AnomalyDTO> children = parent.getChildren();
-
-    // if this parent has no children, then add a copy of itself as a child
-    if (children.isEmpty()) {
-      children.add(copyAnomalyInfo(parent));
-    }
+  private void mergeIntoParent(final AnomalyDTO parent, final AnomalyDTO child) {
     // Extend the end time to match the child anomaly end time.
     parent.setEndTime(Math.max(parent.getEndTime(), child.getEndTime()));
 
@@ -316,36 +307,6 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       // set the highest severity
       parent.setSeverityLabel(child.getSeverityLabel());
     }
-
-    // If anomaly is a child anomaly, add itself else add all its children
-    if (child.getChildren().isEmpty()) {
-      children.add(child);
-    } else {
-      children.addAll(child.getChildren());
-    }
-  }
-
-  private static AnomalyDTO copyAnomalyInfo(final AnomalyDTO from) {
-    final AnomalyDTO to = new AnomalyDTO();
-    to.setStartTime(from.getStartTime());
-    to.setEndTime(from.getEndTime());
-    to.setMetric(from.getMetric());
-    to.setCollection(from.getCollection());
-    to.setDetectionConfigId(from.getDetectionConfigId());
-    to.setAnomalyResultSource(from.getAnomalyResultSource());
-    to.setAvgBaselineVal(from.getAvgBaselineVal());
-    to.setAvgCurrentVal(from.getAvgCurrentVal());
-    to.setFeedback(from.getFeedback());
-    to.setAnomalyFeedbackId(from.getAnomalyFeedbackId());
-    to.setScore(from.getScore());
-    to.setWeight(from.getWeight());
-    to.setProperties(from.getProperties());
-    to.setSeverityLabel(from.getSeverityLabel());
-    // FIXME CYRIL BEFORE MERGE NOT SURE IF THIS WORKS FINE ANYMORE
-    optional(from.getEnumerationItem())
-        .map(AnomalyMergerPostProcessor::cloneEnumerationRef)
-        .ifPresent(to::setEnumerationItem);
-    return to;
   }
 
   /**
@@ -364,12 +325,6 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         parent.put(key, e.getValue());
       }
     }
-  }
-
-  private static EnumerationItemDTO cloneEnumerationRef(final EnumerationItemDTO ei) {
-    final var clone = new EnumerationItemDTO();
-    clone.setId(requireNonNull(ei.getId(), "enumeration item id is null"));
-    return clone;
   }
 
   private @Nullable List<AnomalyLabelDTO> mergeAnomalyLabels(

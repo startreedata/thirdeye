@@ -192,7 +192,6 @@ public class SchedulingTest {
   @Test(dependsOnMethods = "testAfterDetectionCronLastTimestamp", timeOut = 60000L)
   public void testSecondAnomalyIsMerged() throws InterruptedException {
     List<AnomalyApi> anomalies = getAnomalies();
-    int numAnomaliesBeforeDetectionRun = anomalies.size();
 
     // advance detection time to March 23, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 22 - March 23]
@@ -203,26 +202,22 @@ public class SchedulingTest {
     Thread.sleep(1000);
 
     // wait for a new anomaly to be created - proxy to know when the detection has run
-    while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
+    long alertLastTimestamp = getAlertLastTimestamp();
+    while (alertLastTimestamp == MARCH_22_2020_00H00) {
       Thread.sleep(1000);
-      anomalies = getAnomalies();
+      alertLastTimestamp = getAlertLastTimestamp();
     }
 
     // check that lastTimestamp after detection is the runTime of the cron
-    long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(MARCH_23_2020_00H00);
 
     // find anomalies starting on MARCH 21 - there should be 2
     final List<AnomalyApi> march21Anomalies = anomalies.stream()
         .filter(a -> a.getStartTime().getTime() == MARCH_21_2020_00H00)
         .collect(Collectors.toList());
-    assertThat(march21Anomalies.size()).isEqualTo(2);
-    // check that one anomaly finishes on MARCH 22: the child anomaly
-    assertThat(march21Anomalies.stream()
-        .anyMatch(a -> a.getEndTime().getTime() == MARCH_22_2020_00H00)).isTrue();
-    // check that one anomaly finishes on MARCH 23: the parent anomaly
-    assertThat(march21Anomalies.stream()
-        .anyMatch(a -> a.getEndTime().getTime() == MARCH_23_2020_00H00)).isTrue();
+    assertThat(march21Anomalies.size()).isEqualTo(1);
+    // check that the merge of the 2 anomalies starts end on MARCH 23
+    assertThat(march21Anomalies.get(0).getEndTime().getTime()).isEqualTo(MARCH_23_2020_00H00);
   }
 
   private List<AnomalyApi> getAnomalies() {

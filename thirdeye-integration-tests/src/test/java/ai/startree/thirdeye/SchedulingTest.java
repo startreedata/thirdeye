@@ -191,7 +191,6 @@ public class SchedulingTest {
 
   @Test(dependsOnMethods = "testAfterDetectionCronLastTimestamp", timeOut = 60000L)
   public void testSecondAnomalyIsMerged() throws InterruptedException {
-    List<AnomalyApi> anomalies = getAnomalies();
 
     // advance detection time to March 23, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 22 - March 23]
@@ -211,6 +210,7 @@ public class SchedulingTest {
     // check that lastTimestamp after detection is the runTime of the cron
     assertThat(alertLastTimestamp).isEqualTo(MARCH_23_2020_00H00);
 
+    final List<AnomalyApi> anomalies = getAnomalies();
     // find anomalies starting on MARCH 21 - there should be 2
     final List<AnomalyApi> march21Anomalies = anomalies.stream()
         .filter(a -> a.getStartTime().getTime() == MARCH_21_2020_00H00)

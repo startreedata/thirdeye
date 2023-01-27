@@ -61,7 +61,9 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   @JsonIgnore
   private String metricUrn;
   private Long detectionConfigId;
+  @Deprecated
   private Set<Long> childIds; // ids of the anomalies this anomaly merged from
+  @Deprecated
   private boolean isChild;
   @Deprecated
   @JsonIgnore
@@ -84,19 +86,23 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   private EnumerationItemDTO enumerationItem;
   private List<AnomalyLabelDTO> anomalyLabels;
 
+  @Deprecated
   public Set<Long> getChildIds() {
     return childIds;
   }
 
+  @Deprecated
   public AnomalyDTO setChildIds(Set<Long> childIds) {
     this.childIds = childIds;
     return this;
   }
 
+  @Deprecated
   public boolean isChild() {
     return isChild;
   }
 
+  @Deprecated
   public AnomalyDTO setChild(boolean child) {
     isChild = child;
     return this;
@@ -390,10 +396,12 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     this.anomalyFunction = anomalyFunction;
   }
 
+  @Deprecated
   public Set<AnomalyDTO> getChildren() {
     return children;
   }
 
+  @Deprecated
   public void setChildren(Set<AnomalyDTO> children) {
     this.children = children;
   }

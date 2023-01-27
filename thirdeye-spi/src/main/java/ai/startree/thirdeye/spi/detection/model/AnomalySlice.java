@@ -13,11 +13,9 @@
  */
 package ai.startree.thirdeye.spi.detection.model;
 
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -105,50 +103,6 @@ public class AnomalySlice {
     }
 
     return true;
-  }
-
-  public boolean match(AnomalyDTO anomaly) {
-    if (anomaly == null) {
-      return false;
-    }
-
-    if (this.detectionId >= 0 &&
-        (anomaly.getDetectionConfigId() == null
-            || anomaly.getDetectionConfigId() != this.detectionId)) {
-      return false;
-    }
-
-    if (this.start >= 0 && anomaly.getEndTime() <= this.start) {
-      return false;
-    }
-    if (this.end >= 0 && anomaly.getStartTime() >= this.end) {
-      return false;
-    }
-
-    // Matches anomalies on the specified dimension filters
-    //
-    // Let's assume you have anomalies say, A1 on overall pageviews, A2 on pageviews(country=US),
-    // A3 on pageviews(country=US,FR) and A4 on pageviews(country=US, device=Android).
-    //
-    // Now, if you want to fetch all the anomalies in US (country=US), then this matching will
-    // return A2 (country=US) and A4 (country=US, device=Android)
-    for (String dimName : this.filters.keySet()) {
-      if (anomaly.getDimensionMap().containsKey(dimName)) {
-        Collection<String> dimValue = anomaly.getDimensionMap().get(dimName);
-        if (!this.filters.get(dimName).equals(dimValue)) {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    }
-
-    // deprecated logic
-    if (!this.detectionComponentNames.isEmpty()) {
-      return false;
-    } else {
-      return isTaggedAsChild == anomaly.isChild();
-    }
   }
 
   @Override

@@ -21,7 +21,23 @@ import {
 
 jest.mock("numbro", () =>
     jest.fn().mockImplementation((num) => ({
-        format: mockFormat.mockReturnValue(num.toString()),
+        format: mockFormat.mockImplementation(
+            (args: {
+                output?: string;
+                thousandSeparated?: boolean;
+                mantissa?: number;
+                optionalMantissa?: boolean;
+                exponential?: boolean;
+            }) => {
+                if (args?.exponential) {
+                    return `${num
+                        .toExponential(args?.mantissa)
+                        .replace("+", "")}%`; // Get the result in numbro's parsing format
+                }
+
+                return num.toString();
+            }
+        ),
     }))
 );
 
@@ -99,6 +115,7 @@ describe("Number Util", () => {
             thousandSeparated: true,
             mantissa: 2,
             optionalMantissa: true,
+            exponential: false,
         });
     });
 
@@ -109,6 +126,7 @@ describe("Number Util", () => {
             thousandSeparated: true,
             mantissa: 1,
             optionalMantissa: false,
+            exponential: false,
         });
         expect(formatPercentageV1(0, 1, true)).toEqual("0");
         expect(mockFormat).toHaveBeenCalledWith({
@@ -116,8 +134,26 @@ describe("Number Util", () => {
             thousandSeparated: true,
             mantissa: 1,
             optionalMantissa: true,
+            exponential: false,
         });
     });
+
+    it(
+        "formatPercentageV1 should invoke numbro.format with appropriate input and return appropriate " +
+            "string in exponential notation for number if exponential=true",
+        () => {
+            expect(formatPercentageV1(123456789011, 2, true, true)).toEqual(
+                "1.23e11%"
+            );
+            expect(mockFormat).toHaveBeenCalledWith({
+                output: "percent",
+                thousandSeparated: true,
+                mantissa: 2,
+                optionalMantissa: true,
+                exponential: true,
+            });
+        }
+    );
 
     it("stylePercentageV1 should return empty string for invalid number", () => {
         expect(stylePercentageV1(null as unknown as number)).toEqual("");

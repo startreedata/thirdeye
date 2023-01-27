@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.detection.AnomalyResult;
 import ai.startree.thirdeye.spi.events.EventType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -88,18 +87,11 @@ public class NotificationEventsBuilder {
     return new HolidayEventProvider(eventManager).getEvents(eventFilter);
   }
 
-  public List<EventApi> getRelatedEvents(final Collection<? extends AnomalyResult> anomalies) {
+  public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies) {
     DateTime windowStart = DateTime.now(dateTimeZone);
     DateTime windowEnd = new DateTime(0, dateTimeZone);
 
-    for (final AnomalyResult anomalyResult : anomalies) {
-      if (!(anomalyResult instanceof AnomalyDTO)) {
-        LOG.warn("Anomaly result {} isn't an instance of MergedAnomalyResultDTO. Skip from alert.",
-            anomalyResult);
-        continue;
-      }
-      final AnomalyDTO anomaly = (AnomalyDTO) anomalyResult;
-
+    for (final AnomalyDTO anomaly : anomalies) {
       final DateTime anomalyStartTime = new DateTime(anomaly.getStartTime(), dateTimeZone);
       final DateTime anomalyEndTime = new DateTime(anomaly.getEndTime(), dateTimeZone);
 

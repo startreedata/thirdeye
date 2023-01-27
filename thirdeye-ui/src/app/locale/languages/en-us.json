@@ -304,6 +304,7 @@
         "sendgrid-api-key": "SendGrid API Key",
         "sensitivity": "Sensitivity",
         "show-count-default-properties": "Show {{count}} default properties",
+        "show-details": "Show Details",
         "show-log": "Show log",
         "simple": "Simple",
         "slack": "Slack",

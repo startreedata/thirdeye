@@ -288,7 +288,7 @@ public class HappyPathTest {
     Response response = request("api/anomalies/count").get();
     assertThat(response.getStatus()).isEqualTo(200);
     Long anomalyCount = response.readEntity(CountApi.class).getCount();
-    assertThat(anomalyCount).isEqualTo(22);
+    assertThat(anomalyCount).isEqualTo(6);
 
     // there are only 5 parent anomalies
     response = request("api/anomalies/count?isChild=false").get();

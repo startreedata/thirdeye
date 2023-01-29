@@ -127,6 +127,7 @@ export interface PlotBand {
 
 export interface XAxisOptions {
     useUTC?: boolean;
+    timezone?: string;
     hideTime?: boolean;
     enabled?: boolean;
     plotBands?: PlotBand[];

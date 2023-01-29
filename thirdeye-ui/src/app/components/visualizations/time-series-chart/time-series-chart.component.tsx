@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button } from "@material-ui/core";
+import { Box, Button, Typography } from "@material-ui/core";
 import { ParentSize } from "@visx/responsive";
 import { scaleOrdinal, scaleTime } from "@visx/scale";
 import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
+import { Settings } from "luxon";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -23,14 +24,19 @@ import React, {
     useMemo,
     useState,
 } from "react";
+import { useTranslation } from "react-i18next";
+import { DAY_IN_MILLISECONDS } from "../../../utils/time/time.util";
+import { determineGranularity } from "../../../utils/visualization/visualization.util";
 import { ChartBrush } from "./chart-brush/chart-brush.component";
 import { ChartCore } from "./chart-core/chart-core.component";
 import { ChartZoom } from "./chart-zoom/chart-zoom.component";
 import { EventsChart } from "./events-chart/events-chart.component";
 import { Legend } from "./legend/legend.component";
 import {
+    DataPoint,
     EventWithChartState,
     NormalizedSeries,
+    Series,
     TimeSeriesChartInternalProps,
     TimeSeriesChartProps,
     ZoomDomain,
@@ -45,6 +51,7 @@ import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 import { determineXPointForHover } from "./tooltip/tooltip.utils";
 
+const MIN_DATA_POINTS_TO_DISPLAY = 30;
 const CHART_SEPARATION = 30;
 const CHART_MARGINS = {
     top: 20,
@@ -86,7 +93,8 @@ const CHART_MARGINS = {
  *             end: 1639526400000,
  *             color: "#000",
  *             opacity: 0.25
- *         }]
+ *         }],
+ *         timezone: "utc"
  *     },
  *     series,
  *     legend: false,
@@ -130,6 +138,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
         LegendComponent = Legend,
         margins = CHART_MARGINS,
     }) => {
+        const { t } = useTranslation();
         const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
             initialZoom
         );
@@ -139,6 +148,23 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
             useState<NormalizedSeries[]>(normalizeSeries(series));
         const [enabledDisabledSeriesMapping, setEnabledDisabledSeriesMapping] =
             useState<boolean[]>(series.map(syncEnabledDisabled));
+
+        const bestGuessGranularity = useMemo(() => {
+            const candidateSeries: Series | undefined = series.find(
+                (s) => s.data.length > 0
+            );
+
+            if (!candidateSeries) {
+                return DAY_IN_MILLISECONDS;
+            }
+
+            return determineGranularity(
+                (candidateSeries.data as DataPoint[]).map((d: DataPoint) => d.x)
+            );
+        }, [series]);
+        const minMaxValues = useMemo(() => {
+            return getMinMax(series, (d) => [d.x]);
+        }, [series]);
 
         const [processedEvents, setProcessedEvents] = useState<
             EventWithChartState[]
@@ -269,7 +295,18 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
             if (!domain) {
                 return;
             }
-            const { x0, x1 } = domain;
+
+            let { x0, x1 } = domain;
+            // Ensure a minimum of 7 data points are in view
+            while (
+                bestGuessGranularity &&
+                x0 > minMaxValues[0] &&
+                x1 < minMaxValues[1] &&
+                (x1 - x0) / bestGuessGranularity < MIN_DATA_POINTS_TO_DISPLAY
+            ) {
+                x0 = x0 - bestGuessGranularity;
+                x1 = x1 + bestGuessGranularity;
+            }
 
             const seriesDataCopy = series.map((seriesData, idx) => {
                 const copied = { ...seriesData, data: [...seriesData.data] };
@@ -351,6 +388,17 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
 
         return (
             <div style={{ position: "relative" }}>
+                {!!xAxis?.timezone &&
+                    Settings.defaultZone !== xAxis.timezone &&
+                    height > 200 && (
+                        <Box paddingLeft={5} position="absolute">
+                            <Typography color="textSecondary" variant="caption">
+                                {t("message.times-displayed-in-timezone", {
+                                    timezone: xAxis.timezone,
+                                })}
+                            </Typography>
+                        </Box>
+                    )}
                 {events && events.length > 0 && (
                     <EventsChart
                         events={processedEvents}
@@ -443,6 +491,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                         <TooltipPopover
                             colorScale={colorScale}
                             series={processedMainChartSeries}
+                            timezoneOverride={xAxis?.timezone}
                             xValue={tooltipData.xValue}
                         />
                     </TooltipWithBounds>
@@ -459,7 +508,9 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
 
                 {isZoomEnabled && currentZoom && (
                     <Box position="absolute" right={margins.right + 10} top={5}>
-                        <Button onClick={handleResetZoom}>Reset Zoom</Button>
+                        <Button onClick={handleResetZoom}>
+                            {t("label.reset-zoom")}
+                        </Button>
                     </Box>
                 )}
             </div>

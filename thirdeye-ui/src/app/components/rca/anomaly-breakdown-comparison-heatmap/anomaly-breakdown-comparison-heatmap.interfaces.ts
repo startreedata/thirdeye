@@ -19,7 +19,6 @@ export interface AnomalyBreakdownComparisonHeatmapProps {
     comparisonOffset: string;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
     onAddFilterSetClick: (filters: AnomalyFilterOption[]) => void;
-    timezone: string | undefined;
 }
 
 export interface SummaryData {

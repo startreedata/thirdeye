@@ -83,6 +83,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
         onEventSelectionChange,
         getEnumerationItemRequest,
         enumerationItem,
+        timezone,
     }) => {
         const [searchParams, setSearchParams] = useSearchParams();
         const { t } = useTranslation();
@@ -246,7 +247,8 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
                     detectionEvalForAnomaly,
                     anomaly,
                     filteredAlertEvaluation,
-                    t
+                    t,
+                    timezone
                 )
             );
         }, [
@@ -254,6 +256,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
             anomaly,
             filteredAlertEvaluation,
             enumerationItem,
+            timezone,
         ]);
 
         const handleChartHeightChange = (height: number): void => {
@@ -339,7 +342,9 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
                             {/** Use flex to align the button group */}
                             <Box display="flex">
                                 <Box>
-                                    <TimeRangeButtonWithContext />
+                                    <TimeRangeButtonWithContext
+                                        timezone={timezone}
+                                    />
                                 </Box>
                                 <Box marginLeft={1}>
                                     <TooltipV1

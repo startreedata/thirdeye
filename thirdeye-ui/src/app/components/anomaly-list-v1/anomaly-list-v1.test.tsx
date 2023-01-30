@@ -44,6 +44,9 @@ jest.mock("../../platform/utils", () => ({
         .mockImplementation((value: string, id: number) => (
             <a href={`testHref${id}`}>{value}</a>
         )),
+    formatDateAndTimeV1: jest
+        .fn()
+        .mockImplementation((value: number) => (value ? value.toString() : "")),
 }));
 
 jest.mock("../anomaly-quick-filters/anomaly-quick-filters.component", () => ({

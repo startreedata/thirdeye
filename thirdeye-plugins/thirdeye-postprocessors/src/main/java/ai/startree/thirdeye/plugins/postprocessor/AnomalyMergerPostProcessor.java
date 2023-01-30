@@ -282,31 +282,39 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   private void addNewLabel(final AnomalyDTO anomaly) {
-    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
-        new ArrayList<>());
+    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
     labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME) || l.getName()
         .equals(NEW_AFTER_REPLAY_LABEL_NAME));
-    labels.add(new AnomalyLabelDTO().setName(NEW_AFTER_REPLAY_LABEL_NAME).setIgnore(false));
+    labels.add(newAfterReplayLabel());
   }
 
   private void addOutdatedLabel(final AnomalyDTO anomaly) {
-    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
-        new ArrayList<>());
+    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
     labels.removeIf(l -> l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME) || l.getName()
         .equals(OUTDATED_AFTER_REPLAY_LABEL_NAME));
-    labels.add(new AnomalyLabelDTO().setName(OUTDATED_AFTER_REPLAY_LABEL_NAME).setIgnore(true));
+    labels.add(newOutdatedLabel());
+  }
+
+  @VisibleForTesting
+  protected static AnomalyLabelDTO newAfterReplayLabel() {
+    return new AnomalyLabelDTO().setName(NEW_AFTER_REPLAY_LABEL_NAME).setIgnore(false);
+  }
+
+  @VisibleForTesting
+  protected static AnomalyLabelDTO newOutdatedLabel() {
+    return new AnomalyLabelDTO().setName(OUTDATED_AFTER_REPLAY_LABEL_NAME).setIgnore(true);
   }
 
   private boolean currentValueHasChanged(final AnomalyDTO existingA, final AnomalyDTO newA) {
     final double existingCurrentVal = existingA.getAvgCurrentVal();
     final double newCurrentVal = newA.getAvgCurrentVal();
-    final boolean percentageHasChanged = reNotifyPercentageThreshold > 0
+    final boolean percentageHasChanged = reNotifyPercentageThreshold >= 0
         && computeValueChangePercentage(existingCurrentVal, newCurrentVal)
         > reNotifyPercentageThreshold;
 
-    final boolean absoluteHasChanged = reNotifyAbsoluteThreshold > 0
+    final boolean absoluteHasChanged = reNotifyAbsoluteThreshold >= 0
         && Math.abs(existingCurrentVal - newCurrentVal) > reNotifyAbsoluteThreshold;
 
     return percentageHasChanged && absoluteHasChanged;

@@ -244,9 +244,9 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         // apply replay checks
         if (startEndEquals(previousAnomaly, anomaly)) {
           if (currentValueHasChanged(previousAnomaly, anomaly)) {
-            addOutdatedLabel(previousAnomaly);
+            addReplayLabel(previousAnomaly, newOutdatedLabel());
             anomaliesToUpdate.add(previousAnomaly);
-            addNewLabel(anomaly);
+            addReplayLabel(anomaly, newAfterReplayLabel());
           } else {
             // update the existing anomaly with minor changes - drop the new anomaly
             updateAnomalyWithNewValues(previousAnomaly, anomaly);
@@ -281,20 +281,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return new ArrayList<>(anomaliesToUpdate);
   }
 
-  private void addNewLabel(final AnomalyDTO anomaly) {
+  private void addReplayLabel(final AnomalyDTO anomaly, final AnomalyLabelDTO label) {
     final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME) || l.getName()
-        .equals(NEW_AFTER_REPLAY_LABEL_NAME));
-    labels.add(newAfterReplayLabel());
-  }
-
-  private void addOutdatedLabel(final AnomalyDTO anomaly) {
-    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(new ArrayList<>());
-    anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME) || l.getName()
-        .equals(OUTDATED_AFTER_REPLAY_LABEL_NAME));
-    labels.add(newOutdatedLabel());
+    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME) || l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME));
+    labels.add(label);
   }
 
   @VisibleForTesting

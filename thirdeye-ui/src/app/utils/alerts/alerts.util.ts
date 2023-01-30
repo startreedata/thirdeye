@@ -151,7 +151,7 @@ export const createEmptyUiAlertSubscriptionGroup =
     };
 
 export const createAlertEvaluation = (
-    alert: Alert | EditableAlert,
+    alert: Alert | EditableAlert | Pick<Alert, "id">,
     startTime: number,
     endTime: number
 ): AlertEvaluation => {
@@ -450,4 +450,30 @@ export const getAlertAccuracyData = (
     }
 
     return { accuracy, colorScheme, noAnomalyData };
+};
+
+export const determineTimezoneFromAlert = (
+    alert: Pick<Alert, "templateProperties"> | undefined | null
+): string | undefined => {
+    if (alert === undefined || alert === null) {
+        return undefined;
+    }
+
+    if (alert.templateProperties.timezone) {
+        return alert.templateProperties.timezone as string;
+    }
+
+    /**
+     * If no explicit timezone is set, check if monitoring is a
+     * daily granularity order to assume to use UTC
+     */
+    if (alert.templateProperties.monitoringGranularity) {
+        return (
+            alert.templateProperties.monitoringGranularity as string
+        ).endsWith("D")
+            ? "UTC"
+            : undefined;
+    }
+
+    return undefined;
 };

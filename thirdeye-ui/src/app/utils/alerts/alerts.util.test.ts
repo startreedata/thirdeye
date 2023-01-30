@@ -27,6 +27,7 @@ import {
     createEmptyUiAlert,
     createEmptyUiAlertDatasetAndMetric,
     createEmptyUiAlertSubscriptionGroup,
+    determineTimezoneFromAlert,
     extractDetectionEvaluation,
     filterAlerts,
     generateGenericNameForAlert,
@@ -220,6 +221,38 @@ describe("Alerts Util", () => {
         expect(
             generateGenericNameForAlert("hello-world", undefined, undefined)
         ).toEqual("hello-world");
+    });
+
+    it("determineTimezoneFromAlert should return expected results given the inputs", () => {
+        expect(
+            determineTimezoneFromAlert({
+                templateProperties: {
+                    timezone: "America/Los_Angeles",
+                },
+            })
+        ).toEqual("America/Los_Angeles");
+        expect(
+            determineTimezoneFromAlert({
+                templateProperties: {
+                    timezone: "America/Los_Angeles",
+                    monitoringGranularity: "P1H",
+                },
+            })
+        ).toEqual("America/Los_Angeles");
+        expect(
+            determineTimezoneFromAlert({
+                templateProperties: {
+                    monitoringGranularity: "P1H",
+                },
+            })
+        ).toBeUndefined();
+        expect(
+            determineTimezoneFromAlert({
+                templateProperties: {
+                    monitoringGranularity: "P1D",
+                },
+            })
+        ).toEqual("UTC");
     });
 });
 

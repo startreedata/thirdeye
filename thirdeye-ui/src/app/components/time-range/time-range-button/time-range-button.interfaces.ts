@@ -22,4 +22,5 @@ export interface TimeRangeButtonProps {
     minDate?: number;
     btnGroupColor?: "secondary" | "inherit" | "primary" | "default";
     hideQuickExtend?: boolean;
+    timezone?: string;
 }

@@ -199,7 +199,8 @@ export const formatTimeRange = (timeRange: TimeRange): string => {
 
 // Returns formatted string representation of time range duration
 export const formatTimeRangeDuration = (
-    timeRangeDuration: TimeRangeDuration
+    timeRangeDuration: TimeRangeDuration,
+    timezone?: string
 ): string => {
     if (!timeRangeDuration) {
         return "";
@@ -207,20 +208,23 @@ export const formatTimeRangeDuration = (
 
     return formatStartAndEndDuration(
         timeRangeDuration.startTime,
-        timeRangeDuration.endTime
+        timeRangeDuration.endTime,
+        timezone
     );
 };
 
 /**
  * @param startTime - Expected to be in milliseconds
  * @param endTime - Expected to be in milliseconds
+ * @param timezone - Format the time in this timezone
  */
 export const formatStartAndEndDuration = (
     startTime: number,
-    endTime: number
+    endTime: number,
+    timezone?: string
 ): string => {
     return i18n.t("label.start-time-end-time", {
-        startTime: formatDateAndTimeV1(startTime),
-        endTime: formatDateAndTimeV1(endTime),
+        startTime: formatDateAndTimeV1(startTime, timezone),
+        endTime: formatDateAndTimeV1(endTime, timezone),
     });
 };

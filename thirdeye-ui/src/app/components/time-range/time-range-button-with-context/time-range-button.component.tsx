@@ -30,6 +30,7 @@ export const TimeRangeButtonWithContext: FunctionComponent<TimeRangeButtonWithCo
         minDate,
         btnGroupColor = "secondary",
         hideQuickExtend,
+        timezone,
     }) => {
         const { recentCustomTimeRangeDurations, setTimeRangeDuration } =
             useTimeRange();
@@ -80,6 +81,7 @@ export const TimeRangeButtonWithContext: FunctionComponent<TimeRangeButtonWithCo
                 minDate={minDate}
                 recentCustomTimeRangeDurations={recentCustomTimeRangeDurations}
                 timeRangeDuration={timeRangeDuration}
+                timezone={timezone}
                 onChange={onHandleTimeRangeChange}
             />
         );

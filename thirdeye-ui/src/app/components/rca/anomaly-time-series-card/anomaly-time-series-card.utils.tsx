@@ -213,7 +213,8 @@ export const generateChartOptions = (
     detectionEvaluation: DetectionEvaluation,
     anomaly: Anomaly,
     filteredAlertEvaluation: [AlertEvaluation, AnomalyFilterOption[]][],
-    translation: (id: string) => string
+    translation: (id: string) => string,
+    timezone?: string
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
@@ -230,12 +231,14 @@ export const generateChartOptions = (
                 [anomaly],
                 translation,
                 timeseriesData.timestamp,
-                timeseriesData.current
+                timeseriesData.current,
+                undefined,
+                timezone
             )
         );
     }
 
-    return {
+    const chartOptions: TimeSeriesChartProps = {
         series,
         yAxis: {
             position: Orientation.right,
@@ -245,6 +248,14 @@ export const generateChartOptions = (
         zoom: true,
         tooltip: true,
     };
+
+    if (timezone) {
+        chartOptions.xAxis = {
+            timezone,
+        };
+    }
+
+    return chartOptions;
 };
 
 export const generateSeriesForAnomalies = (
@@ -252,7 +263,8 @@ export const generateSeriesForAnomalies = (
     translation: (id: string) => string,
     timestamps: number[],
     valuesToTrackAgainst: number[],
-    navigate?: NavigateFunction
+    navigate?: NavigateFunction,
+    timezone?: string
 ): Series => {
     const granularityBestGuess = determineGranularity(timestamps);
 
@@ -294,7 +306,7 @@ export const generateSeriesForAnomalies = (
     return {
         name: translation("label.anomalies"),
         /**
-         * We need the points in data so it shows up in the legend
+         * We need the points in data, so it shows up in the legend
          * and in the filtered chart
          */
         data: flatten(
@@ -339,7 +351,8 @@ export const generateSeriesForAnomalies = (
                                 <td>{translation("label.start")}</td>
                                 <td align="right">
                                     {formatDateAndTimeV1(
-                                        dataPoint.extraData.startTime
+                                        dataPoint.extraData.startTime,
+                                        timezone
                                     )}
                                 </td>
                             </tr>
@@ -347,7 +360,8 @@ export const generateSeriesForAnomalies = (
                                 <td>{translation("label.end")}</td>
                                 <td align="right">
                                     {formatDateAndTimeV1(
-                                        dataPoint.extraData.endTime
+                                        dataPoint.extraData.endTime,
+                                        timezone
                                     )}
                                 </td>
                             </tr>
@@ -470,7 +484,8 @@ export const generateChartOptionsForAlert = (
     detectionEvaluation: DetectionEvaluation,
     anomalies: Anomaly[],
     translation: (id: string) => string,
-    navigate?: NavigateFunction
+    navigate?: NavigateFunction,
+    timezone?: string
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
@@ -489,12 +504,13 @@ export const generateChartOptionsForAlert = (
                 translation,
                 detectionEvaluation.data.timestamp,
                 detectionEvaluation.data.current,
-                navigate
+                navigate,
+                timezone
             )
         );
     }
 
-    return {
+    const chartOptions: TimeSeriesChartProps = {
         series,
         legend: true,
         brush: true,
@@ -504,12 +520,21 @@ export const generateChartOptionsForAlert = (
             position: Orientation.right,
         },
     };
+
+    if (timezone) {
+        chartOptions.xAxis = {
+            timezone,
+        };
+    }
+
+    return chartOptions;
 };
 
 export const generateChartOptionsForMetricsReport = (
     detectionEvaluation: DetectionEvaluation,
     anomalies: Anomaly[],
-    translation: (id: string) => string
+    translation: (id: string) => string,
+    timezone?: string
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
@@ -535,7 +560,7 @@ export const generateChartOptionsForMetricsReport = (
         );
     }
 
-    return {
+    const chartOptions: TimeSeriesChartProps = {
         series,
         legend: false,
         brush: false,
@@ -543,6 +568,14 @@ export const generateChartOptionsForMetricsReport = (
         tooltip: false,
         yAxis: { enabled: false },
     };
+
+    if (timezone) {
+        chartOptions.xAxis = {
+            timezone,
+        };
+    }
+
+    return chartOptions;
 };
 
 export const determineInitialZoom = (

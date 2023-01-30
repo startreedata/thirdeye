@@ -36,6 +36,7 @@ export const AnomalyDimensionAnalysis: FunctionComponent<AnomalyDimensionAnalysi
         comparisonOffset,
         chartTimeSeriesFilterSet,
         onCheckClick,
+        timezone,
     }) => {
         const { notify } = useNotificationProviderV1();
         const { t } = useTranslation();
@@ -102,6 +103,7 @@ export const AnomalyDimensionAnalysis: FunctionComponent<AnomalyDimensionAnalysi
                                     chartTimeSeriesFilterSet
                                 }
                                 comparisonOffset={comparisonOffset}
+                                timezone={timezone}
                                 onCheckClick={onCheckClick}
                             />
                         )}

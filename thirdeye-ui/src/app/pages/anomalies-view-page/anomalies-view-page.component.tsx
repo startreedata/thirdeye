@@ -13,7 +13,7 @@
  * the License.
  */
 import { Box, Button, Grid, Link } from "@material-ui/core";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -39,7 +39,10 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
+import {
+    useGetAlert,
+    useGetEvaluation,
+} from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
@@ -47,7 +50,10 @@ import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
-import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
+import {
+    determineTimezoneFromAlert,
+    extractDetectionEvaluation,
+} from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
@@ -68,6 +74,7 @@ import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
 export const AnomaliesViewPage: FunctionComponent = () => {
+    const { alert, getAlert } = useGetAlert();
     const {
         enumerationItem,
         getEnumerationItem,
@@ -135,6 +142,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     useEffect(() => {
         // Fetched alert or time range changed, fetch alert evaluation
         fetchAlertEvaluation();
+        anomaly && getAlert(anomaly.alert.id);
     }, [anomaly, searchParams]);
 
     useEffect(() => {
@@ -205,18 +213,14 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     };
 
     useEffect(() => {
-        if (anomalyRequestStatus === ActionStatus.Error) {
-            isEmpty(anomalyRequestErrors)
-                ? notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.anomaly"),
-                      })
-                  )
-                : anomalyRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  );
-        }
+        notifyIfErrors(
+            anomalyRequestStatus,
+            anomalyRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.anomaly"),
+            })
+        );
     }, [anomalyRequestStatus, anomalyRequestErrors]);
 
     const enumerationItemSearchParams =
@@ -360,6 +364,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         isLoading={
                             anomalyRequestStatus === ActionStatus.Working
                         }
+                        timezone={determineTimezoneFromAlert(alert)}
                         uiAnomaly={uiAnomaly}
                     />
                 </Grid>
@@ -382,6 +387,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             header={
                                 <ViewAnomalyHeader
                                     anomaly={anomaly}
+                                    timezone={determineTimezoneFromAlert(alert)}
                                     onRefresh={fetchAlertEvaluation}
                                 />
                             }
@@ -389,6 +395,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                                 getEvaluationRequestStatus ===
                                 ActionStatus.Working
                             }
+                            timezone={determineTimezoneFromAlert(alert)}
                         />
                     )}
                 </Grid>

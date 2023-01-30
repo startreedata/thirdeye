@@ -23,11 +23,13 @@ export interface AlertEvaluationTimeSeriesCardProps {
     header?: React.ReactElement;
     anomalies: Anomaly[];
     disableNavigation?: boolean;
+    timezone?: string;
 }
 
 export interface ViewAnomalyHeaderProps {
     anomaly: Anomaly | null;
     onRefresh?: (start?: number, end?: number) => void;
+    timezone?: string;
 }
 
 export interface CreateAlertHeaderProps {

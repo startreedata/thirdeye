@@ -29,4 +29,5 @@ export interface AnomalyListV1Props extends Partial<EnumerationDataProps> {
     searchFilterValue?: string | null;
     onSearchFilterValueChange?: (value: string) => void;
     toolbar?: ReactNode;
+    timezone?: string;
 }

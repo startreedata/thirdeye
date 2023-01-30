@@ -28,7 +28,7 @@ export interface Anomaly {
     created: number;
     notified: boolean;
     message: string;
-    alert: Alert;
+    alert: Pick<Alert, "id" | "name">;
     metric: Metric;
     children: Anomaly[];
     type: AnomalyType;

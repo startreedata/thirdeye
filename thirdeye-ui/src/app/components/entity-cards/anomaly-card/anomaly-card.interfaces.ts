@@ -19,4 +19,5 @@ export interface AnomalyCardProps {
     searchWords?: string[];
     className?: string;
     isLoading?: boolean;
+    timezone?: string;
 }

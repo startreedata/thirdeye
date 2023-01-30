@@ -20,4 +20,5 @@ export enum AnomalyFilterQueryStringKey {
 
 export interface AnomalyQuickFiltersProps {
     showTimeSelectorOnly?: boolean;
+    timezone?: string;
 }

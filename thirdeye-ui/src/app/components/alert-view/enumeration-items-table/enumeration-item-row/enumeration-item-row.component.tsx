@@ -45,6 +45,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     expanded,
     onExpandChange,
     alertStats,
+    timezone,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -65,7 +66,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         detectionEvaluation,
         anomalies,
         t,
-        navigate
+        navigate,
+        timezone
     );
     const tsDataForExpanded = {
         ...tsData,

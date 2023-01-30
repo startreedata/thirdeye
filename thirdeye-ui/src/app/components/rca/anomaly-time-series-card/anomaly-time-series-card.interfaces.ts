@@ -27,4 +27,5 @@ export interface AnomalyTimeSeriesCardProps {
     onEventSelectionChange: (events: Event[]) => void;
     getEnumerationItemRequest: ActionStatus;
     enumerationItem: EnumerationItem | null;
+    timezone: string | undefined;
 }

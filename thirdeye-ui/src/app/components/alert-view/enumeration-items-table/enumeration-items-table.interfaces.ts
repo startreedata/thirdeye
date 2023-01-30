@@ -26,4 +26,5 @@ export interface EnumerationItemsTableProps {
     onSearchTermChange: (newTerm: string) => void;
     onSortOrderChange: (newOrder: DataGridSortOrderV1) => void;
     alertsStats?: Record<number, AlertStats | null> | null;
+    timezone?: string;
 }

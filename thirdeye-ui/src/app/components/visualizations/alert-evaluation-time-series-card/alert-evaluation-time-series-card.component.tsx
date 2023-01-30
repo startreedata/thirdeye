@@ -31,6 +31,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
         onRefresh,
         anomalies,
         disableNavigation,
+        timezone,
     }) => {
         const navigate = useNavigate();
         const { t } = useTranslation();
@@ -52,6 +53,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
                             <Grid container>
                                 <Grid item>
                                     <TimeRangeButtonWithContext
+                                        timezone={timezone}
                                         onTimeRangeChange={(
                                             start: number,
                                             end: number
@@ -71,7 +73,8 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
                                 detectionEvaluation,
                                 anomalies,
                                 t,
-                                disableNavigation ? undefined : navigate
+                                disableNavigation ? undefined : navigate,
+                                timezone
                             )}
                         />
                     )}

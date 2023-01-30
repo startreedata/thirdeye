@@ -32,6 +32,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { determineTimezoneFromAlert } from "../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../utils/anomalies/anomalies.util";
 import { getFromSavedInvestigationOrDefault } from "../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
@@ -52,6 +53,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         anomaly,
         getAnomalyRequestStatus,
         anomalyRequestErrors,
+        alert,
     } = useOutletContext<InvestigationContext>();
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [chartTimeSeriesFilterSet, setChartTimeSeriesFilterSet] = useState<
@@ -126,6 +128,8 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         );
     }, [getAnomalyRequestStatus, anomalyRequestErrors]);
 
+    const timezone = determineTimezoneFromAlert(alert);
+
     const handleAddFilterSetClick = (filters: AnomalyFilterOption[]): void => {
         const serializedFilters = serializeKeyValuePair(filters);
         const existingIndex = chartTimeSeriesFilterSet.findIndex(
@@ -163,10 +167,12 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                 >
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <AnomalySummaryCard
+                            alert={alert}
                             className={style.fullHeight}
                             isLoading={
                                 getAnomalyRequestStatus === ActionStatus.Working
                             }
+                            timezone={timezone}
                             uiAnomaly={uiAnomaly}
                         />
                     </Grid>
@@ -184,8 +190,8 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             <Grid item xs={12}>
                 <AnomalyTimeSeriesCard
                     anomaly={anomaly}
-                    // Selected events should be shown on the graph
                     enumerationItem={enumerationItem}
+                    // Selected events should be shown on the graph
                     events={selectedEvents}
                     getEnumerationItemRequest={getEnumerationItemRequest}
                     isLoading={
@@ -193,6 +199,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                         getAnomalyRequestStatus === ActionStatus.Initial
                     }
                     timeSeriesFiltersSet={chartTimeSeriesFilterSet}
+                    timezone={timezone}
                     onEventSelectionChange={handleEventSelectionChange}
                     onRemoveBtnClick={handleRemoveBtnClick}
                 />
@@ -206,6 +213,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                     isLoading={getAnomalyRequestStatus === ActionStatus.Working}
                     selectedEvents={selectedEvents}
+                    timezone={timezone}
                     onAddFilterSetClick={handleAddFilterSetClick}
                     onEventSelectionChange={handleEventSelectionChange}
                 />

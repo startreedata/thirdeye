@@ -23,6 +23,7 @@ import {
 } from "../../../platform/components";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { determineTimezoneFromAlert } from "../../../utils/alerts/alerts.util";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
 
@@ -96,7 +97,10 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
                         </Button>
                     </Grid>
                     <Grid item>
-                        <TimeRangeButtonWithContext btnGroupColor="primary" />
+                        <TimeRangeButtonWithContext
+                            btnGroupColor="primary"
+                            timezone={determineTimezoneFromAlert(alert)}
+                        />
                     </Grid>
                 </Grid>
             </Grid>

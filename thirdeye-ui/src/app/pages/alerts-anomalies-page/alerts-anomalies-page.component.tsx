@@ -33,6 +33,7 @@ import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
+import { determineTimezoneFromAlert } from "../../utils/alerts/alerts.util";
 import {
     filterAnomaliesByFunctions,
     getUiAnomalies,
@@ -241,6 +242,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                     ? null
                                     : uiAnomalies
                             }
+                            timezone={determineTimezoneFromAlert(alert)}
                             toolbar={
                                 <>
                                     <Box width="100%">
@@ -258,7 +260,12 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                             label={t("message.show-ignored")}
                                         />
                                     </Box>
-                                    <AnomalyQuickFilters showTimeSelectorOnly />
+                                    <AnomalyQuickFilters
+                                        showTimeSelectorOnly
+                                        timezone={determineTimezoneFromAlert(
+                                            alert
+                                        )}
+                                    />
                                 </>
                             }
                             onDelete={handleAnomalyDelete}

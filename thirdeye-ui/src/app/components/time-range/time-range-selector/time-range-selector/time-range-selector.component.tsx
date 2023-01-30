@@ -33,6 +33,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
     recentCustomTimeRangeDurations,
     onRefresh,
     onChange,
+    timezone,
 }) => {
     const timeRangeSelectorClasses = useTimeRangeSelectorStyles();
     const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
@@ -60,7 +61,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
 
                     {/* Time range duration */}
                     <Typography variant="body2">
-                        {formatTimeRangeDuration(timeRangeDuration)}
+                        {formatTimeRangeDuration(timeRangeDuration, timezone)}
                     </Typography>
                 </Grid>
             )}
@@ -90,6 +91,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
                                 recentCustomTimeRangeDurations
                             }
                             timeRangeDuration={timeRangeDuration}
+                            timezone={timezone}
                             onChange={onChange}
                             onClose={handleTimeRangeSelectorClose}
                         />

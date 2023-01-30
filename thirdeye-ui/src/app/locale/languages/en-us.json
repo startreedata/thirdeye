@@ -436,6 +436,7 @@
         "empty-selection-means-all-is-selected": "An empty selection means all are selected",
         "enter-value-to-override-defaults": "Fields with default values, enter a value to override the defaults",
         "entity-detected-in-your-alerts": "{{entity}} detected in your alerts",
+        "entity-id-verbose-header": "{{entity}} ID",
         "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource.",
         "error-while-fetching": "An issue was experienced while retrieving {{entity}} data",
         "event-end-time-required": "End time is required",

@@ -137,7 +137,7 @@ describe("AnomalyListV1", () => {
             render(<AnomalyListV1 {...props} />);
         });
 
-        expect(await screen.findByText("testAnomaly")).toBeInTheDocument();
+        expect(await screen.findByText("label.entity-id")).toBeInTheDocument();
     });
 
     it("delete button should be disabled if selection is none", async () => {
@@ -174,8 +174,8 @@ describe("AnomalyListV1", () => {
             render(<AnomalyListV1 {...props} />);
         });
 
-        expect(screen.getByText("testAnomaly")).toBeInTheDocument();
-        expect(screen.getByText("testAnomaly")).toHaveAttribute(
+        expect(screen.getByText("label.entity-id")).toBeInTheDocument();
+        expect(screen.getByText("label.entity-id")).toHaveAttribute(
             "href",
             "testHref1"
         );
@@ -184,7 +184,6 @@ describe("AnomalyListV1", () => {
 
 const mockUiAnomaly = {
     id: 1,
-    name: "testAnomaly",
     alertName: "testAlert",
     alertId: 2,
 } as UiAnomaly;

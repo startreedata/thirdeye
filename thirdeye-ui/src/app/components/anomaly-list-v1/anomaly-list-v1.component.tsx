@@ -90,12 +90,16 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const anomalyNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            const { isIgnored } = data;
+            const { isIgnored, id } = data;
 
             return addMutedStyle(
                 linkRendererV1(
-                    `${cellValue}${isIgnored ? `(${t("label.ignored")})` : ""}`,
-                    getAnomaliesAnomalyPath(data.id)
+                    `${t("label.entity-id", { id: cellValue })}${
+                        isIgnored ? `(${t("label.ignored")})` : ""
+                    }`,
+                    getAnomaliesAnomalyPath(id),
+                    false,
+                    `${t("label.view")} ${data.name}`
                 ),
                 data
             );
@@ -106,7 +110,12 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     const alertNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
             return addMutedStyle(
-                linkRendererV1(cellValue, getAlertsAlertPath(data.alertId)),
+                linkRendererV1(
+                    cellValue,
+                    getAlertsAlertPath(data.alertId),
+                    false,
+                    `${t("label.view")} ${t("label.alert")}:${cellValue}`
+                ),
                 data
             );
         },
@@ -281,10 +290,12 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
         const columns: DataGridColumnV1<UiAnomaly>[] = [
             {
                 key: "name",
-                dataKey: "name",
-                header: t("label.name"),
+                dataKey: "id",
+                header: t("message.entity-id-verbose-header", {
+                    entity: t("label.anomaly"),
+                }),
                 sortable: true,
-                minWidth: 200,
+                minWidth: 150,
                 customCellRenderer: anomalyNameRenderer,
             },
             {

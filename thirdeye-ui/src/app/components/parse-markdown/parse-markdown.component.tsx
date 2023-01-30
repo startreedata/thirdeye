@@ -25,6 +25,7 @@ export const ParseMarkdown: FunctionComponent<ParseMarkdownProps> = ({
     customOptions,
 }) => {
     const options: ReactMarkdownOptions = {
+        ...customOptions,
         components: {
             h1: ({ children }) => (
                 <Typography variant="h1">{children}</Typography>
@@ -51,7 +52,7 @@ export const ParseMarkdown: FunctionComponent<ParseMarkdownProps> = ({
                     color="primary"
                     href={href}
                     target="_blank"
-                    variant="body2"
+                    variant="caption"
                 >
                     {children}
                 </LinkV1>
@@ -61,9 +62,9 @@ export const ParseMarkdown: FunctionComponent<ParseMarkdownProps> = ({
                     {children}
                 </Box>
             ),
+            ...customOptions?.components,
         },
         children,
-        ...customOptions,
     };
 
     return <ReactMarkdown {...options} />;

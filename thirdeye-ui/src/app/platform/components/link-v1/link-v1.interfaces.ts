@@ -12,8 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Variant } from "@material-ui/core/styles/createTypography";
-import { HTMLAttributeAnchorTarget, MouseEventHandler, ReactNode } from "react";
+import type { Variant } from "@material-ui/core/styles/createTypography";
+import type {
+    CSSProperties,
+    HTMLAttributeAnchorTarget,
+    MouseEventHandler,
+    ReactNode,
+} from "react";
 
 export interface LinkV1Props {
     href?: string;
@@ -33,4 +38,5 @@ export interface LinkV1Props {
     className?: string;
     onClick?: MouseEventHandler;
     children?: ReactNode;
+    style?: CSSProperties;
 }

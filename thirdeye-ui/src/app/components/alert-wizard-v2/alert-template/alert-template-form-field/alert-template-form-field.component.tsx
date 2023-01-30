@@ -12,15 +12,53 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, TextField, Tooltip, Typography } from "@material-ui/core";
+import {
+    Box,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
 import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
+import { LinkV1 } from "../../../../platform/components";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { ParseMarkdown } from "../../../parse-markdown/parse-markdown.component";
+import { ParseMarkdownProps } from "../../../parse-markdown/parse-markdown.interfaces";
 import { AlertTemplateFormFieldProps } from "./alert-template-form-field.interfaces";
 
 export const AlertTemplateFormField: FunctionComponent<AlertTemplateFormFieldProps> =
     ({ item, textFieldProps, tooltipText }) => {
+        const theme = useTheme();
+
+        const parseMarkdownProps = useMemo<
+            Omit<ParseMarkdownProps, "children">
+        >(
+            () => ({
+                customOptions: {
+                    components: {
+                        a: ({ children, ...props }) => (
+                            <LinkV1
+                                {...props}
+                                externalLink
+                                color="primary"
+                                style={{
+                                    // Using the light color to improve contrast
+                                    // against the dark tooltip background
+                                    color: theme.palette.primary.light,
+                                }}
+                                target="_blank"
+                                variant="caption"
+                            >
+                                {children}
+                            </LinkV1>
+                        ),
+                    },
+                },
+            }),
+            []
+        );
+
         return (
             <InputSection
                 gridContainerProps={{ alignItems: "flex-start" }}
@@ -49,7 +87,7 @@ export const AlertTemplateFormField: FunctionComponent<AlertTemplateFormFieldPro
                                 placement="top"
                                 title={
                                     <Typography variant="caption">
-                                        <ParseMarkdown>
+                                        <ParseMarkdown {...parseMarkdownProps}>
                                             {tooltipText}
                                         </ParseMarkdown>
                                     </Typography>

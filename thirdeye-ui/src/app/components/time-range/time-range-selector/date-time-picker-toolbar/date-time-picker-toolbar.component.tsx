@@ -17,16 +17,18 @@ import { ToolbarComponentProps } from "@material-ui/pickers/Picker/Picker";
 import classnames from "classnames";
 import { DateTime } from "luxon";
 import React, { FunctionComponent } from "react";
-import {
-    formatDayV1,
-    formatHourV1,
-    formatMeridiemV1,
-    formatMinuteV1,
-    formatMonthV1,
-    formatYearV1,
-    switchMeridiemV1,
-} from "../../../../platform/utils";
+import { switchMeridiemV1 } from "../../../../platform/utils";
 import { useDateTimePickerToolbarStyles } from "./date-time-picker-toolbar.styles";
+
+const GRANULARITY_TO_FORMAT = {
+    YEAR: "yyyy",
+    MONTH: "MMM",
+    DAY: "dd",
+    HOUR: "hh",
+    MINUTE: "mm",
+    SECOND: "ss",
+    MERIDIEM: "a",
+};
 
 export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
     props: ToolbarComponentProps
@@ -81,7 +83,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleMonthClick}
             >
-                {props.date && formatMonthV1(props.date.toMillis())}
+                {props.date?.toFormat(GRANULARITY_TO_FORMAT.MONTH)}
             </Link>
 
             {/* Day */}
@@ -93,7 +95,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleDayClick}
             >
-                {props.date && formatDayV1(props.date.toMillis())}
+                {props.date?.toFormat(GRANULARITY_TO_FORMAT.DAY)}
             </Link>
 
             {/* Year */}
@@ -105,7 +107,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleYearClick}
             >
-                {props.date && formatYearV1(props.date.toMillis())}
+                {props.date?.toFormat(GRANULARITY_TO_FORMAT.YEAR)}
             </Link>
 
             {/* Hour */}
@@ -121,7 +123,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleHourClick}
             >
-                {props.date && formatHourV1(props.date.toMillis())}
+                {props.date?.toFormat(GRANULARITY_TO_FORMAT.HOUR)}
             </Link>
 
             {/* Minute */}
@@ -133,7 +135,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleMinuteClick}
             >
-                {props.date && formatMinuteV1(props.date.toMillis())}
+                {props.date?.toFormat(GRANULARITY_TO_FORMAT.MINUTE)}
             </Link>
 
             {/* Meridiem */}
@@ -142,7 +144,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                 variant="subtitle1"
                 onClick={handleMeridiemClick}
             >
-                {props.date && formatMeridiemV1(props.date.toMillis())}
+                {props.date?.toFormat(GRANULARITY_TO_FORMAT.MERIDIEM)}
             </Link>
         </Toolbar>
     );

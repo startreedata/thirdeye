@@ -52,7 +52,9 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell />
+                        <TableCell>
+                            <strong>{t("label.add-to-chart")}</strong>
+                        </TableCell>
                         <TableCell>
                             <strong>{t("label.name")}</strong>
                         </TableCell>
@@ -62,7 +64,9 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
                         <TableCell>
                             <strong>{t("label.impact-score")}</strong>
                         </TableCell>
-                        <TableCell />
+                        <TableCell>
+                            <strong>{t("label.show-details")}</strong>
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

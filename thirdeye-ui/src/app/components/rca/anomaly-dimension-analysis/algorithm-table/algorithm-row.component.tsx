@@ -132,9 +132,10 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                         />
                     )}
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                     <IconButton
                         aria-label="expand row"
+                        color="inherit"
                         size="small"
                         onClick={() => setOpen(!open)}
                     >

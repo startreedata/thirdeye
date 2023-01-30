@@ -152,7 +152,8 @@ public class HappyPathTest {
     formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
     formData.add("datasetName", PINOT_DATASET_NAME);
 
-    final Response response = request("api/data-sources/onboard-dataset/").post(Entity.form(formData));
+    final Response response = request("api/data-sources/onboard-dataset/").post(
+        Entity.form(formData));
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
@@ -253,7 +254,6 @@ public class HappyPathTest {
 
     final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
     assertThat(response.getStatus()).isEqualTo(200);
-
   }
 
   @Test(dependsOnMethods = "testGetAnomalies")
@@ -290,7 +290,7 @@ public class HappyPathTest {
     Long anomalyCount = response.readEntity(CountApi.class).getCount();
     assertThat(anomalyCount).isEqualTo(22);
 
-    // there are only 5 parent anomalies
+    // there are only 6 parent anomalies
     response = request("api/anomalies/count?isChild=false").get();
     assertThat(response.getStatus()).isEqualTo(200);
     anomalyCount = response.readEntity(CountApi.class).getCount();
@@ -304,6 +304,31 @@ public class HappyPathTest {
     assertThat(response.getStatus()).isEqualTo(200);
     anomalyCount = response.readEntity(CountApi.class).getCount();
     assertThat(anomalyCount).isEqualTo(3);
+  }
+
+  @Test(dependsOnMethods = "testAnomalyCount", timeOut = 50000L)
+  public void testReplayIsIdemPotent() throws InterruptedException {
+    // use update time as a way to know when the replay is done
+    final long lastUpdatedTime = getAlertLastUpdatedTime();
+    final Response beforeReplayResponse = request("api/anomalies").get();
+    assertThat(beforeReplayResponse.getStatus()).isEqualTo(200);
+    final List<AnomalyApi> beforeReplayAnomalies = beforeReplayResponse.readEntity(ANOMALIES_LIST_TYPE);
+
+    final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    formData.add("start", String.valueOf(PAGEVIEWS_DATASET_START_TIME));
+    final Response replayResponse = request("api/alerts/" + anomalyId + "/run").post(
+        Entity.form(formData));
+    assertThat(replayResponse.getStatus()).isEqualTo(200);
+
+    while (getAlertLastUpdatedTime() == lastUpdatedTime) {
+      Thread.sleep(1000);
+    }
+
+    final Response afterReplayResponse = request("api/anomalies").get();
+    assertThat(afterReplayResponse.getStatus()).isEqualTo(200);
+    final List<AnomalyApi> afterReplayAnomalies = afterReplayResponse.readEntity(ANOMALIES_LIST_TYPE);
+    // the only contract of the replay is to be user-facing idempotent - hence this test can break if we chose in the implementation to save all anomalies, even the ones at replay
+    assertThat(beforeReplayAnomalies).isEqualTo(afterReplayAnomalies);
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
@@ -343,6 +368,13 @@ public class HappyPathTest {
 
   private String endPoint(final String pathFragment) {
     return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), pathFragment);
+  }
+
+  private long getAlertLastUpdatedTime() {
+    final Response getResponse = request("api/alerts/" + alertId).get();
+    assertThat(getResponse.getStatus()).isEqualTo(200);
+    final AlertApi alert = getResponse.readEntity(AlertApi.class);
+    return alert.getUpdated().getTime();
   }
 }
 

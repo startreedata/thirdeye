@@ -45,6 +45,7 @@ export const AlgorithmRowExpanded: FunctionComponent<AlgorithmRowExpandedProps> 
         alertId,
         dimensionColumns,
         comparisonOffset,
+        timezone,
     }) => {
         const commonClasses = useCommonStyles();
         const {
@@ -88,7 +89,8 @@ export const AlgorithmRowExpanded: FunctionComponent<AlgorithmRowExpandedProps> 
                             startTime,
                             endTime,
                             comparisonOffset,
-                            t
+                            t,
+                            timezone
                         )
                     );
                 }

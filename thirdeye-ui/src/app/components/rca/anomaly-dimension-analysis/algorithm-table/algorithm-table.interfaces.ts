@@ -25,6 +25,7 @@ export interface AlgorithmTableProps {
     comparisonOffset: string;
     onCheckClick?: (filters: AnomalyFilterOption[]) => void;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
+    timezone: string | undefined;
 }
 
 export interface AlgorithmRowProps {
@@ -39,6 +40,7 @@ export interface AlgorithmRowProps {
     dimensionColumns: string[];
     checked: boolean;
     onCheckClick?: (filters: AnomalyFilterOption[]) => void;
+    timezone: string | undefined;
 }
 
 export interface AlgorithmRowExpandedProps {
@@ -48,4 +50,5 @@ export interface AlgorithmRowExpandedProps {
     row: AnomalyDimensionAnalysisMetricRow;
     dimensionColumns: string[];
     comparisonOffset: string;
+    timezone: string | undefined;
 }

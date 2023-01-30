@@ -23,4 +23,5 @@ export interface TimeRangeListProps {
     onClick?: (eventObject: TimeRangeDuration | TimeRange) => void;
     maxDate?: number;
     minDate?: number;
+    timezone?: string;
 }

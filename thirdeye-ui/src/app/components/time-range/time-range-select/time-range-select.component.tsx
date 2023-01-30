@@ -37,6 +37,7 @@ export const TimeRangeSelect: FunctionComponent<TimeRangeSelectProps> = ({
     onChange,
     maxDate,
     minDate,
+    timezone,
 }) => {
     const { t } = useTranslation();
     let filteredRecentTimeRanges = recentCustomTimeRangeDurations || [];
@@ -103,7 +104,8 @@ export const TimeRangeSelect: FunctionComponent<TimeRangeSelectProps> = ({
                         >
                             <ListItemText
                                 primary={formatTimeRangeDuration(
-                                    recentCustomTimeRangeDuration
+                                    recentCustomTimeRangeDuration,
+                                    timezone
                                 )}
                                 primaryTypographyProps={{
                                     variant: "button",

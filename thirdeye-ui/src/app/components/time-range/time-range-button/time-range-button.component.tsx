@@ -37,6 +37,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
     minDate,
     btnGroupColor = "secondary",
     hideQuickExtend,
+    timezone,
 }: TimeRangeButtonProps) => {
     const { t } = useTranslation();
     const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
@@ -104,7 +105,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
                     variant="outlined"
                     onClick={handleTimeRangeSelectorClick}
                 >
-                    {formatTimeRangeDuration(timeRangeDuration)}
+                    {formatTimeRangeDuration(timeRangeDuration, timezone)}
                 </Button>
                 {!hideQuickExtend && (
                     <Button
@@ -143,6 +144,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
                         recentCustomTimeRangeDurations
                     }
                     timeRangeDuration={timeRangeDuration}
+                    timezone={timezone}
                     onChange={onChange}
                     onClose={handleTimeRangeSelectorClose}
                 />

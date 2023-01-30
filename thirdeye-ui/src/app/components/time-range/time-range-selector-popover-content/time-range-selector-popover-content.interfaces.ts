@@ -25,4 +25,5 @@ export interface TimeRangeSelectorPopoverProps {
     onClose?: () => void;
     maxDate?: number;
     minDate?: number;
+    timezone?: string;
 }

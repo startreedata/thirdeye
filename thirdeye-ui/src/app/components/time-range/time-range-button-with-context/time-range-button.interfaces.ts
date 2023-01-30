@@ -20,6 +20,7 @@ export interface TimeRangeButtonProps {
     onChange?: (timeRangeDuration: TimeRangeDuration) => void;
     maxDate?: number;
     minDate?: number;
+    timezone?: string;
 }
 
 export interface TimeRangeButtonWithContextProps {
@@ -28,4 +29,5 @@ export interface TimeRangeButtonWithContextProps {
     maxDate?: number;
     minDate?: number;
     hideQuickExtend?: boolean;
+    timezone?: string;
 }

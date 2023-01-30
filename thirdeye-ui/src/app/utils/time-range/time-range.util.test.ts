@@ -215,6 +215,9 @@ describe("Time Range Util", () => {
         expect(
             formatTimeRangeDuration(null as unknown as TimeRangeDuration)
         ).toEqual("");
+        expect(
+            formatTimeRangeDuration(null as unknown as TimeRangeDuration, "UTC")
+        ).toEqual("");
     });
 
     it("formatTimeRangeDuration should return appropriate string for time range duration", () => {

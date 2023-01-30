@@ -26,6 +26,7 @@ import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import classnames from "classnames";
 import { cloneDeep } from "lodash";
+import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStyles } from "../../../utils/material-ui/common.styles";
@@ -50,6 +51,7 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<TimeRangeSelecto
         onClose,
         minDate,
         maxDate,
+        timezone,
         ...props
     }: TimeRangeSelectorPopoverProps) => {
         const timeRangeSelectorPopoverClasses =
@@ -176,7 +178,13 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<TimeRangeSelecto
                     className={
                         timeRangeSelectorPopoverClasses.timeRangeSelectorHeader
                     }
-                    title={t("label.customize-time-range")}
+                    title={
+                        timezone
+                            ? t("label.customize-time-range-with-timezone", {
+                                  timezone: timezone,
+                              })
+                            : t("label.customize-time-range")
+                    }
                     titleTypographyProps={{ variant: "h6" }}
                 />
 
@@ -204,6 +212,7 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<TimeRangeSelecto
                                         selectedTimeRange={
                                             componentTimeRangeDuration.timeRange
                                         }
+                                        timezone={timezone}
                                         onClick={handleTimeRangeChange}
                                     />
                                 </div>
@@ -272,9 +281,16 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<TimeRangeSelecto
                                                         : undefined
                                                 }
                                                 value={
-                                                    new Date(
-                                                        componentTimeRangeDuration.startTime
-                                                    )
+                                                    timezone
+                                                        ? DateTime.fromMillis(
+                                                              componentTimeRangeDuration.startTime,
+                                                              {
+                                                                  zone: timezone,
+                                                              }
+                                                          )
+                                                        : DateTime.fromMillis(
+                                                              componentTimeRangeDuration.startTime
+                                                          )
                                                 }
                                                 variant="static"
                                                 onChange={handleStartTimeChange}
@@ -326,9 +342,16 @@ export const TimeRangeSelectorPopoverContent: FunctionComponent<TimeRangeSelecto
                                                     )
                                                 }
                                                 value={
-                                                    new Date(
-                                                        componentTimeRangeDuration.endTime
-                                                    )
+                                                    timezone
+                                                        ? DateTime.fromMillis(
+                                                              componentTimeRangeDuration.endTime,
+                                                              {
+                                                                  zone: timezone,
+                                                              }
+                                                          )
+                                                        : DateTime.fromMillis(
+                                                              componentTimeRangeDuration.endTime
+                                                          )
                                                 }
                                                 variant="static"
                                                 onChange={handleEndTimeChange}

@@ -23,4 +23,5 @@ export interface TimeRangeSelectProps {
     onChange?: (eventObject: TimeRangeDuration | TimeRange) => void;
     maxDate?: number;
     minDate?: number;
+    timezone?: string;
 }

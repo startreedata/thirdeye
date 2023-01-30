@@ -316,7 +316,7 @@ public class HappyPathTest {
 
     final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     formData.add("start", String.valueOf(PAGEVIEWS_DATASET_START_TIME));
-    final Response replayResponse = request("api/alerts/" + anomalyId + "/run").post(
+    final Response replayResponse = request("api/alerts/" + alertId + "/run").post(
         Entity.form(formData));
     assertThat(replayResponse.getStatus()).isEqualTo(200);
 

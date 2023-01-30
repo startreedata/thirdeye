@@ -285,7 +285,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
         new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME));
+    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME) || l.getName()
+        .equals(NEW_AFTER_REPLAY_LABEL_NAME));
     labels.add(new AnomalyLabelDTO().setName(NEW_AFTER_REPLAY_LABEL_NAME).setIgnore(false));
   }
 
@@ -293,7 +294,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
         new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME));
+    labels.removeIf(l -> l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME) || l.getName()
+        .equals(OUTDATED_AFTER_REPLAY_LABEL_NAME));
     labels.add(new AnomalyLabelDTO().setName(OUTDATED_AFTER_REPLAY_LABEL_NAME).setIgnore(true));
   }
 

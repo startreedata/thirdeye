@@ -649,10 +649,11 @@ public class AnomalyMergerPostProcessorTest {
   public void testReplayRule3BisPipelineAnomalyMatchesExistingAnomalyWithNoChildAboveRenotifyThreshold() {
   }
 
+  // TODO test when label exists
+
   // not implemented: what if a parent now contains an anomaly to ignore - recompute the merge? recompute the boundaries?
   // in this first implem no, as long as there is one anomaly, we consider this is still an anomaly, and it was notified anyway and the merge is not a big issue
-  // all parents merge edge cases should be implemented
-
+  // later: all parents merge edge cases should be implemented
   // rule 4 not implemented
 }
 

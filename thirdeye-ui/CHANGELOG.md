@@ -1,3 +1,21 @@
+## [2.7.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.6.0...thirdeye-ui-2.7.0) (2023-01-30)
+
+
+### Features
+
+* [TE-1207](https://cortexdata.atlassian.net/browse/TE-1207) added exponential notation and Infinite label to very large anomaly deviations ([71d20c703](https://github.com/startreedata/thirdeye/commit/71d20c703b2992c1cd44070a0cafe52a000f4bb7))
+* [TE-1209](https://cortexdata.atlassian.net/browse/TE-1209) improved contrast on link in markdown tooltip ([155c52d58](https://github.com/startreedata/thirdeye/commit/155c52d58da3025081e3c0e1d395e8e01f8bee99))
+* [TE-1216](https://cortexdata.atlassian.net/browse/TE-1216) charting and determining timezone util functions for support for timezone ([a9200a64e](https://github.com/startreedata/thirdeye/commit/a9200a64ef981b5fb6a5cceaabdc42da12ef72cd))
+* [TE-1216](https://cortexdata.atlassian.net/browse/TE-1216) enhance time series chart to support displaying times by different timezones ([0612e5b1d](https://github.com/startreedata/thirdeye/commit/0612e5b1d9184a6eda8c5449eee1d69237ee21e6))
+* [TE-1216](https://cortexdata.atlassian.net/browse/TE-1216) enhance timepicker to support displaying and returning selected dates in timezone ([81359917f](https://github.com/startreedata/thirdeye/commit/81359917f079102bfff5debdb2a142fca291e959))
+* [TE-1221](https://cortexdata.atlassian.net/browse/TE-1221) improved ui for top contributors in investigate anomalies ([d093e3f2a](https://github.com/startreedata/thirdeye/commit/d093e3f2abec71103763f709a8cf39244b494384))
+* [TE-1225](https://cortexdata.atlassian.net/browse/TE-1225) make links in anomaly table more intuitive ([34a259bdf](https://github.com/startreedata/thirdeye/commit/34a259bdf6f51945460c64f4ca75ee7a0d4f006d))
+
+
+### Bug Fixes
+
+* [TE-1250](https://cortexdata.atlassian.net/browse/TE-1250) add roundOffThreshold param when using count as metric ([5c346275e](https://github.com/startreedata/thirdeye/commit/5c346275eb6b783a5d8581e23bc5998199e443b6))
+
 ## [2.6.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.5.0...thirdeye-ui-2.6.0) (2023-01-22)
 
 

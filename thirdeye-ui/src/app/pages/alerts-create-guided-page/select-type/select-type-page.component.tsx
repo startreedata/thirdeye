@@ -38,9 +38,10 @@ import { notifyIfErrors } from "../../../utils/notifications/notifications.util"
 import { getErrorMessages } from "../../../utils/rest/rest.util";
 import {
     AppRouteRelative,
-    getAlertsAlertViewPath,
+    getAlertsAlertPath,
     getHomePath,
 } from "../../../utils/routes/routes.util";
+import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../../alerts-view-page/alerts-view-page.utils";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 import { SelectTypePageProps } from "./select-type-page.interface";
 
@@ -94,7 +95,14 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         createAlert(clonedConfiguration)
             .then((alert) => {
                 if (navigateToAlertDetailAfterCreate) {
-                    navigate(`${getAlertsAlertViewPath(alert.id)}`);
+                    navigate(
+                        getAlertsAlertPath(
+                            alert.id,
+                            new URLSearchParams([
+                                [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
+                            ])
+                        )
+                    );
                 } else {
                     const queryParams = new URLSearchParams([
                         [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],

@@ -13,6 +13,7 @@
  * the License.
  */
 
+export const QUERY_PARAM_KEY_ANOMALIES_RETRY = "anomaliesRetry";
 export const QUERY_PARAM_KEY_FOR_SEARCH = "search";
 export const QUERY_PARAM_KEY_FOR_SORT = "sort";
 export const CONCAT_SEPARATOR = "+";

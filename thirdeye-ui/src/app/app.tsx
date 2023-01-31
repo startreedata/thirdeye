@@ -12,8 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, useEffect } from "react";
+import axios, { CancelTokenSource } from "axios";
+import React, {
+    FunctionComponent,
+    useEffect,
+    useLayoutEffect,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 import { AppBarConfigProvider } from "./components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import {
     AppContainerV1,
@@ -33,6 +40,39 @@ export const App: FunctionComponent = () => {
     } = useAuthProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+
+    // TODO: Move to a separate component
+    const [interceptorId, setInterceptorId] = useState<number | null>();
+
+    const getNewCancelToken = (): CancelTokenSource =>
+        axios.CancelToken.source();
+
+    const [cancelTokenSource, setCancelTokenSource] =
+        useState<CancelTokenSource>(getNewCancelToken());
+
+    const cancelApiCalls = (): void => {
+        cancelTokenSource.cancel("cancelApiCalls invoked");
+        setCancelTokenSource(getNewCancelToken());
+    };
+
+    useLayoutEffect(() => {
+        interceptorId && axios.interceptors.request.eject(interceptorId);
+
+        const newInterceptorId = axios.interceptors.request.use((config) => ({
+            ...config,
+            cancelToken: cancelTokenSource.token,
+        }));
+
+        setInterceptorId(newInterceptorId);
+    }, [cancelTokenSource]);
+
+    const location = useLocation();
+
+    useLayoutEffect(() => {
+        return () => {
+            cancelApiCalls();
+        };
+    }, [location.pathname]);
 
     useEffect(() => {
         if (authDisabled && authDisabledNotification) {

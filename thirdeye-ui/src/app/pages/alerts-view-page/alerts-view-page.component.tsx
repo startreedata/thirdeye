@@ -76,6 +76,7 @@ import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 import {
     CONCAT_SEPARATOR,
+    QUERY_PARAM_KEY_ANOMALIES_RETRY,
     QUERY_PARAM_KEY_FOR_SEARCH,
     QUERY_PARAM_KEY_FOR_SORT,
 } from "./alerts-view-page.utils";
@@ -95,6 +96,8 @@ export const AlertsViewPage: FunctionComponent = () => {
     // Used for the scenario when user first creates an alert but no anomalies generated yet
     const [refreshAttempts, setRefreshAttempts] = useState(0);
     const [autoRefreshNotification, setAutoRefreshNotification] =
+        useState<NotificationV1 | null>(null);
+    const [resetStatusNotification, setResetStatusNotification] =
         useState<NotificationV1 | null>(null);
 
     const {
@@ -200,11 +203,13 @@ export const AlertsViewPage: FunctionComponent = () => {
             resetAlertRequestStatus === ActionStatus.Done &&
             alertThatWasReset
         ) {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.alert-reset-success-please-reload", {
-                    alertName: alertThatWasReset.name,
-                })
+            setResetStatusNotification(
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.alert-reset-success-will-reload", {
+                        alertName: alertThatWasReset.name,
+                    })
+                )
             );
         }
         notifyIfErrors(
@@ -263,22 +268,51 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, [anomaliesRequestStatus, getAnomaliesErrorsMessages]);
 
     /**
-     * Account for users visiting the alert right when they just created it and
-     * the initial job to create the alert hasn't run yet
+     * If anomalies list is empty and QUERY_PARAM_KEY_ANOMALIES_RETRY flag exists
      */
     useEffect(() => {
-        if (alert && alert.updated === alert.created) {
-            setAutoRefreshNotification(
-                notify(
-                    NotificationTypeV1.Info,
-                    t(
-                        "message.looks-like-this-alert-was-just-created-this-page-a"
+        if (
+            anomalies &&
+            anomalies.length === 0 &&
+            searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
+        ) {
+            // If not in reset flow, assume alert was just created
+            resetStatusNotification === null &&
+                setAutoRefreshNotification(
+                    notify(
+                        NotificationTypeV1.Info,
+                        t(
+                            "message.looks-like-this-alert-was-just-created-this-page-a"
+                        )
                     )
-                )
-            );
+                );
         }
-    }, [alert]);
+    }, [alert, anomalies]);
+    /**
+     * Automatic retry loading anomalies flow
+     */
     useEffect(() => {
+        if (
+            anomalies &&
+            anomalies.length > 0 &&
+            searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
+        ) {
+            searchParams.delete(QUERY_PARAM_KEY_ANOMALIES_RETRY);
+            setSearchParams(searchParams, { replace: true });
+
+            if (resetStatusNotification) {
+                removeNotification(resetStatusNotification);
+                setResetStatusNotification(null);
+                alertThatWasReset &&
+                    notify(
+                        NotificationTypeV1.Success,
+                        t("message.alert-reset-successful", {
+                            alertName: alertThatWasReset.name,
+                        })
+                    );
+            }
+        }
+
         if (
             (anomalies && anomalies.length > 0) ||
             anomaliesRequestStatus !== ActionStatus.Working
@@ -291,7 +325,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             return;
         }
 
-        if (alert && alert.updated === alert.created) {
+        if (alert && searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
             if (refreshAttempts < 3) {
                 setTimeout(() => {
                     setRefreshAttempts(refreshAttempts + 1);
@@ -310,6 +344,12 @@ export const AlertsViewPage: FunctionComponent = () => {
                     removeNotification(autoRefreshNotification);
                     setAutoRefreshNotification(null);
                 }
+
+                if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
+                    searchParams.delete(QUERY_PARAM_KEY_ANOMALIES_RETRY);
+                    setSearchParams(searchParams, { replace: true });
+                }
+
                 notify(
                     NotificationTypeV1.Warning,
                     t("message.no-data-for-entity-for-date-range", {
@@ -410,7 +450,15 @@ export const AlertsViewPage: FunctionComponent = () => {
             okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => {
-                resetAlert(alert.id);
+                resetAlert(alert.id).then(() => {
+                    getAnomalies({
+                        alertId: alert.id,
+                        startTime,
+                        endTime,
+                    });
+                    searchParams.set(QUERY_PARAM_KEY_ANOMALIES_RETRY, "true");
+                    setSearchParams(searchParams, { replace: true });
+                });
             },
         });
     };
@@ -515,7 +563,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                         }
                         isLoading={
                             evaluationRequestStatus === ActionStatus.Working ||
-                            getAlertStatus === ActionStatus.Working
+                            evaluationRequestStatus === ActionStatus.Initial ||
+                            getAlertStatus === ActionStatus.Working ||
+                            getAlertStatus === ActionStatus.Initial
                         }
                         loadingState={
                             <Card variant="outlined">

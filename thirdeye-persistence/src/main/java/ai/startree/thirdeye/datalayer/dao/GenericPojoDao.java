@@ -148,6 +148,11 @@ public class GenericPojoDao {
 
   public <E extends AbstractDTO> int update(final E pojo, final Predicate predicate) {
     requireNonNull(pojo.getId(), String.format("Need an ID to update the DB entity: %s", pojo));
+
+    /* Update updateTime before DB update. Restore if update fails */
+    final Timestamp lastUpdateTime = pojo.getUpdateTime();
+    pojo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+
     try {
       final GenericJsonEntity genericJsonEntity = toGenericJsonEntity(pojo);
       final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(pojo.getClass());
@@ -169,7 +174,8 @@ public class GenericPojoDao {
         return ret;
       }, 0);
     } catch (final Exception e) {
-      LOG.error(e.getMessage(), e);
+      pojo.setUpdateTime(lastUpdateTime);
+      LOG.error("Could not update entity : {}", pojo, e);
       return 0;
     }
   }

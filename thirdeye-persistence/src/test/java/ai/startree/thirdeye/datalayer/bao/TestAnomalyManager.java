@@ -101,6 +101,10 @@ public class TestAnomalyManager {
     return anomaly;
   }
 
+  private static EnumerationItemDTO enumerationItem(final long id) {
+    return (EnumerationItemDTO) new EnumerationItemDTO().setId(id);
+  }
+
   @BeforeClass
   void beforeClass() {
     final Injector injector = MySqlTestDatabase.sharedInjector();
@@ -454,8 +458,23 @@ public class TestAnomalyManager {
         .isEqualTo(collectIds(Set.of(a1)));
   }
 
-  private static EnumerationItemDTO enumerationItem(final long id) {
-    return (EnumerationItemDTO) new EnumerationItemDTO().setId(id);
+  @Test
+  public void testUpdateTime() {
+    final long alertId = 1234L;
+
+    final AnomalyDTO a1 = persist(anomalyWithCreateTime(1000)
+        .setDetectionConfigId(alertId)
+    );
+
+    assertThat(a1.getUpdateTime()).isNull();
+
+    persist(a1.setStartTime(System.currentTimeMillis()));
+    assertThat(a1.getUpdateTime()).isNotNull();
+
+    final Timestamp lastUpdateTime = a1.getUpdateTime();
+    persist(a1.setStartTime(System.currentTimeMillis()));
+    assertThat(a1.getUpdateTime()).isNotNull();
+    assertThat(a1.getUpdateTime().getTime()).isGreaterThan(lastUpdateTime.getTime());
   }
 
   private AnomalyDTO persist(final AnomalyDTO anomaly) {

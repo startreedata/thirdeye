@@ -28,6 +28,7 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -36,6 +37,7 @@ import {
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { PROMISES } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -78,18 +80,14 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 navigate(getSubscriptionGroupsViewPath(subscriptionGroup.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.update-error", {
-                              entity: t("label.subscription-group"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.update-error", {
+                        entity: t("label.subscription-group"),
+                    })
+                );
             });
     };
 

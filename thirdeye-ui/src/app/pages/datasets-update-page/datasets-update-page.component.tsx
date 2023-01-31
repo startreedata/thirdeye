@@ -13,7 +13,7 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -26,6 +26,7 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetDataset } from "../../rest/datasets/datasets.actions";
 import { updateDataset } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
@@ -83,18 +84,14 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                 navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.update-error", {
-                              entity: t("label.dataset"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.update-error", {
+                        entity: t("label.dataset"),
+                    })
+                );
             });
     };
 

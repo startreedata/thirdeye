@@ -13,7 +13,6 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -24,9 +23,11 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { createEmptyDataset } from "../../utils/datasets/datasets.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getDatasetsAllPath,
@@ -60,18 +61,14 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                 navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.onboard-error", {
-                              entity: t("label.dataset"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.onboard-error", {
+                        entity: t("label.dataset"),
+                    })
+                );
             });
     };
 

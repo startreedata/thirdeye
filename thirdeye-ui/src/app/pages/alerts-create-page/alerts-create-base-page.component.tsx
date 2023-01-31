@@ -12,19 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { isEmpty } from "lodash";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-whizard.utils";
-import {
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "../../platform/components";
+import { useNotificationProviderV1 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
@@ -72,18 +70,14 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                     newlyCreatedSubGroup,
                 ]);
             } catch (error) {
-                const errMessages = getErrorMessages(error);
-
-                notify(
-                    NotificationTypeV1.Error,
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
                     t(
                         "message.experienced-error-creating-subscription-group-while-creating-alert"
                     )
                 );
-                !isEmpty(errMessages) &&
-                    errMessages.map((err) =>
-                        notify(NotificationTypeV1.Error, err)
-                    );
             }
         } else {
             createAlertAndUpdateSubscriptionGroups(alert, subscriptionGroups);

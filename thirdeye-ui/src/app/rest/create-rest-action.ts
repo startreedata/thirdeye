@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxiosError } from "axios";
 import "axios/index";
-import { useCallback, useState } from "react";
+import { AxiosError } from "axios/index";
+import { useCallback, useEffect, useState } from "react";
 import { getErrorMessages } from "../utils/rest/rest.util";
 import { ActionStatus } from "./actions.interfaces";
 
@@ -37,22 +37,34 @@ function useHTTPAction<DataResponseType>(
     const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
+    let isMounted = true;
+
+    useEffect(() => {
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
     const makeRequest = useCallback(async (...options) => {
         setStatus(ActionStatus.Working);
         // Reset error message to avoid displaying previous errors
         setErrorMessages([]);
         try {
             const fetchedData = await restFunction(...options);
-            setData(fetchedData);
-            setStatus(ActionStatus.Done);
-            setErrorMessages([]);
+            if (isMounted) {
+                setData(fetchedData);
+                setStatus(ActionStatus.Done);
+                setErrorMessages([]);
+            }
 
             return fetchedData;
         } catch (error) {
-            const axiosError = error as AxiosError;
-            setData(null);
-            setErrorMessages(getErrorMessages(axiosError));
-            setStatus(ActionStatus.Error);
+            if (isMounted) {
+                const axiosError = error as AxiosError;
+                setData(null);
+                setErrorMessages(getErrorMessages(axiosError));
+                setStatus(ActionStatus.Error);
+            }
         }
 
         return undefined;

@@ -48,6 +48,24 @@ public class AnomalyMergerPostProcessorSpec {
    */
   private DetectionPipelineUsage usage;
 
+  /**
+   * If the difference between an existing anomaly and a new anomaly on the same time frame
+   * is above this threshold, renotify. Combined with the absolute threshold below.
+   * Both thresholds have to pass to be renotified.
+   * If zero, always renotify.
+   * If null or negative, never renotifies.
+   **/
+  private Double reNotifyPercentageThreshold;
+
+  /**
+   * If the difference between an existing anomaly and a new anomaly on the same time frame
+   * is above this threshold, renotify. Combined with the percentage threshold above.
+   * Both thresholds have to pass to be renotified.
+   * If zero, always renotify.
+   * If null or negative, never renotifies.
+   **/
+  private Double reNotifyAbsoluteThreshold;
+
   public String getMergeMaxGap() {
     return mergeMaxGap;
   }
@@ -75,11 +93,11 @@ public class AnomalyMergerPostProcessorSpec {
     return this;
   }
 
-  public AnomalyManager getMergedAnomalyResultManager() {
+  public AnomalyManager getAnomalyManager() {
     return anomalyManager;
   }
 
-  public AnomalyMergerPostProcessorSpec setMergedAnomalyResultManager(
+  public AnomalyMergerPostProcessorSpec setAnomalyManager(
       final AnomalyManager anomalyManager) {
     this.anomalyManager = anomalyManager;
     return this;
@@ -101,6 +119,26 @@ public class AnomalyMergerPostProcessorSpec {
   public AnomalyMergerPostProcessorSpec setEnumerationItemDTO(
       final EnumerationItemDTO enumerationItemDTO) {
     this.enumerationItemDTO = enumerationItemDTO;
+    return this;
+  }
+
+  public Double getReNotifyPercentageThreshold() {
+    return reNotifyPercentageThreshold;
+  }
+
+  public AnomalyMergerPostProcessorSpec setReNotifyPercentageThreshold(
+      final Double reNotifyPercentageThreshold) {
+    this.reNotifyPercentageThreshold = reNotifyPercentageThreshold;
+    return this;
+  }
+
+  public Double getReNotifyAbsoluteThreshold() {
+    return reNotifyAbsoluteThreshold;
+  }
+
+  public AnomalyMergerPostProcessorSpec setReNotifyAbsoluteThreshold(
+      final Double reNotifyAbsoluteThreshold) {
+    this.reNotifyAbsoluteThreshold = reNotifyAbsoluteThreshold;
     return this;
   }
 }

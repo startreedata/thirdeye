@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import static ai.startree.thirdeye.spi.rca.Stats.computeValueChangePercentage;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,13 +54,15 @@ import org.slf4j.LoggerFactory;
  * Note:
  * If used with dimension exploration, must be run inside each enumeration.
  * The current implementation should not be run after the forkjoin node, it would merge anomalies
- * from different enumerations. Merge after dx can be implemented by adding enumerationItem to the
- * anomaly key.
+ * from different enumerations.
+ * The algorithm assumes all operatorResult anomalies are of unit size (detection granularity size).
  */
 public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyMergerPostProcessor.class);
   private static final String NAME = "ANOMALY_MERGER";
+  private static final double DEFAULT_RENOTIFY_PERCENTAGE_THRESHOLD = -1;
+  private static final double DEFAULT_RENOTIFY_ABSOLUTE_THRESHOLD = -1;
   private static final Comparator<AnomalyDTO> COMPARATOR = (o1, o2) -> {
     // smallest startTime is smaller
     int res = Long.compare(o1.getStartTime(), o2.getStartTime());
@@ -80,13 +84,17 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       return -1;
     }
 
-    // more children
+    // more children first
     return -1 * Integer.compare(o1.getChildren().size(), o2.getChildren().size());
   };
   @VisibleForTesting
   protected static final Period DEFAULT_MERGE_MAX_GAP = Period.hours(2);
   @VisibleForTesting
   protected static final Period DEFAULT_ANOMALY_MAX_DURATION = Period.days(7);
+  @VisibleForTesting
+  protected static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";
+  @VisibleForTesting
+  protected static final String OUTDATED_AFTER_REPLAY_LABEL_NAME = "OUTDATED_AFTER_REPLAY";
 
   private final Period mergeMaxGap;
   private final Period mergeMaxDuration;
@@ -94,6 +102,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   private final @Nullable EnumerationItemDTO enumerationItem;
   private final DetectionPipelineUsage usage;
   private final AnomalyManager anomalyManager;
+  private double reNotifyPercentageThreshold;
+  private double reNotifyAbsoluteThreshold;
 
   // obtained at runtime
   private Chronology chronology;
@@ -104,8 +114,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     this.alertId = spec.getAlertId();
     this.usage = spec.getUsage();
     this.enumerationItem = spec.getEnumerationItemDTO();
+    this.reNotifyPercentageThreshold = optional(spec.getReNotifyPercentageThreshold()).orElse(
+        DEFAULT_RENOTIFY_PERCENTAGE_THRESHOLD);
+    this.reNotifyAbsoluteThreshold = optional(spec.getReNotifyAbsoluteThreshold()).orElse(
+        DEFAULT_RENOTIFY_ABSOLUTE_THRESHOLD);
 
-    this.anomalyManager = spec.getMergedAnomalyResultManager();
+    this.anomalyManager = spec.getAnomalyManager();
   }
 
   @Override
@@ -214,14 +228,35 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   /**
-   * Expect anomalies to be sorted with {@link #COMPARATOR}.
+   * Pre-condition: anomalies are sorted with {@link #COMPARATOR}.
    */
   @VisibleForTesting
   protected List<AnomalyDTO> doMerge(
       final Collection<AnomalyDTO> sortedAnomalies) {
-    final List<AnomalyDTO> anomaliesToUpdate = new ArrayList<>();
+    // use a set that maintains order
+    final Set<AnomalyDTO> anomaliesToUpdate = new LinkedHashSet<>();
     AnomalyDTO parentCandidate = null;
+    AnomalyDTO previousAnomaly = null;
+    // sorted anomalies look like [parentWithChild, child, replay, child, replay, parentWithNoChild, replay, replayNew]
+    // TODO CYRIL implement rule 4. anomaly that don't exist anymore - requires a rewrite at upper levels
     for (final AnomalyDTO anomaly : sortedAnomalies) {
+      if (previousAnomaly != null && previousAnomaly.getId() != null && anomaly.getId() == null) {
+        // apply replay checks
+        if (startEndEquals(previousAnomaly, anomaly)) {
+          if (currentValueHasChanged(previousAnomaly, anomaly)) {
+            addReplayLabel(previousAnomaly, newOutdatedLabel());
+            anomaliesToUpdate.add(previousAnomaly);
+            addReplayLabel(anomaly, newAfterReplayLabel());
+          } else {
+            // update the existing anomaly with minor changes - drop the new anomaly
+            updateAnomalyWithNewValues(previousAnomaly, anomaly);
+            anomaliesToUpdate.add(previousAnomaly);
+            continue;
+          }
+        }
+      }
+      previousAnomaly = anomaly;
+
       // skip child anomalies. merge their parents instead
       if (anomaly.isChild()) {
         continue;
@@ -243,7 +278,42 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     // add last parent candidate
     anomaliesToUpdate.add(parentCandidate);
 
-    return anomaliesToUpdate;
+    return new ArrayList<>(anomaliesToUpdate);
+  }
+
+  private void addReplayLabel(final AnomalyDTO anomaly, final AnomalyLabelDTO label) {
+    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(new ArrayList<>());
+    anomaly.setAnomalyLabels(labels);
+    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME) || l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME));
+    labels.add(label);
+  }
+
+  @VisibleForTesting
+  protected static AnomalyLabelDTO newAfterReplayLabel() {
+    return new AnomalyLabelDTO().setName(NEW_AFTER_REPLAY_LABEL_NAME).setIgnore(false);
+  }
+
+  @VisibleForTesting
+  protected static AnomalyLabelDTO newOutdatedLabel() {
+    return new AnomalyLabelDTO().setName(OUTDATED_AFTER_REPLAY_LABEL_NAME).setIgnore(true);
+  }
+
+  private boolean currentValueHasChanged(final AnomalyDTO existingA, final AnomalyDTO newA) {
+    final double existingCurrentVal = existingA.getAvgCurrentVal();
+    final double newCurrentVal = newA.getAvgCurrentVal();
+    final boolean percentageHasChanged = reNotifyPercentageThreshold >= 0
+        && computeValueChangePercentage(existingCurrentVal, newCurrentVal)
+        > reNotifyPercentageThreshold;
+
+    final boolean absoluteHasChanged = reNotifyAbsoluteThreshold >= 0
+        && Math.abs(existingCurrentVal - newCurrentVal) > reNotifyAbsoluteThreshold;
+
+    return percentageHasChanged && absoluteHasChanged;
+  }
+
+  private boolean startEndEquals(final AnomalyDTO existingA, final AnomalyDTO newA) {
+    return existingA.getStartTime() == newA.getStartTime()
+        && existingA.getEndTime() == newA.getEndTime();
   }
 
   /**
@@ -345,7 +415,14 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     optional(from.getEnumerationItem())
         .map(AnomalyMergerPostProcessor::cloneEnumerationRef)
         .ifPresent(to::setEnumerationItem);
+    // child and id not set on purpose
     return to;
+  }
+
+  private void updateAnomalyWithNewValues(final AnomalyDTO currentA, final AnomalyDTO newA) {
+    currentA.setAvgBaselineVal(newA.getAvgBaselineVal());
+    currentA.setAvgCurrentVal(newA.getAvgCurrentVal());
+    currentA.setScore(newA.getScore());
   }
 
   /**
@@ -407,7 +484,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         final PostProcessingContext context) {
       final AnomalyMergerPostProcessorSpec spec = new ObjectMapper().convertValue(params,
           AnomalyMergerPostProcessorSpec.class);
-      spec.setMergedAnomalyResultManager(context.getMergedAnomalyResultManager());
+      spec.setAnomalyManager(context.getMergedAnomalyResultManager());
       spec.setAlertId(context.getAlertId());
       spec.setUsage(context.getUsage());
       spec.setEnumerationItemDTO(context.getEnumerationItemDTO());

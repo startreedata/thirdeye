@@ -33,7 +33,6 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -169,10 +168,9 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(
         operatorAnomalies);
     final List<AnomalyDTO> anomaliesToUpdate = vanishedAnomalies(operatorAnomalies, persistenceAnomalies, detectionInterval);
-    // don't use vanished anomalies when merging
+    // exclude vanished anomalies from merge operation
     persistenceAnomalies.removeAll(anomaliesToUpdate);
-    final List<AnomalyDTO> allAnomalies = combineAndSort(operatorAnomalies, persistenceAnomalies);
-    final List<AnomalyDTO> mergedAnomalies = doMerge(allAnomalies);
+    final List<AnomalyDTO> mergedAnomalies = doMerge(operatorAnomalies, persistenceAnomalies);
     anomaliesToUpdate.addAll(mergedAnomalies);
 
     return anomaliesToUpdate;
@@ -295,13 +293,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return generatedAndExistingAnomalies;
   }
 
-  /**
-   * Pre-condition: anomalies are sorted with {@link #COMPARATOR}.
-   */
   @VisibleForTesting
-  protected List<AnomalyDTO> doMerge(
-      final Collection<AnomalyDTO> sortedAnomalies) {
+  protected List<AnomalyDTO> doMerge(final List<AnomalyDTO> operatorAnomalies,
+      final List<AnomalyDTO> persistenceAnomalies) {
     // use a set that maintains order
+    final List<AnomalyDTO> sortedAnomalies = combineAndSort(operatorAnomalies, persistenceAnomalies);
     final Set<AnomalyDTO> anomaliesToUpdate = new LinkedHashSet<>();
     AnomalyDTO parentCandidate = null;
     AnomalyDTO previousAnomaly = null;

@@ -96,6 +96,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";
   @VisibleForTesting
   protected static final String OUTDATED_AFTER_REPLAY_LABEL_NAME = "OUTDATED_AFTER_REPLAY";
+  private static final Set<String> REPLAY_LABELS = Set.of(NEW_AFTER_REPLAY_LABEL_NAME, OUTDATED_AFTER_REPLAY_LABEL_NAME);
 
   private final Period mergeMaxGap;
   private final Period mergeMaxDuration;
@@ -349,8 +350,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
         new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME) || l.getName()
-        .equals(NEW_AFTER_REPLAY_LABEL_NAME));
+    labels.removeIf(l -> REPLAY_LABELS.contains(l.getName()));
     labels.add(label);
   }
 

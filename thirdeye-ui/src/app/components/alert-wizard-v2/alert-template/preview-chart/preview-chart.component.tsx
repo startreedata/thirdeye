@@ -65,6 +65,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
     displayState,
     subtitle,
+    onChartDataLoadSuccess,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -115,6 +116,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         const evaluations = extractDetectionEvaluation(
             fetchedAlertEvaluation as AlertEvaluation
         );
+
+        // Call the callback function if its passed
+        onChartDataLoadSuccess && onChartDataLoadSuccess();
 
         if (evaluations.length === 1) {
             setSelectedEvaluationToDisplay(

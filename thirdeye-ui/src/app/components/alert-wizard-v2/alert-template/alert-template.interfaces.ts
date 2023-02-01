@@ -24,6 +24,7 @@ export interface AlertTemplateProps {
     selectedAlertTemplate: AlertTemplate | null;
     setSelectedAlertTemplate: (newAlertTemplate: AlertTemplate | null) => void;
     alertTemplateOptions: AlertTemplate[];
+    onChartDataLoadSuccess?: () => void;
 }
 
 export interface AlertTemplatePropertyParsedMetadata {

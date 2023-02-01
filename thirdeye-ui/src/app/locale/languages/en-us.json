@@ -526,6 +526,7 @@
         "percentage-rule-algorithm-description": "Compare current timeseries to a baseline. If the percentage change is above a certain threshold, detects an anomaly.",
         "please-complete-the-missing-information-to-see-preview": "Please complete the missing information to see the preview.",
         "please-enter-valid-name": "Please enter valid name",
+        "preview-alert-in-chart-before-submitting": "Preview alert in chart before submitting",
         "preview-anomalies-created-below": "Preview the anomalies created for configuration below",
         "properties-and-values-may-differ": "The properties and values may differ from your environment so the template may show some errors when copied.",
         "property-value-placeholder": "Type and press enter to add values",

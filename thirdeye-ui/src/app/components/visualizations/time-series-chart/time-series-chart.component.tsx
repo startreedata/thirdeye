@@ -388,15 +388,18 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
 
         return (
             <div style={{ position: "relative" }}>
-                <Box paddingLeft={5} position="absolute">
-                    <Typography color="textSecondary" variant="caption">
-                        {t("message.times-displayed-in-timezone", {
-                            timezone:
-                                xAxis?.timezone ??
-                                (Settings.defaultZone as Zone).name,
-                        })}
-                    </Typography>
-                </Box>
+                {height > 200 && (
+                    <Box paddingLeft={5} position="absolute">
+                        <Typography color="textSecondary" variant="caption">
+                            {t("message.times-displayed-in-timezone", {
+                                timezone:
+                                    xAxis?.timezone ??
+                                    (Settings.defaultZone as Zone).name,
+                            })}
+                        </Typography>
+                    </Box>
+                )}
+
                 {events && events.length > 0 && (
                     <EventsChart
                         events={processedEvents}

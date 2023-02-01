@@ -16,7 +16,7 @@ import { Box, Button, Typography } from "@material-ui/core";
 import { ParentSize } from "@visx/responsive";
 import { scaleOrdinal, scaleTime } from "@visx/scale";
 import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
-import { Settings } from "luxon";
+import { Settings, Zone } from "luxon";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -388,17 +388,15 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
 
         return (
             <div style={{ position: "relative" }}>
-                {!!xAxis?.timezone &&
-                    Settings.defaultZone !== xAxis.timezone &&
-                    height > 200 && (
-                        <Box paddingLeft={5} position="absolute">
-                            <Typography color="textSecondary" variant="caption">
-                                {t("message.times-displayed-in-timezone", {
-                                    timezone: xAxis.timezone,
-                                })}
-                            </Typography>
-                        </Box>
-                    )}
+                <Box paddingLeft={5} position="absolute">
+                    <Typography color="textSecondary" variant="caption">
+                        {t("message.times-displayed-in-timezone", {
+                            timezone:
+                                xAxis?.timezone ??
+                                (Settings.defaultZone as Zone).name,
+                        })}
+                    </Typography>
+                </Box>
                 {events && events.length > 0 && (
                     <EventsChart
                         events={processedEvents}

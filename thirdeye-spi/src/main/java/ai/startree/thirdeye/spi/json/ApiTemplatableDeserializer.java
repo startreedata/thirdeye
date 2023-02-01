@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.json;
 
+import static ai.startree.thirdeye.spi.datalayer.Templatable.isTemplatable;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -67,7 +68,7 @@ class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
       throws IOException {
     // case value is a variable in format ${VARIABLE_NAME}
     final String textValue = jsonParser.getText();
-    if (textValue.startsWith("${")) {
+    if (isTemplatable(textValue)) {
       final String stringValue = context.readValue(jsonParser, String.class);
       return new Templatable<>().setTemplatedValue(stringValue);
     }

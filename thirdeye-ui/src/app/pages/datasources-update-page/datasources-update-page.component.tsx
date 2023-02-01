@@ -13,7 +13,7 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import { assign, isEmpty, toNumber } from "lodash";
+import { assign, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,11 +25,13 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import {
     getDatasource,
     updateDatasource,
 } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -75,18 +77,14 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
                 navigate(getDatasourcesViewPath(datasourceResponse.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.update-error", {
-                              entity: t("label.datasource"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.update-error", {
+                        entity: t("label.datasource"),
+                    })
+                );
             });
     };
 
@@ -110,18 +108,14 @@ export const DatasourcesUpdatePage: FunctionComponent = () => {
                 setDatasource(datasource);
             })
             .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.error-while-fetching", {
-                              entity: t("label.datasource"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.datasource"),
+                    })
+                );
             })
             .finally((): void => {
                 setLoading(false);

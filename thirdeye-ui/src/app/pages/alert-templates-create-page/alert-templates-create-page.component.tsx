@@ -14,7 +14,6 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +28,7 @@ import {
     TooltipV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { createAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
 import {
     AlertTemplate,
@@ -36,6 +36,7 @@ import {
 } from "../../rest/dto/alert-template.interfaces";
 import { createDefaultAlertTemplate } from "../../utils/alert-templates/alert-templates.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 
@@ -64,19 +65,14 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
                     navigate(getAlertTemplatesViewPath(alertTemplate.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-
-                          t("message.create-error", {
-                              entity: t("label.alert-template"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.create-error", {
+                        entity: t("label.alert-template"),
+                    })
+                );
             });
     };
 

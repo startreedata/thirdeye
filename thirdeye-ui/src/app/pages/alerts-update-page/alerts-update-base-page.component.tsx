@@ -34,6 +34,7 @@ import {
     createSubscriptionGroup,
     updateSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
@@ -175,18 +176,14 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     newlyCreatedSubGroup,
                 ];
             } catch (error) {
-                const errMessages = getErrorMessages(error);
-
-                notify(
-                    NotificationTypeV1.Error,
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
                     t(
                         "message.experienced-error-creating-subscription-group-while-creating-alert"
                     )
                 );
-                !isEmpty(errMessages) &&
-                    errMessages.map((err) =>
-                        notify(NotificationTypeV1.Error, err)
-                    );
             }
         }
 
@@ -247,18 +244,14 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                 })
             );
         } catch (error) {
-            const errMessages = getErrorMessages(error);
-
-            isEmpty(errMessages)
-                ? notify(
-                      NotificationTypeV1.Error,
-                      t("message.update-error", {
-                          entity: t("label.subscription-groups"),
-                      })
-                  )
-                : errMessages.map((err) =>
-                      notify(NotificationTypeV1.Error, err)
-                  );
+            notifyIfErrors(
+                ActionStatus.Error,
+                getErrorMessages(error),
+                notify,
+                t("message.update-error", {
+                    entity: t("label.subscription-groups"),
+                })
+            );
         } finally {
             // Redirect to alerts detail path
             navigate(getAlertsAlertPath(alert.id));
@@ -279,18 +272,14 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                 handleUpdatingSubscriptionGroups(alert);
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.update-error", {
-                              entity: t("label.alert"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.update-error", {
+                        entity: t("label.alert"),
+                    })
+                );
             });
     };
 

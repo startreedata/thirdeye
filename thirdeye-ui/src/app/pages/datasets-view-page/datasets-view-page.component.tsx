@@ -14,7 +14,7 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -28,9 +28,11 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -76,18 +78,14 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 fetchedUiDataset = getUiDataset(dataset);
             })
             .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.error-while-fetching", {
-                              entity: t("label.dataset"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.dataset"),
+                    })
+                );
             })
             .finally(() => setUiDataset(fetchedUiDataset));
     };
@@ -116,18 +114,14 @@ export const DatasetsViewPage: FunctionComponent = () => {
                 navigate(getDatasetsAllPath());
             })
             .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.delete-error", {
-                              entity: t("label.dataset"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.delete-error", {
+                        entity: t("label.dataset"),
+                    })
+                );
             });
     };
 

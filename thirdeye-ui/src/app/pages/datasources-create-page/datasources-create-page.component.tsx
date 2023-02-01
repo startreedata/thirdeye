@@ -13,7 +13,6 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -24,12 +23,14 @@ import {
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import {
     createDatasource,
     onboardAllDatasets,
 } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getDatasourcesAllPath,
@@ -71,36 +72,28 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
                             );
                         })
                         .catch((error: AxiosError): void => {
-                            const errMessages = getErrorMessages(error);
-
-                            isEmpty(errMessages)
-                                ? notify(
-                                      NotificationTypeV1.Error,
-                                      t("message.onboard-error", {
-                                          entity: t("label.datasets"),
-                                      })
-                                  )
-                                : errMessages.map((err) =>
-                                      notify(NotificationTypeV1.Error, err)
-                                  );
+                            notifyIfErrors(
+                                ActionStatus.Error,
+                                getErrorMessages(error),
+                                notify,
+                                t("message.onboard-error", {
+                                    entity: t("label.datasets"),
+                                })
+                            );
                         });
 
                 // Redirect to datasources detail path
                 navigate(getDatasourcesViewPath(datasource.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.create-error", {
-                              entity: t("label.datasource"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.create-error", {
+                        entity: t("label.datasource"),
+                    })
+                );
             });
     };
 

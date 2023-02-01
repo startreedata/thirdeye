@@ -31,6 +31,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplate } from "../../rest/alert-templates/alert-templates.actions";
 import { updateAlertTemplate } from "../../rest/alert-templates/alert-templates.rest";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertTemplatesViewPath } from "../../utils/routes/routes.util";
 import { AlertTemplatesUpdatePageParams } from "./alert-templates-update-page.interfaces";
@@ -77,18 +78,14 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
                 return;
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.update-error", {
-                              entity: t("label.alert-template"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.update-error", {
+                        entity: t("label.alert-template"),
+                    })
+                );
             });
     };
 

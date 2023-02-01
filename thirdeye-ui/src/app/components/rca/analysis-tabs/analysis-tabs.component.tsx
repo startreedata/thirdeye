@@ -128,11 +128,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                 hideDialog();
                             })
                             .catch((error: AxiosError): void => {
-                                const errMessages = getErrorMessages(error);
-
                                 notifyIfErrors(
                                     ActionStatus.Error,
-                                    errMessages,
+                                    getErrorMessages(error),
                                     notify,
                                     t("message.create-error", {
                                         entity: t("label.event"),

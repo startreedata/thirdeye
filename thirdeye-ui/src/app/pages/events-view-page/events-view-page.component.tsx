@@ -32,6 +32,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { useGetEvent } from "../../rest/event/event.actions";
 import { deleteEvent } from "../../rest/event/events.rest";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getEventsAllPath } from "../../utils/routes/routes.util";
@@ -98,18 +99,14 @@ export const EventsViewPage: FunctionComponent = () => {
                 navigate(getEventsAllPath());
             })
             .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.delete-error", {
-                              entity: t("label.event"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.delete-error", {
+                        entity: t("label.event"),
+                    })
+                );
             });
     };
 

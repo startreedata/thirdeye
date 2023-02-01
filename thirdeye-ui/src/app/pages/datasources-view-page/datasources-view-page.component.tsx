@@ -14,7 +14,7 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -29,6 +29,7 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import {
     deleteDatasource,
     getDatasource,
@@ -36,6 +37,7 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasource } from "../../utils/datasources/datasources.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesAllPath } from "../../utils/routes/routes.util";
@@ -78,18 +80,14 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 fetchedUiDatasource = getUiDatasource(datasource);
             })
             .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.error-while-fetching", {
-                              entity: t("label.datasource"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.datasource"),
+                    })
+                );
             })
             .finally(() => {
                 setUiDatasource(fetchedUiDatasource);
@@ -122,18 +120,14 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 navigate(getDatasourcesAllPath());
             })
             .catch((error: AxiosError) => {
-                const errMessages = getErrorMessages(error);
-
-                isEmpty(errMessages)
-                    ? notify(
-                          NotificationTypeV1.Error,
-                          t("message.delete-error", {
-                              entity: t("label.datasource"),
-                          })
-                      )
-                    : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
-                      );
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.delete-error", {
+                        entity: t("label.datasource"),
+                    })
+                );
             });
     };
 

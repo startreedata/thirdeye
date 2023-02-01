@@ -55,11 +55,9 @@ export const EventsCreatePage: FunctionComponent = () => {
                 navigate(getEventsViewPath(event.id));
             })
             .catch((error: AxiosError): void => {
-                const errMessages = getErrorMessages(error);
-
                 notifyIfErrors(
                     ActionStatus.Error,
-                    errMessages,
+                    getErrorMessages(error),
                     notify,
                     t("message.create-error", {
                         entity: t("label.event"),

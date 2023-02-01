@@ -18,6 +18,7 @@ export interface PreviewChartProps {
     alert: EditableAlert;
     displayState: MessageDisplayState;
     subtitle: string;
+    onChartDataLoadSuccess?: () => void;
 }
 
 export enum MessageDisplayState {

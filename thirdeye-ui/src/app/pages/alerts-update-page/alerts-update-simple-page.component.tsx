@@ -14,6 +14,7 @@
  */
 import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { AlertDetails } from "../../components/alert-wizard-v2/alert-details/alert-details.component";
 import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
@@ -22,6 +23,7 @@ import { PageContentsGridV1 } from "../../platform/components";
 import { AlertEditPageOutletContextProps } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateSimplePage: FunctionComponent = () => {
+    const { t } = useTranslation();
     const {
         alert,
         handleAlertPropertyChange: onAlertPropertyChange,
@@ -31,10 +33,17 @@ export const AlertsUpdateSimplePage: FunctionComponent = () => {
         setSelectedAlertTemplate,
         alertTemplateOptions,
         setShowBottomBar,
+        setIsSubmitBtnEnabled,
+        setSubmitBtnLabel,
+        resetSubmitButtonLabel,
     } = useOutletContext<AlertEditPageOutletContextProps>();
 
     useEffect(() => {
         setShowBottomBar(true);
+        setIsSubmitBtnEnabled(false);
+        setSubmitBtnLabel(
+            t("message.preview-alert-in-chart-before-submitting")
+        );
     }, []);
 
     return (
@@ -52,6 +61,10 @@ export const AlertsUpdateSimplePage: FunctionComponent = () => {
                     selectedAlertTemplate={selectedAlertTemplate}
                     setSelectedAlertTemplate={setSelectedAlertTemplate}
                     onAlertPropertyChange={onAlertPropertyChange}
+                    onChartDataLoadSuccess={() => {
+                        setIsSubmitBtnEnabled(true);
+                        resetSubmitButtonLabel();
+                    }}
                 />
             </Grid>
             <Grid item xs={12}>

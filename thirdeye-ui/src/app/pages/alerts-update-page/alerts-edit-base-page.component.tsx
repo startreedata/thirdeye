@@ -14,7 +14,13 @@
  */
 import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
 import { isEmpty, isEqual } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, {
+    FunctionComponent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
     NavLink,
@@ -64,6 +70,15 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     const [searchParams] = useSearchParams();
     const location = useLocation();
     const { notify } = useNotificationProviderV1();
+    const { showDialog } = useDialogProviderV1();
+    const { t } = useTranslation();
+
+    const {
+        getAlertTemplates,
+        status: alertTemplatesRequestStatus,
+        errorMessages: getAlertTemplatesRequestErrors,
+    } = useGetAlertTemplates();
+
     const [alert, setAlert] = useState<EditableAlert>(
         startingAlertConfiguration
     );
@@ -74,14 +89,14 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     >([]);
     // This is  used by the guided create alert routes
     const [showBottomBar, setShowBottomBar] = useState<boolean>(true);
-    const { showDialog } = useDialogProviderV1();
-    const { t } = useTranslation();
 
-    const {
-        getAlertTemplates,
-        status: alertTemplatesRequestStatus,
-        errorMessages: getAlertTemplatesRequestErrors,
-    } = useGetAlertTemplates();
+    // Allow the children to control the submit button
+    const [isSubmitBtnEnabled, setIsSubmitBtnEnabled] = useState<boolean>(true);
+    const [submitBtnLabel, setSubmitBtnLabel] =
+        useState<string>(submitButtonLabel);
+    const resetSubmitButtonLabel = useCallback(() => {
+        setSubmitBtnLabel(submitButtonLabel);
+    }, [submitButtonLabel]);
 
     useEffect(() => {
         setAlertTemplateOptions([]);
@@ -266,6 +281,9 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                         handleSubmitAlertClick,
                         newSubscriptionGroup,
                         onNewSubscriptionGroupChange,
+                        setIsSubmitBtnEnabled,
+                        setSubmitBtnLabel,
+                        resetSubmitButtonLabel,
                     }}
                 />
             </LoadingErrorStateSwitch>
@@ -275,7 +293,8 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                     backButtonLabel={t("label.cancel")}
                     handleBackClick={handlePageExitChecks}
                     handleNextClick={() => handleSubmitAlertClick(alert)}
-                    nextButtonLabel={submitButtonLabel}
+                    nextButtonIsDisabled={!isSubmitBtnEnabled}
+                    nextButtonLabel={submitBtnLabel}
                 />
             )}
         </PageV1>

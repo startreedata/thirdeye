@@ -51,4 +51,8 @@ export interface AlertEditPageOutletContextProps {
 
     newSubscriptionGroup: SubscriptionGroup;
     onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
+
+    setIsSubmitBtnEnabled: (flag: boolean) => void;
+    setSubmitBtnLabel: (label: string) => void;
+    resetSubmitButtonLabel: () => void;
 }

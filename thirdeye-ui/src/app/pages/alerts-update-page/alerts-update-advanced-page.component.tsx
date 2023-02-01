@@ -41,6 +41,9 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
         handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
         setShowBottomBar,
+        setIsSubmitBtnEnabled,
+        setSubmitBtnLabel,
+        resetSubmitButtonLabel,
     } = useOutletContext<AlertEditPageOutletContextProps>();
 
     const availableFields = useMemo(() => {
@@ -64,6 +67,10 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
 
     useEffect(() => {
         setShowBottomBar(true);
+        setIsSubmitBtnEnabled(false);
+        setSubmitBtnLabel(
+            t("message.preview-alert-in-chart-before-submitting")
+        );
     }, []);
 
     return (
@@ -90,6 +97,10 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
                             subtitle={t(
                                 "message.configure-or-input-template-to-preview-alert"
                             )}
+                            onChartDataLoadSuccess={() => {
+                                setIsSubmitBtnEnabled(true);
+                                resetSubmitButtonLabel();
+                            }}
                         />
                     </Box>
                 </PageContentsCardV1>

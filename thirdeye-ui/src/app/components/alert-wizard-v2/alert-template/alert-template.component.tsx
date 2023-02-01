@@ -50,6 +50,7 @@ function AlertTemplate({
     selectedAlertTemplate,
     setSelectedAlertTemplate,
     alertTemplateOptions,
+    onChartDataLoadSuccess,
 }: AlertTemplateProps): JSX.Element {
     const [alertTemplateProperties, setAlertTemplateProperties] =
         useState<TemplatePropertiesObject>(alert.templateProperties || {});
@@ -249,6 +250,7 @@ function AlertTemplate({
                                 : MessageDisplayState.SELECT_TEMPLATE
                         }
                         subtitle={t("message.select-template-to-preview-alert")}
+                        onChartDataLoadSuccess={onChartDataLoadSuccess}
                     />
                 </Grid>
             </Grid>

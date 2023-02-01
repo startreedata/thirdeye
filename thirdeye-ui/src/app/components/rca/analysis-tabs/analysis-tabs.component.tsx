@@ -293,7 +293,6 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         anomalyId={anomalyId}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
-                        timezone={timezone}
                         onAddFilterSetClick={onAddFilterSetClick}
                     />
                 </Box>

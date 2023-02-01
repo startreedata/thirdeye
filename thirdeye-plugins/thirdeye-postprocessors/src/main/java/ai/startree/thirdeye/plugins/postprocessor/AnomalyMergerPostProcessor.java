@@ -33,7 +33,7 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -95,6 +96,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";
   @VisibleForTesting
   protected static final String OUTDATED_AFTER_REPLAY_LABEL_NAME = "OUTDATED_AFTER_REPLAY";
+  private static final Set<String> REPLAY_LABELS = Set.of(NEW_AFTER_REPLAY_LABEL_NAME, OUTDATED_AFTER_REPLAY_LABEL_NAME);
 
   private final Period mergeMaxGap;
   private final Period mergeMaxDuration;
@@ -102,8 +104,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   private final @Nullable EnumerationItemDTO enumerationItem;
   private final DetectionPipelineUsage usage;
   private final AnomalyManager anomalyManager;
-  private double reNotifyPercentageThreshold;
-  private double reNotifyAbsoluteThreshold;
+  private final double reNotifyPercentageThreshold;
+  private final double reNotifyAbsoluteThreshold;
 
   // obtained at runtime
   private Chronology chronology;
@@ -137,19 +139,20 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
     chronology = detectionInterval.getChronology();
     for (final OperatorResult operatorResult : resultMap.values()) {
-      postProcessResult(operatorResult);
+      postProcessResult(operatorResult, detectionInterval);
     }
 
     return resultMap;
   }
 
-  private void postProcessResult(final OperatorResult operatorResult) {
+  private void postProcessResult(final OperatorResult operatorResult,
+      final Interval detectionInterval) {
     final List<AnomalyDTO> operatorAnomalies = operatorResult.getAnomalies();
     if (operatorAnomalies == null) {
       return;
     }
 
-    final List<AnomalyDTO> mergedAnomalies = merge(operatorAnomalies);
+    final List<AnomalyDTO> mergedAnomalies = merge(operatorAnomalies, detectionInterval);
     // hack - operatorResult is not mutable - exploit list mutability to update the anomalies
     //  could silently bug if a protective copy is returned by an OperatorResult implementation
     // ensure no protective copy is done comparing references
@@ -159,16 +162,80 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   protected List<AnomalyDTO> merge(
-      final List<AnomalyDTO> operatorAnomalies) {
+      final List<AnomalyDTO> operatorAnomalies, final Interval detectionInterval) {
     if (operatorAnomalies.isEmpty()) {
       return emptyList();
     }
     final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(
         operatorAnomalies);
-    final List<AnomalyDTO> allAnomalies = combineAndSort(operatorAnomalies,
-        persistenceAnomalies);
+    final List<AnomalyDTO> anomaliesToUpdate = vanishedAnomalies(operatorAnomalies, persistenceAnomalies, detectionInterval);
+    // exclude vanished anomalies from merge operation
+    persistenceAnomalies.removeAll(anomaliesToUpdate);
+    final List<AnomalyDTO> mergedAnomalies = doMerge(operatorAnomalies, persistenceAnomalies);
+    anomaliesToUpdate.addAll(mergedAnomalies);
 
-    return doMerge(allAnomalies);
+    return anomaliesToUpdate;
+  }
+
+  /**
+   * Vanished anomalies are anomalies that exist in the persistence db but are not detected anymore.
+   * They are tagged as outdated.
+   *
+   * Notes:
+   * A parent anomaly that has a child anomaly vanished, such that the gap between 2 child anomalies is now bigger than mergeMaxGap, is not split into 2 parents.
+   * We consider this is an edge case, and in this case the parent anomaly is still valid.
+   */
+  private List<AnomalyDTO> vanishedAnomalies(final List<AnomalyDTO> operatorAnomalies,
+      final List<AnomalyDTO> persistenceAnomalies, final Interval detectionInterval) {
+    final List<AnomalyDTO> vanishedAnomalies = new ArrayList<>();
+    // first loop looks at the unitary anomalies (child or parent with no children)
+    // check if unitary anomalies are found in the latest detection run, based on anomaly startTime
+    final Set<Long> operatorAnomaliesStartTimes = operatorAnomalies.stream()
+        .map(AnomalyDTO::getStartTime)
+        .collect(Collectors.toSet());
+    for (final AnomalyDTO existingAnomaly : persistenceAnomalies) {
+      boolean isUnitaryAnomaly = existingAnomaly.isChild() || existingAnomaly.getChildren() == null
+          || existingAnomaly.getChildren().size() == 0;
+      boolean isInDetectionInterval =
+          existingAnomaly.getStartTime() >= detectionInterval.getStartMillis()
+              && existingAnomaly.getEndTime() <= detectionInterval.getEndMillis();
+      boolean isInOperatorAnomalies = operatorAnomaliesStartTimes.contains(
+          existingAnomaly.getStartTime());
+      if (isUnitaryAnomaly && isInDetectionInterval && !isInOperatorAnomalies) {
+        // anomaly is outdated - it was not detected in the most recent run
+        addReplayLabel(existingAnomaly, newOutdatedLabel());
+        vanishedAnomalies.add(existingAnomaly);
+      }
+    }
+    // second loop looks at the parents with children
+    // if a parent has all its children tagged as outdated, it is tagged as outdated
+    for (final AnomalyDTO existingAnomaly : persistenceAnomalies) {
+      final Set<AnomalyDTO> children = existingAnomaly.getChildren();
+      if (children != null && children.size() > 0) {
+        int numChildrenOutdated = children.stream().map(AnomalyMergerPostProcessor::hasOutdatedLabel).mapToInt( o -> o ? 1 : 0).sum();
+        if (numChildrenOutdated == children.size()) {
+          // parent is fully outdated
+          addReplayLabel(existingAnomaly, newOutdatedLabel());
+          vanishedAnomalies.add(existingAnomaly);
+        } else if (numChildrenOutdated > 0){
+          // parent is partially outdated - updated bounds
+          final List<AnomalyDTO> sortedNotOutdatedChildren  = children.stream().filter(a -> !hasOutdatedLabel(a)).sorted(COMPARATOR).collect(Collectors.toList());
+          final AnomalyDTO firstChildren = sortedNotOutdatedChildren.get(0);
+          final AnomalyDTO lastChildren = sortedNotOutdatedChildren.get(sortedNotOutdatedChildren.size()-1);
+          existingAnomaly.setStartTime(firstChildren.getStartTime());
+          updateAnomalyWithNewValues(existingAnomaly, firstChildren);
+          existingAnomaly.setEndTime(lastChildren.getEndTime());
+          // not vanished - can still be used for merging
+        }
+      }
+    }
+    return vanishedAnomalies;
+  }
+
+  private static boolean hasOutdatedLabel(final AnomalyDTO child) {
+    return optional(child.getAnomalyLabels()).orElse(Collections.emptyList())
+        .stream()
+        .anyMatch(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME));
   }
 
   private List<AnomalyDTO> retrieveRelevantAnomaliesFromDatabase(
@@ -227,13 +294,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return generatedAndExistingAnomalies;
   }
 
-  /**
-   * Pre-condition: anomalies are sorted with {@link #COMPARATOR}.
-   */
   @VisibleForTesting
-  protected List<AnomalyDTO> doMerge(
-      final Collection<AnomalyDTO> sortedAnomalies) {
+  protected List<AnomalyDTO> doMerge(final List<AnomalyDTO> operatorAnomalies,
+      final List<AnomalyDTO> persistenceAnomalies) {
     // use a set that maintains order
+    final List<AnomalyDTO> sortedAnomalies = combineAndSort(operatorAnomalies, persistenceAnomalies);
     final Set<AnomalyDTO> anomaliesToUpdate = new LinkedHashSet<>();
     AnomalyDTO parentCandidate = null;
     AnomalyDTO previousAnomaly = null;
@@ -282,9 +347,10 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   private void addReplayLabel(final AnomalyDTO anomaly, final AnomalyLabelDTO label) {
-    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(new ArrayList<>());
+    final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
+        new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
-    labels.removeIf(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME) || l.getName().equals(NEW_AFTER_REPLAY_LABEL_NAME));
+    labels.removeIf(l -> REPLAY_LABELS.contains(l.getName()));
     labels.add(label);
   }
 

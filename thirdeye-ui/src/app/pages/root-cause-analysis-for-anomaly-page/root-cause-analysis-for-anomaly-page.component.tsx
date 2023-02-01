@@ -29,10 +29,11 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
+import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { determineTimezoneFromAlert } from "../../utils/alerts/alerts.util";
+import { determineTimezoneFromAlertInEvaluation } from "../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../utils/anomalies/anomalies.util";
 import { getFromSavedInvestigationOrDefault } from "../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
@@ -45,6 +46,12 @@ import { RootCauseAnalysisForAnomalyPageParams } from "./root-cause-analysis-for
 import { useRootCauseAnalysisForAnomalyPageStyles } from "./root-cause-analysis-for-anomaly-page.style";
 
 export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
+    const { notify } = useNotificationProviderV1();
+    const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
+    const { t } = useTranslation();
+    const style = useRootCauseAnalysisForAnomalyPageStyles();
+    const { id: anomalyId } =
+        useParams<RootCauseAnalysisForAnomalyPageParams>();
     const {
         investigation,
         investigationHasChanged,
@@ -55,7 +62,8 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         anomalyRequestErrors,
         alert,
     } = useOutletContext<InvestigationContext>();
-    const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
+
+    const [timezone, setTimezone] = useState<string | undefined>("UTC");
     const [chartTimeSeriesFilterSet, setChartTimeSeriesFilterSet] = useState<
         AnomalyFilterOption[][]
     >(
@@ -73,11 +81,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         )
     );
 
-    const { notify } = useNotificationProviderV1();
-    const { id: anomalyId } =
-        useParams<RootCauseAnalysisForAnomalyPageParams>();
-    const { t } = useTranslation();
-    const style = useRootCauseAnalysisForAnomalyPageStyles();
     const parsedAnomalyId = useMemo(() => {
         return Number(anomalyId);
     }, [anomalyId]);
@@ -127,8 +130,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
             })
         );
     }, [getAnomalyRequestStatus, anomalyRequestErrors]);
-
-    const timezone = determineTimezoneFromAlert(alert);
 
     const handleAddFilterSetClick = (filters: AnomalyFilterOption[]): void => {
         const serializedFilters = serializeKeyValuePair(filters);
@@ -199,7 +200,13 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                         getAnomalyRequestStatus === ActionStatus.Initial
                     }
                     timeSeriesFiltersSet={chartTimeSeriesFilterSet}
-                    timezone={timezone}
+                    onAlertEvaluationDidFetch={(evaluation: AlertEvaluation) =>
+                        setTimezone(
+                            determineTimezoneFromAlertInEvaluation(
+                                evaluation?.alert
+                            )
+                        )
+                    }
                     onEventSelectionChange={handleEventSelectionChange}
                     onRemoveBtnClick={handleRemoveBtnClick}
                 />

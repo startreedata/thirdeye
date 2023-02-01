@@ -63,6 +63,7 @@ export interface AlertInsight {
     datasetEndTime: number;
     defaultStartTime: number;
     defaultEndTime: number;
+    templateWithProperties: Pick<AlertInEvaluation, "metadata">;
 }
 
 export interface AlertDataFetcherNode {
@@ -119,8 +120,14 @@ export enum AlertNodeType {
     DATA_FETCHER = "DataFetcher",
 }
 
+export interface AlertInEvaluation extends Alert {
+    metadata: {
+        timezone?: string;
+    };
+}
+
 export interface AlertEvaluation {
-    alert: Alert;
+    alert: AlertInEvaluation;
     detectionEvaluations: { [index: string]: DetectionEvaluation };
     start: number;
     end: number;

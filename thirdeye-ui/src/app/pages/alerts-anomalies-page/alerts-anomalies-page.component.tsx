@@ -33,7 +33,6 @@ import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
-import { determineTimezoneFromAlert } from "../../utils/alerts/alerts.util";
 import {
     filterAnomaliesByFunctions,
     getUiAnomalies,
@@ -238,11 +237,13 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                 // This prop is set to null every time the API is called again to
                                 // trigger a UI loading state, since otherwise the new data just
                                 // replaces the old one abruptly
-                                anomaliesRequestStatus === ActionStatus.Working
+                                anomaliesRequestStatus ===
+                                    ActionStatus.Working ||
+                                anomaliesRequestStatus === ActionStatus.Initial
                                     ? null
                                     : uiAnomalies
                             }
-                            timezone={determineTimezoneFromAlert(alert)}
+                            // timezone={determineTimezoneFromAlert(alert)}
                             toolbar={
                                 <>
                                     <Box width="100%">
@@ -262,9 +263,9 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                     </Box>
                                     <AnomalyQuickFilters
                                         showTimeSelectorOnly
-                                        timezone={determineTimezoneFromAlert(
-                                            alert
-                                        )}
+                                        // timezone={determineTimezoneFromAlert(
+                                        //     alert
+                                        // )}
                                     />
                                 </>
                             }

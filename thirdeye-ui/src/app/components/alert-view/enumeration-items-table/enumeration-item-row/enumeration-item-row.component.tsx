@@ -86,7 +86,9 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     };
     tsData.xAxis = {
         tickFormatter: (d: string) => {
-            return DateTime.fromJSDate(new Date(d)).toFormat("MMM dd");
+            return DateTime.fromJSDate(new Date(d), {
+                zone: timezone,
+            }).toFormat("MMM dd");
         },
     };
 

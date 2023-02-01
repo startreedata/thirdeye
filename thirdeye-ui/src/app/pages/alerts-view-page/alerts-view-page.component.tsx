@@ -64,10 +64,14 @@ import {
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
-import { Alert, AlertStats } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertInEvaluation,
+    AlertStats,
+} from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
-    determineTimezoneFromAlert,
+    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
 } from "../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../utils/enumeration-items/enumeration-items.util";
@@ -547,7 +551,15 @@ export const AlertsViewPage: FunctionComponent = () => {
                         }
                         loadingState={<SkeletonV1 />}
                     >
-                        <AlertViewSubHeader alert={alert as Alert} />
+                        <AlertViewSubHeader
+                            alert={alert as Alert}
+                            timezone={determineTimezoneFromAlertInEvaluation(
+                                evaluation?.alert.template as Pick<
+                                    AlertInEvaluation,
+                                    "metadata"
+                                >
+                            )}
+                        />
                     </LoadingErrorStateSwitch>
                 </Grid>
 
@@ -608,8 +620,12 @@ export const AlertsViewPage: FunctionComponent = () => {
                                             expanded={expanded}
                                             initialSearchTerm={searchTerm || ""}
                                             sortOrder={sortOrder}
-                                            timezone={determineTimezoneFromAlert(
-                                                alert
+                                            timezone={determineTimezoneFromAlertInEvaluation(
+                                                evaluation?.alert
+                                                    ?.template as Pick<
+                                                    AlertInEvaluation,
+                                                    "metadata"
+                                                >
                                             )}
                                             onExpandedChange={
                                                 handleExpandedChange

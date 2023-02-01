@@ -20,4 +20,5 @@ export interface EventsTabProps {
     selectedEvents: Event[];
     searchValue: string;
     triggerUpdate: boolean;
+    timezone: string | undefined;
 }

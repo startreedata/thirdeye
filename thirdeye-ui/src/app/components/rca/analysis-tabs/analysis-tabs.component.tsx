@@ -66,6 +66,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     selectedEvents,
     onEventSelectionChange,
     isLoading,
+    timezone,
 }) => {
     const { notify } = useNotificationProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -227,9 +228,12 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                 Data Date Range
                             </div>
                             <div>
-                                {formatDateAndTimeV1(anomaly.startTime)}
+                                {formatDateAndTimeV1(
+                                    anomaly.startTime,
+                                    timezone
+                                )}
                                 <strong> to </strong>
-                                {formatDateAndTimeV1(anomaly.endTime)}
+                                {formatDateAndTimeV1(anomaly.endTime, timezone)}
                             </div>
                         </Grid>
                         <Grid item xs={6}>
@@ -251,14 +255,16 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                     anomaly.startTime -
                                         baselineOffsetToMilliseconds(
                                             comparisonOffset
-                                        )
+                                        ),
+                                    timezone
                                 )}
                                 <strong> to </strong>
                                 {formatDateAndTimeV1(
                                     anomaly.endTime -
                                         baselineOffsetToMilliseconds(
                                             comparisonOffset
-                                        )
+                                        ),
+                                    timezone
                                 )}
                             </div>
                         </Grid>
@@ -276,6 +282,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         anomalyId={anomalyId}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
+                        timezone={timezone}
                         onCheckClick={onAddFilterSetClick}
                     />
                 </Box>
@@ -286,6 +293,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         anomalyId={anomalyId}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
+                        timezone={timezone}
                         onAddFilterSetClick={onAddFilterSetClick}
                     />
                 </Box>
@@ -296,6 +304,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         anomalyId={anomalyId}
                         searchValue={eventsSearchValue}
                         selectedEvents={selectedEvents}
+                        timezone={timezone}
                         triggerUpdate={triggerUpdateEvents}
                         onCheckClick={onEventSelectionChange}
                     />

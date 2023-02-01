@@ -24,4 +24,5 @@ export interface AnalysisTabsProps {
     selectedEvents: Event[];
     onEventSelectionChange: (events: Event[]) => void;
     isLoading: boolean;
+    timezone: string | undefined;
 }

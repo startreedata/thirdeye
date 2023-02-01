@@ -22,7 +22,7 @@ export interface MetricsReportListProps {
 }
 
 export interface AnomaliesByAlert {
-    alert: Alert;
+    alert: Pick<Alert, "id" | "name">;
     anomalies: Anomaly[];
     metric: string;
     dataset: string;

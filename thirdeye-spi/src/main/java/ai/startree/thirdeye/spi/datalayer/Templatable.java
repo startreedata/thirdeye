@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.CharMatcher;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -51,7 +52,7 @@ public class Templatable<T> {
   }
 
   public Templatable<T> setTemplatedValue(final @NonNull String templatedValue) {
-    checkArgument( templatedValue.length() >= 4 && templatedValue.startsWith("${") && templatedValue.endsWith("}"),
+    checkArgument( isTemplatable(templatedValue),
         "Invalid templated value variable string: %s. Expected format is ${VARIABLE_NAME}",
         templatedValue);
     this.templatedValue = templatedValue;
@@ -95,5 +96,11 @@ public class Templatable<T> {
         "templatedValue='" + templatedValue + '\'' +
         ", value=" + value +
         '}';
+  }
+
+  public static boolean isTemplatable(final String textValue) {
+    return textValue.length() >= 4 && textValue.startsWith("${") && textValue.endsWith("}")
+        // prevent nested or successive properties. Eg don't match on "${prop1}${prop2}"
+        && CharMatcher.is('}').countIn(textValue) == 1;
   }
 }

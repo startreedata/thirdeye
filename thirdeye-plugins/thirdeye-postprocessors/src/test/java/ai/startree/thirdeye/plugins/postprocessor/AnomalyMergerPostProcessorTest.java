@@ -22,8 +22,8 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.joda.time.DateTimeZone.UTC;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -57,6 +58,7 @@ public class AnomalyMergerPostProcessorTest {
   private static final long JANUARY_1_2021_05H = 1609477200_000L;
   private static final long JANUARY_1_2021_06H = 1609480800_000L;
   private static long ANOMALY_ID = 1000L;
+  private List<AnomalyDTO> existingAnomalies;
   private AnomalyManager anomalyManager;
   private AnomalyMergerPostProcessorSpec detectionSpec;
   private AnomalyMergerPostProcessor detectionMerger;
@@ -91,7 +93,21 @@ public class AnomalyMergerPostProcessorTest {
 
   @BeforeMethod
   public void setUp() {
+    existingAnomalies = new ArrayList<>();
     anomalyManager = mock(AnomalyManager.class);
+    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
+        anyLong(), anyLong(), nullable(Long.class))).then(i -> {
+      final Object[] args = i.getArguments();
+      final long startTime =  (long) args[0];
+      final long endTime  = (long) args[1];
+      final Long enumerationItemId  = (Long) args[3];
+      // pseudo database that filters by start time, end time, enumerationItemId
+      return existingAnomalies.stream()
+          .filter(a -> a.getStartTime() >= startTime)
+          .filter(a -> a.getEndTime() <= endTime)
+          .filter(a -> enumerationItemId==null || enumerationItemId.equals(a.getEnumerationItem().getId()))
+          .collect(Collectors.toList());
+    });
     detectionSpec = new AnomalyMergerPostProcessorSpec().setAnomalyManager(
         anomalyManager).setAlertId(ALERT_ID).setUsage(DetectionPipelineUsage.DETECTION);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -131,8 +147,7 @@ public class AnomalyMergerPostProcessorTest {
 
   @Test
   public void testSingleAnomalyNoMerge() {
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> emptyList());
+    existingAnomalies = emptyList();
     final AnomalyDTO newAnomaly = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final Interval detectionInterval = new Interval(JANUARY_1_2021_01H, JANUARY_1_2021_02H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(singletonList(newAnomaly),
@@ -142,11 +157,8 @@ public class AnomalyMergerPostProcessorTest {
 
   @Test
   public void testSingleAnomalyMergeWithExisting() {
-    final AnomalyDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
-        JANUARY_1_2021_02H);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
-
+    final AnomalyDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    existingAnomalies = listOf(existingAnomaly);
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
     final Interval detectionInterval = new Interval(JANUARY_1_2021_02H, JANUARY_1_2021_03H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(List.of(new1), detectionInterval);
@@ -161,8 +173,7 @@ public class AnomalyMergerPostProcessorTest {
     // existing anomaly is pattern UP
     existingAnomaly.setAvgBaselineVal(0);
     existingAnomaly.setAvgCurrentVal(10);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
+    existingAnomalies = listOf(existingAnomaly);
 
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
     // existing anomaly is pattern DOWN
@@ -179,9 +190,7 @@ public class AnomalyMergerPostProcessorTest {
   public void testSingleAnomalyNoMergeWithExistingIfUsageIsEvaluate() {
     final AnomalyDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> singletonList(existingAnomaly));
-
+    existingAnomalies = listOf(existingAnomaly);
     detectionSpec.setUsage(DetectionPipelineUsage.EVALUATION);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
@@ -197,7 +206,8 @@ public class AnomalyMergerPostProcessorTest {
     final AnomalyDTO new2 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
     final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
-    final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1, new2), List.of(existing1, existing2));
+    final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1, new2),
+        List.of(existing1, existing2));
     assertThat(merged.size()).isEqualTo(1);
 
     assertThat(isSameAnomaly(merged.get(0), existing1)).isTrue();
@@ -231,7 +241,8 @@ public class AnomalyMergerPostProcessorTest {
         DEFAULT_MERGE_MAX_GAP).plus(1).getMillis();
     final long afterMergeGapEnd2 = plusMin(afterMergeGapStart2, 60);
     final AnomalyDTO new2 = newAnomaly(afterMergeGapStart2, afterMergeGapEnd2);
-    final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1, new2), List.of(existing1));
+    final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1, new2),
+        List.of(existing1));
 
     assertThat(merged.size()).isEqualTo(3);
     assertThat(merged.get(0)).isEqualTo(existing1);
@@ -432,9 +443,7 @@ public class AnomalyMergerPostProcessorTest {
     final EnumerationItemDTO ei1 = newEnumerationItemRef(enumerationItemId);
     final AnomalyDTO existingAnomaly = existingAnomaly(JANUARY_1_2021_01H,
         JANUARY_1_2021_02H).setEnumerationItem(ei1);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), eq(enumerationItemId))).thenAnswer(
-        i -> singletonList(existingAnomaly));
+    existingAnomalies = listOf(existingAnomaly);
     final EnumerationItemDTO enumerationDTO = (EnumerationItemDTO) new EnumerationItemDTO().setId(
         enumerationItemId);
     detectionSpec.setEnumerationItemDTO(enumerationDTO);
@@ -453,9 +462,7 @@ public class AnomalyMergerPostProcessorTest {
   public void testReplayRule2PipelineAnomalyIsNewInTheMiddleNotMerged() {
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_05H, JANUARY_1_2021_06H);
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
@@ -470,9 +477,7 @@ public class AnomalyMergerPostProcessorTest {
   public void testReplayRule2PipelineAnomalyIsNewLeftMostNotMerged() {
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_05H, JANUARY_1_2021_06H);
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
@@ -487,9 +492,7 @@ public class AnomalyMergerPostProcessorTest {
   public void testReplayRule2PipelineAnomalyIsNewRightMostNotMerged() {
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_05H, JANUARY_1_2021_06H);
@@ -504,9 +507,7 @@ public class AnomalyMergerPostProcessorTest {
   public void testReplayRule2PipelineAnomalyIsNewRightMostAndMerged() {
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
+    existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
@@ -524,13 +525,11 @@ public class AnomalyMergerPostProcessorTest {
   public void testReplayRule2PipelineAnomalyIsNewAndBecomesAParent() {
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
-    detectionSpec.setMergeMaxGap("PT30M");
+    existingAnomalies = listOf(e1, e2);
+    detectionSpec.setMergeMaxGap("PT1H");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H);
-    // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
+    // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_02H, JANUARY_1_2021_04H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
@@ -549,16 +548,14 @@ public class AnomalyMergerPostProcessorTest {
         .setScore(1)
         .setChild(true);
     e1.setChildren(Set.of(e2));
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
-    detectionSpec.setMergeMaxGap("PT30M");
+    existingAnomalies = listOf(e1, e2);
+    detectionSpec.setMergeMaxGap("PT1H");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H)
         .setAvgCurrentVal(23)
         .setAvgBaselineVal(37)
         .setScore(0.5);
-    // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
+    // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_02H, JANUARY_1_2021_03H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
@@ -578,17 +575,15 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgCurrentVal(10)
         .setAvgBaselineVal(12)
         .setScore(1);
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
-    detectionSpec.setMergeMaxGap("PT30M");
+    existingAnomalies = listOf(e1, e2);
+    detectionSpec.setMergeMaxGap("PT2H");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
         .setAvgCurrentVal(23)
         .setAvgBaselineVal(37)
         .setScore(0.5);
-    // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
-    final Interval detectionInterval = new Interval(JANUARY_1_2021_04H, JANUARY_1_2021_05H, UTC);
+    // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
+    final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_05H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
     assertThat(output).isEqualTo(listOf(e1, e2));
@@ -622,10 +617,8 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgCurrentVal(10)
         .setAvgBaselineVal(12)
         .setScore(1);
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
-    detectionSpec.setMergeMaxGap("PT30M");
+    existingAnomalies = listOf(e1, e2);
+    detectionSpec.setMergeMaxGap("PT2H");
     detectionSpec.setReNotifyAbsoluteThreshold(renotifyAbsoluteThreshold);
     detectionSpec.setReNotifyPercentageThreshold(renotifyPercentageThreshold);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -633,8 +626,8 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgCurrentVal(23)
         .setAvgBaselineVal(37)
         .setScore(0.5);
-    // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
-    final Interval detectionInterval = new Interval(JANUARY_1_2021_04H, JANUARY_1_2021_05H, UTC);
+    // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
+    final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_05H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
     assertThat(output).isEqualTo(listOf(e1, e2));
@@ -655,10 +648,8 @@ public class AnomalyMergerPostProcessorTest {
         .setScore(1)
         .setChild(true);
     e1.setChildren(new HashSet<>(Set.of(e2)));
-    final List<AnomalyDTO> existingAnomalies = listOf(e1, e2);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), isNull())).thenAnswer(i -> existingAnomalies);
-    detectionSpec.setMergeMaxGap("PT30M");
+    existingAnomalies = listOf(e1, e2);
+    detectionSpec.setMergeMaxGap("PT1H");
     detectionSpec.setReNotifyAbsoluteThreshold(renotifyAbsoluteThreshold);
     detectionSpec.setReNotifyPercentageThreshold(renotifyPercentageThreshold);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -666,7 +657,7 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgCurrentVal(23)
         .setAvgBaselineVal(37)
         .setScore(0.5);
-    // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
+    // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_02H, JANUARY_1_2021_03H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
@@ -833,7 +824,7 @@ public class AnomalyMergerPostProcessorTest {
 
     assertThat(output).isEqualTo(List.of(e1, e2, parent, n1));
     // parent and child are marked as outdated
-    for (int i =0; i<3; i++) {
+    for (int i = 0; i < 3; i++) {
       assertThat(output.get(i).getAnomalyLabels().size()).isEqualTo(1);
       assertThat(output.get(i).getAnomalyLabels().get(0).getName()).isEqualTo(
           OUTDATED_AFTER_REPLAY_LABEL_NAME);

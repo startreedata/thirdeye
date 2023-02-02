@@ -13,7 +13,10 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import java.util.List;
@@ -64,6 +67,7 @@ public class DetectionPipelineContext {
   public DetectionPipelineContext setEnumerationItem(
       final EnumerationItemDTO enumerationItem) {
     this.enumerationItem = enumerationItem;
+    optional(enumerationItem).map(AbstractDTO::getNamespace).ifPresent(this::setNamespace);
     return this;
   }
 

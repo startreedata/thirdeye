@@ -23,4 +23,5 @@ export interface EnumerationItemRowProps {
     expanded: string[];
     onExpandChange: (isOpen: boolean, name: string) => void;
     alertStats: AlertStats | null;
+    timezone?: string;
 }

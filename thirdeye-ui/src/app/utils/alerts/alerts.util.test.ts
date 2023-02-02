@@ -16,6 +16,7 @@ import { cloneDeep } from "lodash";
 import {
     Alert,
     AlertEvaluation,
+    AlertInEvaluation,
     AlertNodeType,
 } from "../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
@@ -27,7 +28,7 @@ import {
     createEmptyUiAlert,
     createEmptyUiAlertDatasetAndMetric,
     createEmptyUiAlertSubscriptionGroup,
-    determineTimezoneFromAlert,
+    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
     filterAlerts,
     generateGenericNameForAlert,
@@ -223,34 +224,17 @@ describe("Alerts Util", () => {
         ).toEqual("hello-world");
     });
 
-    it("determineTimezoneFromAlert should return expected results given the inputs", () => {
+    it("determineTimezoneFromAlertInEvaluation should return expected results given the inputs", () => {
         expect(
-            determineTimezoneFromAlert({
-                templateProperties: {
+            determineTimezoneFromAlertInEvaluation({
+                metadata: {
                     timezone: "America/Los_Angeles",
                 },
             })
         ).toEqual("America/Los_Angeles");
         expect(
-            determineTimezoneFromAlert({
-                templateProperties: {
-                    timezone: "America/Los_Angeles",
-                    monitoringGranularity: "P1H",
-                },
-            })
-        ).toEqual("America/Los_Angeles");
-        expect(
-            determineTimezoneFromAlert({
-                templateProperties: {
-                    monitoringGranularity: "P1H",
-                },
-            })
-        ).toBeUndefined();
-        expect(
-            determineTimezoneFromAlert({
-                templateProperties: {
-                    monitoringGranularity: "P1D",
-                },
+            determineTimezoneFromAlertInEvaluation({
+                metadata: {},
             })
         ).toEqual("UTC");
     });
@@ -534,7 +518,7 @@ const mockDetectionEvaluations = [
 ];
 
 const mockAlertEvaluation = {
-    alert: {} as Alert,
+    alert: {} as AlertInEvaluation,
     detectionEvaluations: {
         detectionEvaluation1:
             mockDetectionEvaluations[0] as DetectionEvaluation,

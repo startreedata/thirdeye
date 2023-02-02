@@ -25,6 +25,7 @@ import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { UiAnomaly } from "../../../../rest/dto/ui-anomaly.interfaces";
 import {
     createAlertEvaluation,
+    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
 } from "../../../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../../../utils/anomalies/anomalies.util";
@@ -95,7 +96,8 @@ export const AnomalyRow: FunctionComponent<AnomalyRowProps> = ({ anomaly }) => {
         const options = generateChartOptionsForMetricsReport(
             detectionEvalForAnomaly,
             [anomaly],
-            t
+            t,
+            determineTimezoneFromAlertInEvaluation(evaluation.alert)
         );
 
         options.zoom = true;

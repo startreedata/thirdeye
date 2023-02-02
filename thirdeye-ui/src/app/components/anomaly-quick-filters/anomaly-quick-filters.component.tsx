@@ -52,7 +52,7 @@ function initializeSelected(
 }
 
 export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
-    ({ showTimeSelectorOnly }) => {
+    ({ showTimeSelectorOnly, timezone }) => {
         const {
             timeRangeDuration,
             recentCustomTimeRangeDurations,
@@ -238,6 +238,7 @@ export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
                             recentCustomTimeRangeDurations
                         }
                         timeRangeDuration={timeRangeDuration}
+                        timezone={timezone}
                         onChange={onHandleTimeRangeChange}
                         onRefresh={onHandleRefresh}
                     />

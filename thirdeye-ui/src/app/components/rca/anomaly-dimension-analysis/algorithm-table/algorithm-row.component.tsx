@@ -66,6 +66,7 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     comparisonOffset,
     checked,
     onCheckClick,
+    timezone,
 }) => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
@@ -158,6 +159,7 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                                 endTime={endTime}
                                 row={row}
                                 startTime={startTime}
+                                timezone={timezone}
                             />
                         )}
                     </Collapse>

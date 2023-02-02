@@ -34,6 +34,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
         comparisonOffset,
         chartTimeSeriesFilterSet,
         onCheckClick,
+        timezone,
     }) => {
         const { t } = useTranslation();
         const totalSum = anomalyDimensionAnalysisData.responseRows.reduce(
@@ -120,6 +121,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
                                     }
                                     row={row}
                                     startTime={anomaly.startTime}
+                                    timezone={timezone}
                                     totalSum={totalSum}
                                     onCheckClick={onCheckClick}
                                 />

@@ -64,9 +64,14 @@ import {
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
-import { Alert, AlertStats } from "../../rest/dto/alert.interfaces";
+import {
+    Alert,
+    AlertInEvaluation,
+    AlertStats,
+} from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
+    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
 } from "../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../utils/enumeration-items/enumeration-items.util";
@@ -278,6 +283,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         ) {
             // If not in reset flow, assume alert was just created
             resetStatusNotification === null &&
+                autoRefreshNotification === null &&
                 setAutoRefreshNotification(
                     notify(
                         NotificationTypeV1.Info,
@@ -343,6 +349,11 @@ export const AlertsViewPage: FunctionComponent = () => {
                 if (autoRefreshNotification) {
                     removeNotification(autoRefreshNotification);
                     setAutoRefreshNotification(null);
+                }
+
+                if (resetStatusNotification) {
+                    removeNotification(resetStatusNotification);
+                    setResetStatusNotification(null);
                 }
 
                 if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
@@ -538,11 +549,24 @@ export const AlertsViewPage: FunctionComponent = () => {
             <PageContentsGridV1>
                 {/* Alert sub header */}
                 <Grid item xs={12}>
-                    {getAlertStatus === ActionStatus.Working ? (
-                        <SkeletonV1 />
-                    ) : (
-                        alert && <AlertViewSubHeader alert={alert} />
-                    )}
+                    <LoadingErrorStateSwitch
+                        isError={getAlertStatus === ActionStatus.Error}
+                        isLoading={
+                            getAlertStatus === ActionStatus.Initial ||
+                            getAlertStatus === ActionStatus.Working
+                        }
+                        loadingState={<SkeletonV1 />}
+                    >
+                        <AlertViewSubHeader
+                            alert={alert as Alert}
+                            timezone={determineTimezoneFromAlertInEvaluation(
+                                evaluation?.alert.template as Pick<
+                                    AlertInEvaluation,
+                                    "metadata"
+                                >
+                            )}
+                        />
+                    </LoadingErrorStateSwitch>
                 </Grid>
 
                 {/* Alert evaluation time series */}
@@ -602,6 +626,13 @@ export const AlertsViewPage: FunctionComponent = () => {
                                             expanded={expanded}
                                             initialSearchTerm={searchTerm || ""}
                                             sortOrder={sortOrder}
+                                            timezone={determineTimezoneFromAlertInEvaluation(
+                                                evaluation?.alert
+                                                    ?.template as Pick<
+                                                    AlertInEvaluation,
+                                                    "metadata"
+                                                >
+                                            )}
                                             onExpandedChange={
                                                 handleExpandedChange
                                             }

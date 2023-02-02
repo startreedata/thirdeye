@@ -13,6 +13,7 @@
  * the License.
  */
 import { ActionStatus } from "../../rest/actions.interfaces";
+import { Alert } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { Investigation } from "../../rest/dto/rca.interfaces";
@@ -25,4 +26,5 @@ export type InvestigationContext = {
     anomaly: Anomaly;
     getAnomalyRequestStatus: ActionStatus;
     anomalyRequestErrors: string[];
+    alert: Alert | null;
 };

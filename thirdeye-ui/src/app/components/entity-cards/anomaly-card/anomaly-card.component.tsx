@@ -17,6 +17,8 @@ import classnames from "classnames";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
+import { formatDateAndTimeV1 } from "../../../platform/utils";
+import { timezoneStringShort } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card/anomaly-summary-card-deatil.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
@@ -44,16 +46,28 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = (
                         {/* Start */}
                         <Grid item lg={2} sm={6} xs={12}>
                             <AnomalySummaryCardDetail
-                                label={t("label.start")}
-                                value={props.uiAnomaly.startTime}
+                                label={
+                                    t("label.start") +
+                                    ` (${timezoneStringShort(props.timezone)})`
+                                }
+                                value={formatDateAndTimeV1(
+                                    props.uiAnomaly.startTimeVal,
+                                    props.timezone
+                                )}
                             />
                         </Grid>
 
                         {/* End */}
                         <Grid item lg={2} sm={6} xs={12}>
                             <AnomalySummaryCardDetail
-                                label={t("label.end")}
-                                value={props.uiAnomaly.endTime}
+                                label={
+                                    t("label.end") +
+                                    ` (${timezoneStringShort(props.timezone)})`
+                                }
+                                value={formatDateAndTimeV1(
+                                    props.uiAnomaly.endTimeVal,
+                                    props.timezone
+                                )}
                             />
                         </Grid>
 

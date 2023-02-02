@@ -44,6 +44,7 @@ import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 import {
     DEFAULT_FEEDBACK,
+    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
@@ -83,6 +84,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
         onEventSelectionChange,
         getEnumerationItemRequest,
         enumerationItem,
+        onAlertEvaluationDidFetch,
     }) => {
         const [searchParams, setSearchParams] = useSearchParams();
         const { t } = useTranslation();
@@ -125,10 +127,12 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
 
             getEvaluation(
                 createAlertEvaluation(anomaly.alert.id, startTime, endTime)
-            ).then(
-                (fetchedEvaluation) =>
-                    fetchedEvaluation && setAlertEvaluation(fetchedEvaluation)
-            );
+            ).then((fetchedEvaluation) => {
+                fetchedEvaluation && setAlertEvaluation(fetchedEvaluation);
+                fetchedEvaluation &&
+                    onAlertEvaluationDidFetch &&
+                    onAlertEvaluationDidFetch(fetchedEvaluation);
+            });
         };
 
         const fetchFilteredAlertEvaluations = (): void => {
@@ -246,7 +250,10 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
                     detectionEvalForAnomaly,
                     anomaly,
                     filteredAlertEvaluation,
-                    t
+                    t,
+                    determineTimezoneFromAlertInEvaluation(
+                        alertEvaluation.alert
+                    )
                 )
             );
         }, [
@@ -339,7 +346,11 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
                             {/** Use flex to align the button group */}
                             <Box display="flex">
                                 <Box>
-                                    <TimeRangeButtonWithContext />
+                                    <TimeRangeButtonWithContext
+                                        timezone={determineTimezoneFromAlertInEvaluation(
+                                            alertEvaluation?.alert
+                                        )}
+                                    />
                                 </Box>
                                 <Box marginLeft={1}>
                                     <TooltipV1

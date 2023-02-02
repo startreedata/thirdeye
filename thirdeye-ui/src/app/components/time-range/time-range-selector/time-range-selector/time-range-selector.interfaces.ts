@@ -22,4 +22,5 @@ export interface TimeRangeSelectorProps {
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     onChange?: (timeRangeDuration: TimeRangeDuration) => void;
     onRefresh?: () => void;
+    timezone?: string;
 }

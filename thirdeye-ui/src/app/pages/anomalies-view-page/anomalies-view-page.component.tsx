@@ -13,7 +13,7 @@
  * the License.
  */
 import { Box, Button, Grid, Link } from "@material-ui/core";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -47,7 +47,10 @@ import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
-import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
+import {
+    determineTimezoneFromAlertInEvaluation,
+    extractDetectionEvaluation,
+} from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
     getUiAnomaly,
@@ -205,18 +208,14 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     };
 
     useEffect(() => {
-        if (anomalyRequestStatus === ActionStatus.Error) {
-            isEmpty(anomalyRequestErrors)
-                ? notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.anomaly"),
-                      })
-                  )
-                : anomalyRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  );
-        }
+        notifyIfErrors(
+            anomalyRequestStatus,
+            anomalyRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.anomaly"),
+            })
+        );
     }, [anomalyRequestStatus, anomalyRequestErrors]);
 
     const enumerationItemSearchParams =
@@ -360,6 +359,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         isLoading={
                             anomalyRequestStatus === ActionStatus.Working
                         }
+                        timezone={determineTimezoneFromAlertInEvaluation(
+                            evaluation?.alert
+                        )}
                         uiAnomaly={uiAnomaly}
                     />
                 </Grid>
@@ -382,6 +384,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             header={
                                 <ViewAnomalyHeader
                                     anomaly={anomaly}
+                                    timezone={determineTimezoneFromAlertInEvaluation(
+                                        evaluation?.alert
+                                    )}
                                     onRefresh={fetchAlertEvaluation}
                                 />
                             }
@@ -389,6 +394,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                                 getEvaluationRequestStatus ===
                                 ActionStatus.Working
                             }
+                            timezone={determineTimezoneFromAlertInEvaluation(
+                                evaluation?.alert
+                            )}
                         />
                     )}
                 </Grid>

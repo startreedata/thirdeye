@@ -48,6 +48,7 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
     onCheckClick,
     searchValue,
     triggerUpdate,
+    timezone,
 }: EventsTabProps) => {
     const { t } = useTranslation();
     const { getEventsForAnomaly, errorMessages, status, events } =
@@ -118,14 +119,14 @@ export const EventsTab: FunctionComponent<EventsTabProps> = ({
 
     const startTimeRenderer = useCallback(
         (_: Record<string, unknown>, data: Event): ReactNode =>
-            formatDateAndTimeV1(data.startTime),
-        []
+            formatDateAndTimeV1(data.startTime, timezone),
+        [timezone]
     );
 
     const endTimeRenderer = useCallback(
         (_: Record<string, unknown>, data: Event): ReactNode =>
-            formatDateAndTimeV1(data.endTime),
-        []
+            formatDateAndTimeV1(data.endTime, timezone),
+        [timezone]
     );
 
     const metadataRenderer = useCallback(

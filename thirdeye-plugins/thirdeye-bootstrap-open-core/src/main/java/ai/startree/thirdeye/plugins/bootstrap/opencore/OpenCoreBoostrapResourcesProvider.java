@@ -38,7 +38,7 @@ public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProv
         .collect(Collectors.toList());
     templates.addAll(percentileTemplates);
 
-    CommonProperties.enrichCommonProperties(templates);
+    new CommonProperties().enrichCommonProperties(templates);
 
     return templates;
   }

@@ -8,7 +8,9 @@
       "params": {
         "type": "ANOMALY_MERGER",
         "component.mergeMaxGap": "${mergeMaxGap}",
-        "component.mergeMaxDuration": "${mergeMaxDuration}"
+        "component.mergeMaxDuration": "${mergeMaxDuration}",
+        "component.reNotifyPercentageThreshold": "${replayReNotifyPercentageThreshold}",
+        "component.reNotifyAbsoluteThreshold": "${replayReNotifyAbsoluteThreshold}"
       },
       "inputs": [
         {
@@ -359,6 +361,14 @@
     {
       "name": "seasonalityPeriod",
       "defaultValue": "PT0S"
+    },
+    {
+      "name": "replayReNotifyPercentageThreshold",
+      "defaultValue": -1
+    },
+    {
+      "name": "replayReNotifyAbsoluteThreshold",
+      "defaultValue": -1
     }
   ]
 }

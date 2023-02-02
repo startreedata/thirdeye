@@ -8,7 +8,9 @@
       "params": {
         "type": "ANOMALY_MERGER",
         "component.mergeMaxGap": "${mergeMaxGap}",
-        "component.mergeMaxDuration": "${mergeMaxDuration}"
+        "component.mergeMaxDuration": "${mergeMaxDuration}",
+        "component.reNotifyPercentageThreshold": "${replayReNotifyPercentageThreshold}",
+        "component.reNotifyAbsoluteThreshold": "${replayReNotifyAbsoluteThreshold}"
       },
       "inputs": [
         {
@@ -325,6 +327,14 @@
     {
       "name": "queryLimit",
       "defaultValue": "100000000"
+    },
+    {
+      "name": "replayReNotifyPercentageThreshold",
+      "defaultValue": -1
+    },
+    {
+      "name": "replayReNotifyAbsoluteThreshold",
+      "defaultValue": -1
     }
   ]
 }

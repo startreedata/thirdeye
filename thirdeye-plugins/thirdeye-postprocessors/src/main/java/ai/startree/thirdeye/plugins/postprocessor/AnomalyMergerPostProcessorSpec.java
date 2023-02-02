@@ -49,7 +49,7 @@ public class AnomalyMergerPostProcessorSpec {
   private DetectionPipelineUsage usage;
 
   /**
-   * If the difference between an existing anomaly and a new anomaly on the same time frame
+   * If the percentage difference between an existing anomaly and a new anomaly on the same time frame
    * is above this threshold, renotify. Combined with the absolute threshold below.
    * Both thresholds have to pass to be renotified.
    * If zero, always renotify.
@@ -58,7 +58,7 @@ public class AnomalyMergerPostProcessorSpec {
   private Double reNotifyPercentageThreshold;
 
   /**
-   * If the difference between an existing anomaly and a new anomaly on the same time frame
+   * If the absolute difference between an existing anomaly and a new anomaly on the same time frame
    * is above this threshold, renotify. Combined with the percentage threshold above.
    * Both thresholds have to pass to be renotified.
    * If zero, always renotify.

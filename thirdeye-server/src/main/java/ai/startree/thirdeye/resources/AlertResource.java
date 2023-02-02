@@ -138,6 +138,19 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @Override
+  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
+      final AlertDTO existing,
+      final AlertDTO updated) {
+    // prevent manual update of lastTimestamp
+    updated.setLastTimestamp(existing.getLastTimestamp());
+
+    // Always set a default cron if not present.
+    if (updated.getCron() == null) {
+      updated.setCron(CRON_EVERY_HOUR);
+    }
+  }
+
+  @Override
   protected AlertApi toApi(final AlertDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }

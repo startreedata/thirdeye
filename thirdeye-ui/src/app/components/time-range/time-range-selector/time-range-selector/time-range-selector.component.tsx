@@ -20,6 +20,7 @@ import {
     formatTimeRange,
     formatTimeRangeDuration,
 } from "../../../../utils/time-range/time-range.util";
+import { timezoneStringShort } from "../../../../utils/time/time.util";
 import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TimeRangeSelectorPopoverContent } from "../../time-range-selector-popover-content/time-range-selector-popover-content.component";
 import { TimeRangeSelectorProps } from "./time-range-selector.interfaces";
@@ -33,6 +34,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
     recentCustomTimeRangeDurations,
     onRefresh,
     onChange,
+    timezone,
 }) => {
     const timeRangeSelectorClasses = useTimeRangeSelectorStyles();
     const [timeRangeSelectorAnchorElement, setTimeRangeSelectorAnchorElement] =
@@ -60,7 +62,8 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
 
                     {/* Time range duration */}
                     <Typography variant="body2">
-                        {formatTimeRangeDuration(timeRangeDuration)}
+                        {formatTimeRangeDuration(timeRangeDuration, timezone)} (
+                        {timezoneStringShort(timezone)})
                     </Typography>
                 </Grid>
             )}
@@ -90,6 +93,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
                                 recentCustomTimeRangeDurations
                             }
                             timeRangeDuration={timeRangeDuration}
+                            timezone={timezone}
                             onChange={onChange}
                             onClose={handleTimeRangeSelectorClose}
                         />

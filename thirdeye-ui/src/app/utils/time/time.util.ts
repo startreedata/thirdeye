@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { DateTime } from "luxon";
+
 export const SECOND_IN_MILLISECONDS = 1000;
 export const MINUTE_IN_MILLISECONDS = SECOND_IN_MILLISECONDS * 60;
 export const HOUR_IN_MILLISECONDS = MINUTE_IN_MILLISECONDS * 60;
@@ -25,4 +27,8 @@ export const OFFSET_TO_MILLISECONDS: { [key: string]: number } = {
     W: WEEK_IN_MILLISECONDS,
     M: MONTH_IN_MILLISECONDS,
     Y: YEAR_IN_MILLISECONDS,
+};
+
+export const timezoneStringShort = (timezone: string | undefined): string => {
+    return DateTime.now().setZone(timezone).offsetNameShort;
 };

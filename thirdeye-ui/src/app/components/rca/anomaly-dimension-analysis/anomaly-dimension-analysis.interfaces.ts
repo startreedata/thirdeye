@@ -24,6 +24,7 @@ export interface AnomalyDimensionAnalysisProps {
     anomaly: Anomaly;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
     onCheckClick: (filters: AnomalyFilterOption[]) => void;
+    timezone: string | undefined;
 }
 export interface AnomalyDimensionAnalysisTableProps {
     anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;

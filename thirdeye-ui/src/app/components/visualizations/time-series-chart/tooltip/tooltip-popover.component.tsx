@@ -15,6 +15,7 @@
 import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { formatDateAndTimeV1 } from "../../../../platform/utils";
+import { timezoneStringShort } from "../../../../utils/time/time.util";
 import { DataPoint, NormalizedSeries } from "../time-series-chart.interfaces";
 import { TooltipPopoverProps } from "./tooltip.interfaces";
 import { useTooltipStyles } from "./tooltip.styles";
@@ -42,7 +43,8 @@ export const TooltipPopover: FunctionComponent<TooltipPopoverProps> = ({
                 >
                     <Grid item>
                         <Typography variant="overline">
-                            {formatDateAndTimeV1(xValue, timezoneOverride)}
+                            {formatDateAndTimeV1(xValue, timezoneOverride)}{" "}
+                            {`(${timezoneStringShort(timezoneOverride)})`}
                         </Typography>
                     </Grid>
                 </Grid>

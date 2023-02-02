@@ -28,6 +28,7 @@ import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
 
 export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     alert,
+    timezone,
 }) => {
     const { showDialog, hideDialog } = useDialogProviderV1();
     const { t } = useTranslation();
@@ -96,7 +97,10 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
                         </Button>
                     </Grid>
                     <Grid item>
-                        <TimeRangeButtonWithContext btnGroupColor="primary" />
+                        <TimeRangeButtonWithContext
+                            btnGroupColor="primary"
+                            timezone={timezone}
+                        />
                     </Grid>
                 </Grid>
             </Grid>

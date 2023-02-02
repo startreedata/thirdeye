@@ -30,7 +30,7 @@ import {
     DataGridV1,
     SkeletonV1,
 } from "../../platform/components";
-import { linkRendererV1 } from "../../platform/utils";
+import { formatDateAndTimeV1, linkRendererV1 } from "../../platform/utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import type { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
@@ -52,6 +52,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     showEnumerationItem = false,
     enumerationItems = [],
     enumerationItemsStatus,
+    // If timezone is passed, override all datetime rendering to use this timezone
+    timezone,
 }) => {
     const [selectedAnomaly, setSelectedAnomaly] =
         useState<DataGridSelectionModelV1<UiAnomaly>>();
@@ -181,14 +183,19 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const startTimeRenderer = useCallback(
         // use formatted value to display
-        (_, data: UiAnomaly) => addMutedStyle(data.startTime, data),
-        []
+        (_, data: UiAnomaly) =>
+            addMutedStyle(
+                formatDateAndTimeV1(data.startTimeVal, timezone),
+                data
+            ),
+        [timezone]
     );
 
     const endTimeRenderer = useCallback(
         // use formatted value to display
-        (_, data: UiAnomaly) => addMutedStyle(data.endTime, data),
-        []
+        (_, data: UiAnomaly) =>
+            addMutedStyle(formatDateAndTimeV1(data.endTimeVal, timezone), data),
+        [timezone]
     );
 
     const enumerationItemRender = useCallback(

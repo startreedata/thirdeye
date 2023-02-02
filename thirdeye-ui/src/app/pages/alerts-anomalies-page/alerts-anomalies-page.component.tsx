@@ -28,11 +28,15 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetAlert } from "../../rest/alerts/alerts.actions";
+import {
+    useGetAlert,
+    useGetAlertInsight,
+} from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
+import { determineTimezoneFromAlertInEvaluation } from "../../utils/alerts/alerts.util";
 import {
     filterAnomaliesByFunctions,
     getUiAnomalies,
@@ -59,6 +63,8 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
     const { notify } = useNotificationProviderV1();
     const { id: alertId } = useParams<AlertsAnomaliesParams>();
+    // Insights is used here to get timezone information
+    const { alertInsight, getAlertInsight } = useGetAlertInsight();
     const {
         alert,
         getAlert,
@@ -139,6 +145,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
 
     useEffect(() => {
         getAlert(Number(alertId));
+        getAlertInsight({ alertId: Number(alertId) });
     }, [alertId]);
 
     useEffect(() => {
@@ -237,10 +244,15 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                 // This prop is set to null every time the API is called again to
                                 // trigger a UI loading state, since otherwise the new data just
                                 // replaces the old one abruptly
-                                anomaliesRequestStatus === ActionStatus.Working
+                                anomaliesRequestStatus ===
+                                    ActionStatus.Working ||
+                                anomaliesRequestStatus === ActionStatus.Initial
                                     ? null
                                     : uiAnomalies
                             }
+                            timezone={determineTimezoneFromAlertInEvaluation(
+                                alertInsight?.templateWithProperties
+                            )}
                             toolbar={
                                 <>
                                     <Box width="100%">
@@ -258,7 +270,12 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                             label={t("message.show-ignored")}
                                         />
                                     </Box>
-                                    <AnomalyQuickFilters showTimeSelectorOnly />
+                                    <AnomalyQuickFilters
+                                        showTimeSelectorOnly
+                                        timezone={determineTimezoneFromAlertInEvaluation(
+                                            alertInsight?.templateWithProperties
+                                        )}
+                                    />
                                 </>
                             }
                             onDelete={handleAnomalyDelete}

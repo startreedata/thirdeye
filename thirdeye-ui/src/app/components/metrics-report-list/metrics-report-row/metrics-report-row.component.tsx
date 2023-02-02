@@ -27,9 +27,16 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { Link as RouterLink } from "react-router-dom";
-import { SkeletonV1 } from "../../../platform/components";
+import {
+    NotificationTypeV1,
+    SkeletonV1,
+    useNotificationProviderV1,
+} from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
+import {
+    useGetAlert,
+    useGetEvaluation,
+} from "../../../rest/alerts/alerts.actions";
 import {
     createAlertEvaluation,
     extractDetectionEvaluation,
@@ -50,6 +57,7 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
     chartEnd,
 }) => {
     const classes = useMetricsReportListStyles();
+    const { notify } = useNotificationProviderV1();
     // Use object destructing, so you don't need to remember the exact order
     const { ref, inView } = useInView({
         triggerOnce: true,
@@ -62,6 +70,8 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
         status: evaluationRequestStatus,
         errorMessages: getEvaluationErrors,
     } = useGetEvaluation();
+    const { alert, getAlert, status: getAlertStatus } = useGetAlert();
+
     const [chartOptions, setChartOptions] =
         useState<TimeSeriesChartProps | null>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -70,8 +80,24 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
         // Fetched alert changed, fetch alert evaluation
         if (inView) {
             fetchAlertEvaluation();
+            getAlert(anomalyAlert.alert.id);
         }
     }, [chartStart, chartEnd, inView]);
+
+    /**
+     * Inform users there were issues fetching alert so we will have to default
+     * to UTC for the chart timeøne
+     */
+    useEffect(() => {
+        if (getAlertStatus === ActionStatus.Error) {
+            notify(
+                NotificationTypeV1.Error,
+                t(
+                    "message.experienced-issue-fetching-alert-information-for-anomaly"
+                )
+            );
+        }
+    }, [getAlertStatus]);
 
     const fetchAlertEvaluation = (): void => {
         getEvaluation(
@@ -81,7 +107,8 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
                 const options = generateChartOptionsForMetricsReport(
                     extractDetectionEvaluation(evaluation)[0],
                     anomalyAlert.anomalies,
-                    t
+                    t,
+                    (alert?.templateProperties?.timezone as string) ?? "UTC"
                 );
                 options.zoom = true;
                 options.brush = false;

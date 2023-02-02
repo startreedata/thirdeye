@@ -13,6 +13,7 @@
  * the License.
  */
 import { ActionStatus } from "../../../rest/actions.interfaces";
+import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { Event } from "../../../rest/dto/event.interfaces";
@@ -27,4 +28,5 @@ export interface AnomalyTimeSeriesCardProps {
     onEventSelectionChange: (events: Event[]) => void;
     getEnumerationItemRequest: ActionStatus;
     enumerationItem: EnumerationItem | null;
+    onAlertEvaluationDidFetch: (evaluation: AlertEvaluation) => void;
 }

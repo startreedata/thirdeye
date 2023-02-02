@@ -22,6 +22,7 @@ import { ViewAnomalyHeaderProps } from "../alert-evaluation-time-series-card.int
 export const ViewAnomalyHeader: FunctionComponent<ViewAnomalyHeaderProps> = ({
     anomaly,
     onRefresh,
+    timezone,
 }) => {
     return (
         <CardContent>
@@ -48,6 +49,7 @@ export const ViewAnomalyHeader: FunctionComponent<ViewAnomalyHeaderProps> = ({
                     xs={12}
                 >
                     <TimeRangeButtonWithContext
+                        timezone={timezone}
                         onTimeRangeChange={(start: number, end: number) =>
                             onRefresh && onRefresh(start, end)
                         }

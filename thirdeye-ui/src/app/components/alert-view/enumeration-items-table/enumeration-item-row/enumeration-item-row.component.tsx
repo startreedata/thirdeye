@@ -45,6 +45,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     expanded,
     onExpandChange,
     alertStats,
+    timezone,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -65,7 +66,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         detectionEvaluation,
         anomalies,
         t,
-        navigate
+        navigate,
+        timezone
     );
     const tsDataForExpanded = {
         ...tsData,
@@ -83,8 +85,11 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         right: 0,
     };
     tsData.xAxis = {
+        ...tsData.xAxis,
         tickFormatter: (d: string) => {
-            return DateTime.fromJSDate(new Date(d)).toFormat("MMM dd");
+            return DateTime.fromJSDate(new Date(d), {
+                zone: timezone,
+            }).toFormat("MMM dd");
         },
     };
 
@@ -133,8 +138,12 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                                     )
                                 }
                             >
-                                {!isExpanded && <span>View Details</span>}
-                                {isExpanded && <span>Hide Details</span>}
+                                {!isExpanded && (
+                                    <span>{t("label.view-details")}</span>
+                                )}
+                                {isExpanded && (
+                                    <span>{t("label.hide-details")}</span>
+                                )}
                             </Button>
                         </Grid>
                         <Grid item sm={2} xs={12}>

@@ -47,6 +47,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         sortOrder,
         onSortOrderChange,
         alertsStats,
+        timezone,
     }) => {
         const [filteredDetectionEvaluations, setFilteredDetectionEvaluations] =
             useState(
@@ -257,6 +258,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                         key={generateNameForDetectionResult(
                                             detectionEvaluation
                                         )}
+                                        timezone={timezone}
                                         onExpandChange={handleIsOpenChange}
                                     />
                                 );

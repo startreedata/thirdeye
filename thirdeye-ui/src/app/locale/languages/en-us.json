@@ -175,6 +175,7 @@
         "heatmap-data": "Heatmap Data",
         "help": "Help",
         "hide-count-default-properties": "Hide {{count}} default properties",
+        "hide-details": "Hide Details",
         "hide-preview": "Hide preview",
         "high": "High",
         "holt-winters-rule": "Holt-Winters Rule",

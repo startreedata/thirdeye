@@ -137,7 +137,10 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
         return Collections.emptyList();
       }
 
-      alert.setLastTimestamp(detectionInterval.getEndMillis());
+      // a detection can be replayed on specific period (eg if the data has mutated) - ensure the lastTimestamp never goes back in time because of a detection run
+      // if the user really wants to set the lastTimestamp back in time, he can do it with reset, of by editing the lastTimestamp manually
+      final long newLastTimestamp = Math.max(detectionInterval.getEndMillis(), alert.getLastTimestamp());
+      alert.setLastTimestamp(newLastTimestamp);
       alertManager.update(alert);
       postExecution(result);
 

@@ -141,9 +141,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
       final AlertDTO existing,
       final AlertDTO updated) {
-    // FIXME CYRIL this is preventing manual update of lastTimestamp - done on purpose?
-    updated.setLastTimestamp(existing.getLastTimestamp());
-
     // Always set a default cron if not present.
     // FIXME CYRIL not a good place to do this
     if (updated.getCron() == null) {

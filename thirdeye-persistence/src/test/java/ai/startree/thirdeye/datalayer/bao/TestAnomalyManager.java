@@ -222,7 +222,7 @@ public class TestAnomalyManager {
 
   @Test
   public void testSaveChildren() {
-    mergedResult = buildAnomaly(1500, 2000);
+    mergedResult = buildAnomaly(1000, 2000);
 
     final AnomalyDTO child1 = buildAnomaly(1000, 1500);
 

@@ -277,15 +277,17 @@ export const AlertsViewPage: FunctionComponent = () => {
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
         ) {
             // If not in reset flow, assume alert was just created
-            resetStatusNotification === null &&
-                setAutoRefreshNotification(
-                    notify(
-                        NotificationTypeV1.Info,
-                        t(
-                            "message.looks-like-this-alert-was-just-created-this-page-a"
+            if (resetStatusNotification === null) {
+                autoRefreshNotification === null &&
+                    setAutoRefreshNotification(
+                        notify(
+                            NotificationTypeV1.Info,
+                            t(
+                                "message.looks-like-this-alert-was-just-created-this-page-a"
+                            )
                         )
-                    )
-                );
+                    );
+            }
         }
     }, [alert, anomalies]);
     /**
@@ -343,6 +345,11 @@ export const AlertsViewPage: FunctionComponent = () => {
                 if (autoRefreshNotification) {
                     removeNotification(autoRefreshNotification);
                     setAutoRefreshNotification(null);
+                }
+
+                if (resetStatusNotification) {
+                    removeNotification(resetStatusNotification);
+                    setResetStatusNotification(null);
                 }
 
                 if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {

@@ -18,6 +18,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -184,18 +186,47 @@ public class TestAnomalyManager {
   }
 
   @Test
+  public void testGetAllAnomaliesForFeedback() {
+    Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
+    Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
+
+    AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(id1);
+    final String feedbackComment = "test feedback";
+    final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
+        .setComment(feedbackComment)
+        .setFeedbackType(AnomalyFeedbackType.ANOMALY);
+    anomalyForFeedback.setFeedback(feedback);
+    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyForFeedback);
+
+    // test the findAll flow
+    final List<AnomalyDTO> findAllAnomalies = mergedAnomalyResultDAO.findAll();
+    assertThat(findAnomalyById(findAllAnomalies, id1).getFeedback().getComment()).isEqualTo(feedbackComment);
+    assertThat(findAnomalyById(findAllAnomalies, id2).getFeedback()).isNull();
+
+    // test the filter flow
+    final DaoFilter filter = new DaoFilter()
+        .setPredicate(Predicate.GE("startTime", 0));
+    final List<AnomalyDTO> filterAnomalies = mergedAnomalyResultDAO.filter(filter);
+    assertThat(findAnomalyById(filterAnomalies, id1).getFeedback().getComment()).isEqualTo(feedbackComment);
+    assertThat(findAnomalyById(filterAnomalies, id2).getFeedback()).isNull();
+  }
+
+  private AnomalyDTO findAnomalyById(List<AnomalyDTO> anomalies, Long id) {
+    for (AnomalyDTO anomaly : anomalies) {
+      if(anomaly.getId().equals(id)) {
+        return anomaly;
+      }
+    }
+    return null;
+  }
+
+  @Test
   public void testSaveChildren() {
-    mergedResult = new AnomalyDTO();
-    mergedResult.setStartTime(1000);
-    mergedResult.setEndTime(2000);
+    mergedResult = buildAnomaly(1500, 2000);
 
-    final AnomalyDTO child1 = new AnomalyDTO();
-    child1.setStartTime(1000);
-    child1.setEndTime(1500);
+    final AnomalyDTO child1 = buildAnomaly(1000, 1500);
 
-    final AnomalyDTO child2 = new AnomalyDTO();
-    child2.setStartTime(1500);
-    child2.setEndTime(2000);
+    final AnomalyDTO child2 = buildAnomaly(1500, 2000);
 
     mergedResult.setChildren(new HashSet<>(Arrays.asList(child1, child2)));
 
@@ -204,6 +235,12 @@ public class TestAnomalyManager {
     Assert.assertNotNull(mergedResult.getId());
     Assert.assertNotNull(child1.getId());
     Assert.assertNotNull(child2.getId());
+  }
+
+  private AnomalyDTO buildAnomaly(long startTime, long endTime) {
+    return new AnomalyDTO()
+        .setStartTime(startTime)
+        .setEndTime(endTime);
   }
 
   @Test

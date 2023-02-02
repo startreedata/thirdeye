@@ -36,7 +36,6 @@ public interface AlertMapper {
     return new AlertApi()
         .setId(dto.getId())
         .setName(dto.getName())
-        .setNamespace(dto.getNamespace())
         .setDescription(dto.getDescription())
         .setActive(dto.isActive())
         .setCron(dto.getCron())
@@ -49,14 +48,14 @@ public interface AlertMapper {
             .setPrincipal(dto.getCreatedBy()))
         .setCreated(dto.getCreateTime())
         .setUpdated(dto.getUpdateTime())
-        ;
+        .setAuthorization(optional(dto.getAuthorization())
+            .map(ApiBeanMapper::toApi).orElse(null));
   }
 
   default AlertDTO toAlertDTO(final AlertApi api) {
     final AlertDTO dto = new AlertDTO();
 
     dto.setName(api.getName());
-    dto.setNamespace(api.getNamespace());
     dto.setDescription(api.getDescription());
     dto.setActive(optional(api.getActive()).orElse(true));
     dto.setCron(api.getCron());
@@ -77,6 +76,9 @@ public interface AlertMapper {
         .map(UserApi::getPrincipal)
         .ifPresent(dto::setCreatedBy);
 
+    optional(api.getAuthorization())
+        .map(ApiBeanMapper::toAuthorizationConfigurationDTO)
+        .ifPresent(dto::setAuthorization);
     return dto;
   }
 }

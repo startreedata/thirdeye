@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,7 +108,8 @@ public class AuthorizationManager {
   static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
     return ResourceIdentifier.from(
         optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
-        optional(dto.getNamespace()).orElse(DEFAULT_NAMESPACE),
+        optional(dto.getAuthorization())
+            .map(AuthorizationConfigurationDTO::getNamespace).orElse(DEFAULT_NAMESPACE),
         optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
             .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE));
   }

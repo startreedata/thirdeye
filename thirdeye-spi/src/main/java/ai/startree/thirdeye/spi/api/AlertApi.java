@@ -21,7 +21,6 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   private Long id;
   private String name;
-  private String namespace;
   private String description;
   private AlertTemplateApi template;
   private Map<String, Object> templateProperties;
@@ -32,6 +31,7 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private Date updated;
   private UserApi owner;
   private List<SubscriptionGroupApi> subscriptionGroups;
+  private AuthorizationConfigurationApi authorization;
 
 
   public Long getId() {
@@ -49,15 +49,6 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
 
   public AlertApi setName(final String name) {
     this.name = name;
-    return this;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public AlertApi setNamespace(final String namespace) {
-    this.namespace = namespace;
     return this;
   }
 
@@ -150,6 +141,15 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   public AlertApi setSubscriptionGroups(
       final List<SubscriptionGroupApi> subscriptionGroups) {
     this.subscriptionGroups = subscriptionGroups;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuthorization() {
+    return authorization;
+  }
+
+  public AlertApi setAuthorization(final AuthorizationConfigurationApi authorization) {
+    this.authorization = authorization;
     return this;
   }
 }

@@ -25,12 +25,12 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public abstract class AbstractDTO implements Serializable {
 
   private Long id;
-  private String namespace;
   private int version;
   private Timestamp createTime;
   private String createdBy;
   private Timestamp updateTime;
   private String updatedBy;
+  private AuthorizationConfigurationDTO authorization;
 
   public Long getId() {
     return id;
@@ -38,15 +38,6 @@ public abstract class AbstractDTO implements Serializable {
 
   public AbstractDTO setId(final Long id) {
     this.id = id;
-    return this;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public AbstractDTO setNamespace(final String namespace) {
-    this.namespace = namespace;
     return this;
   }
 
@@ -92,6 +83,15 @@ public abstract class AbstractDTO implements Serializable {
 
   public AbstractDTO setUpdatedBy(final String updatedBy) {
     this.updatedBy = updatedBy;
+    return this;
+  }
+
+  public AuthorizationConfigurationDTO getAuthorization() {
+    return authorization;
+  }
+
+  public AbstractDTO setAuthorization(AuthorizationConfigurationDTO authorization) {
+    this.authorization = authorization;
     return this;
   }
 

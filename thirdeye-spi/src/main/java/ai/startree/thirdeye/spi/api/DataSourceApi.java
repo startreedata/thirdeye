@@ -25,10 +25,10 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
 
   private Long id;
   private String name;
-  private String namespace;
   private String type;
   private Map<String, Object> properties;
   private List<DataSourceMetaApi> metaList;
+  private AuthorizationConfigurationApi authorization;
 
   @Override
   public Long getId() {
@@ -47,15 +47,6 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
 
   public DataSourceApi setName(final String name) {
     this.name = name;
-    return this;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public DataSourceApi setNamespace(final String namespace) {
-    this.namespace = namespace;
     return this;
   }
 
@@ -85,6 +76,15 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
   public DataSourceApi setMetaList(
       final List<DataSourceMetaApi> metaList) {
     this.metaList = metaList;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuthorization() {
+    return authorization;
+  }
+
+  public DataSourceApi setAuthorization(final AuthorizationConfigurationApi authorization) {
+    this.authorization = authorization;
     return this;
   }
 

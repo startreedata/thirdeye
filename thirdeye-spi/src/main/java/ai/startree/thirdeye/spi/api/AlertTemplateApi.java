@@ -23,7 +23,6 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
 
   private Long id;
   private String name;
-  private String namespace;
   private String description;
   private String cron;
   private Date created;
@@ -36,6 +35,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
   private List<TemplatePropertyMetadata> properties;
+  private AuthorizationConfigurationApi authorization;
 
   public Long getId() {
     return id;
@@ -52,15 +52,6 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
 
   public AlertTemplateApi setName(final String name) {
     this.name = name;
-    return this;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public AlertTemplateApi setNamespace(final String namespace) {
-    this.namespace = namespace;
     return this;
   }
 
@@ -158,6 +149,15 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   public AlertTemplateApi setProperties(
       final List<TemplatePropertyMetadata> properties) {
     this.properties = properties;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuthorization() {
+    return authorization;
+  }
+
+  public AlertTemplateApi setAuthorization(final AuthorizationConfigurationApi authorization) {
+    this.authorization = authorization;
     return this;
   }
 }

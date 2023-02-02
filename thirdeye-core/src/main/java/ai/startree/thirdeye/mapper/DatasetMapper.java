@@ -42,14 +42,15 @@ public interface DatasetMapper {
         .setDimensions(api.getDimensions())
         .setRcaExcludedDimensions(api.getRcaExcludedDimensions())
         ;
-    dto.setNamespace(api.getNamespace());
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
       updateTimeGranularityOnDataset(dto, timeColumn);
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
     });
-
+    optional(api.getAuthorization())
+        .map(ApiBeanMapper::toAuthorizationConfigurationDTO)
+        .ifPresent(dto::setAuthorization);
     return dto;
   }
 
@@ -62,11 +63,12 @@ public interface DatasetMapper {
         .setActive(dto.getActive())
         .setDimensions(dto.getDimensions())
         .setName(dto.getDataset())
-        .setNamespace(dto.getNamespace())
         .setDataSource(optional(dto.getDataSource())
             .map(datasourceName -> new DataSourceApi().setName(datasourceName))
             .orElse(null))
-        .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null));
+        .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null))
+        .setAuthorization(optional(dto.getAuthorization())
+            .map(ApiBeanMapper::toApi).orElse(null));
     optional(dto.getRcaExcludedDimensions()).ifPresent(datasetApi::setRcaExcludedDimensions);
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
         new TimeColumnApi()

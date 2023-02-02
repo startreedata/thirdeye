@@ -163,11 +163,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   protected List<AnomalyDTO> merge(
       final List<AnomalyDTO> operatorAnomalies, final Interval detectionInterval) {
-    if (operatorAnomalies.isEmpty()) {
-      return emptyList();
-    }
-    final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(
-        operatorAnomalies);
+    final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(detectionInterval);
     final List<AnomalyDTO> anomaliesToUpdate = vanishedAnomalies(operatorAnomalies, persistenceAnomalies, detectionInterval);
     // exclude vanished anomalies from merge operation
     persistenceAnomalies.removeAll(anomaliesToUpdate);
@@ -238,31 +234,14 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         .anyMatch(l -> l.getName().equals(OUTDATED_AFTER_REPLAY_LABEL_NAME));
   }
 
-  private List<AnomalyDTO> retrieveRelevantAnomaliesFromDatabase(
-      final List<AnomalyDTO> anomalies) {
+  private List<AnomalyDTO> retrieveRelevantAnomaliesFromDatabase(final Interval detectionInterval) {
     if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
       return emptyList();
     } else if (usage.equals(DetectionPipelineUsage.DETECTION)) {
-      final long minTime = anomalies.stream()
-          .map(AnomalyDTO::getStartTime)
-          .mapToLong(e -> e)
-          .min()
-          .orElseThrow(() -> new RuntimeException(String.format(
-              "When trying to merge anomalies for alert id %s: No startTime in the anomalies.",
-              alertId)));
-
-      final long maxTime = anomalies.stream()
-          .map(AnomalyDTO::getEndTime)
-          .mapToLong(e -> e)
-          .max()
-          .orElseThrow(() -> new RuntimeException(String.format(
-              "When trying to merge anomalies for alert id %s: No endTime in the anomalies.",
-              alertId)));
-
-      final long mergeLowerBound = new DateTime(minTime, chronology).minus(mergeMaxGap)
+      final long mergeLowerBound = new DateTime(detectionInterval.getStart()).minus(mergeMaxGap)
           .minus(1)
           .getMillis();
-      final long mergeUpperBound = new DateTime(maxTime, chronology).plus(mergeMaxGap)
+      final long mergeUpperBound = new DateTime(detectionInterval.getEnd()).plus(mergeMaxGap)
           .plus(1)
           .getMillis();
       requireNonNull(alertId, "Cannot pull existing anomalies with null alertId.");
@@ -341,7 +320,9 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       }
     }
     // add last parent candidate
-    anomaliesToUpdate.add(parentCandidate);
+    if (parentCandidate != null) {
+      anomaliesToUpdate.add(parentCandidate);
+    }
 
     return new ArrayList<>(anomaliesToUpdate);
   }

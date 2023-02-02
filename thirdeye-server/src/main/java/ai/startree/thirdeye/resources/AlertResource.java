@@ -138,17 +138,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
-      final AlertDTO existing,
-      final AlertDTO updated) {
-    // Always set a default cron if not present.
-    // FIXME CYRIL not a good place to do this
-    if (updated.getCron() == null) {
-      updated.setCron(CRON_EVERY_HOUR);
-    }
-  }
-
-  @Override
   protected AlertApi toApi(final AlertDTO dto) {
     return ApiBeanMapper.toApi(dto);
   }

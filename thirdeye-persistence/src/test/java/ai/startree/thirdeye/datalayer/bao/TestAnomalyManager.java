@@ -187,10 +187,10 @@ public class TestAnomalyManager {
 
   @Test
   public void testGetAllAnomaliesForFeedback() {
-    Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
-    Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
+    final Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
+    final Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
 
-    AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(id1);
+    final AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(id1);
     final String feedbackComment = "test feedback";
     final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
         .setComment(feedbackComment)
@@ -211,8 +211,8 @@ public class TestAnomalyManager {
     assertThat(findAnomalyById(filterAnomalies, id2).getFeedback()).isNull();
   }
 
-  private AnomalyDTO findAnomalyById(List<AnomalyDTO> anomalies, Long id) {
-    for (AnomalyDTO anomaly : anomalies) {
+  private AnomalyDTO findAnomalyById(final List<AnomalyDTO> anomalies, final Long id) {
+    for (final AnomalyDTO anomaly : anomalies) {
       if(anomaly.getId().equals(id)) {
         return anomaly;
       }

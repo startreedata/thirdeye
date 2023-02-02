@@ -87,13 +87,13 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
 
   @Override
   public List<AnomalyDTO> findAll() {
-    List<AnomalyDTO> anomalies = super.findAll();
+    final List<AnomalyDTO> anomalies = super.findAll();
     return decorateWithFeedback(anomalies);
   }
 
   @Override
   public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
-    List<AnomalyDTO> anomalies = super.filter(daoFilter);
+    final List<AnomalyDTO> anomalies = super.filter(daoFilter);
     return decorateWithFeedback(anomalies);
   }
 

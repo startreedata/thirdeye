@@ -277,17 +277,16 @@ export const AlertsViewPage: FunctionComponent = () => {
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
         ) {
             // If not in reset flow, assume alert was just created
-            if (resetStatusNotification === null) {
+            resetStatusNotification === null &&
                 autoRefreshNotification === null &&
-                    setAutoRefreshNotification(
-                        notify(
-                            NotificationTypeV1.Info,
-                            t(
-                                "message.looks-like-this-alert-was-just-created-this-page-a"
-                            )
+                setAutoRefreshNotification(
+                    notify(
+                        NotificationTypeV1.Info,
+                        t(
+                            "message.looks-like-this-alert-was-just-created-this-page-a"
                         )
-                    );
-            }
+                    )
+                );
         }
     }, [alert, anomalies]);
     /**

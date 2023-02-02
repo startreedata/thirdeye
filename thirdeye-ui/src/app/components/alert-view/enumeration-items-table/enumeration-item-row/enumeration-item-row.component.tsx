@@ -85,6 +85,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         right: 0,
     };
     tsData.xAxis = {
+        ...tsData.xAxis,
         tickFormatter: (d: string) => {
             return DateTime.fromJSDate(new Date(d), {
                 zone: timezone,
@@ -137,8 +138,12 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                                     )
                                 }
                             >
-                                {!isExpanded && <span>View Details</span>}
-                                {isExpanded && <span>Hide Details</span>}
+                                {!isExpanded && (
+                                    <span>{t("label.view-details")}</span>
+                                )}
+                                {isExpanded && (
+                                    <span>{t("label.hide-details")}</span>
+                                )}
                             </Button>
                         </Grid>
                         <Grid item sm={2} xs={12}>

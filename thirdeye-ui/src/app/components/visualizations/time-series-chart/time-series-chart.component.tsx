@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Typography } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import { ParentSize } from "@visx/responsive";
 import { scaleOrdinal, scaleTime } from "@visx/scale";
 import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
-import { Settings, Zone } from "luxon";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -388,18 +387,6 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
 
         return (
             <div style={{ position: "relative" }}>
-                {height > 200 && (
-                    <Box paddingLeft={5} position="absolute">
-                        <Typography color="textSecondary" variant="caption">
-                            {t("message.times-displayed-in-timezone", {
-                                timezone:
-                                    xAxis?.timezone ??
-                                    (Settings.defaultZone as Zone).name,
-                            })}
-                        </Typography>
-                    </Box>
-                )}
-
                 {events && events.length > 0 && (
                     <EventsChart
                         events={processedEvents}

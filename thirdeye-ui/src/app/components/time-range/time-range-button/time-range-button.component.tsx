@@ -13,14 +13,16 @@
  * the License.
  */
 import { Button, ButtonGroup, Popover } from "@material-ui/core";
-import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TooltipV1 } from "../../../platform/components";
 import { formatTimeRangeDuration } from "../../../utils/time-range/time-range.util";
-import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
+import {
+    timezoneStringShort,
+    WEEK_IN_MILLISECONDS,
+} from "../../../utils/time/time.util";
 import { TimeRangeSelectorPopoverContent } from "../time-range-selector-popover-content/time-range-selector-popover-content.component";
 import { TimeRangeButtonProps } from "./time-range-button.interfaces";
 
@@ -101,11 +103,11 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
 
                 <Button
                     color={btnGroupColor}
-                    startIcon={<CalendarTodayIcon />}
                     variant="outlined"
                     onClick={handleTimeRangeSelectorClick}
                 >
-                    {formatTimeRangeDuration(timeRangeDuration, timezone)}
+                    {formatTimeRangeDuration(timeRangeDuration, timezone)} (
+                    {timezoneStringShort(timezone)})
                 </Button>
                 {!hideQuickExtend && (
                     <Button

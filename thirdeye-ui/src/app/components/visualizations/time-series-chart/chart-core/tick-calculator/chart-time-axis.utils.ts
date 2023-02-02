@@ -51,11 +51,16 @@ export const tickFormat = (dateLuxon: DateTime): string => {
     } else if (timeMinute(dateLuxon) < dateLuxon) {
         return dateLuxon.toLocaleString({ second: "2-digit" });
     } else if (timeHour(dateLuxon) < dateLuxon) {
-        return dateLuxon.toLocaleString({ hour: "2-digit", minute: "2-digit" });
+        return dateLuxon.toLocaleString({
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZoneName: "short",
+        });
     } else if (timeDay(dateLuxon) < dateLuxon) {
         return dateLuxon.toLocaleString({
             hour: "2-digit",
             hour12: true,
+            timeZoneName: "short",
         });
     } else if (timeMonth(dateLuxon) < dateLuxon) {
         if (timeWeekday(0)(dateLuxon) < dateLuxon) {

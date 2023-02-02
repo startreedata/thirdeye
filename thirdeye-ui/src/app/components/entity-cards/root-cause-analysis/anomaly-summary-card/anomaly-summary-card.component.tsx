@@ -23,6 +23,7 @@ import {
 } from "../../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../../platform/utils";
 import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
+import { timezoneStringShort } from "../../../../utils/time/time.util";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnomalySummaryCardDetail } from "./anomaly-summary-card-deatil.component";
@@ -123,7 +124,10 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = ({
                         {/* Start */}
                         <Grid item>
                             <AnomalySummaryCardDetail
-                                label={t("label.start")}
+                                label={
+                                    t("label.start") +
+                                    ` (${timezoneStringShort(timezone)})`
+                                }
                                 value={formatDateAndTimeV1(
                                     uiAnomaly.startTimeVal,
                                     timezone

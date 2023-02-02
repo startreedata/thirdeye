@@ -278,6 +278,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         ) {
             // If not in reset flow, assume alert was just created
             resetStatusNotification === null &&
+                autoRefreshNotification === null &&
                 setAutoRefreshNotification(
                     notify(
                         NotificationTypeV1.Info,
@@ -343,6 +344,11 @@ export const AlertsViewPage: FunctionComponent = () => {
                 if (autoRefreshNotification) {
                     removeNotification(autoRefreshNotification);
                     setAutoRefreshNotification(null);
+                }
+
+                if (resetStatusNotification) {
+                    removeNotification(resetStatusNotification);
+                    setResetStatusNotification(null);
                 }
 
                 if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {

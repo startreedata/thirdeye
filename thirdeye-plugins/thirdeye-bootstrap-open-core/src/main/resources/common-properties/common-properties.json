@@ -40,7 +40,7 @@
     "description": "Ignore anomalies at the start of the dataset.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "BOOLEAN",
     "defaultIsNull": null
   },
   {
@@ -84,7 +84,7 @@
     "description": "A mapping of `{DAY: [hours]}`. Anomalies happening on these timeframes are ignored if timeOfWeekIgnore is true. Example: `{\"FRIDAY\": [22, 23], \"SATURDAY\": [0, 1, 2]}`",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "OBJECT",
     "defaultIsNull": null
   },
   {
@@ -103,7 +103,7 @@
       "SUNDAY"
     ],
     "multiselect": true,
-    "jsonType": "STRING",
+    "jsonType": "ARRAY",
     "defaultIsNull": null
   },
   {
@@ -136,7 +136,7 @@
     "description": "Whether to ignore anomalies that happen during events.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "BOOLEAN",
     "defaultIsNull": null
   },
   {
@@ -169,7 +169,7 @@
     "description": "List of event types to filter by. Example: `[\"HOLIDAY\", \"DEPLOYMENT\"]`. `[]` or `null` means no filtering.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "ARRAY",
     "defaultIsNull": null
   },
   {
@@ -191,7 +191,7 @@
     "description": "Whether to ignore anomalies that don't meet the guardrail threshold.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "BOOLEAN",
     "defaultIsNull": null
   },
   {
@@ -202,7 +202,7 @@
     "description": "Maximum threshold of guardrailMetric. If `-1`, no maximum threshold is applied.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -213,7 +213,7 @@
     "description": "Minimum threshold of the guardrail metric. If `-1`, no minimum threshold is applied.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -224,7 +224,7 @@
     "description": "A list of hours. Anomalies happening on these days are ignored if timeOfWeekIgnore is true. Example: `[0,1,2,23]`",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "ARRAY",
     "defaultIsNull": null
   },
   {
@@ -249,7 +249,7 @@
     "description": "Whether to ignore anomalies that don't meet the impact threshold.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "BOOLEAN",
     "defaultIsNull": null
   },
   {
@@ -260,7 +260,7 @@
     "description": "Impact filter threshold.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -352,7 +352,7 @@
     "description": "Maximum number of timeseries point to fetch.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "INTEGER",
     "defaultIsNull": null
   },
   {
@@ -415,10 +415,10 @@
     "defaultValue": null,
     "min": null,
     "max": null,
-    "description": "",
+    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the percentage difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with replayReNotifyAbsoluteThreshold.\n Both thresholds have to pass to get renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -426,10 +426,10 @@
     "defaultValue": null,
     "min": null,
     "max": null,
-    "description": "",
+    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the absolute difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with replayReNotifyPercentageThreshold.\n Both thresholds have to pass to be renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -451,7 +451,7 @@
     "description": "The sensitivity of the model. The smaller, the less anomaly are detected.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -462,7 +462,7 @@
     "description": "Filter threshold maximum. If `-1`, no maximum threshold is applied.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -473,7 +473,7 @@
     "description": "Filter threshold minimum. If `-1`, no minimum threshold is applied.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "NUMBER",
     "defaultIsNull": null
   },
   {
@@ -484,7 +484,7 @@
     "description": "Whether to ignore anomalies that don't meet the thresholdFilter min and max. Example: set `thresholdFilterMin = 10` to ignore anomalies when the metric is smaller than 10. Can help ignore anomalies happening in low data regimes.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "BOOLEAN",
     "defaultIsNull": null
   },
   {
@@ -528,7 +528,7 @@
     "description": "Whether to ignore time periods given in dayHoursOfWeek, daysOfWeek and hoursOfDay.",
     "options": null,
     "multiselect": false,
-    "jsonType": "STRING",
+    "jsonType": "BOOLEAN",
     "defaultIsNull": null
   }
 ]

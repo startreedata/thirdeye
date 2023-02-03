@@ -17,4 +17,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 
 public interface EnumerationItemManager extends AbstractManager<EnumerationItemDTO> {
 
+  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source);
+
 }

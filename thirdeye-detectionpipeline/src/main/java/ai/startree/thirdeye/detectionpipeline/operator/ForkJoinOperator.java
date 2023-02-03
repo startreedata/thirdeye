@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
@@ -28,8 +27,6 @@ import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ForkJoinOperator extends DetectionPipelineOperator {
@@ -118,28 +115,11 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   }
 
   private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {
-    requireNonNull(source.getName(), "enumeration item name does not exist!");
-    final List<EnumerationItemDTO> byName = detectionPipelineContext
-        .getApplicationContext().getEnumerationItemManager().findByName(source.getName());
-
-    final Optional<EnumerationItemDTO> filtered = optional(byName).orElse(emptyList()).stream()
-        .filter(e -> matches(source, e))
-        .findFirst();
-
-    if (filtered.isEmpty()) {
-      /* Create new */
-      detectionPipelineContext.getApplicationContext().getEnumerationItemManager().save(source);
-      requireNonNull(source.getId(), "expecting a generated ID");
-      return source;
-    }
-
-    return filtered.get();
+    return detectionPipelineContext.getApplicationContext()
+        .getEnumerationItemManager()
+        .findExistingOrCreate(source);
   }
 
-  private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
-    return Objects.equals(o1.getName(), o2.getName())
-        && Objects.equals(o1.getParams(), o2.getParams());
-  }
 
   @Override
   public String getOperatorName() {

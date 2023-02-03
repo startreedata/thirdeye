@@ -47,6 +47,11 @@ public class DatasetConfigDTO extends AbstractDTO {
    */
   private String completenessDelay;
   /**
+   * ISO-8601 period. Eg P7D. At detection run, TE re-runs the detection starting from min(lastTimestamp,
+   * endTime-replayPeriod). Used to manage data mutability.
+   */
+  private String mutabilityPeriod;
+  /**
    * Dimensions to exclude from RCA algorithm runs.
    */
   private Templatable<List<String>> rcaExcludedDimensions;
@@ -370,5 +375,14 @@ public class DatasetConfigDTO extends AbstractDTO {
           (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit) : null;
     }
     return bucketTimeGranularity;
+  }
+
+  public String getMutabilityPeriod() {
+    return mutabilityPeriod;
+  }
+
+  public DatasetConfigDTO setMutabilityPeriod(final String mutabilityPeriod) {
+    this.mutabilityPeriod = mutabilityPeriod;
+    return this;
   }
 }

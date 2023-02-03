@@ -22,7 +22,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.util.TimeUtils;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -74,8 +73,6 @@ public class AlertDetectionIntervalCalculator {
 
   /**
    * Applies delay and granularity flooring to the task start and end.
-   *
-   *
    * Notes:
    * Assumes that the caller of this method is setting the corrected endTime as the alert
    * lastTimestamp once the alert pipeline has run successfully.
@@ -93,8 +90,7 @@ public class AlertDetectionIntervalCalculator {
   }
 
   @NonNull
-  @VisibleForTesting
-  protected static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
+  private static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
       final long taskEndMillis, final AlertTemplateDTO templateWithProperties) {
     final Chronology chronology = optional(getDateTimeZone(templateWithProperties))
         .orElse(Constants.DEFAULT_CHRONOLOGY);
@@ -129,12 +125,10 @@ public class AlertDetectionIntervalCalculator {
     }
 
     // apply granularity correction
-    // granularity correction is compatible with datetimezone, but UTC is hardcoded above
-    // given that grouping is performed by Pinot, it is UTC grouping - other dbs may manage timezone-aware grouping
     final Period granularity = getGranularity(templateWithProperties);
     if (granularity != null) {
       // if alert has already run: start = lastTimestamp = correctedEnd = floor(end) and floor(floor(x)) = floor(x)
-      // if alert has never run: floor is safe to run to avoid most-left bucket cut
+      // if alert has never run: floor prevents leftmost bucket cut
       correctedStart = TimeUtils.floorByPeriod(correctedStart, granularity);
       correctedEnd = TimeUtils.floorByPeriod(correctedEnd, granularity);
       LOG.info(

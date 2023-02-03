@@ -19,4 +19,5 @@ export interface EnumerationItemRowProps {
     detectionEvaluation: DetectionEvaluation;
     anomalies: Anomaly[];
     onDeleteClick?: () => void;
+    timezone: string | undefined;
 }

@@ -41,6 +41,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     detectionEvaluation,
     anomalies,
     onDeleteClick,
+    timezone,
 }) => {
     const { t } = useTranslation();
     const [expandedChartHeight, setExpandedChartHeight] =
@@ -52,7 +53,9 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     const tsData = generateChartOptionsForAlert(
         detectionEvaluation,
         anomalies,
-        t
+        t,
+        undefined,
+        timezone
     );
     const tsDataForExpanded = {
         ...tsData,
@@ -70,8 +73,11 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         right: 0,
     };
     tsData.xAxis = {
+        ...tsData.xAxis,
         tickFormatter: (d: string) => {
-            return DateTime.fromJSDate(new Date(d)).toFormat("MMM dd");
+            return DateTime.fromJSDate(new Date(d), {
+                zone: timezone,
+            }).toFormat("MMM dd");
         },
     };
 

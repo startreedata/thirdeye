@@ -40,7 +40,7 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
    * Dimensions to exclude from RCA algorithm runs.
    */
   private Templatable<List<String>> rcaExcludedDimensions;
-  private AuthorizationConfigurationApi authorization;
+  private AuthorizationConfigurationApi auth;
 
   public Long getId() {
     return id;
@@ -144,12 +144,12 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
     return this;
   }
 
-  public AuthorizationConfigurationApi getAuthorization() {
-    return authorization;
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
   }
 
-  public DatasetApi setAuthorization(final AuthorizationConfigurationApi authorization) {
-    this.authorization = authorization;
+  public DatasetApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

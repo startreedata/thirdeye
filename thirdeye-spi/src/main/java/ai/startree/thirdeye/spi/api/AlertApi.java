@@ -31,7 +31,7 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
   private Date updated;
   private UserApi owner;
   private List<SubscriptionGroupApi> subscriptionGroups;
-  private AuthorizationConfigurationApi authorization;
+  private AuthorizationConfigurationApi auth;
 
 
   public Long getId() {
@@ -144,12 +144,12 @@ public class AlertApi implements ThirdEyeCrudApi<AlertApi> {
     return this;
   }
 
-  public AuthorizationConfigurationApi getAuthorization() {
-    return authorization;
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
   }
 
-  public AlertApi setAuthorization(final AuthorizationConfigurationApi authorization) {
-    this.authorization = authorization;
+  public AlertApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

@@ -35,7 +35,7 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
   @Deprecated // use propertiesMetadata
   private Map<String, @Nullable Object> defaultProperties;
   private List<TemplatePropertyMetadata> properties;
-  private AuthorizationConfigurationApi authorization;
+  private AuthorizationConfigurationApi auth;
 
   public Long getId() {
     return id;
@@ -152,12 +152,12 @@ public class AlertTemplateApi implements ThirdEyeCrudApi<AlertTemplateApi> {
     return this;
   }
 
-  public AuthorizationConfigurationApi getAuthorization() {
-    return authorization;
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
   }
 
-  public AlertTemplateApi setAuthorization(final AuthorizationConfigurationApi authorization) {
-    this.authorization = authorization;
+  public AlertTemplateApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

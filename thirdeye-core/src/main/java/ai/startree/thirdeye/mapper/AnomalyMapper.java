@@ -94,7 +94,7 @@ public interface AnomalyMapper {
         )
         .setEnumerationItem(EnumerationItemMapper.INSTANCE.toApi(dto.getEnumerationItem()))
         .setFeedback(toAnomalyFeedbackApi(dto))
-        .setAuthorization(optional(dto.getAuthorization())
+        .setAuth(optional(dto.getAuth())
             .map(ApiBeanMapper::toApi).orElse(null));
 
     if (dto.getMetricUrn() != null) {

@@ -48,9 +48,9 @@ public interface DatasetMapper {
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
     });
-    optional(api.getAuthorization())
+    optional(api.getAuth())
         .map(ApiBeanMapper::toAuthorizationConfigurationDTO)
-        .ifPresent(dto::setAuthorization);
+        .ifPresent(dto::setAuth);
     return dto;
   }
 
@@ -67,7 +67,7 @@ public interface DatasetMapper {
             .map(datasourceName -> new DataSourceApi().setName(datasourceName))
             .orElse(null))
         .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null))
-        .setAuthorization(optional(dto.getAuthorization())
+        .setAuth(optional(dto.getAuth())
             .map(ApiBeanMapper::toApi).orElse(null));
     optional(dto.getRcaExcludedDimensions()).ifPresent(datasetApi::setRcaExcludedDimensions);
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(

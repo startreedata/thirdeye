@@ -28,7 +28,7 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
   private String type;
   private Map<String, Object> properties;
   private List<DataSourceMetaApi> metaList;
-  private AuthorizationConfigurationApi authorization;
+  private AuthorizationConfigurationApi auth;
 
   @Override
   public Long getId() {
@@ -79,12 +79,12 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
     return this;
   }
 
-  public AuthorizationConfigurationApi getAuthorization() {
-    return authorization;
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
   }
 
-  public DataSourceApi setAuthorization(final AuthorizationConfigurationApi authorization) {
-    this.authorization = authorization;
+  public DataSourceApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 

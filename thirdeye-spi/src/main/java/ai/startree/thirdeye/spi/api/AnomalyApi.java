@@ -59,7 +59,7 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
 
   private EnumerationItemApi enumerationItem;
   private List<AnomalyLabelApi> anomalyLabels;
-  private AuthorizationConfigurationApi authorization;
+  private AuthorizationConfigurationApi auth;
 
   public Long getId() {
     return id;
@@ -275,12 +275,12 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
     return this;
   }
 
-  public AuthorizationConfigurationApi getAuthorization() {
-    return authorization;
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
   }
 
-  public AnomalyApi setAuthorization(final AuthorizationConfigurationApi authorization) {
-    this.authorization = authorization;
+  public AnomalyApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

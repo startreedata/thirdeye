@@ -48,7 +48,7 @@ public interface AlertMapper {
             .setPrincipal(dto.getCreatedBy()))
         .setCreated(dto.getCreateTime())
         .setUpdated(dto.getUpdateTime())
-        .setAuthorization(optional(dto.getAuthorization())
+        .setAuth(optional(dto.getAuth())
             .map(ApiBeanMapper::toApi).orElse(null));
   }
 
@@ -76,9 +76,9 @@ public interface AlertMapper {
         .map(UserApi::getPrincipal)
         .ifPresent(dto::setCreatedBy);
 
-    optional(api.getAuthorization())
+    optional(api.getAuth())
         .map(ApiBeanMapper::toAuthorizationConfigurationDTO)
-        .ifPresent(dto::setAuthorization);
+        .ifPresent(dto::setAuth);
     return dto;
   }
 }

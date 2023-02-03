@@ -30,7 +30,7 @@ public abstract class AbstractDTO implements Serializable {
   private String createdBy;
   private Timestamp updateTime;
   private String updatedBy;
-  private AuthorizationConfigurationDTO authorization;
+  private AuthorizationConfigurationDTO auth;
 
   public Long getId() {
     return id;
@@ -86,12 +86,12 @@ public abstract class AbstractDTO implements Serializable {
     return this;
   }
 
-  public AuthorizationConfigurationDTO getAuthorization() {
-    return authorization;
+  public AuthorizationConfigurationDTO getAuth() {
+    return auth;
   }
 
-  public AbstractDTO setAuthorization(AuthorizationConfigurationDTO authorization) {
-    this.authorization = authorization;
+  public AbstractDTO setAuth(AuthorizationConfigurationDTO auth) {
+    this.auth = auth;
     return this;
   }
 

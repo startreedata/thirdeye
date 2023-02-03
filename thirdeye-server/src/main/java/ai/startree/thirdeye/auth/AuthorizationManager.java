@@ -108,7 +108,7 @@ public class AuthorizationManager {
   static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
     return ResourceIdentifier.from(
         optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
-        optional(dto.getAuthorization())
+        optional(dto.getAuth())
             .map(AuthorizationConfigurationDTO::getNamespace).orElse(DEFAULT_NAMESPACE),
         optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
             .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE));

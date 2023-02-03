@@ -560,7 +560,11 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
                         name="redirect_uri"
                         value={location.origin}
                     />
-                    <input readOnly name="scope" value="openid email profile" />
+                    <input
+                        readOnly
+                        name="scope"
+                        value="openid email profile groups"
+                    />
                     {oidcIssuerAudiencePath && (
                         <input
                             readOnly

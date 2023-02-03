@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyLabelApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -35,6 +36,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -167,5 +169,14 @@ public abstract class ApiBeanMapper {
 
   public static EnumerationItemApi toApi(final EnumerationItemDTO dto) {
     return EnumerationItemMapper.INSTANCE.toApi(dto);
+  }
+
+  public static AuthorizationConfigurationDTO toAuthorizationConfigurationDTO(
+      final AuthorizationConfigurationApi api) {
+    return AuthorizationConfigurationMapper.INSTANCE.toDto(api);
+  }
+
+  public static AuthorizationConfigurationApi toApi(final AuthorizationConfigurationDTO dto) {
+    return AuthorizationConfigurationMapper.INSTANCE.toApi(dto);
   }
 }

@@ -16,12 +16,15 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -87,9 +90,14 @@ public class SubscriptionGroupResource extends
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
       ensure(subscriptionGroupManager.findByPredicate(
-          Predicate.EQ("name", api.getName())).size() == 0,
-          ERR_DUPLICATE_NAME);
+              Predicate.EQ("name", api.getName())).size() == 0, ERR_DUPLICATE_NAME);
     }
+    optional(api.getAlertAssociations())
+        .ifPresent(l -> l.forEach(alertAssociation -> {
+          final AlertApi alert = alertAssociation.getAlert();
+          ensureExists(alert, "alert missing in alert association");
+          ensureExists(alert.getId(), "alert.id is missing in alert association");
+        }));
   }
 
   @Override

@@ -349,8 +349,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     final double existingCurrentVal = existingA.getAvgCurrentVal();
     final double newCurrentVal = newA.getAvgCurrentVal();
     final boolean percentageHasChanged = reNotifyPercentageThreshold >= 0
-        && computeValueChangePercentage(existingCurrentVal, newCurrentVal)
-        > reNotifyPercentageThreshold;
+        && ((existingCurrentVal == 0 && newCurrentVal != 0) || computeValueChangePercentage(existingCurrentVal, newCurrentVal)
+        > reNotifyPercentageThreshold);
 
     final boolean absoluteHasChanged = reNotifyAbsoluteThreshold >= 0
         && Math.abs(existingCurrentVal - newCurrentVal) > reNotifyAbsoluteThreshold;

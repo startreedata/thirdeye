@@ -17,4 +17,5 @@ import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
 export interface EnumerationItemsTableProps {
     detectionEvaluations: DetectionEvaluation[];
     onDeleteClick: (detectionEvaluation: DetectionEvaluation) => void;
+    timezone: string | undefined;
 }

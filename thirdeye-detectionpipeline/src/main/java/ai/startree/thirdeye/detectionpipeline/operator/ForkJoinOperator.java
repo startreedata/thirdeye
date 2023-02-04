@@ -22,6 +22,7 @@ import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -40,6 +41,12 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   private PlanNode root;
   private PlanNode combiner;
   private DetectionPipelineContext detectionPipelineContext;
+
+  private static List<AlertDTO> singletonAlertList(final Long alertId) {
+    final AlertDTO alert = new AlertDTO();
+    alert.setId(alertId);
+    return List.of(alert);
+  }
 
   @Override
   public void init(final OperatorContext context) {
@@ -97,21 +104,26 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   }
 
   private List<EnumerationItemDTO> prepareEnumerationItems(
-      List<EnumerationItemDTO> enumerationItems) {
+      final List<EnumerationItemDTO> enumerationItems) {
+    // Add alert id to enumeration items
+    final Long alertId = detectionPipelineContext.getAlertId();
+    final var updated = enumerationItems.stream()
+        .map(e -> e.setAlerts(singletonAlertList(alertId)))
+        .collect(Collectors.toList());
+
     final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
         "Detection pipeline usage is not set");
+
     if (usage.equals(DetectionPipelineUsage.DETECTION)) {
-      enumerationItems = enumerationItems.stream()
+      return updated.stream()
           .map(this::findExistingOrCreate)
           .collect(Collectors.toList());
     } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
       // do nothing - no need to persist enumerationItems nor fetch existing one downstream
-    } else {
-      // don't remove - put here to ensure it breaks if an enum is added one day
-      throw new UnsupportedOperationException(
-          "DetectionPipelineUsage not implemented: " + usage);
+      return updated;
     }
-    return enumerationItems;
+    // don't remove - put here to ensure it breaks if an enum is added one day
+    throw new UnsupportedOperationException("DetectionPipelineUsage not implemented: " + usage);
   }
 
   private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {
@@ -119,7 +131,6 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
         .getEnumerationItemManager()
         .findExistingOrCreate(source);
   }
-
 
   @Override
   public String getOperatorName() {

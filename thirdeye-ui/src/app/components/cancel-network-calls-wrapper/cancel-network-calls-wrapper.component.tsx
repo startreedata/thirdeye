@@ -35,9 +35,13 @@ export const CancelNetworkCallsWrapper: FunctionComponent = ({ children }) => {
     const [cancelTokenSource, setCancelTokenSource] =
         useState<CancelTokenSource>(getNewCancelToken());
 
+    const reloadCancelToken = (): void => {
+        setCancelTokenSource(getNewCancelToken());
+    };
+
     const cancelApiCalls = (): void => {
         cancelTokenSource.cancel("cancelApiCalls invoked");
-        setCancelTokenSource(getNewCancelToken());
+        reloadCancelToken();
     };
 
     useLayoutEffect(() => {
@@ -60,8 +64,17 @@ export const CancelNetworkCallsWrapper: FunctionComponent = ({ children }) => {
 
         previousPath.current = location.pathname;
 
+        // TODO: Remove
+        // axios.interceptors.request.use((c) => {
+        //     console.log(
+        //         `[${shouldCancel}] ${c.url}\nF:${previousPath.current}\nT:${location.pathname}`
+        //     );
+
+        //     return c;
+        // });
+
         return () => {
-            shouldCancel && cancelApiCalls();
+            shouldCancel ? cancelApiCalls() : reloadCancelToken();
         };
     }, [location.pathname]);
 

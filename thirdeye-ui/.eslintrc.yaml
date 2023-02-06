@@ -51,7 +51,9 @@ rules:
     # No lingering console logs
     no-console:
         - error
-        - allow: ["error"]
+        - allow:
+              - info
+              - error
 
     # Require type-safe equality operators
     eqeqeq:

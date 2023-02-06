@@ -2,7 +2,7 @@
 
 # ThirdEye UI
 
-[![build status](https://ci.startreedata.io/api/v1/teams/startree-ui-projects/pipelines/thirdeye-ui-master/jobs/thirdeye-ui-merge/badge)](https://ci.startreedata.io/teams/startree-ui-projects/pipelines/thirdeye-ui-master/jobs/thirdeye-ui-merge) [![publish status](https://ci.startreedata.io/api/v1/teams/startree-ui-publish/pipelines/thirdeye-ui-publish-master/jobs/mythirdeye-ui-publish/badge?title=publish)](https://ci.startreedata.io/teams/startree-ui-publish/pipelines/thirdeye-ui-publish-master/jobs/thirdeye-ui-publish)
+[![build status](https://ci.startreedata.io/api/v1/teams/startree-ui-projects/pipelines/thirdeye-ui-master/jobs/thirdeye-ui-merge/badge)](https://ci.startreedata.io/teams/startree-ui-projects/pipelines/thirdeye-ui-master/jobs/thirdeye-ui-merge) [![publish status](https://ci.startreedata.io/api/v1/teams/startree-ui-publish/pipelines/thirdeye-ui-publish-master/jobs/thirdeye-ui-publish/badge?title=publish)](https://ci.startreedata.io/teams/startree-ui-publish/pipelines/thirdeye-ui-publish-master/jobs/thirdeye-ui-publish)
 
 <br/>
 

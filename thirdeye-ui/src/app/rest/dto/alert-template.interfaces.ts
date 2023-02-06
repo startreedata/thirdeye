@@ -21,9 +21,14 @@ export interface MetadataProperty {
     defaultValue?: PropertyConfigValueTypes;
     defaultIsNull: boolean;
     multiselect: boolean;
+    options?: string[];
 
     /**
      * See spec https://json-schema.org/understanding-json-schema/reference/type.html
+     *
+     * See https://github.com/startreedata/thirdeye/blob/master/thirdeye-spi/src
+     * /main/java/ai/startree/thirdeye/spi/template/TemplatePropertyMetadata.java#L143
+     * for the possible types with the backend
      */
     jsonType?:
         | "STRING"

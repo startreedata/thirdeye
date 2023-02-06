@@ -65,13 +65,14 @@ export const CancelNetworkCallsWrapper: FunctionComponent = ({ children }) => {
         previousPath.current = location.pathname;
 
         // TODO: Remove
-        // axios.interceptors.request.use((c) => {
-        //     console.log(
-        //         `[${shouldCancel}] ${c.url}\nF:${previousPath.current}\nT:${location.pathname}`
-        //     );
+        axios.interceptors.request.use((c) => {
+            // console.log(
+            //     `[shouldCancel: ${shouldCancel}] API: ${c.url}\n
+            // From: ${previousPath.current}\nTo:   ${location.pathname}`
+            // );
 
-        //     return c;
-        // });
+            return c;
+        });
 
         return () => {
             shouldCancel ? cancelApiCalls() : reloadCancelToken();

@@ -50,7 +50,6 @@ public class ForkJoinPipelineBuilder {
           .setPlanNodeBean(clonePlanNodeBean(enumerationItem.getParams(), context.getPlanNodeBean()))
           .setPipelinePlanNodes(clonedPipelinePlanNodes);
       clonedContext.getDetectionPipelineContext().setEnumerationItem(enumerationItem);
-      clonedContext.getDetectionPipelineContext().setAnomalyAuth(enumerationItem.getAuth());
 
       return PlanNodeFactory.build(sourceNode.getClass(), clonedContext);
     } catch (final ReflectiveOperationException e) {

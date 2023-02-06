@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import java.util.List;
@@ -28,7 +27,6 @@ public class DetectionPipelineContext {
   private EnumerationItemDTO enumerationItem;
   private DetectionPipelineUsage usage;
   private Long alertId;
-  private AuthorizationConfigurationDTO anomalyAuth;
 
   public ApplicationContext getApplicationContext() {
     return applicationContext;
@@ -84,15 +82,6 @@ public class DetectionPipelineContext {
 
   public DetectionPipelineContext setAlertId(final Long alertId) {
     this.alertId = alertId;
-    return this;
-  }
-
-  public AuthorizationConfigurationDTO getAnomalyAuth() {
-    return anomalyAuth;
-  }
-
-  public DetectionPipelineContext setAnomalyAuth(final AuthorizationConfigurationDTO auth) {
-    this.anomalyAuth = auth;
     return this;
   }
 }

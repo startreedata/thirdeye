@@ -33,7 +33,6 @@ import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
@@ -68,7 +67,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private Optional<String> anomalyMetric;
   private Optional<String> anomalyDataset;
   private Optional<String> anomalySource;
-  private AuthorizationConfigurationDTO anomalyAuth;
 
   public AnomalyDetectorOperator() {
     super();
@@ -87,7 +85,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
         .getDetectionPipelineContext();
     alertId = detectionPipelineContext.getAlertId();
-    anomalyAuth = detectionPipelineContext.getAnomalyAuth();
     enumerationItemRef = prepareEnumerationItemRef(detectionPipelineContext);
     anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
         .map(Templatable::value)
@@ -209,7 +206,6 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     anomaly.setCreateTime(new Timestamp(System.currentTimeMillis()));
     anomaly.setDetectionConfigId(alertId);
     anomaly.setEnumerationItem(enumerationItemRef);
-    anomaly.setAuth(anomalyAuth);
     anomalyMetric.ifPresent(anomaly::setMetric);
     anomalyDataset.ifPresent(anomaly::setCollection);
     anomalySource.ifPresent(anomaly::setSource);

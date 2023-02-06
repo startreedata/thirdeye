@@ -116,19 +116,14 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                     <AlertTemplateFormField
                         item={item}
                         key={item.key}
-                        textFieldProps={{
-                            inputProps: { tabIndex: idx + 1 },
-                            placeholder: t("label.add-property-value", {
-                                key: item.key,
-                            }),
-                            onChange: (e) => {
-                                handlePropertyValueChange(
-                                    item.key,
-                                    e.currentTarget.value
-                                );
-                            },
-                        }}
+                        placeholder={t("label.add-property-value", {
+                            key: item.key,
+                        })}
+                        tabIndex={idx + 1}
                         tooltipText={item.metadata.description}
+                        onChange={(selected) => {
+                            handlePropertyValueChange(item.key, selected);
+                        }}
                     />
                 ))}
                 {!showMore && optionalKeys.length > 0 && (
@@ -172,21 +167,19 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                             <AlertTemplateFormField
                                 item={item}
                                 key={item.key}
-                                textFieldProps={{
-                                    inputProps: {
-                                        tabIndex: requiredKeys.length + idx + 1,
-                                    },
-                                    placeholder: item.metadata.defaultValue
+                                placeholder={
+                                    item.metadata.defaultValue
                                         ? item.metadata.defaultValue.toString()
-                                        : "",
-                                    onChange: (e) => {
-                                        handlePropertyValueChange(
-                                            item.key,
-                                            e.currentTarget.value
-                                        );
-                                    },
-                                }}
+                                        : ""
+                                }
+                                tabIndex={requiredKeys.length + idx + 1}
                                 tooltipText={item.metadata.description}
+                                onChange={(selected) => {
+                                    handlePropertyValueChange(
+                                        item.key,
+                                        selected
+                                    );
+                                }}
                             />
                         ))}
                     </>

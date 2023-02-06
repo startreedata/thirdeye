@@ -146,7 +146,7 @@ function AlertTemplate({
                         target="_blank"
                         onClick={(e: MouseEvent<HTMLElement>) => {
                             // The link to create a new alert template
-                            // should not able able to actually selected
+                            // should not be able to actually selected
                             e.preventDefault();
                             e.stopPropagation();
                             window.open(

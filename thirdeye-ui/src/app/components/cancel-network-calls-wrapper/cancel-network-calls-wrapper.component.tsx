@@ -14,7 +14,12 @@
  */
 
 import axios, { CancelTokenSource } from "axios";
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, {
+    FunctionComponent,
+    useLayoutEffect,
+    useRef,
+    useState,
+} from "react";
 import { useLocation } from "react-router-dom";
 import type { CancelNetworkCallsContextProps } from "./cancel-network-calls-wrapper.interfaces";
 import {
@@ -25,6 +30,7 @@ import {
 export const CancelNetworkCallsWrapper: FunctionComponent = ({ children }) => {
     const [interceptorId, setInterceptorId] = useState<number | null>();
     const location = useLocation();
+    const previousPath = useRef<string>(location.pathname); // Will always have the previous value
 
     const [cancelTokenSource, setCancelTokenSource] =
         useState<CancelTokenSource>(getNewCancelToken());
@@ -46,8 +52,16 @@ export const CancelNetworkCallsWrapper: FunctionComponent = ({ children }) => {
     }, [cancelTokenSource]);
 
     useLayoutEffect(() => {
+        // Do not Cancel API calls on redirect IF new path is a child of the existing path
+        // (eg: /alerts/all to /alerts/all/stats). This would also cover the case for same path
+        const shouldCancel = !location.pathname.startsWith(
+            previousPath.current
+        );
+
+        previousPath.current = location.pathname;
+
         return () => {
-            cancelApiCalls();
+            shouldCancel && cancelApiCalls();
         };
     }, [location.pathname]);
 

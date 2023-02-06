@@ -26,6 +26,7 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
   private String description;
   private Map<String, Object> params;
   private List<AlertApi> alerts;
+  private AuthorizationConfigurationApi auth;
 
   @Override
   public Long getId() {
@@ -71,6 +72,15 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
 
   public EnumerationItemApi setAlerts(final List<AlertApi> alerts) {
     this.alerts = alerts;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
+  }
+
+  public EnumerationItemApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

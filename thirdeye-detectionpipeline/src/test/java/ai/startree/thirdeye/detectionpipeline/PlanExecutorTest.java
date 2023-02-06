@@ -165,7 +165,7 @@ public class PlanExecutorTest {
         System.currentTimeMillis(),
         DateTimeZone.UTC);
     final DetectionPipelineContext runTimeContext = new DetectionPipelineContext()
-        .setUsage(DetectionPipelineUsage.DETECTION)
+        .setUsage(DetectionPipelineUsage.EVALUATION)
         .setApplicationContext(planExecutor.applicationContext)
         .setDetectionInterval(detectionInterval);
     final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,

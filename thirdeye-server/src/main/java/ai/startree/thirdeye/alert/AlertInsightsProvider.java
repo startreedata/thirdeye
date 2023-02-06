@@ -234,7 +234,15 @@ public class AlertInsightsProvider {
       return Period.years(4);
     }
     final long granularityMillis = alertGranularity.toStandardDuration().getMillis();
-    if (granularityMillis < Period.hours(1).toStandardDuration().getMillis()) {
+    if (granularityMillis < Period.millis(100).toStandardDuration().getMillis()) {
+      return Period.minutes(15);
+    } else if (granularityMillis < Period.seconds(1).toStandardDuration().getMillis()) {
+      return Period.hours(2);
+    } else if (granularityMillis < Period.seconds(15).toStandardDuration().getMillis()) {
+      return Period.days(2);
+    } else if (granularityMillis < Period.minutes(1).toStandardDuration().getMillis()) {
+      return Period.weeks(2);
+    } else if (granularityMillis < Period.hours(1).toStandardDuration().getMillis()) {
       return Period.months(1);
     } else if (granularityMillis < Period.days(1).toStandardDuration().getMillis()) {
       return Period.months(6);

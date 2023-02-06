@@ -37,6 +37,7 @@ import {
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 import {
     createAlertEvaluation,
+    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
@@ -70,6 +71,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     const { notify } = useNotificationProviderV1();
 
     const {
+        evaluation,
         getEvaluation,
         errorMessages: getEvaluationRequestErrors,
         status: getEvaluationStatus,
@@ -125,7 +127,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         const timeseriesConfiguration = generateChartOptionsForAlert(
             detectionEvaluations[0],
             detectionEvaluations[0].anomalies,
-            t
+            t,
+            undefined,
+            determineTimezoneFromAlertInEvaluation(evaluation?.alert)
         );
 
         timeseriesConfiguration.brush = false;
@@ -249,6 +253,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                             <TimeRangeButtonWithContext
                                 hideQuickExtend
                                 btnGroupColor="primary"
+                                timezone={determineTimezoneFromAlertInEvaluation(
+                                    evaluation?.alert
+                                )}
                                 onTimeRangeChange={(start, end) =>
                                     fetchAlertEvaluation(start, end)
                                 }
@@ -349,6 +356,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         detectionEvaluations={
                                             detectionEvaluations
                                         }
+                                        timezone={determineTimezoneFromAlertInEvaluation(
+                                            evaluation?.alert
+                                        )}
                                         onDeleteClick={
                                             handleDeleteEnumerationItemClick
                                         }

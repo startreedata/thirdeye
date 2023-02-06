@@ -19,7 +19,7 @@ import { EnumerationItemRow } from "./enumeration-item-row/enumeration-item-row.
 import { EnumerationItemsTableProps } from "./enumeration-items-table.interfaces";
 
 export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps> =
-    ({ detectionEvaluations, onDeleteClick }) => {
+    ({ detectionEvaluations, onDeleteClick, timezone }) => {
         return (
             <Card variant="outlined">
                 <CardContent>
@@ -32,6 +32,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                     key={generateNameForDetectionResult(
                                         detectionEvaluation
                                     )}
+                                    timezone={timezone}
                                     onDeleteClick={() =>
                                         onDeleteClick(detectionEvaluation)
                                     }

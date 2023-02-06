@@ -11,12 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.bao;
+package ai.startree.thirdeye.mapper;
 
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-public interface EnumerationItemManager extends AbstractManager<EnumerationItemDTO> {
+@Mapper
+public interface AuthorizationConfigurationMapper {
 
-  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source);
+  AuthorizationConfigurationMapper INSTANCE = Mappers.getMapper(AuthorizationConfigurationMapper.class);
 
+  AuthorizationConfigurationDTO toDto(AuthorizationConfigurationApi api);
+
+  AuthorizationConfigurationApi toApi(AuthorizationConfigurationDTO dto);
 }

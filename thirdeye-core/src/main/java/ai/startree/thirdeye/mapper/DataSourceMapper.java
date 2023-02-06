@@ -42,7 +42,8 @@ public interface DataSourceMapper {
                 .collect(Collectors.toList()))
             .orElse(null));
     dto.setId(api.getId());
-    dto.setNamespace(api.getNamespace());
+    optional(api.getAuth()).map(ApiBeanMapper::toAuthorizationConfigurationDTO)
+        .ifPresent(dto::setAuth);
     return dto;
   }
 
@@ -53,12 +54,13 @@ public interface DataSourceMapper {
     return new DataSourceApi()
         .setId(dto.getId())
         .setName(dto.getName())
-        .setNamespace(dto.getNamespace())
         .setType(dto.getType())
         .setProperties(optional(dto.getProperties()).filter(p -> !p.isEmpty()).orElse(null))
         .setMetaList(optional(dto.getMetaList()).filter(l -> !l.isEmpty())
             .map(l -> l.stream().map(DataSourceMapper::toApi).collect(Collectors.toList()))
-            .orElse(null));
+            .orElse(null))
+        .setAuth(optional(dto.getAuth())
+            .map(ApiBeanMapper::toApi).orElse(null));
   }
 
   private static DataSourceMetaApi toApi(final DataSourceMetaBean metaBean) {

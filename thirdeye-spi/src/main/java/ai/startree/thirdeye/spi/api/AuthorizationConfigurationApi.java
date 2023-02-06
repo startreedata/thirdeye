@@ -11,12 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.bao;
+package ai.startree.thirdeye.spi.api;
 
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+public class AuthorizationConfigurationApi {
 
-public interface EnumerationItemManager extends AbstractManager<EnumerationItemDTO> {
+  private String namespace;
 
-  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source);
+  public String getNamespace() {
+    return namespace;
+  }
 
+  public AuthorizationConfigurationApi setNamespace(final String namespace) {
+    this.namespace = namespace;
+    return this;
+  }
 }

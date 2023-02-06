@@ -16,14 +16,17 @@ package ai.startree.thirdeye.mapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {AlertMapper.class})
+@Mapper(uses = {IdMapper.class})
 public interface EnumerationItemMapper {
 
   EnumerationItemMapper INSTANCE = Mappers.getMapper(EnumerationItemMapper.class);
 
+  @Mapping(target = "alerts", qualifiedByName = "IdMapper")
   EnumerationItemDTO toDto(EnumerationItemApi api);
 
+  @Mapping(target = "alerts", qualifiedByName = "IdMapper")
   EnumerationItemApi toApi(EnumerationItemDTO dto);
 }

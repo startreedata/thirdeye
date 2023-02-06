@@ -207,6 +207,20 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
     TimeFormat(String userFacingTimeColumnFormat) {
       switch (userFacingTimeColumnFormat) {
+        case "EPOCH_NANOS":
+        case "1:NANOSECONDS:EPOCH":
+          dateTimeConvertString = "1:NANOSECONDS:EPOCH";
+          dateTruncString = "NANOSECONDS";
+          isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis() * 1_000_000);
+          break;
+        case "EPOCH_MICROS":
+        case "1:MICROSECONDS:EPOCH":
+          dateTimeConvertString = "1:MICROSECONDS:EPOCH";
+          dateTruncString = "MICROSECONDS";
+          isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis() * 1000);
+          break;
         case "EPOCH_MILLIS":
         case "1:MILLISECONDS:EPOCH":
           dateTimeConvertString = "1:MILLISECONDS:EPOCH";

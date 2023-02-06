@@ -444,7 +444,6 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   private static AnomalyDTO copyAnomalyInfo(final AnomalyDTO from) {
     final AnomalyDTO to = new AnomalyDTO();
-    to.setNamespace(from.getNamespace());
     to.setStartTime(from.getStartTime());
     to.setEndTime(from.getEndTime());
     to.setMetric(from.getMetric());
@@ -459,6 +458,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     to.setWeight(from.getWeight());
     to.setProperties(from.getProperties());
     to.setSeverityLabel(from.getSeverityLabel());
+    to.setAuth(from.getAuth());
     // FIXME CYRIL BEFORE MERGE NOT SURE IF THIS WORKS FINE ANYMORE
     optional(from.getEnumerationItem())
         .map(AnomalyMergerPostProcessor::cloneEnumerationRef)

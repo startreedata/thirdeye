@@ -13,10 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import java.util.List;
@@ -30,7 +28,7 @@ public class DetectionPipelineContext {
   private EnumerationItemDTO enumerationItem;
   private DetectionPipelineUsage usage;
   private Long alertId;
-  private String namespace;
+  private AuthorizationConfigurationDTO anomalyAuth;
 
   public ApplicationContext getApplicationContext() {
     return applicationContext;
@@ -67,7 +65,6 @@ public class DetectionPipelineContext {
   public DetectionPipelineContext setEnumerationItem(
       final EnumerationItemDTO enumerationItem) {
     this.enumerationItem = enumerationItem;
-    optional(enumerationItem).map(AbstractDTO::getNamespace).ifPresent(this::setNamespace);
     return this;
   }
 
@@ -90,12 +87,12 @@ public class DetectionPipelineContext {
     return this;
   }
 
-  public String getNamespace() {
-    return namespace;
+  public AuthorizationConfigurationDTO getAnomalyAuth() {
+    return anomalyAuth;
   }
 
-  public DetectionPipelineContext setNamespace(final String namespace) {
-    this.namespace = namespace;
+  public DetectionPipelineContext setAnomalyAuth(final AuthorizationConfigurationDTO auth) {
+    this.anomalyAuth = auth;
     return this;
   }
 }

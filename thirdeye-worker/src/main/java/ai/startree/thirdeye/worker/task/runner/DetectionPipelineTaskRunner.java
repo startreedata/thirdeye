@@ -168,7 +168,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(alert.getId())
-        .setNamespace(alert.getNamespace())
+        .setAnomalyAuth(alert.getAuth())
         .setUsage(DetectionPipelineUsage.DETECTION)
         .setDetectionInterval(detectionInterval);
     final var detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(

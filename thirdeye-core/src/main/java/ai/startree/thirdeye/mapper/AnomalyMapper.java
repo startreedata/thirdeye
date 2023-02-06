@@ -76,7 +76,6 @@ public interface AnomalyMapper {
 
     final AnomalyApi anomalyApi = new AnomalyApi()
         .setId(dto.getId())
-        .setNamespace(dto.getNamespace())
         .setStartTime(new Date(dto.getStartTime()))
         .setEndTime(new Date(dto.getEndTime()))
         .setCreated(dto.getCreateTime())

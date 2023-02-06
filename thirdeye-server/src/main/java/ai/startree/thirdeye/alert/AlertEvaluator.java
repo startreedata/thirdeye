@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -90,7 +91,8 @@ public class AlertEvaluator {
 
       final DetectionPipelineContext context = new DetectionPipelineContext()
           .setAlertId(request.getAlert().getId())
-          .setNamespace(request.getAlert().getNamespace())
+          .setAnomalyAuth(
+              ApiBeanMapper.toAuthorizationConfigurationDTO(request.getAlert().getAuth()))
           .setUsage(DetectionPipelineUsage.EVALUATION)
           .setDetectionInterval(detectionInterval);
 

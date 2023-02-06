@@ -23,7 +23,6 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
 
   private Long id;
   private String name;
-  private String namespace;
   private String description;
   private Map<String, Object> params;
   private List<AlertApi> alerts;
@@ -46,15 +45,6 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
 
   public EnumerationItemApi setName(final String name) {
     this.name = name;
-    return this;
-  }
-
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public EnumerationItemApi setNamespace(final String namespace) {
-    this.namespace = namespace;
     return this;
   }
 

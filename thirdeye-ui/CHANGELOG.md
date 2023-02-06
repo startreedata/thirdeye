@@ -1,3 +1,20 @@
+## [2.8.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.7.0...thirdeye-ui-2.8.0) (2023-02-06)
+
+
+### Features
+
+* [TE-1180](https://cortexdata.atlassian.net/browse/TE-1180) use specific components depending on alert template property type ([5b1d5f4ae](https://github.com/startreedata/thirdeye/commit/5b1d5f4ae4ec3556006d52e1a2f92ed8edbf661f))
+* [TE-1216](https://cortexdata.atlassian.net/browse/TE-1216) create alert flow support timezone ([2786d6e85](https://github.com/startreedata/thirdeye/commit/2786d6e85465a9f998dd4daf311921a9cba28a86))
+* [TE-1216](https://cortexdata.atlassian.net/browse/TE-1216) support timezone in alert details view pages ([a2bc53cac](https://github.com/startreedata/thirdeye/commit/a2bc53caceb933bd559f58e3062caefac4581208))
+* [TE-1233](https://cortexdata.atlassian.net/browse/TE-1233) support auto refreshing when user resets an anomaly in alerts details page ([7138b6e1d](https://github.com/startreedata/thirdeye/commit/7138b6e1d3b0b5213418534cb26873e62cbe33fd))
+* [TE-1239](https://cortexdata.atlassian.net/browse/TE-1239) disable update button for alert until user previews changes ([7b401b82f](https://github.com/startreedata/thirdeye/commit/7b401b82fecfe6eefe9f1b99210bfdf554d9cd00))
+* [TE-1284](https://cortexdata.atlassian.net/browse/TE-1284) added oidc "groups" claim to dex default scopes in platform code in thirdeye-ui ([7331ce07c](https://github.com/startreedata/thirdeye/commit/7331ce07c44ef8d3921403fc8f055dc98c2df1e0))
+
+
+### Bug Fixes
+
+* [TE-1233](https://cortexdata.atlassian.net/browse/TE-1233) fix defect where notification indicating auto reload would not go away ([46d4013df](https://github.com/startreedata/thirdeye/commit/46d4013df05199a287477c77dfe2805374b7247f))
+
 ## [2.7.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.6.0...thirdeye-ui-2.7.0) (2023-01-30)
 
 

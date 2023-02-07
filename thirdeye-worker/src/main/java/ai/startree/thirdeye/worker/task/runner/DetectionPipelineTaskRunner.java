@@ -145,7 +145,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
       // a detection can be replayed on specific period (eg if the data has mutated) - ensure the lastTimestamp never goes back in time because of a detection run
       // if the user really wants to set the lastTimestamp back in time, he can do it with reset, of by editing the lastTimestamp manually
-      final long newLastTimestamp = Math.max(detectionInterval.getEndMillis(), alert.getLastTimestamp());
+      final long newLastTimestamp = Math.max(detectionInterval.getEndMillis(),
+          alert.getLastTimestamp());
       alert.setLastTimestamp(newLastTimestamp);
       alertManager.update(alert);
       postExecution(result);
@@ -207,16 +208,17 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private AnomalyDTO setAnomalyAuth(final AnomalyDTO anomaly) {
-    if (anomaly.getEnumerationItem() != null) {
-      optional(enumerationItemManager.findById(anomaly.getEnumerationItem().getId()))
-          .map(AbstractDTO::getAuth)
-          .ifPresent(anomaly::setAuth);
-      return anomaly;
-    }
-
     optional(alertManager.findById(anomaly.getDetectionConfigId()))
         .map(AbstractDTO::getAuth)
         .ifPresent(anomaly::setAuth);
+
+    // Enumeration item auth overrides Alert auth.
+    optional(anomaly.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .map(enumerationItemManager::findById)
+        .map(AbstractDTO::getAuth)
+        .ifPresent(anomaly::setAuth);
+
     return anomaly;
   }
 }

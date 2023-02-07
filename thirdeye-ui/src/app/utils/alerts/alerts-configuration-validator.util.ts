@@ -18,7 +18,11 @@ import { PropertyConfigValueTypes } from "../../rest/dto/alert.interfaces";
 
 export function validateTemplateProperties(
     alertTemplateProperties: MetadataProperty[],
-    propertyValues: { [index: string]: PropertyConfigValueTypes }
+    propertyValues: { [index: string]: PropertyConfigValueTypes },
+    translate: (
+        key: string,
+        params?: { [key: string]: string | number }
+    ) => string
 ): AlertTemplatePropertyValidationError[] {
     const errors: AlertTemplatePropertyValidationError[] = [];
 
@@ -40,7 +44,9 @@ export function validateTemplateProperties(
                     if (!Array.isArray(valueForProperty)) {
                         errors.push({
                             key: propertyKey,
-                            msg: `${propertyKey} needs to be an array`,
+                            msg: translate("message.needs-to-be-an-array", {
+                                propertyKey: propertyKey,
+                            }),
                         });
                     } else {
                         const allValuesInOptions = (
@@ -54,9 +60,16 @@ export function validateTemplateProperties(
                         if (!allValuesInOptions) {
                             errors.push({
                                 key: propertyKey,
-                                msg: `${propertyKey} values need to be one of the following values: ${matchingPropertyMetadata.options.join(
-                                    ","
-                                )}`,
+                                msg: translate(
+                                    "message.values-need-to-be-one-of-the-following-values",
+                                    {
+                                        propertyKey: propertyKey,
+                                        expectedKeys:
+                                            matchingPropertyMetadata.options.join(
+                                                ","
+                                            ),
+                                    }
+                                ),
                             });
                         }
                     }
@@ -67,9 +80,16 @@ export function validateTemplateProperties(
                 ) {
                     errors.push({
                         key: propertyKey,
-                        msg: `${propertyKey} values need to be one of the following values: ${matchingPropertyMetadata.options.join(
-                            ","
-                        )}. It is: ${valueForProperty}`,
+                        msg: translate(
+                            "message.values-need-to-be-one-of-the-following-values-it-is",
+                            {
+                                propertyKey: propertyKey,
+                                expectedKeys:
+                                    matchingPropertyMetadata.options.join(","),
+                                valueForProperty:
+                                    valueForProperty?.toString() as string,
+                            }
+                        ),
                     });
                 }
                 // Check if value is an array
@@ -77,7 +97,9 @@ export function validateTemplateProperties(
                 if (!Array.isArray(valueForProperty)) {
                     errors.push({
                         key: propertyKey,
-                        msg: `${propertyKey} needs to be an array`,
+                        msg: translate("message.needs-to-be-an-array", {
+                            propertyKey: propertyKey,
+                        }),
                     });
                 }
                 // Check if boolean
@@ -85,7 +107,10 @@ export function validateTemplateProperties(
                 if (typeof valueForProperty !== "boolean") {
                     errors.push({
                         key: propertyKey,
-                        msg: `${propertyKey} needs to be a boolean (true or false)`,
+                        msg: translate(
+                            "message.needs-to-be-a-boolean-true-or-false",
+                            { propertyKey: propertyKey }
+                        ),
                     });
                 }
                 // Check if object
@@ -93,7 +118,9 @@ export function validateTemplateProperties(
                 if (typeof valueForProperty !== "object") {
                     errors.push({
                         key: propertyKey,
-                        msg: `${propertyKey} needs to be an object`,
+                        msg: translate("message.needs-to-be-an-object", {
+                            propertyKey: propertyKey,
+                        }),
                     });
                 }
             }

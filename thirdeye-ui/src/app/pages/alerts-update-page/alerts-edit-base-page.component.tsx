@@ -146,7 +146,8 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
         if (selectedAlertTemplate?.properties) {
             const validationErrors = validateTemplateProperties(
                 selectedAlertTemplate.properties,
-                alertToSubmit.templateProperties
+                alertToSubmit.templateProperties,
+                t
             );
 
             validationErrors.forEach((error) => {

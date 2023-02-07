@@ -14,21 +14,24 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
 import { SubscriptionGroupSpecsCard } from "../../components/entity-cards/subscription-group-specs-card/subscription-group-specs-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
@@ -37,6 +40,7 @@ import {
     getSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { PROMISES } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getSubscriptionGroupsAllPath } from "../../utils/routes/routes.util";
@@ -46,6 +50,7 @@ import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-pag
 export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
         useState<UiSubscriptionGroup | null>(null);
+    const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
     const { showDialog } = useDialogProviderV1();
     const params = useParams<SubscriptionGroupsViewPageParams>();
     const navigate = useNavigate();
@@ -77,12 +82,14 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
             return;
         }
 
+        setStatus(ActionStatus.Working);
         Promise.allSettled([
             getSubscriptionGroup(toNumber(params.id)),
             getAllAlerts(),
         ])
             .then(([subscriptionGroupResponse, alertsResponse]) => {
                 // Determine if any of the calls failed
+                setStatus(ActionStatus.Working);
                 if (
                     subscriptionGroupResponse.status === PROMISES.REJECTED ||
                     alertsResponse.status === PROMISES.REJECTED
@@ -94,34 +101,42 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                               PROMISES.REJECTED
                             ? subscriptionGroupResponse.reason
                             : ({} as AxiosError);
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      alertsResponse.status ===
-                                          PROMISES.REJECTED
-                                          ? "label.alerts"
-                                          : "label.subscription-group"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
+
+                    setStatus(ActionStatus.Error);
+
+                    notifyIfErrors(
+                        ActionStatus.Error,
+                        getErrorMessages(axiosError),
+                        notify,
+                        t("message.error-while-fetching", {
+                            entity: t(
+                                alertsResponse.status === PROMISES.REJECTED
+                                    ? "label.alerts"
+                                    : "label.subscription-group"
+                            ),
+                        })
+                    );
                 }
 
+                const alertsFetchedSuccessfully =
+                    alertsResponse.status === PROMISES.FULFILLED;
+                const subscriptionGroupsFetchedSuccessfully =
+                    subscriptionGroupResponse.status === PROMISES.FULFILLED;
+
                 // Attempt to gather data
-                if (alertsResponse.status === PROMISES.FULFILLED) {
+                if (alertsFetchedSuccessfully) {
                     fetchedAlerts = alertsResponse.value;
                 }
-                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
+                if (subscriptionGroupsFetchedSuccessfully) {
                     fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
                         subscriptionGroupResponse.value,
                         fetchedAlerts
                     );
+                    setStatus(ActionStatus.Done);
                 }
+            })
+            .catch(() => {
+                setStatus(ActionStatus.Error);
             })
             .finally(() => {
                 setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
@@ -160,31 +175,49 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader
-                title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
-            />
-            <PageContentsGridV1>
-                {/* Subscription Group */}
-                <Grid item xs={12}>
-                    <SubscriptionGroupCard
-                        uiSubscriptionGroup={uiSubscriptionGroup}
-                        onDelete={handleSubscriptionGroupDelete}
-                    />
-                </Grid>
+            <LoadingErrorStateSwitch
+                isError={status === ActionStatus.Error}
+                isLoading={status === ActionStatus.Working}
+                loadingState={
+                    <>
+                        <PageHeader>
+                            <SkeletonV1 height={48} width={300} />
+                        </PageHeader>
+                        <PageContentsGridV1>
+                            <Grid item xs={12}>
+                                <SkeletonV1 height={160} />
+                                <SkeletonV1 height={160} />
+                            </Grid>
+                        </PageContentsGridV1>
+                    </>
+                }
+            >
+                <PageHeader
+                    title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
+                />
+                <PageContentsGridV1>
+                    {/* Subscription Group */}
+                    <Grid item xs={12}>
+                        <SubscriptionGroupCard
+                            uiSubscriptionGroup={uiSubscriptionGroup}
+                            onDelete={handleSubscriptionGroupDelete}
+                        />
+                    </Grid>
 
-                {/* Notifications Groups */}
-                <Grid item xs={12}>
-                    {uiSubscriptionGroup &&
-                        uiSubscriptionGroup.subscriptionGroup && (
-                            <SubscriptionGroupSpecsCard
-                                specs={
-                                    uiSubscriptionGroup.subscriptionGroup
-                                        .specs || []
-                                }
-                            />
-                        )}
-                </Grid>
-            </PageContentsGridV1>
+                    {/* Notifications Groups */}
+                    <Grid item xs={12}>
+                        {uiSubscriptionGroup &&
+                            uiSubscriptionGroup.subscriptionGroup && (
+                                <SubscriptionGroupSpecsCard
+                                    specs={
+                                        uiSubscriptionGroup.subscriptionGroup
+                                            .specs || []
+                                    }
+                                />
+                            )}
+                    </Grid>
+                </PageContentsGridV1>
+            </LoadingErrorStateSwitch>
         </PageV1>
     );
 };

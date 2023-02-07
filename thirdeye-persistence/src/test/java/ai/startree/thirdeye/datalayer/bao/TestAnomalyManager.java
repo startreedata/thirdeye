@@ -107,6 +107,31 @@ public class TestAnomalyManager {
     return (EnumerationItemDTO) new EnumerationItemDTO().setId(id);
   }
 
+  private static AnomalyDTO buildAnomaly(long startTime, long endTime) {
+    return new AnomalyDTO()
+        .setStartTime(startTime)
+        .setEndTime(endTime);
+  }
+
+  private static AnomalyDTO findAnomalyById(final List<AnomalyDTO> anomalies, final Long id) {
+    for (final AnomalyDTO anomaly : anomalies) {
+      if(anomaly.getId().equals(id)) {
+        return anomaly;
+      }
+    }
+    return null;
+  }
+
+  private AnomalyDTO provideFeedbackToAnomaly(final Long anomalyId, final AnomalyFeedbackType type, final String comment) {
+    final AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(anomalyId);
+    final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
+        .setComment(comment)
+        .setFeedbackType(type);
+    anomalyForFeedback.setFeedback(feedback);
+    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyForFeedback);
+    return mergedAnomalyResultDAO.findById(anomalyId);
+  }
+
   @BeforeClass
   void beforeClass() {
     final Injector injector = MySqlTestDatabase.sharedInjector();
@@ -186,38 +211,31 @@ public class TestAnomalyManager {
   }
 
   @Test
-  public void testGetAllAnomaliesForFeedback() {
+  public void testFindAllAnomaliesForFeedback() {
     final Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
     final Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
 
-    final AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(id1);
     final String feedbackComment = "test feedback";
-    final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
-        .setComment(feedbackComment)
-        .setFeedbackType(AnomalyFeedbackType.ANOMALY);
-    anomalyForFeedback.setFeedback(feedback);
-    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyForFeedback);
+    provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
 
-    // test the findAll flow
     final List<AnomalyDTO> findAllAnomalies = mergedAnomalyResultDAO.findAll();
     assertThat(findAnomalyById(findAllAnomalies, id1).getFeedback().getComment()).isEqualTo(feedbackComment);
     assertThat(findAnomalyById(findAllAnomalies, id2).getFeedback()).isNull();
+  }
 
-    // test the filter flow
+  @Test(dependsOnMethods = {"testFindAllAnomaliesForFeedback"})
+  public void testFilterAnomaliesForFeedback() {
+    final Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
+    final Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
+
+    final String feedbackComment = "test feedback";
+    provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
+
     final DaoFilter filter = new DaoFilter()
-        .setPredicate(Predicate.GE("startTime", 0));
+        .setPredicate(Predicate.GE("startTime", 10000));
     final List<AnomalyDTO> filterAnomalies = mergedAnomalyResultDAO.filter(filter);
     assertThat(findAnomalyById(filterAnomalies, id1).getFeedback().getComment()).isEqualTo(feedbackComment);
     assertThat(findAnomalyById(filterAnomalies, id2).getFeedback()).isNull();
-  }
-
-  private AnomalyDTO findAnomalyById(final List<AnomalyDTO> anomalies, final Long id) {
-    for (final AnomalyDTO anomaly : anomalies) {
-      if(anomaly.getId().equals(id)) {
-        return anomaly;
-      }
-    }
-    return null;
   }
 
   @Test
@@ -235,12 +253,6 @@ public class TestAnomalyManager {
     Assert.assertNotNull(mergedResult.getId());
     Assert.assertNotNull(child1.getId());
     Assert.assertNotNull(child2.getId());
-  }
-
-  private AnomalyDTO buildAnomaly(long startTime, long endTime) {
-    return new AnomalyDTO()
-        .setStartTime(startTime)
-        .setEndTime(endTime);
   }
 
   @Test

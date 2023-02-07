@@ -44,9 +44,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.joda.time.base.AbstractInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -361,8 +361,8 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         .collect(Collectors.toList());
 
     final List<AnomalyFeedbackDTO> feedbacks = genericPojoDao.get(feedbackIds, AnomalyFeedbackDTO.class);
-    final Map<Long, AnomalyFeedbackDTO> feedbackMap = new HashMap<>();
-    MapUtils.populateMap(feedbackMap, feedbacks, AnomalyFeedbackDTO::getId);
+    final Map<Long, AnomalyFeedbackDTO> feedbackMap = feedbacks.stream()
+        .collect(Collectors.toMap(AnomalyFeedbackDTO::getId, Function.identity()));
     anomalies.stream()
         .filter(anomaly -> anomaly.getAnomalyFeedbackId() != null)
         .forEach(anomaly -> anomaly.setFeedback(feedbackMap.get(anomaly.getAnomalyFeedbackId())));

@@ -26,6 +26,7 @@ import { formatLargeNumberV1 } from "../../../../platform/utils";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { createAlertEvaluation } from "../../../../utils/anomalies/anomalies.util";
+import { baselineOffsetToMilliseconds } from "../../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -146,12 +147,16 @@ export const AlgorithmRowExpanded: FunctionComponent<AlgorithmRowExpandedProps> 
                 row.otherDimensionValues
             );
 
+            const startTimestamp =
+                Number(start) - baselineOffsetToMilliseconds(comparisonOffset);
+            const endTimestamp = Number(end);
+
             getNonFilteredEvaluation(
-                createAlertEvaluation(alertId, Number(start), Number(end))
+                createAlertEvaluation(alertId, startTimestamp, endTimestamp)
             );
 
             getFilteredEvaluation(
-                createAlertEvaluation(alertId, Number(start), Number(end)),
+                createAlertEvaluation(alertId, startTimestamp, endTimestamp),
                 filters
             );
         };

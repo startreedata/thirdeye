@@ -156,6 +156,7 @@ export const generateComparisonChartOptions = (
     const chartOptions: TimeSeriesChartProps = {
         brush: true,
         height: 400,
+        zoom: true,
         series,
         xAxis: {
             plotBands: [

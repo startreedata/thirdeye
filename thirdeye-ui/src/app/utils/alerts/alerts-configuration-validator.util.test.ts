@@ -21,79 +21,103 @@ jest.mock("i18next", () => ({
 
 describe("Alerts Configuration Validator Util", () => {
     it("validateTemplateProperties should return error for optioned property if a value does not exist for single", () => {
-        const result = validateTemplateProperties([OPTIONED_SINGLE], {
-            optionedSingleProperty: "4",
-        });
+        const result = validateTemplateProperties(
+            [OPTIONED_SINGLE],
+            {
+                optionedSingleProperty: "4",
+            },
+            MOCK_TRANSLATION
+        );
 
         expect(result).toEqual([
             {
                 key: "optionedSingleProperty",
-                msg: "optionedSingleProperty values need to be one of the following values: 1,2,3. It is: 4",
+                msg: MOCK_MSG,
             },
         ]);
     });
 
     it("validateTemplateProperties should return error for optioned property if a value does not exist", () => {
-        const result = validateTemplateProperties([OPTIONED_MULTISELECT], {
-            optionedMultiselectProperty: ["4", "1"],
-        });
+        const result = validateTemplateProperties(
+            [OPTIONED_MULTISELECT],
+            {
+                optionedMultiselectProperty: ["4", "1"],
+            },
+            MOCK_TRANSLATION
+        );
 
         expect(result).toEqual([
             {
                 key: "optionedMultiselectProperty",
-                msg: "optionedMultiselectProperty values need to be one of the following values: 1,2,3",
+                msg: MOCK_MSG,
             },
         ]);
     });
 
     it("validateTemplateProperties should return error for optioned property if not array value", () => {
-        const result = validateTemplateProperties([OPTIONED_MULTISELECT], {
-            optionedMultiselectProperty: "4",
-        });
+        const result = validateTemplateProperties(
+            [OPTIONED_MULTISELECT],
+            {
+                optionedMultiselectProperty: "4",
+            },
+            MOCK_TRANSLATION
+        );
 
         expect(result).toEqual([
             {
                 key: "optionedMultiselectProperty",
-                msg: "optionedMultiselectProperty needs to be an array",
+                msg: MOCK_MSG,
             },
         ]);
     });
 
     it("validateTemplateProperties should return error for array jsonType if value is not array", () => {
-        const result = validateTemplateProperties([ARRAY], {
-            arrayProperty: "4",
-        });
+        const result = validateTemplateProperties(
+            [ARRAY],
+            {
+                arrayProperty: "4",
+            },
+            MOCK_TRANSLATION
+        );
 
         expect(result).toEqual([
             {
                 key: "arrayProperty",
-                msg: "arrayProperty needs to be an array",
+                msg: MOCK_MSG,
             },
         ]);
     });
 
     it("validateTemplateProperties should return error for boolean jsonType if value is not boolean", () => {
-        const result = validateTemplateProperties([BOOLEAN], {
-            booleanProperty: "4",
-        });
+        const result = validateTemplateProperties(
+            [BOOLEAN],
+            {
+                booleanProperty: "4",
+            },
+            MOCK_TRANSLATION
+        );
 
         expect(result).toEqual([
             {
                 key: "booleanProperty",
-                msg: "booleanProperty needs to be a boolean (true or false)",
+                msg: MOCK_MSG,
             },
         ]);
     });
 
     it("validateTemplateProperties should return error for object jsonType if value is not object", () => {
-        const result = validateTemplateProperties([OBJECT], {
-            objectProperty: "4",
-        });
+        const result = validateTemplateProperties(
+            [OBJECT],
+            {
+                objectProperty: "4",
+            },
+            MOCK_TRANSLATION
+        );
 
         expect(result).toEqual([
             {
                 key: "objectProperty",
-                msg: "objectProperty needs to be an object",
+                msg: MOCK_MSG,
             },
         ]);
     });
@@ -110,7 +134,8 @@ describe("Alerts Configuration Validator Util", () => {
                     hello: "world",
                 },
                 fieldNotIncluded: "foobar",
-            }
+            },
+            MOCK_TRANSLATION
         );
 
         expect(result).toEqual([]);
@@ -151,3 +176,6 @@ const OBJECT = {
     defaultIsNull: false,
     jsonType: "OBJECT" as MetadataProperty["jsonType"],
 };
+
+const MOCK_MSG = "error msg";
+const MOCK_TRANSLATION = (): string => MOCK_MSG;

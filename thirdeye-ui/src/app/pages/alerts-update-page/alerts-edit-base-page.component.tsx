@@ -13,7 +13,7 @@
  * the License.
  */
 import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
-import { isEmpty, isEqual } from "lodash";
+import { isEqual } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -48,8 +48,10 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
+import { validateTemplateProperties } from "../../utils/alerts/alerts-configuration-validator.util";
 import { handleAlertPropertyChangeGenerator } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
     AppRouteRelative,
     getAlertsAllPath,
@@ -119,18 +121,14 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     }, []);
 
     useEffect(() => {
-        if (alertTemplatesRequestStatus === ActionStatus.Error) {
-            !isEmpty(getAlertTemplatesRequestErrors)
-                ? getAlertTemplatesRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
-                  )
-                : notify(
-                      NotificationTypeV1.Error,
-                      t("message.error-while-fetching", {
-                          entity: t("label.chart-data"),
-                      })
-                  );
-        }
+        notifyIfErrors(
+            alertTemplatesRequestStatus,
+            getAlertTemplatesRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.chart-data"),
+            })
+        );
     }, [getAlertTemplatesRequestErrors, alertTemplatesRequestStatus]);
 
     const handleAlertPropertyChange = useMemo(() => {
@@ -143,7 +141,25 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     }, [setAlert, alertTemplateOptions, setSelectedAlertTemplate]);
 
     const handleSubmitAlertClick = (alertToSubmit: EditableAlert): void => {
-        onSubmit && onSubmit(alertToSubmit);
+        let isOk = true;
+
+        if (selectedAlertTemplate?.properties) {
+            const validationErrors = validateTemplateProperties(
+                selectedAlertTemplate.properties,
+                alertToSubmit.templateProperties,
+                t
+            );
+
+            validationErrors.forEach((error) => {
+                notify(NotificationTypeV1.Error, error.msg);
+            });
+
+            isOk = validationErrors.length === 0;
+        }
+
+        if (isOk) {
+            onSubmit && onSubmit(alertToSubmit);
+        }
     };
 
     /**

@@ -18,6 +18,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -105,6 +107,31 @@ public class TestAnomalyManager {
     return (EnumerationItemDTO) new EnumerationItemDTO().setId(id);
   }
 
+  private static AnomalyDTO buildAnomaly(long startTime, long endTime) {
+    return new AnomalyDTO()
+        .setStartTime(startTime)
+        .setEndTime(endTime);
+  }
+
+  private static AnomalyDTO findAnomalyById(final List<AnomalyDTO> anomalies, final Long id) {
+    for (final AnomalyDTO anomaly : anomalies) {
+      if(anomaly.getId().equals(id)) {
+        return anomaly;
+      }
+    }
+    return null;
+  }
+
+  private AnomalyDTO provideFeedbackToAnomaly(final Long anomalyId, final AnomalyFeedbackType type, final String comment) {
+    final AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(anomalyId);
+    final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
+        .setComment(comment)
+        .setFeedbackType(type);
+    anomalyForFeedback.setFeedback(feedback);
+    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyForFeedback);
+    return mergedAnomalyResultDAO.findById(anomalyId);
+  }
+
   @BeforeClass
   void beforeClass() {
     final Injector injector = MySqlTestDatabase.sharedInjector();
@@ -184,18 +211,40 @@ public class TestAnomalyManager {
   }
 
   @Test
+  public void testFindAllAnomaliesForFeedback() {
+    final Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
+    final Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
+
+    final String feedbackComment = "test feedback";
+    provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
+
+    final List<AnomalyDTO> findAllAnomalies = mergedAnomalyResultDAO.findAll();
+    assertThat(findAnomalyById(findAllAnomalies, id1).getFeedback().getComment()).isEqualTo(feedbackComment);
+    assertThat(findAnomalyById(findAllAnomalies, id2).getFeedback()).isNull();
+  }
+
+  @Test(dependsOnMethods = {"testFindAllAnomaliesForFeedback"})
+  public void testFilterAnomaliesForFeedback() {
+    final Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
+    final Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
+
+    final String feedbackComment = "test feedback";
+    provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
+
+    final DaoFilter filter = new DaoFilter()
+        .setPredicate(Predicate.GE("startTime", 10000));
+    final List<AnomalyDTO> filterAnomalies = mergedAnomalyResultDAO.filter(filter);
+    assertThat(findAnomalyById(filterAnomalies, id1).getFeedback().getComment()).isEqualTo(feedbackComment);
+    assertThat(findAnomalyById(filterAnomalies, id2).getFeedback()).isNull();
+  }
+
+  @Test
   public void testSaveChildren() {
-    mergedResult = new AnomalyDTO();
-    mergedResult.setStartTime(1000);
-    mergedResult.setEndTime(2000);
+    mergedResult = buildAnomaly(1000, 2000);
 
-    final AnomalyDTO child1 = new AnomalyDTO();
-    child1.setStartTime(1000);
-    child1.setEndTime(1500);
+    final AnomalyDTO child1 = buildAnomaly(1000, 1500);
 
-    final AnomalyDTO child2 = new AnomalyDTO();
-    child2.setStartTime(1500);
-    child2.setEndTime(2000);
+    final AnomalyDTO child2 = buildAnomaly(1500, 2000);
 
     mergedResult.setChildren(new HashSet<>(Arrays.asList(child1, child2)));
 

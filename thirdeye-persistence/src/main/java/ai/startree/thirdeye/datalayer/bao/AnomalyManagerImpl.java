@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +44,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.base.AbstractInterval;
@@ -81,6 +83,18 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         return countParentAnomalies(null);
       }
     });
+  }
+
+  @Override
+  public List<AnomalyDTO> findAll() {
+    final List<AnomalyDTO> anomalies = super.findAll();
+    return decorateWithFeedback(anomalies);
+  }
+
+  @Override
+  public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
+    final List<AnomalyDTO> anomalies = super.filter(daoFilter);
+    return decorateWithFeedback(anomalies);
   }
 
   @Override
@@ -338,6 +352,21 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     }
 
     return outList;
+  }
+
+  private List<AnomalyDTO> decorateWithFeedback(final List<AnomalyDTO> anomalies) {
+    final List<Long> feedbackIds = anomalies.stream()
+        .map(AnomalyDTO::getAnomalyFeedbackId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+    final List<AnomalyFeedbackDTO> feedbacks = genericPojoDao.get(feedbackIds, AnomalyFeedbackDTO.class);
+    final Map<Long, AnomalyFeedbackDTO> feedbackMap = feedbacks.stream()
+        .collect(Collectors.toMap(AnomalyFeedbackDTO::getId, Function.identity()));
+    anomalies.stream()
+        .filter(anomaly -> anomaly.getAnomalyFeedbackId() != null)
+        .forEach(anomaly -> anomaly.setFeedback(feedbackMap.get(anomaly.getAnomalyFeedbackId())));
+    return anomalies;
   }
 
   @Override

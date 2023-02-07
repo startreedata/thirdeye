@@ -23,3 +23,8 @@ export enum CreateAlertConfigurationSection {
 export interface AlertsCreatePageProps {
     startingAlertConfiguration: EditableAlert;
 }
+
+export interface AlertTemplatePropertyValidationError {
+    key: string;
+    msg: string;
+}

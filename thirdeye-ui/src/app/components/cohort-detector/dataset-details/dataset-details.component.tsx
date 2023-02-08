@@ -78,8 +78,7 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     const [selectedEnd, setSelectedEnd] = useState<number>(
         generateDateRangeMonthsFromNow(3)[1]
     );
-    const [selectedPercentageFilter, setSelectedPercentageFilter] =
-        useState(25);
+    const [selectedPercentageFilter, setSelectedPercentageFilter] = useState(5);
     const [selectedTable, setSelectedTable] = useState<DatasetInfo | null>(
         null
     );
@@ -467,7 +466,9 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 />
                             </>
                         }
-                        label={`${t("label.cohort-size-filter")}`}
+                        label={`${t(
+                            "label.contribution-percentage-for-the-selected-metrics"
+                        )}`}
                     />
 
                     <InputSection

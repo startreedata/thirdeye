@@ -35,6 +35,7 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
+import { getEnumerationItems } from "../../rest/enumeration-items/enumeration-items.rest";
 import {
     deleteSubscriptionGroup,
     getSubscriptionGroup,
@@ -118,28 +119,47 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                     );
                 }
 
-                const alertsFetchedSuccessfully =
-                    alertsResponse.status === PROMISES.FULFILLED;
-                const subscriptionGroupsFetchedSuccessfully =
-                    subscriptionGroupResponse.status === PROMISES.FULFILLED;
-
                 // Attempt to gather data
-                if (alertsFetchedSuccessfully) {
+                if (alertsResponse.status === PROMISES.FULFILLED) {
                     fetchedAlerts = alertsResponse.value;
                 }
-                if (subscriptionGroupsFetchedSuccessfully) {
-                    fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
-                        subscriptionGroupResponse.value,
-                        fetchedAlerts
-                    );
-                    setStatus(ActionStatus.Done);
+                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
+                    const enumerationIds =
+                        (subscriptionGroupResponse.value.alertAssociations
+                            ?.map((a) => a?.enumerationItem?.id)
+                            .filter(Boolean) || []) as number[];
+
+                    // TODO: Only call if needed, maybe convert to async await
+                    (enumerationIds && enumerationIds.length > 0
+                        ? getEnumerationItems({ ids: enumerationIds })
+                        : Promise.resolve()
+                    )
+                        .then((enumerationItems) => {
+                            fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
+                                subscriptionGroupResponse.value,
+                                fetchedAlerts,
+                                enumerationItems || []
+                            );
+
+                            setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
+                            setStatus(ActionStatus.Done);
+                        })
+                        .catch((err) => {
+                            notifyIfErrors(
+                                ActionStatus.Error,
+                                getErrorMessages(err),
+                                notify,
+                                t("message.error-while-fetching", {
+                                    entity: t("label.enumeration-item"),
+                                })
+                            );
+
+                            setStatus(ActionStatus.Error);
+                        });
                 }
             })
             .catch(() => {
                 setStatus(ActionStatus.Error);
-            })
-            .finally(() => {
-                setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
             });
     };
 
@@ -198,6 +218,10 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                 <PageContentsGridV1>
                     {/* Subscription Group */}
                     <Grid item xs={12}>
+                        <pre>
+                            {JSON.stringify(uiSubscriptionGroup, undefined, 4)}
+                        </pre>
+                        <hr />
                         <SubscriptionGroupCard
                             uiSubscriptionGroup={uiSubscriptionGroup}
                             onDelete={handleSubscriptionGroupDelete}

@@ -15,12 +15,13 @@
 import i18n from "i18next";
 import { cloneDeep, isEmpty } from "lodash";
 import { formatNumberV1 } from "../../platform/utils";
-import { Alert } from "../../rest/dto/alert.interfaces";
-import {
+import type { Alert } from "../../rest/dto/alert.interfaces";
+import type { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
+import type {
     EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
-import {
+import type {
     UiSubscriptionGroup,
     UiSubscriptionGroupAlert,
 } from "../../rest/dto/ui-subscription-group.interfaces";
@@ -46,6 +47,8 @@ export const createEmptyUiSubscriptionGroup = (): UiSubscriptionGroup => {
         cron: i18n.t("label.no-data-marker"),
         alerts: [],
         alertCount: formatNumberV1(0),
+        dimensionCount: formatNumberV1(0),
+        activeChannels: [],
         emails: [],
         emailCount: formatNumberV1(0),
         subscriptionGroup: null,
@@ -62,7 +65,8 @@ export const createEmptyUiSubscriptionGroupAlert =
 
 export const getUiSubscriptionGroup = (
     subscriptionGroup: SubscriptionGroup,
-    alerts: Alert[]
+    alerts: Alert[],
+    enumerationItems: EnumerationItem[] = []
 ): UiSubscriptionGroup => {
     if (!subscriptionGroup) {
         return createEmptyUiSubscriptionGroup();
@@ -71,7 +75,8 @@ export const getUiSubscriptionGroup = (
     // Map alerts to subscription group ids
     const alertsToSubscriptionGroupIdsMap = mapAlertsToSubscriptionGroupIds(
         [subscriptionGroup],
-        alerts
+        alerts,
+        enumerationItems
     );
 
     return getUiSubscriptionGroupInternal(
@@ -82,7 +87,8 @@ export const getUiSubscriptionGroup = (
 
 export const getUiSubscriptionGroups = (
     subscriptionGroups: SubscriptionGroup[],
-    alerts: Alert[]
+    alerts: Alert[],
+    enumerationItems: EnumerationItem[] = []
 ): UiSubscriptionGroup[] => {
     if (isEmpty(subscriptionGroups)) {
         return [];
@@ -91,7 +97,8 @@ export const getUiSubscriptionGroups = (
     // Map alerts to subscription group ids
     const alertsToSubscriptionGroupIdsMap = mapAlertsToSubscriptionGroupIds(
         subscriptionGroups,
-        alerts
+        alerts,
+        enumerationItems
     );
 
     const uiSubscriptionGroups = [];
@@ -108,7 +115,8 @@ export const getUiSubscriptionGroups = (
 };
 
 export const getUiSubscriptionGroupAlert = (
-    alert: Alert
+    alert: Alert,
+    enumerationItems?: EnumerationItem[]
 ): UiSubscriptionGroupAlert => {
     const uiSubscriptionGroupAlert = createEmptyUiSubscriptionGroupAlert();
 
@@ -120,6 +128,10 @@ export const getUiSubscriptionGroupAlert = (
     uiSubscriptionGroupAlert.id = alert.id;
     uiSubscriptionGroupAlert.name =
         alert.name || i18n.t("label.no-data-marker");
+
+    if (enumerationItems && enumerationItems.length > 0) {
+        uiSubscriptionGroupAlert.enumerationItems = enumerationItems;
+    }
 
     return uiSubscriptionGroupAlert;
 };
@@ -237,55 +249,101 @@ const getUiSubscriptionGroupInternal = (
 
 const mapAlertsToSubscriptionGroupIds = (
     subscriptionGroups: SubscriptionGroup[],
-    alerts: Alert[]
+    alerts: Alert[],
+    enumerationItems: EnumerationItem[] = []
 ): Map<number, UiSubscriptionGroupAlert[]> => {
-    const alertsToSubscriptionGroupIdsMap = new Map();
+    const alertsToSubscriptionGroupIdsMap = new Map<
+        number,
+        UiSubscriptionGroupAlert[]
+    >();
 
-    const alertToAlertIdsMap = mapAlertsToAlertIds(alerts);
-    if (isEmpty(alertToAlertIdsMap)) {
+    const alertItemsMap = getMapFromList(alerts);
+    const enumerationItemsMap = getMapFromList(enumerationItems);
+
+    if (isEmpty(alertItemsMap)) {
         return alertsToSubscriptionGroupIdsMap;
     }
 
     for (const subscriptionGroup of subscriptionGroups) {
-        if (isEmpty(subscriptionGroup.alerts)) {
+        const alertToEnumerationItems =
+            getAlertToEnumerationItemsMapForSubscriptionGroup(
+                subscriptionGroup
+            );
+
+        if (isEmpty(alertToEnumerationItems)) {
             continue;
         }
 
-        for (const alert of subscriptionGroup.alerts) {
-            const mappedAlert = alertToAlertIdsMap.get(alert.id);
-            if (!mappedAlert) {
-                continue;
+        alertToEnumerationItems.forEach((enumerationItemIds, alertId) => {
+            const alert = alertItemsMap.get(alertId);
+
+            if (!alert) {
+                return;
             }
+
+            const enumerationItems = enumerationItemIds
+                .map((id) => enumerationItemsMap.get(id))
+                .filter(Boolean) as EnumerationItem[];
+
+            const uiSubscriptionGroupAlert = getUiSubscriptionGroupAlert(
+                alert,
+                enumerationItems
+            );
 
             const uiSubscriptionGroupAlerts =
                 alertsToSubscriptionGroupIdsMap.get(subscriptionGroup.id);
             if (uiSubscriptionGroupAlerts) {
                 // Add to existing list
-                uiSubscriptionGroupAlerts.push(mappedAlert);
+                uiSubscriptionGroupAlerts.push(uiSubscriptionGroupAlert);
             } else {
                 // Create and add to list
                 alertsToSubscriptionGroupIdsMap.set(subscriptionGroup.id, [
-                    mappedAlert,
+                    uiSubscriptionGroupAlert,
                 ]);
             }
-        }
+        });
     }
 
     return alertsToSubscriptionGroupIdsMap;
 };
 
-const mapAlertsToAlertIds = (
-    alerts: Alert[]
-): Map<number, UiSubscriptionGroupAlert> => {
-    const alertsToAlertIdsMap = new Map();
+const getAlertToEnumerationItemsMapForSubscriptionGroup = (
+    subscriptionGroup: SubscriptionGroup
+): Map<number, number[]> => {
+    const alertToEnumerationItems = new Map<number, number[]>();
+    const alertAssociations = subscriptionGroup.alertAssociations;
 
-    if (isEmpty(alerts)) {
-        return alertsToAlertIdsMap;
+    if (alertAssociations && alertAssociations.length > 0) {
+        alertAssociations.forEach((alertAssociation) => {
+            const alertId = alertAssociation.alert.id;
+            const enumerationItemId = alertAssociation.enumerationItem?.id;
+
+            if (!alertToEnumerationItems.has(alertId)) {
+                alertToEnumerationItems.set(alertId, []);
+            }
+
+            if (enumerationItemId) {
+                alertToEnumerationItems.get(alertId)?.push(enumerationItemId);
+            }
+        });
+    } else {
+        // Support the legacy `alerts`
+        subscriptionGroup.alerts?.forEach((alert) => {
+            alertToEnumerationItems.set(alert.id, []);
+        });
     }
 
-    for (const alert of alerts) {
-        alertsToAlertIdsMap.set(alert.id, getUiSubscriptionGroupAlert(alert));
-    }
+    return alertToEnumerationItems;
+};
 
-    return alertsToAlertIdsMap;
+const getMapFromList = <T extends { id: I }, I = number>(
+    list: T[]
+): Map<I, T> => {
+    const itemMap = new Map<I, T>();
+
+    list.forEach((item) => {
+        itemMap.set(item.id, item);
+    });
+
+    return itemMap;
 };

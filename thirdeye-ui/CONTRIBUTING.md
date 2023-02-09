@@ -12,7 +12,7 @@ The following is a set of guidelines for contributing to the ThirdEye UI project
     -   [stylelint](#stylelint)
     -   [Prettier](#prettier)
     -   [Pull request naming standards](#pull-request-naming-standards)
-        -   [Commit messages](#commit-messages)
+-   [Creating a patch release branch](#creating-a-patch-release-branch)
 
 ## Coding conventions and standards
 
@@ -73,7 +73,7 @@ A pull request introducing a breaking change should use an exclamation mark (`!`
 
 One or more Jira issue keys can be included, separated by a space.
 
-> :bulb:<br />In case of a bot generated PR, the string `[auto]` should appear here instead of Jira issue keys.
+> :bulb:<br />In case of a bot generated PR, the string `[auto]` should appear here instead of Jira issue keys. **Please do not use this as a workaround for not having a Jira issue key.**
 
 #### description
 
@@ -96,3 +96,18 @@ In case you end up creating a pull request with a single commit and a commit mes
 $ git commit --amend -m "<new-commit-message>"
 $ git push --force-with-lease
 ```
+
+## Creating a patch release branch
+
+When creating a patch release branch, please follow the checklist below
+
+-   Locate the appropriate [GitHub tag](https://github.com/startreedata/thirdeye/tags) corresponding to the required base version
+-   Checkout the tag creating a patch release branch with the following name pattern
+
+```
+<thirdeye-ui>-<base-version>.next
+```
+
+-   Patch release branch with the above name pattern will be protected with appropriate [branch protection rules](https://github.com/startreedata/thirdeye/settings/branches)
+-   Update the `releaseBranch` property in [**release.config.js**](./release.config.js) on this branch with the patch release branch name
+-   Follow this [wiki](https://cortexdata.atlassian.net/wiki/spaces/CORTEXDATA/pages/1623785483/UI+CI+Pipelines) to setup required build/test/release pipelines for the project on this branch

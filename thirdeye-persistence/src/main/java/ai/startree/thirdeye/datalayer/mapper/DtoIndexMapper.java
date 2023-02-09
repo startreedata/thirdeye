@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
-import java.sql.Timestamp;
 import org.modelmapper.ModelMapper;
 
 public class DtoIndexMapper {
@@ -49,7 +48,7 @@ public class DtoIndexMapper {
       ((HasJsonVal) abstractIndexEntity).setJsonVal(jsonVal);
     }
     abstractIndexEntity.setBaseId(pojo.getId());
-    abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+    abstractIndexEntity.setUpdateTime(pojo.getUpdateTime());
 
     return abstractIndexEntity;
   }

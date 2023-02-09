@@ -13,12 +13,14 @@
  * the License.
  */
 import i18n from "i18next";
-import { cloneDeep, isEmpty } from "lodash";
+import { cloneDeep, flatten, isEmpty, uniq } from "lodash";
 import { formatNumberV1 } from "../../platform/utils";
 import type { Alert } from "../../rest/dto/alert.interfaces";
 import type { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
-import type {
+import {
+    AlertAssociation,
     EmailScheme,
+    SpecType,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
 import type {
@@ -31,7 +33,8 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
     return {
         name: "",
         cron: "0 */5 * * * ?",
-        alerts: [] as Alert[],
+        alerts: [] as Alert[] /** @deprecated */,
+        alertAssociations: [] as AlertAssociation[],
         notificationSchemes: {
             email: {
                 to: [],
@@ -233,6 +236,28 @@ const getUiSubscriptionGroupInternal = (
     uiSubscriptionGroup.alertCount = formatNumberV1(
         uiSubscriptionGroup.alerts.length
     );
+
+    // Number of unique dimensions
+    uiSubscriptionGroup.dimensionCount = uniq(
+        flatten(
+            uiSubscriptionGroup.alerts.map((alert) =>
+                (alert?.enumerationItems || []).map((v) => v.id)
+            )
+        )
+    ).length.toString();
+
+    // TODO remove
+    uiSubscriptionGroup.activeChannels = [
+        { type: SpecType.Slack, params: { webhookUrl: "slack-url" } },
+        // { type: SpecType.Webhook, params: { url: "webhook-url" } },
+        // {
+        //     type: SpecType.EmailSendgrid,
+        //     params: {
+        //         apiKey: "API-Key",
+        //         emailRecipients: { from: "", to: ["rec1@gmail.com"] },
+        //     },
+        // },
+    ];
 
     // Emails
     uiSubscriptionGroup.emails =

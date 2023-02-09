@@ -12,10 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export type SubscriptionGroupsViewPageParams = {
-    id: string;
-};
 
-export type SubscriptionGroupsViewPageQueryParams = {
-    selectedTab: string;
-};
+export interface PropertiesFormProps {
+    name: string;
+    cron: string;
+}

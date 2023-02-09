@@ -15,13 +15,14 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
-import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
-import { SubscriptionGroupSpecsCard } from "../../components/entity-cards/subscription-group-specs-card/subscription-group-specs-card.component";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { AlertsDimensions } from "../../components/subscription-group-view/alerts-dimensions/alerts-dimentions.component";
+import { SubscriptionGroupDetails } from "../../components/subscription-group-view/subscription-group-details/subscription-group-details.component";
 import {
     NotificationTypeV1,
     PageContentsGridV1,
@@ -44,16 +45,36 @@ import { PROMISES } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getSubscriptionGroupsAllPath } from "../../utils/routes/routes.util";
+import {
+    getConfigurationPath,
+    getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsViewPath,
+} from "../../utils/routes/routes.util";
 import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-page.interfaces";
+
+enum SubscriptionGroupViewTabs {
+    GroupDetails,
+    AlertDimensions,
+}
+
+const SelectedTab = "selectedTab";
 
 export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
         useState<UiSubscriptionGroup | null>(null);
     const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
+
     const { showDialog } = useDialogProviderV1();
     const params = useParams<SubscriptionGroupsViewPageParams>();
+    const [searchParams] = useSearchParams();
+    const [selectedTab] = useMemo(
+        () => [
+            Number(searchParams.get(SelectedTab)) ||
+                SubscriptionGroupViewTabs.GroupDetails,
+        ],
+        [searchParams]
+    );
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -193,6 +214,42 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
         });
     };
 
+    const pageHeaderProps: PageHeaderProps = {
+        breadcrumbs: [
+            {
+                label: t("label.configuration"),
+                link: getConfigurationPath(),
+            },
+            {
+                label: t("label.subscription-groups"),
+                link: getSubscriptionGroupsAllPath(),
+            },
+            {
+                label: Number(params.id),
+                link: getSubscriptionGroupsViewPath(Number(params.id)),
+            },
+        ],
+        transparentBackground: true,
+        title: uiSubscriptionGroup?.name || "",
+        subNavigation: [
+            {
+                label: t("label.group-details"),
+                link: `${getSubscriptionGroupsViewPath(
+                    Number(params.id)
+                )}?selectedTab=${SubscriptionGroupViewTabs.GroupDetails}`,
+            },
+            {
+                label: t("label.alerts-and-dimensions"),
+                link: `${getSubscriptionGroupsViewPath(
+                    Number(params.id)
+                )}?selectedTab=${SubscriptionGroupViewTabs.AlertDimensions}`,
+            },
+        ],
+        subNavigationSelected: selectedTab,
+    };
+
+    // const [editedSubscriptionGroup, setEditedSubscriptionGroup] = useState()
+
     return (
         <PageV1>
             <LoadingErrorStateSwitch
@@ -212,24 +269,40 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                     </>
                 }
             >
-                <PageHeader
-                    title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
-                />
-                <PageContentsGridV1>
-                    {/* Subscription Group */}
-                    <Grid item xs={12}>
-                        <pre>
-                            {JSON.stringify(uiSubscriptionGroup, undefined, 4)}
-                        </pre>
-                        <hr />
-                        <SubscriptionGroupCard
+                <PageHeader {...pageHeaderProps} />
+                {uiSubscriptionGroup ? (
+                    <PageContentsGridV1>
+                        {selectedTab ===
+                        SubscriptionGroupViewTabs.GroupDetails ? (
+                            <SubscriptionGroupDetails
+                                uiSubscriptionGroup={uiSubscriptionGroup}
+                            />
+                        ) : null}
+                        {selectedTab ===
+                        SubscriptionGroupViewTabs.AlertDimensions ? (
+                            <AlertsDimensions
+                                uiSubscriptionGroupAlerts={
+                                    uiSubscriptionGroup.alerts
+                                }
+                            />
+                        ) : null}
+
+                        <Grid item xs={12}>
+                            <pre>
+                                {JSON.stringify(
+                                    uiSubscriptionGroup,
+                                    undefined,
+                                    4
+                                )}
+                            </pre>
+                        </Grid>
+
+                        {/* <SubscriptionGroupCard
                             uiSubscriptionGroup={uiSubscriptionGroup}
                             onDelete={handleSubscriptionGroupDelete}
-                        />
-                    </Grid>
-
-                    {/* Notifications Groups */}
-                    <Grid item xs={12}>
+                        /> */}
+                        {/* Notifications Groups */}
+                        {/* <Grid item xs={12}>
                         {uiSubscriptionGroup &&
                             uiSubscriptionGroup.subscriptionGroup && (
                                 <SubscriptionGroupSpecsCard
@@ -239,8 +312,9 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                                     }
                                 />
                             )}
-                    </Grid>
-                </PageContentsGridV1>
+                    </Grid> */}
+                    </PageContentsGridV1>
+                ) : null}
             </LoadingErrorStateSwitch>
         </PageV1>
     );

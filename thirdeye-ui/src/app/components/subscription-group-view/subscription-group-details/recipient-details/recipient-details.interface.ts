@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export type SubscriptionGroupsViewPageParams = {
-    id: string;
-};
 
-export type SubscriptionGroupsViewPageQueryParams = {
-    selectedTab: string;
-};
+import { NotificationSpec } from "../../../../rest/dto/subscription-group.interfaces";
+
+export interface RecipientDetailsProps {
+    activeChannels: NotificationSpec[];
+}

@@ -13,14 +13,10 @@
  * the License.
  */
 import type { EnumerationItem } from "./enumeration-item.interfaces";
-import {
-    SpecConfiguration,
+import type {
+    NotificationSpec,
     SubscriptionGroup,
 } from "./subscription-group.interfaces";
-
-export interface ActiveChannel extends SpecConfiguration {
-    value: string;
-}
 
 export interface UiSubscriptionGroup {
     id: number;
@@ -31,7 +27,7 @@ export interface UiSubscriptionGroup {
     dimensionCount: string;
     emails: string[];
     emailCount: string;
-    activeChannels: ActiveChannel[]; // TODO
+    activeChannels: NotificationSpec[]; // TODO
     subscriptionGroup: SubscriptionGroup | null;
 }
 

@@ -138,6 +138,10 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     mergeAnomalyBean.setChildIds(childAnomalyIds);
 
     final Long id = genericPojoDao.create(mergeAnomalyBean);
+    if (id == null) {
+      LOG.error("Failed to store anomaly: {}", anomalyDTO);
+    }
+
     anomalyDTO.setId(id);
     return id;
   }

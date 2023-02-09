@@ -149,7 +149,12 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           alert.getLastTimestamp());
       alert.setLastTimestamp(newLastTimestamp);
       alertManager.update(alert);
-      postExecution(result);
+
+      optional(result.getAnomalies())
+          .orElse(Collections.emptyList())
+          .stream()
+          .map(this::setAnomalyAuth)
+          .forEach(anomalyDao::save);
 
       detectionTaskSuccessCounter.inc();
       LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
@@ -183,14 +188,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     return detectionPipelineResultMap.values().iterator().next();
-  }
-
-  private void postExecution(final OperatorResult result) {
-    optional(result.getAnomalies())
-        .orElse(Collections.emptyList())
-        .stream()
-        .map(this::setAnomalyAuth)
-        .forEach(anomalyDao::save);
   }
 
   private AnomalyDTO setAnomalyAuth(final AnomalyDTO anomaly) {

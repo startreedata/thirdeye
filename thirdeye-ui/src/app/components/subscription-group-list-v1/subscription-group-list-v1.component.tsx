@@ -92,20 +92,23 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
             {
                 key: "name",
                 dataKey: "name",
-                header: t("label.name"),
+                header: t("label.group-name"),
                 minWidth: 0,
                 flex: 1.5,
                 sortable: true,
                 customCellRenderer: renderLink,
             },
             {
-                key: "cron",
-                dataKey: "cron",
-                header: t("label.schedule"),
+                // TODO: Change to Active Channels + Show icons
+                key: "emailCount",
+                dataKey: "emailCount",
+                header: t("label.subscribed-emails"),
                 minWidth: 0,
                 flex: 1,
+                sortable: true,
             },
             {
+                // TODO: Change to Subscribed Dimensions
                 key: "alertCount",
                 dataKey: "alertCount",
                 header: t("label.subscribed-alerts"),
@@ -114,12 +117,11 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                 sortable: true,
             },
             {
-                key: "emailCount",
-                dataKey: "emailCount",
-                header: t("label.subscribed-emails"),
+                key: "cron",
+                dataKey: "cron",
+                header: t("label.schedule"),
                 minWidth: 0,
                 flex: 1,
-                sortable: true,
             },
         ];
 

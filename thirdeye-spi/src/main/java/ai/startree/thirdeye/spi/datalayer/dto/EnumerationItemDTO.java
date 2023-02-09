@@ -27,6 +27,7 @@ public class EnumerationItemDTO extends AbstractDTO {
   private String name;
   private String description;
   private Map<String, Object> params;
+  private AlertDTO alert;
   private List<AlertDTO> alerts;
 
   public String getName() {
@@ -53,6 +54,15 @@ public class EnumerationItemDTO extends AbstractDTO {
 
   public EnumerationItemDTO setParams(final Map<String, Object> params) {
     this.params = params;
+    return this;
+  }
+
+  public AlertDTO getAlert() {
+    return alert;
+  }
+
+  public EnumerationItemDTO setAlert(final AlertDTO alert) {
+    this.alert = alert;
     return this;
   }
 

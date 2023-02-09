@@ -13,18 +13,17 @@
  */
 package ai.startree.thirdeye.datalayer.mapper;
 
-import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
-public interface MergedAnomalyIndexMapper {
+public interface EnumerationItemIndexMapper {
 
-  MergedAnomalyIndexMapper INSTANCE = Mappers.getMapper(MergedAnomalyIndexMapper.class);
+  EnumerationItemIndexMapper INSTANCE = Mappers.getMapper(EnumerationItemIndexMapper.class);
 
-  @Mapping(source = "enumerationItem.id", target = "enumerationItemId")
-  @Mapping(target = "dimensions", ignore = true)
-  MergedAnomalyResultIndex toIndexEntity(AnomalyDTO dto);
+  @Mapping(source = "alert.id", target = "alertId")
+  EnumerationItemIndex toIndexEntity(EnumerationItemDTO dto);
 }

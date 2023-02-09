@@ -149,7 +149,12 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
           alert.getLastTimestamp());
       alert.setLastTimestamp(newLastTimestamp);
       alertManager.update(alert);
-      postExecution(result);
+
+      optional(result.getAnomalies())
+          .orElse(Collections.emptyList())
+          .stream()
+          .map(this::setAnomalyAuth)
+          .forEach(anomalyDao::save);
 
       detectionTaskSuccessCounter.inc();
       LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
@@ -183,28 +188,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     return detectionPipelineResultMap.values().iterator().next();
-  }
-
-  private void postExecution(final OperatorResult result) {
-    final List<AnomalyDTO> anomalies = result.getAnomalies();
-    if (anomalies == null) {
-      return;
-    }
-    anomalies.stream().map(this::setAnomalyAuth).forEach(anomalyDTO -> {
-      final Long id = anomalyDao.save(anomalyDTO);
-      if (id == null) {
-        LOG.error("Failed to store anomaly: {}", anomalyDTO);
-      }
-    });
-
-    // re-notify the anomalies if any
-    // note cyril - dead code - renotify is always false
-    for (final AnomalyDTO anomaly : anomalies) {
-      // if an anomaly should be re-notified, update the notification lookup table in the database
-      if (anomaly.isRenotify()) {
-        renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
-      }
-    }
   }
 
   private AnomalyDTO setAnomalyAuth(final AnomalyDTO anomaly) {

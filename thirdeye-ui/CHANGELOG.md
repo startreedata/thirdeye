@@ -1,3 +1,12 @@
+## [2.9.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.8.0...thirdeye-ui-2.9.0) (2023-02-09)
+
+
+### Features
+
+* [TE-1180](https://cortexdata.atlassian.net/browse/TE-1180) validate alert templateProperties based on properties content ([8342d0af0](https://github.com/startreedata/thirdeye/commit/8342d0af0c042020cfeaa25d0c2d7c246586cedc))
+* [TE-1231](https://cortexdata.atlassian.net/browse/TE-1231) have the chart timeframe adapt to the baseline offset ([3c3efbd31](https://github.com/startreedata/thirdeye/commit/3c3efbd310fb8e85905815362d3daa671c49fcda))
+* [TE-1267](https://cortexdata.atlassian.net/browse/TE-1267) updated tooltips on welcome flow ([662db4332](https://github.com/startreedata/thirdeye/commit/662db433297ec866ea17c681c4a77176a8f6d5aa))
+
 ## [2.8.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.7.0...thirdeye-ui-2.8.0) (2023-02-06)
 
 

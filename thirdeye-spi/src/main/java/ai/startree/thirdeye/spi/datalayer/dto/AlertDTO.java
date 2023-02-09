@@ -89,8 +89,9 @@ public class AlertDTO extends AbstractDTO {
     return lastTimestamp;
   }
 
-  public void setLastTimestamp(long lastTimestamp) {
+  public AlertDTO setLastTimestamp(long lastTimestamp) {
     this.lastTimestamp = lastTimestamp;
+    return this;
   }
 
   public boolean isActive() {

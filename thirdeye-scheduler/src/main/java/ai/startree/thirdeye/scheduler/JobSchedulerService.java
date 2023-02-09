@@ -34,6 +34,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.util.TimeUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -96,7 +97,8 @@ public class JobSchedulerService {
     return new DetectionPipelineTaskInfo(alert.getId(), start, endTime);
   }
 
-  private long computeTaskStart(final AlertDTO alert, final long endTime) {
+  @VisibleForTesting
+  protected long computeTaskStart(final AlertDTO alert, final long endTime) {
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
           UNUSED_DETECTION_INTERVAL);

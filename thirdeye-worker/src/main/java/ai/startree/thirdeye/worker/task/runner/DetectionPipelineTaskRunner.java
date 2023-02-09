@@ -186,25 +186,11 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   private void postExecution(final OperatorResult result) {
-    final List<AnomalyDTO> anomalies = result.getAnomalies();
-    if (anomalies == null) {
-      return;
-    }
-    anomalies.stream().map(this::setAnomalyAuth).forEach(anomalyDTO -> {
-      final Long id = anomalyDao.save(anomalyDTO);
-      if (id == null) {
-        LOG.error("Failed to store anomaly: {}", anomalyDTO);
-      }
-    });
-
-    // re-notify the anomalies if any
-    // note cyril - dead code - renotify is always false
-    for (final AnomalyDTO anomaly : anomalies) {
-      // if an anomaly should be re-notified, update the notification lookup table in the database
-      if (anomaly.isRenotify()) {
-        renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
-      }
-    }
+    optional(result.getAnomalies())
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(this::setAnomalyAuth)
+        .forEach(anomalyDao::save);
   }
 
   private AnomalyDTO setAnomalyAuth(final AnomalyDTO anomaly) {

@@ -173,6 +173,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
           throw new IllegalArgumentException("Loop detected! Child anomaly referencing ancestor");
         }
       }
+      child.setAuth(parentAnomaly.getAuth());
       child.setChild(true);
       childIds.add(saveAnomaly(child, visitedAnomalies));
     }

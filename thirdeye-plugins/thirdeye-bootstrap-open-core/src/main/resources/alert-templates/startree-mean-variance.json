@@ -1,6 +1,6 @@
 {
   "name": "startree-mean-variance",
-  "description": "Mean-Variance template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "description": "Detect an anomaly if the current value is not in `mean ± n*std`. `mean` and `std` (standard deviation) are estimated with historical data.  The amount of historical data to use is set with the `lookback` property. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",

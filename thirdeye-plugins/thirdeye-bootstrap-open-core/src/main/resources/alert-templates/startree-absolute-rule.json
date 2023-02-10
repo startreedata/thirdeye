@@ -1,6 +1,6 @@
 {
   "name": "startree-absolute-rule",
-  "description": "Absolute rule template. Compares the current time series to a baseline. If the absolute difference is above the threshold, detect it an anomaly. The baseline is set with the `baselineOffset`property. The threshold is set with the `absoluteChange` property. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "description": "Absolute rule template. Compares the current time series to a baseline. If the absolute difference is above the threshold, detect it anomaly. The baseline is set with the `baselineOffset`property. The threshold is set with the `absoluteChange` property. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",

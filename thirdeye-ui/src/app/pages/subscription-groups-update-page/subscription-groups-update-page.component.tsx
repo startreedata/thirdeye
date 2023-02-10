@@ -14,13 +14,13 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { SubscriptionGroupWizardNew } from "../../components/subscription-group-wizard-new/subscription-group-wizard-new.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -31,7 +31,9 @@ import {
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { getEnumerationItems } from "../../rest/enumeration-items/enumeration-items.rest";
 import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
@@ -47,10 +49,13 @@ import {
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
+    const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
     const [subscriptionGroup, setSubscriptionGroup] =
         useState<SubscriptionGroup>();
     const [alerts, setAlerts] = useState<Alert[]>([]);
+    const [enumerationItems, setEnumerationItems] = useState<EnumerationItem[]>(
+        []
+    );
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -91,7 +96,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             });
     };
 
-    const fetchSubscriptionGroup = (): void => {
+    const fetchSubscriptionGroup = async (): Promise<void> => {
         // Validate id from URL
         if (params.id && !isValidNumberId(params.id)) {
             notify(
@@ -101,94 +106,119 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     id: params.id,
                 })
             );
-            setLoading(false);
+            setStatus(ActionStatus.Error);
 
             return;
         }
 
-        Promise.allSettled([
-            getSubscriptionGroup(toNumber(params.id)),
-            getAllAlerts(),
-        ])
-            .then(([subscriptionGroupResponse, alertsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupResponse.status === PROMISES.REJECTED ||
-                    alertsResponse.status === PROMISES.REJECTED
-                ) {
-                    const axiosError =
-                        alertsResponse.status === PROMISES.REJECTED
-                            ? alertsResponse.reason
-                            : subscriptionGroupResponse.status ===
-                              PROMISES.REJECTED
-                            ? subscriptionGroupResponse.reason
-                            : ({} as AxiosError);
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      alertsResponse.status ===
-                                          PROMISES.REJECTED
-                                          ? "label.alerts"
-                                          : "label.subscription-group"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
-                }
+        const [subscriptionGroupResponse, alertsResponse] =
+            await Promise.allSettled([
+                getSubscriptionGroup(toNumber(params.id)),
+                getAllAlerts(),
+            ]);
 
-                // Attempt to gather data
-                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
-                    setSubscriptionGroup(subscriptionGroupResponse.value);
-                }
-                if (alertsResponse.status === PROMISES.FULFILLED) {
-                    setAlerts(alertsResponse.value);
-                }
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
+        if (
+            subscriptionGroupResponse.status === PROMISES.REJECTED ||
+            alertsResponse.status === PROMISES.REJECTED
+        ) {
+            const axiosError: AxiosError =
+                (alertsResponse.status === PROMISES.REJECTED &&
+                    alertsResponse.reason) ||
+                (subscriptionGroupResponse.status === PROMISES.REJECTED &&
+                    subscriptionGroupResponse.reason);
+
+            setStatus(ActionStatus.Error);
+
+            notifyIfErrors(
+                ActionStatus.Error,
+                getErrorMessages(axiosError),
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t(
+                        alertsResponse.status === PROMISES.REJECTED
+                            ? "label.alerts"
+                            : "label.subscription-group"
+                    ),
+                })
+            );
+
+            return;
+        }
+
+        setAlerts(alertsResponse.value);
+        setSubscriptionGroup(subscriptionGroupResponse.value);
+
+        const enumerationIds =
+            (subscriptionGroupResponse.value.alertAssociations
+                ?.map((a) => a?.enumerationItem?.id)
+                .filter(Boolean) || []) as number[];
+
+        if (enumerationIds && enumerationIds.length > 0) {
+            let enumerationItems: EnumerationItem[] | null = null;
+            try {
+                enumerationItems = await getEnumerationItems({
+                    ids: enumerationIds,
+                });
+                setEnumerationItems(enumerationItems);
+            } catch (err) {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(err as AxiosError),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.enumeration-item"),
+                    })
+                );
+
+                setStatus(ActionStatus.Error);
+
+                return;
+            }
+        }
+
+        setStatus(ActionStatus.Done);
     };
 
     const handleOnCancelClick = (): void => {
         navigate(getSubscriptionGroupsAllPath());
     };
 
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <PageV1>
-            <PageHeader
-                title={t("label.update-entity", {
-                    entity: t("label.subscription-group"),
-                })}
-            />
-            {subscriptionGroup && (
-                <SubscriptionGroupWizard
-                    alerts={alerts}
-                    submitBtnLabel={t("label.update-entity", {
-                        entity: t("label.subscription-group"),
-                    })}
-                    subscriptionGroup={subscriptionGroup}
-                    onCancel={handleOnCancelClick}
-                    onFinish={onSubscriptionGroupWizardFinish}
-                />
-            )}
-
-            {/* No data available message */}
-            {!subscriptionGroup && (
-                <PageContentsGridV1>
-                    <Grid item xs={12}>
-                        <NoDataIndicator />
-                    </Grid>
-                </PageContentsGridV1>
-            )}
+            <LoadingErrorStateSwitch
+                isError={status === ActionStatus.Error}
+                isLoading={status === ActionStatus.Working}
+                loadingState={<AppLoadingIndicatorV1 />}
+            >
+                {subscriptionGroup ? (
+                    <SubscriptionGroupWizardNew
+                        isExisting
+                        alerts={alerts}
+                        enumerationItems={enumerationItems}
+                        submitBtnLabel={t("label.update-entity", {
+                            entity: t("label.subscription-group"),
+                        })}
+                        subscriptionGroup={subscriptionGroup}
+                        onCancel={handleOnCancelClick}
+                        onFinish={onSubscriptionGroupWizardFinish}
+                    />
+                ) : (
+                    // <SubscriptionGroupWizard
+                    //     alerts={alerts}
+                    //     submitBtnLabel={t("label.update-entity", {
+                    //         entity: t("label.subscription-group"),
+                    //     })}
+                    //     subscriptionGroup={subscriptionGroup}
+                    //     onCancel={handleOnCancelClick}
+                    //     onFinish={onSubscriptionGroupWizardFinish}
+                    // />
+                    <PageContentsGridV1>
+                        <Grid item xs={12}>
+                            <NoDataIndicator />
+                        </Grid>
+                    </PageContentsGridV1>
+                )}
+            </LoadingErrorStateSwitch>
         </PageV1>
     );
 };

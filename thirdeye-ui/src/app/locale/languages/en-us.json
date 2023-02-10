@@ -383,6 +383,7 @@
     },
     "message": {
         "absolute-change-rule-algorithm-description": "Compares current time series to a baseline. If the absolute change is above a certain threshold, detect it as an anomaly.",
+        "add-alert-dimensions": "Add alert dimensions",
         "add-emails-example": "Add multiple emails separated by comma. e.g. email1@domain.com, email2@domain.com.",
         "add-new-pinot-datasource": "Add new Pinot datasource",
         "add-the-final-details-for-your-alert": "Add the final details for your alert",

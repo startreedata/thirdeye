@@ -13,8 +13,22 @@
  * the License.
  */
 
-import { UiSubscriptionGroup } from "../../../rest/dto/ui-subscription-group.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 
-export interface SubscriptionGroupDetailsProps {
-    uiSubscriptionGroup: UiSubscriptionGroup;
-}
+export const getEnumerationItemName = (
+    item?: EnumerationItem
+): string | null => {
+    if (!item) {
+        return null;
+    }
+
+    const { params, name } = item;
+
+    if (!params) {
+        return name;
+    }
+
+    return Object.entries(params)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(";");
+};

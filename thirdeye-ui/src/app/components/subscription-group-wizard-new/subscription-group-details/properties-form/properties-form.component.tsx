@@ -22,8 +22,7 @@ import {
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { AlertFrequency } from "../../../alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
+import { CronEditor } from "../../../cron-editor-v1/cron-editor-v1.component";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { PropertiesFormProps } from "./properties-form.interface";
 
@@ -34,7 +33,7 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
 }) => {
     const { t } = useTranslation();
 
-    const handleCronUpdate = (props?: { cron?: string }): void => {
+    const handleUpdateCron = (cron: string): void => {
         // console.log("Updated cron: ", props);
     };
 
@@ -46,7 +45,6 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
                     <InputSection
                         inputComponent={
                             <TextField
-                                disabled
                                 fullWidth
                                 required
                                 // error={Boolean(
@@ -65,11 +63,10 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
                         }
                         label={t("label.group-name")}
                     />
-
                     {/* TODO: Move to dedicated component */}
-                    <AlertFrequency<EditableAlert>
-                        alert={{ cron } as EditableAlert}
-                        onAlertPropertyChange={handleCronUpdate}
+                    <CronEditor
+                        cron={cron}
+                        handleUpdateCron={handleUpdateCron}
                     />
                 </CardContent>
             </Card>

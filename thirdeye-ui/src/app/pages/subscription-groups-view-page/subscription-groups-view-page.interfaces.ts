@@ -15,7 +15,3 @@
 export type SubscriptionGroupsViewPageParams = {
     id: string;
 };
-
-export type SubscriptionGroupsViewPageQueryParams = {
-    selectedTab: string;
-};

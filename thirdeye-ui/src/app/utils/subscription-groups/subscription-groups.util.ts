@@ -361,7 +361,7 @@ const getAlertToEnumerationItemsMapForSubscriptionGroup = (
     return alertToEnumerationItems;
 };
 
-const getMapFromList = <T extends { id: I }, I = number>(
+export const getMapFromList = <T extends { id: I }, I = number>(
     list: T[]
 ): Map<I, T> => {
     const itemMap = new Map<I, T>();

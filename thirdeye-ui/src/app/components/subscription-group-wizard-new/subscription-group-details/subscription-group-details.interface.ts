@@ -13,8 +13,8 @@
  * the License.
  */
 
-import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
-export interface AlertsDimensionsProps {
-    uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[];
+export interface SubscriptionGroupDetailsProps {
+    subscriptionGroup: SubscriptionGroup;
 }

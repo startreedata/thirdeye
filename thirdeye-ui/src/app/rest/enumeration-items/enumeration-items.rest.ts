@@ -32,7 +32,7 @@ export const getEnumerationItems = async ({
         url += `?${queryParams.toString()}`;
     }
 
-    const response = await axios.get(url);
+    const response = await axios.get<EnumerationItem[]>(url);
 
     return response.data;
 };
@@ -40,7 +40,9 @@ export const getEnumerationItems = async ({
 export const getEnumerationItem = async (
     id: number
 ): Promise<EnumerationItem> => {
-    const response = await axios.get(`${BASE_URL_ENUMERATION_ITEM}/${id}`);
+    const response = await axios.get<EnumerationItem>(
+        `${BASE_URL_ENUMERATION_ITEM}/${id}`
+    );
 
     return response.data;
 };

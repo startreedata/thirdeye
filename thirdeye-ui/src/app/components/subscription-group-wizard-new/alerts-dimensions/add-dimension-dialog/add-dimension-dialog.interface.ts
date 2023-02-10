@@ -12,12 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Alert } from "./alert.interfaces";
-import { EnumerationItemParams } from "./detection.interfaces";
 
-export interface EnumerationItem {
+import { Alert } from "../../../../rest/dto/alert.interfaces";
+import { Association } from "../../subscription-group-wizard-new.interface";
+
+export interface DimensionRow {
     id: number;
     name: string;
-    params: EnumerationItemParams;
-    alerts: Pick<Alert, "id">[];
+}
+
+export interface AddDimensionDialogProps {
+    alerts: Alert[];
+    associations: Association[];
 }

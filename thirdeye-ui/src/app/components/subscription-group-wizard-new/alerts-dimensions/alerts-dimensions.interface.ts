@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Alert } from "./alert.interfaces";
-import { EnumerationItemParams } from "./detection.interfaces";
 
-export interface EnumerationItem {
-    id: number;
-    name: string;
-    params: EnumerationItemParams;
-    alerts: Pick<Alert, "id">[];
+import { Alert } from "../../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
+import { Association } from "../subscription-group-wizard-new.interface";
+
+export interface AlertsDimensionsProps {
+    alerts: Alert[];
+    enumerationItems: EnumerationItem[];
+    associations: Association[];
+    handleChangeAssociations: (newAssociations: Association[]) => void;
 }

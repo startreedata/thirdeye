@@ -1,6 +1,6 @@
 {
   "name": "startree-percentage-rule",
-  "description": "Percentage rule template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "description": "Detect an anomaly if the percentage difference between the current value and the baseline is greater than the threshold. The baseline is a previous value, set with the `baselineOffset` property. The threshold is set with the `percentageChange` property. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",
@@ -230,7 +230,9 @@
       "name":  "aggregationFunction"
     },
     {
-      "name":  "baselineOffset"
+      "name":  "baselineOffset",
+      "description": "Offset in ISO-8601 format. Example: `P7D` means \"use the value of the last week as a baseline\".",
+      "jsonType": "STRING"
     },
     {
       "name":  "dataSource"
@@ -242,7 +244,10 @@
       "name":  "monitoringGranularity"
     },
     {
-      "name":  "percentageChange"
+      "name":  "percentageChange",
+      "description": "Percentage threshold. If the percentage change is above this threshold, detect an anomaly.\nIn ratio. Eg 0.1 means 10 percent. [Learn more](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/reference/operators/anomaly-detector/percentage).",
+      "min": 0,
+      "jsonType": "NUMBER"
     },
     {
       "name": "timezone",

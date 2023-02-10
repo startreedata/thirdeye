@@ -1,6 +1,6 @@
 {
   "name": "startree-threshold",
-  "description": "Threshold template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "description": "Detect an anomaly if a metric is above a maximum threshold or below a minimum threshold. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",
@@ -204,10 +204,14 @@
       "name":  "dataset"
     },
     {
-      "name": "max"
+      "name": "max",
+      "description": "If the current value is above this threshold, detect an anomaly.",
+      "type": "NUMBER"
     },
     {
-      "name": "min"
+      "name": "min",
+      "description": "If the current value is below this threshold, detect an anomaly.",
+      "type": "NUMBER"
     },
     {
       "name":  "monitoringGranularity"

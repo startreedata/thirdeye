@@ -225,7 +225,7 @@
   "properties": [
     {
       "name":  "absoluteChange",
-      "description": "Difference threshold. If the absolute difference between the current value and the baseline value is above this threshold, an anomaly is detected.",
+      "description": "Difference threshold. If the absolute difference between the metric and the baseline value is above this threshold, an anomaly is detected.",
       "min": 0,
       "jsonType": "NUMBER"
     },

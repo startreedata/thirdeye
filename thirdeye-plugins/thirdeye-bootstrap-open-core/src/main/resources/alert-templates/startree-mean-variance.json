@@ -362,7 +362,7 @@
       "name": "seasonalityPeriod",
       "defaultValue": "PT0S",
       "description": "Seasonality to consider when computing mean and variance. Possible values are `P7D` (weekly and smaller periods), `P1D` (daily and smaller periods), PT0S (no seasonality). Eg: with P7D, a Monday 12 AM value will be estimated from the mean and variance of the previous Monday 12 AM values. ",
-      "options": ["P0D", "P1D", "P7D"],
+      "options": ["PT0S", "P1D", "P7D"],
       "multiselect": false,
       "jsonType": "STRING"
     },

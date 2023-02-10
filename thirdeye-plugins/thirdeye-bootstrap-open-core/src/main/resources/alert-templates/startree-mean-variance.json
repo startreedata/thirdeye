@@ -1,6 +1,6 @@
 {
   "name": "startree-mean-variance",
-  "description": "Mean-Variance template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "description": "Detect an anomaly if the metric is not in `mean ± n*std`. `mean` and `std` (standard deviation) are estimated with historical data.  The amount of historical data to use is set with the `lookback` property. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",
@@ -360,7 +360,11 @@
     },
     {
       "name": "seasonalityPeriod",
-      "defaultValue": "PT0S"
+      "defaultValue": "PT0S",
+      "description": "Seasonality to consider when computing mean and variance. Possible values are `P7D` (weekly and smaller periods), `P1D` (daily and smaller periods), PT0S (no seasonality). Eg: with P7D, a Monday 12 AM value will be estimated from the mean and variance of the previous Monday 12 AM values. ",
+      "options": ["PT0S", "P1D", "P7D"],
+      "multiselect": false,
+      "jsonType": "STRING"
     },
     {
       "name": "replayReNotifyPercentageThreshold",

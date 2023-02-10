@@ -44,11 +44,6 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   private PlanNode combiner;
   private DetectionPipelineContext detectionPipelineContext;
 
-  private static List<AlertDTO> singletonAlertList(final Long alertId) {
-    final AlertDTO alert = newAlert(alertId);
-    return List.of(alert);
-  }
-
   private static AlertDTO newAlert(final Long alertId) {
     final AlertDTO alert = new AlertDTO();
     alert.setId(alertId);
@@ -122,7 +117,6 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
       /* decorate enumeration item with alert id */
       final var decorated = enumerationItems.stream()
-          .map(e -> e.setAlerts(singletonAlertList(alertId)))
           .map(e -> e.setAlert(newAlert(alertId)))
           .collect(Collectors.toList());
 

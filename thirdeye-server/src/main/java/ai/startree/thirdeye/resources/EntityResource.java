@@ -16,9 +16,11 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
+import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -53,10 +55,13 @@ import javax.ws.rs.core.UriInfo;
 public class EntityResource {
 
   private final GenericPojoDao genericPojoDao;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
-  public EntityResource(final GenericPojoDao genericPojoDao) {
+  public EntityResource(final GenericPojoDao genericPojoDao,
+      final AuthorizationManager authorizationManager) {
     this.genericPojoDao = genericPojoDao;
+    this.authorizationManager = authorizationManager;
   }
 
   @GET
@@ -64,7 +69,9 @@ public class EntityResource {
   public Response getRawEntity(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
-    return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
+    final AbstractDTO dto = ensureExists(genericPojoDao.getRaw(id));
+    authorizationManager.ensureCanRead(principal, dto);
+    return Response.ok(dto).build();
   }
 
   @GET
@@ -134,7 +141,9 @@ public class EntityResource {
       } else {
         abstractBeans = genericPojoDao.list(beanClass, limit, offset);
       }
-      return Response.ok(abstractBeans).build();
+      return Response.ok(abstractBeans.stream().filter(dto ->
+          authorizationManager.hasAccess(principal, dto, AccessType.READ)
+      )).build();
     } catch (Exception e) {
       throw serverError(ThirdEyeStatus.ERR_UNKNOWN, e);
     }

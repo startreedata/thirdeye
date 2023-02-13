@@ -119,4 +119,4 @@ $ git checkout tags/<GitHub-tag-name> -b <patch-release-branch-name>
 ```
 
 -   Update the `releaseBranch` property in [**release.config.js**](./release.config.js) on this branch with the patch release branch name
--   Follow this [wiki](https://cortexdata.atlassian.net/wiki/spaces/CORTEXDATA/pages/1623785483/UI+CI+Pipelines) to setup required build/test/release pipelines for this branch
+-   Setup required build/test/release pipelines for this branch

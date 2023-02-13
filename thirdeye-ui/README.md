@@ -286,10 +286,6 @@ Run [`license-header-fix`](#license-header-fix), [`eslint-fix`](#eslint-fix), [`
 $ npm run lint-fix
 ```
 
-## Contributing
-
-[Coding standards, conventions and other things.](./CONTRIBUTING.md)
-
 ### `ci-check`
 
 Run all the scripts that will be executed as part of pull request validation for the project
@@ -297,3 +293,7 @@ Run all the scripts that will be executed as part of pull request validation for
 ```console
 $ npm run ci-check
 ```
+
+## Contributing
+
+[Coding standards, conventions and other things.](./CONTRIBUTING.md)

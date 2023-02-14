@@ -312,6 +312,7 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   private long getTaskLatency(TaskType type) {
+    // fetch pending tasks from DB of the given type
     final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);
     final DaoFilter filter = new DaoFilter()
         .setPredicate(Predicate.AND(
@@ -320,6 +321,7 @@ public class TaskManagerImpl implements TaskManager {
         ));
     final long currentTime = System.currentTimeMillis();
     return filter(filter).stream()
+        // Calculate latency as max value of (current time) - (task creation time) from the filtered tasks
         .map(task -> currentTime - task.getCreateTime().getTime())
         .max(Long::compare).orElse(0L);
   }

@@ -291,9 +291,39 @@ public class TaskManagerImpl implements TaskManager {
         return count();
       }
     });
+
+    metricRegistry.register("detectionTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+      @Override
+      protected Long loadValue() {
+        return getTaskLatency(TaskType.DETECTION);
+      }
+    });
+
+    metricRegistry.register("notificationTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+      @Override
+      protected Long loadValue() {
+        return getTaskLatency(TaskType.NOTIFICATION);
+      }
+    });
+
     for (TaskStatus status : TaskStatus.values()) {
       registerStatusMetric(status);
     }
+  }
+
+  private long getTaskLatency(TaskType type) {
+    // fetch pending tasks from DB of the given type
+    final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);
+    final DaoFilter filter = new DaoFilter()
+        .setPredicate(Predicate.AND(
+            Predicate.IN("status", pendingStatus.toArray()),
+            Predicate.EQ("type", type)
+        ));
+    final long currentTime = System.currentTimeMillis();
+    return filter(filter).stream()
+        // Calculate latency as max value of (current time) - (task creation time) from the filtered tasks
+        .map(task -> currentTime - task.getCreateTime().getTime())
+        .max(Long::compare).orElse(0L);
   }
 
   private void registerStatusMetric(final TaskStatus status) {

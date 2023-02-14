@@ -30,38 +30,46 @@ import org.testng.annotations.Test;
 public class TestTaskManager {
 
   @Test
-  public void taskLatencyMetricTest() {
-    final TaskDTO pendingTask = buildTask("test-job-1", TaskType.DETECTION, TaskStatus.WAITING);
-    final TaskDTO completedTask = buildTask("test-job-2", TaskType.NOTIFICATION, TaskStatus.COMPLETED);
-    final List<TaskDTO> tasks = List.of(pendingTask, completedTask);
-
+  public void notificationTaskLatencyMetricTest() {
     final Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+    final Timestamp olderTS = new Timestamp(currentTime.getTime() - 60000);
+    final Timestamp recentTS = new Timestamp(currentTime.getTime() - 30000);
 
-    // Case 1 - Task execution fulfilled with a higher latency than pending tasks
-    pendingTask.setCreateTime(currentTime);
-    completedTask.setCreateTime(new Timestamp(currentTime.getTime() - 60000))
-        .setUpdateTime(currentTime);
-    Long value = getTaskLatencyGaugeValue(tasks);
-    assertThat(value).isGreaterThanOrEqualTo(60000);
+    final List<TaskDTO> tasks = List.of(
+        buildTask("test-job-1", TaskType.NOTIFICATION, TaskStatus.WAITING, recentTS),
+        buildTask("test-job-2", TaskType.NOTIFICATION, TaskStatus.RUNNING, olderTS));
 
-    // Case 2 - Pending tasks have a higher latency than completed task runs
-    pendingTask.setCreateTime(new Timestamp(currentTime.getTime() - 300000));
-    value = getTaskLatencyGaugeValue(tasks);
-    assertThat(value).isGreaterThanOrEqualTo(300000);
+    final Long latency = getGaugeValue(tasks, "notificationTaskLatencyInMillis");
+    assertThat(latency).isGreaterThanOrEqualTo(60000);
   }
 
-  private Long getTaskLatencyGaugeValue(final List<TaskDTO> tasks) {
+  @Test
+  public void detectionTaskLatencyMetricTest() {
+    final Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+    final Timestamp olderTS = new Timestamp(currentTime.getTime() - 60000);
+    final Timestamp recentTS = new Timestamp(currentTime.getTime() - 30000);
+
+    final List<TaskDTO> tasks = List.of(
+        buildTask("test-job-1", TaskType.DETECTION, TaskStatus.WAITING, recentTS),
+        buildTask("test-job-2", TaskType.DETECTION, TaskStatus.RUNNING, olderTS));
+
+    final Long latency = getGaugeValue(tasks, "detectionTaskLatencyInMillis");
+    assertThat(latency).isGreaterThanOrEqualTo(60000);
+  }
+
+  private Long getGaugeValue(final List<TaskDTO> tasks, final String gaugeName) {
     final TaskDao dao = Mockito.mock(TaskDao.class);
     when(dao.filter(any())).thenReturn(tasks);
     final MetricRegistry metricRegistry = new MetricRegistry();
     new TaskManagerImpl(dao, metricRegistry);
-    return (Long) metricRegistry.getGauges().get("taskLatencyInMillis").getValue();
+    return (Long) metricRegistry.getGauges().get(gaugeName).getValue();
   }
 
-  private TaskDTO buildTask(String name, TaskType type, TaskStatus status) {
-    return new TaskDTO()
+  private TaskDTO buildTask(String name, TaskType type, TaskStatus status, Timestamp createTme) {
+    return (TaskDTO) new TaskDTO()
         .setJobName(name)
         .setTaskType(type)
-        .setStatus(status);
+        .setStatus(status)
+        .setCreateTime(createTme);
   }
 }

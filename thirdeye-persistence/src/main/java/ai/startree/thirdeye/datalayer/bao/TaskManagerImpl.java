@@ -67,8 +67,6 @@ public class TaskManagerImpl implements TaskManager {
   private static final String FIND_BY_NAME_ORDER_BY_CREATE_TIME_DESC =
       " WHERE name = :name order by createTime desc limit ";
 
-  private static Timestamp taskLatencyWindowStart = new Timestamp(System.currentTimeMillis());
-
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
   private final Meter orphanTasksCount;
@@ -294,43 +292,36 @@ public class TaskManagerImpl implements TaskManager {
       }
     });
 
-    metricRegistry.register("taskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+    metricRegistry.register("detectionTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
       @Override
       protected Long loadValue() {
-        final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);
-        final Timestamp taskLatencyWindowEnd = new Timestamp(System.currentTimeMillis());
-        final DaoFilter filter = new DaoFilter()
-            .setPredicate(Predicate.OR(
-                // tasks which are still active in the lifecycle
-                Predicate.IN("status", pendingStatus.toArray()),
-                // tasks which completed(updated with the final status) lifecycle in the window
-                Predicate.AND(
-                    Predicate.GE("updateTime", taskLatencyWindowStart),
-                    Predicate.LT("updateTime", taskLatencyWindowEnd)
-                )
-            ));
-        final List<TaskDTO> tasks = filter(filter);
-        if(tasks.isEmpty()) {
-          return 0L;
-        }
-        final long maxLatency = tasks.stream().map(task -> {
-          if(pendingStatus.contains(task.getStatus())) {
-            // Time spent by active tasks in the system. From creation till now
-            return (taskLatencyWindowEnd.getTime() - task.getCreateTime().getTime());
-          } else {
-            // Time spent by fulfilled tasks. From creation time to last updated time
-            return (task.getUpdateTime().getTime() - task.getCreateTime().getTime());
-          }
-        }).max(Long::compare).get();
-        // move the latency calculation window
-        taskLatencyWindowStart = taskLatencyWindowEnd;
-        return maxLatency;
+        return getTaskLatency(TaskType.DETECTION);
+      }
+    });
+
+    metricRegistry.register("notificationTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+      @Override
+      protected Long loadValue() {
+        return getTaskLatency(TaskType.NOTIFICATION);
       }
     });
 
     for (TaskStatus status : TaskStatus.values()) {
       registerStatusMetric(status);
     }
+  }
+
+  private long getTaskLatency(TaskType type) {
+    final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);
+    final DaoFilter filter = new DaoFilter()
+        .setPredicate(Predicate.AND(
+            Predicate.IN("status", pendingStatus.toArray()),
+            Predicate.EQ("type", type)
+        ));
+    final long currentTime = System.currentTimeMillis();
+    return filter(filter).stream()
+        .map(task -> currentTime - task.getCreateTime().getTime())
+        .max(Long::compare).orElse(0L);
   }
 
   private void registerStatusMetric(final TaskStatus status) {

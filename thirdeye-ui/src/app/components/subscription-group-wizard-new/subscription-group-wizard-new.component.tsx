@@ -14,7 +14,7 @@
  */
 
 import { Box, Button, Grid } from "@material-ui/core";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
@@ -31,6 +31,7 @@ import {
 import { PageHeader } from "../page-header/page-header.component";
 import { PageHeaderProps } from "../page-header/page-header.interfaces";
 import { AlertsDimensions } from "./alerts-dimensions/alerts-dimensions.component";
+import { getAssociationId } from "./alerts-dimensions/alerts-dimensions.utils";
 import { SubscriptionGroupDetails } from "./subscription-group-details/subscription-group-details.component";
 import {
     Association,
@@ -44,7 +45,7 @@ const SelectedTab = "selectedTab";
 const getAssociations = (
     subscriptionGroup: SubscriptionGroup
 ): Association[] => {
-    const alertAssociations = subscriptionGroup.alertAssociations;
+    const { alertAssociations, alerts = [] } = subscriptionGroup;
 
     const associations: Association[] = alertAssociations?.length
         ? alertAssociations.map(({ alert, enumerationItem }) => ({
@@ -52,9 +53,16 @@ const getAssociations = (
               ...(enumerationItem?.id && {
                   enumerationId: enumerationItem?.id,
               }),
+              id: getAssociationId({
+                  alertId: alert.id,
+                  enumerationId: enumerationItem?.id,
+              }),
           }))
-        : (subscriptionGroup.alerts || []).map((alert) => ({
+        : alerts.map((alert) => ({
               alertId: alert.id,
+              id: getAssociationId({
+                  alertId: alert.id,
+              }),
           }));
 
     return associations;
@@ -128,6 +136,33 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
             subNavigationSelected: selectedTab,
         };
 
+        const handleChangeEditedSubscriptionGroup = (
+            newData: Partial<SubscriptionGroup>
+        ): void => {
+            setEditedSubscriptionGroup((subscriptionGroupProp) => ({
+                ...subscriptionGroupProp,
+                ...newData,
+            }));
+        };
+
+        useEffect(() => {
+            const newSubscriptionGroupAssociations = editedAssociations.map(
+                (association) => ({
+                    alert: { id: association.alertId },
+                    ...(association.enumerationId && {
+                        enumerationItem: { id: association.enumerationId },
+                    }),
+                })
+            ) as SubscriptionGroup["alertAssociations"];
+
+            // Remove the @deprecated `alerts` key from existing data
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            setEditedSubscriptionGroup(({ alerts, ...stateProp }) => ({
+                ...stateProp,
+                alertAssociations: newSubscriptionGroupAssociations,
+            }));
+        }, [editedAssociations]);
+
         return (
             <>
                 <PageHeader {...pageHeaderProps} />
@@ -136,6 +171,7 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
                     {selectedTab === SubscriptionGroupViewTabs.GroupDetails ? (
                         <SubscriptionGroupDetails
                             subscriptionGroup={editedSubscriptionGroup}
+                            onChange={handleChangeEditedSubscriptionGroup}
                         />
                     ) : null}
                     {selectedTab ===
@@ -144,19 +180,20 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
                             alerts={alerts}
                             associations={editedAssociations}
                             enumerationItems={enumerationItems}
-                            handleChangeAssociations={setEditedAssociations}
+                            setAssociations={setEditedAssociations}
+                            onChange={handleChangeEditedSubscriptionGroup}
                         />
                     ) : null}
 
-                    {/* <Grid item xs={12}>
-                <pre>
-                    {JSON.stringify(
-                        uiSubscriptionGroup,
-                        undefined,
-                        4
-                    )}
-                </pre>
-            </Grid> */}
+                    <Grid item xs={12}>
+                        <pre>
+                            {JSON.stringify(
+                                editedSubscriptionGroup,
+                                undefined,
+                                4
+                            )}
+                        </pre>
+                    </Grid>
                 </PageContentsGridV1>
                 <Box textAlign="right" width="100%">
                     <PageContentsCardV1>

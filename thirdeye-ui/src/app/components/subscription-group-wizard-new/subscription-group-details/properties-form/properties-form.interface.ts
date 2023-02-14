@@ -13,7 +13,12 @@
  * the License.
  */
 
-export interface PropertiesFormProps {
+interface FormValues {
     name: string;
     cron: string;
+}
+
+export interface PropertiesFormProps {
+    values: FormValues;
+    onChange: (newValue: Partial<FormValues>) => void;
 }

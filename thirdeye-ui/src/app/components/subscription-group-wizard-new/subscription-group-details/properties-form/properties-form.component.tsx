@@ -28,13 +28,17 @@ import { PropertiesFormProps } from "./properties-form.interface";
 
 // Refer: SubscriptionGroupPropertiesForm
 export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
-    name,
-    cron,
+    values: { name, cron },
+    onChange,
 }) => {
     const { t } = useTranslation();
 
     const handleUpdateCron = (cron: string): void => {
-        // console.log("Updated cron: ", props);
+        onChange({ cron });
+    };
+
+    const handleUpdateName = (name: string): void => {
+        onChange({ name });
     };
 
     return (
@@ -56,14 +60,14 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
                                 name="name"
                                 type="string"
                                 value={name}
-                                // onChange={(e) => {
-                                // }}
                                 variant="outlined"
+                                onChange={(e) => {
+                                    handleUpdateName(e.currentTarget.value);
+                                }}
                             />
                         }
                         label={t("label.group-name")}
                     />
-                    {/* TODO: Move to dedicated component */}
                     <CronEditor
                         cron={cron}
                         handleUpdateCron={handleUpdateCron}

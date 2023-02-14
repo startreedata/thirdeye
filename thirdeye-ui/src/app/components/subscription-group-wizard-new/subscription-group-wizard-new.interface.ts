@@ -38,6 +38,7 @@ export type SubscriptionGroupsWizardParams = {
 };
 
 export interface Association {
+    id: string;
     alertId: number;
     enumerationId?: number;
 }

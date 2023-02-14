@@ -17,4 +17,5 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
 
 export interface SubscriptionGroupDetailsProps {
     subscriptionGroup: SubscriptionGroup;
+    onChange: (p: Partial<SubscriptionGroup>) => void;
 }

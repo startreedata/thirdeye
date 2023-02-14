@@ -13,13 +13,16 @@
  * the License.
  */
 
+import { Dispatch, SetStateAction } from "react";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 import { Association } from "../subscription-group-wizard-new.interface";
 
 export interface AlertsDimensionsProps {
     alerts: Alert[];
     enumerationItems: EnumerationItem[];
     associations: Association[];
-    handleChangeAssociations: (newAssociations: Association[]) => void;
+    setAssociations: Dispatch<SetStateAction<Association[]>>;
+    onChange: (p: Partial<SubscriptionGroup>) => void;
 }

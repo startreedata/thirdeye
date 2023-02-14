@@ -1,9 +1,3 @@
-import { DataGridSelectionModelV1 } from "../../../../platform/components";
-import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
-import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
-import { Association } from "../../subscription-group-wizard-new.interface";
-import { DimensionRow } from "./add-dimension-dialog.interface";
-
 /*
  * Copyright 2022 StarTree Inc
  *
@@ -18,6 +12,14 @@ import { DimensionRow } from "./add-dimension-dialog.interface";
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
+import { DataGridSelectionModelV1 } from "../../../../platform/components";
+import { Alert } from "../../../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
+import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
+import { Association } from "../../subscription-group-wizard-new.interface";
+import { getAssociationId } from "../alerts-dimensions.utils";
+import { DimensionRow } from "./add-dimension-dialog.interface";
 
 export const getEnumerationItemName = (
     item?: EnumerationItem
@@ -37,19 +39,19 @@ export const getEnumerationItemName = (
         .join(";");
 };
 
-export const getId = ({ alertId, enumerationId }: Association): string =>
-    `${alertId}${enumerationId ? `-${enumerationId}` : ""}`;
-
 export const getDimensionRow = (
-    enumerationItem: EnumerationItem
+    enumerationItem: EnumerationItem,
+    alertId: number
 ): DimensionRow => ({
-    id: enumerationItem.id,
+    id: getAssociationId({ alertId, enumerationId: enumerationItem.id }),
     name: getEnumerationItemName(enumerationItem) as string,
 });
 
 export const getDimensionRows = (
-    enumerationItems: EnumerationItem[]
-): DimensionRow[] => enumerationItems.map(getDimensionRow);
+    enumerationItems: EnumerationItem[],
+    alertId: number
+): DimensionRow[] =>
+    enumerationItems.map((item) => getDimensionRow(item, alertId));
 
 export const ALL_DIMENSIONS_INDEX = -1;
 
@@ -58,21 +60,23 @@ export const getSelectedRows = ({
     enumerationItems = [],
     allSelected = false,
     AllDimensionsSelectedRow,
+    selectedAlertId,
 }: {
     associations?: Association[];
     enumerationItems?: EnumerationItem[];
     allSelected?: boolean;
     AllDimensionsSelectedRow: DimensionRow;
+    selectedAlertId: number;
 }): DataGridSelectionModelV1<DimensionRow> => {
     const enumerationItemsMap = getMapFromList(enumerationItems);
 
     const rowKeyValues: unknown[] = allSelected
         ? [ALL_DIMENSIONS_INDEX]
-        : associations.map((item) => item.enumerationId);
+        : associations.map((item) => getAssociationId(item));
 
     const rowKeyValueMap = new Map<number, DimensionRow>(
         allSelected
-            ? [[ALL_DIMENSIONS_INDEX, AllDimensionsSelectedRow]]
+            ? [[selectedAlertId, AllDimensionsSelectedRow]]
             : (
                   associations
                       .filter((item) => item.enumerationId)
@@ -82,7 +86,7 @@ export const getSelectedRows = ({
                       .filter((v) => v) as EnumerationItem[]
               ).map<[number, DimensionRow]>((enumerationItem) => [
                   enumerationItem?.id || ALL_DIMENSIONS_INDEX,
-                  getDimensionRow(enumerationItem),
+                  getDimensionRow(enumerationItem, selectedAlertId),
               ])
     );
 
@@ -91,3 +95,52 @@ export const getSelectedRows = ({
         rowKeyValueMap,
     };
 };
+
+export const getEnumerationItemsForAlert = (
+    enumerationItems: EnumerationItem[],
+    alert: Alert
+): EnumerationItem[] => {
+    return (enumerationItems || []).filter(
+        (enumerationItem) =>
+            // TODO: Confirm if this works
+            (enumerationItem.alerts || [])?.some((a) => a.id === alert.id) ||
+            enumerationItem.alert?.id === alert.id
+    );
+};
+
+export const getAssociationIdsForAlert = ({
+    enumerationIds,
+    alertId,
+}: {
+    enumerationIds: number[];
+    alertId: number;
+}): string[] =>
+    [undefined, ...enumerationIds].map((enumerationId) =>
+        getAssociationId({
+            alertId,
+            enumerationId,
+        })
+    );
+
+export const getDataRowsForAlert = ({
+    AllDimensionsSelectedRow,
+    allSelected,
+    enumerationItemsForAlert,
+    alertId,
+}: {
+    AllDimensionsSelectedRow: DimensionRow;
+    allSelected: boolean;
+    enumerationItemsForAlert: EnumerationItem[];
+    alertId: number;
+}): DimensionRow[] => [
+    AllDimensionsSelectedRow,
+    ...(allSelected ? [] : getDimensionRows(enumerationItemsForAlert, alertId)),
+];
+
+export const areAllRowsSelected = ({
+    selectedRow,
+    alertId,
+}: {
+    selectedRow: DataGridSelectionModelV1<DimensionRow>;
+    alertId: number;
+}): boolean => selectedRow.rowKeyValues.includes(getAssociationId({ alertId }));

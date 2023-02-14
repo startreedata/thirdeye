@@ -19,12 +19,17 @@ import { RecipientDetails } from "./recipient-details/recipient-details.componen
 import type { SubscriptionGroupDetailsProps } from "./subscription-group-details.interface";
 
 export const SubscriptionGroupDetails: FunctionComponent<SubscriptionGroupDetailsProps> =
-    ({ subscriptionGroup }) => {
+    ({ subscriptionGroup, onChange }) => {
+        const propertiesFormValues = {
+            cron: subscriptionGroup.cron,
+            name: subscriptionGroup.name,
+        };
+
         return (
             <>
                 <PropertiesForm
-                    cron={subscriptionGroup.cron}
-                    name={subscriptionGroup.name}
+                    values={propertiesFormValues}
+                    onChange={onChange}
                 />
                 <RecipientDetails
                     activeChannels={subscriptionGroup.activeChannels}

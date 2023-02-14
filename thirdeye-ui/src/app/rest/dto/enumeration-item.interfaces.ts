@@ -19,5 +19,6 @@ export interface EnumerationItem {
     id: number;
     name: string;
     params: EnumerationItemParams;
-    alerts: Pick<Alert, "id">[];
+    alerts?: Pick<Alert, "id">[];
+    alert?: Pick<Alert, "id">;
 }

@@ -14,6 +14,7 @@
  */
 
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
+import { Association } from "../subscription-group-wizard-new.interface";
 
 export const getEnumerationItemName = (
     item?: EnumerationItem
@@ -32,3 +33,9 @@ export const getEnumerationItemName = (
         .map(([k, v]) => `${k}=${v}`)
         .join(";");
 };
+
+export const getAssociationId = ({
+    alertId,
+    enumerationId,
+}: Omit<Association, "id">): string =>
+    `${alertId}${enumerationId ? `-${enumerationId}` : ""}`;

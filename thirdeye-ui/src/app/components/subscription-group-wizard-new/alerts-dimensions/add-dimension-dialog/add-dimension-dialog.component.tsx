@@ -17,111 +17,108 @@ import { Box, Divider, TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    AppLoadingIndicatorV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-} from "../../../../platform/components";
-import { DataGridV1Props } from "../../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.interfaces";
+import { AppLoadingIndicatorV1 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { useGetEnumerationItems } from "../../../../rest/enumeration-items/enumeration-items.actions";
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { Association } from "../../subscription-group-wizard-new.interface";
+import { AlertsTable } from "../alert-dimension-table/alert-dimension-table.component";
+import { getAssociationId } from "../alerts-dimensions.utils";
+import { AddDimensionDialogProps } from "./add-dimension-dialog.interface";
 import {
-    AddDimensionDialogProps,
-    DimensionRow,
-} from "./add-dimension-dialog.interface";
-import {
-    ALL_DIMENSIONS_INDEX,
-    getDimensionRows,
-    getSelectedRows,
+    getAssociationIdsForAlert,
+    getEnumerationItemsForAlert,
 } from "./add-dimension-dialog.utils";
 
 export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
-    ({ alerts, associations }) => {
+    ({ alerts, associations, updateAssociations }) => {
+        const [associationsSelected, setAssociationsSelected] = useState<
+            Record<string, boolean>
+        >(
+            Object.assign(
+                {},
+                ...associations.map((item) => ({ [item.id]: true }))
+            )
+        );
+
+        const [selectedAlertId, setSelectedAlertId] = useState<number>(null);
         const { t } = useTranslation();
+
+        const alertsMap = getMapFromList(alerts);
+
         const { getEnumerationItems, enumerationItems, status } =
             useGetEnumerationItems();
 
-        const AllDimensionsSelectedRow: DimensionRow = {
-            id: ALL_DIMENSIONS_INDEX,
-            name: t("label.overall-entity", {
-                entity: t("label.alert"),
-            }),
-        };
+        useEffect(() => {
+            getEnumerationItems();
+        }, []);
 
-        const [selectedRow, setSelectedRow] = useState<
-            DataGridSelectionModelV1<DimensionRow>
-        >(() => getSelectedRows({ AllDimensionsSelectedRow }));
+        useEffect(() => {
+            const associationsList: Association[] = Object.entries(
+                associationsSelected
+            )
+                .filter(([, isChecked]) => isChecked)
+                .map(([associationId]) => associationId)
+                .map((associationId) => {
+                    const [stringAlertId, stringEnumerationId] =
+                        associationId.split("-");
 
-        const [selectedAlertId, setSelectedAlertId] = useState<number | null>(
-            null
-        );
-        const alertsMap = getMapFromList(alerts);
+                    const alertId = Number(stringAlertId);
+                    const enumerationId = stringEnumerationId
+                        ? Number(stringEnumerationId)
+                        : undefined;
+
+                    const association: Association = {
+                        id: getAssociationId({
+                            alertId,
+                            enumerationId,
+                        }),
+                        alertId,
+                        ...(enumerationId && {
+                            enumerationId,
+                        }),
+                    };
+
+                    return association;
+                }) as Association[];
+
+            updateAssociations(associationsList);
+        }, [associationsSelected]);
 
         const selectedAlert =
             (selectedAlertId && alertsMap.get(selectedAlertId)) || null;
 
-        const allSelected =
-            selectedRow.rowKeyValues.includes(ALL_DIMENSIONS_INDEX);
+        const associationsForAlert = associations.filter(
+            (item) => item.alertId === selectedAlertId
+        );
 
-        useEffect(() => {
-            getEnumerationItems().then((enumerationItemsProp) => {
-                setSelectedRow(() =>
-                    getSelectedRows({
-                        associations,
-                        enumerationItems: enumerationItemsProp,
-                        allSelected,
-                        AllDimensionsSelectedRow,
-                    })
-                );
-            });
-        }, []);
+        const enumerationItemsForAlert =
+            selectedAlert && enumerationItems
+                ? getEnumerationItemsForAlert(enumerationItems, selectedAlert)
+                : [];
 
-        const dataRows: DimensionRow[] = [
-            AllDimensionsSelectedRow,
-            ...(allSelected
-                ? []
-                : getDimensionRows(
-                      (enumerationItems || []).filter((enumerationItem) =>
-                          (enumerationItem.alerts || [])?.some(
-                              (a) => a.id === selectedAlertId
-                          )
-                      )
-                  )),
-        ];
-        const handleSelectionChange = (
-            newRows: DataGridSelectionModelV1<DimensionRow>
+        const associationIdsForAlert = selectedAlertId
+            ? getAssociationIdsForAlert({
+                  enumerationIds: enumerationItemsForAlert.map(
+                      (item) => item.id
+                  ),
+                  alertId: selectedAlertId,
+              })
+            : [];
+
+        const handleChangeAssociations = (
+            newAssociationIds: string[]
         ): void => {
-            setSelectedRow(newRows);
-        };
-
-        const dataGridProps: DataGridV1Props<DimensionRow> = {
-            data: dataRows,
-            rowKey: "id",
-            hideBorder: true,
-            columns: [
-                {
-                    key: "name",
-                    dataKey: "name",
-                    header: t("label.dimensions"),
-                    minWidth: 150,
-                    flex: 1,
-                },
-            ],
-            selectionModel: selectedRow,
-            onSelectionChange: handleSelectionChange,
-            toolbarComponent: (
-                <>
-                    <Typography variant="h6">
-                        {t("message.select-entity", {
-                            entity: t("label.dimensions"),
-                        })}
-                    </Typography>
-                </>
-            ),
+            // console.log({ newAssociationIds });
+            associationIdsForAlert.forEach((associationId) => {
+                setAssociationsSelected((stateProp) => ({
+                    ...stateProp,
+                    [associationId]: newAssociationIds.includes(associationId),
+                }));
+            });
         };
 
         return (
@@ -135,7 +132,10 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
                     inputComponent={
                         <Autocomplete<Alert>
                             getOptionLabel={(option) => option.name}
-                            options={alerts}
+                            options={alerts.map((a) => ({
+                                ...a,
+                                name: `[${a.id}]${a.name}`,
+                            }))}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -169,19 +169,27 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
                     })}
                 />
 
-                <Box pb={2} pt={2}>
-                    <Divider />
-                </Box>
+                <pre>{JSON.stringify(associationsSelected, undefined, 4)}</pre>
 
-                <Box height={500}>
+                {selectedAlert && enumerationItems ? (
+                    // TODO: remove
                     <LoadingErrorStateSwitch
                         isError={status === ActionStatus.Error}
                         isLoading={status === ActionStatus.Working}
                         loadingState={<AppLoadingIndicatorV1 />}
                     >
-                        <DataGridV1<DimensionRow> {...dataGridProps} />
+                        <Box pb={2} pt={2}>
+                            <Divider />
+                        </Box>
+
+                        <AlertsTable
+                            associations={associationsForAlert}
+                            enumerationItemsForAlert={enumerationItemsForAlert}
+                            selectedAlert={selectedAlert}
+                            onChangeAssociations={handleChangeAssociations}
+                        />
                     </LoadingErrorStateSwitch>
-                </Box>
+                ) : null}
             </Box>
         );
     };

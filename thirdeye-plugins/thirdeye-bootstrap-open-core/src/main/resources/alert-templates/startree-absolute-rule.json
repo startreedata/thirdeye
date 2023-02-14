@@ -1,6 +1,6 @@
 {
   "name": "startree-absolute-rule",
-  "description": "Absolute rule template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "description": "Detect an anomaly if the absolute difference between the current value and the baseline is greater than the threshold. The baseline is a previous value, set with the `baselineOffset` property. The threshold is set with the `absoluteChange` property. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",
@@ -224,7 +224,10 @@
   },
   "properties": [
     {
-      "name":  "absoluteChange"
+      "name":  "absoluteChange",
+      "description": "Difference threshold. If the absolute difference between the metric and the baseline value is above this threshold, an anomaly is detected.",
+      "min": 0,
+      "jsonType": "NUMBER"
     },
     {
       "name":  "aggregationColumn"
@@ -233,7 +236,9 @@
       "name":  "aggregationFunction"
     },
     {
-      "name":  "baselineOffset"
+      "name":  "baselineOffset",
+      "description": "Offset in ISO-8601 format. Example: `P7D` means \"use the value of the last week as a baseline\".",
+      "jsonType": "STRING"
     },
     {
       "name":  "dataSource"

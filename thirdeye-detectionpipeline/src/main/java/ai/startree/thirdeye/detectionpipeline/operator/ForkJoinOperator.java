@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import static ai.startree.thirdeye.spi.detection.DetectionPipelineUsage.DETECTION;
+import static ai.startree.thirdeye.spi.detection.DetectionPipelineUsage.EVALUATION;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
@@ -42,10 +44,10 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   private PlanNode combiner;
   private DetectionPipelineContext detectionPipelineContext;
 
-  private static List<AlertDTO> singletonAlertList(final Long alertId) {
+  private static AlertDTO newAlert(final Long alertId) {
     final AlertDTO alert = new AlertDTO();
     alert.setId(alertId);
-    return List.of(alert);
+    return alert;
   }
 
   @Override
@@ -105,22 +107,26 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
 
   private List<EnumerationItemDTO> prepareEnumerationItems(
       final List<EnumerationItemDTO> enumerationItems) {
-    // Add alert id to enumeration items
-    final Long alertId = detectionPipelineContext.getAlertId();
-    final var updated = enumerationItems.stream()
-        .map(e -> e.setAlerts(singletonAlertList(alertId)))
-        .collect(Collectors.toList());
-
     final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
         "Detection pipeline usage is not set");
 
-    if (usage.equals(DetectionPipelineUsage.DETECTION)) {
-      return updated.stream()
+    if (DETECTION.equals(usage)) {
+      // Add alert id to enumeration items
+      final Long alertId = requireNonNull(detectionPipelineContext.getAlertId(),
+          "alert ID is not set");
+
+      /* decorate enumeration item with alert id */
+      final var decorated = enumerationItems.stream()
+          .map(e -> e.setAlert(newAlert(alertId)))
+          .collect(Collectors.toList());
+
+      /* find existing or create new enumeration item */
+      return decorated.stream()
           .map(this::findExistingOrCreate)
           .collect(Collectors.toList());
-    } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
+    } else if (EVALUATION.equals(usage)) {
       // do nothing - no need to persist enumerationItems nor fetch existing one downstream
-      return updated;
+      return enumerationItems;
     }
     // don't remove - put here to ensure it breaks if an enum is added one day
     throw new UnsupportedOperationException("DetectionPipelineUsage not implemented: " + usage);

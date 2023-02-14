@@ -76,7 +76,7 @@ public class AuthorizationManager {
   }
 
   public void ensureCanEvaluate(final ThirdEyePrincipal principal, final AlertDTO entity) {
-    ensureCanCreate(principal, entity);
+    ensureCanRead(principal, entity);
   }
 
   public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {

@@ -41,10 +41,14 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class EnumerationItemResource extends CrudResource<EnumerationItemApi, EnumerationItemDTO> {
 
+  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
+      .put("alert.id", "alertId")
+      .build();
+
   @Inject
   public EnumerationItemResource(final EnumerationItemManager enumerationItemManager,
       final AuthorizationManager authorizationManager) {
-    super(enumerationItemManager, ImmutableMap.of(), authorizationManager);
+    super(enumerationItemManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
   }
 
   @Override

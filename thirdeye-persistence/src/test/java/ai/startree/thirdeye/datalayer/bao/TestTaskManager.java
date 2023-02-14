@@ -57,6 +57,12 @@ public class TestTaskManager {
     assertThat(latency).isGreaterThanOrEqualTo(60000);
   }
 
+  @Test
+  public void taskLatencyMetricWithEmptyTaskListTest() {
+    assertThat(getGaugeValue(List.of(), "detectionTaskLatencyInMillis")).isZero();
+    assertThat(getGaugeValue(List.of(), "notificationTaskLatencyInMillis")).isZero();
+  }
+
   private Long getGaugeValue(final List<TaskDTO> tasks, final String gaugeName) {
     final TaskDao dao = Mockito.mock(TaskDao.class);
     when(dao.filter(any())).thenReturn(tasks);

@@ -55,6 +55,17 @@
     "defaultIsNull": null
   },
   {
+    "name": "completenessDelay",
+    "defaultValue": null,
+    "min": null,
+    "max": null,
+    "description": "The time for your data to be considered complete and ready for anomaly detection. In ISO-8601 format. Example: `PT2H`. [Learn more](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration#completenessdelay).",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "STRING",
+    "defaultIsNull": null
+  },
+  {
     "name": "dataset",
     "defaultValue": null,
     "min": null,
@@ -221,9 +232,9 @@
     "defaultValue": null,
     "min": null,
     "max": null,
-    "description": "A list of hours. Anomalies happening on these days are ignored if timeOfWeekIgnore is true. Example: `[0,1,2,23]`",
-    "options": null,
-    "multiselect": false,
+    "description": "A list of hours. Anomalies happening on these hours are ignored if timeOfWeekIgnore is true. Example: `[0,1,2,23]`",
+    "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
+    "multiselect": true,
     "jsonType": "ARRAY",
     "defaultIsNull": null
   },

@@ -12,22 +12,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { SubscriptionGroupWizardNew } from "../../components/subscription-group-wizard-new/subscription-group-wizard-new.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
+    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { getAllAlerts } from "../../rest/alerts/alerts.rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
+import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -38,14 +41,22 @@ import {
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const [alerts, setAlerts] = useState<Alert[]>([]);
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
+    const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
+    const {
+        enumerationItems,
+        getEnumerationItems,
+        status: enumerationItemsStatus,
+    } = useGetEnumerationItems();
+
     useEffect(() => {
-        fetchAllAlerts();
+        // Fetching all alerts and enumeration items since this is an edit flow and
+        // the new values will need the corresponding entities to be displayed
+        getAlerts();
+        getEnumerationItems();
     }, []);
 
     const onSubscriptionGroupWizardFinish = (
@@ -79,41 +90,44 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             });
     };
 
-    const fetchAllAlerts = (): void => {
-        getAllAlerts()
-            .then((alerts: Alert[]): void => {
-                setAlerts(alerts);
-            })
-            .finally((): void => {
-                setLoading(false);
-            });
-    };
-
     const handleOnCancelClick = (): void => {
         navigate(getSubscriptionGroupsAllPath());
     };
 
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
+    const isLoading = [alertsStatus, enumerationItemsStatus].some(
+        (v) => v === ActionStatus.Working
+    );
+
+    const isError = [alertsStatus, enumerationItemsStatus].some(
+        (v) => v === ActionStatus.Error
+    );
 
     return (
         <PageV1>
-            <PageHeader
-                title={t("label.create-entity", {
-                    entity: t("label.subscription-group"),
-                })}
-            />
-
-            <SubscriptionGroupWizard
-                alerts={alerts}
-                submitBtnLabel={t("label.create-entity", {
-                    entity: t("label.subscription-group"),
-                })}
-                subscriptionGroup={createEmptySubscriptionGroup()}
-                onCancel={handleOnCancelClick}
-                onFinish={onSubscriptionGroupWizardFinish}
-            />
+            <LoadingErrorStateSwitch
+                isError={isError}
+                isLoading={isLoading}
+                loadingState={<AppLoadingIndicatorV1 />}
+            >
+                {alerts && enumerationItems ? (
+                    <SubscriptionGroupWizardNew
+                        alerts={alerts}
+                        enumerationItems={enumerationItems}
+                        submitBtnLabel={t("label.create-entity", {
+                            entity: t("label.subscription-group"),
+                        })}
+                        subscriptionGroup={createEmptySubscriptionGroup()}
+                        onCancel={handleOnCancelClick}
+                        onFinish={onSubscriptionGroupWizardFinish}
+                    />
+                ) : (
+                    <PageContentsGridV1>
+                        <Grid item xs={12}>
+                            <NoDataIndicator />
+                        </Grid>
+                    </PageContentsGridV1>
+                )}
+            </LoadingErrorStateSwitch>
         </PageV1>
     );
 };

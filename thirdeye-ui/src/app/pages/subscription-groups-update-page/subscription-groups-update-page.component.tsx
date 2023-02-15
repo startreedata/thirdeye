@@ -173,15 +173,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                         onFinish={onSubscriptionGroupWizardFinish}
                     />
                 ) : (
-                    // <SubscriptionGroupWizard
-                    //     alerts={alerts}
-                    //     submitBtnLabel={t("label.update-entity", {
-                    //         entity: t("label.subscription-group"),
-                    //     })}
-                    //     subscriptionGroup={subscriptionGroup}
-                    //     onCancel={handleOnCancelClick}
-                    //     onFinish={onSubscriptionGroupWizardFinish}
-                    // />
                     <PageContentsGridV1>
                         <Grid item xs={12}>
                             <NoDataIndicator />

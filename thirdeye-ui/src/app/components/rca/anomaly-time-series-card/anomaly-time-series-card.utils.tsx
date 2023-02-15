@@ -128,13 +128,15 @@ export const generateSeriesDataForDetectionEvaluation = (
             type: SeriesType.AREA_CLOSED,
             fillOpacity: 0.1,
             color: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
-            data: timeSeriesData.lowerBound.map((value, idx) => {
-                return {
-                    y: value,
-                    y1: timeSeriesData.upperBound[idx],
-                    x: timeSeriesData.timestamp[idx],
-                };
-            }),
+            data: timeSeriesData.lowerBound
+                .map((value, idx) => {
+                    return {
+                        y: value,
+                        y1: timeSeriesData.upperBound[idx],
+                        x: timeSeriesData.timestamp[idx],
+                    };
+                })
+                .filter((d) => Number.isFinite(d.y) && Number.isFinite(d.y1)),
             stroke: Palette.COLOR_VISUALIZATION_STROKE_UPPER_AND_LOWER_BOUND,
             strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_DEFAULT,
             tooltip: {

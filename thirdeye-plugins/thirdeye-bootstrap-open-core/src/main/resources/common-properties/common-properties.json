@@ -55,17 +55,6 @@
     "defaultIsNull": null
   },
   {
-    "name": "mutabilityPeriod",
-    "defaultValue": "P0D",
-    "min": null,
-    "max": null,
-    "description": "FIXME CYRIL",
-    "options": null,
-    "multiselect": false,
-    "jsonType": "STRING",
-    "defaultIsNull": null
-  },
-  {
     "name": "dataset",
     "defaultValue": null,
     "min": null,
@@ -324,6 +313,17 @@
     "min": null,
     "max": null,
     "description": "The period of aggregation of the timeseries. In ISO-8601 format. Example: `PT1H`.",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "STRING",
+    "defaultIsNull": null
+  },
+  {
+    "name": "mutabilityPeriod",
+    "defaultValue": "P0D",
+    "min": null,
+    "max": null,
+    "description": "FIXME CYRIL",
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",

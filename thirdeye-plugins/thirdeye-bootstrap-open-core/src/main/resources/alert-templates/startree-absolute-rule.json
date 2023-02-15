@@ -208,6 +208,7 @@
       "name": "${dataset}",
       "dimensions": "${rcaIncludedDimensions}",
       "rcaExcludedDimensions": "${rcaExcludedDimensions}",
+      "mutabilityPeriod": "${mutabilityPeriod}",
       "completenessDelay": "${completenessDelay}"
     },
     "metric": {
@@ -267,6 +268,10 @@
     },
     {
       "name": "completenessDelay",
+      "defaultValue": "P0D"
+    },
+    {
+      "name": "mutabilityPeriod",
       "defaultValue": "P0D"
     },
     {

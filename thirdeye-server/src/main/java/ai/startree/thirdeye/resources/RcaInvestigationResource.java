@@ -13,13 +13,16 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -38,7 +41,10 @@ import javax.ws.rs.core.MediaType;
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, RcaInvestigationDTO> {
+public class RcaInvestigationResource extends
+    CrudResource<RcaInvestigationApi, RcaInvestigationDTO> {
+
+  final AnomalyManager anomalyManager;
 
   public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("anomaly.id", "anomalyId")
@@ -48,21 +54,33 @@ public class RcaInvestigationResource extends CrudResource<RcaInvestigationApi, 
 
   @Inject
   public RcaInvestigationResource(final RcaInvestigationManager rootCauseSessionDAO,
+      final AnomalyManager anomalyManager,
       final AuthorizationManager authorizationManager) {
     super(rootCauseSessionDAO, API_TO_INDEX_FILTER_MAP, authorizationManager);
+    this.anomalyManager = anomalyManager;
   }
 
   @Override
   protected RcaInvestigationDTO createDto(final ThirdEyePrincipal principal,
       final RcaInvestigationApi api) {
-    final RcaInvestigationDTO rcaInvestigationDTO = ApiBeanMapper.toDto(api);
+    final RcaInvestigationDTO rcaInvestigationDTO = toDto(api);
     rcaInvestigationDTO.setCreatedBy(principal.getName());
     return rcaInvestigationDTO;
   }
 
   @Override
   protected RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
-    return ApiBeanMapper.toDto(api);
+    final RcaInvestigationDTO dto = ApiBeanMapper.toDto(api);
+
+    // Copy auth from the anomaly.
+    if (dto.getAuth() == null) {
+      optional(dto.getAnomaly())
+          .map(AbstractDTO::getId)
+          .map(anomalyManager::findById)
+          .map(AbstractDTO::getAuth)
+          .ifPresent(dto::setAuth);
+    }
+    return dto;
   }
 
   @Override

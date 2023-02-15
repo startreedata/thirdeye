@@ -17,16 +17,20 @@ import static org.testng.Assert.*;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
+import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import org.testng.annotations.Test;
 
 // This test validates the mapping between api <-> dto objects.
@@ -134,6 +138,46 @@ public class ApiBeanMapperTest {
   }
 
   @Test
+  public void testToAnomalyApi() {
+    final AnomalyDTO dto = new AnomalyDTO();
+    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
+
+    final AnomalyApi gotApi = ApiBeanMapper.toApi(dto);
+    assertNotNull(gotApi.getAuth());
+    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+  }
+
+  @Test
+  public void testToAnomalyDTO() {
+    final AnomalyApi api = new AnomalyApi().setAuth(new AuthorizationConfigurationApi().setNamespace(
+        "my-namespace"));
+
+    final AnomalyDTO gotDto = ApiBeanMapper.toDto(api);
+    assertNotNull(gotDto.getAuth());
+    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+  }
+
+  @Test
+  public void testToRcaInvestigationApi() {
+    final RcaInvestigationDTO dto = new RcaInvestigationDTO();
+    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
+
+    final RcaInvestigationApi gotApi = ApiBeanMapper.toApi(dto);
+    assertNotNull(gotApi.getAuth());
+    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+  }
+
+  @Test
+  void testToRcaInvestigationDTO() {
+    final RcaInvestigationApi api = new RcaInvestigationApi().setAuth(new AuthorizationConfigurationApi().setNamespace(
+        "my-namespace"));
+
+    final RcaInvestigationDTO gotDto = ApiBeanMapper.toDto(api);
+    assertNotNull(gotDto.getAuth());
+    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+  }
+
+  @Test
   public void testToAuthorizationConfigurationApi() {
     final AuthorizationConfigurationDTO dto = new AuthorizationConfigurationDTO();
     dto.setNamespace("my-namespace");
@@ -150,5 +194,4 @@ public class ApiBeanMapperTest {
     final AuthorizationConfigurationDTO gotDto = ApiBeanMapper.toAuthorizationConfigurationDTO(api);
     assertEquals(gotDto.getNamespace(), "my-namespace");
   }
-
 }

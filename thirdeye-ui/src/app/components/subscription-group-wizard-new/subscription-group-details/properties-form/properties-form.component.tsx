@@ -34,11 +34,11 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
     const { t } = useTranslation();
 
     const handleUpdateCron = (cron: string): void => {
-        onChange({ cron });
+        onChange((stateProp) => ({ ...stateProp, cron }));
     };
 
     const handleUpdateName = (name: string): void => {
-        onChange({ name });
+        onChange((stateProp) => ({ ...stateProp, name }));
     };
 
     return (

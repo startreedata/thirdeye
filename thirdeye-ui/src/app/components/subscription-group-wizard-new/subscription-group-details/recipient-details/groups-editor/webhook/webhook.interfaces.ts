@@ -12,16 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { WebhookSpec } from "../../../../../../rest/dto/subscription-group.interfaces";
 
-import { Dispatch, SetStateAction } from "react";
-import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
-
-interface FormValues {
-    name: string;
-    cron: string;
+export interface WebhookProps {
+    configuration: WebhookSpec;
+    onSpecChange: (updatedSpec: WebhookSpec) => void;
+    onDeleteClick: () => void;
 }
 
-export interface PropertiesFormProps {
-    values: FormValues;
-    onChange: Dispatch<SetStateAction<SubscriptionGroup>>;
+export interface WebhookFormEntries {
+    url: string;
 }

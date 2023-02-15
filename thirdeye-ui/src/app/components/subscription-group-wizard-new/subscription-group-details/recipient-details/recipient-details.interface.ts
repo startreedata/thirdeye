@@ -13,8 +13,10 @@
  * the License.
  */
 
-import { NotificationSpec } from "../../../../rest/dto/subscription-group.interfaces";
+import { Dispatch, SetStateAction } from "react";
+import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
 
 export interface RecipientDetailsProps {
-    activeChannels: NotificationSpec[];
+    subscriptionGroup: SubscriptionGroup;
+    onChange: Dispatch<SetStateAction<SubscriptionGroup>>;
 }

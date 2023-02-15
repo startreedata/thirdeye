@@ -13,9 +13,10 @@
  * the License.
  */
 
+import { Dispatch, SetStateAction } from "react";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export interface SubscriptionGroupDetailsProps {
     subscriptionGroup: SubscriptionGroup;
-    onChange: (p: Partial<SubscriptionGroup>) => void;
+    onChange: Dispatch<SetStateAction<SubscriptionGroup>>;
 }

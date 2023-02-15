@@ -45,7 +45,6 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
     enumerationItems,
     associations,
     setAssociations,
-    onChange,
 }) => {
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();

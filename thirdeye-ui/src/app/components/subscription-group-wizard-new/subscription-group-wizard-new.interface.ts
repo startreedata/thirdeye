@@ -22,7 +22,6 @@ export interface SubscriptionGroupWizardNewProps {
     submitBtnLabel: string;
     subscriptionGroup: SubscriptionGroup;
     enumerationItems: EnumerationItem[];
-    onChange?: () => void;
     onCancel?: () => void;
     onFinish?: (subscriptionGroup: SubscriptionGroup) => void;
     isExisting?: boolean;

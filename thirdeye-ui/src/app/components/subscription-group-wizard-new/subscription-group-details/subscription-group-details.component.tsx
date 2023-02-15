@@ -32,7 +32,8 @@ export const SubscriptionGroupDetails: FunctionComponent<SubscriptionGroupDetail
                     onChange={onChange}
                 />
                 <RecipientDetails
-                    activeChannels={subscriptionGroup.activeChannels}
+                    subscriptionGroup={subscriptionGroup}
+                    onChange={onChange}
                 />
             </>
         );

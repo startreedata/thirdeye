@@ -29,16 +29,13 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { getAllAlerts } from "../../rest/alerts/alerts.rest";
-import { Alert } from "../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
+import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { getEnumerationItems } from "../../rest/enumeration-items/enumeration-items.rest";
+import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
 import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import { PROMISES } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -49,13 +46,22 @@ import {
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
-    const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
+    const [subscriptionGroupStatus, setSubscriptionGroupStatus] =
+        useState<ActionStatus>(ActionStatus.Initial);
     const [subscriptionGroup, setSubscriptionGroup] =
         useState<SubscriptionGroup>();
-    const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [enumerationItems, setEnumerationItems] = useState<EnumerationItem[]>(
-        []
-    );
+
+    const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
+    const {
+        enumerationItems,
+        getEnumerationItems,
+        status: enumerationItemsStatus,
+    } = useGetEnumerationItems();
+
+    // const [alerts, setAlerts] = useState<Alert[]>([]);
+    // const [enumerationItems, setEnumerationItems] = useState<EnumerationItem[]>(
+    //     []
+    // );
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -63,6 +69,10 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
 
     useEffect(() => {
         fetchSubscriptionGroup();
+        // Fetching all alerts and enumeration items since this is an edit flow and
+        // the new values will need the corresponding entities to be displayed
+        getAlerts();
+        getEnumerationItems();
     }, []);
 
     const onSubscriptionGroupWizardFinish = (
@@ -96,7 +106,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             });
     };
 
-    const fetchSubscriptionGroup = async (): Promise<void> => {
+    const fetchSubscriptionGroup = (): void => {
         // Validate id from URL
         if (params.id && !isValidNumberId(params.id)) {
             notify(
@@ -106,91 +116,51 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     id: params.id,
                 })
             );
-            setStatus(ActionStatus.Error);
+            setSubscriptionGroupStatus(ActionStatus.Error);
 
             return;
         }
 
-        const [subscriptionGroupResponse, alertsResponse] =
-            await Promise.allSettled([
-                getSubscriptionGroup(toNumber(params.id)),
-                getAllAlerts(),
-            ]);
-
-        if (
-            subscriptionGroupResponse.status === PROMISES.REJECTED ||
-            alertsResponse.status === PROMISES.REJECTED
-        ) {
-            const axiosError: AxiosError =
-                (alertsResponse.status === PROMISES.REJECTED &&
-                    alertsResponse.reason) ||
-                (subscriptionGroupResponse.status === PROMISES.REJECTED &&
-                    subscriptionGroupResponse.reason);
-
-            setStatus(ActionStatus.Error);
-
-            notifyIfErrors(
-                ActionStatus.Error,
-                getErrorMessages(axiosError),
-                notify,
-                t("message.error-while-fetching", {
-                    entity: t(
-                        alertsResponse.status === PROMISES.REJECTED
-                            ? "label.alerts"
-                            : "label.subscription-group"
-                    ),
-                })
-            );
-
-            return;
-        }
-
-        setAlerts(alertsResponse.value);
-        setSubscriptionGroup(subscriptionGroupResponse.value);
-
-        const enumerationIds =
-            (subscriptionGroupResponse.value.alertAssociations
-                ?.map((a) => a?.enumerationItem?.id)
-                .filter(Boolean) || []) as number[];
-
-        if (enumerationIds && enumerationIds.length > 0) {
-            let enumerationItems: EnumerationItem[] | null = null;
-            try {
-                enumerationItems = await getEnumerationItems({
-                    ids: enumerationIds,
-                });
-                setEnumerationItems(enumerationItems);
-            } catch (err) {
+        getSubscriptionGroup(toNumber(params.id))
+            .then((data) => {
+                setSubscriptionGroup(data);
+            })
+            .catch((err) => {
                 notifyIfErrors(
                     ActionStatus.Error,
-                    getErrorMessages(err as AxiosError),
+                    getErrorMessages(err),
                     notify,
                     t("message.error-while-fetching", {
-                        entity: t("label.enumeration-item"),
+                        entity: t("label.subscription-group"),
                     })
                 );
-
-                setStatus(ActionStatus.Error);
-
-                return;
-            }
-        }
-
-        setStatus(ActionStatus.Done);
+            });
     };
 
     const handleOnCancelClick = (): void => {
         navigate(getSubscriptionGroupsAllPath());
     };
 
+    const isLoading = [
+        alertsStatus,
+        enumerationItemsStatus,
+        subscriptionGroupStatus,
+    ].some((v) => v === ActionStatus.Working);
+
+    const isError = [
+        alertsStatus,
+        enumerationItemsStatus,
+        subscriptionGroupStatus,
+    ].some((v) => v === ActionStatus.Error);
+
     return (
         <PageV1>
             <LoadingErrorStateSwitch
-                isError={status === ActionStatus.Error}
-                isLoading={status === ActionStatus.Working}
+                isError={isError}
+                isLoading={isLoading}
                 loadingState={<AppLoadingIndicatorV1 />}
             >
-                {subscriptionGroup ? (
+                {subscriptionGroup && alerts && enumerationItems ? (
                     <SubscriptionGroupWizardNew
                         isExisting
                         alerts={alerts}

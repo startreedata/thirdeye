@@ -31,7 +31,6 @@ import {
 import { PageHeader } from "../page-header/page-header.component";
 import { PageHeaderProps } from "../page-header/page-header.interfaces";
 import { AlertsDimensions } from "./alerts-dimensions/alerts-dimensions.component";
-import { getAssociationId } from "./alerts-dimensions/alerts-dimensions.utils";
 import { SubscriptionGroupDetails } from "./subscription-group-details/subscription-group-details.component";
 import {
     Association,
@@ -39,34 +38,11 @@ import {
     SubscriptionGroupViewTabs,
     SubscriptionGroupWizardNewProps,
 } from "./subscription-group-wizard-new.interface";
-
-const SelectedTab = "selectedTab";
-
-const getAssociations = (
-    subscriptionGroup: SubscriptionGroup
-): Association[] => {
-    const { alertAssociations, alerts = [] } = subscriptionGroup;
-
-    const associations: Association[] = alertAssociations?.length
-        ? alertAssociations.map(({ alert, enumerationItem }) => ({
-              alertId: alert.id,
-              ...(enumerationItem?.id && {
-                  enumerationId: enumerationItem?.id,
-              }),
-              id: getAssociationId({
-                  alertId: alert.id,
-                  enumerationId: enumerationItem?.id,
-              }),
-          }))
-        : alerts.map((alert) => ({
-              alertId: alert.id,
-              id: getAssociationId({
-                  alertId: alert.id,
-              }),
-          }));
-
-    return associations;
-};
+import {
+    getAssociations,
+    SelectedTab,
+    validateSubscriptionGroup,
+} from "./subscription-group-wizard-new.utils";
 
 export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWizardNewProps> =
     ({
@@ -74,7 +50,6 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
         submitBtnLabel,
         subscriptionGroup,
         enumerationItems,
-        onChange,
         onCancel,
         onFinish,
         isExisting = false,
@@ -136,13 +111,8 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
             subNavigationSelected: selectedTab,
         };
 
-        const handleChangeEditedSubscriptionGroup = (
-            newData: Partial<SubscriptionGroup>
-        ): void => {
-            setEditedSubscriptionGroup((subscriptionGroupProp) => ({
-                ...subscriptionGroupProp,
-                ...newData,
-            }));
+        const handleSubmitClick = (): void => {
+            onFinish?.(editedSubscriptionGroup);
         };
 
         useEffect(() => {
@@ -163,6 +133,10 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
             }));
         }, [editedAssociations]);
 
+        const isSubscriptionGroupValid = validateSubscriptionGroup(
+            editedSubscriptionGroup
+        );
+
         return (
             <>
                 <PageHeader {...pageHeaderProps} />
@@ -171,7 +145,7 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
                     {selectedTab === SubscriptionGroupViewTabs.GroupDetails ? (
                         <SubscriptionGroupDetails
                             subscriptionGroup={editedSubscriptionGroup}
-                            onChange={handleChangeEditedSubscriptionGroup}
+                            onChange={setEditedSubscriptionGroup}
                         />
                     ) : null}
                     {selectedTab ===
@@ -181,7 +155,6 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
                             associations={editedAssociations}
                             enumerationItems={enumerationItems}
                             setAssociations={setEditedAssociations}
-                            onChange={handleChangeEditedSubscriptionGroup}
                         />
                     ) : null}
 
@@ -209,10 +182,11 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
                             <Grid item>
                                 <Button
                                     color="primary"
-                                    // disabled={!isSubscriptionGroupValid}
-                                    // onClick={handleSubmitClick}
+                                    disabled={!isSubscriptionGroupValid}
+                                    onClick={handleSubmitClick}
                                 >
-                                    {isExisting
+                                    {/* TODO */}
+                                    {submitBtnLabel || isExisting
                                         ? t("label.save")
                                         : t("label.create")}
                                 </Button>

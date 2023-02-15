@@ -55,11 +55,11 @@
     "defaultIsNull": null
   },
   {
-    "name": "completenessDelay",
-    "defaultValue": null,
+    "name": "mutabilityPeriod",
+    "defaultValue": "P0D",
     "min": null,
     "max": null,
-    "description": "The time for your data to be considered complete and ready for anomaly detection. In ISO-8601 format. Example: `PT2H`. [Learn more](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/alert-configuration#completenessdelay).",
+    "description": "FIXME CYRIL",
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",

@@ -23,7 +23,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "EVENTS",
-        "component.ignore": "${eventFilterIgnore}",
+        "component.ignore": "true",
         "component.beforeEventMargin": "${eventFilterBeforeEventMargin}",
         "component.afterEventMargin": "${eventFilterAfterEventMargin}"
       },
@@ -44,7 +44,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "THRESHOLD",
-        "component.ignore": "${thresholdIgnore}",
+        "component.ignore": "true",
         "component.min": "${thresholdFilterMin}",
         "component.max": "${thresholdFilterMax}"
       },
@@ -60,7 +60,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "TIME_OF_WEEK",
-        "component.ignore": "${timeOfWeekIgnore}",
+        "component.ignore": "true",
         "component.daysOfWeek": "${daysOfWeek}",
         "component.hoursOfDay": "${hoursOfDay}",
         "component.dayHoursOfWeek": "${dayHoursOfWeek}"
@@ -77,7 +77,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "COLD_START",
-        "component.ignore": "${coldStartIgnore}",
+        "component.ignore": "true",
         "component.tableName": "${dataset}",
         "component.coldStartPeriod": "${baselineOffset}"
       },
@@ -307,14 +307,6 @@
       "defaultValue": ""
     },
     {
-      "name": "coldStartIgnore",
-      "defaultValue": "true"
-    },
-    {
-      "name": "timeOfWeekIgnore",
-      "defaultValue": "true"
-    },
-    {
       "name": "daysOfWeek",
       "defaultValue": []
     },
@@ -325,10 +317,6 @@
     {
       "name": "dayHoursOfWeek",
       "defaultValue": {}
-    },
-    {
-      "name": "thresholdIgnore",
-      "defaultValue": "true"
     },
     {
       "name": "thresholdFilterMin",
@@ -348,11 +336,9 @@
     },
     {
       "name": "eventFilterTypes",
-      "defaultValue": []
-    },
-    {
-      "name": "eventFilterIgnore",
-      "defaultValue": false
+      "defaultValue": [
+        "__NO_EVENTS"
+      ]
     },
     {
       "name": "eventFilterBeforeEventMargin",

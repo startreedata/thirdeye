@@ -323,7 +323,7 @@
     "defaultValue": "P0D",
     "min": null,
     "max": null,
-    "description": "Use if your data is mutable. ThirdEye will maintain the detection results up to date on the mutable period. For instance, if your last 10 days of data is mutable, set `P10D`. At each cron detection job, the detection results for the last 10 days of data will be updated.",
+    "description": "Use if your data is mutable. ThirdEye will maintain the detection results up to date on the mutable period. For instance, if your last 10 days of data is mutable, set `P10D`. At each cron detection job, the detection results for the last 10 days will be updated.",
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",

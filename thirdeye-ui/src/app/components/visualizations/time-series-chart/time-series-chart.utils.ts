@@ -56,11 +56,16 @@ export function getMinMax(
         const values: number[] = [];
         seriesOptions.data.forEach((item) => {
             const extractedValue = extract(item, seriesOptions);
+            const extractedValueType = typeof extractedValue;
 
-            if (typeof extractedValue === "number") {
-                values.push(extractedValue);
-            } else {
-                extractedValue.forEach((subItem) => values.push(subItem));
+            if (extractedValueType === "number") {
+                values.push(extractedValue as number);
+            } else if (Array.isArray(extractedValueType)) {
+                (extractedValue as []).forEach((subItem: unknown) => {
+                    if (typeof subItem === "number") {
+                        values.push(subItem);
+                    }
+                });
             }
         });
         arrayOfArrayOfValues.push(values);

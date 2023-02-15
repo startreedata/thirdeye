@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { SeriesType } from "./time-series-chart.interfaces";
+import { Series, SeriesType } from "./time-series-chart.interfaces";
 import {
     defaultAreaSeriesPointFormatter,
     defaultPointFormatter,
@@ -80,6 +80,42 @@ describe("Time Series Chart Utils", () => {
 
         expect(getMinMax(testSeries)).toEqual([1, 25]);
         expect(getMinMax(testSeries, (d) => d.y)).toEqual([101, 150]);
+    });
+
+    it("should return correct min and max values ignoring null values", () => {
+        const testSeries = [
+            {
+                data: [
+                    {
+                        x: 1,
+                        y: 105,
+                    },
+                    {
+                        x: 2,
+                        y: 101,
+                    },
+                    {
+                        x: 10,
+                        y: 110,
+                    },
+                    {
+                        x: 11,
+                        y: null,
+                    },
+                    {
+                        x: 25,
+                        y: null,
+                    },
+                ],
+            },
+        ];
+
+        expect(getMinMax(testSeries as Pick<Series, "data">[])).toEqual([
+            1, 25,
+        ]);
+        expect(
+            getMinMax(testSeries as Pick<Series, "data">[], (d) => d.y)
+        ).toEqual([101, 110]);
     });
 
     it("should set default values for required fields if missing", () => {

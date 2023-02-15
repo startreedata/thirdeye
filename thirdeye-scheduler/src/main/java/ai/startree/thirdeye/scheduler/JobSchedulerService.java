@@ -13,6 +13,11 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -20,35 +25,52 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
+import ai.startree.thirdeye.spi.util.TimeUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.joda.time.Chronology;
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.quartz.JobKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class JobSchedulerService {
 
+  private static final Logger LOG = LoggerFactory.getLogger(JobSchedulerService.class);
+  public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0, 0, DEFAULT_CHRONOLOGY);
   private final TaskManager taskManager;
   private final AlertManager alertManager;
   private final AnomalyManager anomalyManager;
   private final AnomalySubscriptionGroupNotificationManager notificationManager;
+  private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
   public JobSchedulerService(final TaskManager taskManager,
       final AlertManager alertManager,
       final AnomalyManager anomalyManager,
-      final AnomalySubscriptionGroupNotificationManager notificationManager) {
+      final AnomalySubscriptionGroupNotificationManager notificationManager,
+      final AlertTemplateRenderer alertTemplateRenderer) {
     this.taskManager = taskManager;
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
     this.notificationManager = notificationManager;
+    this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
   public boolean taskAlreadyRunning(final String jobName) {
@@ -71,9 +93,38 @@ public class JobSchedulerService {
       return null;
     }
 
-    // start and end are corrected with delay and granularity at execution time
-    long start = alert.getLastTimestamp();
+    final long start = computeTaskStart(alert, endTime);
     return new DetectionPipelineTaskInfo(alert.getId(), start, endTime);
+  }
+
+  @VisibleForTesting
+  protected long computeTaskStart(final AlertDTO alert, final long endTime) {
+    try {
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
+          UNUSED_DETECTION_INTERVAL);
+      final Chronology chronology = optional(getDateTimeZone(templateWithProperties)).orElse(
+          DEFAULT_CHRONOLOGY);
+      final DateTime defaultStartTime = new DateTime(alert.getLastTimestamp(), chronology);
+      final DateTime endDateTime = new DateTime(endTime, chronology);
+      final Period mutabilityPeriod = getMutabilityPeriod(templateWithProperties);
+      final DateTime mutabilityStart = endDateTime.minus(mutabilityPeriod);
+      if (mutabilityStart.isBefore(defaultStartTime)) {
+        LOG.info(
+            "Applied mutability period of {} for alert id {} between {} and {}. Corrected task interval is between {} and {}",
+            mutabilityPeriod,
+            alert.getId(),
+            defaultStartTime,
+            endDateTime,
+            mutabilityStart,
+            endDateTime
+        );
+        return mutabilityStart.getMillis();
+      } else {
+        return defaultStartTime.getMillis();
+      }
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static Long getIdFromJobKey(String jobKey) {
@@ -121,5 +172,14 @@ public class JobSchedulerService {
         notificationManager.findByPredicate(
             Predicate.IN("detectionConfigId", vectorClocks.keySet().toArray()));
     return !anomalySubscriptionGroupNotifications.isEmpty();
+  }
+
+  @NonNull
+  private static Period getMutabilityPeriod(final AlertTemplateDTO templateWithProperties) {
+    return optional(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getDataset)
+        .map(DatasetConfigDTO::getMutabilityPeriod)
+        .map(TimeUtils::isoPeriod)
+        .orElse(Period.ZERO);
   }
 }

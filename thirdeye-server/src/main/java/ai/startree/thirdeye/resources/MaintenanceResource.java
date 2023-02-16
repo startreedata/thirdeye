@@ -29,6 +29,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
@@ -165,7 +166,7 @@ public class MaintenanceResource {
   }
 
   @POST
-  @Path("/enumeration-items/fix-incorrect-migrations")
+  @Path("/enumeration-items/fix-incorrect-anomaly-migrations")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation("Go through all anomalies and fix incorrect migrations")
@@ -236,6 +237,65 @@ public class MaintenanceResource {
             id -> new AlertApi().setId(id)
         ).collect(Collectors.toList())
     ).build();
+  }
+
+  @POST
+  @Path("/enumeration-items/fix-incorrect-sg-migrations")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation("Go through all anomalies and fix incorrect migrations")
+  public Response fixIncorrectSubscriptionGroupMigrations(
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @ApiParam(defaultValue = "true") @FormParam("dryRun") final boolean dryRun) {
+
+    final Map<Long, EnumerationItemDTO> idToEi = enumerationItemManager.findAll().stream()
+        .collect(Collectors.toMap(AbstractDTO::getId, ei -> ei));
+
+    final Map<EiKey, EnumerationItemDTO> eiMap = new HashMap<>();
+
+    final List<SubscriptionGroupDTO> allSgs = subscriptionGroupManager.findAll();
+    for (var sg : allSgs) {
+      if (sg.getAlertAssociations() == null) {
+        continue;
+      }
+
+      boolean updateRequired = false;
+      for (var aa : sg.getAlertAssociations()) {
+        if (aa.getEnumerationItem() == null || aa.getAlert() == null) {
+          continue;
+        }
+        final EnumerationItemDTO ei = idToEi.get(aa.getEnumerationItem().getId());
+        if (ei == null) {
+          log.error("Subscription group(id: {}) has an enumeration item(id: {}) that does not exist",
+              sg.getId(),
+              aa.getEnumerationItem().getId());
+          continue;
+        }
+        if (ei.getAlert() == null) {
+          log.error("Enumeration item(id: {}) has no alert", ei.getId());
+          continue;
+        }
+        if (aa.getAlert().getId().equals(ei.getAlert().getId())) {
+          continue;
+        }
+
+        // Case where the alert id in the alert association does not match the alert id in the enumeration item
+        final EnumerationItemDTO existingOrCreated = getExistingOrCreate(aa.getAlert().getId(), ei, eiMap);
+        log.info("Moving subscription group {} to {} enumeration item(id: {}) from (id: {})",
+            sg.getId(),
+            idToEi.containsKey(existingOrCreated.getId()) ? "existing" : "new",
+            existingOrCreated.getId(),
+            ei.getId());
+
+        aa.setEnumerationItem(eiRef(existingOrCreated.getId()));
+        updateRequired = true;
+      }
+      if (!dryRun && updateRequired) {
+        subscriptionGroupManager.update(sg);
+      }
+    }
+
+    return Response.ok().build();
   }
 
   private EnumerationItemDTO getExistingOrCreate(final Long alertId, final EnumerationItemDTO ei,

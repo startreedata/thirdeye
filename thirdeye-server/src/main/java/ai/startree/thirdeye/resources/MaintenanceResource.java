@@ -41,6 +41,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -183,7 +184,10 @@ public class MaintenanceResource {
         .map(AbstractDTO::getId)
         .collect(Collectors.toSet());
 
+    final Map<EiKey, EnumerationItemDTO> eiMap = new HashMap<>();
+    int count = 0;
     for (final Long alertId : alertIds) {
+      log.info("Processing alert(id: {}) {}/{}", alertId, count, alertIds.size());
       final AnomalyFilter f = new AnomalyFilter().setAlertId(alertId);
       final List<AnomalyDTO> anomalies = anomalyManager.filter(f);
       for (final AnomalyDTO anomaly : anomalies) {
@@ -210,15 +214,10 @@ public class MaintenanceResource {
               alertId);
           // This is the problem we are trying to fix
 
-          final EnumerationItemDTO existingOrCreated = enumerationItemManager.findExistingOrCreate(
-              new EnumerationItemDTO()
-                  .setAlert(toAlertDTO(alertId))
-                  .setName(ei.getName())
-                  .setParams(ei.getParams())
-          );
+          final EnumerationItemDTO existingOrCreated = getExistingOrCreate(alertId, ei, eiMap);
           log.info("Moving anomaly {} to {} enumeration item(id: {}) from (id: {})",
               anomaly.getId(),
-              idToEi.containsKey(existingOrCreated.getId())? "existing" : "new",
+              idToEi.containsKey(existingOrCreated.getId()) ? "existing" : "new",
               existingOrCreated.getId(),
               ei.getId());
 
@@ -229,6 +228,7 @@ public class MaintenanceResource {
           }
         }
       }
+      count++;
     }
 
     return Response.ok(
@@ -236,5 +236,65 @@ public class MaintenanceResource {
             id -> new AlertApi().setId(id)
         ).collect(Collectors.toList())
     ).build();
+  }
+
+  private EnumerationItemDTO getExistingOrCreate(final Long alertId, final EnumerationItemDTO ei,
+      final Map<EiKey, EnumerationItemDTO> eiMap) {
+    final EiKey key = new EiKey(alertId, ei.getName(), ei.getParams());
+    if (eiMap.containsKey(key)) {
+      return eiMap.get(key);
+    }
+    final EnumerationItemDTO existingOrCreated = enumerationItemManager.findExistingOrCreate(
+        new EnumerationItemDTO()
+            .setAlert(toAlertDTO(alertId))
+            .setName(ei.getName())
+            .setParams(ei.getParams())
+    );
+    eiMap.put(key, existingOrCreated);
+    return existingOrCreated;
+  }
+
+  public static class EiKey {
+
+    private final Long alertId;
+    private final String name;
+    private final Map<String, Object> params;
+
+    public EiKey(final Long alertId, final String name, final Map<String, Object> params) {
+      this.alertId = alertId;
+      this.name = name;
+      this.params = params;
+    }
+
+    public Long getAlertId() {
+      return alertId;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public Map<String, Object> getParams() {
+      return params;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final EiKey eiKey = (EiKey) o;
+      return Objects.equals(alertId, eiKey.alertId) &&
+          Objects.equals(name, eiKey.name) &&
+          Objects.equals(params, eiKey.params);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(alertId, name, params);
+    }
   }
 }

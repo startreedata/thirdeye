@@ -127,7 +127,7 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     LOG.info("Migrating enumeration item {} to {} for alert {}", from.getId(), toId, alertId);
 
     /* Migrate anomalies */
-    final var filter = new AnomalyFilter().setEnumerationItemId(from.getId());
+    final var filter = new AnomalyFilter().setEnumerationItemId(from.getId()).setAlertId(alertId);
     anomalyManager.filter(filter).stream()
         .filter(Objects::nonNull)
         .map(a -> a.setEnumerationItem(eiRef(toId)))

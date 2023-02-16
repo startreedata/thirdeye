@@ -215,6 +215,11 @@ public class MaintenanceResource {
                   .setName(ei.getName())
                   .setParams(ei.getParams())
           );
+          log.info("Moving anomaly {} to {} enumeration item(id: {}) from (id: {})",
+              anomaly.getId(),
+              idToEi.containsKey(existingOrCreated.getId())? "existing" : "new",
+              existingOrCreated.getId(),
+              ei.getId());
 
           anomalyManager.update(
               anomaly.setEnumerationItem(eiRef(existingOrCreated.getId()))

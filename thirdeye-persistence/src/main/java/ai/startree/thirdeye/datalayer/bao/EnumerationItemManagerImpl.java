@@ -127,10 +127,7 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     LOG.info("Migrating enumeration item {} to {} for alert {}", from.getId(), toId, alertId);
 
     /* Migrate anomalies */
-    final var filter = new AnomalyFilter()
-        .setEnumerationItemId(from.getId())
-        .setAlertId(alertId);
-
+    final var filter = new AnomalyFilter().setEnumerationItemId(from.getId()).setAlertId(alertId);
     anomalyManager.filter(filter).stream()
         .filter(Objects::nonNull)
         .map(a -> a.setEnumerationItem(eiRef(toId)))
@@ -142,15 +139,17 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
         .filter(sg -> sg.getAlertAssociations() != null)
         .filter(sg -> sg.getAlertAssociations().stream()
             .filter(Objects::nonNull)
+            .filter(aa -> aa.getAlert() != null)
+            .anyMatch(aa -> to.getAlert().getId().equals(aa.getAlert().getId())))
+        .filter(sg -> sg.getAlertAssociations().stream()
+            .filter(Objects::nonNull)
             .filter(aa -> aa.getEnumerationItem() != null)
-            .anyMatch(aa -> from.getId().equals(aa.getEnumerationItem().getId())
-                && alertId.equals(aa.getAlert().getId()))
+            .anyMatch(aa -> from.getId().equals(aa.getEnumerationItem().getId()))
         )
         .forEach(sg -> {
           sg.getAlertAssociations().stream()
               .filter(aa -> aa.getEnumerationItem() != null)
-              .filter(aa -> from.getId().equals(aa.getEnumerationItem().getId())
-                  && alertId.equals(aa.getAlert().getId()))
+              .filter(aa -> from.getId().equals(aa.getEnumerationItem().getId()))
               .forEach(aa -> aa.setEnumerationItem(eiRef(toId)));
           subscriptionGroupManager.update(sg);
         });

@@ -16,6 +16,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl.eiRef;
 import static ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl.toAlertDTO;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -202,31 +203,32 @@ public class MaintenanceResource {
               anomaly.getEnumerationItem().getId());
           continue;
         }
-        if (ei.getAlert() == null) {
-          log.error("Enumeration item(id: {}) has no alert", ei.getId());
+        if (ei.getAlert() != null && alertId.equals(ei.getAlert().getId())) {
           continue;
         }
-        if (!alertId.equals(ei.getAlert().getId())) {
-          log.error(
-              "Enumeration item(id: {}) has an alert(id: {}) that does not match anomaly(id: {})'s alert(id: {})",
-              ei.getId(),
-              ei.getAlert().getId(),
-              anomaly.getId(),
-              alertId);
-          // This is the problem we are trying to fix
+        log.error(
+            "Enumeration item(id: {}) has an alert(id: {}) that does not match anomaly(id: {})'s alert(id: {})",
+            ei.getId(),
+            optional(ei.getAlert()).map(AbstractDTO::getId).orElse(null),
+            anomaly.getId(),
+            alertId);
 
-          final EnumerationItemDTO existingOrCreated = getExistingOrCreate(alertId, ei, eiMap);
-          log.info("Moving anomaly {} to {} enumeration item(id: {}) from (id: {})",
-              anomaly.getId(),
-              idToEi.containsKey(existingOrCreated.getId()) ? "existing" : "new",
-              existingOrCreated.getId(),
-              ei.getId());
+        // This is the problem we are trying to fix
+        final EnumerationItemDTO existingOrCreated = getExistingOrCreate(alertId, ei, eiMap);
+        if (existingOrCreated == null) {
+          log.error("can't fix enumeration item {} for alert(id: {})", ei.getId(), alertId);
+          continue;
+        }
+        log.info("Moving anomaly {} to {} enumeration item(id: {}) from (id: {})",
+            anomaly.getId(),
+            idToEi.containsKey(existingOrCreated.getId()) ? "existing" : "new",
+            existingOrCreated.getId(),
+            ei.getId());
 
-          if (!dryRun) {
-            anomalyManager.update(
-                anomaly.setEnumerationItem(eiRef(existingOrCreated.getId()))
-            );
-          }
+        if (!dryRun) {
+          anomalyManager.update(
+              anomaly.setEnumerationItem(eiRef(existingOrCreated.getId()))
+          );
         }
       }
       count++;
@@ -271,16 +273,20 @@ public class MaintenanceResource {
               aa.getEnumerationItem().getId());
           continue;
         }
-        if (ei.getAlert() == null) {
-          log.error("Enumeration item(id: {}) has no alert", ei.getId());
-          continue;
-        }
-        if (aa.getAlert().getId().equals(ei.getAlert().getId())) {
+        if (ei.getAlert() != null && aa.getAlert().getId().equals(ei.getAlert().getId())) {
           continue;
         }
 
         // Case where the alert id in the alert association does not match the alert id in the enumeration item
-        final EnumerationItemDTO existingOrCreated = getExistingOrCreate(aa.getAlert().getId(), ei, eiMap);
+        final EnumerationItemDTO existingOrCreated = getExistingOrCreate(aa.getAlert().getId(),
+            ei,
+            eiMap);
+        if (existingOrCreated == null) {
+          log.error("can't fix enumeration item {} for alert(id: {})",
+              ei.getId(),
+              aa.getAlert().getId());
+          continue;
+        }
         log.info("Moving subscription group {} to {} enumeration item(id: {}) from (id: {})",
             sg.getId(),
             idToEi.containsKey(existingOrCreated.getId()) ? "existing" : "new",
@@ -300,6 +306,14 @@ public class MaintenanceResource {
 
   private EnumerationItemDTO getExistingOrCreate(final Long alertId, final EnumerationItemDTO ei,
       final Map<EiKey, EnumerationItemDTO> eiMap) {
+    if (ei.getName() == null
+        || ei.getName().trim().isEmpty()
+        || ei.getParams() == null
+        || ei.getParams().size() == 0) {
+      log.error("Enumeration item(id: {}) has no name or params", ei.getId());
+      return null;
+    }
+
     final EiKey key = new EiKey(alertId, ei.getName(), ei.getParams());
     if (eiMap.containsKey(key)) {
       return eiMap.get(key);

@@ -59,13 +59,13 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
         && Objects.equals(o1.getParams(), o2.getParams());
   }
 
-  static AlertDTO toAlertDTO(final Long alertId) {
+  public static AlertDTO toAlertDTO(final Long alertId) {
     final AlertDTO alert = new AlertDTO();
     alert.setId(alertId);
     return alert;
   }
 
-  private static EnumerationItemDTO eiRef(final long id) {
+  public static EnumerationItemDTO eiRef(final long id) {
     final EnumerationItemDTO enumerationItemDTO = new EnumerationItemDTO();
     enumerationItemDTO.setId(id);
     return enumerationItemDTO;

@@ -14,13 +14,20 @@
 
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl.eiRef;
+import static ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl.toAlertDTO;
+
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.codahale.metrics.annotation.Timed;
@@ -34,10 +41,15 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
@@ -65,16 +77,23 @@ public class MaintenanceResource {
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final AuthorizationManager authorizationManager;
+  private final AlertManager alertManager;
 
   @Inject
   public MaintenanceResource(final EnumerationItemManager enumerationItemManager,
       final AnomalyManager anomalyManager,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final AlertManager alertManager) {
     this.enumerationItemManager = enumerationItemManager;
     this.anomalyManager = anomalyManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.authorizationManager = authorizationManager;
+    this.alertManager = alertManager;
+  }
+
+  private static AbstractDTO ei(final EnumerationItemDTO existingOrCreated) {
+    return new EnumerationItemDTO().setId(existingOrCreated.getId());
   }
 
   @DELETE
@@ -83,7 +102,7 @@ public class MaintenanceResource {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation("Remove enumeration items that are not associated with any alert and have no anomalies")
   public Response purge(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
-      @ApiParam(defaultValue = "true") @FormParam("dryRun") boolean dryRun) {
+      @ApiParam(defaultValue = "true") @FormParam("dryRun") final boolean dryRun) {
     enumerationItemManager.findAll().stream()
         .peek(ei -> authorizationManager.ensureCanDelete(principal, ei))
         .filter(ei -> ei.getAlert() == null)
@@ -102,7 +121,7 @@ public class MaintenanceResource {
       eiString = ThirdEyeSerialization
           .getObjectMapper()
           .writeValueAsString(ApiBeanMapper.toApi(ei));
-    } catch (Exception e) {
+    } catch (final Exception e) {
       eiString = ei.toString();
     }
     log.warn("Deleting{} by {}. enumeration item(id: {}}) json: {}",
@@ -142,5 +161,72 @@ public class MaintenanceResource {
         .map(ei -> ei.setAlerts(null))
         .forEach(enumerationItemManager::update);
     return Response.ok().build();
+  }
+
+  @POST
+  @Path("/enumeration-items/fix-incorrect-migrations")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation("Go through all anomalies and fix incorrect migrations")
+  public Response fixIncorrectMigrations(
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
+
+    final List<EnumerationItemDTO> allEis = enumerationItemManager.findAll();
+
+    final Map<Long, EnumerationItemDTO> idToEi = allEis.stream()
+        .collect(Collectors.toMap(AbstractDTO::getId, ei -> ei));
+
+    final Set<Long> alertIds = allEis.stream()
+        .filter(ei -> ei.getAlert() != null)
+        .map(EnumerationItemDTO::getAlert)
+        .map(AbstractDTO::getId)
+        .collect(Collectors.toSet());
+
+    for (final Long alertId : alertIds) {
+      final AnomalyFilter f = new AnomalyFilter().setAlertId(alertId);
+      final List<AnomalyDTO> anomalies = anomalyManager.filter(f);
+      for (final AnomalyDTO anomaly : anomalies) {
+        if (anomaly.getEnumerationItem() == null) {
+          continue;
+        }
+        final EnumerationItemDTO ei = idToEi.get(anomaly.getEnumerationItem().getId());
+        if (ei == null) {
+          log.error("Anomaly(id: {}) has an enumeration item(id: {}) that does not exist",
+              anomaly.getId(),
+              anomaly.getEnumerationItem().getId());
+          continue;
+        }
+        if (ei.getAlert() == null) {
+          log.error("Enumeration item(id: {}) has no alert", ei.getId());
+          continue;
+        }
+        if (!alertId.equals(ei.getAlert().getId())) {
+          log.error(
+              "Enumeration item(id: {}) has an alert(id: {}) that does not match anomaly(id: {})'s alert(id: {})",
+              ei.getId(),
+              ei.getAlert().getId(),
+              anomaly.getId(),
+              alertId);
+          // This is the problem we are trying to fix
+
+          final EnumerationItemDTO existingOrCreated = enumerationItemManager.findExistingOrCreate(
+              new EnumerationItemDTO()
+                  .setAlert(toAlertDTO(alertId))
+                  .setName(ei.getName())
+                  .setParams(ei.getParams())
+          );
+
+          anomalyManager.update(
+              anomaly.setEnumerationItem(eiRef(existingOrCreated.getId()))
+          );
+        }
+      }
+    }
+
+    return Response.ok(
+        alertIds.stream().map(
+            id -> new AlertApi().setId(id)
+        ).collect(Collectors.toList())
+    ).build();
   }
 }

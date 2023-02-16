@@ -169,7 +169,8 @@ public class MaintenanceResource {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation("Go through all anomalies and fix incorrect migrations")
   public Response fixIncorrectMigrations(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @ApiParam(defaultValue = "true") @FormParam("dryRun") final boolean dryRun) {
 
     final List<EnumerationItemDTO> allEis = enumerationItemManager.findAll();
 
@@ -221,9 +222,11 @@ public class MaintenanceResource {
               existingOrCreated.getId(),
               ei.getId());
 
-          anomalyManager.update(
-              anomaly.setEnumerationItem(eiRef(existingOrCreated.getId()))
-          );
+          if (!dryRun) {
+            anomalyManager.update(
+                anomaly.setEnumerationItem(eiRef(existingOrCreated.getId()))
+            );
+          }
         }
       }
     }

@@ -12,13 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { PropertyConfigValueTypes } from "../../../../rest/dto/alert.interfaces";
-import type { PropertyRenderConfig } from "../alert-template-properties-builder/alert-template-properties-builder.interfaces";
 
-export interface AlertTemplateFormFieldProps {
-    item: PropertyRenderConfig;
-    tabIndex: number;
-    placeholder: string;
+export interface LabelForTemplateFieldProps {
+    name: string;
     tooltipText?: string | null;
-    onChange: (selected: PropertyConfigValueTypes) => void;
 }

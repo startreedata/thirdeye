@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { PropertyConfigValueTypes } from "../../../../rest/dto/alert.interfaces";
-import type { PropertyRenderConfig } from "../alert-template-properties-builder/alert-template-properties-builder.interfaces";
+import { MetadataProperty } from "../../../../../rest/dto/alert-template.interfaces";
+import { PropertyConfigValueTypes } from "../../../../../rest/dto/alert.interfaces";
 
-export interface AlertTemplateFormFieldProps {
-    item: PropertyRenderConfig;
-    tabIndex: number;
-    placeholder: string;
-    tooltipText?: string | null;
+export interface FormComponentForTemplateFieldProps {
+    templateFieldProperty: MetadataProperty;
     onChange: (selected: PropertyConfigValueTypes) => void;
+    placeholder?: string;
+    tabIndex?: number;
+    value: PropertyConfigValueTypes;
+    propertyKey: string;
 }

@@ -130,7 +130,7 @@ module.exports = {
                     icon_emoji: ":white_circle:",
                     text:
                         "<!channel> Successfully published `$package_name $npm_package_version`\n" +
-                        "Links: <https://repo.startreedata.io/ui/repos/tree/General/startree-ui/$package_name/-/$package_name-$npm_package_version.tgz|Artifactory> | " +
+                        "Links: <https://repo.startreedata.io/ui/repos/tree/General/startree-ui/$package_name/-/$package_name-$npm_package_version.tgz|Artifacts> | " +
                         "<$repo_url/releases/tag/" +
                         projectName +
                         "-$npm_package_version|Github>",

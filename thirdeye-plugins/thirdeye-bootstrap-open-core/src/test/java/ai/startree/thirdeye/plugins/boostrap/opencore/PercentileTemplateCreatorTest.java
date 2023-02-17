@@ -60,10 +60,10 @@ public class PercentileTemplateCreatorTest {
     final AlertTemplateApi output = PercentileTemplateCreator.createPercentileVariant(input);
 
     assertThat(output).isNull();
-
   }
 
-  private static void assertWellFormedPercentileVariant(final AlertTemplateApi expected, final AlertTemplateApi output) {
+  private static void assertWellFormedPercentileVariant(final AlertTemplateApi expected,
+      final AlertTemplateApi output) {
     assertThat(output).isNotNull();
     assertThat(output.getName()).isEqualTo(expected.getName());
     assertThat(output.getDescription()).isEqualTo(expected.getDescription());
@@ -73,6 +73,12 @@ public class PercentileTemplateCreatorTest {
         .allMatch(s -> s.contains("${aggregationParameter}"))
     ).isTrue();
     assertThat(
-        output.getProperties().stream().filter(p -> p.getName().equals("aggregationParameter")).count()).isEqualTo(1);
+        output.getProperties()
+            .stream()
+            .filter(p -> p.getName().equals("aggregationParameter"))
+            .count()).isEqualTo(1);
+    assertThat(
+        output.getMetadata().getDataset().getRcaExcludedDimensions().templatedValue()).isEqualTo(
+        expected.getMetadata().getDataset().getRcaExcludedDimensions().templatedValue());
   }
 }

@@ -69,14 +69,14 @@ public class EntityResource {
   public Response getRawEntity(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
-    final AbstractDTO dto = ensureExists(genericPojoDao.getRaw(id));
-    authorizationManager.ensureCanRead(principal, dto);
-    return Response.ok(dto).build();
+    authorizationManager.ensureHasAutomationAccess(principal);
+    return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
   }
 
   @GET
   @Path("types")
   public Response listEntities(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+    authorizationManager.ensureHasAutomationAccess(principal);
     final Map<String, Long> entityCountMap = new TreeMap<>();
     final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
     for (Class<? extends AbstractDTO> beanClass : beanClasses) {
@@ -91,6 +91,7 @@ public class EntityResource {
   public Response getEntityInfo(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("bean_class") String beanClass) {
+    authorizationManager.ensureHasAutomationAccess(principal);
     try {
       List<String> indexedColumns = genericPojoDao.getIndexedColumns(Class.forName(beanClass));
       return Response.ok(indexedColumns).build();
@@ -107,6 +108,7 @@ public class EntityResource {
       @PathParam("bean_class") String beanClassRef,
       @Context UriInfo uriInfo
   ) {
+    authorizationManager.ensureHasAutomationAccess(principal);
     try {
       final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
       int limit = 10;
@@ -141,9 +143,7 @@ public class EntityResource {
       } else {
         abstractBeans = genericPojoDao.list(beanClass, limit, offset);
       }
-      return Response.ok(abstractBeans.stream().filter(dto ->
-          authorizationManager.hasAccess(principal, dto, AccessType.READ)
-      )).build();
+      return Response.ok(abstractBeans).build();
     } catch (Exception e) {
       throw serverError(ThirdEyeStatus.ERR_UNKNOWN, e);
     }

@@ -38,6 +38,12 @@ import javax.ws.rs.core.Response.Status;
 
 public class AuthorizationManager {
 
+  // A meta-resource to authorize thirdeye automation/maintenance.
+  static final ResourceIdentifier AUTOMATION_RESOURCE_ID = ResourceIdentifier.from(
+      "thirdeye-automation",
+      "thirdeye-automation",
+      "thirdeye-automation");
+
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
 
@@ -81,6 +87,10 @@ public class AuthorizationManager {
 
   public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
     ensureCanCreate(principal, entity);
+  }
+
+  public void ensureHasAutomationAccess(final ThirdEyePrincipal principal) {
+    ensureHasAccess(principal, AUTOMATION_RESOURCE_ID, AccessType.WRITE);
   }
 
   public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,

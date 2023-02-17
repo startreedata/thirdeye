@@ -107,9 +107,7 @@ public class AuthorizationManager {
 
   public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
-    return hasRootAccess(principal) || accessControl.hasAccess(principal.authToken,
-        identifier,
-        accessType);
+    return accessControl.hasAccess(principal.authToken, identifier, accessType);
   }
 
   public void ensureHasRootAccess(final ThirdEyePrincipal principal) {

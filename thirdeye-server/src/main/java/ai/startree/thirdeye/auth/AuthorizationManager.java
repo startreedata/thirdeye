@@ -95,6 +95,10 @@ public class AuthorizationManager {
     }
   }
 
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal, final T entity) {
+    return hasAccess(principal, resourceId(entity), AccessType.READ);
+  }
+
   public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     return hasAccess(principal, resourceId(entity), accessType);

@@ -68,7 +68,7 @@ public class PercentileTemplateCreatorTest {
     assertThat(output.getName()).isEqualTo(expected.getName());
     assertThat(output.getDescription()).isEqualTo(expected.getDescription());
     assertThat(output.getNodes().stream().filter(n -> n.getType().equalsIgnoreCase("DataFetcher"))
-        .map(n -> n.getParams().get("component.query").value())
+        .map(n -> n.getParams().get("component.query").getValue())
         .map(v -> (String) v)
         .allMatch(s -> s.contains("${aggregationParameter}"))
     ).isTrue();
@@ -78,7 +78,7 @@ public class PercentileTemplateCreatorTest {
             .filter(p -> p.getName().equals("aggregationParameter"))
             .count()).isEqualTo(1);
     assertThat(
-        output.getMetadata().getDataset().getRcaExcludedDimensions().templatedValue()).isEqualTo(
-        expected.getMetadata().getDataset().getRcaExcludedDimensions().templatedValue());
+        output.getMetadata().getDataset().getRcaExcludedDimensions().getTemplatedValue()).isEqualTo(
+        expected.getMetadata().getDataset().getRcaExcludedDimensions().getTemplatedValue());
   }
 }

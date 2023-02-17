@@ -64,7 +64,7 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   @Override
   public void execute() throws Exception {
     final Boolean dryRun = optional(planNode.getParams().get("dryRun"))
-        .map(Templatable::value)
+        .map(Templatable::getValue)
         .map(b -> (Boolean) b)
         .orElse(false);
 

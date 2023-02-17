@@ -51,7 +51,7 @@ public class TemplatableMap<K, V> extends HashMap<K, Templatable<V>> {
     for (K k : this.keySet()) {
       final Templatable<V> templatable = this.get(k);
       checkPropertyIsApplied(templatable);
-      valueMap.put(k, templatable.value());
+      valueMap.put(k, templatable.getValue());
     }
     return valueMap;
   }
@@ -59,7 +59,7 @@ public class TemplatableMap<K, V> extends HashMap<K, Templatable<V>> {
   public V getValue(Object key) {
     Templatable<V> templatable = get(key);
     checkPropertyIsApplied(templatable);
-    return templatable.value();
+    return templatable.getValue();
   }
 
   public V putValue(K key, V value) {
@@ -67,11 +67,11 @@ public class TemplatableMap<K, V> extends HashMap<K, Templatable<V>> {
     if (old == null) {
       return null;
     }
-    return old.value();
+    return old.getValue();
   }
 
   private void checkPropertyIsApplied(final Templatable<V> templatable) {
-    if (templatable.value() == null && templatable.templatedValue() != null) {
+    if (templatable.getValue() == null && templatable.getTemplatedValue() != null) {
       throw new IllegalStateException("Cannot return value map. Properties not resolved");
     }
   }

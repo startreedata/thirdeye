@@ -56,7 +56,7 @@ public class PercentileTemplateCreator {
       return false;
     }
     final Optional<Object> queryObj = optional(params.get(PARAMS_QUERY_KEY))
-        .map(Templatable::value);
+        .map(Templatable::getValue);
     if (queryObj.isEmpty()) {
       return false;
     }

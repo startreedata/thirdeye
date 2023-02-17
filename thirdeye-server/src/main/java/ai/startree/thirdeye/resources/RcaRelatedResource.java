@@ -113,7 +113,7 @@ public class RcaRelatedResource {
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
     final List<@NonNull String> types = optional(type)
         .map(List::of)
-        .orElse(optional(eventContext.getTypes()).map(Templatable::value).orElse(List.of()));
+        .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
         endWithLookahead,
         types,

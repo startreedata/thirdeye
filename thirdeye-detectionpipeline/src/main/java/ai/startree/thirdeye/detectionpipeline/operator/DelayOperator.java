@@ -24,7 +24,7 @@ public class DelayOperator extends DetectionPipelineOperator{
   @Override
   public void execute() throws Exception {
     final long sleepTime = optional(getPlanNode().getParams().get(DELAY_TIME))
-        .map(Templatable::value)
+        .map(Templatable::getValue)
         .map(Object::toString)
         .map(text -> Duration.parse(text).toMillis())
         .orElse(0L);

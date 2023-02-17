@@ -119,7 +119,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     final DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
 
     final List<String> dimensions = new ArrayList<>(optional(datasetConfigDTO.getDimensions()).map(
-        Templatable::value).orElse(List.of()));
+        Templatable::getValue).orElse(List.of()));
     dimensions.removeAll(slice.getPredicates()
         .stream()
         .map(Predicate::getLhs)

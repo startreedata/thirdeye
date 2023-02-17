@@ -63,11 +63,6 @@ public class AlertTemplateRenderer {
       throws IOException, ClassNotFoundException {
     ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
-    if (alert.getId() != null) {
-      final AlertDTO alertDto = ensureExists(alertManager.findById(alert.getId()));
-      return renderAlert(alertDto, detectionInterval);
-    }
-
     final AlertTemplateApi templateApi = alert.getTemplate();
     ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
     final Map<String, Object> templateProperties = alert.getTemplateProperties();

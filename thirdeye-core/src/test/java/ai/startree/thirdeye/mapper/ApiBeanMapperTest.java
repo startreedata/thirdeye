@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.mapper;
 
-import static org.testng.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -43,8 +43,8 @@ public class ApiBeanMapperTest {
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
 
     final DataSourceApi gotApi = ApiBeanMapper.toApi(dto);
-    assertNotNull(gotApi.getAuth());
-    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotApi.getAuth()).isNotNull();
+    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -53,8 +53,8 @@ public class ApiBeanMapperTest {
         .setAuth(new AuthorizationConfigurationApi().setNamespace("my-namespace"));
 
     final DataSourceDTO gotDto = ApiBeanMapper.toDataSourceDto(api);
-    assertNotNull(gotDto.getAuth());
-    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotDto.getAuth()).isNotNull();
+    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -63,8 +63,8 @@ public class ApiBeanMapperTest {
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
 
     final DatasetApi gotApi = ApiBeanMapper.toApi(dto);
-    assertNotNull(gotApi.getAuth());
-    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotApi.getAuth()).isNotNull();
+    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -73,8 +73,8 @@ public class ApiBeanMapperTest {
         .setAuth(new AuthorizationConfigurationApi().setNamespace("my-namespace"));
 
     final DatasetConfigDTO gotDto = ApiBeanMapper.toDatasetConfigDto(api);
-    assertNotNull(gotDto.getAuth());
-    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotDto.getAuth()).isNotNull();
+    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -83,8 +83,8 @@ public class ApiBeanMapperTest {
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
 
     final AlertTemplateApi gotApi = ApiBeanMapper.toAlertTemplateApi(dto);
-    assertNotNull(gotApi.getAuth());
-    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotApi.getAuth()).isNotNull();
+    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -93,8 +93,8 @@ public class ApiBeanMapperTest {
         .setAuth(new AuthorizationConfigurationApi().setNamespace("my-namespace"));
 
     final AlertTemplateDTO gotDto = ApiBeanMapper.toAlertTemplateDto(api);
-    assertNotNull(gotDto.getAuth());
-    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotDto.getAuth()).isNotNull();
+    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -103,8 +103,8 @@ public class ApiBeanMapperTest {
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
 
     final AlertApi gotApi = ApiBeanMapper.toApi(dto);
-    assertNotNull(gotApi.getAuth());
-    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotApi.getAuth()).isNotNull();
+    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -113,8 +113,8 @@ public class ApiBeanMapperTest {
         .setAuth(new AuthorizationConfigurationApi().setNamespace("my-namespace"));
 
     final AlertDTO gotDto = ApiBeanMapper.toAlertDto(api);
-    assertNotNull(gotDto.getAuth());
-    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotDto.getAuth()).isNotNull();
+    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -123,8 +123,8 @@ public class ApiBeanMapperTest {
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
 
     final EnumerationItemApi gotApi = ApiBeanMapper.toApi(dto);
-    assertNotNull(gotApi.getAuth());
-    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotApi.getAuth()).isNotNull();
+    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -133,8 +133,8 @@ public class ApiBeanMapperTest {
         .setAuth(new AuthorizationConfigurationApi().setNamespace("my-namespace"));
 
     final EnumerationItemDTO gotDto = ApiBeanMapper.toEnumerationItemDTO(api);
-    assertNotNull(gotDto.getAuth());
-    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotDto.getAuth()).isNotNull();
+    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -143,8 +143,8 @@ public class ApiBeanMapperTest {
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
 
     final AnomalyApi gotApi = ApiBeanMapper.toApi(dto);
-    assertNotNull(gotApi.getAuth());
-    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotApi.getAuth()).isNotNull();
+    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -153,8 +153,8 @@ public class ApiBeanMapperTest {
         "my-namespace"));
 
     final AnomalyDTO gotDto = ApiBeanMapper.toDto(api);
-    assertNotNull(gotDto.getAuth());
-    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotDto.getAuth()).isNotNull();
+    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -163,8 +163,8 @@ public class ApiBeanMapperTest {
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
 
     final RcaInvestigationApi gotApi = ApiBeanMapper.toApi(dto);
-    assertNotNull(gotApi.getAuth());
-    assertEquals(gotApi.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotApi.getAuth()).isNotNull();
+    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -173,8 +173,8 @@ public class ApiBeanMapperTest {
         "my-namespace"));
 
     final RcaInvestigationDTO gotDto = ApiBeanMapper.toDto(api);
-    assertNotNull(gotDto.getAuth());
-    assertEquals(gotDto.getAuth().getNamespace(), "my-namespace");
+    assertThat(gotDto.getAuth()).isNotNull();
+    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -183,7 +183,7 @@ public class ApiBeanMapperTest {
     dto.setNamespace("my-namespace");
 
     final AuthorizationConfigurationApi gotApi = ApiBeanMapper.toApi(dto);
-    assertEquals(gotApi.getNamespace(), "my-namespace");
+    assertThat(gotApi.getNamespace()).isEqualTo("my-namespace");
   }
 
   @Test
@@ -192,6 +192,6 @@ public class ApiBeanMapperTest {
         .setNamespace("my-namespace");
 
     final AuthorizationConfigurationDTO gotDto = ApiBeanMapper.toAuthorizationConfigurationDTO(api);
-    assertEquals(gotDto.getNamespace(), "my-namespace");
+    assertThat(gotDto.getNamespace()).isEqualTo("my-namespace");
   }
 }

@@ -119,11 +119,11 @@ data:
       noTaskDelay: {{ .Values.worker.config.noTaskDelay | default 15 }}
       heartbeatInterval: {{ .Values.worker.config.heartbeatInterval | default 30 }}
       activeThresholdMultiplier: {{ .Values.worker.config.activeThresholdMultiplier | default 30 }}
-
+  
     time:
       timezone: {{ .Values.time.timezone }}
       minimumOnboardingStartTime: {{ .Values.time.minimumOnboardingStartTime }}
-
+  
     rca:
       topContributors:
         algorithm: {{ .Values.rca.topContributors.algorithm }}

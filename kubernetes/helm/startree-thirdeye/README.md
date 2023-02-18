@@ -23,7 +23,7 @@ To deploy thirdeye on Kubernetes, you may need access credentials to fetch docke
 Startree artifactory. To do that, simply create a kubernetes secret using the vault credentials.
 
 ```bash
-kubectl create secret docker-registry startree \
+kubectl create secret docker-registry startree \ 
   --docker-server="<DOCKER-REPO>" \
   --docker-username=<your-name> \
   --docker-password=<your-pword> \
@@ -49,14 +49,14 @@ helm install thirdeye . --namespace te
 ```
 
 To see the notifications in action ThirdEye can be configured to fire emails once it set up with an SMTP server. The following example
-uses the Google SMTP server.
+uses the Google SMTP server.  
 Make sure you pass the `ui.publicUrl` as it will be used to form the anomaly page links shared in the email.
 
 ```bash
 export SMTP_PASSWORD="password"
 export SMTP_USERNAME="from.email@gmail.com"
 export THIRDEYE_UI_PUBLIC_URL="http://localhost:8081"
-# please ask for access to Startree repo - see https://github.com/startreedata/thirdeye/tree/master/recipes/quickstart
+# please ask for access to Startree repo - see https://github.com/startreedata/thirdeye/tree/master/recipes/quickstart 
 export DOCKER_CONTAINER_URL=<TE_DOCKER_CONTAINER_URL>
 
 helm install thirdeye . \
@@ -100,8 +100,8 @@ helm install thirdeye . -f values.yaml
 
 ### Dynamic Secrets
 
-ThirdEye has plugin infrastructure which allow users to go ahead and create their own plugins. To avoid creating `Secret`
-resources for the sensitive data for each new plugin, it provides a way of creating dynamic secrets as required. Below
+ThirdEye has plugin infrastructure which allow users to go ahead and create their own plugins. To avoid creating `Secret` 
+resources for the sensitive data for each new plugin, it provides a way of creating dynamic secrets as required. Below 
 is a snippet from the `values.yaml` file
 ```yaml
 secrets:
@@ -115,11 +115,11 @@ secrets:
     encoded: true
     value: <base 64 encoded json key>
 ```
-1. A single Secret resource will be created which will have data fields corresponding to each entry in `secrets`.
-2. A secret data field will be injected as an environment variable, with name as `env`, in the server pods if we pass the `env`.
-   For example, smtpUsername will be injected as environment variable with variable name as `SMTP_USER` and value as `tobefedexternally`,
+1. A single Secret resource will be created which will have data fields corresponding to each entry in `secrets`. 
+2. A secret data field will be injected as an environment variable, with name as `env`, in the server pods if we pass the `env`.  
+   For example, smtpUsername will be injected as environment variable with variable name as `SMTP_USER` and value as `tobefedexternally`,  
    while `holidayLoaderKey` won't be injected as environment variable.
-3. The values will be considered as plain text by default and will be encoded internally unless we provide `encoded: true`, then the value won't be encoded by the charts.
+3. The values will be considered as plain text by default and will be encoded internally unless we provide `encoded: true`, then the value won't be encoded by the charts. 
 4. It is recommended to pass values other than simple string (e.g. JSON payload) as `base64` encoded value to avoid any parsing issues.
 
 ### Holiday Events
@@ -301,8 +301,8 @@ mysql:
 | `worker.replicas`                                  | Number of worker pods required                                                                                       |
 | `worker.randomWorkerIdEnabled`                     | Flag to enable assigning random worker ids to worker pods. Must be set true for multiple workers.                    |
 | `prometheus.enabled`                               | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
-| `mysql.enabled`                                    | Flag to disable MySQL deployment if using external instance
-| `mysql.mysqlUrl`                                   | Database URL if using external instance
+| `mysql.enabled`                                    | Flag to disable MySQL deployment if using external instance                                                          |
+| `mysql.mysqlUrl`                                   | Database URL if using external instance                                                                              |
 | `mysql.mysqlUser`                                  | Database username                                                                                                    |
 | `mysql.mysqlPassword`                              | Database password                                                                                                    |
 | `mysql.persistence.size`                           | Size of persistent volume created for database storage                                                               |

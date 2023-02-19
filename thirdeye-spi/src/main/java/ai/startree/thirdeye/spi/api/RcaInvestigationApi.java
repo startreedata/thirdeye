@@ -30,6 +30,7 @@ public class RcaInvestigationApi implements ThirdEyeCrudApi<RcaInvestigationApi>
   private UserApi createdBy;
   private Date updated;
   private UserApi updatedBy;
+  private AuthorizationConfigurationApi auth;
 
   @Override
   public Long getId() {
@@ -112,6 +113,15 @@ public class RcaInvestigationApi implements ThirdEyeCrudApi<RcaInvestigationApi>
 
   public RcaInvestigationApi setUpdatedBy(final UserApi updatedBy) {
     this.updatedBy = updatedBy;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
+  }
+
+  public RcaInvestigationApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

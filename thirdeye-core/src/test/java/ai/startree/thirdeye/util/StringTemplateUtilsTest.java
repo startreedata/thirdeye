@@ -89,14 +89,14 @@ public class StringTemplateUtilsTest {
         input,
         properties);
 
-    assertThat(output.templatableDto.value()).isEqualTo(datasetConfigDTO);
-    assertThat(output.templatableDto.templatedValue()).isNull();
+    assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableDto.getTemplatedValue()).isNull();
 
-    assertThat(output.templatableMap.value()).isEqualTo(map);
-    assertThat(output.templatableMap.templatedValue()).isNull();
+    assertThat(output.templatableMap.getValue()).isEqualTo(map);
+    assertThat(output.templatableMap.getTemplatedValue()).isNull();
 
-    assertThat(output.templatableList.value()).isEqualTo(list);
-    assertThat(output.templatableList.templatedValue()).isNull();
+    assertThat(output.templatableList.getValue()).isEqualTo(list);
+    assertThat(output.templatableList.getTemplatedValue()).isNull();
   }
 
   @Test
@@ -113,8 +113,8 @@ public class StringTemplateUtilsTest {
         input,
         properties);
 
-    assertThat(output.templatableDto.value()).isEqualTo(datasetConfigDTO);
-    assertThat(output.templatableDto.templatedValue()).isNull();
+    assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableDto.getTemplatedValue()).isNull();
   }
 
   @Test
@@ -149,8 +149,8 @@ public class StringTemplateUtilsTest {
         objectWithNestedTemplatable,
         properties);
 
-    assertThat(output.templatableNested.value()).isEqualTo(objectWithTemplatableFields);
-    assertThat(output.templatableNested.templatedValue()).isNull();
+    assertThat(output.templatableNested.getValue()).isEqualTo(objectWithTemplatableFields);
+    assertThat(output.templatableNested.getTemplatedValue()).isNull();
   }
 
   @Test
@@ -172,8 +172,8 @@ public class StringTemplateUtilsTest {
     final ObjectWithTemplatableFields objectWithTemplatableFields = new ObjectWithTemplatableFields();
     objectWithTemplatableFields.templatableDto = Templatable.of(datasetConfigDTO);
 
-    assertThat(output.templatableNested.value()).isEqualTo(objectWithTemplatableFields);
-    assertThat(output.templatableNested.templatedValue()).isNull();
+    assertThat(output.templatableNested.getValue()).isEqualTo(objectWithTemplatableFields);
+    assertThat(output.templatableNested.getTemplatedValue()).isNull();
   }
 
   @Test
@@ -192,8 +192,8 @@ public class StringTemplateUtilsTest {
         objectWithNestedTemplatable,
         properties);
 
-    assertThat(output.templatableNested.value().templatableDto.value()).isEqualTo(datasetConfigDTO);
-    assertThat(output.templatableNested.value().templatableDto.templatedValue()).isNull();
+    assertThat(output.templatableNested.getValue().templatableDto.getValue()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableNested.getValue().templatableDto.getTemplatedValue()).isNull();
   }
 
   @Test

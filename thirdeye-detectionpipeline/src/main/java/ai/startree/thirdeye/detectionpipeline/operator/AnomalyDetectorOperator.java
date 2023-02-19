@@ -87,13 +87,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     alertId = detectionPipelineContext.getAlertId();
     enumerationItemRef = prepareEnumerationItemRef(detectionPipelineContext);
     anomalyMetric = optional(planNode.getParams().get("anomaly.metric"))
-        .map(Templatable::value)
+        .map(Templatable::getValue)
         .map(Object::toString);
     anomalyDataset = optional(planNode.getParams().get("anomaly.dataset"))
-        .map(Templatable::value)
+        .map(Templatable::getValue)
         .map(Object::toString);
     anomalySource = optional(planNode.getParams().get("anomaly.source"))
-        .map(Templatable::value)
+        .map(Templatable::getValue)
         .map(Object::toString);
   }
 

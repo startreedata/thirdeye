@@ -38,6 +38,11 @@ import javax.ws.rs.core.Response.Status;
 
 public class AuthorizationManager {
 
+  // A meta-resource to authorize thirdeye automation/maintenance.
+  static final ResourceIdentifier ROOT_RESOURCE_ID = ResourceIdentifier.from("thirdeye-root",
+      "thirdeye-root",
+      "thirdeye-root");
+
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
 
@@ -95,6 +100,10 @@ public class AuthorizationManager {
     }
   }
 
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal, final T entity) {
+    return hasAccess(principal, resourceId(entity), AccessType.READ);
+  }
+
   public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     return hasAccess(principal, resourceId(entity), accessType);
@@ -103,6 +112,19 @@ public class AuthorizationManager {
   public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     return accessControl.hasAccess(principal.authToken, identifier, accessType);
+  }
+
+  public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
+    if (!hasRootAccess(principal)) {
+      throw new ForbiddenException(Response.status(
+          Status.FORBIDDEN.getStatusCode(),
+          String.format("root access denied to %s", principal.getName())
+      ).build());
+    }
+  }
+
+  public boolean hasRootAccess(final ThirdEyePrincipal principal) {
+    return accessControl.hasAccess(principal.authToken, ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
   static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {

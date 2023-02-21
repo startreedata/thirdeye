@@ -12,24 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React from "react";
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import {
-    AlertEvaluation,
-    EditableAlert,
-} from "../../../rest/dto/alert.interfaces";
 
-export interface PreviewChartProps {
+import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
+import { AnomaliesFilterConfiguratorRenderConfigs } from "../anomalies-filter-panel.interfaces";
+
+export interface FilterConfiguratorProps {
+    renderConfig: AnomaliesFilterConfiguratorRenderConfigs;
     alert: EditableAlert;
-    showLoadButton: boolean;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
-        isTotalReplace?: boolean
+        isTotalChange?: boolean
     ) => void;
-    fetchOnInitialRender?: boolean;
-    headerComponent?: (
-        evaluation: AlertEvaluation | null,
-        evaluationRequestStatus: ActionStatus
-    ) => React.ReactNode;
-    onEvaluationFetchStart?: (startTime: number, endTime: number) => void;
 }

@@ -228,6 +228,7 @@
       "name":  "absoluteChange",
       "description": "Difference threshold. If the absolute difference between the metric and the baseline value is above this threshold, an anomaly is detected.",
       "min": 0,
+      "step": "DETECTION",
       "jsonType": "NUMBER"
     },
     {
@@ -239,6 +240,7 @@
     {
       "name":  "baselineOffset",
       "description": "Offset in ISO-8601 format. Example: `P7D` means \"use the value of the last week as a baseline\".",
+      "step": "DETECTION",
       "jsonType": "STRING"
     },
     {

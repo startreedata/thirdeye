@@ -12,13 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { PropertyConfigValueTypes } from "../../../../rest/dto/alert.interfaces";
-import type { PropertyRenderConfig } from "../alert-template-properties-builder/alert-template-properties-builder.interfaces";
 
-export interface AlertTemplateFormFieldProps {
-    item: PropertyRenderConfig;
-    tabIndex: number;
-    placeholder: string;
-    tooltipText?: string | null;
-    onChange: (selected: PropertyConfigValueTypes) => void;
+import { JSONEditorV1Props } from "../../platform/components/json-editor-v1/json-editor-v1.interfaces";
+
+export interface JSONEditorWithLocalCacheProps<T = string>
+    extends JSONEditorV1Props<T> {
+    initialValue: T;
 }

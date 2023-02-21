@@ -16,9 +16,17 @@
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { Association } from "../subscription-group-wizard-new.interface";
 
-export const getEnumerationItemName = (
-    item?: EnumerationItem
-): string | null => {
+// Function type signature overloading helps inform the TS compiler to infer
+// types smartly from the parameters themselves. Here, it is important to
+// place the narrower type above the more general type for this to work properly
+export function getEnumerationItemName(item: EnumerationItem): string;
+export function getEnumerationItemName(
+    item: EnumerationItem | undefined | null
+): string | null;
+
+export function getEnumerationItemName(
+    item: EnumerationItem | undefined | null
+): string | null {
     if (!item) {
         return null;
     }
@@ -32,10 +40,10 @@ export const getEnumerationItemName = (
     return Object.entries(params)
         .map(([k, v]) => `${k}=${v}`)
         .join(";");
-};
+}
 
 export const getAssociationId = ({
     alertId,
     enumerationId,
-}: Omit<Association, "id">): string =>
+}: Pick<Association, "alertId" | "enumerationId">): string =>
     `${alertId}${enumerationId ? `-${enumerationId}` : ""}`;

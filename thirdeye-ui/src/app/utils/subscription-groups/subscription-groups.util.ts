@@ -20,7 +20,6 @@ import type { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces
 import {
     AlertAssociation,
     EmailScheme,
-    SpecType,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
 import type {
@@ -246,18 +245,8 @@ const getUiSubscriptionGroupInternal = (
         )
     ).length.toString();
 
-    // TODO remove
-    uiSubscriptionGroup.activeChannels = [
-        { type: SpecType.Slack, params: { webhookUrl: "slack-url" } },
-        // { type: SpecType.Webhook, params: { url: "webhook-url" } },
-        // {
-        //     type: SpecType.EmailSendgrid,
-        //     params: {
-        //         apiKey: "API-Key",
-        //         emailRecipients: { from: "", to: ["rec1@gmail.com"] },
-        //     },
-        // },
-    ];
+    // TODO check if emails need to go in there
+    uiSubscriptionGroup.activeChannels = [...subscriptionGroup.specs];
 
     // Emails
     uiSubscriptionGroup.emails =

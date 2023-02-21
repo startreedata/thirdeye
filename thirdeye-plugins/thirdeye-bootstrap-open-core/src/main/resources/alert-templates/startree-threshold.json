@@ -207,11 +207,13 @@
     {
       "name": "max",
       "description": "If the current value is above this threshold, detect an anomaly.",
+      "step": "DETECTION",
       "type": "NUMBER"
     },
     {
       "name": "min",
       "description": "If the current value is below this threshold, detect an anomaly.",
+      "step": "DETECTION",
       "type": "NUMBER"
     },
     {

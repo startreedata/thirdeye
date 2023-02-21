@@ -8,6 +8,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -19,6 +20,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -30,6 +32,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -41,6 +44,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -52,6 +56,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -63,6 +68,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -74,6 +80,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "OBJECT",
+    "step": "FILTER",
+    "subStep": "Time of week",
     "defaultIsNull": null
   },
   {
@@ -93,6 +101,8 @@
     ],
     "multiselect": true,
     "jsonType": "ARRAY",
+    "step": "FILTER",
+    "subStep": "Time of week",
     "defaultIsNull": null
   },
   {
@@ -104,6 +114,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Special events",
     "defaultIsNull": null
   },
   {
@@ -115,6 +127,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Special events",
     "defaultIsNull": null
   },
   {
@@ -126,6 +140,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "FILTER",
     "defaultIsNull": null
   },
   {
@@ -137,6 +152,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Special events",
     "defaultIsNull": null
   },
   {
@@ -148,6 +165,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "ARRAY",
+    "step": "FILTER",
+    "subStep": "Special events",
     "defaultIsNull": null
   },
   {
@@ -159,6 +178,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Guardrail metric",
     "defaultIsNull": null
   },
   {
@@ -170,6 +191,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "FILTER",
+    "subStep": "Guardrail metric",
     "defaultIsNull": null
   },
   {
@@ -181,6 +204,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "FILTER",
+    "subStep": "Guardrail metric",
     "defaultIsNull": null
   },
   {
@@ -192,6 +217,8 @@
     "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
     "multiselect": true,
     "jsonType": "ARRAY",
+    "step": "FILTER",
+    "subStep": "Time of week",
     "defaultIsNull": null
   },
   {
@@ -206,6 +233,8 @@
     ],
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Impact",
     "defaultIsNull": null
   },
   {
@@ -217,6 +246,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "FILTER",
+    "subStep": "Impact",
     "defaultIsNull": null
   },
   {
@@ -228,6 +259,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Impact",
     "defaultIsNull": null
   },
   {
@@ -239,6 +272,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DETECTION",
     "defaultIsNull": null
   },
   {
@@ -250,6 +284,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "POSTPROCESS",
+    "subStep": "Anomaly merger",
     "defaultIsNull": null
   },
   {
@@ -261,6 +297,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "POSTPROCESS",
+    "subStep": "Anomaly merger",
     "defaultIsNull": null
   },
   {
@@ -272,6 +310,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -283,6 +322,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "POSTPROCESS",
+    "subStep": "Data mutability",
     "defaultIsNull": null
   },
   {
@@ -298,6 +339,7 @@
     ],
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DETECTION",
     "defaultIsNull": null
   },
   {
@@ -309,6 +351,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -320,6 +363,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "INTEGER",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -331,6 +375,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "RCA",
     "defaultIsNull": null
   },
   {
@@ -342,6 +387,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "RCA",
     "defaultIsNull": null
   },
   {
@@ -353,6 +399,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "RCA",
     "defaultIsNull": null
   },
   {
@@ -364,6 +411,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "ARRAY",
+    "step": "RCA",
     "defaultIsNull": null
   },
   {
@@ -375,6 +423,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "ARRAY",
+    "step": "RCA",
     "defaultIsNull": null
   },
   {
@@ -386,6 +435,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "POSTPROCESS",
+    "subStep": "Data mutability",
     "defaultIsNull": null
   },
   {
@@ -397,6 +448,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "POSTPROCESS",
+    "subStep": "Data mutability",
     "defaultIsNull": null
   },
   {
@@ -408,6 +461,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DETECTION",
     "defaultIsNull": null
   },
   {
@@ -419,6 +473,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "DETECTION",
     "defaultIsNull": null
   },
   {
@@ -430,6 +485,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "FILTER",
+    "subStep": "Threshold",
     "defaultIsNull": null
   },
   {
@@ -441,6 +498,8 @@
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
+    "step": "FILTER",
+    "subStep": "Threshold",
     "defaultIsNull": null
   },
   {
@@ -452,6 +511,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -463,6 +523,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   },
   {
@@ -474,6 +535,7 @@
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",
+    "step": "DATA",
     "defaultIsNull": null
   }
 ]

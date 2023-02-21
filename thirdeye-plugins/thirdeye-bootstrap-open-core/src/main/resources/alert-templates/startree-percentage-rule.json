@@ -233,6 +233,7 @@
     {
       "name":  "baselineOffset",
       "description": "Offset in ISO-8601 format. Example: `P7D` means \"use the value of the last week as a baseline\".",
+      "step": "DETECTION",
       "jsonType": "STRING"
     },
     {
@@ -248,6 +249,7 @@
       "name":  "percentageChange",
       "description": "Percentage threshold. If the percentage change is above this threshold, detect an anomaly.\nIn ratio. Eg 0.1 means 10 percent. [Learn more](https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/reference/operators/anomaly-detector/percentage).",
       "min": 0,
+      "step": "DETECTION",
       "jsonType": "NUMBER"
     },
     {

@@ -56,6 +56,16 @@ public class TemplatePropertyMetadata {
    */
   private JsonType jsonType;
 
+  /**
+   * The logical step of the property when configuring an alert.
+   */
+  private Step step;
+
+  /**
+   * A free string subStep. Used to group properties belonging to the same step in smaller groups.
+   */
+  private String subStep;
+
   public String getName() {
     return name;
   }
@@ -137,10 +147,33 @@ public class TemplatePropertyMetadata {
     return this;
   }
 
+  public Step getStep() {
+    return step;
+  }
+
+  public TemplatePropertyMetadata setStep(
+      final Step step) {
+    this.step = step;
+    return this;
+  }
+
+  public String getSubStep() {
+    return subStep;
+  }
+
+  public TemplatePropertyMetadata setSubStep(final String subStep) {
+    this.subStep = subStep;
+    return this;
+  }
+
   /**
    * See spec https://json-schema.org/understanding-json-schema/reference/type.html
    */
   public enum JsonType {
     STRING, NUMBER, INTEGER, OBJECT, ARRAY, BOOLEAN, NULL
+  }
+
+  public enum Step {
+    DATA, PREPROCESS, DETECTION, FILTER, POSTPROCESS, RCA, OTHER
   }
 }

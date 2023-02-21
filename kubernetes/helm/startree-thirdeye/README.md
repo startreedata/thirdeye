@@ -301,6 +301,8 @@ mysql:
 | `worker.replicas`                                  | Number of worker pods required                                                                                       |
 | `worker.randomWorkerIdEnabled`                     | Flag to enable assigning random worker ids to worker pods. Must be set true for multiple workers.                    |
 | `prometheus.enabled`                               | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
+| `mysql.enabled`                                    | Flag to disable MySQL deployment if using external instance                                                          |
+| `mysql.mysqlUrl`                                   | Database URL if using external instance                                                                              |
 | `mysql.mysqlUser`                                  | Database username                                                                                                    |
 | `mysql.mysqlPassword`                              | Database password                                                                                                    |
 | `mysql.persistence.size`                           | Size of persistent volume created for database storage                                                               |

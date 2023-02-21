@@ -1,3 +1,10 @@
+### [2.9.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.9.0...thirdeye-ui-2.9.1) (2023-02-16)
+
+
+### Bug Fixes
+
+* [TE-1331](https://cortexdata.atlassian.net/browse/TE-1331) add missing non number filter on upper and lower bound ([9b4d41a4e](https://github.com/startreedata/thirdeye/commit/9b4d41a4ea4f67a159e5f4219dce32074533f862))
+
 ## [2.9.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.8.0...thirdeye-ui-2.9.0) (2023-02-09)
 
 

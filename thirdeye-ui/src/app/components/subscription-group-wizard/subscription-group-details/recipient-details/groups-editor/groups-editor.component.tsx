@@ -145,7 +145,11 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                 currentSpecs.map((spec: NotificationSpec, idx: number) => {
                     if (specTypeToUIConfig[spec.type]) {
                         return (
-                            <Box paddingBottom={1} paddingTop={1}>
+                            <Box
+                                key={`${spec.type}-${idx}`}
+                                paddingBottom={1}
+                                paddingTop={1}
+                            >
                                 {React.createElement(
                                     specTypeToUIConfig[spec.type].formComponent,
                                     {

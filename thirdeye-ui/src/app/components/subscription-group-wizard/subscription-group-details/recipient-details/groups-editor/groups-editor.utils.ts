@@ -23,7 +23,7 @@ import {
     subscriptionGroupChannelHeaderMap,
     subscriptionGroupChannelIconsMap,
 } from "../../../../subscription-group-view/notification-channels-card/notification-channels-card.utils";
-import { SendgridEmailReview } from "../../../../subscription-group-wizard/subscription-group-renderer/sendgrid-email-review/sendgrid-email-review.component";
+import { SendgridEmailReview } from "../groups-renderer/sendgrid-email-review/sendgrid-email-review.component";
 import { SpecUIConfig } from "./groups-editor.interfaces";
 import { SendgridEmail } from "./sendgrid-email/sendgrid-email.component";
 import { Slack } from "./slack/slack.component";

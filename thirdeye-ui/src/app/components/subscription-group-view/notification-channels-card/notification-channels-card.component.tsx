@@ -13,7 +13,8 @@
  * the License.
  */
 
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
+import { capitalize } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { SubscriptionGroupViewCard } from "../subscription-group-view-card/subscription-group-view-card.component";
@@ -34,6 +35,20 @@ export const NotificationChannelsCard: FunctionComponent<NotificationChannelsCar
 
         return (
             <>
+                <Grid item xs={12}>
+                    <Typography variant="h5">
+                        {t("label.active-channels")}
+                    </Typography>
+                    {renderCards.length === 0 ? (
+                        <Typography variant="subtitle1">
+                            {capitalize(
+                                t("label.no-entity-found", {
+                                    entity: t("label.channels"),
+                                })
+                            )}
+                        </Typography>
+                    ) : null}
+                </Grid>
                 {renderCards.map((cardProps, index) => (
                     <Grid item key={index} xs={12}>
                         <SubscriptionGroupViewCard {...cardProps} />

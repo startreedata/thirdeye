@@ -268,7 +268,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                     <PageContentsGridV1>
                         <Grid item xs={12}>
                             <SubscriptionGroupViewCard
-                                header="Schedule"
+                                header={t("label.schedule")}
                                 rows={[
                                     {
                                         label: t("label.name"),
@@ -283,7 +283,11 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <Card>
-                                <CardHeader title="Active alerts & dimensions" />
+                                <CardHeader
+                                    title={t(
+                                        "label.active-alerts-and-dimensions"
+                                    )}
+                                />
                                 <CardContent>
                                     <AlertAssociationsViewTable
                                         uiSubscriptionGroup={
@@ -296,34 +300,6 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                         <NotificationChannelsCard
                             activeChannels={uiSubscriptionGroup.activeChannels}
                         />
-
-                        {/* TODO: Delete the code and components below */}
-                        {/* <Grid item xs={12}>
-                            <pre>
-                                {JSON.stringify(
-                                    uiSubscriptionGroup,
-                                    undefined,
-                                    4
-                                )}
-                            </pre>
-                        </Grid> */}
-
-                        {/* <SubscriptionGroupCard
-                            uiSubscriptionGroup={uiSubscriptionGroup}
-                            onDelete={handleSubscriptionGroupDelete}
-                        /> */}
-                        {/* Notifications Groups */}
-                        {/* <Grid item xs={12}>
-                        {uiSubscriptionGroup &&
-                            uiSubscriptionGroup.subscriptionGroup && (
-                                <SubscriptionGroupSpecsCard
-                                    specs={
-                                        uiSubscriptionGroup.subscriptionGroup
-                                            .specs || []
-                                    }
-                                />
-                            )}
-                    </Grid> */}
                     </PageContentsGridV1>
                 ) : null}
             </LoadingErrorStateSwitch>

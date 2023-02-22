@@ -153,6 +153,11 @@ public class EnumerationItemManagerImplTest {
         .setDetectionConfigId(5678L);
     anomalyManager.save(a3);
 
+    final var a4 = anomaly(1000L, 2000L)
+        .setDetectionConfigId(5678L)
+        .setEnumerationItem(ei1);
+    anomalyManager.save(a4);
+
     final var sg1 = new SubscriptionGroupDTO()
         .setName("sg1")
         .setAlertAssociations(List.of(new AlertAssociationDto()
@@ -167,6 +172,13 @@ public class EnumerationItemManagerImplTest {
             .setEnumerationItem(ei2)));
     subscriptionGroupManager.save(sg2);
 
+    final var sg3 = new SubscriptionGroupDTO()
+        .setName("sg3")
+        .setAlertAssociations(List.of(new AlertAssociationDto()
+            .setAlert(toAlertDTO(5678L))
+            .setEnumerationItem(ei1)));
+    subscriptionGroupManager.save(sg3);
+
     final EnumerationItemDTO migrated = enumerationItemManager.findExistingOrCreate(source);
 
     assertThat(migrated).isNotNull();
@@ -178,6 +190,7 @@ public class EnumerationItemManagerImplTest {
 
     assertThat(migrated.getId()).isNotEqualTo(ei1.getId());
 
+    /* Test anomaly migration */
     final var a1Updated = anomalyManager.findById(a1.getId());
     assertThat(a1Updated.getEnumerationItem().getId()).isEqualTo(migrated.getId());
 
@@ -189,6 +202,10 @@ public class EnumerationItemManagerImplTest {
         .getEnumerationItem())
         .isNull();
 
+    assertThat(anomalyManager.findById(a4.getId())
+        .getEnumerationItem()
+        .getId()).isEqualTo(ei1.getId());
+
     /* Test subscription group migration */
     final var sg1Updated = subscriptionGroupManager.findById(sg1.getId());
     assertThat(sg1Updated.getAlertAssociations().get(0).getEnumerationItem().getId())
@@ -197,5 +214,9 @@ public class EnumerationItemManagerImplTest {
     final var sg2Updated = subscriptionGroupManager.findById(sg2.getId());
     assertThat(sg2Updated.getAlertAssociations().get(0).getEnumerationItem().getId())
         .isEqualTo(ei2.getId());
+
+    final var sg3Updated = subscriptionGroupManager.findById(sg3.getId());
+    assertThat(sg3Updated.getAlertAssociations().get(0).getEnumerationItem().getId())
+        .isEqualTo(ei1.getId());
   }
 }

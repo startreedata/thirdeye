@@ -134,7 +134,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             detectionEvaluations[0].anomalies,
             t,
             undefined,
-            determineTimezoneFromAlertInEvaluation(evaluation?.alert)
+            determineTimezoneFromAlertInEvaluation(evaluation?.alert.template)
         );
 
         timeseriesConfiguration.brush = false;
@@ -253,7 +253,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                     hideQuickExtend
                                     btnGroupColor="primary"
                                     timezone={determineTimezoneFromAlertInEvaluation(
-                                        evaluation?.alert
+                                        evaluation?.alert.template
                                     )}
                                     onTimeRangeChange={(start, end) =>
                                         fetchAlertEvaluation(start, end)
@@ -374,7 +374,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                             detectionEvaluations
                                         }
                                         timezone={determineTimezoneFromAlertInEvaluation(
-                                            evaluation?.alert
+                                            evaluation?.alert.template
                                         )}
                                         onDeleteClick={
                                             handleDeleteEnumerationItemClick

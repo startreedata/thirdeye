@@ -63,7 +63,7 @@ export const SetupMonitoringPage: FunctionComponent = () => {
                         ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
                         : `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
                 }
-                nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS}`}
+                nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
             />
         </>
     );

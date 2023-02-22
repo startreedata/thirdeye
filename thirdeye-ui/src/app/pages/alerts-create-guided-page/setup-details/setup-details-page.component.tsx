@@ -226,7 +226,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
             </PageContentsGridV1>
 
             <WizardBottomBar
-                backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
+                backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
                 handleNextClick={() => handleCreateAlertClick(alert)}
                 nextButtonIsDisabled={isCreatingAlert}
                 nextButtonLabel={

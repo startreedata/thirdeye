@@ -145,6 +145,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
         timeseriesConfiguration.brush = false;
         timeseriesConfiguration.zoom = true;
+        timeseriesConfiguration.svgContainerUseAuto = true;
 
         return timeseriesConfiguration;
     }, [detectionEvaluations]);

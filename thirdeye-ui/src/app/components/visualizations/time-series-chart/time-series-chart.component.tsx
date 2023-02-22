@@ -398,7 +398,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                         xMax={xMax}
                     />
                 )}
-                <svg height={height} width={width}>
+                <svg height={height} width="auto">
                     <ChartCore
                         colorScale={colorScale}
                         height={height}

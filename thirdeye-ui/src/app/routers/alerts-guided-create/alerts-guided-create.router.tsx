@@ -38,19 +38,25 @@ const SelectTypePage = lazy(() =>
 
 const SetupMonitoringPage = lazy(() =>
     import(
-        /* webpackChunkName: "select-monitoring-page" */ "../../pages/alerts-create-guided-page/setup-monitoring/setup-monitoring-page.component"
+        /* webpackChunkName: "setup-monitoring-page" */ "../../pages/alerts-create-guided-page/setup-monitoring/setup-monitoring-page.component"
     ).then((module) => ({ default: module.SetupMonitoringPage }))
 );
 
 const SetupDetailsPage = lazy(() =>
     import(
-        /* webpackChunkName: "select-details-page" */ "../../pages/alerts-create-guided-page/setup-details/setup-details-page.component"
+        /* webpackChunkName: "setup-details-page" */ "../../pages/alerts-create-guided-page/setup-details/setup-details-page.component"
     ).then((module) => ({ default: module.SetupDetailsPage }))
+);
+
+const SetupAnomaliesFilterPage = lazy(() =>
+    import(
+        /* webpackChunkName: "setup-anomalies-filter-page" */ "../../pages/alerts-create-guided-page/setup-anomalies-filter/setup-anomalies-filter-page.component"
+    ).then((module) => ({ default: module.SetupAnomaliesFilterPage }))
 );
 
 const SetupDimensionGroupsPage = lazy(() =>
     import(
-        /* webpackChunkName: "select-dimension-groups-page" */ "../../pages/alerts-create-guided-page/setup-dimension-groups/setup-dimension-groups-page.component"
+        /* webpackChunkName: "setup-dimension-groups-page" */ "../../pages/alerts-create-guided-page/setup-dimension-groups/setup-dimension-groups-page.component"
     ).then((module) => ({ default: module.SetupDimensionGroupsPage }))
 );
 
@@ -118,6 +124,13 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                             element={<SetupMonitoringPage />}
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
+                            }
+                        />
+
+                        <Route
+                            element={<SetupAnomaliesFilterPage />}
+                            path={
+                                AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER
                             }
                         />
 

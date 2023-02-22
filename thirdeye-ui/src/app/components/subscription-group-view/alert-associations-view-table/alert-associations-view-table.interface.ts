@@ -13,10 +13,12 @@
  * the License.
  */
 
+import { ReactNode } from "react";
 import { UiSubscriptionGroup } from "../../../rest/dto/ui-subscription-group.interfaces";
 
 export interface AlertAssociationsViewTableProps {
     uiSubscriptionGroup: UiSubscriptionGroup;
+    customToolbar?: ReactNode;
 }
 
 export interface UiAssociation {

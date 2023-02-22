@@ -13,8 +13,8 @@
  * the License.
  */
 
-import { Box } from "@material-ui/core";
-import { sortBy } from "lodash";
+import { Box, Typography } from "@material-ui/core";
+import { capitalize, sortBy } from "lodash";
 import React, { FunctionComponent, ReactNode, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { DataGridColumnV1, DataGridV1 } from "../../../platform/components";
@@ -28,7 +28,7 @@ import {
 import { getUiAssociation } from "./alert-associations-view-table.utils";
 
 export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsViewTableProps> =
-    ({ uiSubscriptionGroup }) => {
+    ({ uiSubscriptionGroup, customToolbar }) => {
         const { t } = useTranslation();
         const uiAssociations = getUiAssociation(uiSubscriptionGroup.alerts, t);
 
@@ -70,11 +70,37 @@ export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsView
             rowKey: "id",
             hideBorder: true,
             disableSelection: true,
+            toolbarComponent: customToolbar,
         };
 
         return (
-            <Box height={400}>
-                <DataGridV1<UiAssociation> {...dataGridProps} />
-            </Box>
+            <>
+                <Box height={uiAssociations.length > 0 ? 400 : 100}>
+                    <DataGridV1<UiAssociation> {...dataGridProps} />
+                </Box>
+                {uiAssociations.length === 0 ? (
+                    <Box
+                        alignItems="center"
+                        display="flex"
+                        flexDirection="column"
+                        justifyContent="center"
+                        py={8}
+                    >
+                        <Typography variant="body2">
+                            {capitalize(
+                                t(
+                                    "message.no-children-present-for-this-parent",
+                                    {
+                                        children: t("label.active-entity", {
+                                            entity: t("label.dimensions"),
+                                        }),
+                                        parent: t("label.subscription-group"),
+                                    }
+                                )
+                            )}
+                        </Typography>
+                    </Box>
+                ) : null}
+            </>
         );
     };

@@ -12,7 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Grid,
+    Typography,
+} from "@material-ui/core";
 import { AxiosError } from "axios";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -283,13 +290,17 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <Card>
-                                <CardHeader
-                                    title={t(
-                                        "label.active-alerts-and-dimensions"
-                                    )}
-                                />
                                 <CardContent>
                                     <AlertAssociationsViewTable
+                                        customToolbar={
+                                            <Box clone ml={-2}>
+                                                <Typography variant="h5">
+                                                    {t(
+                                                        "label.active-alerts-and-dimensions"
+                                                    )}
+                                                </Typography>
+                                            </Box>
+                                        }
                                         uiSubscriptionGroup={
                                             uiSubscriptionGroup
                                         }

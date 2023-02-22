@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import { SpecType } from "../../../../rest/dto/subscription-group.interfaces";
 import { EmailListInput } from "../../../form-basics/email-list-input/email-list-input.component";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
-import { generateEmptyEmailSendGridConfiguration } from "../../../subscription-group-wizard/groups-editor/groups-editor.utils";
+import { generateEmptyEmailSendGridConfiguration } from "../../../subscription-group-wizard/subscription-group-details/recipient-details/groups-editor/groups-editor.utils";
 import { OnlyEmailsProps } from "./only-emails.interfaces";
 
 export const OnlyEmails: FunctionComponent<OnlyEmailsProps> = ({

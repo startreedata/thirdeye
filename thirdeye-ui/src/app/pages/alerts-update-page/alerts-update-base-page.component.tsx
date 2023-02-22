@@ -18,7 +18,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-whizard.utils";
+import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,

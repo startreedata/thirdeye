@@ -19,7 +19,7 @@ import {
     NotificationSpec,
     SubscriptionGroup,
 } from "../../../../rest/dto/subscription-group.interfaces";
-import { GroupsEditor } from "../../../subscription-group-wizard/groups-editor/groups-editor.component";
+import { GroupsEditor } from "../../../subscription-group-wizard/subscription-group-details/recipient-details/groups-editor/groups-editor.component";
 import { SubscriptionGroupPropertiesForm } from "../../../subscription-group-wizard/subscription-group-properties-form/subscription-group-properties-form.component";
 import { CreateSubscriptionGroupProps } from "./create-subscription-group.interfaces";
 

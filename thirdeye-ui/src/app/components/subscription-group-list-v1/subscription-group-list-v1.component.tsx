@@ -12,11 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid, Link } from "@material-ui/core";
-import React, { FunctionComponent, ReactElement, useState } from "react";
+import { Icon } from "@iconify/react";
+import { Box, Button, Grid, Link, useTheme } from "@material-ui/core";
+import React, {
+    FunctionComponent,
+    ReactElement,
+    useCallback,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
+    DataGridColumnV1,
     DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridV1,
@@ -27,6 +34,8 @@ import {
     getSubscriptionGroupsUpdatePath,
     getSubscriptionGroupsViewPath,
 } from "../../utils/routes/routes.util";
+import { getUiAssociation } from "../subscription-group-view/alert-associations-view-table/alert-associations-view-table.utils";
+import { subscriptionGroupChannelIconsMap } from "../subscription-group-view/notification-channels-card/notification-channels-card.utils";
 import { SubscriptionGroupListV1Props } from "./subscription-group-list-v1.interfaces";
 
 export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1Props> =
@@ -35,6 +44,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] =
             useState<DataGridSelectionModelV1<UiSubscriptionGroup>>();
         const navigate = useNavigate();
+        const theme = useTheme();
 
         const handleSubscriptionGroupDelete = (): void => {
             if (
@@ -88,42 +98,121 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
             );
         };
 
-        const subscriptionGroupColumns = [
-            {
-                key: "name",
-                dataKey: "name",
-                header: t("label.group-name"),
-                minWidth: 0,
-                flex: 1.5,
-                sortable: true,
-                customCellRenderer: renderLink,
+        const activeChannelsRenderer = useCallback(
+            (_, data: UiSubscriptionGroup) => {
+                return (
+                    <Box display="flex" gridGap={6} justifyContent="center">
+                        {[...new Set(data.activeChannels.map((c) => c.type))]
+                            .map(
+                                (iconType) =>
+                                    subscriptionGroupChannelIconsMap[iconType]
+                            )
+                            .map((iconName) => (
+                                <Icon
+                                    color={theme.palette.primary.dark}
+                                    fontSize={24}
+                                    icon={iconName}
+                                    key={iconName}
+                                />
+                            ))}
+                    </Box>
+                );
             },
-            {
-                // TODO: Change to Active Channels + Show icons
-                key: "emailCount",
-                dataKey: "emailCount",
-                header: t("label.subscribed-emails"),
-                minWidth: 0,
-                flex: 1,
-                sortable: true,
+            []
+        );
+
+        const alertsCountRenderer = useCallback(
+            (_, data: UiSubscriptionGroup) => {
+                return data.alerts.length;
             },
-            {
-                // TODO: Change to Subscribed Dimensions
-                key: "alertCount",
-                dataKey: "alertCount",
-                header: t("label.subscribed-alerts"),
-                minWidth: 0,
-                flex: 1,
-                sortable: true,
+            []
+        );
+
+        const alertsCountTooltipRenderer = useCallback(
+            (_, data: UiSubscriptionGroup) => {
+                return data.alerts
+                    .map((a) => a.name)
+                    .reduce(
+                        (sum, val) => (
+                            <>
+                                {sum}
+                                {val}
+                                <br />
+                            </>
+                        ),
+                        <></>
+                    );
             },
-            {
-                key: "cron",
-                dataKey: "cron",
-                header: t("label.schedule"),
-                minWidth: 0,
-                flex: 1,
+            []
+        );
+
+        const dimensionCountTooltipRenderer = useCallback(
+            (_, data: UiSubscriptionGroup) => {
+                return getUiAssociation(data.alerts, t)
+                    .filter((a) => a.enumerationId)
+                    .map((a) => a.enumerationName)
+                    .reduce(
+                        (sum, val) => (
+                            <>
+                                {sum}
+                                {val}
+                                <br />
+                            </>
+                        ),
+                        <></>
+                    );
             },
-        ];
+            []
+        );
+
+        const subscriptionGroupColumns: DataGridColumnV1<UiSubscriptionGroup>[] =
+            [
+                {
+                    key: "name",
+                    dataKey: "name",
+                    header: t("label.group-name"),
+                    minWidth: 0,
+                    flex: 1.5,
+                    sortable: true,
+                    customCellRenderer: renderLink,
+                },
+                {
+                    key: "activeChannels",
+                    dataKey: "activeChannels",
+                    header: t("label.active-channels"),
+                    minWidth: 0,
+                    flex: 1,
+                    sortable: true,
+                    cellTooltip: false,
+                    customCellRenderer: activeChannelsRenderer,
+                },
+                {
+                    key: "alertCount",
+                    dataKey: "alertCount",
+                    header: t("label.subscribed-alerts"),
+                    minWidth: 0,
+                    flex: 1,
+                    sortable: true,
+                    customCellRenderer: alertsCountRenderer,
+                    customCellTooltipRenderer: alertsCountTooltipRenderer,
+                },
+                {
+                    key: "dimensionCount",
+                    dataKey: "dimensionCount",
+                    header: t("label.subscribed-dimensions"),
+                    minWidth: 0,
+                    flex: 1,
+                    sortable: true,
+                    customCellTooltipRenderer: dimensionCountTooltipRenderer,
+                },
+                {
+                    key: "cron",
+                    dataKey: "cron",
+                    header: t("label.schedule"),
+                    minWidth: 0,
+                    flex: 1,
+                },
+            ];
 
         return (
             <Grid item xs={12}>

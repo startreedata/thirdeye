@@ -15,7 +15,7 @@
 
 import { Icon } from "@iconify/react";
 import { Box } from "@material-ui/core";
-import React, { Key } from "react";
+import React from "react";
 import { lightV1 } from "../../../platform/utils";
 import {
     NotificationSpec,
@@ -23,31 +23,34 @@ import {
 } from "../../../rest/dto/subscription-group.interfaces";
 import { SubscriptionGroupViewCardProps } from "../subscription-group-view-card/subscription-group-view-card.interface";
 
+export const subscriptionGroupChannelHeaderMap = {
+    [SpecType.Webhook]: "label.webhook",
+    [SpecType.Slack]: "label.slack",
+    [SpecType.EmailSendgrid]: "label.email",
+};
+
+export const subscriptionGroupChannelIconsMap = {
+    [SpecType.Webhook]: "material-symbols:webhook-rounded",
+    [SpecType.Slack]: "mdi:slack",
+    [SpecType.EmailSendgrid]: "ic:outline-email",
+};
+
 export const getCardProps = (
     channel: NotificationSpec,
     t: (v: string) => string
-): SubscriptionGroupViewCardProps & { key?: Key } => {
-    const channelHeaderMap = {
-        [SpecType.Webhook]: t("label.webhook"),
-        [SpecType.Slack]: t("label.slack"),
-        [SpecType.EmailSendgrid]: t("label.email"),
-    };
-
-    const channelIconsMap = {
-        [SpecType.Webhook]: "material-symbols:webhook-rounded",
-        [SpecType.Slack]: "mdi:slack",
-        [SpecType.EmailSendgrid]: "ic:outline-email",
-    };
-
-    const cardProps: SubscriptionGroupViewCardProps & { key?: Key } = {
+): SubscriptionGroupViewCardProps => {
+    const cardProps: SubscriptionGroupViewCardProps = {
         header: (
             <Box alignItems="center" display="flex" gridGap={8}>
                 <Icon
                     color={lightV1.palette.primary.dark}
                     fontSize={32}
-                    icon={channelIconsMap[channel.type]}
+                    icon={subscriptionGroupChannelIconsMap[channel.type]}
                 />
-                {channelHeaderMap[channel.type] || t("label.email")}
+                {t(
+                    subscriptionGroupChannelHeaderMap[channel.type] ||
+                        "label.email"
+                )}
             </Box>
         ),
         rows: [],

@@ -60,8 +60,8 @@ data:
 
     database:
       # Defaults to k8s cluster local MySQL server running on port 3306, but uses URL if provided
-      {{ if .Values.mysql.mysqlUrl }}
-      url: jdbc:mysql://{{- .Values.mysql.mysqlUrl -}}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
+      {{ if .Values.mysql.url }}
+      url: jdbc:mysql://{{- .Values.mysql.url -}}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
       {{ else }}
       url: jdbc:mysql://{{ include "thirdeye.mysql.fullname" . }}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
       {{ end }}

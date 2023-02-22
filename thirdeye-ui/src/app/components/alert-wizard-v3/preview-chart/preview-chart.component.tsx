@@ -56,6 +56,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
     showLoadButton,
     onAlertPropertyChange,
+    fetchOnInitialRender,
+    headerComponent,
+    onEvaluationFetchStart,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -89,6 +92,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         start: number,
         end: number
     ): Promise<void> => {
+        onEvaluationFetchStart && onEvaluationFetchStart(start, end);
+
         const copiedAlert = { ...alert };
         delete copiedAlert.id;
         const fetchedAlertEvaluation = await getEvaluation(
@@ -136,7 +141,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         timeseriesConfiguration.zoom = true;
 
         return timeseriesConfiguration;
-    }, detectionEvaluations);
+    }, [detectionEvaluations]);
 
     const handleAutoRangeClick = (): void => {
         getAlertInsight({ alert }).then(
@@ -196,49 +201,73 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             );
     };
 
+    useEffect(() => {
+        if (fetchOnInitialRender) {
+            handleAutoRangeClick();
+        }
+    }, []);
+
     return (
         <>
+            {headerComponent &&
+                headerComponent(evaluation, getEvaluationStatus)}
             {getEvaluationStatus !== ActionStatus.Initial && (
-                <Grid item xs={12}>
-                    <Grid
-                        container
-                        alignItems="center"
-                        justifyContent="space-between"
-                    >
-                        <Grid item>
-                            <Button
-                                color="primary"
-                                disabled={!showLoadButton}
-                                variant="outlined"
-                                onClick={() => {
-                                    const isNotInitialRequest =
-                                        (getEvaluationStatus as ActionStatus) !==
-                                        ActionStatus.Initial;
-                                    const missingStartEnd =
-                                        !startTime || !endTime;
+                <>
+                    <Grid item xs={12}>
+                        <Grid
+                            container
+                            alignItems="center"
+                            justifyContent="space-between"
+                        >
+                            <Grid item>
+                                <Button
+                                    color="primary"
+                                    disabled={!showLoadButton}
+                                    variant="outlined"
+                                    onClick={() => {
+                                        const isNotInitialRequest =
+                                            (getEvaluationStatus as ActionStatus) !==
+                                            ActionStatus.Initial;
+                                        const missingStartEnd =
+                                            !startTime || !endTime;
 
-                                    if (
-                                        isNotInitialRequest &&
-                                        !missingStartEnd
-                                    ) {
-                                        fetchAlertEvaluation(
-                                            startTime,
-                                            endTime
-                                        );
-                                    } else {
-                                        handleAutoRangeClick();
+                                        if (
+                                            isNotInitialRequest &&
+                                            !missingStartEnd
+                                        ) {
+                                            fetchAlertEvaluation(
+                                                startTime,
+                                                endTime
+                                            );
+                                        } else {
+                                            handleAutoRangeClick();
+                                        }
+                                    }}
+                                >
+                                    <RefreshIcon fontSize="small" />
+                                    {t("label.reload-preview")}
+                                </Button>
+                            </Grid>
+                            <Grid item>
+                                <TimeRangeButtonWithContext
+                                    hideQuickExtend
+                                    btnGroupColor="primary"
+                                    timezone={determineTimezoneFromAlertInEvaluation(
+                                        evaluation?.alert
+                                    )}
+                                    onTimeRangeChange={(start, end) =>
+                                        fetchAlertEvaluation(start, end)
                                     }
-                                }}
-                            >
-                                <RefreshIcon fontSize="small" />
-                                {t("label.reload-preview")}
-                            </Button>
+                                />
+                            </Grid>
                         </Grid>
-                        {!isEqual(alertForCurrentEvaluation, alert) &&
-                            (getEvaluationStatus as ActionStatus) !==
-                                ActionStatus.Initial &&
-                            getEvaluationStatus !== ActionStatus.Working && (
-                                <Grid item>
+                    </Grid>
+                    {!isEqual(alertForCurrentEvaluation, alert) &&
+                        (getEvaluationStatus as ActionStatus) !==
+                            ActionStatus.Initial &&
+                        getEvaluationStatus !== ActionStatus.Working && (
+                            <Grid item xs={12}>
+                                <Box paddingTop={1}>
                                     <Alert
                                         severity="warning"
                                         variant="outlined"
@@ -247,22 +276,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                             "message.chart-data-not-reflective-of-current-config"
                                         )}
                                     </Alert>
-                                </Grid>
-                            )}
-                        <Grid item>
-                            <TimeRangeButtonWithContext
-                                hideQuickExtend
-                                btnGroupColor="primary"
-                                timezone={determineTimezoneFromAlertInEvaluation(
-                                    evaluation?.alert
-                                )}
-                                onTimeRangeChange={(start, end) =>
-                                    fetchAlertEvaluation(start, end)
-                                }
-                            />
-                        </Grid>
-                    </Grid>
-                </Grid>
+                                </Box>
+                            </Grid>
+                        )}
+                </>
             )}
 
             <Grid item xs={12}>

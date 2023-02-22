@@ -21,7 +21,10 @@ import {
     PageContentsCardV1,
     PageContentsGridV1,
 } from "../../platform/components";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    AlertAssociation,
+    SubscriptionGroup,
+} from "../../rest/dto/subscription-group.interfaces";
 import {
     getConfigurationPath,
     getSubscriptionGroupsAllPath,
@@ -116,14 +119,13 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
         };
 
         useEffect(() => {
-            const newSubscriptionGroupAssociations = editedAssociations.map(
-                (association) => ({
-                    alert: { id: association.alertId },
-                    ...(association.enumerationId && {
-                        enumerationItem: { id: association.enumerationId },
+            const newSubscriptionGroupAssociations: AlertAssociation[] =
+                editedAssociations.map(({ alertId, enumerationId }) => ({
+                    alert: { id: alertId },
+                    ...(enumerationId && {
+                        enumerationItem: { id: enumerationId },
                     }),
-                })
-            ) as SubscriptionGroup["alertAssociations"];
+                }));
 
             // Remove the @deprecated `alerts` key from existing data
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -157,23 +159,14 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
                             setAssociations={setEditedAssociations}
                         />
                     ) : null}
-
-                    <Grid item xs={12}>
-                        <pre>
-                            {JSON.stringify(
-                                editedSubscriptionGroup,
-                                undefined,
-                                4
-                            )}
-                        </pre>
-                    </Grid>
                 </PageContentsGridV1>
                 <Box textAlign="right" width="100%">
-                    <PageContentsCardV1>
+                    <PageContentsCardV1 fullHeight>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
                                 <Button
                                     color="secondary"
+                                    variant="outlined"
                                     onClick={() => onCancel?.()}
                                 >
                                     {t("label.cancel")}
@@ -185,7 +178,6 @@ export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWiza
                                     disabled={!isSubscriptionGroupValid}
                                     onClick={handleSubmitClick}
                                 >
-                                    {/* TODO */}
                                     {submitBtnLabel || isExisting
                                         ? t("label.save")
                                         : t("label.create")}

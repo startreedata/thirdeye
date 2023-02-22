@@ -27,13 +27,13 @@ export const subscriptionGroupChannelHeaderMap = {
     [SpecType.Webhook]: "label.webhook",
     [SpecType.Slack]: "label.slack",
     [SpecType.EmailSendgrid]: "label.email",
-};
+} as const;
 
 export const subscriptionGroupChannelIconsMap = {
     [SpecType.Webhook]: "material-symbols:webhook-rounded",
     [SpecType.Slack]: "mdi:slack",
     [SpecType.EmailSendgrid]: "ic:outline-email",
-};
+} as const;
 
 export const getCardProps = (
     channel: NotificationSpec,

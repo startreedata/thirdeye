@@ -58,10 +58,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
         status: enumerationItemsStatus,
     } = useGetEnumerationItems();
 
-    // const [alerts, setAlerts] = useState<Alert[]>([]);
-    // const [enumerationItems, setEnumerationItems] = useState<EnumerationItem[]>(
-    //     []
-    // );
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -141,17 +137,15 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
         navigate(getSubscriptionGroupsAllPath());
     };
 
-    const isLoading = [
+    const statusList = [
         alertsStatus,
         enumerationItemsStatus,
         subscriptionGroupStatus,
-    ].some((v) => v === ActionStatus.Working);
+    ];
 
-    const isError = [
-        alertsStatus,
-        enumerationItemsStatus,
-        subscriptionGroupStatus,
-    ].some((v) => v === ActionStatus.Error);
+    const isLoading = statusList.some((v) => v === ActionStatus.Working);
+
+    const isError = statusList.some((v) => v === ActionStatus.Error);
 
     return (
         <PageV1>

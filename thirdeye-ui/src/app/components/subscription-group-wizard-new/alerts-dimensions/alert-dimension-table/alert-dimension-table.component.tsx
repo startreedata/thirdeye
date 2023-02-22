@@ -100,13 +100,6 @@ export const AlertsTable: FunctionComponent<AlertDimensionTableProps> = ({
         hideBorder: true,
         columns: [
             {
-                key: "id",
-                dataKey: "id",
-                header: t("label.id"),
-                minWidth: 150,
-                flex: 1,
-            },
-            {
                 key: "name",
                 dataKey: "name",
                 header: t("label.dimensions"),

@@ -13,7 +13,7 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
-import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
+import { Box, Button, Divider, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -167,18 +167,10 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
 
             <Box paddingBottom={1} paddingTop={1}>
                 <Grid container>
-                    {hasSomeConfig && (
-                        <Grid item xs={12}>
-                            <Box>
-                                <Typography variant="h5">
-                                    {t("label.add-more-channels")}
-                                </Typography>
-                            </Box>
-                        </Grid>
-                    )}
                     {availableSpecTypes.map((item) => (
                         <Grid item key={item.id}>
                             <Button
+                                color="primary"
                                 variant="outlined"
                                 onClick={() =>
                                     handleShortcutCreateOnclick(item.id)
@@ -194,7 +186,11 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                                         marginTop={2}
                                         textAlign="center"
                                     >
-                                        {t(item.internationalizationString)}
+                                        {t("label.add-entity", {
+                                            entity: t(
+                                                item.internationalizationString
+                                            ),
+                                        })}
                                     </Box>
                                 </Box>
                             </Button>

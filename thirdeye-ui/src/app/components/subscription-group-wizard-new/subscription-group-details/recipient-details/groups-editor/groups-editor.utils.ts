@@ -19,6 +19,10 @@ import {
     SpecType,
     WebhookSpec,
 } from "../../../../../rest/dto/subscription-group.interfaces";
+import {
+    subscriptionGroupChannelHeaderMap,
+    subscriptionGroupChannelIconsMap,
+} from "../../../../subscription-group-view/notification-channels-card/notification-channels-card.utils";
 import { SendgridEmailReview } from "../../../../subscription-group-wizard/subscription-group-renderer/sendgrid-email-review/sendgrid-email-review.component";
 import { SpecUIConfig } from "./groups-editor.interfaces";
 import { SendgridEmail } from "./sendgrid-email/sendgrid-email.component";
@@ -28,8 +32,9 @@ import { Webhook } from "./webhook/webhook.component";
 export const availableSpecTypes: SpecUIConfig[] = [
     {
         id: SpecType.EmailSendgrid,
-        internationalizationString: "label.email",
-        icon: "ic:twotone-email",
+        internationalizationString:
+            subscriptionGroupChannelHeaderMap[SpecType.EmailSendgrid],
+        icon: subscriptionGroupChannelIconsMap[SpecType.EmailSendgrid],
         formComponent: SendgridEmail,
         reviewComponent: SendgridEmailReview,
         viewComponent: SendgridEmailReview,
@@ -44,8 +49,9 @@ export const availableSpecTypes: SpecUIConfig[] = [
     },
     {
         id: SpecType.Slack,
-        internationalizationString: "label.slack",
-        icon: "logos:slack-icon",
+        internationalizationString:
+            subscriptionGroupChannelHeaderMap[SpecType.Slack],
+        icon: subscriptionGroupChannelIconsMap[SpecType.Slack],
         formComponent: Slack,
         reviewComponent: (props) => props.configuration.params.webhookUrl,
         viewComponent: Slack,
@@ -57,8 +63,9 @@ export const availableSpecTypes: SpecUIConfig[] = [
     },
     {
         id: SpecType.Webhook,
-        internationalizationString: "label.webhook",
-        icon: "logos:webhooks",
+        internationalizationString:
+            subscriptionGroupChannelHeaderMap[SpecType.Webhook],
+        icon: subscriptionGroupChannelIconsMap[SpecType.Webhook],
         formComponent: Webhook,
         reviewComponent: (props) => props.configuration.params.url,
         viewComponent: Webhook,

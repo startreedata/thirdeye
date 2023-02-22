@@ -17,13 +17,10 @@ import { Box, Divider, TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLoadingIndicatorV1 } from "../../../../platform/components";
-import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { useGetEnumerationItems } from "../../../../rest/enumeration-items/enumeration-items.actions";
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
-import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { Association } from "../../subscription-group-wizard-new.interface";
 import { AlertsTable } from "../alert-dimension-table/alert-dimension-table.component";
 import { getAssociationId } from "../alerts-dimensions.utils";
@@ -44,12 +41,14 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
             )
         );
 
-        const [selectedAlertId, setSelectedAlertId] = useState<number>(null);
+        const [selectedAlertId, setSelectedAlertId] = useState<number | null>(
+            null
+        );
         const { t } = useTranslation();
 
         const alertsMap = getMapFromList(alerts);
 
-        const { getEnumerationItems, enumerationItems, status } =
+        const { getEnumerationItems, enumerationItems } =
             useGetEnumerationItems();
 
         useEffect(() => {
@@ -112,7 +111,6 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
         const handleChangeAssociations = (
             newAssociationIds: string[]
         ): void => {
-            // console.log({ newAssociationIds });
             associationIdsForAlert.forEach((associationId) => {
                 setAssociationsSelected((stateProp) => ({
                     ...stateProp,
@@ -123,19 +121,14 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
 
         return (
             <Box>
-                <Typography variant="h6">
-                    {t("message.select-entity", { entity: t("label.alert") })}
-                </Typography>
+                <Typography variant="h6">{t("label.alert")}</Typography>
 
                 <InputSection
                     fullWidth
                     inputComponent={
                         <Autocomplete<Alert>
                             getOptionLabel={(option) => option.name}
-                            options={alerts.map((a) => ({
-                                ...a,
-                                name: `[${a.id}]${a.name}`,
-                            }))}
+                            options={alerts}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -156,12 +149,6 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
 
                                 setSelectedAlertId(alertProp.id);
                             }}
-                            // error={Boolean(
-                            //     errors && errors.name
-                            // )}
-                            // helperText={
-                            //     errors?.name?.message
-                            // }
                         />
                     }
                     label={t("message.select-entity", {
@@ -169,15 +156,8 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
                     })}
                 />
 
-                <pre>{JSON.stringify(associationsSelected, undefined, 4)}</pre>
-
                 {selectedAlert && enumerationItems ? (
-                    // TODO: remove
-                    <LoadingErrorStateSwitch
-                        isError={status === ActionStatus.Error}
-                        isLoading={status === ActionStatus.Working}
-                        loadingState={<AppLoadingIndicatorV1 />}
-                    >
+                    <>
                         <Box pb={2} pt={2}>
                             <Divider />
                         </Box>
@@ -188,7 +168,7 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
                             selectedAlert={selectedAlert}
                             onChangeAssociations={handleChangeAssociations}
                         />
-                    </LoadingErrorStateSwitch>
+                    </>
                 ) : null}
             </Box>
         );

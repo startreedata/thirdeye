@@ -22,6 +22,7 @@ import {
     Grid,
     TextField,
     Typography,
+    useTheme,
 } from "@material-ui/core";
 import { cloneDeep } from "lodash";
 import React, { FunctionComponent } from "react";
@@ -29,9 +30,13 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../../../platform/components";
-import { lightV1 } from "../../../../../../platform/utils";
+import { SpecType } from "../../../../../../rest/dto/subscription-group.interfaces";
 import { EmailListInput } from "../../../../../form-basics/email-list-input/email-list-input.component";
 import { InputSection } from "../../../../../form-basics/input-section/input-section.component";
+import {
+    subscriptionGroupChannelHeaderMap,
+    subscriptionGroupChannelIconsMap,
+} from "../../../../../subscription-group-view/notification-channels-card/notification-channels-card.utils";
 import {
     SendgridEmailFormEntries,
     SendgridEmailProps,
@@ -43,6 +48,7 @@ export const SendgridEmail: FunctionComponent<SendgridEmailProps> = ({
     onDeleteClick,
 }) => {
     const { t } = useTranslation();
+    const theme = useTheme();
     const { register, errors } = useForm<SendgridEmailFormEntries>({
         mode: "onChange",
         reValidateMode: "onChange",
@@ -69,19 +75,33 @@ export const SendgridEmail: FunctionComponent<SendgridEmailProps> = ({
             <CardContent>
                 <Grid container justifyContent="space-between">
                     <Grid item>
-                        <Typography variant="h5">
-                            <Icon height={24} icon="ic:twotone-email" />{" "}
-                            {t("label.email")}
-                        </Typography>
+                        <Box clone alignItems="center" display="flex">
+                            <Typography variant="h5">
+                                <Icon
+                                    color={theme.palette.primary.main}
+                                    height={28}
+                                    icon={
+                                        subscriptionGroupChannelIconsMap[
+                                            SpecType.EmailSendgrid
+                                        ]
+                                    }
+                                />
+                                &nbsp;
+                                {t(
+                                    subscriptionGroupChannelHeaderMap[
+                                        SpecType.EmailSendgrid
+                                    ]
+                                )}
+                            </Typography>
+                        </Box>
                     </Grid>
                     <Grid item>
                         <Box textAlign="right">
-                            <LocalThemeProviderV1
-                                primary={lightV1.palette.error}
-                            >
+                            <LocalThemeProviderV1 primary={theme.palette.error}>
                                 <Button
                                     color="primary"
                                     data-testid="email-delete-btn"
+                                    variant="outlined"
                                     onClick={onDeleteClick}
                                 >
                                     {t("label.delete")}

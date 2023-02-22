@@ -23,14 +23,19 @@ import {
     Grid,
     TextField,
     Typography,
+    useTheme,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../../../platform/components";
-import { lightV1 } from "../../../../../../platform/utils";
+import { SpecType } from "../../../../../../rest/dto/subscription-group.interfaces";
 import { InputSection } from "../../../../../form-basics/input-section/input-section.component";
+import {
+    subscriptionGroupChannelHeaderMap,
+    subscriptionGroupChannelIconsMap,
+} from "../../../../../subscription-group-view/notification-channels-card/notification-channels-card.utils";
 import { SlackFormEntries, SlackProps } from "./slack.interfaces";
 
 export const Slack: FunctionComponent<SlackProps> = ({
@@ -39,6 +44,7 @@ export const Slack: FunctionComponent<SlackProps> = ({
     onDeleteClick,
 }) => {
     const { t } = useTranslation();
+    const theme = useTheme();
     const { register, errors } = useForm<SlackFormEntries>({
         mode: "onChange",
         reValidateMode: "onChange",
@@ -67,19 +73,33 @@ export const Slack: FunctionComponent<SlackProps> = ({
             <CardContent>
                 <Grid container justifyContent="space-between">
                     <Grid item>
-                        <Typography variant="h5">
-                            <Icon height={24} icon="logos:slack-icon" />{" "}
-                            {t("label.slack")}
-                        </Typography>
+                        <Box clone alignItems="center" display="flex">
+                            <Typography variant="h5">
+                                <Icon
+                                    color={theme.palette.primary.main}
+                                    height={28}
+                                    icon={
+                                        subscriptionGroupChannelIconsMap[
+                                            SpecType.Slack
+                                        ]
+                                    }
+                                />
+                                &nbsp;
+                                {t(
+                                    subscriptionGroupChannelHeaderMap[
+                                        SpecType.Slack
+                                    ]
+                                )}
+                            </Typography>
+                        </Box>
                     </Grid>
                     <Grid item>
                         <Box textAlign="right">
-                            <LocalThemeProviderV1
-                                primary={lightV1.palette.error}
-                            >
+                            <LocalThemeProviderV1 primary={theme.palette.error}>
                                 <Button
                                     color="primary"
                                     data-testid="slack-delete-btn"
+                                    variant="outlined"
                                     onClick={onDeleteClick}
                                 >
                                     {t("label.delete")}

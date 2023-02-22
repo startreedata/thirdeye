@@ -83,6 +83,12 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         return countParentAnomalies(null);
       }
     });
+    metricRegistry.register("anomalyFeedbackCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return genericPojoDao.count(AnomalyFeedbackDTO.class);
+      }
+    });
   }
 
   @Override

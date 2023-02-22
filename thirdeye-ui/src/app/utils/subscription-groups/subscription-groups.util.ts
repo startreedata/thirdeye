@@ -245,7 +245,6 @@ const getUiSubscriptionGroupInternal = (
         )
     ).length.toString();
 
-    // TODO check if emails need to go in there
     uiSubscriptionGroup.activeChannels = [...subscriptionGroup.specs];
 
     // Emails

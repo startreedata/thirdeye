@@ -101,10 +101,7 @@ export const getEnumerationItemsForAlert = (
     alert: Alert
 ): EnumerationItem[] => {
     return (enumerationItems || []).filter(
-        (enumerationItem) =>
-            // TODO: Confirm if this works
-            (enumerationItem.alerts || [])?.some((a) => a.id === alert.id) ||
-            enumerationItem.alert?.id === alert.id
+        (enumerationItem) => enumerationItem.alert?.id === alert.id
     );
 };
 

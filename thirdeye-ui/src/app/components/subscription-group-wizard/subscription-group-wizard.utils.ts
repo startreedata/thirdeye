@@ -22,7 +22,6 @@ import { Association } from "./subscription-group-wizard.interface";
 export function validateSubscriptionGroup(
     subscriptionGroup: SubscriptionGroup
 ): boolean {
-    // TODO
     const isValid = [
         CronValidator.isValidCronExpression(subscriptionGroup.cron),
         subscriptionGroup.name !== "",

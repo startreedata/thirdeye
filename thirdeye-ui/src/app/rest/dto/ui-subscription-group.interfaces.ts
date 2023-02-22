@@ -27,7 +27,7 @@ export interface UiSubscriptionGroup {
     dimensionCount: string;
     emails: string[];
     emailCount: string;
-    activeChannels: NotificationSpec[]; // TODO
+    activeChannels: NotificationSpec[];
     subscriptionGroup: SubscriptionGroup | null;
 }
 

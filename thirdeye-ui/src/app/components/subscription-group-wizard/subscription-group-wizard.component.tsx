@@ -39,15 +39,15 @@ import {
     Association,
     SubscriptionGroupsWizardParams,
     SubscriptionGroupViewTabs,
-    SubscriptionGroupWizardNewProps,
-} from "./subscription-group-wizard-new.interface";
+    SubscriptionGroupWizardProps,
+} from "./subscription-group-wizard.interface";
 import {
     getAssociations,
     SelectedTab,
     validateSubscriptionGroup,
-} from "./subscription-group-wizard-new.utils";
+} from "./subscription-group-wizard.utils";
 
-export const SubscriptionGroupWizardNew: FunctionComponent<SubscriptionGroupWizardNewProps> =
+export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardProps> =
     ({
         alerts,
         submitBtnLabel,

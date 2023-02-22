@@ -17,7 +17,7 @@ import { DataGridSelectionModelV1 } from "../../../../platform/components";
 import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
-import { Association } from "../../subscription-group-wizard-new.interface";
+import { Association } from "../../subscription-group-wizard.interface";
 import { getAssociationId } from "../alerts-dimensions.utils";
 import { DimensionRow } from "./add-dimension-dialog.interface";
 

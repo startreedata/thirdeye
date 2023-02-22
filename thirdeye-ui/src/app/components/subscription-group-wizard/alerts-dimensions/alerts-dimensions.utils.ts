@@ -14,7 +14,7 @@
  */
 
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
-import { Association } from "../subscription-group-wizard-new.interface";
+import { Association } from "../subscription-group-wizard.interface";
 
 // Function type signature overloading helps inform the TS compiler to infer
 // types smartly from the parameters themselves. Here, it is important to

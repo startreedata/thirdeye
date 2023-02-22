@@ -20,7 +20,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { SubscriptionGroupWizardNew } from "../../components/subscription-group-wizard-new/subscription-group-wizard-new.component";
+import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -155,7 +155,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 loadingState={<AppLoadingIndicatorV1 />}
             >
                 {subscriptionGroup && alerts && enumerationItems ? (
-                    <SubscriptionGroupWizardNew
+                    <SubscriptionGroupWizard
                         isExisting
                         alerts={alerts}
                         enumerationItems={enumerationItems}

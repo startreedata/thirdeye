@@ -32,7 +32,7 @@ import {
 } from "../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.interfaces";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getMapFromList } from "../../../utils/subscription-groups/subscription-groups.util";
-import { Association } from "../subscription-group-wizard-new.interface";
+import { Association } from "../subscription-group-wizard.interface";
 import { AddDimensionsDialog } from "./add-dimension-dialog/add-dimension-dialog.component";
 import { AlertsDimensionsProps } from "./alerts-dimensions.interface";
 import {
@@ -180,9 +180,6 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                 <Box>
                     <Typography variant="h5">
                         {t("label.alerts-and-dimensions")}
-                    </Typography>
-                    <Typography variant="subtitle1">
-                        Add description here
                     </Typography>
                 </Box>
                 <Button

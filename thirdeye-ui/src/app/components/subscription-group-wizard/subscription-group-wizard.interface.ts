@@ -17,7 +17,7 @@ import { Alert } from "../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
-export interface SubscriptionGroupWizardNewProps {
+export interface SubscriptionGroupWizardProps {
     alerts: Alert[];
     submitBtnLabel: string;
     subscriptionGroup: SubscriptionGroup;

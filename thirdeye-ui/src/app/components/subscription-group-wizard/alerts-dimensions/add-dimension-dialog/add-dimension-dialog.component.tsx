@@ -21,7 +21,7 @@ import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { useGetEnumerationItems } from "../../../../rest/enumeration-items/enumeration-items.actions";
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
-import { Association } from "../../subscription-group-wizard-new.interface";
+import { Association } from "../../subscription-group-wizard.interface";
 import { AlertsTable } from "../alert-dimension-table/alert-dimension-table.component";
 import { getAssociationId } from "../alerts-dimensions.utils";
 import { AddDimensionDialogProps } from "./add-dimension-dialog.interface";

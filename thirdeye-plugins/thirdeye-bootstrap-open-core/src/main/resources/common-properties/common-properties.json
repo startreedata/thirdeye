@@ -302,6 +302,32 @@
     "defaultIsNull": null
   },
   {
+    "name": "reNotifyPercentageThreshold",
+    "defaultValue": null,
+    "min": -1,
+    "max": null,
+    "description": "For detection replay when data is mutable. If the percentage difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, renotify. Combined with `reNotifyAbsoluteThreshold`. Both thresholds must pass to be re-notified. If zero, always renotify. If null or negative, never re-notifies.",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "NUMBER",
+    "step": "POSTPROCESS",
+    "subStep": "Anomaly merger",
+    "defaultIsNull": null
+  },
+  {
+    "name": "reNotifyAbsoluteThreshold",
+    "defaultValue": null,
+    "min": -1,
+    "max": null,
+    "description": "For detection replay when data is mutable. If the absolute difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, renotify. Combined with `reNotifyPercentageThreshold`. Both thresholds must pass to be re-notified. If zero, always renotify. If null or negative, never re-notifies.",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "NUMBER",
+    "step": "POSTPROCESS",
+    "subStep": "Anomaly merger",
+    "defaultIsNull": null
+  },
+  {
     "name": "monitoringGranularity",
     "defaultValue": null,
     "min": null,
@@ -427,11 +453,11 @@
     "defaultIsNull": null
   },
   {
-    "name": "replayReNotifyPercentageThreshold",
+    "name": "reNotifyPercentageThreshold",
     "defaultValue": null,
     "min": null,
     "max": null,
-    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the percentage difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with replayReNotifyAbsoluteThreshold.\n Both thresholds have to pass to get renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
+    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the percentage difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with reNotifyAbsoluteThreshold.\n Both thresholds have to pass to get renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",
@@ -440,11 +466,11 @@
     "defaultIsNull": null
   },
   {
-    "name": "replayReNotifyAbsoluteThreshold",
+    "name": "reNotifyAbsoluteThreshold",
     "defaultValue": null,
     "min": null,
     "max": null,
-    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the absolute difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with replayReNotifyPercentageThreshold.\n Both thresholds have to pass to be renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
+    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the absolute difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with reNotifyPercentageThreshold.\n Both thresholds have to pass to be renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",

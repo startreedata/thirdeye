@@ -9,8 +9,8 @@
         "type": "ANOMALY_MERGER",
         "component.mergeMaxGap": "${mergeMaxGap}",
         "component.mergeMaxDuration": "${mergeMaxDuration}",
-        "component.reNotifyPercentageThreshold": "${replayReNotifyPercentageThreshold}",
-        "component.reNotifyAbsoluteThreshold": "${replayReNotifyAbsoluteThreshold}"
+        "component.reNotifyPercentageThreshold": "${reNotifyPercentageThreshold}",
+        "component.reNotifyAbsoluteThreshold": "${reNotifyAbsoluteThreshold}"
       },
       "inputs": [
         {
@@ -326,11 +326,11 @@
       "defaultValue": "100000000"
     },
     {
-      "name": "replayReNotifyPercentageThreshold",
+      "name": "reNotifyPercentageThreshold",
       "defaultValue": -1
     },
     {
-      "name": "replayReNotifyAbsoluteThreshold",
+      "name": "reNotifyAbsoluteThreshold",
       "defaultValue": -1
     }
   ]

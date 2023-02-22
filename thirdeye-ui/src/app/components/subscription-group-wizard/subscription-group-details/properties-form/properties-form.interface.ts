@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
 
 interface FormValues {
@@ -24,4 +24,5 @@ interface FormValues {
 export interface PropertiesFormProps {
     values: FormValues;
     onChange: Dispatch<SetStateAction<SubscriptionGroup>>;
+    customHeader?: ReactNode;
 }

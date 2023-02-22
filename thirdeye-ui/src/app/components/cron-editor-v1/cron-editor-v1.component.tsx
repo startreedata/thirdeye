@@ -24,10 +24,10 @@ import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDialogProviderV1 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { isSimpleConvertible } from "../alert-wizard-v2/alert-details/alert-frequency/alert-date-time-cron-simple/alert-date-time-cron-simple.utils";
 import { InputSection } from "../form-basics/input-section/input-section.component";
 import { CronAdvance } from "./cron-advance/cron-advance.component";
 import { CronSimple } from "./cron-simple/cron-simple.component";
+import { isSimpleConvertible } from "./cron-simple/cron-simple.utils";
 
 enum CronMode {
     SIMPLE,
@@ -110,7 +110,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
                 labelComponent={
                     <Box alignItems="center" display="flex" paddingTop={1}>
                         <Typography variant="body2">
-                            {t("label.date-type")}
+                            {t("label.schedule")}
                         </Typography>
                     </Box>
                 }

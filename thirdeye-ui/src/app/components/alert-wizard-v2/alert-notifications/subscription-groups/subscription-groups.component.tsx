@@ -51,7 +51,12 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
         getSubscriptionGroups().then((fetchedSubscriptionGroups) => {
             const subscribed = fetchedSubscriptionGroups
                 ? fetchedSubscriptionGroups.filter((group) => {
-                      return group.alerts.some((item) => item.id === alert.id);
+                      const alerts =
+                          group.alertAssociations?.map((a) => a.alert) ||
+                          group.alerts ||
+                          [];
+
+                      return alerts.some((item) => item.id === alert.id);
                   })
                 : [];
 

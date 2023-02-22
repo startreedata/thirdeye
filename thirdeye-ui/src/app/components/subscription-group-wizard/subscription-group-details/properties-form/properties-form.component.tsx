@@ -30,6 +30,7 @@ import { PropertiesFormProps } from "./properties-form.interface";
 export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
     values: { name, cron },
     onChange,
+    customHeader,
 }) => {
     const { t } = useTranslation();
 
@@ -43,20 +44,16 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
 
     return (
         <Grid item xs={12}>
-            <Card variant="outlined">
-                <CardHeader title={t("label.group-details")} />
+            <Card>
+                {customHeader || (
+                    <CardHeader title={t("label.group-details")} />
+                )}
                 <CardContent>
                     <InputSection
                         inputComponent={
                             <TextField
                                 fullWidth
                                 required
-                                // error={Boolean(
-                                //     errors && errors.name
-                                // )}
-                                // helperText={
-                                //     errors?.name?.message
-                                // }
                                 name="name"
                                 type="string"
                                 value={name}

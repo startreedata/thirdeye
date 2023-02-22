@@ -39,6 +39,7 @@ import { lightV1 } from "../../platform/utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import { getEnumerationItems } from "../../rest/enumeration-items/enumeration-items.rest";
 import {
@@ -136,20 +137,13 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                 ?.map((a) => a?.enumerationItem?.id)
                 .filter(Boolean) || []) as number[];
 
+        let enumerationItemsProp: EnumerationItem[] = [];
+
         if (enumerationIds && enumerationIds.length > 0) {
             try {
-                const enumerationItemsProp = await getEnumerationItems({
+                enumerationItemsProp = await getEnumerationItems({
                     ids: enumerationIds,
                 });
-
-                fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
-                    subscriptionGroupResponse.value,
-                    fetchedAlerts,
-                    enumerationItemsProp || []
-                );
-
-                setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
-                setStatus(ActionStatus.Done);
             } catch (err) {
                 notifyIfErrors(
                     ActionStatus.Error,
@@ -162,10 +156,15 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
 
                 setStatus(ActionStatus.Error);
             }
-        } else {
-            setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
-            setStatus(ActionStatus.Done);
         }
+
+        fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
+            subscriptionGroupResponse.value,
+            fetchedAlerts,
+            enumerationItemsProp
+        );
+        setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
+        setStatus(ActionStatus.Done);
     };
 
     const handleSubscriptionGroupEdit = (): void => {

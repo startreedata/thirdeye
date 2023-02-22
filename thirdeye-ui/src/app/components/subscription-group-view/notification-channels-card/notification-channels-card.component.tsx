@@ -25,7 +25,10 @@ export const NotificationChannelsCard: FunctionComponent<NotificationChannelsCar
         const { t } = useTranslation();
 
         const renderCards = useMemo(
-            () => activeChannels.map((channel) => getCardProps(channel, t)),
+            () =>
+                (activeChannels || []).map((channel) =>
+                    getCardProps(channel, t)
+                ),
             [activeChannels]
         );
 

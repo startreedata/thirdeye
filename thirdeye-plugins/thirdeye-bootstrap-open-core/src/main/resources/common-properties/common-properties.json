@@ -311,7 +311,7 @@
     "multiselect": false,
     "jsonType": "NUMBER",
     "step": "POSTPROCESS",
-    "subStep": "Anomaly merger",
+    "subStep": "Data mutability",
     "defaultIsNull": null
   },
   {
@@ -324,7 +324,7 @@
     "multiselect": false,
     "jsonType": "NUMBER",
     "step": "POSTPROCESS",
-    "subStep": "Anomaly merger",
+    "subStep": "Data mutability",
     "defaultIsNull": null
   },
   {
@@ -450,32 +450,6 @@
     "multiselect": false,
     "jsonType": "ARRAY",
     "step": "RCA",
-    "defaultIsNull": null
-  },
-  {
-    "name": "reNotifyPercentageThreshold",
-    "defaultValue": null,
-    "min": null,
-    "max": null,
-    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the percentage difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with reNotifyAbsoluteThreshold.\n Both thresholds have to pass to get renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
-    "options": null,
-    "multiselect": false,
-    "jsonType": "NUMBER",
-    "step": "POSTPROCESS",
-    "subStep": "Data mutability",
-    "defaultIsNull": null
-  },
-  {
-    "name": "reNotifyAbsoluteThreshold",
-    "defaultValue": null,
-    "min": null,
-    "max": null,
-    "description": "Used for replay when data is mutable. Avoid being renotified by small variations caused by data mutability when a detection is replayed. At replay, if the absolute difference between an existing anomaly and a new anomaly on the same time frame is above this threshold, the new anomaly is notified. Else, it is not notified. \nCombined with reNotifyPercentageThreshold.\n Both thresholds have to pass to be renotified.\n  If zero, always renotify. If null or negative, never renotifies.",
-    "options": null,
-    "multiselect": false,
-    "jsonType": "NUMBER",
-    "step": "POSTPROCESS",
-    "subStep": "Data mutability",
     "defaultIsNull": null
   },
   {

@@ -21,7 +21,7 @@ import {
     Grid,
     Typography,
 } from "@material-ui/core";
-import { sortBy } from "lodash";
+import { capitalize, sortBy } from "lodash";
 import React, { FunctionComponent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DataGridV1, useDialogProviderV1 } from "../../../platform/components";
@@ -81,14 +81,6 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
     }));
 
     const dataGridColumns: DataGridColumnV1<DataRow>[] = [
-        // TODO: Remove column
-        {
-            key: "id",
-            dataKey: "id",
-            header: t("label.id"),
-            minWidth: 150,
-            flex: 1,
-        },
         {
             key: "alertName",
             dataKey: "alertName",
@@ -140,11 +132,10 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
     const dataGridProps: DataGridV1Props<DataRow> = {
         data: dataGridRows,
         rowKey: "id",
-        // hideBorder: true,
         columns: dataGridColumns,
         selectionModel: selectedRow,
         onSelectionChange: setSelectedRow,
-        // TODO: Add delete button
+        hideBorder: true,
         toolbarComponent: (
             <Button
                 // data-testid="button-delete"
@@ -196,7 +187,6 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                 </Box>
                 <Button
                     color="primary"
-                    // disabled={isActionButtonDisable}
                     variant="contained"
                     onClick={handleAddDimensions}
                 >
@@ -205,9 +195,42 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
             </Box>
             <Card variant="outlined">
                 <CardContent>
-                    <Box height={500}>
+                    <Box height={dataGridRows.length > 0 ? 500 : 100}>
                         <DataGridV1<DataRow> {...dataGridProps} />
                     </Box>
+                    {dataGridRows.length === 0 ? (
+                        <Box
+                            alignItems="center"
+                            display="flex"
+                            flexDirection="column"
+                            justifyContent="center"
+                            py={8}
+                        >
+                            <Typography variant="body2">
+                                {capitalize(
+                                    t(
+                                        "message.no-children-present-for-this-parent",
+                                        {
+                                            children: t("label.active-entity", {
+                                                entity: t("label.dimensions"),
+                                            }),
+                                            parent: t(
+                                                "label.subscription-group"
+                                            ),
+                                        }
+                                    )
+                                )}
+                            </Typography>
+                            <br />
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                onClick={handleAddDimensions}
+                            >
+                                {t("message.add-alert-dimensions")}
+                            </Button>
+                        </Box>
+                    ) : null}
                 </CardContent>
             </Card>
         </Grid>

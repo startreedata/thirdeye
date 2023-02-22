@@ -31,6 +31,7 @@ import {
 } from "../../../rest/alerts/alerts.actions";
 import {
     AlertEvaluation,
+    AlertInEvaluation,
     EditableAlert,
     EnumerationItemConfig,
 } from "../../../rest/dto/alert.interfaces";
@@ -134,7 +135,12 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             detectionEvaluations[0].anomalies,
             t,
             undefined,
-            determineTimezoneFromAlertInEvaluation(evaluation?.alert)
+            determineTimezoneFromAlertInEvaluation(
+                evaluation?.alert.template as Pick<
+                    AlertInEvaluation,
+                    "metadata"
+                >
+            )
         );
 
         timeseriesConfiguration.brush = false;
@@ -253,7 +259,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                     hideQuickExtend
                                     btnGroupColor="primary"
                                     timezone={determineTimezoneFromAlertInEvaluation(
-                                        evaluation?.alert
+                                        evaluation?.alert.template as Pick<
+                                            AlertInEvaluation,
+                                            "metadata"
+                                        >
                                     )}
                                     onTimeRangeChange={(start, end) =>
                                         fetchAlertEvaluation(start, end)
@@ -374,7 +383,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                             detectionEvaluations
                                         }
                                         timezone={determineTimezoneFromAlertInEvaluation(
-                                            evaluation?.alert
+                                            evaluation?.alert.template as Pick<
+                                                AlertInEvaluation,
+                                                "metadata"
+                                            >
                                         )}
                                         onDeleteClick={
                                             handleDeleteEnumerationItemClick

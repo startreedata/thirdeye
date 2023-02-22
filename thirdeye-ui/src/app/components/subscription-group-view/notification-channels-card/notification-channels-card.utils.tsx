@@ -21,7 +21,7 @@ import {
     NotificationSpec,
     SpecType,
 } from "../../../rest/dto/subscription-group.interfaces";
-import { SubscriptionGroupViewCardProps } from "../subscription-group-view-card/subscription-group-view-card.interface";
+import { SubscriptionGroupViewCardProps } from "../../entity-cards/subscription-group-view-card/subscription-group-view-card.interface";
 
 export const subscriptionGroupChannelHeaderMap = {
     [SpecType.Webhook]: "label.webhook",

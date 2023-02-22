@@ -17,7 +17,7 @@ import { Grid, Typography } from "@material-ui/core";
 import { capitalize } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { SubscriptionGroupViewCard } from "../subscription-group-view-card/subscription-group-view-card.component";
+import { SubscriptionGroupViewCard } from "../../entity-cards/subscription-group-view-card/subscription-group-view-card.component";
 import { NotificationChannelsCardProps } from "./notification-channels-card.interface";
 import { getCardProps } from "./notification-channels-card.utils";
 

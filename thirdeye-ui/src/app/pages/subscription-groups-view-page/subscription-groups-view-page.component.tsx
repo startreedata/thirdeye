@@ -18,12 +18,12 @@ import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
+import { SubscriptionGroupViewCard } from "../../components/entity-cards/subscription-group-view-card/subscription-group-view-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AlertAssociationsViewTable } from "../../components/subscription-group-view/alert-associations-view-table/alert-associations-view-table.component";
 import { NotificationChannelsCard } from "../../components/subscription-group-view/notification-channels-card/notification-channels-card.component";
-import { SubscriptionGroupViewCard } from "../../components/subscription-group-view/subscription-group-view-card/subscription-group-view-card.component";
 import {
     LocalThemeProviderV1,
     NotificationTypeV1,

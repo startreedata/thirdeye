@@ -13,6 +13,7 @@
  * the License.
  */
 import { AxiosError } from "axios";
+import { InternalAxiosRequestConfig } from "axios/index";
 import {
     duplicateKeyForArrayQueryParams,
     getFulfilledResponseInterceptorV1,
@@ -30,19 +31,25 @@ describe("Axios Util", () => {
             null as unknown as string
         );
 
-        expect(requestInterceptor({})).toEqual({});
+        expect(
+            requestInterceptor({ headers: {} } as InternalAxiosRequestConfig)
+        ).toEqual({ headers: {} });
     });
 
     it("axios request interceptor should not attach empty access token to request header", () => {
         const requestInterceptor = getRequestInterceptorV1("");
 
-        expect(requestInterceptor({})).toEqual({});
+        expect(
+            requestInterceptor({ headers: {} } as InternalAxiosRequestConfig)
+        ).toEqual({ headers: {} });
     });
 
     it("axios request interceptor should attach access token to request header", () => {
         const requestInterceptor = getRequestInterceptorV1("testToken");
 
-        expect(requestInterceptor({})).toEqual({
+        expect(
+            requestInterceptor({ headers: {} } as InternalAxiosRequestConfig)
+        ).toEqual({
             headers: {
                 Authorization: "Bearer testToken",
             },

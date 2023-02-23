@@ -54,5 +54,7 @@ module.exports = {
         // Ref: https://stackoverflow.com/questions/72382316/jest-encountered-an-unexpected-token-react-markdown
         "react-markdown":
             "<rootDir>/node_modules/react-markdown/react-markdown.min.js",
+        // See https://github.com/axios/axios/issues/5026
+        "^axios$": "axios/dist/node/axios.cjs",
     },
 };

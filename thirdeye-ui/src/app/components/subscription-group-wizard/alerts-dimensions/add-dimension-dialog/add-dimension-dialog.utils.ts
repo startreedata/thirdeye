@@ -16,35 +16,18 @@
 import { DataGridSelectionModelV1 } from "../../../../platform/components";
 import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
+import { generateNameForEnumerationItem } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { Association } from "../../subscription-group-wizard.interfaces";
 import { getAssociationId } from "../alerts-dimensions.utils";
 import { DimensionRow } from "./add-dimension-dialog.interfaces";
-
-export const getEnumerationItemName = (
-    item?: EnumerationItem
-): string | null => {
-    if (!item) {
-        return null;
-    }
-
-    const { params, name } = item;
-
-    if (!params) {
-        return name;
-    }
-
-    return Object.entries(params)
-        .map(([k, v]) => `${k}=${v}`)
-        .join(";");
-};
 
 export const getDimensionRow = (
     enumerationItem: EnumerationItem,
     alertId: number
 ): DimensionRow => ({
     id: getAssociationId({ alertId, enumerationId: enumerationItem.id }),
-    name: getEnumerationItemName(enumerationItem) as string,
+    name: generateNameForEnumerationItem(enumerationItem, true),
 });
 
 export const getDimensionRows = (

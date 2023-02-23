@@ -31,15 +31,14 @@ import {
     DataGridV1Props,
 } from "../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.interfaces";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
+import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
 import { getMapFromList } from "../../../utils/subscription-groups/subscription-groups.util";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { Association } from "../subscription-group-wizard.interfaces";
 import { AddDimensionsDialog } from "./add-dimension-dialog/add-dimension-dialog.component";
 import { AlertsDimensionsProps } from "./alerts-dimensions.interfaces";
-import {
-    getAssociationId,
-    getEnumerationItemName,
-} from "./alerts-dimensions.utils";
+import { getAssociationId } from "./alerts-dimensions.utils";
 
 export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
     alerts,
@@ -65,10 +64,15 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                 enumerationId,
                 alertName: alertItemsMap.get(alertId)?.name,
                 enumerationName: enumerationId
-                    ? getEnumerationItemName(
-                          enumerationItemsMap.get(enumerationId)
+                    ? generateNameForEnumerationItem(
+                          enumerationItemsMap.get(
+                              enumerationId
+                          ) as EnumerationItem,
+                          true
                       )
-                    : t("label.overall-entity", { entity: t("label.alert") }),
+                    : t("label.overall-entity", {
+                          entity: t("label.alert"),
+                      }),
             })),
         "id"
     );

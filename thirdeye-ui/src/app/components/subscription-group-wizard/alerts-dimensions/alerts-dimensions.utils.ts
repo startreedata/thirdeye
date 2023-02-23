@@ -13,34 +13,7 @@
  * the License.
  */
 
-import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { Association } from "../subscription-group-wizard.interfaces";
-
-// Function type signature overloading helps inform the TS compiler to infer
-// types smartly from the parameters themselves. Here, it is important to
-// place the narrower type above the more general type for this to work properly
-export function getEnumerationItemName(item: EnumerationItem): string;
-export function getEnumerationItemName(
-    item: EnumerationItem | undefined | null
-): string | null;
-
-export function getEnumerationItemName(
-    item: EnumerationItem | undefined | null
-): string | null {
-    if (!item) {
-        return null;
-    }
-
-    const { params, name } = item;
-
-    if (!params) {
-        return name;
-    }
-
-    return Object.entries(params)
-        .map(([k, v]) => `${k}=${v}`)
-        .join(";");
-}
 
 export const getAssociationId = ({
     alertId,

@@ -14,10 +14,8 @@
  */
 
 import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
-import {
-    getAssociationId,
-    getEnumerationItemName,
-} from "../../subscription-group-wizard/alerts-dimensions/alerts-dimensions.utils";
+import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
+import { getAssociationId } from "../../subscription-group-wizard/alerts-dimensions/alerts-dimensions.utils";
 import { UiAssociation } from "./alert-associations-view-table.interfaces";
 
 export const getUiAssociation = (
@@ -49,7 +47,10 @@ export const getUiAssociation = (
                 alertId: alert.id,
                 alertName: alert.name,
                 enumerationId: enumerationItem.id,
-                enumerationName: getEnumerationItemName(enumerationItem),
+                enumerationName: generateNameForEnumerationItem(
+                    enumerationItem,
+                    true
+                ),
             });
         });
     });

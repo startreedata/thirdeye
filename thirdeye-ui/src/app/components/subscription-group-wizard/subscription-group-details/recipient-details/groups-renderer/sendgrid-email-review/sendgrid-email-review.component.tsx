@@ -14,7 +14,7 @@
  */
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { SendgridEmailReviewProps } from "./sendgrid-email-review.interface";
+import { SendgridEmailReviewProps } from "./sendgrid-email-review.interfaces";
 
 export const SendgridEmailReview: FunctionComponent<SendgridEmailReviewProps> =
     ({ configuration }) => {

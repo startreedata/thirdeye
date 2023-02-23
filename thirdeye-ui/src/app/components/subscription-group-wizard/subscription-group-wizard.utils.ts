@@ -18,7 +18,7 @@ import { isEmpty } from "lodash";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAssociationId } from "./alerts-dimensions/alerts-dimensions.utils";
 import { specTypeToUIConfig } from "./subscription-group-details/recipient-details/groups-editor/groups-editor.utils";
-import { Association } from "./subscription-group-wizard.interface";
+import { Association } from "./subscription-group-wizard.interfaces";
 
 export function validateSubscriptionGroup(
     subscriptionGroup: SubscriptionGroup

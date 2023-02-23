@@ -23,7 +23,7 @@ import { PageHeaderProps } from "../../components/page-header/page-header.interf
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
-import { SubscriptionGroupViewTabs } from "../../components/subscription-group-wizard/subscription-group-wizard.interface";
+import { SubscriptionGroupViewTabs } from "../../components/subscription-group-wizard/subscription-group-wizard.interfaces";
 import { SelectedTab } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import {
     AppLoadingIndicatorV1,

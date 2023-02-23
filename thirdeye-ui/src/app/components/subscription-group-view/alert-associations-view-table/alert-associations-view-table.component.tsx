@@ -25,7 +25,7 @@ import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-sta
 import {
     AlertAssociationsViewTableProps,
     UiAssociation,
-} from "./alert-associations-view-table.interface";
+} from "./alert-associations-view-table.interfaces";
 import { getUiAssociation } from "./alert-associations-view-table.utils";
 
 export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsViewTableProps> =

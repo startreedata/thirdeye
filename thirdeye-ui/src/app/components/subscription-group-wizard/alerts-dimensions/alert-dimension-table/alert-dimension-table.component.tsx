@@ -21,14 +21,14 @@ import {
     DataGridV1,
 } from "../../../../platform/components";
 import { DataGridV1Props } from "../../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.interfaces";
-import { DimensionRow } from "../add-dimension-dialog/add-dimension-dialog.interface";
+import { DimensionRow } from "../add-dimension-dialog/add-dimension-dialog.interfaces";
 import {
     areAllRowsSelected,
     getDataRowsForAlert,
     getSelectedRows,
 } from "../add-dimension-dialog/add-dimension-dialog.utils";
 import { getAssociationId } from "../alerts-dimensions.utils";
-import { AlertDimensionTableProps } from "./alert-dimension-table.interface";
+import { AlertDimensionTableProps } from "./alert-dimension-table.interfaces";
 
 export const AlertsTable: FunctionComponent<AlertDimensionTableProps> = ({
     selectedAlert,

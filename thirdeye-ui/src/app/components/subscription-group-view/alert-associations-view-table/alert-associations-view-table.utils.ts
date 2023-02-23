@@ -18,7 +18,7 @@ import {
     getAssociationId,
     getEnumerationItemName,
 } from "../../subscription-group-wizard/alerts-dimensions/alerts-dimensions.utils";
-import { UiAssociation } from "./alert-associations-view-table.interface";
+import { UiAssociation } from "./alert-associations-view-table.interfaces";
 
 export const getUiAssociation = (
     uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[],

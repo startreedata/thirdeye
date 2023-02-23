@@ -33,7 +33,7 @@ import {
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getMapFromList } from "../../../utils/subscription-groups/subscription-groups.util";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
-import { Association } from "../subscription-group-wizard.interface";
+import { Association } from "../subscription-group-wizard.interfaces";
 import { AddDimensionsDialog } from "./add-dimension-dialog/add-dimension-dialog.component";
 import { AlertsDimensionsProps } from "./alerts-dimensions.interface";
 import {

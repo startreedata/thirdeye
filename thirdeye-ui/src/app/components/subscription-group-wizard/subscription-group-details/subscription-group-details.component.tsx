@@ -16,7 +16,7 @@
 import React, { FunctionComponent } from "react";
 import { PropertiesForm } from "./properties-form/properties-form.component";
 import { RecipientDetails } from "./recipient-details/recipient-details.component";
-import type { SubscriptionGroupDetailsProps } from "./subscription-group-details.interface";
+import type { SubscriptionGroupDetailsProps } from "./subscription-group-details.interfaces";
 
 export const SubscriptionGroupDetails: FunctionComponent<SubscriptionGroupDetailsProps> =
     ({ subscriptionGroup, onChange }) => {

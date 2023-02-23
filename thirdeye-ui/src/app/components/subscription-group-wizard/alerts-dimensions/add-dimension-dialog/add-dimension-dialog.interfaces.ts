@@ -14,12 +14,15 @@
  */
 
 import { Alert } from "../../../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
-import { Association } from "../../subscription-group-wizard.interface";
+import { Association } from "../../subscription-group-wizard.interfaces";
 
-export interface AlertDimensionTableProps {
-    selectedAlert: Alert;
+export interface DimensionRow {
+    id: string;
+    name: string;
+}
+
+export interface AddDimensionDialogProps {
+    alerts: Alert[];
     associations: Association[];
-    onChangeAssociations: (p: string[]) => void;
-    enumerationItemsForAlert: EnumerationItem[];
+    updateAssociations: (p: Association[]) => void;
 }

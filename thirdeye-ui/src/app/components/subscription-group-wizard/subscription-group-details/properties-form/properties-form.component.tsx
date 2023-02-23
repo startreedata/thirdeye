@@ -24,7 +24,7 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { CronEditor } from "../../../cron-editor-v1/cron-editor-v1.component";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
-import { PropertiesFormProps } from "./properties-form.interface";
+import { PropertiesFormProps } from "./properties-form.interfaces";
 
 // Refer: SubscriptionGroupPropertiesForm
 export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({

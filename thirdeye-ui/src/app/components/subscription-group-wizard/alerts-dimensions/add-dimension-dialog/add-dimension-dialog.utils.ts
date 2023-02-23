@@ -17,9 +17,9 @@ import { DataGridSelectionModelV1 } from "../../../../platform/components";
 import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
-import { Association } from "../../subscription-group-wizard.interface";
+import { Association } from "../../subscription-group-wizard.interfaces";
 import { getAssociationId } from "../alerts-dimensions.utils";
-import { DimensionRow } from "./add-dimension-dialog.interface";
+import { DimensionRow } from "./add-dimension-dialog.interfaces";
 
 export const getEnumerationItemName = (
     item?: EnumerationItem

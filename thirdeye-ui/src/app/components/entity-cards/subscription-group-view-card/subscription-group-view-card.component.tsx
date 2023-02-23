@@ -22,7 +22,7 @@ import {
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
-import { SubscriptionGroupViewCardProps } from "./subscription-group-view-card.interface";
+import { SubscriptionGroupViewCardProps } from "./subscription-group-view-card.interfaces";
 
 export const SubscriptionGroupViewCard: FunctionComponent<SubscriptionGroupViewCardProps> =
     ({ header, rows }) => {

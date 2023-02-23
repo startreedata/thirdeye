@@ -26,7 +26,7 @@ import {
     Association,
     SubscriptionGroupViewTabs,
     SubscriptionGroupWizardProps,
-} from "./subscription-group-wizard.interface";
+} from "./subscription-group-wizard.interfaces";
 import {
     getAssociations,
     validateSubscriptionGroup,

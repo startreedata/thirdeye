@@ -22,10 +22,10 @@ import { useGetEnumerationItems } from "../../../../rest/enumeration-items/enume
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { EmptyStateSwitch } from "../../../page-states/empty-state-switch/empty-state-switch.component";
-import { Association } from "../../subscription-group-wizard.interface";
+import { Association } from "../../subscription-group-wizard.interfaces";
 import { AlertsTable } from "../alert-dimension-table/alert-dimension-table.component";
 import { getAssociationId } from "../alerts-dimensions.utils";
-import { AddDimensionDialogProps } from "./add-dimension-dialog.interface";
+import { AddDimensionDialogProps } from "./add-dimension-dialog.interfaces";
 import {
     getAssociationIdsForAlert,
     getEnumerationItemsForAlert,

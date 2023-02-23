@@ -16,7 +16,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
-import { Association } from "../subscription-group-wizard.interface";
+import { Association } from "../subscription-group-wizard.interfaces";
 
 export interface AlertsDimensionsProps {
     alerts: Alert[];

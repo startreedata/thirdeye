@@ -103,6 +103,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                 return (
                     <Box display="flex" gridGap={6} justifyContent="center">
                         {[...new Set(data.activeChannels.map((c) => c.type))]
+                            .sort()
                             .map(
                                 (iconType) =>
                                     subscriptionGroupChannelIconsMap[iconType]

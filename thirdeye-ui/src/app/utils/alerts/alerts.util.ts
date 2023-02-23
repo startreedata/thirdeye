@@ -357,7 +357,16 @@ const mapSubscriptionGroupsToAlertIds = (
         uiAlertSubscriptionGroup.name =
             subscriptionGroup.name || i18n.t("label.no-data-marker");
 
-        for (const alert of subscriptionGroup.alerts) {
+        let alerts: Pick<Alert, "id">[] = [];
+        if (subscriptionGroup.alertAssociations) {
+            alerts = subscriptionGroup.alertAssociations.map(
+                (association) => association.alert
+            );
+        } else if (subscriptionGroup.alerts) {
+            alerts = subscriptionGroup.alerts;
+        }
+
+        for (const alert of alerts) {
             const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(
                 alert.id
             );

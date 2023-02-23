@@ -40,10 +40,7 @@ import {
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import {
-    getSubscriptionGroupsAllPath,
-    getSubscriptionGroupsViewPath,
-} from "../../utils/routes/routes.util";
+import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
@@ -135,7 +132,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     };
 
     const handleOnCancelClick = (): void => {
-        navigate(getSubscriptionGroupsAllPath());
+        navigate(getSubscriptionGroupsViewPath(toNumber(params.id)));
     };
 
     const statusList = [
@@ -170,10 +167,9 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                         <SubscriptionGroupWizard
                             isExisting
                             alerts={alerts}
+                            cancelBtnLabel={t("label.cancel")}
                             enumerationItems={enumerationItems}
-                            submitBtnLabel={t("label.update-entity", {
-                                entity: t("label.subscription-group"),
-                            })}
+                            submitBtnLabel={t("label.update")}
                             subscriptionGroup={subscriptionGroup}
                             onCancel={handleOnCancelClick}
                             onFinish={onSubscriptionGroupWizardFinish}

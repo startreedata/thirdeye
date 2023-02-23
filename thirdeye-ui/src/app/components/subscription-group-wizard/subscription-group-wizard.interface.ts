@@ -20,6 +20,7 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 export interface SubscriptionGroupWizardProps {
     alerts: Alert[];
     submitBtnLabel: string;
+    cancelBtnLabel: string;
     subscriptionGroup: SubscriptionGroup;
     enumerationItems: EnumerationItem[];
     onCancel?: () => void;

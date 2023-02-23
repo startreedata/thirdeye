@@ -13,14 +13,10 @@
  * the License.
  */
 
-import { Box, Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
-import {
-    PageContentsCardV1,
-    PageContentsGridV1,
-} from "../../platform/components";
+import { PageContentsGridV1 } from "../../platform/components";
 import {
     AlertAssociation,
     SubscriptionGroup,
@@ -33,6 +29,7 @@ import {
 } from "../../utils/routes/routes.util";
 import { PageHeader } from "../page-header/page-header.component";
 import { PageHeaderProps } from "../page-header/page-header.interfaces";
+import { WizardBottomBar } from "../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { AlertsDimensions } from "./alerts-dimensions/alerts-dimensions.component";
 import { SubscriptionGroupDetails } from "./subscription-group-details/subscription-group-details.component";
 import {
@@ -51,6 +48,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
     ({
         alerts,
         submitBtnLabel,
+        cancelBtnLabel,
         subscriptionGroup,
         enumerationItems,
         onCancel,
@@ -160,32 +158,13 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                         />
                     ) : null}
                 </PageContentsGridV1>
-                <Box textAlign="right" width="100%">
-                    <PageContentsCardV1 fullHeight>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item>
-                                <Button
-                                    color="secondary"
-                                    variant="outlined"
-                                    onClick={() => onCancel?.()}
-                                >
-                                    {t("label.cancel")}
-                                </Button>
-                            </Grid>
-                            <Grid item>
-                                <Button
-                                    color="primary"
-                                    disabled={!isSubscriptionGroupValid}
-                                    onClick={handleSubmitClick}
-                                >
-                                    {submitBtnLabel || isExisting
-                                        ? t("label.save")
-                                        : t("label.create")}
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </PageContentsCardV1>
-                </Box>
+                <WizardBottomBar
+                    backButtonLabel={cancelBtnLabel}
+                    handleBackClick={onCancel}
+                    handleNextClick={handleSubmitClick}
+                    nextButtonIsDisabled={!isSubscriptionGroupValid}
+                    nextButtonLabel={submitBtnLabel}
+                />
             </>
         );
     };

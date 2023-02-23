@@ -125,10 +125,9 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                     {isDataLoaded ? (
                         <SubscriptionGroupWizard
                             alerts={alerts}
+                            cancelBtnLabel={t("label.cancel")}
                             enumerationItems={enumerationItems}
-                            submitBtnLabel={t("label.create-entity", {
-                                entity: t("label.subscription-group"),
-                            })}
+                            submitBtnLabel={t("label.save")}
                             subscriptionGroup={createEmptySubscriptionGroup()}
                             onCancel={handleOnCancelClick}
                             onFinish={onSubscriptionGroupWizardFinish}

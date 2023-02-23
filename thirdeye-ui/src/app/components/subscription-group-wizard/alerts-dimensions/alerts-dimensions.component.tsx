@@ -35,7 +35,7 @@ import { getMapFromList } from "../../../utils/subscription-groups/subscription-
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { Association } from "../subscription-group-wizard.interfaces";
 import { AddDimensionsDialog } from "./add-dimension-dialog/add-dimension-dialog.component";
-import { AlertsDimensionsProps } from "./alerts-dimensions.interface";
+import { AlertsDimensionsProps } from "./alerts-dimensions.interfaces";
 import {
     getAssociationId,
     getEnumerationItemName,

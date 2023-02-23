@@ -19,7 +19,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { SubscriptionGroupViewCard } from "../../entity-cards/subscription-group-view-card/subscription-group-view-card.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
-import { NotificationChannelsCardProps } from "./notification-channels-card.interface";
+import { NotificationChannelsCardProps } from "./notification-channels-card.interfaces";
 import { getCardProps } from "./notification-channels-card.utils";
 
 export const NotificationChannelsCard: FunctionComponent<NotificationChannelsCardProps> =

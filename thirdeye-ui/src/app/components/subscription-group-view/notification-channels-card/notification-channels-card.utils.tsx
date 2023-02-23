@@ -16,6 +16,7 @@
 import { Icon } from "@iconify/react";
 import { Box } from "@material-ui/core";
 import React from "react";
+import { TFunction } from "react-i18next";
 import { lightV1 } from "../../../platform/utils";
 import {
     NotificationSpec,
@@ -37,7 +38,7 @@ export const subscriptionGroupChannelIconsMap = {
 
 export const getCardProps = (
     channel: NotificationSpec,
-    t: (v: string) => string
+    t: TFunction
 ): SubscriptionGroupViewCardProps => {
     const cardProps: SubscriptionGroupViewCardProps = {
         header: (

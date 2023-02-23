@@ -13,7 +13,8 @@
  * the License.
  */
 
-import { Box, Typography } from "@material-ui/core";
+import { Icon } from "@iconify/react";
+import { Box, Typography, useTheme } from "@material-ui/core";
 import { capitalize, sortBy } from "lodash";
 import React, { FunctionComponent, ReactNode, useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,7 @@ import { getUiAssociation } from "./alert-associations-view-table.utils";
 export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsViewTableProps> =
     ({ uiSubscriptionGroup, customToolbar }) => {
         const { t } = useTranslation();
+        const theme = useTheme();
         const uiAssociations = getUiAssociation(
             uiSubscriptionGroup.alerts || [],
             t
@@ -77,34 +79,53 @@ export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsView
             toolbarComponent: customToolbar,
         };
 
-        const isTableEmpty = uiAssociations.length === 0;
-
         return (
             <>
-                <Box height={isTableEmpty ? 100 : 400}>
-                    <DataGridV1<UiAssociation> {...dataGridProps} />
-                </Box>
-                <EmptyStateSwitch emptyState={null} isEmpty={!isTableEmpty}>
-                    <Box
-                        alignItems="center"
-                        display="flex"
-                        flexDirection="column"
-                        justifyContent="center"
-                        py={8}
-                    >
-                        <Typography variant="body2">
-                            {capitalize(
-                                t(
-                                    "message.no-children-present-for-this-parent",
-                                    {
-                                        children: t("label.active-entity", {
+                <EmptyStateSwitch
+                    emptyState={
+                        <Box
+                            alignItems="center"
+                            display="flex"
+                            flexDirection="column"
+                            justifyContent="center"
+                            py={8}
+                        >
+                            <Icon
+                                color={theme.palette.primary.main}
+                                fontSize={32}
+                                icon="mdi:chart-line-variant"
+                            />
+                            <Typography variant="body2">
+                                {capitalize(
+                                    t(
+                                        "message.no-children-present-for-this-parent",
+                                        {
+                                            children: t("label.active-entity", {
+                                                entity: t("label.dimensions"),
+                                            }),
+                                            parent: t(
+                                                "label.subscription-group"
+                                            ),
+                                        }
+                                    )
+                                )}
+                            </Typography>
+                            <Typography color="textSecondary" variant="caption">
+                                {capitalize(
+                                    t(
+                                        "message.active-entity-will-be-listed-here",
+                                        {
                                             entity: t("label.dimensions"),
-                                        }),
-                                        parent: t("label.subscription-group"),
-                                    }
-                                )
-                            )}
-                        </Typography>
+                                        }
+                                    )
+                                )}
+                            </Typography>
+                        </Box>
+                    }
+                    isEmpty={uiAssociations.length === 0}
+                >
+                    <Box height={400}>
+                        <DataGridV1<UiAssociation> {...dataGridProps} />
                     </Box>
                 </EmptyStateSwitch>
             </>

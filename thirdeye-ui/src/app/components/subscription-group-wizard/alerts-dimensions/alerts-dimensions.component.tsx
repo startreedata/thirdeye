@@ -13,6 +13,7 @@
  * the License.
  */
 
+import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
@@ -20,6 +21,7 @@ import {
     CardContent,
     Grid,
     Typography,
+    useTheme,
 } from "@material-ui/core";
 import { capitalize, sortBy } from "lodash";
 import React, { FunctionComponent, useRef, useState } from "react";
@@ -47,6 +49,7 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
     setAssociations,
 }) => {
     const { t } = useTranslation();
+    const theme = useTheme();
     const { showDialog } = useDialogProviderV1();
     const alertItemsMap = getMapFromList(alerts);
     const enumerationItemsMap = getMapFromList(enumerationItems);
@@ -174,8 +177,6 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
         });
     };
 
-    const isDataEmpty = dataGridRows.length === 0;
-
     return (
         <Grid item xs={12}>
             <Box
@@ -200,40 +201,67 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
             </Box>
             <Card variant="outlined">
                 <CardContent>
-                    <Box height={isDataEmpty ? 100 : 500}>
-                        <DataGridV1<DataRow> {...dataGridProps} />
-                    </Box>
-                    <EmptyStateSwitch emptyState={null} isEmpty={!isDataEmpty}>
-                        <Box
-                            alignItems="center"
-                            display="flex"
-                            flexDirection="column"
-                            justifyContent="center"
-                            py={8}
-                        >
-                            <Typography variant="body2">
-                                {capitalize(
-                                    t(
-                                        "message.no-children-present-for-this-parent",
-                                        {
-                                            children: t("label.active-entity", {
-                                                entity: t("label.dimensions"),
-                                            }),
-                                            parent: t(
-                                                "label.subscription-group"
-                                            ),
-                                        }
-                                    )
-                                )}
-                            </Typography>
-                            <br />
-                            <Button
-                                color="primary"
-                                variant="contained"
-                                onClick={handleAddDimensions}
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Box
+                                alignItems="center"
+                                display="flex"
+                                flexDirection="column"
+                                justifyContent="center"
+                                py={8}
                             >
-                                {t("message.add-alert-dimensions")}
-                            </Button>
+                                <Icon
+                                    color={theme.palette.primary.main}
+                                    fontSize={32}
+                                    icon="mdi:chart-line-variant"
+                                />
+                                <Typography variant="body2">
+                                    {capitalize(
+                                        t(
+                                            "message.no-children-present-for-this-parent",
+                                            {
+                                                children: t(
+                                                    "label.active-entity",
+                                                    {
+                                                        entity: t(
+                                                            "label.dimensions"
+                                                        ),
+                                                    }
+                                                ),
+                                                parent: t(
+                                                    "label.subscription-group"
+                                                ),
+                                            }
+                                        )
+                                    )}
+                                </Typography>
+                                <Typography
+                                    color="textSecondary"
+                                    variant="caption"
+                                >
+                                    {capitalize(
+                                        t(
+                                            "message.active-entity-will-be-listed-here",
+                                            {
+                                                entity: t("label.dimensions"),
+                                            }
+                                        )
+                                    )}
+                                </Typography>
+                                <br />
+                                <Button
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={handleAddDimensions}
+                                >
+                                    {t("message.add-alert-dimensions")}
+                                </Button>
+                            </Box>
+                        }
+                        isEmpty={dataGridRows.length === 0}
+                    >
+                        <Box height={500}>
+                            <DataGridV1<DataRow> {...dataGridProps} />
                         </Box>
                     </EmptyStateSwitch>
                 </CardContent>

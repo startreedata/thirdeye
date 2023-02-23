@@ -13,34 +13,22 @@
  * the License.
  */
 
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useParams, useSearchParams } from "react-router-dom";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { PageContentsGridV1 } from "../../platform/components";
 import {
     AlertAssociation,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
-import {
-    getConfigurationPath,
-    getSubscriptionGroupsAllPath,
-    getSubscriptionGroupsCreatePath,
-    getSubscriptionGroupsUpdatePath,
-} from "../../utils/routes/routes.util";
-import { PageHeader } from "../page-header/page-header.component";
-import { PageHeaderProps } from "../page-header/page-header.interfaces";
 import { WizardBottomBar } from "../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { AlertsDimensions } from "./alerts-dimensions/alerts-dimensions.component";
 import { SubscriptionGroupDetails } from "./subscription-group-details/subscription-group-details.component";
 import {
     Association,
-    SubscriptionGroupsWizardParams,
     SubscriptionGroupViewTabs,
     SubscriptionGroupWizardProps,
 } from "./subscription-group-wizard.interface";
 import {
     getAssociations,
-    SelectedTab,
     validateSubscriptionGroup,
 } from "./subscription-group-wizard.utils";
 
@@ -53,7 +41,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         enumerationItems,
         onCancel,
         onFinish,
-        isExisting = false,
+        selectedTab,
     }) => {
         const [editedSubscriptionGroup, setEditedSubscriptionGroup] =
             useState<SubscriptionGroup>(subscriptionGroup);
@@ -61,56 +49,6 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         const [editedAssociations, setEditedAssociations] = useState<
             Association[]
         >(getAssociations(subscriptionGroup));
-
-        const { t } = useTranslation();
-
-        const params = useParams<SubscriptionGroupsWizardParams>();
-        const [searchParams] = useSearchParams();
-        const [selectedTab] = useMemo(
-            () => [
-                Number(searchParams.get(SelectedTab)) ||
-                    SubscriptionGroupViewTabs.GroupDetails,
-            ],
-            [searchParams]
-        );
-
-        const id = isExisting ? Number(params.id) : null;
-
-        const pagePath = isExisting
-            ? getSubscriptionGroupsUpdatePath(Number(params.id))
-            : getSubscriptionGroupsCreatePath();
-
-        const pageHeaderProps: PageHeaderProps = {
-            breadcrumbs: [
-                {
-                    label: t("label.configuration"),
-                    link: getConfigurationPath(),
-                },
-                {
-                    label: t("label.subscription-groups"),
-                    link: getSubscriptionGroupsAllPath(),
-                },
-                {
-                    label: isExisting && id ? id : t("label.create"),
-                    link: pagePath,
-                },
-            ],
-            transparentBackground: true,
-            title: t(`label.${isExisting ? "update" : "create"}-entity`, {
-                entity: t("label.subscription-group"),
-            }),
-            subNavigation: [
-                {
-                    label: t("label.group-details"),
-                    link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.GroupDetails}`,
-                },
-                {
-                    label: t("label.alerts-and-dimensions"),
-                    link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.AlertDimensions}`,
-                },
-            ],
-            subNavigationSelected: selectedTab,
-        };
 
         const handleSubmitClick = (): void => {
             onFinish?.(editedSubscriptionGroup);
@@ -139,8 +77,6 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
 
         return (
             <>
-                <PageHeader {...pageHeaderProps} />
-
                 <PageContentsGridV1>
                     {selectedTab === SubscriptionGroupViewTabs.GroupDetails ? (
                         <SubscriptionGroupDetails

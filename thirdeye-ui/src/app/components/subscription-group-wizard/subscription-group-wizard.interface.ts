@@ -25,7 +25,7 @@ export interface SubscriptionGroupWizardProps {
     enumerationItems: EnumerationItem[];
     onCancel?: () => void;
     onFinish?: (subscriptionGroup: SubscriptionGroup) => void;
-    isExisting?: boolean;
+    selectedTab: SubscriptionGroupViewTabs;
 }
 
 export enum SubscriptionGroupViewTabs {

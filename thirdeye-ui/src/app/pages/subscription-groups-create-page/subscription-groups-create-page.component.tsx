@@ -14,13 +14,17 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+import { SubscriptionGroupViewTabs } from "../../components/subscription-group-wizard/subscription-group-wizard.interface";
+import { SelectedTab } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -36,7 +40,9 @@ import { createSubscriptionGroup } from "../../rest/subscription-groups/subscrip
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
+    getConfigurationPath,
     getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsCreatePath,
     getSubscriptionGroupsViewPath,
 } from "../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
@@ -52,6 +58,15 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
         getEnumerationItems,
         status: enumerationItemsStatus,
     } = useGetEnumerationItems();
+
+    const [searchParams] = useSearchParams();
+    const [selectedTab] = useMemo(
+        () => [
+            Number(searchParams.get(SelectedTab)) ||
+                SubscriptionGroupViewTabs.GroupDetails,
+        ],
+        [searchParams]
+    );
 
     useEffect(() => {
         // Fetching all alerts and enumeration items since this is an edit flow and
@@ -95,6 +110,40 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
         navigate(getSubscriptionGroupsAllPath());
     };
 
+    const pagePath = getSubscriptionGroupsCreatePath();
+
+    const pageHeaderProps: PageHeaderProps = {
+        breadcrumbs: [
+            {
+                label: t("label.configuration"),
+                link: getConfigurationPath(),
+            },
+            {
+                label: t("label.subscription-groups"),
+                link: getSubscriptionGroupsAllPath(),
+            },
+            {
+                label: t("label.create"),
+                link: pagePath,
+            },
+        ],
+        transparentBackground: true,
+        title: t(`label.create-entity`, {
+            entity: t("label.subscription-group"),
+        }),
+        subNavigation: [
+            {
+                label: t("label.group-details"),
+                link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.GroupDetails}`,
+            },
+            {
+                label: t("label.alerts-and-dimensions"),
+                link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.AlertDimensions}`,
+            },
+        ],
+        subNavigationSelected: selectedTab,
+    };
+
     const isLoading = [alertsStatus, enumerationItemsStatus].some(
         (v) => v === ActionStatus.Working
     );
@@ -122,11 +171,13 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                     }
                     isEmpty={!isDataLoaded}
                 >
+                    <PageHeader {...pageHeaderProps} />
                     {isDataLoaded ? (
                         <SubscriptionGroupWizard
                             alerts={alerts}
                             cancelBtnLabel={t("label.cancel")}
                             enumerationItems={enumerationItems}
+                            selectedTab={selectedTab}
                             submitBtnLabel={t("label.save")}
                             subscriptionGroup={createEmptySubscriptionGroup()}
                             onCancel={handleOnCancelClick}

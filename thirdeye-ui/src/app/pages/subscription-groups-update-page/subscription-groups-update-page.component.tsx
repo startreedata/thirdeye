@@ -15,13 +15,17 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
+import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+import { SubscriptionGroupViewTabs } from "../../components/subscription-group-wizard/subscription-group-wizard.interface";
+import { SelectedTab } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -40,7 +44,12 @@ import {
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getSubscriptionGroupsViewPath } from "../../utils/routes/routes.util";
+import {
+    getConfigurationPath,
+    getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsUpdatePath,
+    getSubscriptionGroupsViewPath,
+} from "../../utils/routes/routes.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
@@ -60,6 +69,14 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [searchParams] = useSearchParams();
+    const [selectedTab] = useMemo(
+        () => [
+            Number(searchParams.get(SelectedTab)) ||
+                SubscriptionGroupViewTabs.GroupDetails,
+        ],
+        [searchParams]
+    );
 
     useEffect(() => {
         fetchSubscriptionGroup();
@@ -68,6 +85,42 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
         getAlerts();
         getEnumerationItems();
     }, []);
+
+    const id = Number(params.id);
+
+    const pagePath = getSubscriptionGroupsUpdatePath(Number(params.id));
+
+    const pageHeaderProps: PageHeaderProps = {
+        breadcrumbs: [
+            {
+                label: t("label.configuration"),
+                link: getConfigurationPath(),
+            },
+            {
+                label: t("label.subscription-groups"),
+                link: getSubscriptionGroupsAllPath(),
+            },
+            {
+                label: id,
+                link: pagePath,
+            },
+        ],
+        transparentBackground: true,
+        title: t(`label.update-entity`, {
+            entity: t("label.subscription-group"),
+        }),
+        subNavigation: [
+            {
+                label: t("label.group-details"),
+                link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.GroupDetails}`,
+            },
+            {
+                label: t("label.alerts-and-dimensions"),
+                link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.AlertDimensions}`,
+            },
+        ],
+        subNavigationSelected: selectedTab,
+    };
 
     const onSubscriptionGroupWizardFinish = (
         subscriptionGroup: SubscriptionGroup
@@ -163,12 +216,13 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     }
                     isEmpty={!isDataLoaded}
                 >
+                    <PageHeader {...pageHeaderProps} />
                     {isDataLoaded ? (
                         <SubscriptionGroupWizard
-                            isExisting
                             alerts={alerts}
                             cancelBtnLabel={t("label.cancel")}
                             enumerationItems={enumerationItems}
+                            selectedTab={selectedTab}
                             submitBtnLabel={t("label.update")}
                             subscriptionGroup={subscriptionGroup}
                             onCancel={handleOnCancelClick}

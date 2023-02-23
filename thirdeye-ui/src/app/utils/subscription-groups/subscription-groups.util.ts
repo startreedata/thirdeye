@@ -245,7 +245,9 @@ const getUiSubscriptionGroupInternal = (
         )
     ).length.toString();
 
-    uiSubscriptionGroup.activeChannels = [...subscriptionGroup.specs];
+    if (subscriptionGroup.specs) {
+        uiSubscriptionGroup.activeChannels = [...subscriptionGroup.specs];
+    }
 
     // Emails
     uiSubscriptionGroup.emails =
@@ -354,9 +356,11 @@ export const getMapFromList = <T extends { id: I }, I = number>(
 ): Map<I, T> => {
     const itemMap = new Map<I, T>();
 
-    list.forEach((item) => {
-        itemMap.set(item.id, item);
-    });
+    if (list) {
+        list.forEach((item) => {
+            itemMap.set(item.id, item);
+        });
+    }
 
     return itemMap;
 };

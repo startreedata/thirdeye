@@ -14,6 +14,7 @@
  */
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
@@ -65,7 +66,11 @@ export const AlertTemplatesRouter: FunctionComponent = () => {
 
                 {/* AlertTemplates all path */}
                 <Route
-                    element={<AlertTemplatesAllPage />}
+                    element={
+                        <CancelAPICallsOnPageUnload>
+                            <AlertTemplatesAllPage />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={AppRouteRelative.ALERT_TEMPLATES_ALL}
                 />
 

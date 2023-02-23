@@ -13,7 +13,7 @@
  * the License.
  */
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
-import axios, { AxiosError, CancelTokenSource } from "axios";
+import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
@@ -81,18 +81,20 @@ export const AlertsAllPage: FunctionComponent = () => {
         );
     }, [status]);
 
+    let isMounted = true;
+
     useEffect(() => {
-        const cancelTokenSource = axios.CancelToken.source();
-
         // Time range refreshed, fetch alerts
-        fetchAllAlerts(cancelTokenSource);
+        fetchAllAlerts();
+    }, []);
 
+    useEffect(() => {
         return () => {
-            cancelTokenSource.cancel();
+            isMounted = false;
         };
     }, []);
 
-    const fetchAllAlerts = (cancelTokenSource: CancelTokenSource): void => {
+    const fetchAllAlerts = (): void => {
         setIsLoading(true);
         setUiAlerts(null);
 
@@ -100,6 +102,9 @@ export const AlertsAllPage: FunctionComponent = () => {
         let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
         Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
             .then(([alertsResponse, subscriptionGroupsResponse]) => {
+                if (!isMounted) {
+                    return;
+                }
                 // Determine if any of the calls failed
                 if (
                     subscriptionGroupsResponse.status === PROMISES.REJECTED ||
@@ -143,6 +148,9 @@ export const AlertsAllPage: FunctionComponent = () => {
                 }
             })
             .finally(() => {
+                if (!isMounted) {
+                    return;
+                }
                 setIsLoading(false);
                 setUiAlerts(fetchedUiAlerts);
 
@@ -153,10 +161,10 @@ export const AlertsAllPage: FunctionComponent = () => {
                     .forEach((alertId) => {
                         getAlertStats({
                             alertId,
-                            axiosConfig: {
-                                cancelToken: cancelTokenSource.token,
-                            },
                         }).then((alertStatsData) => {
+                            if (!isMounted) {
+                                return;
+                            }
                             setAlertsStats((alertsStatsProp) => ({
                                 ...alertsStatsProp,
                                 [alertId]: alertStatsData,

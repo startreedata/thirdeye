@@ -35,6 +35,8 @@ import {
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
 import {
@@ -215,18 +217,20 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     isEmpty={!(subscriptionGroup && alerts && enumerationItems)}
                 >
                     <PageHeader {...pageHeaderProps} />
-                    {subscriptionGroup && alerts && enumerationItems ? (
-                        <SubscriptionGroupWizard
-                            alerts={alerts}
-                            cancelBtnLabel={t("label.cancel")}
-                            enumerationItems={enumerationItems}
-                            selectedTab={selectedTab}
-                            submitBtnLabel={t("label.update")}
-                            subscriptionGroup={subscriptionGroup}
-                            onCancel={handleOnCancelClick}
-                            onFinish={onSubscriptionGroupWizardFinish}
-                        />
-                    ) : null}
+                    (
+                    <SubscriptionGroupWizard
+                        alerts={alerts as Alert[]}
+                        cancelBtnLabel={t("label.cancel")}
+                        enumerationItems={enumerationItems as EnumerationItem[]}
+                        selectedTab={selectedTab}
+                        submitBtnLabel={t("label.update")}
+                        subscriptionGroup={
+                            subscriptionGroup as SubscriptionGroup
+                        }
+                        onCancel={handleOnCancelClick}
+                        onFinish={onSubscriptionGroupWizardFinish}
+                    />
+                    )
                 </EmptyStateSwitch>
             </LoadingErrorStateSwitch>
         </PageV1>

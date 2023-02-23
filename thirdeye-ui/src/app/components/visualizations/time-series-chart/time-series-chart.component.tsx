@@ -136,6 +136,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
         events,
         LegendComponent = Legend,
         margins = CHART_MARGINS,
+        svgContainerUseAuto,
     }) => {
         const { t } = useTranslation();
         const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
@@ -398,7 +399,10 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                         xMax={xMax}
                     />
                 )}
-                <svg height={height} width="auto">
+                <svg
+                    height={height}
+                    width={svgContainerUseAuto ? "auto" : width}
+                >
                     <ChartCore
                         colorScale={colorScale}
                         height={height}

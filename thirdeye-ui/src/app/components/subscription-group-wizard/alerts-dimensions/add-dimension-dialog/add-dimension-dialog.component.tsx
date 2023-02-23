@@ -21,6 +21,7 @@ import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { useGetEnumerationItems } from "../../../../rest/enumeration-items/enumeration-items.actions";
 import { getMapFromList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
+import { EmptyStateSwitch } from "../../../page-states/empty-state-switch/empty-state-switch.component";
 import { Association } from "../../subscription-group-wizard.interface";
 import { AlertsTable } from "../alert-dimension-table/alert-dimension-table.component";
 import { getAssociationId } from "../alerts-dimensions.utils";
@@ -119,6 +120,8 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
             });
         };
 
+        const isDataLoaded = !!(selectedAlert && enumerationItems);
+
         return (
             <Box>
                 <Typography variant="h6">{t("label.alert")}</Typography>
@@ -156,20 +159,24 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
                     })}
                 />
 
-                {selectedAlert && enumerationItems ? (
-                    <>
-                        <Box pb={2} pt={2}>
-                            <Divider />
-                        </Box>
+                <EmptyStateSwitch emptyState={null} isEmpty={!isDataLoaded}>
+                    {isDataLoaded ? (
+                        <>
+                            <Box pb={2} pt={2}>
+                                <Divider />
+                            </Box>
 
-                        <AlertsTable
-                            associations={associationsForAlert}
-                            enumerationItemsForAlert={enumerationItemsForAlert}
-                            selectedAlert={selectedAlert}
-                            onChangeAssociations={handleChangeAssociations}
-                        />
-                    </>
-                ) : null}
+                            <AlertsTable
+                                associations={associationsForAlert}
+                                enumerationItemsForAlert={
+                                    enumerationItemsForAlert
+                                }
+                                selectedAlert={selectedAlert}
+                                onChangeAssociations={handleChangeAssociations}
+                            />
+                        </>
+                    ) : null}
+                </EmptyStateSwitch>
             </Box>
         );
     };

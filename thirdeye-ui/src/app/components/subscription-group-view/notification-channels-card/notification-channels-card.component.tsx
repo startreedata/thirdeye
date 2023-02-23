@@ -18,6 +18,7 @@ import { capitalize } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { SubscriptionGroupViewCard } from "../../entity-cards/subscription-group-view-card/subscription-group-view-card.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { NotificationChannelsCardProps } from "./notification-channels-card.interface";
 import { getCardProps } from "./notification-channels-card.utils";
 
@@ -33,27 +34,38 @@ export const NotificationChannelsCard: FunctionComponent<NotificationChannelsCar
             [activeChannels]
         );
 
+        const isCardListEmpty = renderCards.length === 0;
+
         return (
-            <>
+            <EmptyStateSwitch
+                emptyState={
+                    <Grid item xs={12}>
+                        <Typography variant="h5">
+                            {t("label.active-channels")}
+                        </Typography>
+                        {renderCards.length === 0 ? (
+                            <Typography variant="subtitle1">
+                                {capitalize(
+                                    t("label.no-entity-found", {
+                                        entity: t("label.channels"),
+                                    })
+                                )}
+                            </Typography>
+                        ) : null}
+                    </Grid>
+                }
+                isEmpty={isCardListEmpty}
+            >
                 <Grid item xs={12}>
                     <Typography variant="h5">
                         {t("label.active-channels")}
                     </Typography>
-                    {renderCards.length === 0 ? (
-                        <Typography variant="subtitle1">
-                            {capitalize(
-                                t("label.no-entity-found", {
-                                    entity: t("label.channels"),
-                                })
-                            )}
-                        </Typography>
-                    ) : null}
                 </Grid>
                 {renderCards.map((cardProps, index) => (
                     <Grid item key={index} xs={12}>
                         <SubscriptionGroupViewCard {...cardProps} />
                     </Grid>
                 ))}
-            </>
+            </EmptyStateSwitch>
         );
     };

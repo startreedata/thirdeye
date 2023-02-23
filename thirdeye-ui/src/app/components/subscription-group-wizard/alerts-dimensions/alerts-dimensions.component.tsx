@@ -32,6 +32,7 @@ import {
 } from "../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.interfaces";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getMapFromList } from "../../../utils/subscription-groups/subscription-groups.util";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { Association } from "../subscription-group-wizard.interface";
 import { AddDimensionsDialog } from "./add-dimension-dialog/add-dimension-dialog.component";
 import { AlertsDimensionsProps } from "./alerts-dimensions.interface";
@@ -168,6 +169,8 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
         });
     };
 
+    const isDataEmpty = dataGridRows.length === 0;
+
     return (
         <Grid item xs={12}>
             <Box
@@ -192,10 +195,10 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
             </Box>
             <Card variant="outlined">
                 <CardContent>
-                    <Box height={dataGridRows.length > 0 ? 500 : 100}>
+                    <Box height={isDataEmpty ? 100 : 500}>
                         <DataGridV1<DataRow> {...dataGridProps} />
                     </Box>
-                    {dataGridRows.length === 0 ? (
+                    <EmptyStateSwitch emptyState={null} isEmpty={!isDataEmpty}>
                         <Box
                             alignItems="center"
                             display="flex"
@@ -227,7 +230,7 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                                 {t("message.add-alert-dimensions")}
                             </Button>
                         </Box>
-                    ) : null}
+                    </EmptyStateSwitch>
                 </CardContent>
             </Card>
         </Grid>

@@ -21,6 +21,7 @@ import { DataGridColumnV1, DataGridV1 } from "../../../platform/components";
 import { DataGridV1Props } from "../../../platform/components/data-grid-v1/data-grid-v1/data-grid-v1.interfaces";
 import { linkRendererV1 } from "../../../platform/utils";
 import { getAlertsAlertPath } from "../../../utils/routes/routes.util";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import {
     AlertAssociationsViewTableProps,
     UiAssociation,
@@ -73,12 +74,14 @@ export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsView
             toolbarComponent: customToolbar,
         };
 
+        const isTableEmpty = uiAssociations.length === 0;
+
         return (
             <>
-                <Box height={uiAssociations.length > 0 ? 400 : 100}>
+                <Box height={isTableEmpty ? 100 : 400}>
                     <DataGridV1<UiAssociation> {...dataGridProps} />
                 </Box>
-                {uiAssociations.length === 0 ? (
+                <EmptyStateSwitch emptyState={null} isEmpty={!isTableEmpty}>
                     <Box
                         alignItems="center"
                         display="flex"
@@ -100,7 +103,7 @@ export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsView
                             )}
                         </Typography>
                     </Box>
-                ) : null}
+                </EmptyStateSwitch>
             </>
         );
     };

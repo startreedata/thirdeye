@@ -19,6 +19,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
 import {
@@ -144,8 +145,9 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     ];
 
     const isLoading = statusList.some((v) => v === ActionStatus.Working);
-
     const isError = statusList.some((v) => v === ActionStatus.Error);
+
+    const isDataLoaded = !!(subscriptionGroup && alerts && enumerationItems);
 
     return (
         <PageV1>
@@ -154,25 +156,30 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 isLoading={isLoading}
                 loadingState={<AppLoadingIndicatorV1 />}
             >
-                {subscriptionGroup && alerts && enumerationItems ? (
-                    <SubscriptionGroupWizard
-                        isExisting
-                        alerts={alerts}
-                        enumerationItems={enumerationItems}
-                        submitBtnLabel={t("label.update-entity", {
-                            entity: t("label.subscription-group"),
-                        })}
-                        subscriptionGroup={subscriptionGroup}
-                        onCancel={handleOnCancelClick}
-                        onFinish={onSubscriptionGroupWizardFinish}
-                    />
-                ) : (
-                    <PageContentsGridV1>
-                        <Grid item xs={12}>
-                            <NoDataIndicator />
-                        </Grid>
-                    </PageContentsGridV1>
-                )}
+                <EmptyStateSwitch
+                    emptyState={
+                        <PageContentsGridV1>
+                            <Grid item xs={12}>
+                                <NoDataIndicator />
+                            </Grid>
+                        </PageContentsGridV1>
+                    }
+                    isEmpty={!isDataLoaded}
+                >
+                    {isDataLoaded ? (
+                        <SubscriptionGroupWizard
+                            isExisting
+                            alerts={alerts}
+                            enumerationItems={enumerationItems}
+                            submitBtnLabel={t("label.update-entity", {
+                                entity: t("label.subscription-group"),
+                            })}
+                            subscriptionGroup={subscriptionGroup}
+                            onCancel={handleOnCancelClick}
+                            onFinish={onSubscriptionGroupWizardFinish}
+                        />
+                    ) : null}
+                </EmptyStateSwitch>
             </LoadingErrorStateSwitch>
         </PageV1>
     );

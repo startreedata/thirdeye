@@ -70,6 +70,12 @@ public class CommonProperties {
         if (p.getJsonType() == null) {
           p.setJsonType(commonProperty.getJsonType());
         }
+        if (p.getStep() == null) {
+          p.setStep(commonProperty.getStep());
+        }
+        if (p.getSubStep() == null) {
+          p.setSubStep(commonProperty.getSubStep());
+        }
       }
     }
   }

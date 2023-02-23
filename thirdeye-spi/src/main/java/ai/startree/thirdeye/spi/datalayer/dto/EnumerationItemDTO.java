@@ -27,6 +27,9 @@ public class EnumerationItemDTO extends AbstractDTO {
   private String name;
   private String description;
   private Map<String, Object> params;
+  private AlertDTO alert;
+
+  @Deprecated
   private List<AlertDTO> alerts;
 
   public String getName() {
@@ -56,10 +59,21 @@ public class EnumerationItemDTO extends AbstractDTO {
     return this;
   }
 
+  public AlertDTO getAlert() {
+    return alert;
+  }
+
+  public EnumerationItemDTO setAlert(final AlertDTO alert) {
+    this.alert = alert;
+    return this;
+  }
+
+  @Deprecated
   public List<AlertDTO> getAlerts() {
     return alerts;
   }
 
+  @Deprecated
   public EnumerationItemDTO setAlerts(
       final List<AlertDTO> alerts) {
     this.alerts = alerts;

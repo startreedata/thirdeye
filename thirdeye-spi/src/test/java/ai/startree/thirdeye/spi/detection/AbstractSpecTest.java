@@ -31,7 +31,7 @@ public class AbstractSpecTest {
     assertThat(spec.getA()).isEqualTo(123);
     assertThat(spec.getB()).isEqualTo(456.7);
     assertThat(spec.getC()).isEqualTo("default");
-    assertThat(spec.getTemplatableList().value()).isEqualTo(List.of());
+    assertThat(spec.getTemplatableList().getValue()).isEqualTo(List.of());
   }
 
   @Test
@@ -40,7 +40,7 @@ public class AbstractSpecTest {
     assertThat(spec.getA()).isEqualTo(321);
     assertThat(spec.getB()).isEqualTo(456.7);
     assertThat(spec.getC()).isEqualTo("default");
-    assertThat(spec.getTemplatableList().value()).isEqualTo(List.of());
+    assertThat(spec.getTemplatableList().getValue()).isEqualTo(List.of());
   }
 
   @Test
@@ -50,7 +50,7 @@ public class AbstractSpecTest {
     assertThat(spec.getA()).isEqualTo(321);
     assertThat(spec.getB()).isEqualTo(456.7);
     assertThat(spec.getC()).isEqualTo("default");
-    assertThat(spec.getTemplatableList().value()).isEqualTo(List.of());
+    assertThat(spec.getTemplatableList().getValue()).isEqualTo(List.of());
   }
 
   @Test
@@ -62,7 +62,7 @@ public class AbstractSpecTest {
     assertThat(spec.getB()).isEqualTo(456.7);
     assertThat(spec.getC()).isEqualTo("default");
     assertThat(spec.getConfiguration()).isEqualTo(ImmutableMap.of("k1", "v1", "k2", "v2"));
-    assertThat(spec.getTemplatableList().value()).isEqualTo(List.of());
+    assertThat(spec.getTemplatableList().getValue()).isEqualTo(List.of());
   }
 
   @Test
@@ -72,7 +72,7 @@ public class AbstractSpecTest {
     assertThat(spec.getUpThreshold()).isEqualTo(0.2);
     assertThat(spec.getThreshold()).isEqualTo(0.1);
     assertThat(spec.getDownThreshold()).isEqualTo(0.3);
-    assertThat(spec.getTemplatableList().value()).isEqualTo(List.of());
+    assertThat(spec.getTemplatableList().getValue()).isEqualTo(List.of());
   }
 
   @Test
@@ -81,7 +81,7 @@ public class AbstractSpecTest {
     TestSpec spec = AbstractSpec
         .fromProperties(ImmutableMap.of("templatableList", stringList), TestSpec.class);
 
-    assertThat(spec.getTemplatableList().value()).isEqualTo(stringList);
+    assertThat(spec.getTemplatableList().getValue()).isEqualTo(stringList);
   }
 
   @Test
@@ -90,7 +90,7 @@ public class AbstractSpecTest {
     TestSpec spec = AbstractSpec
         .fromProperties(ImmutableMap.of("templatableList", variableString), TestSpec.class);
 
-    assertThat(spec.getTemplatableList().templatedValue()).isEqualTo(variableString);
+    assertThat(spec.getTemplatableList().getTemplatedValue()).isEqualTo(variableString);
   }
 
   @Test

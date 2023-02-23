@@ -83,6 +83,12 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         return countParentAnomalies(null);
       }
     });
+    metricRegistry.register("anomalyFeedbackCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return genericPojoDao.count(AnomalyFeedbackDTO.class);
+      }
+    });
   }
 
   @Override
@@ -138,6 +144,10 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     mergeAnomalyBean.setChildIds(childAnomalyIds);
 
     final Long id = genericPojoDao.create(mergeAnomalyBean);
+    if (id == null) {
+      LOG.error("Failed to store anomaly: {}", anomalyDTO);
+    }
+
     anomalyDTO.setId(id);
     return id;
   }
@@ -173,6 +183,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
           throw new IllegalArgumentException("Loop detected! Child anomaly referencing ancestor");
         }
       }
+      child.setAuth(parentAnomaly.getAuth());
       child.setChild(true);
       childIds.add(saveAnomaly(child, visitedAnomalies));
     }

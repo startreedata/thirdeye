@@ -16,6 +16,7 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
@@ -53,10 +54,13 @@ import javax.ws.rs.core.UriInfo;
 public class EntityResource {
 
   private final GenericPojoDao genericPojoDao;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
-  public EntityResource(final GenericPojoDao genericPojoDao) {
+  public EntityResource(final GenericPojoDao genericPojoDao,
+      final AuthorizationManager authorizationManager) {
     this.genericPojoDao = genericPojoDao;
+    this.authorizationManager = authorizationManager;
   }
 
   @GET
@@ -64,12 +68,14 @@ public class EntityResource {
   public Response getRawEntity(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
+    authorizationManager.ensureHasRootAccess(principal);
     return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
   }
 
   @GET
   @Path("types")
   public Response listEntities(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+    authorizationManager.ensureHasRootAccess(principal);
     final Map<String, Long> entityCountMap = new TreeMap<>();
     final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
     for (Class<? extends AbstractDTO> beanClass : beanClasses) {
@@ -84,6 +90,7 @@ public class EntityResource {
   public Response getEntityInfo(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("bean_class") String beanClass) {
+    authorizationManager.ensureHasRootAccess(principal);
     try {
       List<String> indexedColumns = genericPojoDao.getIndexedColumns(Class.forName(beanClass));
       return Response.ok(indexedColumns).build();
@@ -100,6 +107,7 @@ public class EntityResource {
       @PathParam("bean_class") String beanClassRef,
       @Context UriInfo uriInfo
   ) {
+    authorizationManager.ensureHasRootAccess(principal);
     try {
       final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
       int limit = 10;

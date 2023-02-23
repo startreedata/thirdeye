@@ -18,8 +18,8 @@ import ai.startree.thirdeye.datalayer.entity.HasJsonVal;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
-import java.sql.Timestamp;
 import org.modelmapper.ModelMapper;
 
 public class DtoIndexMapper {
@@ -39,7 +39,8 @@ public class DtoIndexMapper {
   }
 
   public static <E extends AbstractDTO> AbstractIndexEntity toAbstractIndexEntity(final E pojo,
-      final Class<? extends AbstractIndexEntity> indexClass, final String jsonVal)
+      final Class<? extends AbstractIndexEntity> indexClass,
+      final String jsonVal)
       throws InstantiationException, IllegalAccessException {
     final AbstractIndexEntity abstractIndexEntity = buildAbstractIndexEntity(pojo, indexClass);
 
@@ -47,7 +48,7 @@ public class DtoIndexMapper {
       ((HasJsonVal) abstractIndexEntity).setJsonVal(jsonVal);
     }
     abstractIndexEntity.setBaseId(pojo.getId());
-    abstractIndexEntity.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+    abstractIndexEntity.setUpdateTime(pojo.getUpdateTime());
 
     return abstractIndexEntity;
   }
@@ -56,11 +57,11 @@ public class DtoIndexMapper {
       final Class<? extends AbstractIndexEntity> indexClass)
       throws InstantiationException, IllegalAccessException {
     if (pojo instanceof AnomalyDTO) {
-      return MergedAnomalyIndexMapper.INSTANCE.toMergedAnomalyResultIndex((AnomalyDTO) pojo);
+      return MergedAnomalyIndexMapper.INSTANCE.toIndexEntity((AnomalyDTO) pojo);
+    } else if (pojo instanceof EnumerationItemDTO) {
+      return EnumerationItemIndexMapper.INSTANCE.toIndexEntity((EnumerationItemDTO) pojo);
     }
-    return buildWithLegacyModelMapper(
-        pojo,
-        indexClass);
+    return buildWithLegacyModelMapper(pojo, indexClass);
   }
 
   /**

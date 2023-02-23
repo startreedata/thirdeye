@@ -14,24 +14,33 @@
 
 package ai.startree.thirdeye.datalayer.bao;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl.toAlertDTO;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Injector;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class EnumerationItemManagerImplTest {
 
+  public static final long ALERT_ID = 1234L;
   private EnumerationItemManager enumerationItemManager;
+  private AnomalyManager anomalyManager;
+  private SubscriptionGroupManager subscriptionGroupManager;
 
   private static List<AlertDTO> toAlertList(final Long... alertIds) {
     return Arrays.stream(alertIds).map(alertId -> {
@@ -41,67 +50,173 @@ public class EnumerationItemManagerImplTest {
     }).collect(Collectors.toList());
   }
 
-  private static EnumerationItemDTO ei(final String ei1) {
-    return new EnumerationItemDTO().setName(ei1);
+  private static EnumerationItemDTO ei(final String name) {
+    return ei(name, Map.of());
+  }
+
+  private static EnumerationItemDTO ei(final String name, Map<String, Object> m) {
+    return new EnumerationItemDTO().setName(name).setParams(m);
+  }
+
+  private static EnumerationItemDTO sourceEi() {
+    return ei("ei1")
+        .setParams(Map.of("a", 1))
+        .setAlert(toAlertDTO(ALERT_ID));
+  }
+
+  private static AnomalyDTO anomaly(long startTime, long endTime) {
+    return new AnomalyDTO()
+        .setStartTime(startTime)
+        .setEndTime(endTime);
   }
 
   @BeforeClass
   void beforeClass() {
     final Injector injector = MySqlTestDatabase.sharedInjector();
     enumerationItemManager = injector.getInstance(EnumerationItemManager.class);
+    anomalyManager = injector.getInstance(AnomalyManager.class);
+    subscriptionGroupManager = injector.getInstance(SubscriptionGroupManager.class);
   }
 
-  @AfterClass(alwaysRun = true)
+  @AfterMethod
   void afterClass() {
     enumerationItemManager.findAll().forEach(enumerationItemManager::delete);
+    anomalyManager.findAll().forEach(anomalyManager::delete);
+    subscriptionGroupManager.findAll().forEach(subscriptionGroupManager::delete);
   }
 
   @Test
-  public void testFindExistingOrCreate() {
-    // Create list of enumeration Item DTOs
-    final EnumerationItemDTO ei1 = ei("ei1").setParams(Map.of("k1", "v1"));
-    final EnumerationItemDTO ei2 = ei("ei2").setParams(Map.of("k2", "v2"))
-        .setAlerts(toAlertList(123L, 456L));
-    final EnumerationItemDTO ei3 = ei("ei3").setParams(Map.of("k3", "v3"));
-    final List<EnumerationItemDTO> list = List.of(ei1, ei2, ei3);
-    list.forEach(enumerationItemManager::save);
+  public void testFindExistingOrCreateCaseNewCreation() {
+    final EnumerationItemDTO source = sourceEi();
+    final EnumerationItemDTO created = enumerationItemManager.findExistingOrCreate(source);
+    assertThat(created).isNotNull();
+    assertThat(created.getId()).isNotNull();
+    assertThat(created.getName()).isEqualTo(source.getName());
+    assertThat(created.getParams()).isEqualTo(source.getParams());
+    assertThat(created.getAlert()).isNotNull();
+    assertThat(created.getAlert().getId()).isEqualTo(source.getAlert().getId());
+  }
 
-    final EnumerationItemDTO dtoNoMatch = enumerationItemManager.findExistingOrCreate(ei("ei2")
-        .setParams(Map.of("k1", "v1")) // params are different
-        .setAlerts(toAlertList(123L)));
+  @Test
+  public void testFindExistingOrCreateCaseExistingWithAlert() {
+    final var source = sourceEi();
 
-    // assert that dtoNoMatch id is not in the list of enumeration item ids
-    assertThat(list.stream()
-        .map(EnumerationItemDTO::getId)
-        .collect(Collectors.toList()))
-        .doesNotContain(dtoNoMatch.getId());
+    final var existing = ei(source.getName(), source.getParams())
+        .setAlert(source.getAlert());
+    enumerationItemManager.save(existing);
 
-    final EnumerationItemDTO dto1 = enumerationItemManager.findExistingOrCreate(ei("ei1")
-        .setParams(Map.of("k1", "v1"))
-        .setAlerts(toAlertList(123L)));
+    final var existingOtherName = ei("someOtherName", source.getParams())
+        .setAlert(source.getAlert());
+    enumerationItemManager.save(existingOtherName);
 
-    assertThat(dto1.getName()).isEqualTo(ei1.getName());
+    final var existingOtherParams = ei(source.getName(), Map.of("blah", 1))
+        .setAlert(source.getAlert());
+    enumerationItemManager.save(existingOtherParams);
 
-    final EnumerationItemDTO dto2 = enumerationItemManager.findExistingOrCreate(ei("ei2")
-        .setParams(Map.of("k2", "v2"))
-        .setAlerts(toAlertList(123L)));
+    final var found = enumerationItemManager.findExistingOrCreate(source);
+    assertThat(found).isNotNull();
+    assertThat(found.getId()).isNotNull();
+    assertThat(found.getName()).isEqualTo(source.getName());
+    assertThat(found.getParams()).isEqualTo(source.getParams());
+    assertThat(found.getAlert()).isNotNull();
+    assertThat(found.getAlert().getId()).isEqualTo(source.getAlert().getId());
 
-    assertThat(dto2.getName()).isEqualTo(ei2.getName());
-    assertThat(dto2.getAlerts()).isEqualTo(ei2.getAlerts());
+    assertThat(found.getId()).isEqualTo(existing.getId());
+    assertThat(found.getId()).isNotEqualTo(existingOtherName.getId());
+    assertThat(found.getId()).isNotEqualTo(existingOtherParams.getId());
+  }
 
-    final EnumerationItemDTO dto3 = enumerationItemManager.findExistingOrCreate(ei("ei3")
-        .setParams(Map.of("k3", "v3"))
-        .setAlerts(toAlertList(123L)));
+  /**
+   * Test whether legacy enumeration items are migrated correctly.
+   */
+  @Test
+  public void testFindExistingOrCreateCaseAnomalyMigration() {
+    final EnumerationItemDTO source = sourceEi();
 
-    assertThat(dto3.getName()).isEqualTo(ei3.getName());
-    assertThat(dto3.getAlerts()).containsExactlyInAnyOrderElementsOf(toAlertList(123L));
+    final var ei1 = ei(source.getName(), source.getParams());
+    enumerationItemManager.save(ei1);
 
-    final EnumerationItemDTO dto4 = enumerationItemManager.findExistingOrCreate(ei("ei2")
-        .setParams(Map.of("k2", "v2"))
-        .setAlerts(toAlertList(789L)));
+    final var ei2 = ei("ei2", Map.of("a", 1));
+    enumerationItemManager.save(ei2);
 
-    assertThat(dto4.getName()).isEqualTo(ei2.getName());
-    assertThat(dto4.getAlerts()).containsExactlyInAnyOrderElementsOf(toAlertList(
-        123L, 456L, 789L));
+    final var a1 = anomaly(1000L, 2000L)
+        .setDetectionConfigId(ALERT_ID)
+        .setEnumerationItem(ei1);
+    anomalyManager.save(a1);
+
+    final var a2 = anomaly(1000L, 2000L)
+        .setDetectionConfigId(ALERT_ID)
+        .setEnumerationItem(ei2);
+    anomalyManager.save(a2);
+
+    final var a3 = anomaly(1000L, 2000L)
+        .setDetectionConfigId(5678L);
+    anomalyManager.save(a3);
+
+    final var a4 = anomaly(1000L, 2000L)
+        .setDetectionConfigId(5678L)
+        .setEnumerationItem(ei1);
+    anomalyManager.save(a4);
+
+    final var sg1 = new SubscriptionGroupDTO()
+        .setName("sg1")
+        .setAlertAssociations(List.of(new AlertAssociationDto()
+            .setAlert(toAlertDTO(ALERT_ID))
+            .setEnumerationItem(ei1)));
+    subscriptionGroupManager.save(sg1);
+
+    final var sg2 = new SubscriptionGroupDTO()
+        .setName("sg2")
+        .setAlertAssociations(List.of(new AlertAssociationDto()
+            .setAlert(toAlertDTO(ALERT_ID))
+            .setEnumerationItem(ei2)));
+    subscriptionGroupManager.save(sg2);
+
+    final var sg3 = new SubscriptionGroupDTO()
+        .setName("sg3")
+        .setAlertAssociations(List.of(new AlertAssociationDto()
+            .setAlert(toAlertDTO(5678L))
+            .setEnumerationItem(ei1)));
+    subscriptionGroupManager.save(sg3);
+
+    final EnumerationItemDTO migrated = enumerationItemManager.findExistingOrCreate(source);
+
+    assertThat(migrated).isNotNull();
+    assertThat(migrated.getId()).isNotNull();
+    assertThat(migrated.getName()).isEqualTo(source.getName());
+    assertThat(migrated.getParams()).isEqualTo(source.getParams());
+    assertThat(migrated.getAlert()).isNotNull();
+    assertThat(migrated.getAlert().getId()).isEqualTo(source.getAlert().getId());
+
+    assertThat(migrated.getId()).isNotEqualTo(ei1.getId());
+
+    /* Test anomaly migration */
+    final var a1Updated = anomalyManager.findById(a1.getId());
+    assertThat(a1Updated.getEnumerationItem().getId()).isEqualTo(migrated.getId());
+
+    assertThat(anomalyManager.findById(a2.getId())
+        .getEnumerationItem()
+        .getId()).isEqualTo(ei2.getId());
+
+    assertThat(anomalyManager.findById(a3.getId())
+        .getEnumerationItem())
+        .isNull();
+
+    assertThat(anomalyManager.findById(a4.getId())
+        .getEnumerationItem()
+        .getId()).isEqualTo(ei1.getId());
+
+    /* Test subscription group migration */
+    final var sg1Updated = subscriptionGroupManager.findById(sg1.getId());
+    assertThat(sg1Updated.getAlertAssociations().get(0).getEnumerationItem().getId())
+        .isEqualTo(migrated.getId());
+
+    final var sg2Updated = subscriptionGroupManager.findById(sg2.getId());
+    assertThat(sg2Updated.getAlertAssociations().get(0).getEnumerationItem().getId())
+        .isEqualTo(ei2.getId());
+
+    final var sg3Updated = subscriptionGroupManager.findById(sg3.getId());
+    assertThat(sg3Updated.getAlertAssociations().get(0).getEnumerationItem().getId())
+        .isEqualTo(ei1.getId());
   }
 }

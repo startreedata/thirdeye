@@ -37,6 +37,12 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
    */
   private String completenessDelay;
   /**
+   * ISO-8601 period. Eg P7D. At detection run, TE re-runs the detection starting from
+   * min(lastTimestamp,
+   * endTime-replayPeriod). Used to manage data mutability.
+   */
+  private String mutabilityPeriod;
+  /**
    * Dimensions to exclude from RCA algorithm runs.
    */
   private Templatable<List<String>> rcaExcludedDimensions;
@@ -150,6 +156,15 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
 
   public DatasetApi setAuth(final AuthorizationConfigurationApi auth) {
     this.auth = auth;
+    return this;
+  }
+
+  public String getMutabilityPeriod() {
+    return mutabilityPeriod;
+  }
+
+  public DatasetApi setMutabilityPeriod(final String mutabilityPeriod) {
+    this.mutabilityPeriod = mutabilityPeriod;
     return this;
   }
 }

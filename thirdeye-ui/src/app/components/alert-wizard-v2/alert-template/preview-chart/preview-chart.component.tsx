@@ -39,6 +39,7 @@ import {
 } from "../../../../rest/alerts/alerts.actions";
 import {
     AlertEvaluation,
+    AlertInEvaluation,
     EditableAlert,
 } from "../../../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
@@ -172,7 +173,12 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 detectionEvaluation.anomalies,
                 t,
                 undefined,
-                determineTimezoneFromAlertInEvaluation(evaluation?.alert)
+                determineTimezoneFromAlertInEvaluation(
+                    evaluation?.alert.template as Pick<
+                        AlertInEvaluation,
+                        "metadata"
+                    >
+                )
             );
 
             timeseriesConfiguration.brush = false;
@@ -436,7 +442,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                 <Grid item>
                                     <TimeRangeButtonWithContext
                                         timezone={determineTimezoneFromAlertInEvaluation(
-                                            evaluation?.alert
+                                            evaluation?.alert.template as Pick<
+                                                AlertInEvaluation,
+                                                "metadata"
+                                            >
                                         )}
                                         onTimeRangeChange={(start, end) =>
                                             displayState ===

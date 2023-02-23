@@ -38,7 +38,7 @@ public class TemplateEngineTemplatableSerializer extends JsonSerializer<Templata
   @Override
   public void serialize(final Templatable templatable, final JsonGenerator jsonGenerator,
       final SerializerProvider serializerProvider) throws IOException {
-    final String templatedValue = templatable.templatedValue();
+    final String templatedValue = templatable.getTemplatedValue();
     if (templatedValue != null) {
       final String property = templatedValue.substring(2, templatedValue.length() - 1);
       checkArgument(valuesMap.containsKey(property), "Property not provided for templatable value: %s", property);
@@ -47,7 +47,7 @@ public class TemplateEngineTemplatableSerializer extends JsonSerializer<Templata
     } else {
       // cannot call writeObject --> this would create an infinite recursive loop
       jsonGenerator.writeStartObject();
-      jsonGenerator.writeObjectField(Templatable.VALUE_FIELD_STRING,  templatable.value());
+      jsonGenerator.writeObjectField(Templatable.VALUE_FIELD_STRING,  templatable.getValue());
       jsonGenerator.writeEndObject();
     }
   }

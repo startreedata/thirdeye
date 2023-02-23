@@ -190,6 +190,11 @@ traefik:
 
 # Persistence layer configuration
 mysql:
+  # Use the MySQL chart dependency
+  # Set to false if bringing your own MySQL
+  enabled: true
+  mysqlUrl: ""
+
   imageTag: 8.0.28
   mysqlRootPassword: password
   mysqlUser: uthirdeye

@@ -50,11 +50,11 @@ public class PlanNodeApiTest {
     Assert.assertEquals(inputNode.getType(), "AnomalyDetector");
     Assert.assertEquals(inputNode.getParams().size(), 6);
     // parsing templatable with a templated value
-    assertThat(inputNode.getParams().get("metric").templatedValue()).isEqualTo("${metricName}");
+    assertThat(inputNode.getParams().get("metric").getTemplatedValue()).isEqualTo("${metricName}");
     // parsing templatable with an object value
-    assertThat(inputNode.getParams().get("dimensions").value()).isEqualTo(List.of());
+    assertThat(inputNode.getParams().get("dimensions").getValue()).isEqualTo(List.of());
     // parsing templatable with a string value
-    assertThat(inputNode.getParams().get("detectorName").value()).isEqualTo("PERCENTAGE_CHANGE");
+    assertThat(inputNode.getParams().get("detectorName").getValue()).isEqualTo("PERCENTAGE_CHANGE");
     Assert.assertEquals(inputNode.getInputs().size(), 2);
     Assert.assertEquals(inputNode.getInputs().get(0).getTargetProperty(), "baseline");
     Assert.assertEquals(inputNode.getInputs().get(0).getSourcePlanNode(), "baselineDataFetcher");

@@ -40,7 +40,7 @@ public class RcaDimensionFilterHelper {
       return cleanDimensionStrings(includedDimensions);
     } else {
       final Templatable<List<String>> datasetDimensions = datasetConfigDTO.getDimensions();
-      if (datasetDimensions == null || datasetDimensions.value() == null) {
+      if (datasetDimensions == null || datasetDimensions.getValue() == null) {
         // no known dimensions - no need to apply exclusion list
         return List.of();
       } else {
@@ -51,10 +51,10 @@ public class RcaDimensionFilterHelper {
         } else {
           // use default exclusion list
           excludedDimensionsToUse = optional(datasetConfigDTO.getRcaExcludedDimensions()).map(
-              Templatable::value).orElse(List.of());
+              Templatable::getValue).orElse(List.of());
         }
         final List<String> rcaDimensions = new ArrayList<>(optional(datasetDimensions).map(
-            Templatable::value).orElse(List.of()));
+            Templatable::getValue).orElse(List.of()));
         rcaDimensions.removeAll(cleanDimensionStrings(excludedDimensionsToUse));
         return rcaDimensions;
       }

@@ -1,6 +1,6 @@
 {
   "name": "startree-mean-variance",
-  "description": "Mean-Variance template. Aggregation function with 1 operand: SUM, MAX,etc...",
+  "description": "Detect an anomaly if the metric is not in `mean ± n*std`. `mean` and `std` (standard deviation) are estimated with historical data.  The amount of historical data to use is set with the `lookback` property. Aggregation function with 1 operand: SUM, MAX,etc...",
   "nodes": [
     {
       "name": "root",
@@ -9,8 +9,8 @@
         "type": "ANOMALY_MERGER",
         "component.mergeMaxGap": "${mergeMaxGap}",
         "component.mergeMaxDuration": "${mergeMaxDuration}",
-        "component.reNotifyPercentageThreshold": "${replayReNotifyPercentageThreshold}",
-        "component.reNotifyAbsoluteThreshold": "${replayReNotifyAbsoluteThreshold}"
+        "component.reNotifyPercentageThreshold": "${reNotifyPercentageThreshold}",
+        "component.reNotifyAbsoluteThreshold": "${reNotifyAbsoluteThreshold}"
       },
       "inputs": [
         {
@@ -23,7 +23,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "EVENTS",
-        "component.ignore": "${eventFilterIgnore}",
+        "component.ignore": "true",
         "component.beforeEventMargin": "${eventFilterBeforeEventMargin}",
         "component.afterEventMargin": "${eventFilterAfterEventMargin}"
       },
@@ -44,7 +44,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "THRESHOLD",
-        "component.ignore": "${guardrailMetricIgnore}",
+        "component.ignore": "true",
         "component.min": "${guardrailMetricMin}",
         "component.max": "${guardrailMetricMax}",
         "component.valueName": "${guardrailMetric}",
@@ -67,7 +67,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "THRESHOLD",
-        "component.ignore": "${thresholdIgnore}",
+        "component.ignore": "true",
         "component.min": "${thresholdFilterMin}",
         "component.max": "${thresholdFilterMax}"
       },
@@ -83,7 +83,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "TIME_OF_WEEK",
-        "component.ignore": "${timeOfWeekIgnore}",
+        "component.ignore": "true",
         "component.daysOfWeek": "${daysOfWeek}",
         "component.hoursOfDay": "${hoursOfDay}",
         "component.dayHoursOfWeek": "${dayHoursOfWeek}"
@@ -100,7 +100,7 @@
       "type": "PostProcessor",
       "params": {
         "type": "COLD_START",
-        "component.ignore": "${coldStartIgnore}",
+        "component.ignore": "true",
         "component.tableName": "${dataset}",
         "component.coldStartPeriod": "${lookback}"
       },
@@ -194,6 +194,7 @@
       "name": "${dataset}",
       "dimensions": "${rcaIncludedDimensions}",
       "rcaExcludedDimensions": "${rcaExcludedDimensions}",
+      "mutabilityPeriod": "${mutabilityPeriod}",
       "completenessDelay": "${completenessDelay}"
     },
     "metric": {
@@ -251,6 +252,10 @@
       "defaultValue": "P0D"
     },
     {
+      "name": "mutabilityPeriod",
+      "defaultValue": "P0D"
+    },
+    {
       "name": "mergeMaxGap",
       "defaultValue": ""
     },
@@ -287,14 +292,6 @@
       "defaultValue": ""
     },
     {
-      "name": "coldStartIgnore",
-      "defaultValue": "true"
-    },
-    {
-      "name": "timeOfWeekIgnore",
-      "defaultValue": "true"
-    },
-    {
       "name": "daysOfWeek",
       "defaultValue": []
     },
@@ -307,20 +304,12 @@
       "defaultValue": {}
     },
     {
-      "name": "thresholdIgnore",
-      "defaultValue": "true"
-    },
-    {
       "name": "thresholdFilterMin",
       "defaultValue": "-1"
     },
     {
       "name": "thresholdFilterMax",
       "defaultValue": "-1"
-    },
-    {
-      "name": "guardrailMetricIgnore",
-      "defaultValue": "true"
     },
     {
       "name": "guardrailMetricMin",
@@ -344,11 +333,9 @@
     },
     {
       "name": "eventFilterTypes",
-      "defaultValue": []
-    },
-    {
-      "name": "eventFilterIgnore",
-      "defaultValue": false
+      "defaultValue": [
+        "__NO_EVENTS"
+      ]
     },
     {
       "name": "eventFilterBeforeEventMargin",
@@ -360,14 +347,19 @@
     },
     {
       "name": "seasonalityPeriod",
-      "defaultValue": "PT0S"
+      "defaultValue": "PT0S",
+      "description": "Seasonality to consider when computing mean and variance. Possible values are `P7D` (weekly and smaller periods), `P1D` (daily and smaller periods), PT0S (no seasonality). Eg: with P7D, a Monday 12 AM value will be estimated from the mean and variance of the previous Monday 12 AM values. ",
+      "options": ["PT0S", "P1D", "P7D"],
+      "multiselect": false,
+      "step": "DETECTION",
+      "jsonType": "STRING"
     },
     {
-      "name": "replayReNotifyPercentageThreshold",
+      "name": "reNotifyPercentageThreshold",
       "defaultValue": -1
     },
     {
-      "name": "replayReNotifyAbsoluteThreshold",
+      "name": "reNotifyAbsoluteThreshold",
       "defaultValue": -1
     }
   ]

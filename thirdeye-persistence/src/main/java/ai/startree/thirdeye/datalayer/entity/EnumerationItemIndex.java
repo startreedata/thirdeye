@@ -18,6 +18,7 @@ public class EnumerationItemIndex extends AbstractIndexEntity implements
 
   private String name;
   private String description;
+  private Long alertId;
   private String jsonVal;
 
   public String getName() {
@@ -35,6 +36,15 @@ public class EnumerationItemIndex extends AbstractIndexEntity implements
 
   public EnumerationItemIndex setDescription(final String description) {
     this.description = description;
+    return this;
+  }
+
+  public Long getAlertId() {
+    return alertId;
+  }
+
+  public EnumerationItemIndex setAlertId(final Long alertId) {
+    this.alertId = alertId;
     return this;
   }
 

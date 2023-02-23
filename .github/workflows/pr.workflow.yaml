@@ -14,6 +14,7 @@ jobs:
         # Job to validate PR title
         name: pr-title
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
             - id: filter
               name: Filter
@@ -47,6 +48,7 @@ jobs:
         # Job to assign PR labels
         name: pr-labels
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
             - name: Assign labels
               uses: actions/labeler@v2

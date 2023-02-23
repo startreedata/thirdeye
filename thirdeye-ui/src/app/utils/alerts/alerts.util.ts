@@ -32,6 +32,7 @@ import {
     UiAlertSubscriptionGroup,
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
+import { getSubscriptionGroupAlertsList } from "../subscription-groups/subscription-groups.util";
 
 export const DEFAULT_FEEDBACK = {
     type: AnomalyFeedbackType.NO_FEEDBACK,
@@ -357,14 +358,7 @@ const mapSubscriptionGroupsToAlertIds = (
         uiAlertSubscriptionGroup.name =
             subscriptionGroup.name || i18n.t("label.no-data-marker");
 
-        let alerts: Pick<Alert, "id">[] = [];
-        if (subscriptionGroup.alertAssociations) {
-            alerts = subscriptionGroup.alertAssociations.map(
-                (association) => association.alert
-            );
-        } else if (subscriptionGroup.alerts) {
-            alerts = subscriptionGroup.alerts;
-        }
+        const alerts = getSubscriptionGroupAlertsList(subscriptionGroup);
 
         for (const alert of alerts) {
             const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(

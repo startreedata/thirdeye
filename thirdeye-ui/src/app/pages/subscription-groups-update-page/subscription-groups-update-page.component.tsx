@@ -197,8 +197,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const isLoading = statusList.some((v) => v === ActionStatus.Working);
     const isError = statusList.some((v) => v === ActionStatus.Error);
 
-    const isDataLoaded = !!(subscriptionGroup && alerts && enumerationItems);
-
     return (
         <PageV1>
             <LoadingErrorStateSwitch
@@ -214,10 +212,10 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                             </Grid>
                         </PageContentsGridV1>
                     }
-                    isEmpty={!isDataLoaded}
+                    isEmpty={!(subscriptionGroup && alerts && enumerationItems)}
                 >
                     <PageHeader {...pageHeaderProps} />
-                    {isDataLoaded ? (
+                    {subscriptionGroup && alerts && enumerationItems ? (
                         <SubscriptionGroupWizard
                             alerts={alerts}
                             cancelBtnLabel={t("label.cancel")}

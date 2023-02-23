@@ -117,7 +117,9 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                 (id) => !idsToDelete.includes(id)
             );
 
-            const newRowKeyValueMap = new Map(stateProp.rowKeyValueMap);
+            const newRowKeyValueMap = new Map(
+                stateProp.rowKeyValueMap?.entries() || []
+            );
 
             idsToDelete.forEach((id) => {
                 newRowKeyValueMap.delete(id);

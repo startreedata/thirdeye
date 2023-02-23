@@ -120,8 +120,6 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
             });
         };
 
-        const isDataLoaded = !!(selectedAlert && enumerationItems);
-
         return (
             <Box>
                 <Typography variant="h6">{t("label.alert")}</Typography>
@@ -159,8 +157,11 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
                     })}
                 />
 
-                <EmptyStateSwitch emptyState={null} isEmpty={!isDataLoaded}>
-                    {isDataLoaded ? (
+                <EmptyStateSwitch
+                    emptyState={null}
+                    isEmpty={!(selectedAlert && enumerationItems)}
+                >
+                    {selectedAlert && enumerationItems ? (
                         <>
                             <Box pb={2} pt={2}>
                                 <Divider />

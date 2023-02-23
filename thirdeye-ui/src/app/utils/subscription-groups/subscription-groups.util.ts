@@ -360,3 +360,21 @@ export const getMapFromList = <T extends { id: I }, I = number>(
 
     return itemMap;
 };
+
+export const getSubscriptionGroupAlertsList = (
+    subscriptionGroup: SubscriptionGroup
+): Pick<Alert, "id">[] => {
+    let extractedAlerts: Pick<Alert, "id">[] = [];
+
+    const { alertAssociations, alerts } = subscriptionGroup;
+
+    if (alertAssociations && !isEmpty(alertAssociations)) {
+        extractedAlerts = alertAssociations.map(
+            (association) => association.alert
+        );
+    } else if (alerts && !isEmpty(alerts)) {
+        extractedAlerts = alerts;
+    }
+
+    return extractedAlerts;
+};

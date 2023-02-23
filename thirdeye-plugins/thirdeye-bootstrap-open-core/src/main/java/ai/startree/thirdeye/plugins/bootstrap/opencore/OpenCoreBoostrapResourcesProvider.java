@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProvider {
 
-  private static final String RESOURCES_TEMPLATES_PATH = "alert-templates";
+  public static final String RESOURCES_TEMPLATES_PATH = "alert-templates";
 
   @Override
   public List<AlertTemplateApi> getAlertTemplates() {

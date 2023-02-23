@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
+import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
@@ -33,6 +34,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
+import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -51,7 +53,9 @@ import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -239,7 +243,31 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     // see TE-1172 - ensure the dto passed to the authManager is complete, not only a reference {id:1234}
     final AlertDTO alertDTO = optional(alert.getId()).map(this::get).orElseGet(() -> toDto(alert));
     authorizationManager.ensureCanEvaluate(principal, alertDTO);
-    return Response.ok(alertEvaluator.evaluate(request)).build();
+
+    final AlertEvaluationApi results = alertEvaluator.evaluate(request);
+    results.setDetectionEvaluations(allowedEvaluations(principal,
+        results.getDetectionEvaluations()));
+    return Response.ok(results).build();
+  }
+
+  private Map<String, DetectionEvaluationApi> allowedEvaluations(
+      final ThirdEyePrincipal principal, final Map<String, DetectionEvaluationApi> gotEvals) {
+    final Map<String, DetectionEvaluationApi> allowedEvals = new HashMap<>();
+
+    // Assume entries without an enumeration item are allowed because the evaluation was executed.
+    gotEvals.entrySet()
+        .stream()
+        .filter(entry -> entry.getValue().getEnumerationItem() == null)
+        .forEach(entry -> allowedEvals.put(entry.getKey(), entry.getValue()));
+
+    // Check read access for entries with an enumeration item.
+    gotEvals.entrySet()
+        .stream()
+        .filter(entry -> entry.getValue().getEnumerationItem() != null)
+        .filter(entry -> authorizationManager.canRead(principal,
+            toEnumerationItemDTO(entry.getValue().getEnumerationItem())))
+        .forEach(entry -> allowedEvals.put(entry.getKey(), entry.getValue()));
+    return allowedEvals;
   }
 
   @ApiOperation(value = "Delete associated anomalies and rerun detection till present")

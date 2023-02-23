@@ -60,19 +60,25 @@ public class PercentileTemplateCreatorTest {
     final AlertTemplateApi output = PercentileTemplateCreator.createPercentileVariant(input);
 
     assertThat(output).isNull();
-
   }
 
-  private static void assertWellFormedPercentileVariant(final AlertTemplateApi expected, final AlertTemplateApi output) {
+  private static void assertWellFormedPercentileVariant(final AlertTemplateApi expected,
+      final AlertTemplateApi output) {
     assertThat(output).isNotNull();
     assertThat(output.getName()).isEqualTo(expected.getName());
     assertThat(output.getDescription()).isEqualTo(expected.getDescription());
     assertThat(output.getNodes().stream().filter(n -> n.getType().equalsIgnoreCase("DataFetcher"))
-        .map(n -> n.getParams().get("component.query").value())
+        .map(n -> n.getParams().get("component.query").getValue())
         .map(v -> (String) v)
         .allMatch(s -> s.contains("${aggregationParameter}"))
     ).isTrue();
     assertThat(
-        output.getProperties().stream().filter(p -> p.getName().equals("aggregationParameter")).count()).isEqualTo(1);
+        output.getProperties()
+            .stream()
+            .filter(p -> p.getName().equals("aggregationParameter"))
+            .count()).isEqualTo(1);
+    assertThat(
+        output.getMetadata().getDataset().getRcaExcludedDimensions().getTemplatedValue()).isEqualTo(
+        expected.getMetadata().getDataset().getRcaExcludedDimensions().getTemplatedValue());
   }
 }

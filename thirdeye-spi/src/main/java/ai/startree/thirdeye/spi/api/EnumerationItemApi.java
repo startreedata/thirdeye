@@ -25,6 +25,9 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
   private String name;
   private String description;
   private Map<String, Object> params;
+  private AlertApi alert;
+
+  @Deprecated
   private List<AlertApi> alerts;
   private AuthorizationConfigurationApi auth;
 
@@ -66,10 +69,21 @@ public class EnumerationItemApi implements ThirdEyeCrudApi<EnumerationItemApi> {
     return this;
   }
 
+  public AlertApi getAlert() {
+    return alert;
+  }
+
+  public EnumerationItemApi setAlert(final AlertApi alert) {
+    this.alert = alert;
+    return this;
+  }
+
+  @Deprecated
   public List<AlertApi> getAlerts() {
     return alerts;
   }
 
+  @Deprecated
   public EnumerationItemApi setAlerts(final List<AlertApi> alerts) {
     this.alerts = alerts;
     return this;

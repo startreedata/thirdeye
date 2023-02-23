@@ -38,6 +38,28 @@ export interface MetadataProperty {
         | "ARRAY"
         | "BOOLEAN"
         | "NULL";
+
+    /**
+     * Should indicate what part of the anomaly detection pipeline the property
+     * affects
+     *
+     * See introduction PR https://github.com/startreedata/thirdeye/pull/974
+     */
+    step?:
+        | "DATA"
+        | "PREPROCESS"
+        | "DETECTION"
+        | "FILTER"
+        | "POSTPROCESS"
+        | "RCA"
+        | "OTHER";
+    /**
+     * A free string subStep. Used to group properties belonging to the same
+     * step in smaller groups.
+     *
+     * See introduction PR https://github.com/startreedata/thirdeye/pull/974
+     */
+    subStep?: string;
 }
 
 export interface NewAlertTemplate {

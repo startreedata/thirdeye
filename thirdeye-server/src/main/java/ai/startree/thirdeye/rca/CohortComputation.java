@@ -184,7 +184,7 @@ public class CohortComputation {
 
     final List<String> dimensions = new ArrayList<>(optional(request.getDimensions())
         .orElse(optional(dataset.getDimensions())
-            .map(Templatable::value)
+            .map(Templatable::getValue)
             .map(dims -> removeWhereDimensions(dims, context.getWhere()))
             .orElse(List.of())));
     ensure(!dimensions.isEmpty(), "Dimension list is empty");

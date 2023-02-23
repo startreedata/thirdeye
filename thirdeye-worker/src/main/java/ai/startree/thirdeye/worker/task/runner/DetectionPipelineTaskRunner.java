@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -24,6 +25,8 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -62,6 +65,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AnomalyManager anomalyDao;
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
+  private final EnumerationItemManager enumerationItemManager;
 
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
@@ -70,13 +74,15 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
       final AnomalyManager anomalyDao,
       final PlanExecutor planExecutor,
-      final AlertTemplateRenderer alertTemplateRenderer) {
+      final AlertTemplateRenderer alertTemplateRenderer,
+      final EnumerationItemManager enumerationItemManager) {
     this.alertManager = alertManager;
     this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
     this.anomalyDao = anomalyDao;
     this.planExecutor = planExecutor;
     this.alertTemplateRenderer = alertTemplateRenderer;
+    this.enumerationItemManager = enumerationItemManager;
 
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
@@ -139,10 +145,16 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
       // a detection can be replayed on specific period (eg if the data has mutated) - ensure the lastTimestamp never goes back in time because of a detection run
       // if the user really wants to set the lastTimestamp back in time, he can do it with reset, of by editing the lastTimestamp manually
-      final long newLastTimestamp = Math.max(detectionInterval.getEndMillis(), alert.getLastTimestamp());
+      final long newLastTimestamp = Math.max(detectionInterval.getEndMillis(),
+          alert.getLastTimestamp());
       alert.setLastTimestamp(newLastTimestamp);
       alertManager.update(alert);
-      postExecution(result);
+
+      optional(result.getAnomalies())
+          .orElse(Collections.emptyList())
+          .stream()
+          .map(this::setAnomalyAuth)
+          .forEach(anomalyDao::save);
 
       detectionTaskSuccessCounter.inc();
       LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
@@ -178,25 +190,18 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     return detectionPipelineResultMap.values().iterator().next();
   }
 
-  private void postExecution(final OperatorResult result) {
-    final List<AnomalyDTO> anomalies = result.getAnomalies();
-    if (anomalies == null) {
-      return;
-    }
-    for (final AnomalyDTO anomalyDTO : anomalies) {
-      final Long id = anomalyDao.save(anomalyDTO);
-      if (id == null) {
-        LOG.error("Failed to store anomaly: {}", anomalyDTO);
-      }
-    }
+  private AnomalyDTO setAnomalyAuth(final AnomalyDTO anomaly) {
+    optional(alertManager.findById(anomaly.getDetectionConfigId()))
+        .map(AbstractDTO::getAuth)
+        .ifPresent(anomaly::setAuth);
 
-    // re-notify the anomalies if any
-    // note cyril - dead code - renotify is always false
-    for (final AnomalyDTO anomaly : anomalies) {
-      // if an anomaly should be re-notified, update the notification lookup table in the database
-      if (anomaly.isRenotify()) {
-        renotifyAnomaly(anomaly, anomalySubscriptionGroupNotificationManager);
-      }
-    }
+    // Enumeration item auth overrides Alert auth.
+    optional(anomaly.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .map(enumerationItemManager::findById)
+        .map(AbstractDTO::getAuth)
+        .ifPresent(anomaly::setAuth);
+
+    return anomaly;
   }
 }

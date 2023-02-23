@@ -12,7 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import React from "react";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import {
+    AlertEvaluation,
+    EditableAlert,
+} from "../../../rest/dto/alert.interfaces";
 
 export interface PreviewChartProps {
     alert: EditableAlert;
@@ -21,4 +26,10 @@ export interface PreviewChartProps {
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean
     ) => void;
+    fetchOnInitialRender?: boolean;
+    headerComponent?: (
+        evaluation: AlertEvaluation | null,
+        evaluationRequestStatus: ActionStatus
+    ) => React.ReactNode;
+    onEvaluationFetchStart?: (startTime: number, endTime: number) => void;
 }

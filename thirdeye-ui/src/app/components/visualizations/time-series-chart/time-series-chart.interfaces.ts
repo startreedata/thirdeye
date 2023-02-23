@@ -160,6 +160,7 @@ export interface TimeSeriesChartProps {
         top: number;
         bottom: number;
     };
+    svgContainerUseAuto?: boolean;
 }
 
 export interface ZoomDomain {

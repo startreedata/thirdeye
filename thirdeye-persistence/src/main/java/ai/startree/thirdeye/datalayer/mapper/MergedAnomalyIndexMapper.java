@@ -26,5 +26,5 @@ public interface MergedAnomalyIndexMapper {
 
   @Mapping(source = "enumerationItem.id", target = "enumerationItemId")
   @Mapping(target = "dimensions", ignore = true)
-  MergedAnomalyResultIndex toMergedAnomalyResultIndex(AnomalyDTO dto);
+  MergedAnomalyResultIndex toIndexEntity(AnomalyDTO dto);
 }

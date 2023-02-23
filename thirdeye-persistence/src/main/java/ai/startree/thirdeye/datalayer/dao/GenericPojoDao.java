@@ -249,7 +249,7 @@ public class GenericPojoDao {
     }
   }
 
-  public Object getRaw(final Long id) {
+  public AbstractDTO getRaw(final Long id) {
     try {
       final GenericJsonEntity genericJsonEntity = transactionService.executeTransaction(
           (connection) -> databaseService.find(id, GenericJsonEntity.class, connection),

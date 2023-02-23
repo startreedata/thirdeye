@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
 import { default as React, FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
@@ -26,6 +26,7 @@ import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { generateGenericNameForAlert } from "../../utils/alerts/alerts.util";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 import { AlertsCreateGuidedPageProps } from "./alerts-create-guided-page.interfaces";
+import { useAlertsCreateGuidedPage } from "./alerts-create-guided-page.styles";
 
 const STEPS = [
     {
@@ -35,6 +36,10 @@ const STEPS = [
     {
         subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING,
         translationLabel: "setup-alert-monitoring",
+    },
+    {
+        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER,
+        translationLabel: "setup-anomaly-filters",
     },
     {
         subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS,
@@ -62,6 +67,7 @@ export const CreateAlertGuidedPage: FunctionComponent<AlertsCreateGuidedPageProp
     }) => {
         const { t } = useTranslation();
         const { pathname } = useLocation();
+        const classes = useAlertsCreateGuidedPage();
 
         // Ensure to filter for what is available on the server
         const [simpleOptions, advancedOptions] = useMemo(() => {
@@ -139,58 +145,71 @@ export const CreateAlertGuidedPage: FunctionComponent<AlertsCreateGuidedPageProp
 
         return (
             <>
-                <PageContentsGridV1>
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <Typography variant="h6">
-                                {t("message.complete-the-following-steps")}
-                            </Typography>
-                            <StepperV1
-                                activeStep={activeStep}
-                                stepLabelFn={(step: string): string => {
-                                    const stepDefinition = stepsToDisplay.find(
-                                        (candidate) =>
-                                            candidate.subPath === step
-                                    );
+                <Box display="flex">
+                    <Box flex="1 2 auto">
+                        <PageContentsGridV1>
+                            <Grid item xs={12}>
+                                <PageContentsCardV1>
+                                    <Typography variant="h6">
+                                        {t(
+                                            "message.complete-the-following-steps"
+                                        )}
+                                    </Typography>
+                                    <StepperV1
+                                        activeStep={activeStep}
+                                        stepLabelFn={(step: string): string => {
+                                            const stepDefinition =
+                                                stepsToDisplay.find(
+                                                    (candidate) =>
+                                                        candidate.subPath ===
+                                                        step
+                                                );
 
-                                    return t(
-                                        `message.${stepDefinition?.translationLabel}`
-                                    );
-                                }}
-                                steps={stepsToDisplay.map(
-                                    (item) => item.subPath
-                                )}
-                            />
-                        </PageContentsCardV1>
-                    </Grid>
-                </PageContentsGridV1>
+                                            return t(
+                                                `message.${stepDefinition?.translationLabel}`
+                                            );
+                                        }}
+                                        steps={stepsToDisplay.map(
+                                            (item) => item.subPath
+                                        )}
+                                    />
+                                </PageContentsCardV1>
+                            </Grid>
+                        </PageContentsGridV1>
 
-                <Outlet
-                    context={{
-                        alert,
-                        onAlertPropertyChange,
-                        simpleOptions,
-                        advancedOptions,
-                        selectedAlgorithmOption,
-                        handleCreateAlertClick,
-                        isCreatingAlert,
-                        getAlertTemplates,
-                        alertTemplates,
+                        <Outlet
+                            context={{
+                                alert,
+                                onAlertPropertyChange,
+                                simpleOptions,
+                                advancedOptions,
+                                selectedAlgorithmOption,
+                                handleCreateAlertClick,
+                                isCreatingAlert,
+                                getAlertTemplates,
+                                alertTemplates,
 
-                        /**
-                         * New Subscription group is used for the case when user
-                         * wants to create one single new subscription group
-                         * while creating an alert
-                         */
-                        newSubscriptionGroup,
-                        onNewSubscriptionGroupChange,
+                                /**
+                                 * New Subscription group is used for the case when user
+                                 * wants to create one single new subscription group
+                                 * while creating an alert
+                                 */
+                                newSubscriptionGroup,
+                                onNewSubscriptionGroupChange,
 
-                        selectedSubscriptionGroups:
-                            selectedSubscriptionGroups ?? [],
-                        handleSubscriptionGroupChange:
-                            onSubscriptionGroupChange ?? (() => null),
-                    }}
-                />
+                                selectedSubscriptionGroups:
+                                    selectedSubscriptionGroups ?? [],
+                                handleSubscriptionGroupChange:
+                                    onSubscriptionGroupChange ?? (() => null),
+                            }}
+                        />
+                    </Box>
+                    <Box
+                        className={classes.guidedUserFlowPortalContainer}
+                        flex="0 0 400px"
+                        id="guided-user-flow-portal"
+                    />
+                </Box>
             </>
         );
     };

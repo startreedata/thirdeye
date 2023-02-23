@@ -106,7 +106,7 @@ public class RcaInfoFetcher {
   private static <E> boolean templatableListIsNotEmpty(
       final Templatable<List<E>> metadataDatasetDTO) {
     return optional(metadataDatasetDTO).map(
-        Templatable::value).map(l -> !l.isEmpty()).orElse(false);
+        Templatable::getValue).map(l -> !l.isEmpty()).orElse(false);
   }
 
   /**

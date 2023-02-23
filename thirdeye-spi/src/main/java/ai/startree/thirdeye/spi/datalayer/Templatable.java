@@ -47,7 +47,7 @@ public class Templatable<T> {
 
   @JsonProperty("templatedValue")
   // getter is shortened for ease of use and readability
-  public @Nullable String templatedValue() {
+  public @Nullable String getTemplatedValue() {
     return templatedValue;
   }
 
@@ -61,7 +61,7 @@ public class Templatable<T> {
 
   @JsonProperty("value")
   // getter is shortened for ease of use and readability
-  public @Nullable T value() {
+  public @Nullable T getValue() {
     return value;
   }
 

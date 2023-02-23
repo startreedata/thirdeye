@@ -31,7 +31,10 @@ import { getUiAssociation } from "./alert-associations-view-table.utils";
 export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsViewTableProps> =
     ({ uiSubscriptionGroup, customToolbar }) => {
         const { t } = useTranslation();
-        const uiAssociations = getUiAssociation(uiSubscriptionGroup.alerts, t);
+        const uiAssociations = getUiAssociation(
+            uiSubscriptionGroup.alerts || [],
+            t
+        );
 
         const alertNameRenderer = useCallback(
             (

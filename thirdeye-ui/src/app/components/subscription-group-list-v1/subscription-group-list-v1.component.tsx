@@ -149,7 +149,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
 
         const dimensionCountTooltipRenderer = useCallback(
             (_, data: UiSubscriptionGroup) => {
-                return getUiAssociation(data.alerts, t)
+                return getUiAssociation(data.alerts || [], t)
                     .filter((a) => a.enumerationId)
                     .map((a) => a.enumerationName)
                     .reduce(

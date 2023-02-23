@@ -26,7 +26,7 @@ export const getUiAssociation = (
 ): UiAssociation[] => {
     const uiAssociations: UiAssociation[] = [];
 
-    (uiSubscriptionGroupAlerts || []).forEach((alert) => {
+    uiSubscriptionGroupAlerts.forEach((alert) => {
         if (!alert.enumerationItems) {
             uiAssociations.push({
                 id: getAssociationId({ alertId: alert.id }),

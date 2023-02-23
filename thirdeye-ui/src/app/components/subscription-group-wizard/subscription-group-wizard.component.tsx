@@ -78,21 +78,21 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
         return (
             <>
                 <PageContentsGridV1>
-                    {selectedTab === SubscriptionGroupViewTabs.GroupDetails ? (
+                    {selectedTab === SubscriptionGroupViewTabs.GroupDetails && (
                         <SubscriptionGroupDetails
                             subscriptionGroup={editedSubscriptionGroup}
                             onChange={setEditedSubscriptionGroup}
                         />
-                    ) : null}
+                    )}
                     {selectedTab ===
-                    SubscriptionGroupViewTabs.AlertDimensions ? (
+                        SubscriptionGroupViewTabs.AlertDimensions && (
                         <AlertsDimensions
                             alerts={alerts}
                             associations={editedAssociations}
                             enumerationItems={enumerationItems}
                             setAssociations={setEditedAssociations}
                         />
-                    ) : null}
+                    )}
                 </PageContentsGridV1>
                 <WizardBottomBar
                     backButtonLabel={cancelBtnLabel}

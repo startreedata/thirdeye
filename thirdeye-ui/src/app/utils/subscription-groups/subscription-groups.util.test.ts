@@ -14,7 +14,10 @@
  */
 import { cloneDeep } from "lodash";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    AlertAssociation,
+    SubscriptionGroup,
+} from "../../rest/dto/subscription-group.interfaces";
 import {
     UiSubscriptionGroup,
     UiSubscriptionGroupAlert,
@@ -264,6 +267,7 @@ const mockEmptySubscriptionGroup = {
     name: "",
     cron: "0 */5 * * * ?",
     alerts: [],
+    alertAssociations: [] as AlertAssociation[],
     notificationSchemes: {
         email: {
             to: [],
@@ -277,6 +281,8 @@ const mockEmptyUiSubscriptionGroup = {
     cron: "label.no-data-marker",
     alerts: [],
     alertCount: "0",
+    dimensionCount: "0",
+    activeChannels: [],
     emails: [],
     emailCount: "0",
     subscriptionGroup: null,

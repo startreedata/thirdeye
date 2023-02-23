@@ -59,13 +59,13 @@ export const getSelectedRows = ({
     associations = [],
     enumerationItems = [],
     allSelected = false,
-    AllDimensionsSelectedRow,
+    allDimensionsSelectedRow,
     selectedAlertId,
 }: {
     associations?: Association[];
     enumerationItems?: EnumerationItem[];
     allSelected?: boolean;
-    AllDimensionsSelectedRow: DimensionRow;
+    allDimensionsSelectedRow: DimensionRow;
     selectedAlertId: number;
 }): DataGridSelectionModelV1<DimensionRow> => {
     const enumerationItemsMap = getMapFromList(enumerationItems);
@@ -76,7 +76,7 @@ export const getSelectedRows = ({
 
     const rowKeyValueMap = new Map<number, DimensionRow>(
         allSelected
-            ? [[selectedAlertId, AllDimensionsSelectedRow]]
+            ? [[selectedAlertId, allDimensionsSelectedRow]]
             : (
                   associations
                       .filter((item) => item.enumerationId)
@@ -120,17 +120,17 @@ export const getAssociationIdsForAlert = ({
     );
 
 export const getDataRowsForAlert = ({
-    AllDimensionsSelectedRow,
+    allDimensionsSelectedRow,
     allSelected,
     enumerationItemsForAlert,
     alertId,
 }: {
-    AllDimensionsSelectedRow: DimensionRow;
+    allDimensionsSelectedRow: DimensionRow;
     allSelected: boolean;
     enumerationItemsForAlert: EnumerationItem[];
     alertId: number;
 }): DimensionRow[] => [
-    AllDimensionsSelectedRow,
+    allDimensionsSelectedRow,
     ...(allSelected ? [] : getDimensionRows(enumerationItemsForAlert, alertId)),
 ];
 

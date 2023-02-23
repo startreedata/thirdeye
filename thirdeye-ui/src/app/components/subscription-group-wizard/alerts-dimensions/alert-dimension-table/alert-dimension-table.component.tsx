@@ -38,7 +38,7 @@ export const AlertsTable: FunctionComponent<AlertDimensionTableProps> = ({
 }) => {
     const { t } = useTranslation();
 
-    const AllDimensionsSelectedRow: DimensionRow = {
+    const allDimensionsSelectedRow: DimensionRow = {
         id: getAssociationId({ alertId: selectedAlert.id }),
         name: t("label.overall-entity", {
             entity: t("label.alert"),
@@ -49,7 +49,7 @@ export const AlertsTable: FunctionComponent<AlertDimensionTableProps> = ({
         DataGridSelectionModelV1<DimensionRow>
     >(() =>
         getSelectedRows({
-            AllDimensionsSelectedRow,
+            allDimensionsSelectedRow,
             selectedAlertId: selectedAlert.id,
         })
     );
@@ -60,7 +60,7 @@ export const AlertsTable: FunctionComponent<AlertDimensionTableProps> = ({
                 associations,
                 enumerationItems: enumerationItemsForAlert,
                 allSelected,
-                AllDimensionsSelectedRow,
+                allDimensionsSelectedRow,
                 selectedAlertId: selectedAlert.id,
             })
         );
@@ -72,7 +72,7 @@ export const AlertsTable: FunctionComponent<AlertDimensionTableProps> = ({
     });
 
     const dataRows: DimensionRow[] = getDataRowsForAlert({
-        AllDimensionsSelectedRow,
+        allDimensionsSelectedRow,
         enumerationItemsForAlert,
         allSelected,
         alertId: selectedAlert.id,

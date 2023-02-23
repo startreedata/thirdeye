@@ -34,6 +34,8 @@ import {
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
@@ -170,18 +172,16 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                     isEmpty={!(alerts && enumerationItems)}
                 >
                     <PageHeader {...pageHeaderProps} />
-                    {alerts && enumerationItems ? (
-                        <SubscriptionGroupWizard
-                            alerts={alerts}
-                            cancelBtnLabel={t("label.cancel")}
-                            enumerationItems={enumerationItems}
-                            selectedTab={selectedTab}
-                            submitBtnLabel={t("label.save")}
-                            subscriptionGroup={createEmptySubscriptionGroup()}
-                            onCancel={handleOnCancelClick}
-                            onFinish={onSubscriptionGroupWizardFinish}
-                        />
-                    ) : null}
+                    <SubscriptionGroupWizard
+                        alerts={alerts as Alert[]}
+                        cancelBtnLabel={t("label.cancel")}
+                        enumerationItems={enumerationItems as EnumerationItem[]}
+                        selectedTab={selectedTab}
+                        submitBtnLabel={t("label.save")}
+                        subscriptionGroup={createEmptySubscriptionGroup()}
+                        onCancel={handleOnCancelClick}
+                        onFinish={onSubscriptionGroupWizardFinish}
+                    />
                 </EmptyStateSwitch>
             </LoadingErrorStateSwitch>
         </PageV1>

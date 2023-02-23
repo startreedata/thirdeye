@@ -34,8 +34,6 @@ export const NotificationChannelsCard: FunctionComponent<NotificationChannelsCar
             [activeChannels]
         );
 
-        const isCardListEmpty = renderCards.length === 0;
-
         return (
             <EmptyStateSwitch
                 emptyState={
@@ -43,18 +41,16 @@ export const NotificationChannelsCard: FunctionComponent<NotificationChannelsCar
                         <Typography variant="h5">
                             {t("label.active-channels")}
                         </Typography>
-                        {renderCards.length === 0 ? (
-                            <Typography variant="subtitle1">
-                                {capitalize(
-                                    t("label.no-entity-found", {
-                                        entity: t("label.channels"),
-                                    })
-                                )}
-                            </Typography>
-                        ) : null}
+                        <Typography variant="subtitle1">
+                            {capitalize(
+                                t("label.no-entity-found", {
+                                    entity: t("label.channels"),
+                                })
+                            )}
+                        </Typography>
                     </Grid>
                 }
-                isEmpty={isCardListEmpty}
+                isEmpty={renderCards.length === 0}
             >
                 <Grid item xs={12}>
                     <Typography variant="h5">

@@ -161,22 +161,18 @@ export const AddDimensionsDialog: FunctionComponent<AddDimensionDialogProps> =
                     emptyState={null}
                     isEmpty={!(selectedAlert && enumerationItems)}
                 >
-                    {selectedAlert && enumerationItems ? (
-                        <>
-                            <Box pb={2} pt={2}>
-                                <Divider />
-                            </Box>
+                    <>
+                        <Box pb={2} pt={2}>
+                            <Divider />
+                        </Box>
 
-                            <AlertsTable
-                                associations={associationsForAlert}
-                                enumerationItemsForAlert={
-                                    enumerationItemsForAlert
-                                }
-                                selectedAlert={selectedAlert}
-                                onChangeAssociations={handleChangeAssociations}
-                            />
-                        </>
-                    ) : null}
+                        <AlertsTable
+                            associations={associationsForAlert}
+                            enumerationItemsForAlert={enumerationItemsForAlert}
+                            selectedAlert={selectedAlert as Alert}
+                            onChangeAssociations={handleChangeAssociations}
+                        />
+                    </>
                 </EmptyStateSwitch>
             </Box>
         );

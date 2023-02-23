@@ -139,7 +139,6 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
         hideBorder: true,
         toolbarComponent: (
             <Button
-                // data-testid="button-delete"
                 disabled={selectedRow.rowKeyValues.length === 0}
                 variant="contained"
                 onClick={handleDeleteAssociation}

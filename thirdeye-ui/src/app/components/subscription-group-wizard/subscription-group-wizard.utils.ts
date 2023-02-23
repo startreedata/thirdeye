@@ -14,6 +14,7 @@
  */
 
 import CronValidator from "cron-expression-validator";
+import { isEmpty } from "lodash";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAssociationId } from "./alerts-dimensions/alerts-dimensions.utils";
 import { specTypeToUIConfig } from "./subscription-group-details/recipient-details/groups-editor/groups-editor.utils";
@@ -42,23 +43,29 @@ export const getAssociations = (
 ): Association[] => {
     const { alertAssociations, alerts = [] } = subscriptionGroup;
 
-    const associations: Association[] = alertAssociations?.length
-        ? alertAssociations.map(({ alert, enumerationItem }) => ({
-              alertId: alert.id,
-              ...(enumerationItem?.id && {
-                  enumerationId: enumerationItem?.id,
-              }),
-              id: getAssociationId({
-                  alertId: alert.id,
-                  enumerationId: enumerationItem?.id,
-              }),
-          }))
-        : alerts.map((alert) => ({
-              alertId: alert.id,
-              id: getAssociationId({
-                  alertId: alert.id,
-              }),
-          }));
+    let associations: Association[] = [];
+
+    // Use the newer alertAssociations if present
+    if (alertAssociations && !isEmpty(alertAssociations)) {
+        associations = alertAssociations.map(({ alert, enumerationItem }) => ({
+            alertId: alert.id,
+            ...(enumerationItem?.id && {
+                enumerationId: enumerationItem?.id,
+            }),
+            id: getAssociationId({
+                alertId: alert.id,
+                enumerationId: enumerationItem?.id,
+            }),
+        }));
+    } else {
+        // Or else, check the @deprecated `alerts` for data
+        associations = alerts.map((alert) => ({
+            alertId: alert.id,
+            id: getAssociationId({
+                alertId: alert.id,
+            }),
+        }));
+    }
 
     return associations;
 };

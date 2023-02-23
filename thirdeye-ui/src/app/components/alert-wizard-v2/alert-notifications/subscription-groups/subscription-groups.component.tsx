@@ -49,16 +49,23 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
 
     useEffect(() => {
         getSubscriptionGroups().then((fetchedSubscriptionGroups) => {
-            const subscribed = fetchedSubscriptionGroups
-                ? fetchedSubscriptionGroups.filter((group) => {
-                      const alerts =
-                          group.alertAssociations?.map((a) => a.alert) ||
-                          group.alerts ||
-                          [];
+            let subscribed: SubscriptionGroup[] = [];
 
-                      return alerts.some((item) => item.id === alert.id);
-                  })
-                : [];
+            if (fetchedSubscriptionGroups) {
+                subscribed = fetchedSubscriptionGroups.filter((group) => {
+                    // Get the list of alerts for the subscription group.
+                    // `subscriptionGroup.alertAssociations` is the new way to store
+                    // alert+enumeration item data for a subscription group, whereas
+                    // `subscriptionGroup.alert` is the @deprecated way to do that,
+                    // and does not support enumeration items
+                    const alerts =
+                        group.alertAssociations?.map((a) => a.alert) ||
+                        group.alerts ||
+                        [];
+
+                    return alerts.some((item) => item.id === alert.id);
+                });
+            }
 
             if (subscribed.length > 0 && !selectedSubscriptionGroup) {
                 setSelectedSubscriptionGroup({

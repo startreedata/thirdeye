@@ -252,6 +252,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
+            <PageHeader {...pageHeaderProps} />
             <LoadingErrorStateSwitch
                 isError={status === ActionStatus.Error}
                 isLoading={status === ActionStatus.Working}
@@ -259,18 +260,47 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                     <>
                         <PageContentsGridV1>
                             <Grid item xs={12}>
-                                <SkeletonV1 height={56} width={300} />
-                                <SkeletonV1 height={80} width={200} />
-                                <SkeletonV1 height={180} />
-                                <SkeletonV1 height={300} />
-                                <SkeletonV1 height={120} />
-                                <SkeletonV1 height={120} />
+                                <SubscriptionGroupViewCard
+                                    header={
+                                        <SkeletonV1 height={80} width={200} />
+                                    }
+                                    rows={[
+                                        {
+                                            label: t("label.name"),
+                                            value: <SkeletonV1 width={400} />,
+                                        },
+                                        {
+                                            label: t("label.repeat-every"),
+                                            value: <SkeletonV1 width={400} />,
+                                        },
+                                    ]}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Card>
+                                    <CardContent>
+                                        <SkeletonV1 height={160} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Card>
+                                    <CardContent>
+                                        <SkeletonV1 height={80} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Card>
+                                    <CardContent>
+                                        <SkeletonV1 height={80} />
+                                    </CardContent>
+                                </Card>
                             </Grid>
                         </PageContentsGridV1>
                     </>
                 }
             >
-                <PageHeader {...pageHeaderProps} />
                 {uiSubscriptionGroup ? (
                     <PageContentsGridV1>
                         <Grid item xs={12}>

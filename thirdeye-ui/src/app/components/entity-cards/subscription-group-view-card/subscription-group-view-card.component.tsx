@@ -30,7 +30,7 @@ export const SubscriptionGroupViewCard: FunctionComponent<SubscriptionGroupViewC
             <Card>
                 <CardHeader title={header} />
                 <CardContent>
-                    {rows.map((row) => (
+                    {rows.map((row, idx) => (
                         <InputSection
                             gridContainerProps={{ spacing: 8 }}
                             inputComponent={
@@ -38,7 +38,7 @@ export const SubscriptionGroupViewCard: FunctionComponent<SubscriptionGroupViewC
                                     {row.value}
                                 </Typography>
                             }
-                            key={JSON.stringify(row)}
+                            key={idx}
                             labelComponent={
                                 <InputLabel>{row.label}</InputLabel>
                             }

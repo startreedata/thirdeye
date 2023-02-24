@@ -18,7 +18,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { CancelAPICallsOnPageUnloadProps } from "./cancel-api-calls-on-page-unload.interfaces";
 
 /**
- * This has to be wrapped around a page and not a router.
  * The `key` property needs to be set so that this component is unique when
  * used in react router: https://stackoverflow.com/questions/38710250/react-multiple
  * -instances-of-same-component-are-getting-same-state

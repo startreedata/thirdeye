@@ -86,7 +86,7 @@
         "type": "COLD_START",
         "component.ignore": "true",
         "component.tableName": "${dataset}",
-        "component.coldStartPeriod": "${coldStartPeriod}"
+        "component.coldStartPeriod": "P0D"
       },
       "inputs": [
         {
@@ -270,10 +270,6 @@
     {
       "name": "rcaEventSqlFilter",
       "defaultValue": ""
-    },
-    {
-      "name": "coldStartPeriod",
-      "defaultValue": "P0D"
     },
     {
       "name": "daysOfWeek",

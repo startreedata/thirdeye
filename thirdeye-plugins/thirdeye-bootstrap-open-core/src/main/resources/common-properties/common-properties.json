@@ -353,6 +353,56 @@
     "defaultIsNull": null
   },
   {
+    "name": "offsetBaselineFilterIntervalsMethod",
+    "description": "Used to ignore anomalies that are not detected as anomalies by a simple model. Method to compute intervals. `PERCENTAGE` or `ABSOLUTE`.",
+    "options": ["ABSOLUTE", "PERCENTAGE"],
+    "multiselect": false,
+    "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Simple baseline",
+    "defaultIsNull": null
+  },
+  {
+    "name": "offsetBaselineFilterModelAggregation",
+    "description": "Used to ignore anomalies that are not detected as anomalies by a simple model. The aggregation function to use to combine historical values. In `MEDIAN`, `AVERAGE`, `MIN`, `MAX` and any of `PCTXXXXX` eg `PCT05` (5th percentile), `PCT95`, `PCT999` (99.9th percentile).",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Simple baseline",
+    "defaultIsNull": null
+  },
+  {
+    "name": "offsetBaselineFilterModelOffsets",
+    "description": "Used to ignore anomalies that are not detected as anomalies by a simple model. A list of offsets in ISO-8601 format to use as baseline. Eg `[P7D, P14D]` will compare the current value to the aggregation of the values of the 2 previous weeks.",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "ARRAY",
+    "step": "FILTER",
+    "subStep": "Simple baseline",
+    "defaultIsNull": null
+  },
+  {
+    "name": "offsetBaselineFilterPattern",
+    "description": "Used to ignore anomalies that are not detected as anomalies by a simple model. Whether to detect an anomaly if it's a drop, a spike or any of the two.",
+    "options": ["UP_OR_DOWN", "UP", "DOWN"],
+    "multiselect": false,
+    "jsonType": "STRING",
+    "step": "FILTER",
+    "subStep": "Simple baseline",
+    "defaultIsNull": null
+  },
+  {
+    "name": "offsetBaselineFilterSensitivity",
+    "description": "Used to ignore anomalies that are not detected as anomalies by a simple model. Detection sensitivity. For instance with `offsetBaselineFilterIntervalsMethod=PERCENTAGE`, set 50 for a 50% percentage change threshold. With `offsetBaselineFilterIntervalsMethod=ABSOLUTE`, set 200 for a 200 absolute difference threshold between the metric and the baseline.",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "NUMBER",
+    "step": "FILTER",
+    "subStep": "Simple baseline",
+    "defaultIsNull": null
+  },
+  {
     "name": "pattern",
     "defaultValue": null,
     "min": null,

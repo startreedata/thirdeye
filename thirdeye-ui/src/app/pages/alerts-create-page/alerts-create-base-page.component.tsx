@@ -15,7 +15,7 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-whizard.utils";
+import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import { useNotificationProviderV1 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";

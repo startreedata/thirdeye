@@ -12,15 +12,33 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
 export interface SubscriptionGroupWizardProps {
-    subscriptionGroup: SubscriptionGroup;
     alerts: Alert[];
-    showCancel?: boolean;
-    onChange?: () => void;
+    submitBtnLabel: string;
+    cancelBtnLabel: string;
+    subscriptionGroup: SubscriptionGroup;
+    enumerationItems: EnumerationItem[];
     onCancel?: () => void;
     onFinish?: (subscriptionGroup: SubscriptionGroup) => void;
-    submitBtnLabel: string;
+    selectedTab: SubscriptionGroupViewTabs;
+}
+
+export enum SubscriptionGroupViewTabs {
+    GroupDetails,
+    AlertDimensions,
+}
+
+export type SubscriptionGroupsWizardParams = {
+    id: string;
+};
+
+export interface Association {
+    id: string;
+    alertId: number;
+    enumerationId?: number;
 }

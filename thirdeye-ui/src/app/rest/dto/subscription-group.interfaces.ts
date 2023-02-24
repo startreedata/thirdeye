@@ -12,16 +12,22 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Alert } from "./alert.interfaces";
-import { Application } from "./application.interfaces";
-import { User } from "./user.interfaces";
+import type { Alert } from "./alert.interfaces";
+import type { Application } from "./application.interfaces";
+import type { User } from "./user.interfaces";
+
+export interface AlertAssociation {
+    alert: { id: number };
+    enumerationItem?: { id: number };
+}
 
 export interface SubscriptionGroup {
     id: number;
     name: string;
     cron: string;
     application: Application;
-    alerts: Alert[];
+    alerts?: Alert[]; // deprecated
+    alertAssociations?: AlertAssociation[];
     created: number;
     updated: number;
     owner: User;
@@ -37,9 +43,7 @@ export enum SpecType {
 
 export interface SpecConfiguration {
     type: string | SpecType;
-    params: {
-        [key: string]: unknown;
-    };
+    params: Record<string, unknown>;
 }
 
 export interface SlackSpec extends SpecConfiguration {

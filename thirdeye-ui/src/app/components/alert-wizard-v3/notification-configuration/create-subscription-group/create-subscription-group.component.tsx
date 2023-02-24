@@ -13,14 +13,14 @@
  * the License.
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationSpec,
     SubscriptionGroup,
 } from "../../../../rest/dto/subscription-group.interfaces";
-import { GroupsEditor } from "../../../subscription-group-wizard/groups-editor/groups-editor.component";
-import { SubscriptionGroupPropertiesForm } from "../../../subscription-group-wizard/subscription-group-properties-form/subscription-group-properties-form.component";
+import { PropertiesForm } from "../../../subscription-group-wizard/subscription-group-details/properties-form/properties-form.component";
+import { GroupsEditor } from "../../../subscription-group-wizard/subscription-group-details/recipient-details/groups-editor/groups-editor.component";
 import { CreateSubscriptionGroupProps } from "./create-subscription-group.interfaces";
 
 export const CreateSubscriptionGroup: FunctionComponent<CreateSubscriptionGroupProps> =
@@ -29,22 +29,9 @@ export const CreateSubscriptionGroup: FunctionComponent<CreateSubscriptionGroupP
             useState<SubscriptionGroup>(subscriptionGroup);
         const { t } = useTranslation();
 
-        const handleSubscriptionChange = (
-            modifiedSubscriptionGroup: Partial<SubscriptionGroup>
-        ): void => {
-            // Update subscription group with form inputs
-            setEditedSubscriptionGroup((currentlyEdited) => {
-                const final = {
-                    ...currentlyEdited,
-                    ...modifiedSubscriptionGroup,
-                };
-
-                onNewSubscriptionGroupChange &&
-                    onNewSubscriptionGroupChange(final);
-
-                return final;
-            });
-        };
+        useEffect(() => {
+            onNewSubscriptionGroupChange?.(editedSubscriptionGroup);
+        }, [editedSubscriptionGroup]);
 
         const handleSpecsChange = (specs: NotificationSpec[]): void => {
             setEditedSubscriptionGroup((newSubscriptionGroup) => {
@@ -54,29 +41,30 @@ export const CreateSubscriptionGroup: FunctionComponent<CreateSubscriptionGroupP
                     ...newSubscriptionGroup,
                 };
 
-                onNewSubscriptionGroupChange &&
-                    onNewSubscriptionGroupChange(final);
-
                 return final;
             });
         };
 
         return (
             <Grid container>
-                <Grid item xs={12}>
-                    <Typography variant="h5">
-                        {t("label.create-new-notification-group")}
-                    </Typography>
-                    <Typography variant="body2">
-                        {t("message.channels-subtitle")}
-                    </Typography>
-                </Grid>
                 {editedSubscriptionGroup.specs &&
                     editedSubscriptionGroup.specs.length > 0 && (
                         <Grid item xs={12}>
-                            <SubscriptionGroupPropertiesForm
-                                subscriptionGroup={editedSubscriptionGroup}
-                                onChange={handleSubscriptionChange}
+                            <PropertiesForm
+                                customHeader={
+                                    <>
+                                        <Typography variant="h5">
+                                            {t(
+                                                "label.create-new-notification-group"
+                                            )}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {t("message.channels-subtitle")}
+                                        </Typography>
+                                    </>
+                                }
+                                values={editedSubscriptionGroup}
+                                onChange={setEditedSubscriptionGroup}
                             />
                             <Box paddingTop={3}>
                                 <Divider />

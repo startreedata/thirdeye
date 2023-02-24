@@ -18,7 +18,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-whizard.utils";
+import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -38,7 +38,10 @@ import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
-import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
+import {
+    createEmptySubscriptionGroup,
+    getSubscriptionGroupAlertsList,
+} from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditBasePage } from "./alerts-edit-base-page.component";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
@@ -99,8 +102,11 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     const currentAlertId = getAlertResult.value.id;
                     const subGroupsAlertIsIn =
                         getSubscriptionResult.value.filter((subGroup) => {
+                            const alerts =
+                                getSubscriptionGroupAlertsList(subGroup);
+
                             return some(
-                                subGroup.alerts.map(
+                                alerts.map(
                                     (alert) => alert.id === currentAlertId
                                 )
                             );
@@ -224,7 +230,9 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         const subscriptionGroupsToBeOmitted = subscriptionGroupsRemoved.map(
             (subscriptionGroup) => ({
                 ...subscriptionGroup,
-                alerts: subscriptionGroup.alerts.filter(
+                alerts: getSubscriptionGroupAlertsList(
+                    subscriptionGroup
+                ).filter(
                     (subGroupAlert) => subGroupAlert.id !== alert.id // Remove alert from list
                 ),
             })
@@ -236,7 +244,9 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         ];
 
         try {
-            await updateSubscriptionGroups(subscriptionGroupsToBeUpdated);
+            await updateSubscriptionGroups(
+                subscriptionGroupsToBeUpdated as SubscriptionGroup[]
+            );
             notify(
                 NotificationTypeV1.Success,
                 t("message.update-success", {

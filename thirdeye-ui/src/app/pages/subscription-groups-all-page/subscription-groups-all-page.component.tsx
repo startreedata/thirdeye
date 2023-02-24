@@ -30,6 +30,7 @@ import {
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
+import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { deleteSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import {
@@ -54,6 +55,13 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         status: getAlertsStatus,
         errorMessages: getAlertsErrorMessages,
     } = useGetAlerts();
+
+    const {
+        enumerationItems,
+        getEnumerationItems,
+        status: getEnumerationItemsStatus,
+        errorMessages: getEnumerationItemsErrorMessages,
+    } = useGetEnumerationItems();
 
     const [uiSubscriptionGroups, setUiSubscriptionGroups] = useState<
         UiSubscriptionGroup[]
@@ -90,18 +98,34 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     }, [getAlertsStatus]);
 
     useEffect(() => {
-        if (!alerts || !subscriptionGroups) {
+        notifyIfErrors(
+            getEnumerationItemsStatus,
+            getEnumerationItemsErrorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.enumeration-items"),
+            })
+        );
+    }, [getEnumerationItemsStatus]);
+
+    useEffect(() => {
+        if (!alerts || !subscriptionGroups || !enumerationItems) {
             return;
         }
         setUiSubscriptionGroups(
-            getUiSubscriptionGroups(subscriptionGroups, alerts)
+            getUiSubscriptionGroups(
+                subscriptionGroups,
+                alerts,
+                enumerationItems
+            )
         );
-    }, [alerts, subscriptionGroups]);
+    }, [alerts, subscriptionGroups, enumerationItems]);
 
     const fetchAllSubscriptionGroups = (): void => {
         setUiSubscriptionGroups([]);
 
         getSubscriptionGroups();
+        getEnumerationItems();
         getAlerts();
     };
 
@@ -138,6 +162,16 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
             t("label.subscription-groups")
         );
     };
+    const statusList = [
+        getSubscriptionGroupStatus,
+        getAlertsStatus,
+        getEnumerationItemsStatus,
+    ];
+
+    const isError = statusList.some((status) => status === ActionStatus.Error);
+    const isLoading = statusList.some(
+        (status) => status === ActionStatus.Working
+    );
 
     return (
         <PageV1>
@@ -146,14 +180,8 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
                 <LoadingErrorStateSwitch
                     wrapInCard
                     wrapInGrid
-                    isError={
-                        getSubscriptionGroupStatus === ActionStatus.Error ||
-                        getAlertsStatus === ActionStatus.Error
-                    }
-                    isLoading={
-                        getSubscriptionGroupStatus === ActionStatus.Working ||
-                        getAlertsStatus === ActionStatus.Working
-                    }
+                    isError={isError}
+                    isLoading={isLoading}
                 >
                     <EmptyStateSwitch
                         emptyState={

@@ -12,40 +12,65 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Grid,
+    Typography,
+} from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
+import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
-import { SubscriptionGroupSpecsCard } from "../../components/entity-cards/subscription-group-specs-card/subscription-group-specs-card.component";
+import { SubscriptionGroupViewCard } from "../../components/entity-cards/subscription-group-view-card/subscription-group-view-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { AlertAssociationsViewTable } from "../../components/subscription-group-view/alert-associations-view-table/alert-associations-view-table.component";
+import { NotificationChannelsCard } from "../../components/subscription-group-view/notification-channels-card/notification-channels-card.component";
 import {
+    LocalThemeProviderV1,
     NotificationTypeV1,
     PageContentsGridV1,
+    PageHeaderActionsV1,
     PageV1,
+    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { lightV1 } from "../../platform/utils";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
+import { getEnumerationItems } from "../../rest/enumeration-items/enumeration-items.rest";
 import {
     deleteSubscriptionGroup,
     getSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { PROMISES } from "../../utils/constants/constants.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import { getSubscriptionGroupsAllPath } from "../../utils/routes/routes.util";
+import {
+    getConfigurationPath,
+    getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsUpdatePath,
+    getSubscriptionGroupsViewPath,
+} from "../../utils/routes/routes.util";
 import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-page.interfaces";
 
 export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
         useState<UiSubscriptionGroup | null>(null);
+    const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
+
     const { showDialog } = useDialogProviderV1();
     const params = useParams<SubscriptionGroupsViewPageParams>();
     const navigate = useNavigate();
@@ -57,7 +82,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
         fetchSubscriptionGroup();
     }, []);
 
-    const fetchSubscriptionGroup = (): void => {
+    const fetchSubscriptionGroup = async (): Promise<void> => {
         setUiSubscriptionGroup(null);
         let fetchedUiSubscriptionGroup = {} as UiSubscriptionGroup;
         let fetchedAlerts: Alert[] = [];
@@ -77,60 +102,89 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
             return;
         }
 
-        Promise.allSettled([
-            getSubscriptionGroup(toNumber(params.id)),
-            getAllAlerts(),
-        ])
-            .then(([subscriptionGroupResponse, alertsResponse]) => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupResponse.status === PROMISES.REJECTED ||
-                    alertsResponse.status === PROMISES.REJECTED
-                ) {
-                    const axiosError =
-                        alertsResponse.status === PROMISES.REJECTED
-                            ? alertsResponse.reason
-                            : subscriptionGroupResponse.status ===
-                              PROMISES.REJECTED
-                            ? subscriptionGroupResponse.reason
-                            : ({} as AxiosError);
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      alertsResponse.status ===
-                                          PROMISES.REJECTED
-                                          ? "label.alerts"
-                                          : "label.subscription-group"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
-                }
+        setStatus(ActionStatus.Working);
+        const [subscriptionGroupResponse, alertsResponse] =
+            await Promise.allSettled([
+                getSubscriptionGroup(toNumber(params.id)),
+                getAllAlerts(),
+            ]);
 
-                // Attempt to gather data
-                if (alertsResponse.status === PROMISES.FULFILLED) {
-                    fetchedAlerts = alertsResponse.value;
-                }
-                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
-                    fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
-                        subscriptionGroupResponse.value,
-                        fetchedAlerts
-                    );
-                }
-            })
-            .finally(() => {
-                setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
-            });
+        if (
+            subscriptionGroupResponse.status === PROMISES.REJECTED ||
+            alertsResponse.status === PROMISES.REJECTED
+        ) {
+            const axiosError: AxiosError =
+                (alertsResponse.status === PROMISES.REJECTED &&
+                    alertsResponse.reason) ||
+                (subscriptionGroupResponse.status === PROMISES.REJECTED &&
+                    subscriptionGroupResponse.reason) ||
+                ({} as AxiosError);
+
+            setStatus(ActionStatus.Error);
+            notifyIfErrors(
+                ActionStatus.Error,
+                getErrorMessages(axiosError),
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t(
+                        alertsResponse.status === PROMISES.REJECTED
+                            ? "label.alerts"
+                            : "label.subscription-group"
+                    ),
+                })
+            );
+
+            return;
+        }
+
+        fetchedAlerts = alertsResponse.value;
+
+        const enumerationIds =
+            (subscriptionGroupResponse.value.alertAssociations
+                ?.map((a) => a?.enumerationItem?.id)
+                .filter(Boolean) || []) as number[];
+
+        let enumerationItemsProp: EnumerationItem[] = [];
+
+        if (enumerationIds && enumerationIds.length > 0) {
+            try {
+                enumerationItemsProp = await getEnumerationItems({
+                    ids: enumerationIds,
+                });
+            } catch (err) {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(err as AxiosError),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.enumeration-item"),
+                    })
+                );
+
+                setStatus(ActionStatus.Error);
+            }
+        }
+
+        fetchedUiSubscriptionGroup = getUiSubscriptionGroup(
+            subscriptionGroupResponse.value,
+            fetchedAlerts,
+            enumerationItemsProp
+        );
+        setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
+        setStatus(ActionStatus.Done);
     };
 
-    const handleSubscriptionGroupDelete = (
-        uiSubscriptionGroup: UiSubscriptionGroup
-    ): void => {
+    const handleSubscriptionGroupEdit = (): void => {
+        if (!uiSubscriptionGroup) {
+            return;
+        }
+        navigate(getSubscriptionGroupsUpdatePath(uiSubscriptionGroup.id));
+    };
+
+    const handleSubscriptionGroupDelete = (): void => {
+        if (!uiSubscriptionGroup) {
+            return;
+        }
         showDialog({
             type: DialogType.ALERT,
             contents: t("message.delete-confirmation", {
@@ -153,38 +207,143 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                 })
             );
 
-            // Redirect to subscription groups all path
             navigate(getSubscriptionGroupsAllPath());
         });
     };
 
+    const pageHeaderProps: PageHeaderProps = {
+        breadcrumbs: [
+            {
+                label: t("label.configuration"),
+                link: getConfigurationPath(),
+            },
+            {
+                label: t("label.subscription-groups"),
+                link: getSubscriptionGroupsAllPath(),
+            },
+            {
+                label: Number(params.id),
+                link: getSubscriptionGroupsViewPath(Number(params.id)),
+            },
+        ],
+        transparentBackground: true,
+        title: uiSubscriptionGroup?.name || "",
+        customActions: (
+            <PageHeaderActionsV1>
+                <Button
+                    color="primary"
+                    variant="outlined"
+                    onClick={handleSubscriptionGroupEdit}
+                >
+                    {t("label.edit")}
+                </Button>
+                <LocalThemeProviderV1 primary={lightV1.palette.error}>
+                    <Button
+                        color="primary"
+                        variant="outlined"
+                        onClick={handleSubscriptionGroupDelete}
+                    >
+                        {t("label.delete")}
+                    </Button>
+                </LocalThemeProviderV1>
+            </PageHeaderActionsV1>
+        ),
+    };
+
     return (
         <PageV1>
-            <PageHeader
-                title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
-            />
-            <PageContentsGridV1>
-                {/* Subscription Group */}
-                <Grid item xs={12}>
-                    <SubscriptionGroupCard
-                        uiSubscriptionGroup={uiSubscriptionGroup}
-                        onDelete={handleSubscriptionGroupDelete}
-                    />
-                </Grid>
-
-                {/* Notifications Groups */}
-                <Grid item xs={12}>
-                    {uiSubscriptionGroup &&
-                        uiSubscriptionGroup.subscriptionGroup && (
-                            <SubscriptionGroupSpecsCard
-                                specs={
-                                    uiSubscriptionGroup.subscriptionGroup
-                                        .specs || []
-                                }
+            <PageHeader {...pageHeaderProps} />
+            <LoadingErrorStateSwitch
+                isError={status === ActionStatus.Error}
+                isLoading={status === ActionStatus.Working}
+                loadingState={
+                    <>
+                        <PageContentsGridV1>
+                            <Grid item xs={12}>
+                                <SubscriptionGroupViewCard
+                                    header={
+                                        <SkeletonV1 height={80} width={200} />
+                                    }
+                                    rows={[
+                                        {
+                                            label: t("label.name"),
+                                            value: <SkeletonV1 width={400} />,
+                                        },
+                                        {
+                                            label: t("label.repeat-every"),
+                                            value: <SkeletonV1 width={400} />,
+                                        },
+                                    ]}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Card>
+                                    <CardContent>
+                                        <SkeletonV1 height={160} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Card>
+                                    <CardContent>
+                                        <SkeletonV1 height={80} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Card>
+                                    <CardContent>
+                                        <SkeletonV1 height={80} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </PageContentsGridV1>
+                    </>
+                }
+            >
+                {uiSubscriptionGroup ? (
+                    <PageContentsGridV1>
+                        <Grid item xs={12}>
+                            <SubscriptionGroupViewCard
+                                header={t("label.schedule")}
+                                rows={[
+                                    {
+                                        label: t("label.name"),
+                                        value: uiSubscriptionGroup.name,
+                                    },
+                                    {
+                                        label: t("label.repeat-every"),
+                                        value: uiSubscriptionGroup.cron,
+                                    },
+                                ]}
                             />
-                        )}
-                </Grid>
-            </PageContentsGridV1>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Card>
+                                <CardContent>
+                                    <AlertAssociationsViewTable
+                                        customToolbar={
+                                            <Box clone ml={-2}>
+                                                <Typography variant="h5">
+                                                    {t(
+                                                        "label.active-alerts-and-dimensions"
+                                                    )}
+                                                </Typography>
+                                            </Box>
+                                        }
+                                        uiSubscriptionGroup={
+                                            uiSubscriptionGroup
+                                        }
+                                    />
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        <NotificationChannelsCard
+                            activeChannels={uiSubscriptionGroup.activeChannels}
+                        />
+                    </PageContentsGridV1>
+                ) : null}
+            </LoadingErrorStateSwitch>
         </PageV1>
     );
 };

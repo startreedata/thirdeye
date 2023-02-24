@@ -12,7 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { SubscriptionGroup } from "./subscription-group.interfaces";
+import type { EnumerationItem } from "./enumeration-item.interfaces";
+import type {
+    NotificationSpec,
+    SubscriptionGroup,
+} from "./subscription-group.interfaces";
 
 export interface UiSubscriptionGroup {
     id: number;
@@ -20,12 +24,15 @@ export interface UiSubscriptionGroup {
     cron: string;
     alerts: UiSubscriptionGroupAlert[];
     alertCount: string;
+    dimensionCount: string;
     emails: string[];
     emailCount: string;
+    activeChannels: NotificationSpec[];
     subscriptionGroup: SubscriptionGroup | null;
 }
 
 export interface UiSubscriptionGroupAlert {
     id: number;
     name: string;
+    enumerationItems?: Array<EnumerationItem>; // If this is not mentioned, all the enumeration items will be counted
 }

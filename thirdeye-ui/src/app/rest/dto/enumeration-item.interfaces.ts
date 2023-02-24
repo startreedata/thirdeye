@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Alert } from "./alert.interfaces";
 import { EnumerationItemParams } from "./detection.interfaces";
 
 export interface EnumerationItem {
     id: number;
     name: string;
     params: EnumerationItemParams;
+    alert?: Pick<Alert, "id">;
 }

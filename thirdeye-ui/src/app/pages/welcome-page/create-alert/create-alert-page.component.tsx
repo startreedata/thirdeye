@@ -27,7 +27,7 @@ import { createNewStartingAlert } from "../../../components/alert-wizard-v2/aler
 import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { generateEmptyEmailSendGridConfiguration } from "../../../components/subscription-group-wizard/groups-editor/groups-editor.utils";
+import { generateEmptyEmailSendGridConfiguration } from "../../../components/subscription-group-wizard/subscription-group-details/recipient-details/groups-editor/groups-editor.utils";
 import {
     NotificationTypeV1,
     PageV1,

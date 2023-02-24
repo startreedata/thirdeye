@@ -23,6 +23,7 @@ import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
 import { useGetSubscriptionGroups } from "../../../../rest/subscription-groups/subscription-groups.actions";
 import { getSubscriptionGroupsCreatePath } from "../../../../utils/routes/routes.util";
+import { getSubscriptionGroupAlertsList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { EmptyStateSwitch } from "../../../page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupsProps } from "./subscription-groups.interfaces";
@@ -49,11 +50,20 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
 
     useEffect(() => {
         getSubscriptionGroups().then((fetchedSubscriptionGroups) => {
-            const subscribed = fetchedSubscriptionGroups
-                ? fetchedSubscriptionGroups.filter((group) => {
-                      return group.alerts.some((item) => item.id === alert.id);
-                  })
-                : [];
+            let subscribed: SubscriptionGroup[] = [];
+
+            if (fetchedSubscriptionGroups) {
+                subscribed = fetchedSubscriptionGroups.filter((group) => {
+                    // Get the list of alerts for the subscription group.
+                    // `subscriptionGroup.alertAssociations` is the new way to store
+                    // alert+enumeration item data for a subscription group, whereas
+                    // `subscriptionGroup.alert` is the @deprecated way to do that,
+                    // and does not support enumeration items
+                    const alerts = getSubscriptionGroupAlertsList(group);
+
+                    return alerts.some((item) => item.id === alert.id);
+                });
+            }
 
             if (subscribed.length > 0 && !selectedSubscriptionGroup) {
                 setSelectedSubscriptionGroup({

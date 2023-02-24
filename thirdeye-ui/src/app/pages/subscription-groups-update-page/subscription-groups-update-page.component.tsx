@@ -14,13 +14,18 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { isEmpty, toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import { toNumber } from "lodash";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SubscriptionGroupWizard } from "../../components/subscription-group-wizard/subscription-group-wizard.component";
+import { SubscriptionGroupViewTabs } from "../../components/subscription-group-wizard/subscription-group-wizard.interfaces";
+import { SelectedTab } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -29,36 +34,95 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { getAllAlerts } from "../../rest/alerts/alerts.rest";
+import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
 import {
     getSubscriptionGroup,
     updateSubscriptionGroup,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import { PROMISES } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
+    getConfigurationPath,
     getSubscriptionGroupsAllPath,
+    getSubscriptionGroupsUpdatePath,
     getSubscriptionGroupsViewPath,
 } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsUpdatePageParams } from "./subscription-groups-update-page.interfaces";
 
 export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
+    const [subscriptionGroupStatus, setSubscriptionGroupStatus] =
+        useState<ActionStatus>(ActionStatus.Initial);
     const [subscriptionGroup, setSubscriptionGroup] =
         useState<SubscriptionGroup>();
-    const [alerts, setAlerts] = useState<Alert[]>([]);
+
+    const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
+    const {
+        enumerationItems,
+        getEnumerationItems,
+        status: enumerationItemsStatus,
+    } = useGetEnumerationItems();
+
     const params = useParams<SubscriptionGroupsUpdatePageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [searchParams] = useSearchParams();
+    const [selectedTab] = useMemo(
+        () => [
+            Number(searchParams.get(SelectedTab)) ||
+                SubscriptionGroupViewTabs.GroupDetails,
+        ],
+        [searchParams]
+    );
 
     useEffect(() => {
         fetchSubscriptionGroup();
+        // Fetching all alerts and enumeration items since this is an edit flow and
+        // the new values will need the corresponding entities to be displayed
+        getAlerts();
+        getEnumerationItems();
     }, []);
+
+    const id = Number(params.id);
+
+    const pagePath = getSubscriptionGroupsUpdatePath(Number(params.id));
+
+    const pageHeaderProps: PageHeaderProps = {
+        breadcrumbs: [
+            {
+                label: t("label.configuration"),
+                link: getConfigurationPath(),
+            },
+            {
+                label: t("label.subscription-groups"),
+                link: getSubscriptionGroupsAllPath(),
+            },
+            {
+                label: id,
+                link: pagePath,
+            },
+        ],
+        transparentBackground: true,
+        title: t(`label.update-entity`, {
+            entity: t("label.subscription-group"),
+        }),
+        subNavigation: [
+            {
+                label: t("label.group-details"),
+                link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.GroupDetails}`,
+            },
+            {
+                label: t("label.alerts-and-dimensions"),
+                link: `${pagePath}?${SelectedTab}=${SubscriptionGroupViewTabs.AlertDimensions}`,
+            },
+        ],
+        subNavigationSelected: selectedTab,
+    };
 
     const onSubscriptionGroupWizardFinish = (
         subscriptionGroup: SubscriptionGroup
@@ -101,94 +165,74 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     id: params.id,
                 })
             );
-            setLoading(false);
+            setSubscriptionGroupStatus(ActionStatus.Error);
 
             return;
         }
 
-        Promise.allSettled([
-            getSubscriptionGroup(toNumber(params.id)),
-            getAllAlerts(),
-        ])
-            .then(([subscriptionGroupResponse, alertsResponse]): void => {
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupResponse.status === PROMISES.REJECTED ||
-                    alertsResponse.status === PROMISES.REJECTED
-                ) {
-                    const axiosError =
-                        alertsResponse.status === PROMISES.REJECTED
-                            ? alertsResponse.reason
-                            : subscriptionGroupResponse.status ===
-                              PROMISES.REJECTED
-                            ? subscriptionGroupResponse.reason
-                            : ({} as AxiosError);
-                    const errMessages = getErrorMessages(axiosError);
-                    isEmpty(errMessages)
-                        ? notify(
-                              NotificationTypeV1.Error,
-                              t("message.error-while-fetching", {
-                                  entity: t(
-                                      alertsResponse.status ===
-                                          PROMISES.REJECTED
-                                          ? "label.alerts"
-                                          : "label.subscription-group"
-                                  ),
-                              })
-                          )
-                        : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
-                          );
-                }
-
-                // Attempt to gather data
-                if (subscriptionGroupResponse.status === PROMISES.FULFILLED) {
-                    setSubscriptionGroup(subscriptionGroupResponse.value);
-                }
-                if (alertsResponse.status === PROMISES.FULFILLED) {
-                    setAlerts(alertsResponse.value);
-                }
+        getSubscriptionGroup(toNumber(params.id))
+            .then((data) => {
+                setSubscriptionGroup(data);
             })
-            .finally((): void => {
-                setLoading(false);
+            .catch((err) => {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(err),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.subscription-group"),
+                    })
+                );
             });
     };
 
     const handleOnCancelClick = (): void => {
-        navigate(getSubscriptionGroupsAllPath());
+        navigate(getSubscriptionGroupsViewPath(toNumber(params.id)));
     };
 
-    if (loading) {
-        return <AppLoadingIndicatorV1 />;
-    }
+    const statusList = [
+        alertsStatus,
+        enumerationItemsStatus,
+        subscriptionGroupStatus,
+    ];
+
+    const isLoading = statusList.some((v) => v === ActionStatus.Working);
+    const isError = statusList.some((v) => v === ActionStatus.Error);
 
     return (
         <PageV1>
-            <PageHeader
-                title={t("label.update-entity", {
-                    entity: t("label.subscription-group"),
-                })}
-            />
-            {subscriptionGroup && (
-                <SubscriptionGroupWizard
-                    alerts={alerts}
-                    submitBtnLabel={t("label.update-entity", {
-                        entity: t("label.subscription-group"),
-                    })}
-                    subscriptionGroup={subscriptionGroup}
-                    onCancel={handleOnCancelClick}
-                    onFinish={onSubscriptionGroupWizardFinish}
-                />
-            )}
-
-            {/* No data available message */}
-            {!subscriptionGroup && (
-                <PageContentsGridV1>
-                    <Grid item xs={12}>
-                        <NoDataIndicator />
-                    </Grid>
-                </PageContentsGridV1>
-            )}
+            <LoadingErrorStateSwitch
+                isError={isError}
+                isLoading={isLoading}
+                loadingState={<AppLoadingIndicatorV1 />}
+            >
+                <EmptyStateSwitch
+                    emptyState={
+                        <PageContentsGridV1>
+                            <Grid item xs={12}>
+                                <NoDataIndicator />
+                            </Grid>
+                        </PageContentsGridV1>
+                    }
+                    isEmpty={!(subscriptionGroup && alerts && enumerationItems)}
+                >
+                    <PageHeader {...pageHeaderProps} />
+                    (
+                    <SubscriptionGroupWizard
+                        alerts={alerts as Alert[]}
+                        cancelBtnLabel={t("label.cancel")}
+                        enumerationItems={enumerationItems as EnumerationItem[]}
+                        selectedTab={selectedTab}
+                        submitBtnLabel={t("label.update")}
+                        subscriptionGroup={
+                            subscriptionGroup as SubscriptionGroup
+                        }
+                        onCancel={handleOnCancelClick}
+                        onFinish={onSubscriptionGroupWizardFinish}
+                    />
+                    )
+                </EmptyStateSwitch>
+            </LoadingErrorStateSwitch>
         </PageV1>
     );
 };

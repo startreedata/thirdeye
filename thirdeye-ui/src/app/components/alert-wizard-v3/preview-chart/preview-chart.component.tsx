@@ -81,8 +81,11 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         status: getEvaluationStatus,
     } = useGetEvaluation();
 
-    const { getAlertInsight, status: getAlertInsightStatus } =
-        useGetAlertInsight();
+    const {
+        alertInsight,
+        getAlertInsight,
+        status: getAlertInsightStatus,
+    } = useGetAlertInsight();
 
     const [detectionEvaluations, setDetectionEvaluations] =
         useState<DetectionEvaluation[]>();
@@ -151,34 +154,35 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     }, [detectionEvaluations]);
 
     const handleAutoRangeClick = (): void => {
-        getAlertInsight({ alert }).then(
-            (insights) => {
-                let startToUse = startTime;
-                let endToUse = endTime;
-
-                if (insights) {
-                    searchParams.set(
-                        TimeRangeQueryStringKey.START_TIME,
-                        insights.defaultStartTime.toString()
-                    );
-                    searchParams.set(
-                        TimeRangeQueryStringKey.END_TIME,
-                        insights.defaultEndTime.toString()
-                    );
-                    setSearchParams(searchParams, { replace: true });
-
-                    startToUse = insights.defaultStartTime;
-                    endToUse = insights.defaultEndTime;
-                }
-
-                fetchAlertEvaluation(startToUse, endToUse);
-            },
-            () => {
-                // If API fails use current start and end
-                fetchAlertEvaluation(startTime, endTime);
-            }
-        );
+        getAlertInsight({ alert });
     };
+
+    useEffect(() => {
+        if (
+            getAlertInsightStatus === ActionStatus.Done ||
+            getAlertInsightStatus === ActionStatus.Error
+        ) {
+            let startToUse = startTime;
+            let endToUse = endTime;
+
+            if (alertInsight) {
+                searchParams.set(
+                    TimeRangeQueryStringKey.START_TIME,
+                    alertInsight.defaultStartTime.toString()
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.END_TIME,
+                    alertInsight.defaultEndTime.toString()
+                );
+                setSearchParams(searchParams, { replace: true });
+
+                startToUse = alertInsight.defaultStartTime;
+                endToUse = alertInsight.defaultEndTime;
+            }
+
+            fetchAlertEvaluation(startToUse, endToUse);
+        }
+    }, [getAlertInsightStatus]);
 
     const handleDeleteEnumerationItemClick = (
         detectionEvaluation: DetectionEvaluation

@@ -17,6 +17,11 @@ import static ai.startree.thirdeye.DropwizardTestUtils.alertEvaluationApi;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
+import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_CHILD_ROOT;
+import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_ROOT;
+import static ai.startree.thirdeye.IntegrationTestUtils.combinerNode;
+import static ai.startree.thirdeye.IntegrationTestUtils.enumeratorNode;
+import static ai.startree.thirdeye.IntegrationTestUtils.forkJoinNode;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +32,7 @@ import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
+import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.CountApi;
@@ -35,6 +41,7 @@ import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
+import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
@@ -42,6 +49,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -73,6 +81,7 @@ public class HappyPathTest {
 
   public static final GenericType<List<AnomalyApi>> ANOMALIES_LIST_TYPE = new GenericType<>() {};
   public static final GenericType<List<AlertApi>> ALERT_LIST_TYPE = new GenericType<>() {};
+  public static final String THRESHOLD_TEMPLATE_NAME = "startree-threshold";
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 
   private static final AlertApi MAIN_ALERT_API;
@@ -147,6 +156,33 @@ public class HappyPathTest {
     assertThat(response.getStatus()).isEqualTo(200);
   }
 
+  @Test(dependsOnMethods = "testCreateDefaultTemplates")
+  public void testCreateDxTemplate() {
+    final Response response = request("/api/alert-templates/name/" + THRESHOLD_TEMPLATE_NAME).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    final AlertTemplateApi template = response.readEntity(AlertTemplateApi.class);
+    final List<PlanNodeApi> nodes = template.getNodes();
+    final List<PlanNodeApi> childRootNodes = nodes
+        .stream()
+        .filter(node -> NODE_NAME_ROOT.equals(node.getName()))
+        .collect(Collectors.toList());
+    assertThat(childRootNodes).hasSize(1);
+
+    childRootNodes.iterator().next().setName(NODE_NAME_CHILD_ROOT);
+    nodes.add(enumeratorNode());
+    nodes.add(forkJoinNode());
+    nodes.add(combinerNode());
+
+    template
+        .setName(template.getName() + "-dx")
+        .setId(null);
+
+    final Response updateResponse = request("/api/alert-templates")
+        .post(Entity.json(List.of(template)));
+    assertThat(updateResponse.getStatus()).isEqualTo(200);
+  }
+
   @Test(dependsOnMethods = "testPinotDataSourceHealth")
   public void testCreateDataset() {
     final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
@@ -179,11 +215,17 @@ public class HappyPathTest {
   @DataProvider(name = "happyPathAlerts")
   public Object[][] happyPathAlerts() {
     // one alert for each template
-    return new Object[][]{{"startree-absolute-rule-alert.json"},
-        {"startree-absolute-rule-percentile-alert.json"}, {"startree-mean-variance-alert.json"},
-        {"startree-mean-variance-percentile-alert.json"}, {"startree-percentage-rule-alert.json"},
-        {"startree-percentage-rule-percentile-alert.json"}, {"startree-threshold-alert.json"},
-        {"startree-threshold-percentile-alert.json"}};
+    return new Object[][]{
+        {"startree-absolute-rule-alert.json"},
+        {"startree-absolute-rule-percentile-alert.json"},
+        {"startree-mean-variance-alert.json"},
+        {"startree-mean-variance-percentile-alert.json"},
+        {"startree-percentage-rule-alert.json"},
+        {"startree-percentage-rule-percentile-alert.json"},
+        {"startree-threshold-alert.json"},
+        {"startree-threshold-percentile-alert.json"},
+        {"startree-threshold-dx-alert.json"}
+    };
   }
 
   @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 10000L, dataProvider = "happyPathAlerts")
@@ -315,7 +357,8 @@ public class HappyPathTest {
     final long lastUpdatedTime = getAlertLastUpdatedTime();
     final Response beforeReplayResponse = request("api/anomalies").get();
     assertThat(beforeReplayResponse.getStatus()).isEqualTo(200);
-    final List<AnomalyApi> beforeReplayAnomalies = beforeReplayResponse.readEntity(ANOMALIES_LIST_TYPE);
+    final List<AnomalyApi> beforeReplayAnomalies = beforeReplayResponse.readEntity(
+        ANOMALIES_LIST_TYPE);
 
     final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     formData.add("start", String.valueOf(PAGEVIEWS_DATASET_START_TIME));

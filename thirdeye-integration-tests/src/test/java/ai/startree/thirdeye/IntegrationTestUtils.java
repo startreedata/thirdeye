@@ -14,9 +14,11 @@
 package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
+import static ai.startree.thirdeye.spi.datalayer.TemplatableMap.fromValueMap;
 import static com.google.api.client.util.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -28,8 +30,42 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import java.io.File;
+import java.util.Map;
 
 public class IntegrationTestUtils {
+
+  public static final String ENUMERATION_ITEMS_KEY = "enumerationItems";
+  static final String NODE_NAME_ROOT = "root";
+  static final String NODE_NAME_CHILD_ROOT = "childRoot";
+  static final String NODE_NAME_ENUMERATOR = "enumerator";
+  static final String NODE_NAME_COMBINER = "combiner";
+  static final String TYPE_ENUMERATOR = "Enumerator";
+  static final String TYPE_FORK_JOIN = "ForkJoin";
+  static final String TYPE_COMBINER = "Combiner";
+
+  static PlanNodeApi forkJoinNode() {
+    return new PlanNodeApi()
+        .setName(NODE_NAME_ROOT)
+        .setType(TYPE_FORK_JOIN)
+        .setParams(fromValueMap(Map.of(
+            "enumerator", NODE_NAME_ENUMERATOR,
+            "combiner", NODE_NAME_COMBINER,
+            "root", NODE_NAME_CHILD_ROOT
+        )));
+  }
+
+  static PlanNodeApi enumeratorNode() {
+    return new PlanNodeApi()
+        .setName(NODE_NAME_ENUMERATOR)
+        .setType(TYPE_ENUMERATOR)
+        .setParams(fromValueMap(Map.of("items", "${" + ENUMERATION_ITEMS_KEY + "}")));
+  }
+
+  static PlanNodeApi combinerNode() {
+    return new PlanNodeApi()
+        .setName(NODE_NAME_COMBINER)
+        .setType(TYPE_COMBINER);
+  }
 
   public static JWKSet getJWKS(String kid) throws JOSEException {
     return new JWKSet(new RSAKeyGenerator(2048)

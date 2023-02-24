@@ -12,20 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxiosError, AxiosRequestConfig } from "axios";
+import { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 // Returns axios request interceptor
 export const getRequestInterceptorV1 = (
     accessToken: string
-): ((requestConfig: AxiosRequestConfig) => AxiosRequestConfig) => {
+): ((
+    requestConfig: InternalAxiosRequestConfig
+) => InternalAxiosRequestConfig) => {
     const requestInterceptor = (
-        requestConfig: AxiosRequestConfig
-    ): AxiosRequestConfig => {
+        requestConfig: InternalAxiosRequestConfig
+    ): InternalAxiosRequestConfig => {
         // If access token is available, attach it to the request
         if (accessToken) {
-            requestConfig.headers = {
-                Authorization: `Bearer ${accessToken}`,
-            };
+            requestConfig.headers["Authorization"] = `Bearer ${accessToken}`;
         }
 
         return requestConfig;

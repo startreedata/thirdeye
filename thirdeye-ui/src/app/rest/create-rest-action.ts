@@ -13,7 +13,6 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import "axios/index";
 import { useCallback, useState } from "react";
 import { getErrorMessages } from "../utils/rest/rest.util";
 import { ActionStatus } from "./actions.interfaces";

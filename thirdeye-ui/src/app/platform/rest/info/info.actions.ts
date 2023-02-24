@@ -32,14 +32,15 @@ export const useGetInfoV1 = (): GetInfoV1 => {
             setStatus(ActionStatus.Done);
             setErrorMessage("");
         } catch (error) {
-            const axiosError = error as AxiosError;
+            const axiosError = error as AxiosError<{ message: string }>;
             setInfoV1(null);
             setStatus(ActionStatus.Error);
             setErrorMessage(
-                axiosError &&
+                (axiosError &&
                     axiosError.response &&
                     axiosError.response.data &&
-                    axiosError.response.data.message
+                    axiosError.response.data.message) ||
+                    ""
             );
         }
     }, []);

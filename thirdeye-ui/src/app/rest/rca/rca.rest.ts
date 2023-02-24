@@ -40,7 +40,7 @@ export const getAnomalyMetricBreakdown = async (
         `${BASE_URL_RCA}/metrics/heatmap?${queryParams.toString()}`,
         {
             params,
-            paramsSerializer: duplicateKeyForArrayQueryParams,
+            paramsSerializer: { serialize: duplicateKeyForArrayQueryParams },
         }
     );
 
@@ -65,7 +65,7 @@ export const getDimensionAnalysisForAnomaly = async (
         `${BASE_URL_RCA}/dim-analysis?${queryParams.toString()}`,
         {
             params,
-            paramsSerializer: duplicateKeyForArrayQueryParams,
+            paramsSerializer: { serialize: duplicateKeyForArrayQueryParams },
         }
     );
 

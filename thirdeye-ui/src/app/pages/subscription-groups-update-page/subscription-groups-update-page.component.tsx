@@ -217,7 +217,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     isEmpty={!(subscriptionGroup && alerts && enumerationItems)}
                 >
                     <PageHeader {...pageHeaderProps} />
-                    (
                     <SubscriptionGroupWizard
                         alerts={alerts as Alert[]}
                         cancelBtnLabel={t("label.cancel")}
@@ -230,7 +229,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                         onCancel={handleOnCancelClick}
                         onFinish={onSubscriptionGroupWizardFinish}
                     />
-                    )
                 </EmptyStateSwitch>
             </LoadingErrorStateSwitch>
         </PageV1>

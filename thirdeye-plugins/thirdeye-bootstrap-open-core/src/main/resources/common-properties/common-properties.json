@@ -141,6 +141,7 @@
     "multiselect": false,
     "jsonType": "STRING",
     "step": "FILTER",
+    "subStep": "Special events",
     "defaultIsNull": null
   },
   {

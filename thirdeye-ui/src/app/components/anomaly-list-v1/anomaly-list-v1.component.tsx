@@ -76,12 +76,14 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const addMutedStyle = useCallback(
         (content: ReactNode, data: UiAnomaly): ReactNode => {
-            const { isIgnored } = data;
+            const { isIgnored, isFlaggedAsNotAnAnomaly } = data;
 
             return (
                 <Typography
                     variant="body2"
-                    {...(isIgnored && { className: styles.muted })}
+                    {...((isIgnored || isFlaggedAsNotAnAnomaly) && {
+                        className: styles.muted,
+                    })}
                 >
                     {content}
                 </Typography>
@@ -92,12 +94,16 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const anomalyNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
-            const { isIgnored, id } = data;
+            const { isIgnored, isFlaggedAsNotAnAnomaly, id } = data;
 
             return addMutedStyle(
                 linkRendererV1(
                     `${t("label.entity-id", { id: cellValue })}${
                         isIgnored ? `(${t("label.ignored")})` : ""
+                    }${
+                        !isIgnored && isFlaggedAsNotAnAnomaly
+                            ? `(${t("label.flagged")})`
+                            : ""
                     }`,
                     getAnomaliesAnomalyPath(id),
                     false,

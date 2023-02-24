@@ -24,8 +24,10 @@ import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.Enumerator.Context;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class EnumeratorOperator extends DetectionPipelineOperator {
 
@@ -61,12 +63,12 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
         "Missing configuration parameters in EnumeratorOperator.");
     final Map<String, Object> paramsMap = getPlanNode().getParams().valueMap();
 
-    final var params = new ObjectMapper().convertValue(paramsMap,
-        EnumeratorParams.class);
+    final var params = new ObjectMapper().convertValue(paramsMap, EnumeratorOperatorParams.class);
 
     final String type = optional(params.getType()).orElse(DEFAULT_ENUMERATOR_TYPE);
     final Enumerator enumerator = detectionRegistry.buildEnumerator(type);
     final List<EnumerationItemDTO> items = enumerator.enumerate(new Context().setParams(paramsMap));
+    validate(params, items);
 
     /* Populate names if not present */
     final EnumerationItemNameGenerator generator = new EnumerationItemNameGenerator();
@@ -75,6 +77,16 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
         .forEach(ei -> ei.setName(generator.generateName(ei)));
 
     setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(items));
+  }
+
+  private void validate(final EnumeratorOperatorParams params,
+      final List<EnumerationItemDTO> items) {
+    if (params.getIdKeys() != null && !params.getIdKeys().isEmpty()) {
+      /* If id keys are specified, then all items must contain all the id keys. */
+      final Set<String> idKeys = new HashSet<>(params.getIdKeys());
+      items.forEach(ei -> checkArgument(ei.getParams().keySet().containsAll(idKeys),
+          "Enumeration item " + ei + " does not contain all the id keys: " + idKeys));
+    }
   }
 
   @Override

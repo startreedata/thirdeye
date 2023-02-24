@@ -14,17 +14,28 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EnumeratorParams {
+public class EnumeratorOperatorParams {
 
+  private List<String> idKeys;
   private String type;
+
+  public List<String> getIdKeys() {
+    return idKeys;
+  }
+
+  public EnumeratorOperatorParams setIdKeys(final List<String> idKeys) {
+    this.idKeys = idKeys;
+    return this;
+  }
 
   public String getType() {
     return type;
   }
 
-  public EnumeratorParams setType(final String type) {
+  public EnumeratorOperatorParams setType(final String type) {
     this.type = type;
     return this;
   }

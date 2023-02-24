@@ -14,8 +14,10 @@
 package ai.startree.thirdeye.plugins.enumerator;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DefaultEnumeratorParams {
 
   private List<EnumerationItemDTO> items;

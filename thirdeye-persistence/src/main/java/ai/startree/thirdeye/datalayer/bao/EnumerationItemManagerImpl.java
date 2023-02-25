@@ -95,14 +95,19 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     requireNonNull(sourceAlertId, "enumeration item needs a source alert with a valid id!");
 
     /*
-     * If idKeys are provided, try to find an existing EnumerationItem with the same idKeys.
-     * Skip the rest of the logic if found.
+     * If idKeys are provided, try to find an existing EnumerationItem with the same idKeys or
+     * create. Either way, skip the rest of the logic including migration
      */
     if (idKeys != null && !idKeys.isEmpty()) {
       final EnumerationItemDTO existing = findUsingIdKeys(source, idKeys);
       if (existing != null) {
         return existing;
       }
+
+      /* Create new */
+      save(source);
+      requireNonNull(source.getId(), "expecting a generated ID");
+      return source;
     }
 
     /*

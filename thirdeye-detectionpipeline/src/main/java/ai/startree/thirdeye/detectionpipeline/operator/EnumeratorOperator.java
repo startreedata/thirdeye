@@ -95,7 +95,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
         .forEach(ei -> ei.setName(generator.generateName(ei)));
 
     /* Sync with existing enumeration items */
-    final List<EnumerationItemDTO> prepared = prepare(items);
+    final List<EnumerationItemDTO> prepared = prepare(items, params);
 
     /* Set output */
     setOutput(DEFAULT_OUTPUT_KEY, new EnumeratorResult(prepared));
@@ -120,7 +120,8 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
     }
   }
 
-  private List<EnumerationItemDTO> prepare(final List<EnumerationItemDTO> enumerationItems) {
+  private List<EnumerationItemDTO> prepare(final List<EnumerationItemDTO> enumerationItems,
+      final EnumeratorOperatorParams params) {
     final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
         "Detection pipeline usage is not set");
     if (EVALUATION.equals(usage)) {
@@ -144,7 +145,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
         .getEnumerationItemManager();
 
     return decorated.stream()
-        .map(enumerationItemManager::findExistingOrCreate)
+        .map(source -> enumerationItemManager.findExistingOrCreate(source, params.getIdKeys()))
         .collect(toList());
   }
 

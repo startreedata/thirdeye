@@ -18,6 +18,8 @@ import static ai.startree.thirdeye.spi.detection.DetectionPipelineUsage.EVALUATI
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
@@ -35,7 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 public class EnumeratorOperator extends DetectionPipelineOperator {
 
@@ -106,6 +108,15 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
       final Set<String> idKeys = new HashSet<>(params.getIdKeys());
       items.forEach(ei -> checkArgument(ei.getParams().keySet().containsAll(idKeys),
           "Enumeration item " + ei + " does not contain all the id keys: " + idKeys));
+
+      final List<Map<String, Object>> allKeys = items.stream()
+          .map(EnumerationItemDTO::getParams)
+          .map(p -> idKeys.stream()
+              .filter(p::containsKey)
+              .collect(toMap(Function.identity(), p::get)))
+          .collect(toList());
+      checkArgument(allKeys.stream().distinct().count() == allKeys.size(),
+          "Enumeration Items have duplicate keys. idKeys:" + idKeys);
     }
   }
 
@@ -125,7 +136,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
     /* decorate enumeration item with alert id */
     final var decorated = enumerationItems.stream()
         .map(e -> e.setAlert(newAlert(alertId)))
-        .collect(Collectors.toList());
+        .collect(toList());
 
     /* find existing or create new enumeration item */
     final EnumerationItemManager enumerationItemManager = detectionPipelineContext
@@ -134,7 +145,7 @@ public class EnumeratorOperator extends DetectionPipelineOperator {
 
     return decorated.stream()
         .map(enumerationItemManager::findExistingOrCreate)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   @Override

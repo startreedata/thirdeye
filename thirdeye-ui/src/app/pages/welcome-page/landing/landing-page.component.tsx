@@ -74,7 +74,9 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                         allowFullScreen
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         frameBorder="0"
-                                        src={t("url.startree-te-demo")}
+                                        src={t(
+                                            "url.startree-te-demo-video-link"
+                                        )}
                                     />
                                 </IframeVideoPlayerContainer>
                             </Grid>

@@ -12,13 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Icon } from "@iconify/react";
 import { Box, Button, Grid, Link } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { IframeVideoPlayerContainer } from "../../components/iframe-video-player-container/iframe-video-player-container.component";
+import { anomaliesInvestigateBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
@@ -96,6 +98,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [detectionEvaluation, setDetectionEvaluation] =
         useState<DetectionEvaluation | null>(null);
+    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const { showDialog } = useDialogProviderV1();
     const { id: anomalyId } = useParams<AnomaliesViewPageParams>();
@@ -255,24 +258,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const getAnomalyName = ({ name, isIgnored }: UiAnomaly): string =>
         `${name}${isIgnored ? `(${t("label.ignored")})` : ""}`;
 
-    const onHowInvestigateClick = (): void => {
-        showDialog({
-            type: DialogType.CUSTOM,
-            width: "md",
-            contents: (
-                <IframeVideoPlayerContainer>
-                    <iframe
-                        allowFullScreen
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        src={t("url.how-to-use-te-video")}
-                    />
-                </IframeVideoPlayerContainer>
-            ),
-            hideOkButton: true,
-            cancelButtonText: t("label.close"),
-        });
-    };
-
     return (
         <PageV1>
             <PageHeader
@@ -288,12 +273,25 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 customActions={
                     <PageHeaderActionsV1>
                         <Button
-                            color="secondary"
-                            variant="contained"
-                            onClick={onHowInvestigateClick}
+                            color="primary"
+                            component="button"
+                            size="small"
+                            variant="outlined"
+                            onClick={() => setIsHelpPanelOpen(true)}
                         >
-                            {t("label.how-to-investigate")}
+                            {t("label.need-help")}
+                            &nbsp;&nbsp;
+                            <Icon
+                                fontSize={24}
+                                icon="mdi:question-mark-circle-outline"
+                            />
                         </Button>
+                        <HelpDrawerV1
+                            cards={anomaliesInvestigateBasicHelpCards}
+                            handleClose={() => setIsHelpPanelOpen(false)}
+                            isOpen={isHelpPanelOpen}
+                            title={`${t("label.need-help")}?`}
+                        />
                         <Button
                             color="primary"
                             component="button"

@@ -38,6 +38,16 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
         return countActive();
       }
     });
+    metricRegistry.register("activeTimeseriesMonitoredCount", new CachedGauge<Integer>(15, TimeUnit.MINUTES) {
+      @Override
+      protected Integer loadValue() {
+        return findAllActive().stream()
+            // look for enumerationItems and get the item count
+            .map(alert -> ((List<?>)alert.getTemplateProperties().getOrDefault("enumerationItems", List.of())).size())
+            // add enumerationItems count if present, else just add 1 for simple alert
+            .reduce(0, (tsCount, enumCount) -> tsCount + (enumCount == 0 ? 1 : enumCount));
+      }
+    });
   }
 
   @Override

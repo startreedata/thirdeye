@@ -15,8 +15,11 @@ package ai.startree.thirdeye.datalayer.mapper;
 
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -26,5 +29,19 @@ public interface MergedAnomalyIndexMapper {
 
   @Mapping(source = "enumerationItem.id", target = "enumerationItemId")
   @Mapping(target = "dimensions", ignore = true)
+  @Mapping(source = "anomalyLabels", target = "ignored", qualifiedByName = "labelsToIgnoredMapper")
   MergedAnomalyResultIndex toIndexEntity(AnomalyDTO dto);
+
+  @Named("labelsToIgnoredMapper")
+  static boolean labelsToIgnored(List<AnomalyLabelDTO> labels) {
+    if (labels == null) {
+      return false;
+    }
+    for (AnomalyLabelDTO label : labels) {
+      if (label.isIgnore()) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

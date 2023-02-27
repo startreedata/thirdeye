@@ -44,9 +44,9 @@ export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
             open={isOpen}
             onClose={handleClose}
         >
-            <Card>
-                <CardHeader
-                    title={
+            <Box pb={2}>
+                <Card>
+                    <CardContent>
                         <Box
                             alignItems="center"
                             display="flex"
@@ -60,12 +60,12 @@ export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
                                 onClick={handleClose}
                             />
                         </Box>
-                    }
-                />
-            </Card>
+                    </CardContent>
+                </Card>
+            </Box>
             {!!cards &&
                 cards.map((card, idx) => (
-                    <Box key={idx} p={2}>
+                    <Box key={idx} px={2} py={1}>
                         <Card variant="outlined">
                             <CardHeader title={card.title} />
                             <CardContent>{card.body}</CardContent>

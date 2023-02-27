@@ -17,5 +17,6 @@ import { makeStyles } from "@material-ui/core";
 export const useHelperDrawerV1Styles = makeStyles((theme) => ({
     drawerPaper: {
         backgroundColor: theme.palette.background.default,
+        maxWidth: 480,
     },
 }));

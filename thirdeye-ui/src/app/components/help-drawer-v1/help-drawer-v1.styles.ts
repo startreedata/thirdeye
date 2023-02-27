@@ -12,17 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { makeStyles } from "@material-ui/core";
 
-import { ReactNode } from "react";
-
-export interface HelpDrawerV1Card {
-    title?: string | ReactNode;
-    body?: string | ReactNode;
-}
-
-export interface HelpDrawerV1Props {
-    title: string | ReactNode;
-    isOpen: boolean;
-    handleClose: () => void;
-    cards?: HelpDrawerV1Card[];
-}
+export const useHelperDrawerV1Styles = makeStyles((theme) => ({
+    drawerPaper: {
+        backgroundColor: theme.palette.background.default,
+    },
+}));

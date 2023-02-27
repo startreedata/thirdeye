@@ -23,21 +23,22 @@ import {
     Typography,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { ColorV1 } from "../../platform/utils/material-ui/color.util";
 import { HelpDrawerV1Props } from "./help-drawer-v1.interfaces";
+import { useHelperDrawerV1Styles } from "./help-drawer-v1.styles";
 
 export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
     isOpen,
     handleClose,
     title,
-    customHeader,
     cards,
     children,
 }) => {
+    const classes = useHelperDrawerV1Styles();
+
     return (
         <Drawer
             PaperProps={{
-                style: { backgroundColor: ColorV1.Grey4 },
+                className: classes.drawerPaper,
             }}
             anchor="right"
             open={isOpen}
@@ -46,21 +47,19 @@ export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
             <Card>
                 <CardHeader
                     title={
-                        customHeader || (
-                            <Box
-                                alignItems="center"
-                                display="flex"
-                                justifyContent="space-between"
-                            >
-                                <Typography variant="h5">{title}</Typography>
-                                <Icon
-                                    cursor="pointer"
-                                    fontSize={24}
-                                    icon="ic:round-close"
-                                    onClick={handleClose}
-                                />
-                            </Box>
-                        )
+                        <Box
+                            alignItems="center"
+                            display="flex"
+                            justifyContent="space-between"
+                        >
+                            <Typography variant="h5">{title}</Typography>
+                            <Icon
+                                cursor="pointer"
+                                fontSize={24}
+                                icon="ic:round-close"
+                                onClick={handleClose}
+                            />
+                        </Box>
                     }
                 />
             </Card>

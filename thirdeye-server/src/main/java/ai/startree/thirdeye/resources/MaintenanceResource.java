@@ -23,12 +23,15 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
@@ -326,6 +329,35 @@ public class MaintenanceResource {
     );
     eiMap.put(key, existingOrCreated);
     return existingOrCreated;
+  }
+
+  @POST
+  @Path("/anomaly/index-ignored")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation("Update the ignored index based on anomaly labels for historical anomalies")
+  public Response updateIgnoreLabelIndex(
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal
+  ) {
+    // skip already updated ignored index
+    final DaoFilter filter = new DaoFilter().setPredicate(Predicate.NEQ("ignored", true));
+    anomalyManager.filter(filter).stream()
+        .peek(anomaly -> authorizationManager.ensureCanEdit(principal, anomaly, anomaly))
+        .filter(this::isIgnored)
+        .forEach(anomalyManager::update);
+    return Response.ok().build();
+  }
+  private boolean isIgnored(final AnomalyDTO anomaly) {
+    final List<AnomalyLabelDTO> labels = anomaly.getAnomalyLabels();
+    if (labels == null) {
+      return false;
+    }
+    for (AnomalyLabelDTO label : labels) {
+      if (label.isIgnore()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static class EiKey {

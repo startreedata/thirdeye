@@ -1,3 +1,19 @@
+## [2.10.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.9.1...thirdeye-ui-2.10.0) (2023-02-27)
+
+
+### Features
+
+* [TE-1142](https://cortexdata.atlassian.net/browse/TE-1142) anomalies filtering in alert create for new user flow ([2a3ce381a](https://github.com/startreedata/thirdeye/commit/2a3ce381a73238e7f1162a159b02b83d25c78937))
+* [TE-1270](https://cortexdata.atlassian.net/browse/TE-1270) alert notification fatigue revamp ([cc2b275b2](https://github.com/startreedata/thirdeye/commit/cc2b275b2c371d0ababf5ee30bd26cdb597dbd7e))
+* [TE-1270](https://cortexdata.atlassian.net/browse/TE-1270) remove misplaced character from UI ([b6ec36281](https://github.com/startreedata/thirdeye/commit/b6ec3628169d26726ca2b2152d7fa83d9293ef62))
+
+
+### Bug Fixes
+
+* [TE-1142](https://cortexdata.atlassian.net/browse/TE-1142) fix bug where page would navigate back to filter page ([75cd444fc](https://github.com/startreedata/thirdeye/commit/75cd444fc9e48eff4eb5e2d9f28910143f7a10d3))
+* [TE-1356](https://cortexdata.atlassian.net/browse/TE-1356) use evaluation.alert.template in preview charts when for timezone ([6ff2951a7](https://github.com/startreedata/thirdeye/commit/6ff2951a78c7d647d102f0dcd1b3401570073a6c))
+* [TE-1357](https://cortexdata.atlassian.net/browse/TE-1357) revert default svg of time series chart and make only preview charts use it ([60d7759e9](https://github.com/startreedata/thirdeye/commit/60d7759e9257b49b11d2d28b35995bc1015db766))
+
 ### [2.9.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.9.0...thirdeye-ui-2.9.1) (2023-02-16)
 
 

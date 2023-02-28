@@ -13,6 +13,8 @@
  * the License.
  */
 
+import { isEmpty } from "lodash";
+import { TFunction } from "react-i18next";
 import { UiSubscriptionGroupAlert } from "../../../rest/dto/ui-subscription-group.interfaces";
 import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
 import { getAssociationId } from "../../subscription-group-wizard/alerts-dimensions/alerts-dimensions.utils";
@@ -20,40 +22,42 @@ import { UiAssociation } from "./alert-associations-view-table.interfaces";
 
 export const getUiAssociation = (
     uiSubscriptionGroupAlerts: UiSubscriptionGroupAlert[],
-    t: (v: string, args?: Record<string, string>) => string
+    t: TFunction
 ): UiAssociation[] => {
     const uiAssociations: UiAssociation[] = [];
 
-    uiSubscriptionGroupAlerts.forEach((alert) => {
-        if (!alert.enumerationItems) {
-            uiAssociations.push({
-                id: getAssociationId({ alertId: alert.id }),
-                alertId: alert.id,
-                alertName: alert.name,
-                enumerationName: t("label.overall-entity", {
-                    entity: t("label.alert"),
-                }),
-            });
-
-            return;
-        }
-
-        alert.enumerationItems.forEach((enumerationItem) => {
-            uiAssociations.push({
-                id: getAssociationId({
+    if (!isEmpty(uiSubscriptionGroupAlerts)) {
+        uiSubscriptionGroupAlerts.forEach((alert) => {
+            if (!alert.enumerationItems || isEmpty(alert.enumerationItems)) {
+                uiAssociations.push({
+                    id: getAssociationId({ alertId: alert.id }),
                     alertId: alert.id,
+                    alertName: alert.name,
+                    enumerationName: t("label.overall-entity", {
+                        entity: t("label.alert"),
+                    }),
+                });
+
+                return;
+            }
+
+            alert.enumerationItems.forEach((enumerationItem) => {
+                uiAssociations.push({
+                    id: getAssociationId({
+                        alertId: alert.id,
+                        enumerationId: enumerationItem.id,
+                    }),
+                    alertId: alert.id,
+                    alertName: alert.name,
                     enumerationId: enumerationItem.id,
-                }),
-                alertId: alert.id,
-                alertName: alert.name,
-                enumerationId: enumerationItem.id,
-                enumerationName: generateNameForEnumerationItem(
-                    enumerationItem,
-                    true
-                ),
+                    enumerationName: generateNameForEnumerationItem(
+                        enumerationItem,
+                        true
+                    ),
+                });
             });
         });
-    });
+    }
 
     return uiAssociations;
 };

@@ -12,11 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Icon } from "@iconify/react";
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
 import axios, { AxiosError, CancelTokenSource } from "axios";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
+import { CreateMenuButton } from "../../components/create-menu-button.component/create-menu-button.component";
+import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
@@ -24,6 +28,7 @@ import { LoadingErrorStateSwitch } from "../../components/page-states/loading-er
 import {
     NotificationTypeV1,
     PageContentsGridV1,
+    PageHeaderActionsV1,
     PageV1,
     useDialogProviderV1,
     useNotificationProviderV1,
@@ -53,6 +58,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     const [alertsStats, setAlertsStats] = useState<
         Record<Alert["id"], AlertStats>
     >({});
+    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -291,9 +297,37 @@ export const AlertsAllPage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
-                showCreateButton
                 transparentBackground
+                customActions={
+                    <PageHeaderActionsV1>
+                        <Button
+                            color="primary"
+                            size="small"
+                            variant="outlined"
+                            onClick={() => setIsHelpPanelOpen(true)}
+                        >
+                            <Box component="span" mr={1}>
+                                {t("label.need-help")}
+                            </Box>
+                            <Box component="span" display="flex">
+                                <Icon
+                                    fontSize={24}
+                                    icon="mdi:question-mark-circle-outline"
+                                />
+                            </Box>
+                        </Button>{" "}
+                        {/* Rendering the create button here instead of using the 
+                        `showCreateButton` to show it in the same row as the help button */}
+                        <CreateMenuButton />
+                    </PageHeaderActionsV1>
+                }
                 title={t("label.alerts")}
+            />
+            <HelpDrawerV1
+                cards={alertsBasicHelpCards}
+                isOpen={isHelpPanelOpen}
+                title={`${t("label.need-help")}?`}
+                onClose={() => setIsHelpPanelOpen(false)}
             />
 
             <PageContentsGridV1 fullHeight>

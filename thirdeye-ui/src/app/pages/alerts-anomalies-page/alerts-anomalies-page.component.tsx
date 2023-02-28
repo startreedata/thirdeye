@@ -40,6 +40,7 @@ import { determineTimezoneFromAlertInEvaluation } from "../../utils/alerts/alert
 import {
     filterAnomaliesByFunctions,
     getUiAnomalies,
+    isAnomalyFlaggedAsNotAnAnomaly,
     isAnomalyIgnored,
 } from "../../utils/anomalies/anomalies.util";
 import {
@@ -131,7 +132,15 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         // All anomalies being fetched, and then filtered here at UI level
         const filteredAnomalies = filterAnomaliesByFunctions(
             anomalies,
-            filterIgnoredAnomalies ? [(a) => !isAnomalyIgnored(a)] : []
+            filterIgnoredAnomalies
+                ? [
+                      (a) =>
+                          !(
+                              isAnomalyIgnored(a) ||
+                              isAnomalyFlaggedAsNotAnAnomaly(a)
+                          ),
+                  ]
+                : []
         );
 
         return getUiAnomalies(filteredAnomalies);
@@ -267,7 +276,9 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                                     }
                                                 />
                                             }
-                                            label={t("message.show-ignored")}
+                                            label={t(
+                                                "message.show-ignored-flagged"
+                                            )}
                                         />
                                     </Box>
                                     <AnomalyQuickFilters

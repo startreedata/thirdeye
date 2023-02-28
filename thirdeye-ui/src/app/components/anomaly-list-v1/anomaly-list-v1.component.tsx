@@ -96,15 +96,19 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
             const { isIgnored, isFlaggedAsNotAnAnomaly, id } = data;
 
+            let label = t("label.entity-id", { id: cellValue });
+
+            // These two flags should never be true simultaneously,
+            // but if they do, "Ignored" gets priority
+            if (isIgnored) {
+                label += `(${t("label.ignored")})`;
+            } else if (isFlaggedAsNotAnAnomaly) {
+                label += `(${t("label.flagged")})`;
+            }
+
             return addMutedStyle(
                 linkRendererV1(
-                    `${t("label.entity-id", { id: cellValue })}${
-                        isIgnored ? `(${t("label.ignored")})` : ""
-                    }${
-                        !isIgnored && isFlaggedAsNotAnAnomaly
-                            ? `(${t("label.flagged")})`
-                            : ""
-                    }`,
+                    label,
                     getAnomaliesAnomalyPath(id),
                     false,
                     `${t("label.view")} ${data.name}`

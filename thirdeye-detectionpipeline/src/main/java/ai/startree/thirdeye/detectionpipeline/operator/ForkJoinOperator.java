@@ -13,10 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
-import static ai.startree.thirdeye.spi.detection.DetectionPipelineUsage.DETECTION;
-import static ai.startree.thirdeye.spi.detection.DetectionPipelineUsage.EVALUATION;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.Operator;
@@ -24,13 +21,8 @@ import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNode;
 import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ForkJoinOperator extends DetectionPipelineOperator {
 
@@ -43,12 +35,6 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
   private PlanNode root;
   private PlanNode combiner;
   private DetectionPipelineContext detectionPipelineContext;
-
-  private static AlertDTO newAlert(final Long alertId) {
-    final AlertDTO alert = new AlertDTO();
-    alert.setId(alertId);
-    return alert;
-  }
 
   @Override
   public void init(final OperatorContext context) {
@@ -74,11 +60,10 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
       resultMap.put(dryRunOutputName(), enumeratorResult);
       return;
     }
-    final List<EnumerationItemDTO> enumerationItems = prepareEnumerationItems(enumeratorResult.getResults());
     /* Execute in parallel */
     final ForkJoinParallelExecutor parallelExecutor = new ForkJoinParallelExecutor(
         detectionPipelineContext);
-    final var allResults = parallelExecutor.execute(root, enumerationItems);
+    final var allResults = parallelExecutor.execute(root, enumeratorResult.getResults());
 
     /* Combine results */
     final Map<String, OperatorResult> outputs = runCombiner(new ForkJoinResult(allResults));
@@ -103,39 +88,6 @@ public class ForkJoinOperator extends DetectionPipelineOperator {
     combinerOp.execute();
 
     return combinerOp.getOutputs();
-  }
-
-  private List<EnumerationItemDTO> prepareEnumerationItems(
-      final List<EnumerationItemDTO> enumerationItems) {
-    final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
-        "Detection pipeline usage is not set");
-
-    if (DETECTION.equals(usage)) {
-      // Add alert id to enumeration items
-      final Long alertId = requireNonNull(detectionPipelineContext.getAlertId(),
-          "alert ID is not set");
-
-      /* decorate enumeration item with alert id */
-      final var decorated = enumerationItems.stream()
-          .map(e -> e.setAlert(newAlert(alertId)))
-          .collect(Collectors.toList());
-
-      /* find existing or create new enumeration item */
-      return decorated.stream()
-          .map(this::findExistingOrCreate)
-          .collect(Collectors.toList());
-    } else if (EVALUATION.equals(usage)) {
-      // do nothing - no need to persist enumerationItems nor fetch existing one downstream
-      return enumerationItems;
-    }
-    // don't remove - put here to ensure it breaks if an enum is added one day
-    throw new UnsupportedOperationException("DetectionPipelineUsage not implemented: " + usage);
-  }
-
-  private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {
-    return detectionPipelineContext.getApplicationContext()
-        .getEnumerationItemManager()
-        .findExistingOrCreate(source);
   }
 
   @Override

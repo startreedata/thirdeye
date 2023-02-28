@@ -19,7 +19,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -38,9 +37,9 @@ import org.testng.annotations.Test;
 public class EnumerationItemManagerImplTest {
 
   public static final long ALERT_ID = 1234L;
-  private EnumerationItemManager enumerationItemManager;
   private AnomalyManager anomalyManager;
   private SubscriptionGroupManager subscriptionGroupManager;
+  private EnumerationItemManagerImpl enumerationItemManager;
 
   private static List<AlertDTO> toAlertList(final Long... alertIds) {
     return Arrays.stream(alertIds).map(alertId -> {
@@ -73,9 +72,9 @@ public class EnumerationItemManagerImplTest {
   @BeforeClass
   void beforeClass() {
     final Injector injector = MySqlTestDatabase.sharedInjector();
-    enumerationItemManager = injector.getInstance(EnumerationItemManager.class);
     anomalyManager = injector.getInstance(AnomalyManager.class);
     subscriptionGroupManager = injector.getInstance(SubscriptionGroupManager.class);
+    enumerationItemManager = injector.getInstance(EnumerationItemManagerImpl.class);
   }
 
   @AfterMethod
@@ -218,5 +217,41 @@ public class EnumerationItemManagerImplTest {
     final var sg3Updated = subscriptionGroupManager.findById(sg3.getId());
     assertThat(sg3Updated.getAlertAssociations().get(0).getEnumerationItem().getId())
         .isEqualTo(ei1.getId());
+  }
+
+  @Test
+  public void testFindByIdKeys() {
+    final EnumerationItemDTO source = sourceEi();
+
+    final var ei1 = ei(source.getName(), source.getParams())
+        .setAlert(source.getAlert());
+    enumerationItemManager.save(ei1);
+
+    final var ei2 = ei("ei2", Map.of("a", 2))
+        .setAlert(source.getAlert());
+    enumerationItemManager.save(ei2);
+
+    final var ei3 = ei("ei3", Map.of("a", 3))
+        .setAlert(source.getAlert());
+    enumerationItemManager.save(ei3);
+
+    final var ei4 = ei("ei4", Map.of("a", 1))
+        .setAlert(toAlertDTO(5678L));
+    enumerationItemManager.save(ei4);
+
+    final var ei5 = ei("ei5", Map.of("a", 2))
+        .setAlert(toAlertDTO(5678L));
+    enumerationItemManager.save(ei5);
+
+    final var ei6 = ei("ei6", Map.of("a", 1));
+    enumerationItemManager.save(ei6);
+
+    final EnumerationItemDTO sourceNew = sourceEi().setParams(Map.of("a", 5));
+    assertThat(enumerationItemManager.findUsingIdKeys(sourceNew, List.of("a")))
+        .isNull();
+
+    final EnumerationItemDTO found = enumerationItemManager.findUsingIdKeys(source, List.of("a"));
+    assertThat(found).isNotNull();
+    assertThat(found.getId()).isEqualTo(ei1.getId());
   }
 }

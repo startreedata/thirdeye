@@ -82,6 +82,7 @@ export const createEmptyUiAnomaly = (): UiAnomaly => {
         startTimeVal: -1,
         datasetName: noDataMarker,
         hasFeedback: false,
+        isFlaggedAsNotAnAnomaly: false,
         isIgnored: false,
     };
 };
@@ -194,6 +195,9 @@ export const getUiAnomaly = (anomaly: Anomaly): UiAnomaly => {
         ) {
             uiAnomaly.hasFeedback = true;
         }
+    }
+    if (isAnomalyFlaggedAsNotAnAnomaly(anomaly)) {
+        uiAnomaly.isFlaggedAsNotAnAnomaly = true;
     }
 
     if (anomaly.anomalyLabels) {
@@ -532,6 +536,12 @@ export const isAnomalyIgnored = (anomaly: Anomaly): boolean =>
     !!(
         anomaly?.anomalyLabels &&
         anomaly?.anomalyLabels.some((label) => label.ignore)
+    );
+
+export const isAnomalyFlaggedAsNotAnAnomaly = (anomaly: Anomaly): boolean =>
+    !!(
+        anomaly?.feedback &&
+        anomaly?.feedback.type === AnomalyFeedbackType.NOT_ANOMALY
     );
 
 export const filterOutIgnoredAnomalies = (anomalies: Anomaly[]): Anomaly[] => {

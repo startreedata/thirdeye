@@ -14,9 +14,14 @@
 package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import java.util.List;
 
 public interface EnumerationItemManager extends AbstractManager<EnumerationItemDTO> {
 
-  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source);
+  default EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source) {
+    return findExistingOrCreate(source, null);
+  }
 
+  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
+      final List<String> idKeys);
 }

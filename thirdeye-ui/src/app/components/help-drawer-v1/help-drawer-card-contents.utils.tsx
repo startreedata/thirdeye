@@ -13,6 +13,7 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
+import { Box } from "@material-ui/core";
 import i18next from "i18next";
 import { capitalize } from "lodash";
 import React from "react";
@@ -45,7 +46,7 @@ export const alertsBasicHelpCards: HelpDrawerV1Card[] = [
                     variant="outlined"
                 >
                     <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    &nbsp;
+                    <Box pr="4px" />
                     {i18next.t("label.view-entity", {
                         entity: i18next.t("label.video"),
                     })}
@@ -66,7 +67,7 @@ export const alertsBasicHelpCards: HelpDrawerV1Card[] = [
                     target="_blank"
                     variant="body2"
                 >
-                    &nbsp;
+                    <Box pr="4px" />
                     {capitalize(
                         i18next.t("message.learn-more-about-entity", {
                             entity: i18next.t("label.alerts"),
@@ -85,11 +86,11 @@ export const alertsBasicHelpCards: HelpDrawerV1Card[] = [
                 {i18next.t("message.alert-templates-helper-description")}
                 <LinkV1
                     externalLink
-                    href={i18next.t("url.alert-templates-doc")}
+                    href={i18next.t("url.alert-templates-docs")}
                     target="_blank"
                     variant="body2"
                 >
-                    &nbsp;
+                    <Box pr="4px" />
                     {capitalize(
                         i18next.t("message.learn-more-about-entity", {
                             entity: i18next.t("label.alert-templates"),
@@ -125,7 +126,7 @@ export const anomaliesBasicHelpCards: HelpDrawerV1Card[] = [
                     variant="outlined"
                 >
                     <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    &nbsp;
+                    <Box pr="4px" />
                     {i18next.t("label.view-entity", {
                         entity: i18next.t("label.video"),
                     })}
@@ -137,7 +138,24 @@ export const anomaliesBasicHelpCards: HelpDrawerV1Card[] = [
         title: i18next.t("message.what-is-an-entity", {
             entity: i18next.t("label.anomaly"),
         }),
-        body: <Trans i18nKey="message.anomaly-helper-description" />,
+        body: (
+            <>
+                <Trans i18nKey="message.anomaly-helper-description" />
+                <LinkV1
+                    externalLink
+                    href={i18next.t("url.how-to-investigate-anomaly")}
+                    target="_blank"
+                    variant="body2"
+                >
+                    <Box pr="4px" />
+                    {capitalize(
+                        i18next.t("message.learn-more-about-entity", {
+                            entity: i18next.t("label.anomalies"),
+                        })
+                    )}
+                </LinkV1>
+            </>
+        ),
     },
 ];
 
@@ -165,7 +183,7 @@ export const anomaliesInvestigateBasicHelpCards: HelpDrawerV1Card[] = [
                     variant="outlined"
                 >
                     <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    &nbsp;
+                    <Box pr="4px" />
                     {i18next.t("label.view-entity", {
                         entity: i18next.t("label.video"),
                     })}
@@ -177,7 +195,24 @@ export const anomaliesInvestigateBasicHelpCards: HelpDrawerV1Card[] = [
         title: i18next.t("message.what-is-an-entity", {
             entity: i18next.t("label.anomaly-investigation"),
         }),
-        body: i18next.t("message.investigate-helper-description"),
+        body: (
+            <>
+                {i18next.t("message.investigate-helper-description")}
+                <LinkV1
+                    externalLink
+                    href={i18next.t("url.how-to-investigate-anomaly")}
+                    target="_blank"
+                    variant="body2"
+                >
+                    <Box pr="4px" />
+                    {capitalize(
+                        i18next.t("message.learn-more-about-entity", {
+                            entity: i18next.t("label.anomaly-investigation"),
+                        })
+                    )}
+                </LinkV1>
+            </>
+        ),
     },
     {
         title: i18next.t("label.learn-more"),
@@ -199,7 +234,7 @@ export const anomaliesInvestigateBasicHelpCards: HelpDrawerV1Card[] = [
                     variant="outlined"
                 >
                     <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    &nbsp;
+                    <Box pr="4px" />
                     {i18next.t("label.view-entity", {
                         entity: i18next.t("label.video"),
                     })}

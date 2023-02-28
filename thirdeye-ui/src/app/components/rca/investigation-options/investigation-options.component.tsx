@@ -13,7 +13,7 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
-import { Button } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
 import { isEmpty, isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -141,7 +141,7 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                     onClick={() => setIsHelpPanelOpen(true)}
                 >
                     {t("label.need-help")}
-                    &nbsp;&nbsp;
+                    <Box pr="4px" />
                     <Icon
                         fontSize={24}
                         icon="mdi:question-mark-circle-outline"

@@ -280,7 +280,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             onClick={() => setIsHelpPanelOpen(true)}
                         >
                             {t("label.need-help")}
-                            &nbsp;&nbsp;
+                            <Box pr="4px" />
                             <Icon
                                 fontSize={24}
                                 icon="mdi:question-mark-circle-outline"

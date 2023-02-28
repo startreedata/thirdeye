@@ -13,7 +13,7 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
-import { Button } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -68,7 +68,7 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
                             onClick={() => setIsHelpPanelOpen(true)}
                         >
                             {t("label.need-help")}
-                            &nbsp;&nbsp;
+                            <Box pr="4px" />
                             <Icon
                                 fontSize={24}
                                 icon="mdi:question-mark-circle-outline"

@@ -322,9 +322,9 @@ export const AlertsAllPage: FunctionComponent = () => {
             />
             <HelpDrawerV1
                 cards={alertsBasicHelpCards}
-                handleClose={() => setIsHelpPanelOpen(false)}
                 isOpen={isHelpPanelOpen}
                 title={`${t("label.need-help")}?`}
+                onClose={() => setIsHelpPanelOpen(false)}
             />
 
             <PageContentsGridV1 fullHeight>

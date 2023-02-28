@@ -272,9 +272,9 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                         </Button>
                         <HelpDrawerV1
                             cards={alertsBasicHelpCards}
-                            handleClose={() => setIsHelpPanelOpen(false)}
                             isOpen={isHelpPanelOpen}
                             title={`${t("label.need-help")}?`}
+                            onClose={() => setIsHelpPanelOpen(false)}
                         />
                     </PageHeaderActionsV1>
                 }

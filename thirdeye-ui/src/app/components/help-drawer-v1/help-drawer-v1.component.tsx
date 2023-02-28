@@ -28,7 +28,7 @@ import { useHelperDrawerV1Styles } from "./help-drawer-v1.styles";
 
 export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
     isOpen,
-    handleClose,
+    onClose,
     title,
     cards,
     children,
@@ -42,7 +42,7 @@ export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
             }}
             anchor="right"
             open={isOpen}
-            onClose={handleClose}
+            onClose={onClose}
         >
             <Box pb={2}>
                 <Card>
@@ -57,7 +57,7 @@ export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
                                 cursor="pointer"
                                 fontSize={24}
                                 icon="ic:round-close"
-                                onClick={handleClose}
+                                onClick={onClose}
                             />
                         </Box>
                     </CardContent>

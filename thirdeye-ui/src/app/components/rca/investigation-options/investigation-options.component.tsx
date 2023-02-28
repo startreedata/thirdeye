@@ -212,9 +212,9 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
 
                 <HelpDrawerV1
                     cards={anomaliesInvestigateBasicHelpCards}
-                    handleClose={() => setIsHelpPanelOpen(false)}
                     isOpen={isHelpPanelOpen}
                     title={`${t("label.need-help")}?`}
+                    onClose={() => setIsHelpPanelOpen(false)}
                 />
             </>
         );

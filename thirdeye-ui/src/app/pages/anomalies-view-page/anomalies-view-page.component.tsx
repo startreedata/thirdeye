@@ -288,9 +288,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                         </Button>
                         <HelpDrawerV1
                             cards={anomaliesInvestigateBasicHelpCards}
-                            handleClose={() => setIsHelpPanelOpen(false)}
                             isOpen={isHelpPanelOpen}
                             title={`${t("label.need-help")}?`}
+                            onClose={() => setIsHelpPanelOpen(false)}
                         />
                         <Button
                             color="primary"

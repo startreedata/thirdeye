@@ -95,9 +95,9 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
             />
             <HelpDrawerV1
                 cards={anomaliesBasicHelpCards}
-                handleClose={() => setIsHelpPanelOpen(false)}
                 isOpen={isHelpPanelOpen}
                 title={`${t("label.need-help")}?`}
+                onClose={() => setIsHelpPanelOpen(false)}
             />
         </>
     );

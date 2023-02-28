@@ -12,23 +12,23 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button } from "@material-ui/core";
+import { Icon } from "@iconify/react";
+import { Box, Button } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
 import { isEmpty, isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     NotificationTypeV1,
-    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
-import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
 import {
     createInvestigation,
     updateInvestigation,
 } from "../../../rest/rca/rca.rest";
-import { IframeVideoPlayerContainer } from "../../iframe-video-player-container/iframe-video-player-container.component";
+import { anomaliesInvestigateBasicHelpCards } from "../../help-drawer-v1/help-drawer-card-contents.utils";
+import { HelpDrawerV1 } from "../../help-drawer-v1/help-drawer-v1.component";
 import { InvestigationOptionsProps } from "./investigation-options.interfaces";
 import { ModifyInvestigationDialog } from "./modify-investigation-dialog/modify-investigation-dialog.component";
 
@@ -40,9 +40,9 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
         onSuccessfulUpdate,
         onRemoveInvestigationAssociation,
     }) => {
+        const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
-        const { showDialog } = useDialogProviderV1();
         const [
             isLocalInvestigationInSync,
             setIsLocalInvestigationDifferentInSync,
@@ -132,32 +132,23 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                 .finally(() => setIsSaving(false));
         };
 
-        const onHowDoIUseClick = (): void => {
-            showDialog({
-                type: DialogType.CUSTOM,
-                width: "md",
-                contents: (
-                    <IframeVideoPlayerContainer>
-                        <iframe
-                            allowFullScreen
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            src={t("url.how-to-use-te-video")}
-                        />
-                    </IframeVideoPlayerContainer>
-                ),
-                hideOkButton: true,
-                cancelButtonText: t("label.close"),
-            });
-        };
-
         return (
             <>
                 <Button
-                    color="secondary"
-                    variant="contained"
-                    onClick={onHowDoIUseClick}
+                    color="primary"
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setIsHelpPanelOpen(true)}
                 >
-                    {t("label.how-to-investigate")}
+                    <Box component="span" mr={1}>
+                        {t("label.need-help")}
+                    </Box>
+                    <Box component="span" display="flex">
+                        <Icon
+                            fontSize={24}
+                            icon="mdi:question-mark-circle-outline"
+                        />
+                    </Box>
                 </Button>
                 {investigationId === null && (
                     <Button
@@ -221,6 +212,13 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                         Remove Investigation Association
                     </Button>
                 )}
+
+                <HelpDrawerV1
+                    cards={anomaliesInvestigateBasicHelpCards}
+                    isOpen={isHelpPanelOpen}
+                    title={`${t("label.need-help")}?`}
+                    onClose={() => setIsHelpPanelOpen(false)}
+                />
             </>
         );
     };

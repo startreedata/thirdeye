@@ -504,7 +504,7 @@
         "invalid-email": "Invalid email",
         "invalid-id": "Invalid {{entity}} id {{id}}",
         "invalid-json": "Invalid JSON",
-        "investigate-helper-description": "Once the system flags anomalous behaviour, the next step is to figure out the factors that caused the system to deviate from predicted behavior. ThirdEye has a simple yet powerful anomaly investigation screen that lets you compare the relative change in various metrics, isolate the most impactful factors, and view the anomaly with the context of an event that may have been a contributing factor",
+        "investigate-helper-description": "Once the system flags anomalous behaviour, the next step is to figure out the factors that caused the system to deviate from predicted behavior. ThirdEye has a simple yet powerful anomaly investigation screen that lets you compare the relative change in various metrics, isolate the most impactful factors, and view the anomaly with the context of an event that may have been a contributing factor.",
         "is-this-an-anomaly": "Is this an anomaly?",
         "json-input-required": "JSON input is required",
         "kpis-monitor-and-outliers": "KPIs monitor and outliers",

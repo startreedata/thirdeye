@@ -45,11 +45,14 @@ export const alertsBasicHelpCards: HelpDrawerV1Card[] = [
                     target="_blank"
                     variant="outlined"
                 >
-                    <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    <Box pr="4px" />
-                    {i18next.t("label.view-entity", {
-                        entity: i18next.t("label.video"),
-                    })}
+                    <Box component="span" display="flex" mr={1}>
+                        <Icon icon="material-symbols:slow-motion-video-sharp" />
+                    </Box>
+                    <Box component="span">
+                        {i18next.t("label.view-entity", {
+                            entity: i18next.t("label.video"),
+                        })}
+                    </Box>
                 </LinkButtonV1>
             </>
         ),
@@ -60,14 +63,13 @@ export const alertsBasicHelpCards: HelpDrawerV1Card[] = [
         }),
         body: (
             <>
-                {i18next.t("message.alerts-helper-description")}
+                {i18next.t("message.alerts-helper-description")}{" "}
                 <LinkV1
                     externalLink
                     href={i18next.t("url.create-an-alert")}
                     target="_blank"
                     variant="body2"
                 >
-                    <Box pr="4px" />
                     {capitalize(
                         i18next.t("message.learn-more-about-entity", {
                             entity: i18next.t("label.alerts"),
@@ -83,14 +85,13 @@ export const alertsBasicHelpCards: HelpDrawerV1Card[] = [
         }),
         body: (
             <>
-                {i18next.t("message.alert-templates-helper-description")}
+                {i18next.t("message.alert-templates-helper-description")}{" "}
                 <LinkV1
                     externalLink
                     href={i18next.t("url.alert-templates-docs")}
                     target="_blank"
                     variant="body2"
                 >
-                    <Box pr="4px" />
                     {capitalize(
                         i18next.t("message.learn-more-about-entity", {
                             entity: i18next.t("label.alert-templates"),
@@ -125,11 +126,14 @@ export const anomaliesBasicHelpCards: HelpDrawerV1Card[] = [
                     target="_blank"
                     variant="outlined"
                 >
-                    <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    <Box pr="4px" />
-                    {i18next.t("label.view-entity", {
-                        entity: i18next.t("label.video"),
-                    })}
+                    <Box component="span" display="flex" mr={1}>
+                        <Icon icon="material-symbols:slow-motion-video-sharp" />
+                    </Box>
+                    <Box component="span">
+                        {i18next.t("label.view-entity", {
+                            entity: i18next.t("label.video"),
+                        })}
+                    </Box>
                 </LinkButtonV1>
             </>
         ),
@@ -140,14 +144,13 @@ export const anomaliesBasicHelpCards: HelpDrawerV1Card[] = [
         }),
         body: (
             <>
-                <Trans i18nKey="message.anomaly-helper-description" />
+                <Trans i18nKey="message.anomaly-helper-description" />{" "}
                 <LinkV1
                     externalLink
                     href={i18next.t("url.how-to-investigate-anomaly")}
                     target="_blank"
                     variant="body2"
                 >
-                    <Box pr="4px" />
                     {capitalize(
                         i18next.t("message.learn-more-about-entity", {
                             entity: i18next.t("label.anomalies"),
@@ -182,11 +185,14 @@ export const anomaliesInvestigateBasicHelpCards: HelpDrawerV1Card[] = [
                     target="_blank"
                     variant="outlined"
                 >
-                    <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    <Box pr="4px" />
-                    {i18next.t("label.view-entity", {
-                        entity: i18next.t("label.video"),
-                    })}
+                    <Box component="span" display="flex" mr={1}>
+                        <Icon icon="material-symbols:slow-motion-video-sharp" />
+                    </Box>
+                    <Box component="span">
+                        {i18next.t("label.view-entity", {
+                            entity: i18next.t("label.video"),
+                        })}
+                    </Box>
                 </LinkButtonV1>
             </>
         ),
@@ -197,14 +203,13 @@ export const anomaliesInvestigateBasicHelpCards: HelpDrawerV1Card[] = [
         }),
         body: (
             <>
-                {i18next.t("message.investigate-helper-description")}
+                {i18next.t("message.investigate-helper-description")}{" "}
                 <LinkV1
                     externalLink
                     href={i18next.t("url.how-to-investigate-anomaly")}
                     target="_blank"
                     variant="body2"
                 >
-                    <Box pr="4px" />
                     {capitalize(
                         i18next.t("message.learn-more-about-entity", {
                             entity: i18next.t("label.anomaly-investigation"),
@@ -233,11 +238,14 @@ export const anomaliesInvestigateBasicHelpCards: HelpDrawerV1Card[] = [
                     target="_blank"
                     variant="outlined"
                 >
-                    <Icon icon="material-symbols:slow-motion-video-sharp" />
-                    <Box pr="4px" />
-                    {i18next.t("label.view-entity", {
-                        entity: i18next.t("label.video"),
-                    })}
+                    <Box component="span" display="flex" mr={1}>
+                        <Icon icon="material-symbols:slow-motion-video-sharp" />
+                    </Box>
+                    <Box component="span">
+                        {i18next.t("label.view-entity", {
+                            entity: i18next.t("label.video"),
+                        })}
+                    </Box>
                 </LinkButtonV1>
             </>
         ),

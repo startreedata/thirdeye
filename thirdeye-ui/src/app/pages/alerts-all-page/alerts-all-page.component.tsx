@@ -306,12 +306,15 @@ export const AlertsAllPage: FunctionComponent = () => {
                             variant="outlined"
                             onClick={() => setIsHelpPanelOpen(true)}
                         >
-                            {t("label.need-help")}
-                            <Box pr="4px" />
-                            <Icon
-                                fontSize={24}
-                                icon="mdi:question-mark-circle-outline"
-                            />
+                            <Box component="span" mr={1}>
+                                {t("label.need-help")}
+                            </Box>
+                            <Box component="span" display="flex">
+                                <Icon
+                                    fontSize={24}
+                                    icon="mdi:question-mark-circle-outline"
+                                />
+                            </Box>
                         </Button>{" "}
                         {/* Rendering the create button here instead of using the 
                         `showCreateButton` to show it in the same row as the help button */}

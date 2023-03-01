@@ -140,10 +140,10 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                         </LoadingErrorStateSwitch>
 
                         <Box clone pb={3} pt={2} textAlign="center">
-                            <Typography color="secondary" variant="body2">
+                            <Typography variant="body2">
                                 <Trans i18nKey="message.you-can-always-change-your-setup-in-the-configuration-section">
                                     <LinkV1
-                                        color="secondary"
+                                        color="primary"
                                         href={getConfigurationPath()}
                                         variant="body2"
                                     />

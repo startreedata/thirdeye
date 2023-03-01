@@ -20,10 +20,15 @@ import { Trans, useTranslation } from "react-i18next";
 import { IframeVideoPlayerContainer } from "../../../components/iframe-video-player-container/iframe-video-player-container.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WelcomeStepCard } from "../../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
-import { PageContentsCardV1, PageV1 } from "../../../platform/components";
+import {
+    LinkV1,
+    PageContentsCardV1,
+    PageV1,
+} from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import {
+    getConfigurationPath,
     getDataConfigurationCreatePath,
     getWelcomeCreateAlert,
 } from "../../../utils/routes/routes.util";
@@ -136,9 +141,13 @@ export const WelcomeLandingPage: FunctionComponent = () => {
 
                         <Box clone pb={3} pt={2} textAlign="center">
                             <Typography color="secondary" variant="body2">
-                                {t(
-                                    "message.you-can-always-change-your-setup-in-the-configuration-section"
-                                )}
+                                <Trans i18nKey="message.you-can-always-change-your-setup-in-the-configuration-section">
+                                    <LinkV1
+                                        color="secondary"
+                                        href={getConfigurationPath()}
+                                        variant="body2"
+                                    />
+                                </Trans>
                             </Typography>
                         </Box>
                     </Box>

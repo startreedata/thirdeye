@@ -423,6 +423,7 @@
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
         "anomaly-helper-description": "An anomaly is the system flagging the recorded behavior of the system deviating from the expected behaviour. Anomalies are created by an alert that is configured to used a specific flagging criteria to determine if the system has shown unexpected behavior within a bound period of time. <br /><br /> Anomalies form the basis of further investigations to determine the impact of various factors on the system, which may be helpful in determining the cause behind the unexpected behaviour of the system in the past, or to even predict/prevent similar behaviour in the future.",
         "anomaly-precision-tooltip": "(Anomalies labeled as anomalies) / (Anomalies with feedback)",
+        "are-you-sure-to-proceed-without-any-alerts-dimensions-added-to-subscription-group": "Are you sure you want to proceed without any alerts or dimensions added to this subscription group?",
         "authentication-disabled": "Authentication has been disabled.",
         "authentication-error": "Authentication could not be initialized. Please try reloading the page. (Error code: {{exceptionCode}})",
         "automatically-detects-and-prioritizes-dimensions": "Automatically detects and prioritizes dimensions to monitor",

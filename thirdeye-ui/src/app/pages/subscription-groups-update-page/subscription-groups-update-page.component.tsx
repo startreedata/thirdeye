@@ -110,7 +110,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 link: pagePath,
             },
         ],
-        transparentBackground: true,
         title: t(`label.update-entity`, {
             entity: t("label.subscription-group"),
         }),

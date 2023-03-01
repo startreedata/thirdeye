@@ -182,7 +182,6 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
                 link: pagePath,
             },
         ],
-        transparentBackground: true,
         title: t(`label.create-entity`, {
             entity: t("label.subscription-group"),
         }),

@@ -34,14 +34,6 @@ public interface MergedAnomalyIndexMapper {
 
   @Named("labelsToIgnoredMapper")
   static boolean labelsToIgnored(List<AnomalyLabelDTO> labels) {
-    if (labels == null) {
-      return false;
-    }
-    for (AnomalyLabelDTO label : labels) {
-      if (label.isIgnore()) {
-        return true;
-      }
-    }
-    return false;
+    return labels != null && labels.stream().anyMatch(AnomalyLabelDTO::isIgnore);
   }
 }

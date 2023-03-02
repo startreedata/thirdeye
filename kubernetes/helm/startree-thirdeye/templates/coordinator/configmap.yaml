@@ -59,12 +59,8 @@ data:
 {{ toYaml .Values.auth | indent 6 }}
 
     database:
-      # Defaults to k8s cluster local MySQL server running on port 3306, but uses URL if provided
-      {{ if .Values.mysql.mysqlUrl }}
-      url: jdbc:mysql://{{- .Values.mysql.mysqlUrl -}}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
-      {{ else }}
-      url: jdbc:mysql://{{ include "thirdeye.mysql.fullname" . }}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
-      {{ end }}
+      # If internal MySQL is disabled, connection will be made to the provided 'mysql.url' on port 3306
+      url: jdbc:mysql://{{- if .Values.mysql.enabled -}}{{- include "thirdeye.mysql.fullname" . -}}{{- else -}}{{- .Values.mysql.url -}}{{- end -}}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
       user: {{ .Values.mysql.mysqlUser }}
       password: {{ .Values.mysql.mysqlPassword }}
       driver: com.mysql.cj.jdbc.Driver

@@ -1,0 +1,180 @@
+/*
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+import { TextField } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
+import { capitalize } from "lodash";
+import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
+import { SkeletonV1 } from "../../../platform/components";
+import { ActionStatus } from "../../../platform/rest/actions.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
+import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
+import { InputSection } from "../../form-basics/input-section/input-section.component";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import {
+    CreateAnomalyFormKeys,
+    CreateAnomalyReadOnlyFormFields,
+} from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
+import { getEnumerationItemsConfigFromAlert } from "../create-anomaly-wizard/create-anomaly-wizard.utils";
+import { CreateAnomalyPropertiesFormProps } from "./create-anomaly-properties-form";
+
+export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropertiesFormProps> =
+    ({
+        alerts,
+        formFields,
+        readOnlyFormFields,
+        handleSetField,
+        enumerationItemsForAlert,
+        enumerationItemsStatus,
+    }) => {
+        const { t } = useTranslation();
+
+        const showEnumerationItemsField = !!(
+            formFields.alert &&
+            getEnumerationItemsConfigFromAlert(formFields.alert)
+        );
+
+        const formLabels: Record<CreateAnomalyFormKeys, string> = {
+            alert: t("label.alert"),
+            dataSource: t("label.datasource"),
+            dataset: t("label.dataset"),
+            dateRange: t("label.date-range"),
+            enumerationItem: t("label.dimension"),
+            metric: t("label.metric"),
+        };
+
+        return (
+            <>
+                <InputSection
+                    inputComponent={
+                        <Autocomplete
+                            fullWidth
+                            getOptionLabel={(option) => option.name}
+                            options={alerts}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    InputProps={{
+                                        ...params.InputProps,
+                                    }}
+                                    margin="dense"
+                                    placeholder={capitalize(
+                                        t(
+                                            "message.click-here-to-select-entity",
+                                            {
+                                                entity: t("label.alert"),
+                                            }
+                                        )
+                                    )}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            )}
+                            value={formFields.alert}
+                            onChange={(_, selectedValue) => {
+                                selectedValue &&
+                                    handleSetField("alert", selectedValue);
+                            }}
+                        />
+                    }
+                    label={formLabels.alert}
+                />
+
+                {(
+                    Object.keys(
+                        readOnlyFormFields
+                    ) as (keyof CreateAnomalyReadOnlyFormFields)[]
+                ).map((readOnlyKey: keyof CreateAnomalyReadOnlyFormFields) => (
+                    <InputSection
+                        inputComponent={
+                            <TextField
+                                disabled
+                                fullWidth
+                                required
+                                name={readOnlyKey}
+                                // size={"large" as "medium"}
+                                title="These properties are derived from the selected alert"
+                                type="string"
+                                value={readOnlyFormFields[readOnlyKey]}
+                                variant="outlined"
+                            />
+                        }
+                        key={readOnlyKey}
+                        label={formLabels[readOnlyKey]}
+                    />
+                ))}
+
+                <LoadingErrorStateSwitch
+                    isError={enumerationItemsStatus === ActionStatus.Error}
+                    isLoading={enumerationItemsStatus === ActionStatus.Working}
+                    loadingState={
+                        <InputSection
+                            inputComponent={
+                                <SkeletonV1 height="80" width="400" />
+                            }
+                            label={formLabels.enumerationItem}
+                        />
+                    }
+                >
+                    {!!(
+                        showEnumerationItemsField &&
+                        enumerationItemsForAlert &&
+                        enumerationItemsForAlert.length > 0
+                    ) && (
+                        <InputSection
+                            inputComponent={
+                                <Autocomplete<EnumerationItem>
+                                    fullWidth
+                                    getOptionLabel={(option) =>
+                                        generateNameForEnumerationItem(option)
+                                    }
+                                    options={enumerationItemsForAlert}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            InputProps={{
+                                                ...params.InputProps,
+                                            }}
+                                            placeholder={capitalize(
+                                                t(
+                                                    "message.click-here-to-select-entity",
+                                                    {
+                                                        entity: t(
+                                                            "label.enumeration-item"
+                                                        ),
+                                                    }
+                                                )
+                                            )}
+                                            variant="outlined"
+                                        />
+                                    )}
+                                    size="small"
+                                    value={formFields.enumerationItem}
+                                    onChange={(_, selectedValue) => {
+                                        handleSetField(
+                                            "enumerationItem",
+                                            selectedValue
+                                        );
+                                    }}
+                                />
+                            }
+                            label={formLabels.enumerationItem}
+                        />
+                    )}
+                </LoadingErrorStateSwitch>
+            </>
+        );
+    };

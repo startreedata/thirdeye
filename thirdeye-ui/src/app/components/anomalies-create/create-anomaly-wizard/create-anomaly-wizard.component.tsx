@@ -13,9 +13,8 @@
  * the License.
  */
 
-import { Grid, TextField, Typography } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import { Grid, Typography } from "@material-ui/core";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
@@ -23,10 +22,17 @@ import {
     PageContentsGridV1,
 } from "../../../platform/components";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
 import { generateDateRangeDaysFromNow } from "../../../utils/routes/routes.util";
-import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
-import { CreateAnomalyWizardProps } from "./create-anomaly-wizard.interfaces";
+import { CreateAnomalyPropertiesForm } from "../create-anomaly-properties-form/create-anomaly-properties-form.component";
+import {
+    CreateAnomalyEditableFormFields,
+    CreateAnomalyReadOnlyFormFields,
+    CreateAnomalyWizardProps,
+    HandleSetFields,
+} from "./create-anomaly-wizard.interfaces";
+import { getEnumerationItemsConfigFromAlert } from "./create-anomaly-wizard.utils";
 
 export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
     ({
@@ -42,43 +48,55 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
 
         const [editedAnomaly, setEditedAnomaly] =
             useState<EditedAnomaly>(initialAnomalyData);
+        const {
+            enumerationItems,
+            getEnumerationItems,
+            status: enumerationItemsStatus,
+        } = useGetEnumerationItems();
 
-        interface FormFields {
-            alert: Alert | null;
-            enumerationItem: number | null;
-            dateRange: [number, number];
-        }
+        const [formFields, setFormFields] =
+            useState<CreateAnomalyEditableFormFields>({
+                alert: null,
+                enumerationItem: null,
+                dateRange: generateDateRangeDaysFromNow(3),
+            });
 
-        const [formFields, setFormFields] = useState<FormFields>({
-            alert: null,
-            enumerationItem: null,
-            dateRange: generateDateRangeDaysFromNow(3),
-        });
-
-        const readOnlyFormFields = useMemo(() => {
-            if (!formFields.alert) {
-                return {
-                    dataSource: null,
-                    dataset: null,
-                    metric: null,
-                };
+        useEffect(() => {
+            if (
+                formFields.alert &&
+                getEnumerationItemsConfigFromAlert(formFields.alert)
+            ) {
+                getEnumerationItems({
+                    alertId: formFields.alert.id,
+                });
             }
-            const {
-                dataSource,
-                dataset,
-                aggregationColumn: metric,
-            } = formFields.alert.templateProperties as {
-                dataSource: string;
-                dataset: string;
-                aggregationColumn: string;
-            };
-
-            return {
-                dataSource,
-                dataset,
-                metric,
-            };
         }, [formFields.alert]);
+
+        const readOnlyFormFields =
+            useMemo<CreateAnomalyReadOnlyFormFields>(() => {
+                if (!formFields.alert) {
+                    return {
+                        dataSource: null,
+                        dataset: null,
+                        metric: null,
+                    };
+                }
+                const {
+                    dataSource,
+                    dataset,
+                    aggregationColumn: metric,
+                } = formFields.alert.templateProperties as {
+                    dataSource: string;
+                    dataset: string;
+                    aggregationColumn: string;
+                };
+
+                return {
+                    dataSource,
+                    dataset,
+                    metric,
+                };
+            }, [formFields.alert]);
 
         const handleCancelClick = (): void => {
             onCancel?.();
@@ -87,13 +105,16 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             onSubmit?.(editedAnomaly);
         };
 
-        const handleSetField = <T extends keyof typeof formFields>(
-            fieldName: T,
-            fieldValue: FormFields[T]
-        ): void => {
+        const handleSetField: HandleSetFields = (fieldName, fieldValue) => {
             setFormFields((stateProp) => ({
                 ...stateProp,
                 [fieldName]: fieldValue,
+
+                // Clear out enumeration items if alert is set
+                ...(fieldName === "alert" &&
+                    !!((fieldValue as Alert).id !== stateProp.alert?.id) && {
+                        enumerationItem: null,
+                    }),
             }));
         };
 
@@ -121,66 +142,26 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    <InputSection
-                                        inputComponent={
-                                            <Autocomplete
-                                                fullWidth
-                                                getOptionLabel={(option) =>
-                                                    option.name
-                                                }
-                                                options={alerts}
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        InputProps={{
-                                                            ...params.InputProps,
-                                                        }}
-                                                        placeholder={t(
-                                                            "message.click-here-to-select-entity",
-                                                            {
-                                                                entity: t(
-                                                                    "label.alert"
-                                                                ),
-                                                            }
-                                                        )}
-                                                        variant="outlined"
-                                                    />
-                                                )}
-                                                size="small"
-                                                value={formFields.alert}
-                                                onChange={(
-                                                    _,
-                                                    selectedValue
-                                                ) => {
-                                                    handleSetField(
-                                                        "alert",
-                                                        selectedValue
-                                                    );
-                                                }}
-                                            />
+                                    <CreateAnomalyPropertiesForm
+                                        alerts={alerts}
+                                        enumerationItemsForAlert={
+                                            enumerationItems || []
                                         }
-                                        label={t("label.alert")}
+                                        enumerationItemsStatus={
+                                            enumerationItemsStatus
+                                        }
+                                        formFields={formFields}
+                                        handleSetField={handleSetField}
+                                        readOnlyFormFields={readOnlyFormFields}
                                     />
-
-                                    {Object.entries(readOnlyFormFields).map(
-                                        ([readOnlyKey, readOnlyValue]) => (
-                                            <InputSection
-                                                inputComponent={
-                                                    <TextField
-                                                        disabled
-                                                        fullWidth
-                                                        required
-                                                        name={readOnlyKey}
-                                                        type="string"
-                                                        value={readOnlyValue}
-                                                        variant="outlined"
-                                                    />
-                                                }
-                                                key={readOnlyKey}
-                                                label={readOnlyKey}
-                                            />
-                                        )
-                                    )}
+                                    {/* <Divider />
+                                    <pre>
+                                        {JSON.stringify(
+                                            formFields,
+                                            undefined,
+                                            4
+                                        )}
+                                    </pre> */}
                                 </Grid>
                             </Grid>
                         </PageContentsCardV1>

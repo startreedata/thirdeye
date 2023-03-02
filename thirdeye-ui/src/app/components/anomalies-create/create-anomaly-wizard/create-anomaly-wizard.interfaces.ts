@@ -15,6 +15,7 @@
 
 import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 
 export interface CreateAnomalyWizardProps {
     alerts: Alert[];
@@ -24,3 +25,24 @@ export interface CreateAnomalyWizardProps {
     onSubmit: (anomaly: EditedAnomaly) => void;
     onCancel: () => void;
 }
+
+export interface CreateAnomalyEditableFormFields {
+    alert: Alert | null;
+    enumerationItem: EnumerationItem | null;
+    dateRange: [number, number];
+}
+
+export interface CreateAnomalyReadOnlyFormFields {
+    dataSource: string | null;
+    dataset: string | null;
+    metric: string | null;
+}
+
+export type CreateAnomalyFormKeys =
+    | keyof CreateAnomalyEditableFormFields
+    | keyof CreateAnomalyReadOnlyFormFields;
+
+export type HandleSetFields = <T extends keyof CreateAnomalyEditableFormFields>(
+    fieldName: T,
+    fieldValue: CreateAnomalyEditableFormFields[T]
+) => void;

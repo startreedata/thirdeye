@@ -57,8 +57,16 @@ export const RecipientDetails: FunctionComponent<RecipientDetailsProps> = ({
 
     return (
         <Grid item xs={12}>
-            <Card variant="outlined">
-                <CardHeader title={t("label.recipient-details")} />
+            <Card>
+                <CardHeader
+                    subheader={t(
+                        "message.configure-notification-channels-that-will-receive-updates-from-this-subscription-group"
+                    )}
+                    subheaderTypographyProps={{
+                        variant: "subtitle1",
+                    }}
+                    title={t("label.recipient-details")}
+                />
                 <CardContent>
                     <GroupsEditor
                         subscriptionGroup={subscriptionGroup}

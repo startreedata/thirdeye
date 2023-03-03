@@ -190,6 +190,11 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                     <Typography variant="h5">
                         {t("label.alerts-and-dimensions")}
                     </Typography>
+                    <Typography color="textSecondary" variant="subtitle1">
+                        {t(
+                            "message.add-individual-alerts-and-dimensions-that-will-send-updates-via-this-subscription-group"
+                        )}
+                    </Typography>
                 </Box>
                 <Button
                     color="primary"
@@ -199,7 +204,7 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                     {t("message.add-alert-dimensions")}
                 </Button>
             </Box>
-            <Card variant="outlined">
+            <Card>
                 <CardContent>
                     <EmptyStateSwitch
                         emptyState={

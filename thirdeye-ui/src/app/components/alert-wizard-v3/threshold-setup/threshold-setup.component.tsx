@@ -43,6 +43,7 @@ import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import {
     buildPinotDatasourcesTree,
     DatasetInfo,
+    STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
@@ -131,6 +132,13 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
         if (!metric || !selectedTable) {
             return;
         }
+        let aggregationColumn = selectedAggregationFunction;
+
+        // If metric is * set the aggregation function to COUNT
+        if (metric === STAR_COLUMN) {
+            setSelectedAggregationFunction(MetricAggFunction.COUNT);
+            aggregationColumn = MetricAggFunction.COUNT;
+        }
 
         setSelectedMetric(metric);
 
@@ -140,7 +148,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                 ...generateTemplateProperties(
                     metric,
                     selectedTable.dataset,
-                    selectedAggregationFunction
+                    aggregationColumn
                 ),
             },
         });
@@ -369,13 +377,19 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                             <Autocomplete
                                 disableClearable
                                 fullWidth
-                                options={[
-                                    MetricAggFunction.SUM,
-                                    MetricAggFunction.AVG,
-                                    MetricAggFunction.COUNT,
-                                    MetricAggFunction.MIN,
-                                    MetricAggFunction.MAX,
-                                ]}
+                                // Disable selection if selected column is *
+                                disabled={selectedMetric === STAR_COLUMN}
+                                options={
+                                    selectedMetric === STAR_COLUMN
+                                        ? [MetricAggFunction.COUNT]
+                                        : [
+                                              MetricAggFunction.SUM,
+                                              MetricAggFunction.AVG,
+                                              MetricAggFunction.COUNT,
+                                              MetricAggFunction.MIN,
+                                              MetricAggFunction.MAX,
+                                          ]
+                                }
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}

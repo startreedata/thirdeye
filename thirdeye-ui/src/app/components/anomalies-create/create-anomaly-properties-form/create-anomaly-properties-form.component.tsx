@@ -24,6 +24,7 @@ import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import {
     CreateAnomalyFormKeys,
     CreateAnomalyReadOnlyFormFields,
@@ -101,14 +102,16 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                     <InputSection
                         inputComponent={
                             <TextField
-                                disabled
                                 fullWidth
                                 required
+                                InputProps={{
+                                    margin: "none",
+                                    readOnly: true,
+                                }}
                                 name={readOnlyKey}
-                                // size={"large" as "medium"}
                                 title="These properties are derived from the selected alert"
                                 type="string"
-                                value={readOnlyFormFields[readOnlyKey]}
+                                value={readOnlyFormFields[readOnlyKey] || ""}
                                 variant="outlined"
                             />
                         }
@@ -123,7 +126,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                     loadingState={
                         <InputSection
                             inputComponent={
-                                <SkeletonV1 height="80" width="400" />
+                                <SkeletonV1 height={60} width="100%" />
                             }
                             label={formLabels.enumerationItem}
                         />
@@ -175,6 +178,18 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                         />
                     )}
                 </LoadingErrorStateSwitch>
+
+                <InputSection
+                    fullWidth
+                    inputComponent={
+                        <TimeRangeButtonWithContext
+                            onTimeRangeChange={(start: number, end: number) =>
+                                handleSetField("dateRange", [start, end])
+                            }
+                        />
+                    }
+                    label={formLabels.dateRange}
+                />
             </>
         );
     };

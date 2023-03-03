@@ -276,9 +276,9 @@ describe("Subscription Groups Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render page not found page at any other path", async () => {
+    it("should render page not found page at invalid subscription group path (no path after an id of an subscription group)", async () => {
         render(
-            <MemoryRouter initialEntries={["/testPath"]}>
+            <MemoryRouter initialEntries={["/1234/testPath"]}>
                 <SubscriptionGroupsRouter />
             </MemoryRouter>
         );

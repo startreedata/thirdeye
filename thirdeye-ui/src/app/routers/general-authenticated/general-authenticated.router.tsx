@@ -14,6 +14,7 @@
  */
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import {
     AppRoute,
@@ -65,13 +66,23 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
 
                 {/* Home path */}
                 <Route
-                    element={<HomePage />}
+                    element={
+                        <CancelAPICallsOnPageUnload key={AppRouteRelative.HOME}>
+                            <HomePage />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.HOME}`}
                 />
 
                 {/* Admin path */}
                 <Route
-                    element={<AdminPage />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={AppRouteRelative.ADMIN}
+                        >
+                            <AdminPage />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.ADMIN}`}
                 />
 

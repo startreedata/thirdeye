@@ -14,6 +14,7 @@
  */
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 
@@ -73,36 +74,72 @@ export const ConfigurationRouter: FunctionComponent = () => {
 
                 {/* Direct all subscription groups paths to subscription groups router */}
                 <Route
-                    element={<SubscriptionGroupsRouter />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={`${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
+                        >
+                            <SubscriptionGroupsRouter />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
                 />
 
                 {/* Direct all datasets paths to datasets router */}
                 <Route
-                    element={<DatasetsRouter />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={`${AppRouteRelative.DATASETS}/*`}
+                        >
+                            <DatasetsRouter />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.DATASETS}/*`}
                 />
 
                 {/* Direct all datasource paths to datasources router */}
                 <Route
-                    element={<DatasourcesRouter />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={`${AppRouteRelative.DATASOURCES}/*`}
+                        >
+                            <DatasourcesRouter />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.DATASOURCES}/*`}
                 />
 
                 {/* Direct all metrics paths to metrics router */}
                 <Route
-                    element={<MetricsRouter />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={`${AppRouteRelative.METRICS}/*`}
+                        >
+                            <MetricsRouter />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.METRICS}/*`}
                 />
 
                 {/* Alert templates path */}
                 <Route
-                    element={<AlertTemplatesRouter />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={`${AppRouteRelative.ALERT_TEMPLATES}/*`}
+                        >
+                            <AlertTemplatesRouter />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.ALERT_TEMPLATES}/*`}
                 />
 
                 <Route
-                    element={<EventsRouter />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={`${AppRouteRelative.EVENTS}/*`}
+                        >
+                            <EventsRouter />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={`${AppRouteRelative.EVENTS}/*`}
                 />
 

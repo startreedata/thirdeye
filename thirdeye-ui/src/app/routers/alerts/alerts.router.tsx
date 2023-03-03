@@ -15,6 +15,7 @@
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertsUpdateBasePage } from "../../pages/alerts-update-page/alerts-update-base-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
@@ -109,7 +110,13 @@ export const AlertsRouter: FunctionComponent = () => {
 
                 {/* Alerts all path */}
                 <Route
-                    element={<AlertsAllPage />}
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={AppRouteRelative.ALERTS_ALL}
+                        >
+                            <AlertsAllPage />
+                        </CancelAPICallsOnPageUnload>
+                    }
                     path={AppRouteRelative.ALERTS_ALL}
                 />
 
@@ -126,7 +133,13 @@ export const AlertsRouter: FunctionComponent = () => {
                     />
 
                     <Route
-                        element={<AlertsCreatePageNew />}
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={`${AppRouteRelative.ALERTS_CREATE_NEW}/*`}
+                            >
+                                <AlertsCreatePageNew />
+                            </CancelAPICallsOnPageUnload>
+                        }
                         path={`${AppRouteRelative.ALERTS_CREATE_NEW}/*`}
                     >
                         <Route
@@ -145,13 +158,17 @@ export const AlertsRouter: FunctionComponent = () => {
 
                         <Route
                             element={
-                                <AlertsCreateGuidedRouter
-                                    navigateToAlertDetailAfterSampleAlertCreate
-                                    sampleAlertsBottom
-                                    useParentForNonWelcomeFlow
-                                    createLabel={t("label.create")}
-                                    inProgressLabel={t("label.creating")}
-                                />
+                                <CancelAPICallsOnPageUnload
+                                    key={`${AppRouteRelative.ALERTS_CREATE_NEW_USER}/*`}
+                                >
+                                    <AlertsCreateGuidedRouter
+                                        navigateToAlertDetailAfterSampleAlertCreate
+                                        sampleAlertsBottom
+                                        useParentForNonWelcomeFlow
+                                        createLabel={t("label.create")}
+                                        inProgressLabel={t("label.creating")}
+                                    />
+                                </CancelAPICallsOnPageUnload>
                             }
                             path={`${AppRouteRelative.ALERTS_CREATE_NEW_USER}/*`}
                         />

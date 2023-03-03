@@ -22,9 +22,11 @@ import { SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../platform/rest/actions.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
+import { createTimeRangeDuration } from "../../../utils/time-range/time-range.util";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
+import { TimeRangeButton } from "../../time-range/time-range-button/time-range-button.component";
+import { TimeRange } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import {
     CreateAnomalyFormKeys,
     CreateAnomalyReadOnlyFormFields,
@@ -56,6 +58,12 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
             enumerationItem: t("label.dimension"),
             metric: t("label.metric"),
         };
+
+        const timeRangeDuration = createTimeRangeDuration(
+            TimeRange.CUSTOM,
+            formFields.dateRange[0],
+            formFields.dateRange[1]
+        );
 
         return (
             <>
@@ -182,9 +190,13 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                 <InputSection
                     fullWidth
                     inputComponent={
-                        <TimeRangeButtonWithContext
-                            onTimeRangeChange={(start: number, end: number) =>
-                                handleSetField("dateRange", [start, end])
+                        <TimeRangeButton
+                            timeRangeDuration={timeRangeDuration}
+                            onChange={({ startTime, endTime }) =>
+                                handleSetField("dateRange", [
+                                    startTime,
+                                    endTime,
+                                ])
                             }
                         />
                     }

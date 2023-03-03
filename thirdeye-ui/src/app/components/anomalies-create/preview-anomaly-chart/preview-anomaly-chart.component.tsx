@@ -1,0 +1,168 @@
+/*
+ * Copyright 2022 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+import { Box } from "@material-ui/core";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
+import {
+    PageContentsCardV1,
+    useNotificationProviderV1,
+} from "../../../platform/components";
+import { ActionStatus } from "../../../platform/rest/actions.interfaces";
+import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
+import {
+    createAlertEvaluation,
+    determineTimezoneFromAlertInEvaluation,
+    extractDetectionEvaluation,
+} from "../../../utils/alerts/alerts.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { generateDateRangeMonthsFromNow } from "../../../utils/routes/routes.util";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { AlertEvaluationTimeSeriesCard } from "../../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
+import { ViewAnomalyHeader } from "../../visualizations/alert-evaluation-time-series-card/headers/view-anomaly-header.component";
+import { PreviewAnomalyChartProps } from "./preview-anomaly-chart.interfaces";
+
+export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
+    ({ editedAnomaly: anomaly }) => {
+        const {
+            evaluation,
+            getEvaluation,
+            errorMessages,
+            status: getEvaluationRequestStatus,
+        } = useGetEvaluation();
+
+        const [detectionEvaluation, setDetectionEvaluation] =
+            useState<DetectionEvaluation | null>(null);
+        const [searchParams, setSearchParams] = useSearchParams();
+        const { t } = useTranslation();
+        const { notify } = useNotificationProviderV1();
+
+        useEffect(() => {
+            if (!evaluation || !anomaly) {
+                return;
+            }
+
+            const detectionEvalForAnomaly =
+                extractDetectionEvaluation(evaluation)[0];
+
+            // Only filter for the current anomaly
+            detectionEvalForAnomaly.anomalies = [anomaly as Anomaly];
+            setDetectionEvaluation(detectionEvalForAnomaly);
+        }, [evaluation, anomaly.alert.id]);
+
+        useEffect(() => {
+            // Fetched alert or time range changed, fetch alert evaluation
+            fetchAlertEvaluation();
+        }, [searchParams, anomaly.alert.id, anomaly.enumerationItem]);
+
+        useEffect(() => {
+            const defaultDatetimeValues = generateDateRangeMonthsFromNow(36);
+
+            if (
+                !(
+                    searchParams.has(TimeRangeQueryStringKey.START_TIME) &&
+                    searchParams.has(TimeRangeQueryStringKey.END_TIME)
+                )
+            ) {
+                searchParams.set(
+                    TimeRangeQueryStringKey.START_TIME,
+                    `${defaultDatetimeValues[0]}`
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.END_TIME,
+                    `${defaultDatetimeValues[1]}`
+                );
+                setSearchParams(searchParams);
+            }
+        }, []);
+
+        useEffect(() => {
+            notifyIfErrors(
+                getEvaluationRequestStatus,
+                errorMessages,
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t("label.chart-data"),
+                })
+            );
+        }, [errorMessages, getEvaluationRequestStatus]);
+
+        const fetchAlertEvaluation = (): void => {
+            const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+            const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+            if (!anomaly || !anomaly.alert || !start || !end) {
+                setDetectionEvaluation(null);
+
+                return;
+            }
+            getEvaluation(
+                createAlertEvaluation(
+                    anomaly.alert,
+                    Number(start),
+                    Number(end)
+                ),
+                undefined,
+                anomaly.enumerationItem
+            );
+        };
+
+        /**
+         * Chart data will have issues if the evaluation request errors or
+         * anomaly belongs to an enumeration item and its request errors
+         */
+        const chartDataHasIssues =
+            getEvaluationRequestStatus === ActionStatus.Error;
+
+        return (
+            <Box>
+                {chartDataHasIssues && (
+                    <PageContentsCardV1>
+                        <Box pb={20} pt={20}>
+                            <NoDataIndicator />
+                        </Box>
+                    </PageContentsCardV1>
+                )}
+                {!chartDataHasIssues && (
+                    <AlertEvaluationTimeSeriesCard
+                        disableNavigation
+                        alertEvaluationTimeSeriesHeight={500}
+                        anomalies={[anomaly as Anomaly]}
+                        detectionEvaluation={detectionEvaluation}
+                        header={
+                            <ViewAnomalyHeader
+                                anomaly={anomaly as Anomaly}
+                                timezone={determineTimezoneFromAlertInEvaluation(
+                                    evaluation?.alert
+                                )}
+                                onRefresh={fetchAlertEvaluation}
+                            />
+                        }
+                        isLoading={
+                            getEvaluationRequestStatus === ActionStatus.Working
+                        }
+                        rootCardProps={{ variant: "elevation" }}
+                        timezone={determineTimezoneFromAlertInEvaluation(
+                            evaluation?.alert
+                        )}
+                    />
+                )}
+            </Box>
+        );
+    };

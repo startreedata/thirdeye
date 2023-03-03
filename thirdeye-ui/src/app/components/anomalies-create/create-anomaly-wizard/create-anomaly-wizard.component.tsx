@@ -13,19 +13,23 @@
  * the License.
  */
 
-import { Grid, Typography } from "@material-ui/core";
+import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
+    SkeletonV1,
 } from "../../../platform/components";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { AnomalyResultSource } from "../../../rest/dto/anomaly.interfaces";
+import { Metric } from "../../../rest/dto/metric.interfaces";
 import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
-import { generateDateRangeDaysFromNow } from "../../../utils/routes/routes.util";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { CreateAnomalyPropertiesForm } from "../create-anomaly-properties-form/create-anomaly-properties-form.component";
+import { PreviewAnomalyChart } from "../preview-anomaly-chart/preview-anomaly-chart.component";
 import {
     CreateAnomalyEditableFormFields,
     CreateAnomalyReadOnlyFormFields,
@@ -46,8 +50,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
     }) => {
         const { t } = useTranslation();
 
-        const [editedAnomaly, setEditedAnomaly] =
-            useState<EditedAnomaly>(initialAnomalyData);
         const {
             enumerationItems,
             getEnumerationItems,
@@ -56,21 +58,13 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
 
         const [formFields, setFormFields] =
             useState<CreateAnomalyEditableFormFields>({
+                // TODO: Implement initialAnomalyData
                 alert: null,
                 enumerationItem: null,
-                dateRange: generateDateRangeDaysFromNow(3),
+                // Hardcoded for Anomaly #366
+                // TODO: Proper values
+                dateRange: [1639958400000, 1640044800000],
             });
-
-        useEffect(() => {
-            if (
-                formFields.alert &&
-                getEnumerationItemsConfigFromAlert(formFields.alert)
-            ) {
-                getEnumerationItems({
-                    alertId: formFields.alert.id,
-                });
-            }
-        }, [formFields.alert]);
 
         const readOnlyFormFields =
             useMemo<CreateAnomalyReadOnlyFormFields>(() => {
@@ -98,11 +92,63 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 };
             }, [formFields.alert]);
 
+        const editedAnomaly: EditedAnomaly | null = useMemo(() => {
+            if (
+                !(
+                    formFields.alert &&
+                    formFields.dateRange &&
+                    // formFields.enumerationItem &&
+                    readOnlyFormFields.dataset &&
+                    readOnlyFormFields.metric
+                )
+            ) {
+                return null;
+            }
+
+            return {
+                sourceType: AnomalyResultSource.USER_LABELED_ANOMALY,
+                startTime: formFields.dateRange[0],
+                endTime: formFields.dateRange[1],
+                ...(formFields.enumerationItem && {
+                    enumerationItem: formFields.enumerationItem,
+                }),
+                alert: formFields.alert,
+                metadata: {
+                    dataset: { name: readOnlyFormFields.dataset },
+                    metric: { name: readOnlyFormFields.metric } as Metric,
+                },
+                metric: { name: readOnlyFormFields.metric } as Metric,
+
+                // TODO: ?Proper values
+                avgBaselineVal: 0,
+                avgCurrentVal: 0,
+
+                // Hardcoded for Anomaly #366, for testing
+                // avgBaselineVal: -0.9689632094628097,
+                // avgCurrentVal: 3,
+
+                score: 0.0,
+                weight: 0.0,
+                impactToGlobal: 0.0,
+            };
+        }, [formFields, readOnlyFormFields]);
+
+        useEffect(() => {
+            if (
+                formFields.alert &&
+                getEnumerationItemsConfigFromAlert(formFields.alert)?.length
+            ) {
+                getEnumerationItems({
+                    alertId: formFields.alert.id,
+                });
+            }
+        }, [formFields.alert]);
+
         const handleCancelClick = (): void => {
             onCancel?.();
         };
         const handleSubmitClick = (): void => {
-            onSubmit?.(editedAnomaly);
+            editedAnomaly && onSubmit?.(editedAnomaly);
         };
 
         const handleSetField: HandleSetFields = (fieldName, fieldValue) => {
@@ -154,6 +200,50 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         handleSetField={handleSetField}
                                         readOnlyFormFields={readOnlyFormFields}
                                     />
+                                    <Grid item xs={12}>
+                                        <Box pb={3} pt={2}>
+                                            <Divider />
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <LoadingErrorStateSwitch
+                                            isError={false}
+                                            isLoading={!editedAnomaly}
+                                            loadingState={
+                                                <Box p={1} position="relative">
+                                                    <SkeletonV1
+                                                        animation={false}
+                                                        height={400}
+                                                        variant="rect"
+                                                        width="100%"
+                                                    />
+                                                    <Box
+                                                        alignItems="center"
+                                                        display="flex"
+                                                        height={400}
+                                                        justifyContent="center"
+                                                        position="absolute"
+                                                        top={0}
+                                                        width="100%"
+                                                    >
+                                                        <Typography
+                                                            color="textSecondary"
+                                                            variant="body2"
+                                                        >
+                                                            Select an alert to
+                                                            preview anomaly
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            }
+                                        >
+                                            <PreviewAnomalyChart
+                                                editedAnomaly={
+                                                    editedAnomaly as EditedAnomaly
+                                                }
+                                            />
+                                        </LoadingErrorStateSwitch>
+                                    </Grid>
                                     {/* <Divider />
                                     <pre>
                                         {JSON.stringify(

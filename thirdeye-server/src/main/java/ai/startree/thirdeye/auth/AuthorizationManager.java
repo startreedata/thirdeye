@@ -80,10 +80,6 @@ public class AuthorizationManager {
     ensureHasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
-  public void ensureCanEvaluate(final ThirdEyePrincipal principal, final AlertDTO entity) {
-    ensureCanRead(principal, entity);
-  }
-
   public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
     ensureCanCreate(principal, entity);
   }

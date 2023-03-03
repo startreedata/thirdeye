@@ -22,7 +22,6 @@ import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -34,7 +33,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.ws.rs.WebApplicationException;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -76,73 +74,52 @@ public class AlertEvaluator {
     executorService.shutdownNow();
   }
 
-  public AlertEvaluationApi evaluateExistingAlert(final AlertEvaluationApi request,
-      final AlertDTO alertDto) {
+  public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
+      throws ExecutionException {
     try {
+      final long startTime = request.getStart().getTime();
+      final long endTime = request.getEnd().getTime();
       final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
-          alertDto, request.getStart().getTime(), request.getEnd().getTime());
+          request.getAlert(),
+          startTime,
+          endTime);
 
       // apply template properties
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDto,
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
           detectionInterval);
 
-      return evaluate(request, detectionInterval, templateWithProperties);
+      final DetectionPipelineContext context = new DetectionPipelineContext()
+          .setAlertId(request.getAlert().getId())
+          .setUsage(DetectionPipelineUsage.EVALUATION)
+          .setDetectionInterval(detectionInterval);
+
+      // inject custom evaluation context
+      evaluationContextProcessor.process(context,
+          request.getEvaluationContext(),
+          templateWithProperties);
+
+      if (bool(request.isDryRun())) {
+        return new AlertEvaluationApi()
+            .setDryRun(true)
+            .setAlert(new AlertApi()
+                .setTemplate(toAlertTemplateApi(templateWithProperties)));
+      }
+
+      final Map<String, OperatorResult> result = executorService
+          .submit(() -> planExecutor.runPipelineAndGetRootOutputs(templateWithProperties.getNodes(),
+              context))
+          .get(TIMEOUT, TimeUnit.MILLISECONDS);
+
+      final Map<String, OperatorResult> processed = new DetectionPipelineOutputPostProcessor()
+          .process(result, request);
+
+      return toAlertEvaluationApi(processed)
+          .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
       handleAlertEvaluationException(e);
     }
     return null;
-  }
-
-  public AlertEvaluationApi evaluateNewAlert(final AlertEvaluationApi request,
-      final AlertApi alertApi) {
-    try {
-      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
-          alertApi, request.getStart().getTime(), request.getEnd().getTime());
-
-      // apply template properties
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
-          detectionInterval);
-
-      return evaluate(request, detectionInterval, templateWithProperties);
-    } catch (final WebApplicationException e) {
-      throw e;
-    } catch (final Exception e) {
-      handleAlertEvaluationException(e);
-    }
-    return null;
-  }
-
-  private AlertEvaluationApi evaluate(final AlertEvaluationApi request,
-      final Interval detectionInterval, final AlertTemplateDTO templateWithProperties)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    final DetectionPipelineContext context = new DetectionPipelineContext()
-        .setAlertId(request.getAlert().getId())
-        .setUsage(DetectionPipelineUsage.EVALUATION)
-        .setDetectionInterval(detectionInterval);
-
-    // inject custom evaluation context
-    evaluationContextProcessor.process(context,
-        request.getEvaluationContext(),
-        templateWithProperties);
-
-    if (bool(request.isDryRun())) {
-      return new AlertEvaluationApi()
-          .setDryRun(true)
-          .setAlert(new AlertApi()
-              .setTemplate(toAlertTemplateApi(templateWithProperties)));
-    }
-
-    final Map<String, OperatorResult> result = executorService
-        .submit(() -> planExecutor.runPipelineAndGetRootOutputs(templateWithProperties.getNodes(),
-            context))
-        .get(TIMEOUT, TimeUnit.MILLISECONDS);
-
-    final Map<String, OperatorResult> processed = new DetectionPipelineOutputPostProcessor()
-        .process(result, request);
-
-    return toAlertEvaluationApi(processed)
-        .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
   }
 }

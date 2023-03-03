@@ -239,16 +239,14 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final AlertApi alertApi = ensureExists(request.getAlert())
         .setOwner(new UserApi().setPrincipal(principal.getName()));
 
-    AlertEvaluationApi results;
     if (alertApi.getId() != null) {
       final AlertDTO alertDto = ensureExists(dtoManager.findById(alertApi.getId()));
       authorizationManager.ensureCanRead(principal, alertDto);
-      results = alertEvaluator.evaluateExistingAlert(request, alertDto);
     } else {
       authorizationManager.ensureCanCreate(principal, toDto(alertApi));
-      results = alertEvaluator.evaluateNewAlert(request, alertApi);
     }
 
+    final AlertEvaluationApi results = alertEvaluator.evaluate(request);
     results.setDetectionEvaluations(allowedEvaluations(principal,
         results.getDetectionEvaluations()));
     return Response.ok(results).build();

@@ -255,7 +255,7 @@ public class AlertResourceTest {
 
     when(alertTemplateManager.findById(1L)).thenReturn(alertTemplateDto);
     when(alertManager.findById(2L)).thenReturn(alertDto);
-    when(alertEvaluator.evaluateExistingAlert(alertEvaluationApi, alertDto))
+    when(alertEvaluator.evaluate(alertEvaluationApi))
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(new HashMap<>()));
 
     new AlertResource(
@@ -297,7 +297,7 @@ public class AlertResourceTest {
 
     when(alertTemplateManager.findById(1L)).thenReturn(alertTemplateDto);
     when(alertManager.findById(2L)).thenReturn(alertDto);
-    when(alertEvaluator.evaluateExistingAlert(alertEvaluationApi, alertDto))
+    when(alertEvaluator.evaluate(alertEvaluationApi))
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(
             new HashMap<>() {{
               put("allowedEval",
@@ -352,7 +352,7 @@ public class AlertResourceTest {
         .setEnd(new Date());
 
     when(alertTemplateManager.findById(1L)).thenReturn(alertTemplateDto);
-    when(alertEvaluator.evaluateNewAlert(alertEvaluationApi, alertEvaluationApi.getAlert()))
+    when(alertEvaluator.evaluate(alertEvaluationApi))
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(new HashMap<>()));
 
     new AlertResource(
@@ -391,7 +391,7 @@ public class AlertResourceTest {
         .setEnd(new Date());
 
     when(alertTemplateManager.findById(1L)).thenReturn(alertTemplateDto);
-    when(alertEvaluator.evaluateNewAlert(alertEvaluationApi, alertApi))
+    when(alertEvaluator.evaluate(alertEvaluationApi))
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(
             new HashMap<>() {{
               put("allowedEval",

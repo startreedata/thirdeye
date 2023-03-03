@@ -140,6 +140,23 @@ describe("Alerts Configuration Validator Util", () => {
 
         expect(result).toEqual([]);
     });
+
+    it("validateTemplateProperties should return no errors for dimension exploration values", () => {
+        const result = validateTemplateProperties(
+            [OPTIONED_SINGLE, OPTIONED_MULTISELECT, ARRAY, BOOLEAN, OBJECT],
+            {
+                optionedSingleProperty: "${foo}",
+                optionedMultiselectProperty: "${foo}",
+                arrayProperty: "${foo}",
+                booleanProperty: "${foo}",
+                objectProperty: "${foo}",
+                fieldNotIncluded: "${foo}",
+            },
+            MOCK_TRANSLATION
+        );
+
+        expect(result).toEqual([]);
+    });
 });
 
 const OPTIONED_SINGLE = {

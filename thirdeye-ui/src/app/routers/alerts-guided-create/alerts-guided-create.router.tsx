@@ -14,6 +14,7 @@
  */
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 import { AlertsGuidedCreateRouterProps } from "./alerts-guided-create.router.interface";
@@ -97,16 +98,22 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                         />
                         <Route
                             element={
-                                <SelectTypePage
-                                    hideCurrentlySelected={
-                                        hideCurrentlySelected
+                                <CancelAPICallsOnPageUnload
+                                    key={
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
                                     }
-                                    hideSampleAlerts={hideSampleAlerts}
-                                    navigateToAlertDetailAfterCreate={
-                                        navigateToAlertDetailAfterSampleAlertCreate
-                                    }
-                                    sampleAlertsBottom={sampleAlertsBottom}
-                                />
+                                >
+                                    <SelectTypePage
+                                        hideCurrentlySelected={
+                                            hideCurrentlySelected
+                                        }
+                                        hideSampleAlerts={hideSampleAlerts}
+                                        navigateToAlertDetailAfterCreate={
+                                            navigateToAlertDetailAfterSampleAlertCreate
+                                        }
+                                        sampleAlertsBottom={sampleAlertsBottom}
+                                    />
+                                </CancelAPICallsOnPageUnload>
                             }
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
@@ -114,21 +121,45 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                         />
 
                         <Route
-                            element={<SetupDimensionGroupsPage />}
+                            element={
+                                <CancelAPICallsOnPageUnload
+                                    key={
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
+                                    }
+                                >
+                                    <SetupDimensionGroupsPage />
+                                </CancelAPICallsOnPageUnload>
+                            }
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
                             }
                         />
 
                         <Route
-                            element={<SetupMonitoringPage />}
+                            element={
+                                <CancelAPICallsOnPageUnload
+                                    key={
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
+                                    }
+                                >
+                                    <SetupMonitoringPage />
+                                </CancelAPICallsOnPageUnload>
+                            }
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
                             }
                         />
 
                         <Route
-                            element={<SetupAnomaliesFilterPage />}
+                            element={
+                                <CancelAPICallsOnPageUnload
+                                    key={
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER
+                                    }
+                                >
+                                    <SetupAnomaliesFilterPage />
+                                </CancelAPICallsOnPageUnload>
+                            }
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER
                             }
@@ -136,13 +167,19 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
 
                         <Route
                             element={
-                                <SetupDetailsPage
-                                    createLabel={createLabel}
-                                    inProgressLabel={inProgressLabel}
-                                    showEmailOnlyForSubscriptionGroup={
-                                        showEmailOnlyForSubscriptionGroup
+                                <CancelAPICallsOnPageUnload
+                                    key={
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS
                                     }
-                                />
+                                >
+                                    <SetupDetailsPage
+                                        createLabel={createLabel}
+                                        inProgressLabel={inProgressLabel}
+                                        showEmailOnlyForSubscriptionGroup={
+                                            showEmailOnlyForSubscriptionGroup
+                                        }
+                                    />
+                                </CancelAPICallsOnPageUnload>
                             }
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS

@@ -41,19 +41,23 @@ export const getAllMetrics = async (
     return response.data;
 };
 
-export const createMetric = async (metric: LogicalMetric): Promise<Metric> => {
+export const createMetric = async (
+    metric: LogicalMetric
+): Promise<LogicalMetric> => {
     const response = await axios.post(BASE_URL_METRICS, [metric]);
 
     return response.data[0];
 };
 
-export const updateMetric = async (metric: LogicalMetric): Promise<Metric> => {
+export const updateMetric = async (
+    metric: LogicalMetric
+): Promise<LogicalMetric> => {
     const response = await axios.put(BASE_URL_METRICS, [metric]);
 
     return response.data[0];
 };
 
-export const deleteMetric = async (id: number): Promise<Metric> => {
+export const deleteMetric = async (id: number): Promise<LogicalMetric> => {
     const response = await axios.delete(`${BASE_URL_METRICS}/${id}`);
 
     return response.data;

@@ -29,6 +29,7 @@ public class MergedAnomalyResultIndex extends AbstractIndexEntity {
   boolean notified;
   boolean child;
   Long enumerationItemId;
+  boolean ignored;
 
   public long getDetectionConfigId() {
     return detectionConfigId;
@@ -125,5 +126,13 @@ public class MergedAnomalyResultIndex extends AbstractIndexEntity {
   public MergedAnomalyResultIndex setEnumerationItemId(final Long enumerationItemId) {
     this.enumerationItemId = enumerationItemId;
     return this;
+  }
+
+  public boolean isIgnored() {
+    return ignored;
+  }
+
+  public void setIgnored(final boolean ignored) {
+    this.ignored = ignored;
   }
 }

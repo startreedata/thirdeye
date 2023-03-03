@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -8,20 +8,10 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
- *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ButtonProps, PropTypes } from "@material-ui/core";
-import { HTMLAttributeAnchorTarget, ReactNode } from "react";
 
-export interface LinkButtonV1Props {
-    href: string;
-    externalLink?: boolean;
-    target?: HTMLAttributeAnchorTarget;
-    color?: PropTypes.Color;
-    disabled?: boolean;
-    className?: string;
-    children?: ReactNode;
-    variant?: ButtonProps["variant"];
-}
+ALTER TABLE merged_anomaly_result_index
+    ADD COLUMN ignored boolean DEFAULT FALSE;
+CREATE INDEX ignored_label_idx ON merged_anomaly_result_index (ignored);

@@ -14,6 +14,7 @@
  */
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
+import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
@@ -83,7 +84,13 @@ export const AppRouter: FunctionComponent = () => {
 
                     {/* Direct all configuration paths to configuration router */}
                     <Route
-                        element={<ConfigurationRouter />}
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRoute.CONFIGURATION}
+                            >
+                                <ConfigurationRouter />
+                            </CancelAPICallsOnPageUnload>
+                        }
                         path={`${AppRoute.CONFIGURATION}/*`}
                     />
 

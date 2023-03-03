@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.google.inject.Injector;
@@ -107,10 +108,18 @@ public class TestAnomalyManager {
     return (EnumerationItemDTO) new EnumerationItemDTO().setId(id);
   }
 
-  private static AnomalyDTO buildAnomaly(long startTime, long endTime) {
+  private static AnomalyDTO anomaly(long startTime, long endTime) {
     return new AnomalyDTO()
         .setStartTime(startTime)
         .setEndTime(endTime);
+  }
+
+  private static AnomalyDTO anomaly() {
+    return new AnomalyDTO();
+  }
+
+  private static AnomalyLabelDTO anomalyLabel(final boolean ignore) {
+    return new AnomalyLabelDTO().setIgnore(ignore);
   }
 
   private static AnomalyDTO findAnomalyById(final List<AnomalyDTO> anomalies, final Long id) {
@@ -212,8 +221,8 @@ public class TestAnomalyManager {
 
   @Test
   public void testFindAllAnomaliesForFeedback() {
-    final Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
-    final Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
+    final Long id1 = mergedAnomalyResultDAO.save(anomaly(10000, 11000));
+    final Long id2 = mergedAnomalyResultDAO.save(anomaly(12000, 13000));
 
     final String feedbackComment = "test feedback";
     provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
@@ -225,8 +234,8 @@ public class TestAnomalyManager {
 
   @Test(dependsOnMethods = {"testFindAllAnomaliesForFeedback"})
   public void testFilterAnomaliesForFeedback() {
-    final Long id1 = mergedAnomalyResultDAO.save(buildAnomaly(10000, 11000));
-    final Long id2 = mergedAnomalyResultDAO.save(buildAnomaly(12000, 13000));
+    final Long id1 = mergedAnomalyResultDAO.save(anomaly(10000, 11000));
+    final Long id2 = mergedAnomalyResultDAO.save(anomaly(12000, 13000));
 
     final String feedbackComment = "test feedback";
     provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
@@ -240,11 +249,11 @@ public class TestAnomalyManager {
 
   @Test
   public void testSaveChildren() {
-    mergedResult = buildAnomaly(1000, 2000);
+    mergedResult = anomaly(1000, 2000);
 
-    final AnomalyDTO child1 = buildAnomaly(1000, 1500);
+    final AnomalyDTO child1 = anomaly(1000, 1500);
 
-    final AnomalyDTO child2 = buildAnomaly(1500, 2000);
+    final AnomalyDTO child2 = anomaly(1500, 2000);
 
     mergedResult.setChildren(new HashSet<>(Arrays.asList(child1, child2)));
 
@@ -530,5 +539,66 @@ public class TestAnomalyManager {
     final long id = mergedAnomalyResultDAO.save(anomaly);
     assertThat(id).isNotNull();
     return anomaly;
+  }
+
+  @Test
+  public void ignoreLabelIndexNoLabelsTest() {
+    final Long id = mergedAnomalyResultDAO.save(anomaly());
+    assertByIdAndIgnored(id, false);
+  }
+
+  @Test
+  public void ignoreLabelIndexLabelsWithNoIgnoreTest() {
+    final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(false), anomalyLabel(false));
+    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+    assertByIdAndIgnored(id, false);
+  }
+
+  @Test
+  public void ignoreLabelIndexLabelsWithIgnoreTest() {
+    final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(false), anomalyLabel(true));
+    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+    assertByIdAndIgnored(id, true);
+  }
+
+  @Test
+  public void updateLabelsToIgnoreTest() {
+    // create anomaly with labels with no ignore
+    final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(false), anomalyLabel(false));
+    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+
+    // update the anomaly label to ignore
+    final AnomalyDTO result = mergedAnomalyResultDAO.findById(id);
+    result.getAnomalyLabels().get(0).setIgnore(true);
+    mergedAnomalyResultDAO.update(result);
+    assertByIdAndIgnored(id, true);
+  }
+
+  @Test
+  public void updateResetIgnoreLabelsTest() {
+    // create anomaly with ignore label
+    final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(true), anomalyLabel(false));
+    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+
+    // update the anomaly label not to ignore
+    final AnomalyDTO result = mergedAnomalyResultDAO.findById(id);
+    result.getAnomalyLabels().forEach(label -> label.setIgnore(false));
+    mergedAnomalyResultDAO.update(result);
+    assertByIdAndIgnored(id, false);
+  }
+
+  private List<AnomalyDTO> filterByIdAndIgnored(final Long id, final boolean ignored) {
+    final DaoFilter filter = new DaoFilter().setPredicate(Predicate.AND(
+        Predicate.EQ("baseId", id),
+        Predicate.EQ("ignored", ignored)
+    ));
+    return mergedAnomalyResultDAO.filter(filter);
+  }
+
+  private void assertByIdAndIgnored(final long id, final boolean ignored) {
+    final List<AnomalyDTO> anomalies = filterByIdAndIgnored(id, ignored);
+    assertThat(anomalies.size()).isEqualTo(1);
+    assertThat(anomalies.get(0).getId()).isEqualTo(id);
+    assertThat(filterByIdAndIgnored(id, !ignored).size()).isEqualTo(0);
   }
 }

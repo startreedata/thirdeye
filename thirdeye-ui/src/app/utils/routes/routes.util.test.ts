@@ -144,7 +144,7 @@ describe("Routes Util", () => {
 
     it("getSubscriptionGroupsViewPath should return appropriate path with appropriate query string for id", () => {
         expect(getSubscriptionGroupsViewPath(1)).toEqual(
-            "/configuration/subscription-groups/view/id/1"
+            "/configuration/subscription-groups/1/view"
         );
     });
 
@@ -156,7 +156,7 @@ describe("Routes Util", () => {
 
     it("getSubscriptionGroupsUpdatePath should return appropriate path with appropriate query string for id", () => {
         expect(getSubscriptionGroupsUpdatePath(1)).toEqual(
-            "/configuration/subscription-groups/update/id/1"
+            "/configuration/subscription-groups/1/update"
         );
     });
 

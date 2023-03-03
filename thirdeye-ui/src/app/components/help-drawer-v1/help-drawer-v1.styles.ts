@@ -12,16 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ButtonProps, PropTypes } from "@material-ui/core";
-import { HTMLAttributeAnchorTarget, ReactNode } from "react";
+import { makeStyles } from "@material-ui/core";
 
-export interface LinkButtonV1Props {
-    href: string;
-    externalLink?: boolean;
-    target?: HTMLAttributeAnchorTarget;
-    color?: PropTypes.Color;
-    disabled?: boolean;
-    className?: string;
-    children?: ReactNode;
-    variant?: ButtonProps["variant"];
-}
+export const useHelperDrawerV1Styles = makeStyles((theme) => ({
+    drawerPaper: {
+        backgroundColor: theme.palette.background.default,
+        maxWidth: 480,
+    },
+}));

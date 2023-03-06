@@ -72,16 +72,28 @@ export const AnomaliesRouter: FunctionComponent = () => {
                     }
                 />
 
-                <Route
-                    element={
-                        <CancelAPICallsOnPageUnload
-                            key={AppRouteRelative.ANOMALIES_CREATE}
-                        >
-                            <AnomaliesCreatePage />
-                        </CancelAPICallsOnPageUnload>
-                    }
-                    path={AppRouteRelative.ANOMALIES_CREATE}
-                />
+                <Route path={AppRouteRelative.ANOMALIES_CREATE}>
+                    <Route
+                        index
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ANOMALIES_CREATE}
+                            >
+                                <AnomaliesCreatePage />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                    />
+                    <Route
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ANOMALIES_ALERT_CREATE}
+                            >
+                                <AnomaliesCreatePage />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                        path={AppRouteRelative.ANOMALIES_ALERT_CREATE}
+                    />
+                </Route>
 
                 {/* Anomalies all path */}
                 <Route path={AppRouteRelative.ANOMALIES_ALL}>

@@ -282,6 +282,7 @@
         "predicted": "Predicted",
         "preview": "Preview",
         "preview-alert": "Preview Alert",
+        "preview-entity": "Preview {{entity}}",
         "property-name": "Property name",
         "property-value": "Property value",
         "query-filter": "Query filter",

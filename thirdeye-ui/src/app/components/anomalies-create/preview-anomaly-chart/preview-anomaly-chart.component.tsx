@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { Box } from "@material-ui/core";
+import { Box, CardContent, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -32,9 +32,9 @@ import {
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
-import { ViewAnomalyHeader } from "../../visualizations/alert-evaluation-time-series-card/headers/view-anomaly-header.component";
 import { PreviewAnomalyChartProps } from "./preview-anomaly-chart.interfaces";
 
 export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
@@ -124,13 +124,49 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                         anomalies={[anomaly as Anomaly]}
                         detectionEvaluation={detectionEvaluation}
                         header={
-                            <ViewAnomalyHeader
-                                anomaly={anomaly as Anomaly}
-                                timezone={determineTimezoneFromAlertInEvaluation(
-                                    evaluation?.alert
-                                )}
-                                onRefresh={fetchAlertEvaluation}
-                            />
+                            <CardContent>
+                                <Grid container justifyContent="space-between">
+                                    <Grid
+                                        item
+                                        lg="auto"
+                                        md="auto"
+                                        sm={4}
+                                        xs={12}
+                                    >
+                                        <Typography variant="h5">
+                                            {t("label.preview-entity", {
+                                                entity: t("label.anomaly"),
+                                            })}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            Visualize how the anomaly will look
+                                            once flagged
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid
+                                        item
+                                        alignContent="flex-end"
+                                        lg="auto"
+                                        md="auto"
+                                        sm={8}
+                                        xs={12}
+                                    >
+                                        <TimeRangeButtonWithContext
+                                            timezone={determineTimezoneFromAlertInEvaluation(
+                                                evaluation?.alert
+                                            )}
+                                            onTimeRangeChange={() =>
+                                                fetchAlertEvaluation()
+                                            }
+                                        />
+                                        <Typography variant="body2">
+                                            Set the date range of the alert
+                                            chart below
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
                         }
                         isLoading={
                             getEvaluationRequestStatus === ActionStatus.Working

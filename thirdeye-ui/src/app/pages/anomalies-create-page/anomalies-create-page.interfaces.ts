@@ -21,7 +21,7 @@ import {
 import { Metric } from "../../rest/dto/metric.interfaces";
 
 // TODO: Proper interface
-export interface EditedAnomaly {
+export interface EditableAnomaly {
     startTime: number;
     endTime: number;
 

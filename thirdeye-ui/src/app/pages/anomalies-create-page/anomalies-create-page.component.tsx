@@ -37,7 +37,7 @@ import {
     getAnomaliesCreatePath,
     getAnomaliesViewPath,
 } from "../../utils/routes/routes.util";
-import { EditedAnomaly } from "./anomalies-create-page.interfaces";
+import { EditableAnomaly } from "./anomalies-create-page.interfaces";
 import { createEmptyAnomaly } from "./anomalies-create-page.utils";
 
 export const AnomaliesCreatePage: FunctionComponent = () => {
@@ -68,8 +68,8 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
         navigate(getAnomaliesAllPath());
     };
 
-    const handleAnomalyCreate = (editedAnomaly: EditedAnomaly): void => {
-        createAnomaly(editedAnomaly)
+    const handleAnomalyCreate = (editableAnomaly: EditableAnomaly): void => {
+        createAnomaly(editableAnomaly)
             .then((data) => {
                 notify(
                     NotificationTypeV1.Success,

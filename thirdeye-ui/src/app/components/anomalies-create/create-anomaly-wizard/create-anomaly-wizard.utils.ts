@@ -14,7 +14,7 @@
  */
 
 import { isNumber } from "lodash";
-import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
+import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     Alert,
     EnumerationItemConfig,
@@ -37,8 +37,10 @@ export const getEnumerationItemsConfigFromAlert = (
 
 export const AlertId = "alertId";
 
-export const getIsAnomalyValid = (editedAnomaly: EditedAnomaly): boolean => {
-    const { alert, startTime, endTime } = editedAnomaly;
+export const getIsAnomalyValid = (
+    editableAnomaly: EditableAnomaly
+): boolean => {
+    const { alert, startTime, endTime } = editableAnomaly;
 
     // Basic sanity checks for values
     const conditions = [

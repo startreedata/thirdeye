@@ -24,7 +24,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
+import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
@@ -125,7 +125,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 };
             }, [formFields.alert]);
 
-        const editedAnomaly: EditedAnomaly | null = useMemo(() => {
+        const editableAnomaly: EditableAnomaly | null = useMemo(() => {
             if (
                 !(
                     formFields.alert &&
@@ -235,7 +235,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             onCancel?.();
         };
         const handleSubmitClick = (): void => {
-            editedAnomaly && onSubmit?.(editedAnomaly);
+            editableAnomaly && onSubmit?.(editableAnomaly);
         };
 
         const handleSetField: HandleSetFields = (fieldName, fieldValue) => {
@@ -252,8 +252,8 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         };
 
         const isAnomalyValid = useCallback(
-            () => !!editedAnomaly && getIsAnomalyValid(editedAnomaly),
-            [editedAnomaly]
+            () => !!editableAnomaly && getIsAnomalyValid(editableAnomaly),
+            [editableAnomaly]
         );
 
         return (
@@ -305,7 +305,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                 ActionStatus.Error
                                             }
                                             isLoading={
-                                                !editedAnomaly ||
+                                                !editableAnomaly ||
                                                 alertInsightStatus ===
                                                     ActionStatus.Working
                                             }
@@ -338,8 +338,8 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                             }
                                         >
                                             <PreviewAnomalyChart
-                                                editedAnomaly={
-                                                    editedAnomaly as EditedAnomaly
+                                                editableAnomaly={
+                                                    editableAnomaly as EditableAnomaly
                                                 }
                                             />
                                         </LoadingErrorStateSwitch>

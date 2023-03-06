@@ -15,11 +15,11 @@
 
 import { AnomalyResultSource } from "../../rest/dto/anomaly.interfaces";
 import { generateDateRangeDaysFromNow } from "../../utils/routes/routes.util";
-import { EditedAnomaly } from "./anomalies-create-page.interfaces";
+import { EditableAnomaly } from "./anomalies-create-page.interfaces";
 
 export const createEmptyAnomaly = (
-    initialData?: Partial<EditedAnomaly>
-): EditedAnomaly => {
+    initialData?: Partial<EditableAnomaly>
+): EditableAnomaly => {
     const [start, end] = generateDateRangeDaysFromNow(2);
 
     // TODO: Proper type
@@ -32,5 +32,5 @@ export const createEmptyAnomaly = (
         sourceType: AnomalyResultSource.USER_LABELED_ANOMALY,
     };
 
-    return newAnomaly as EditedAnomaly;
+    return newAnomaly as EditableAnomaly;
 };

@@ -13,8 +13,8 @@
  * the License.
  */
 
-import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
+import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 
 export interface PreviewAnomalyChartProps {
-    editedAnomaly: EditedAnomaly;
+    editableAnomaly: EditableAnomaly;
 }

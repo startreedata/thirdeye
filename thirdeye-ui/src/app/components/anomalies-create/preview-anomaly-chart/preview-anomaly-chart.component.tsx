@@ -38,7 +38,7 @@ import { AlertEvaluationTimeSeriesCard } from "../../visualizations/alert-evalua
 import { PreviewAnomalyChartProps } from "./preview-anomaly-chart.interfaces";
 
 export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
-    ({ editedAnomaly: anomaly }) => {
+    ({ editableAnomaly: anomaly }) => {
         const {
             evaluation,
             getEvaluation,

@@ -13,7 +13,7 @@
  * the License.
  */
 import axios from "axios";
-import { EditedAnomaly } from "../../pages/anomalies-create-page/anomalies-create-page.interfaces";
+import { EditableAnomaly } from "../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import { filterOutIgnoredAnomalies } from "../../utils/anomalies/anomalies.util";
 import type {
     Anomaly,
@@ -99,7 +99,7 @@ export const getAnomalyStats = async ({
 };
 
 export const createAnomaly = async (
-    anomalies: EditedAnomaly
+    anomalies: EditableAnomaly
 ): Promise<Anomaly> => {
     const response = await axios.post(BASE_URL_ANOMALIES, [anomalies]);
 

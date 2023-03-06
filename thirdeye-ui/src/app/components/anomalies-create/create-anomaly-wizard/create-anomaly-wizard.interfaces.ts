@@ -13,16 +13,16 @@
  * the License.
  */
 
-import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
+import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 
 export interface CreateAnomalyWizardProps {
     alerts: Alert[];
-    initialAnomalyData: EditedAnomaly;
+    initialAnomalyData: EditableAnomaly;
     submitBtnLabel: string;
     cancelBtnLabel: string;
-    onSubmit: (anomaly: EditedAnomaly) => void;
+    onSubmit: (anomaly: EditableAnomaly) => void;
     onCancel: () => void;
 }
 

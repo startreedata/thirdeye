@@ -32,7 +32,7 @@ import {
     CreateAnomalyReadOnlyFormFields,
 } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
 import { getEnumerationItemsConfigFromAlert } from "../create-anomaly-wizard/create-anomaly-wizard.utils";
-import { CreateAnomalyPropertiesFormProps } from "./create-anomaly-properties-form";
+import { CreateAnomalyPropertiesFormProps } from "./create-anomaly-properties-form.interfaces";
 
 export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropertiesFormProps> =
     ({

@@ -14,19 +14,27 @@
  */
 
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
+import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
     SkeletonV1,
 } from "../../../platform/components";
+import { getAlertInsight } from "../../../rest/alerts/alerts.rest";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { AnomalyResultSource } from "../../../rest/dto/anomaly.interfaces";
 import { Metric } from "../../../rest/dto/metric.interfaces";
 import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
+import {
+    generateDateRangeDaysFromNow,
+    getAnomaliesCreatePath,
+} from "../../../utils/routes/routes.util";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { CreateAnomalyPropertiesForm } from "../create-anomaly-properties-form/create-anomaly-properties-form.component";
 import { PreviewAnomalyChart } from "../preview-anomaly-chart/preview-anomaly-chart.component";
@@ -49,6 +57,13 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         initialAnomalyData,
     }) => {
         const { t } = useTranslation();
+        const [searchParams, setSearchParams] = useSearchParams();
+        const { id: selectedAlertId } = useParams<{ id: string }>();
+        const navigate = useNavigate();
+
+        const selectedAlert = alerts?.find(
+            (a) => a.id === Number(selectedAlertId)
+        );
 
         const {
             enumerationItems,
@@ -59,11 +74,13 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         const [formFields, setFormFields] =
             useState<CreateAnomalyEditableFormFields>({
                 // TODO: Implement initialAnomalyData
-                alert: null,
+                alert: selectedAlert || null,
                 enumerationItem: null,
                 // Hardcoded for Anomaly #366
                 // TODO: Proper values
-                dateRange: [1639958400000, 1640044800000],
+                // dateRange: [0, 0],
+                // dateRange: [1639958400000, 1640044800000],
+                dateRange: generateDateRangeDaysFromNow(2),
             });
 
         const readOnlyFormFields =
@@ -134,15 +151,59 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         }, [formFields, readOnlyFormFields]);
 
         useEffect(() => {
-            if (
-                formFields.alert &&
-                getEnumerationItemsConfigFromAlert(formFields.alert)?.length
-            ) {
-                getEnumerationItems({
-                    alertId: formFields.alert.id,
+            // If the alert is valid
+            if (formFields.alert) {
+                const newAlertId = formFields.alert.id;
+
+                // Update the alert id URL param
+                navigate(getAnomaliesCreatePath(newAlertId), {
+                    replace: true,
                 });
+
+                // Fetch the enumeration items for this alert
+                if (
+                    getEnumerationItemsConfigFromAlert(formFields.alert)?.length
+                ) {
+                    getEnumerationItems({
+                        alertId: formFields.alert.id,
+                    });
+                }
             }
         }, [formFields.alert]);
+
+        useEffect(() => {
+            if (selectedAlertId) {
+                // Get the start and end time for the alert
+                getAlertInsight({ alertId: Number(selectedAlertId) }).then(
+                    (alertInsight) => {
+                        // console.log("Set search params bruh", alertInsight);
+                        searchParams.set(
+                            TimeRangeQueryStringKey.START_TIME,
+                            `${alertInsight.datasetStartTime}`
+                        );
+                        searchParams.set(
+                            TimeRangeQueryStringKey.END_TIME,
+                            `${alertInsight.datasetEndTime}`
+                        );
+                        setSearchParams(searchParams);
+
+                        // TODO: Verify if needed
+                        // Set the date range to the middle of the anomaly chart by default
+                        handleSetField(
+                            "dateRange",
+                            generateDateRangeDaysFromNow(
+                                2,
+                                DateTime.fromMillis(
+                                    (alertInsight.datasetStartTime +
+                                        alertInsight.datasetEndTime) /
+                                        2
+                                )
+                            )
+                        );
+                    }
+                );
+            }
+        }, [selectedAlertId]);
 
         const handleCancelClick = (): void => {
             onCancel?.();

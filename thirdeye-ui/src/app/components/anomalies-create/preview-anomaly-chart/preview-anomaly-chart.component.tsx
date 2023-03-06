@@ -31,7 +31,6 @@ import {
     extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
-import { generateDateRangeMonthsFromNow } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
@@ -49,7 +48,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
 
         const [detectionEvaluation, setDetectionEvaluation] =
             useState<DetectionEvaluation | null>(null);
-        const [searchParams, setSearchParams] = useSearchParams();
+        const [searchParams] = useSearchParams();
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
 
@@ -70,27 +69,6 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
             // Fetched alert or time range changed, fetch alert evaluation
             fetchAlertEvaluation();
         }, [searchParams, anomaly.alert.id, anomaly.enumerationItem]);
-
-        useEffect(() => {
-            const defaultDatetimeValues = generateDateRangeMonthsFromNow(36);
-
-            if (
-                !(
-                    searchParams.has(TimeRangeQueryStringKey.START_TIME) &&
-                    searchParams.has(TimeRangeQueryStringKey.END_TIME)
-                )
-            ) {
-                searchParams.set(
-                    TimeRangeQueryStringKey.START_TIME,
-                    `${defaultDatetimeValues[0]}`
-                );
-                searchParams.set(
-                    TimeRangeQueryStringKey.END_TIME,
-                    `${defaultDatetimeValues[1]}`
-                );
-                setSearchParams(searchParams);
-            }
-        }, []);
 
         useEffect(() => {
             notifyIfErrors(

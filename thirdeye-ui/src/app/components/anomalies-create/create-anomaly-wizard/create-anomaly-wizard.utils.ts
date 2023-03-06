@@ -32,3 +32,5 @@ export const getEnumerationItemsConfigFromAlert = (
 
     return null;
 };
+
+export const AlertId = "alertId";

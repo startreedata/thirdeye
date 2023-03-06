@@ -13,15 +13,17 @@
  * the License.
  */
 
-import { TextField } from "@material-ui/core";
+import { TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { capitalize } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../platform/rest/actions.interfaces";
+import { linkRendererV1 } from "../../../platform/utils";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
+import { getAlertsAlertViewPath } from "../../../utils/routes/routes.util";
 import { createTimeRangeDuration } from "../../../utils/time-range/time-range.util";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -99,7 +101,24 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                             }}
                         />
                     }
-                    label={formLabels.alert}
+                    labelComponent={
+                        <>
+                            <Typography variant="body2">
+                                {formLabels.alert}
+                            </Typography>
+                            {!!formFields.alert &&
+                                linkRendererV1(
+                                    t("label.view-entity", {
+                                        entity: t("label.alert"),
+                                    }),
+                                    getAlertsAlertViewPath(formFields.alert.id),
+                                    false,
+                                    undefined,
+                                    true,
+                                    "_blank"
+                                )}
+                        </>
+                    }
                 />
 
                 {(

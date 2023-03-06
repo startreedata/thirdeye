@@ -347,6 +347,7 @@ public class MaintenanceResource {
         .forEach(anomalyManager::update);
     return Response.ok().build();
   }
+
   private boolean isIgnored(final AnomalyDTO anomaly) {
     final List<AnomalyLabelDTO> labels = anomaly.getAnomalyLabels();
     return labels != null && labels.stream().anyMatch(AnomalyLabelDTO::isIgnore);

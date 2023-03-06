@@ -14,7 +14,7 @@
  */
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { toNumber } from "lodash";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -31,8 +31,10 @@ import {
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { Alert } from "../../rest/dto/alert.interfaces";
@@ -71,7 +73,8 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
-    const [searchParams] = useSearchParams();
+    const { showDialog } = useDialogProviderV1();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [selectedTab] = useMemo(
         () => [
             Number(searchParams.get(SelectedTab)) ||
@@ -107,7 +110,6 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                 link: pagePath,
             },
         ],
-        transparentBackground: true,
         title: t(`label.update-entity`, {
             entity: t("label.subscription-group"),
         }),
@@ -124,7 +126,7 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
         subNavigationSelected: selectedTab,
     };
 
-    const onSubscriptionGroupWizardFinish = (
+    const handleSubscriptionGroupWizardFinish = (
         subscriptionGroup: SubscriptionGroup
     ): void => {
         if (!subscriptionGroup) {
@@ -186,9 +188,58 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
             });
     };
 
-    const handleOnCancelClick = (): void => {
-        navigate(getSubscriptionGroupsViewPath(toNumber(params.id)));
+    const setSelectedTab = (goToTab: SubscriptionGroupViewTabs): void => {
+        searchParams.set(SelectedTab, goToTab.toString());
+        setSearchParams(searchParams);
     };
+
+    const handleOnCancelClick = (): void => {
+        if (selectedTab === SubscriptionGroupViewTabs.AlertDimensions) {
+            setSelectedTab(SubscriptionGroupViewTabs.GroupDetails);
+        } else {
+            navigate(getSubscriptionGroupsViewPath(toNumber(params.id)));
+        }
+    };
+
+    const handleSubscriptionGroupWizardFinishDialog = (
+        subscriptionGroup: SubscriptionGroup
+    ): void => {
+        showDialog({
+            type: DialogType.ALERT,
+            contents: t(
+                "message.are-you-sure-to-proceed-without-any-alerts-dimensions-added-to-subscription-group"
+            ),
+            okButtonText: t("label.yes"),
+            cancelButtonText: t("label.no"),
+            onOk: () => handleSubscriptionGroupWizardFinish(subscriptionGroup),
+        });
+    };
+
+    const handleOnNextClick = (subscriptionGroup: SubscriptionGroup): void => {
+        // If on the last tab
+        if (selectedTab === SubscriptionGroupViewTabs.AlertDimensions) {
+            if (isEmpty(subscriptionGroup.alertAssociations)) {
+                // If there are no alert associations, show a dialog confirming if this is intended
+                handleSubscriptionGroupWizardFinishDialog(subscriptionGroup);
+            } else {
+                // Otherwise, proceed with saving the data
+                handleSubscriptionGroupWizardFinish(subscriptionGroup);
+            }
+        } else {
+            // Go to the next tab
+            setSelectedTab(SubscriptionGroupViewTabs.AlertDimensions);
+        }
+    };
+
+    const nextButtonLabel =
+        selectedTab === SubscriptionGroupViewTabs.GroupDetails
+            ? t("label.next")
+            : t("label.update");
+
+    const cancelButtonLabel =
+        selectedTab === SubscriptionGroupViewTabs.GroupDetails
+            ? t("label.cancel")
+            : t("label.back");
 
     const statusList = [
         alertsStatus,
@@ -219,15 +270,15 @@ export const SubscriptionGroupsUpdatePage: FunctionComponent = () => {
                     <PageHeader {...pageHeaderProps} />
                     <SubscriptionGroupWizard
                         alerts={alerts as Alert[]}
-                        cancelBtnLabel={t("label.cancel")}
+                        cancelBtnLabel={cancelButtonLabel}
                         enumerationItems={enumerationItems as EnumerationItem[]}
                         selectedTab={selectedTab}
-                        submitBtnLabel={t("label.update")}
+                        submitBtnLabel={nextButtonLabel}
                         subscriptionGroup={
                             subscriptionGroup as SubscriptionGroup
                         }
                         onCancel={handleOnCancelClick}
-                        onFinish={onSubscriptionGroupWizardFinish}
+                        onFinish={handleOnNextClick}
                     />
                 </EmptyStateSwitch>
             </LoadingErrorStateSwitch>

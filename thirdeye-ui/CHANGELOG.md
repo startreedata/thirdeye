@@ -1,3 +1,22 @@
+## [2.11.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.10.0...thirdeye-ui-2.11.0) (2023-03-03)
+
+
+### Features
+
+* [TE-1206](https://cortexdata.atlassian.net/browse/TE-1206) cancel api calls when user leaves some pages ([31e0834cc](https://github.com/startreedata/thirdeye/commit/31e0834ccc429f25e9586ed65da347d3034393cb))
+* [TE-1266](https://cortexdata.atlassian.net/browse/TE-1266) improve video tutorial experience ([91e243ed2](https://github.com/startreedata/thirdeye/commit/91e243ed29e2f4d83400d27655f31156b786a3ae))
+* [TE-1298](https://cortexdata.atlassian.net/browse/TE-1298) anomaly filtering by feedback of not an anomaly ([760ed0c04](https://github.com/startreedata/thirdeye/commit/760ed0c048501d523a15d08c0661e3c4a700aa89))
+* [TE-1304](https://cortexdata.atlassian.net/browse/TE-1304) support count * as a metric ([7be582904](https://github.com/startreedata/thirdeye/commit/7be582904abe99764fa9eb2e06e80776da98e342))
+* [TE-1305](https://cortexdata.atlassian.net/browse/TE-1305) added link to config section in welcome flow ([b204170c5](https://github.com/startreedata/thirdeye/commit/b204170c51069f6fe6ebea8215eb2b7526acb180))
+* [TE-1317](https://cortexdata.atlassian.net/browse/TE-1317) added `aggregationColumn` to new alert configuration ([a79f9c248](https://github.com/startreedata/thirdeye/commit/a79f9c248506d34420d08bc62eca2a61e254b7d7))
+* [TE-1364](https://cortexdata.atlassian.net/browse/TE-1364) added sequential flow between tabs in subscription group wizard ([ec65c2c80](https://github.com/startreedata/thirdeye/commit/ec65c2c802362cdd3c72d47e3bb191bb927f7216))
+* [TE-1373](https://cortexdata.atlassian.net/browse/TE-1373) changed subscription group routing to match the rest of the app ([7f68b9c90](https://github.com/startreedata/thirdeye/commit/7f68b9c9009460fcdb79b426ee3650986ed3449c))
+
+
+### Bug Fixes
+
+* [TE-1366](https://cortexdata.atlassian.net/browse/TE-1366) allow dimension exploration values in template properties validator ([f2aff1ee7](https://github.com/startreedata/thirdeye/commit/f2aff1ee7fa7689c987d5f52f77325becc861baf))
+
 ## [2.10.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.9.1...thirdeye-ui-2.10.0) (2023-02-27)
 
 

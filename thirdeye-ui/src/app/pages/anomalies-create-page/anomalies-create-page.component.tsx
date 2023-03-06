@@ -20,13 +20,21 @@ import { CreateAnomalyWizard } from "../../components/anomalies-create/create-an
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { PageV1 } from "../../platform/components";
+import {
+    NotificationTypeV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "../../platform/components";
 import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
+import { createAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getAnomaliesAllPath,
     getAnomaliesCreatePath,
+    getAnomaliesViewPath,
 } from "../../utils/routes/routes.util";
 import { EditedAnomaly } from "./anomalies-create-page.interfaces";
 import { createEmptyAnomaly } from "./anomalies-create-page.utils";
@@ -34,6 +42,7 @@ import { createEmptyAnomaly } from "./anomalies-create-page.utils";
 export const AnomaliesCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { notify } = useNotificationProviderV1();
     const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
 
     useEffect(() => {
@@ -45,8 +54,25 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
     };
 
     const handleAnomalyCreate = (editedAnomaly: EditedAnomaly): void => {
-        editedAnomaly;
-        // console.log({ editedAnomaly });
+        createAnomaly(editedAnomaly)
+            .then((data) => {
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.create-success", { entity: t("label.alert") })
+                );
+                // TODO: Remove
+                window.open(getAnomaliesViewPath(data.id), "_blank");
+            })
+            .catch((error) => {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.create-error", {
+                        entity: t("label.alert"),
+                    })
+                );
+            });
     };
 
     const initialAnomaly = useMemo(() => createEmptyAnomaly(), []);

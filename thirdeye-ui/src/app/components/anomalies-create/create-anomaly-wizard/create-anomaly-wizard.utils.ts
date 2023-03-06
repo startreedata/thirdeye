@@ -13,6 +13,8 @@
  * the License.
  */
 
+import { isNumber } from "lodash";
+import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     Alert,
     EnumerationItemConfig,
@@ -34,3 +36,20 @@ export const getEnumerationItemsConfigFromAlert = (
 };
 
 export const AlertId = "alertId";
+
+export const getIsAnomalyValid = (editedAnomaly: EditedAnomaly): boolean => {
+    const { alert, startTime, endTime } = editedAnomaly;
+
+    // Basic sanity checks for values
+    const conditions = [
+        isNumber(alert?.id),
+        isNumber(startTime),
+        isNumber(endTime),
+        startTime > 0,
+        endTime > 0,
+        endTime > startTime,
+    ];
+
+    // The anomaly is valid iff all check are valid
+    return conditions.every((c) => !!c);
+};

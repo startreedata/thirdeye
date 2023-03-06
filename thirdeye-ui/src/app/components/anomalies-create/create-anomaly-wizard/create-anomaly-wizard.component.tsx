@@ -15,7 +15,13 @@
 
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import { DateTime } from "luxon";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, {
+    FunctionComponent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { EditedAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
@@ -44,7 +50,10 @@ import {
     CreateAnomalyWizardProps,
     HandleSetFields,
 } from "./create-anomaly-wizard.interfaces";
-import { getEnumerationItemsConfigFromAlert } from "./create-anomaly-wizard.utils";
+import {
+    getEnumerationItemsConfigFromAlert,
+    getIsAnomalyValid,
+} from "./create-anomaly-wizard.utils";
 
 export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
     ({
@@ -137,16 +146,16 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 metric: { name: readOnlyFormFields.metric } as Metric,
 
                 // TODO: ?Proper values
-                avgBaselineVal: 0,
-                avgCurrentVal: 0,
+                // avgBaselineVal: 0,
+                // avgCurrentVal: 0,
 
                 // Hardcoded for Anomaly #366, for testing
                 // avgBaselineVal: -0.9689632094628097,
                 // avgCurrentVal: 3,
 
-                score: 0.0,
-                weight: 0.0,
-                impactToGlobal: 0.0,
+                // score: 0.0,
+                // weight: 0.0,
+                // impactToGlobal: 0.0,
             };
         }, [formFields, readOnlyFormFields]);
 
@@ -225,7 +234,10 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }));
         };
 
-        const isAnomalyValid = false;
+        const isAnomalyValid = useCallback(
+            () => !!editedAnomaly && getIsAnomalyValid(editedAnomaly),
+            [editedAnomaly]
+        );
 
         return (
             <>

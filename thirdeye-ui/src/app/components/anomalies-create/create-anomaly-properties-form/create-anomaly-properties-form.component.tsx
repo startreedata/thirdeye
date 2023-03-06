@@ -44,6 +44,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
         handleSetField,
         enumerationItemsForAlert,
         enumerationItemsStatus,
+        timezone,
     }) => {
         const { t } = useTranslation();
 
@@ -72,6 +73,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                 <InputSection
                     inputComponent={
                         <Autocomplete
+                            disableClearable
                             fullWidth
                             getOptionLabel={(option) => option.name}
                             options={alerts}
@@ -94,7 +96,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     variant="outlined"
                                 />
                             )}
-                            value={formFields.alert}
+                            value={formFields.alert || undefined}
                             onChange={(_, selectedValue) => {
                                 selectedValue &&
                                     handleSetField("alert", selectedValue);
@@ -121,31 +123,40 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                     }
                 />
 
-                {(
-                    Object.keys(
-                        readOnlyFormFields
-                    ) as (keyof CreateAnomalyReadOnlyFormFields)[]
-                ).map((readOnlyKey: keyof CreateAnomalyReadOnlyFormFields) => (
-                    <InputSection
-                        inputComponent={
-                            <TextField
-                                fullWidth
-                                required
-                                InputProps={{
-                                    margin: "none",
-                                    readOnly: true,
-                                }}
-                                name={readOnlyKey}
-                                title="These properties are derived from the selected alert"
-                                type="string"
-                                value={readOnlyFormFields[readOnlyKey] || ""}
-                                variant="outlined"
+                {/* Since these fields are read-only, only show them when the alert is loaded */}
+                {!!formFields.alert &&
+                    (
+                        Object.keys(
+                            readOnlyFormFields
+                        ) as (keyof CreateAnomalyReadOnlyFormFields)[]
+                    ).map(
+                        (
+                            readOnlyKey: keyof CreateAnomalyReadOnlyFormFields
+                        ) => (
+                            <InputSection
+                                inputComponent={
+                                    <TextField
+                                        fullWidth
+                                        required
+                                        InputProps={{
+                                            margin: "none",
+                                            readOnly: true,
+                                        }}
+                                        name={readOnlyKey}
+                                        title="These properties are derived from the selected alert"
+                                        type="string"
+                                        value={
+                                            readOnlyFormFields[readOnlyKey] ||
+                                            ""
+                                        }
+                                        variant="outlined"
+                                    />
+                                }
+                                key={readOnlyKey}
+                                label={formLabels[readOnlyKey]}
                             />
-                        }
-                        key={readOnlyKey}
-                        label={formLabels[readOnlyKey]}
-                    />
-                ))}
+                        )
+                    )}
 
                 <LoadingErrorStateSwitch
                     isError={enumerationItemsStatus === ActionStatus.Error}
@@ -206,21 +217,26 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                     )}
                 </LoadingErrorStateSwitch>
 
-                <InputSection
-                    fullWidth
-                    inputComponent={
-                        <TimeRangeButton
-                            timeRangeDuration={timeRangeDuration}
-                            onChange={({ startTime, endTime }) =>
-                                handleSetField("dateRange", [
-                                    startTime,
-                                    endTime,
-                                ])
-                            }
-                        />
-                    }
-                    label={formLabels.dateRange}
-                />
+                {/* Only show the datetime picker when the timezone prop is passed, 
+                to have the timezone shown be relevant to the selected alert  */}
+                {!!timezone && (
+                    <InputSection
+                        fullWidth
+                        inputComponent={
+                            <TimeRangeButton
+                                timeRangeDuration={timeRangeDuration}
+                                timezone={timezone}
+                                onChange={({ startTime, endTime }) =>
+                                    handleSetField("dateRange", [
+                                        startTime,
+                                        endTime,
+                                    ])
+                                }
+                            />
+                        }
+                        label={formLabels.dateRange}
+                    />
+                )}
             </>
         );
     };

@@ -30,11 +30,13 @@ import {
     PageContentsGridV1,
     SkeletonV1,
 } from "../../../platform/components";
-import { getAlertInsight } from "../../../rest/alerts/alerts.rest";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { useGetAlertInsight } from "../../../rest/alerts/alerts.actions";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { AnomalyResultSource } from "../../../rest/dto/anomaly.interfaces";
 import { Metric } from "../../../rest/dto/metric.interfaces";
 import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
+import { determineTimezoneFromAlertInEvaluation } from "../../../utils/alerts/alerts.util";
 import {
     generateDateRangeDaysFromNow,
     getAnomaliesCreatePath,
@@ -63,7 +65,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         cancelBtnLabel,
         onSubmit,
         onCancel,
-        initialAnomalyData,
+        initialAnomalyData, // TODO: Implement initialAnomalyData
     }) => {
         const { t } = useTranslation();
         const [searchParams, setSearchParams] = useSearchParams();
@@ -80,16 +82,21 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             status: enumerationItemsStatus,
         } = useGetEnumerationItems();
 
+        const {
+            alertInsight,
+            getAlertInsight,
+            status: alertInsightStatus,
+        } = useGetAlertInsight();
+
         const [formFields, setFormFields] =
             useState<CreateAnomalyEditableFormFields>({
                 // TODO: Implement initialAnomalyData
                 alert: selectedAlert || null,
                 enumerationItem: null,
-                // Hardcoded for Anomaly #366
-                // TODO: Proper values
-                // dateRange: [0, 0],
-                // dateRange: [1639958400000, 1640044800000],
-                dateRange: generateDateRangeDaysFromNow(2),
+                // These dateRange values are meaningless without a selectedAlert, and once
+                // the alert insights are fetched, this is set to values from that data
+                // anyways, so these are just dummy values to prevent initiation errors
+                dateRange: [0, 0],
             });
 
         const readOnlyFormFields =
@@ -164,6 +171,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             if (formFields.alert) {
                 const newAlertId = formFields.alert.id;
 
+                // Get the insights to get the start and end time for the alert
+                getAlertInsight({ alertId: Number(newAlertId) });
+
                 // Update the alert id URL param
                 navigate(getAnomaliesCreatePath(newAlertId), {
                     replace: true,
@@ -180,39 +190,46 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }
         }, [formFields.alert]);
 
-        useEffect(() => {
-            if (selectedAlertId) {
-                // Get the start and end time for the alert
-                getAlertInsight({ alertId: Number(selectedAlertId) }).then(
-                    (alertInsight) => {
-                        // console.log("Set search params bruh", alertInsight);
-                        searchParams.set(
-                            TimeRangeQueryStringKey.START_TIME,
-                            `${alertInsight.datasetStartTime}`
-                        );
-                        searchParams.set(
-                            TimeRangeQueryStringKey.END_TIME,
-                            `${alertInsight.datasetEndTime}`
-                        );
-                        setSearchParams(searchParams);
+        // TODO: Remove if not needed for error handling
+        // useEffect(() => {
+        //     if (selectedAlertId) {
+        //         // Get the start and end time for the alert
+        //         getAlertInsight({ alertId: Number(selectedAlertId) });
+        //     }
+        // }, [selectedAlertId]);
 
-                        // TODO: Verify if needed
-                        // Set the date range to the middle of the anomaly chart by default
-                        handleSetField(
-                            "dateRange",
-                            generateDateRangeDaysFromNow(
-                                2,
-                                DateTime.fromMillis(
-                                    (alertInsight.datasetStartTime +
-                                        alertInsight.datasetEndTime) /
-                                        2
-                                )
-                            )
-                        );
-                    }
+        useEffect(() => {
+            if (alertInsight) {
+                searchParams.set(
+                    TimeRangeQueryStringKey.START_TIME,
+                    `${alertInsight.datasetStartTime}`
+                );
+                searchParams.set(
+                    TimeRangeQueryStringKey.END_TIME,
+                    `${alertInsight.datasetEndTime}`
+                );
+                setSearchParams(searchParams);
+
+                // TODO: Verify if this is how it should be done
+                // Set the date range to the middle of the anomaly chart by default
+                handleSetField(
+                    "dateRange",
+                    generateDateRangeDaysFromNow(
+                        2,
+                        DateTime.fromSeconds(
+                            (alertInsight.datasetStartTime +
+                                alertInsight.datasetEndTime) /
+                                2_000,
+                            {
+                                zone: determineTimezoneFromAlertInEvaluation(
+                                    alertInsight?.templateWithProperties
+                                ),
+                            }
+                        )
+                    )
                 );
             }
-        }, [selectedAlertId]);
+        }, [alertInsight]);
 
         const handleCancelClick = (): void => {
             onCancel?.();
@@ -272,6 +289,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         formFields={formFields}
                                         handleSetField={handleSetField}
                                         readOnlyFormFields={readOnlyFormFields}
+                                        timezone={determineTimezoneFromAlertInEvaluation(
+                                            alertInsight?.templateWithProperties
+                                        )}
                                     />
                                     <Grid item xs={12}>
                                         <Box pb={3} pt={2}>
@@ -280,8 +300,15 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                     </Grid>
                                     <Grid item xs={12}>
                                         <LoadingErrorStateSwitch
-                                            isError={false}
-                                            isLoading={!editedAnomaly}
+                                            isError={
+                                                alertInsightStatus ===
+                                                ActionStatus.Error
+                                            }
+                                            isLoading={
+                                                !editedAnomaly ||
+                                                alertInsightStatus ===
+                                                    ActionStatus.Working
+                                            }
                                             loadingState={
                                                 <Box p={1} position="relative">
                                                     <SkeletonV1

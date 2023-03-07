@@ -13,15 +13,20 @@
  * the License.
  */
 
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import { Icon } from "@iconify/react";
+import { Box, Button } from "@material-ui/core";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { CreateAnomalyWizard } from "../../components/anomalies-create/create-anomaly-wizard/create-anomaly-wizard.component";
+import { anomaliesBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     NotificationTypeV1,
+    PageHeaderActionsV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -45,6 +50,7 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
     const { id: selectedAlertId } = useParams<{ id?: string }>();
+    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
 
     useEffect(() => {
         getAlerts();
@@ -109,11 +115,38 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
                   ]
                 : []),
         ],
+        customActions: (
+            <PageHeaderActionsV1>
+                <Button
+                    color="primary"
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setIsHelpPanelOpen(true)}
+                >
+                    <Box component="span" mr={1}>
+                        {t("label.need-help")}
+                    </Box>
+                    <Box component="span" display="flex">
+                        <Icon
+                            fontSize={24}
+                            icon="mdi:question-mark-circle-outline"
+                        />
+                    </Box>
+                </Button>
+                &nbsp;
+            </PageHeaderActionsV1>
+        ),
     };
 
     return (
         <PageV1>
             <PageHeader {...pageHeaderProps} />
+            <HelpDrawerV1
+                cards={anomaliesBasicHelpCards}
+                isOpen={isHelpPanelOpen}
+                title={`${t("label.need-help")}?`}
+                onClose={() => setIsHelpPanelOpen(false)}
+            />
 
             <LoadingErrorStateSwitch
                 isError={alertsStatus === ActionStatus.Error}

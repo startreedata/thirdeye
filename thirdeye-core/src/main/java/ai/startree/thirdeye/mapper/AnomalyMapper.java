@@ -53,6 +53,7 @@ public interface AnomalyMapper {
   @Mapping(source = "alert.id", target = "detectionConfigId")
   @Mapping(source = "metadata.metric.name", target = "metric")
   @Mapping(source = "metadata.dataset.name", target = "collection")
+  @Mapping(source = "sourceType", target = "anomalyResultSource")
   AnomalyDTO toDto(AnomalyApi api);
 
   default long map(@Nullable final Date value) {

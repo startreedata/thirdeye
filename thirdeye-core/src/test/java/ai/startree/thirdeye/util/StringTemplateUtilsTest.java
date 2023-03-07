@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.util;
 
-import static ai.startree.thirdeye.util.StringTemplateUtils.sanitizeValues;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
@@ -56,30 +55,19 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testStringReplacementWithDoubleQuotes() throws IOException, ClassNotFoundException {
+  public void testStringReplacementWithJsonEscapeRequired() throws IOException, ClassNotFoundException {
     final Map<String, Object> values = Map.of(
-        "k1", "value with \"double quotes\"",
-        "k2", "value with \\\"double quotes escaped\\\""
+        "k1", "\"double quotes\"",
+        "k2", "\\\"backslash and quote\""
     );
 
-    final Map<String, String> map1 = StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of("templateKey", "value with ${k1} and ${k2}")),
+    final Map<String, Object> map1 = StringTemplateUtils.applyContext(
+        new HashMap<>(Map.of(
+            "stringKey", "value with ${k1} and ${k2}")),
         values);
-    assertThat(map1).isEqualTo(Map.of("templateKey",
-        "value with value with \"double quotes\" and value with \"double quotes escaped\""));
-  }
-
-  @Test
-  public void testSanitizeValues() throws IOException, ClassNotFoundException {
-    final Map<String, Object> values = Map.of(
-        "k1", "value with \"double quotes\"",
-        "k2", "value with \\\"double quotes escaped\\\""
-    );
-    final Map<String, Object> sanitizeValues = sanitizeValues(values);
-    assertThat(sanitizeValues).isEqualTo(Map.of(
-        "k1", "value with \\\"double quotes\\\"",
-        "k2", "value with \\\"double quotes escaped\\\""
-    ));
+    final Map<String, Object> expected = Map.of(
+        "stringKey", "value with \"double quotes\" and \\\"backslash and quote\"");
+    assertThat(map1).isEqualTo(expected);
   }
 
   @Test
@@ -107,7 +95,7 @@ public class StringTemplateUtilsTest {
 
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
     final Map<String, String> map = Map.of("test", "test2");
-    final List<String> list = List.of("test");
+    final List<String> list = List.of("test", "\"quotedValue\"");
     final Map<String, Object> properties = Map.of(datasetKey,
         datasetConfigDTO,
         mapKey,

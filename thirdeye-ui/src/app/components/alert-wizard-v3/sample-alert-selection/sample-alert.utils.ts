@@ -20,6 +20,7 @@ import { SampleAlertOption } from "./sample-alert-selection.interfaces";
 const PAGE_VIEWS_DATASET_NAME = "CleanPageViewsData";
 const E_COMMERCE_DATASET_NAME = "USStoreSalesOrderData";
 const ADS_DATASET_NAME = "AdCampaignData";
+const LOGISTICS_DATASET = "LogisticsData";
 const STARTREE_PERCENTAGE_RULE = "startree-percentage-rule";
 const STARTREE_ETS_DX = "startree-ets-dx";
 
@@ -137,6 +138,7 @@ export const generateOptions = (
             },
         });
     }
+
     const adsDataset = datasets.find((d) => d.name === ADS_DATASET_NAME);
     if (adsDataset && alertTemplates.find((a) => a.name === STARTREE_ETS_DX)) {
         availableOptions.push({
@@ -186,6 +188,102 @@ export const generateOptions = (
                     ],
                 },
                 cron: "0 0 5 ? * * *",
+            },
+        });
+    }
+
+    const logisticsDataset = datasets.find((d) => d.name === LOGISTICS_DATASET);
+    if (
+        logisticsDataset &&
+        alertTemplates.find((a) => a.name === STARTREE_ETS_DX)
+    ) {
+        availableOptions.push({
+            title: t("message.monitor-driver-request-api-failures"),
+            description: t(
+                "message.monitor-metrics-critical-to-rideshare-customer"
+            ),
+            recipeLink:
+                "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/rideshare_recipe",
+            alertConfiguration: {
+                name: "LogisticsData-rideshare-dx-sample-alert",
+                description: t(
+                    "message.monitor-metrics-critical-to-rideshare-customer"
+                ),
+                template: {
+                    name: STARTREE_ETS_DX,
+                },
+                templateProperties: {
+                    dataSource: logisticsDataset.dataSource.name,
+                    dataset: LOGISTICS_DATASET,
+                    timeColumn: "timestamp",
+                    timeColumnFormat: "EPOCH",
+                    aggregationFunction: "SUM",
+                    seasonalityPeriod: "P1D",
+                    lookback: "P28D",
+                    monitoringGranularity: "PT1H",
+                    aggregationColumn: "Ride_Request_WaitTime",
+                    rcaAggregationFunction: "COUNT",
+                    queryFilters: "${queryFilters}",
+                    enumerationItems: [
+                        {
+                            name: "overall",
+                            params: {
+                                queryFilters: "",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'Los_Angeles' and RideType = 'Standard'",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'Los_Angeles' and RideType = 'Shared'",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'Los_Angeles' and RideType = 'Premium'",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'New_York' and RideType = 'Standard'",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'New_York' and RideType = 'Shared'",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'New_York' and RideType = 'Premium'",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'San_Francisco' and RideType = 'Standard'",
+                            },
+                        },
+                        {
+                            params: {
+                                queryFilters:
+                                    " AND City = 'San_Francisco' and RideType = 'Shared'",
+                            },
+                        },
+                    ],
+                    pattern: "UP",
+                    sensitivity: "3",
+                },
+                cron: "0 0 5 ? * MON-FRI *",
             },
         });
     }

@@ -116,25 +116,6 @@ export const generateOptions = (
         // advanced
         [
             {
-                title: t("label.holt-winters-rule"),
-                description: t(
-                    "message.holt-winters-rule-algorithm-description"
-                ),
-                alertTemplate: "startree-holt-winters",
-                alertTemplateForMultidimension: "startree-holt-winters-dx",
-                alertTemplateForPercentile: "startree-holt-winters-percentile",
-                inputFieldConfigs: [
-                    {
-                        templatePropertyName: "sensitivity",
-                        label: t("label.sensitivity"),
-                        description: "",
-                        type: "slider",
-                        min: -26,
-                        max: 14,
-                    },
-                ],
-            },
-            {
                 title: t("label.startree-ets"),
                 description: t("message.startree-ets-algorithm-description"),
                 alertTemplate: "startree-ets",

@@ -528,6 +528,8 @@
         "minimum-alert-template-value-property-description": "Values cannot be less than this value",
         "misreported-anomalies": "Misreported Anomalies",
         "monitor-ad-campaign-performance": "Monitor Ad Campaign performance",
+        "monitor-driver-request-api-failures": "Monitor driver request API failures for ride-share application",
+        "monitor-metrics-critical-to-rideshare-customer": "Monitor metrics critical to ride-share customer experience like cancellations and wait time",
         "monitor-number-of-clicks-across-multiple-dimension": "Monitor number of clicks across multiple dimensions such as Country and Ad Campaign Size",
         "monitor-number-of-orders-across-multiple-dimension": "Monitor number of Orders across multiple dimensions such as Products, Sales Channel, Sales Region, and Store Locations",
         "monitor-number-of-page-views-across-multiple": "Monitor number of page views across multiple dimensions such as location, device, browser",

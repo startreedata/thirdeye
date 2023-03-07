@@ -38,7 +38,6 @@ import {
     getAnomaliesViewPath,
 } from "../../utils/routes/routes.util";
 import { EditableAnomaly } from "./anomalies-create-page.interfaces";
-import { createEmptyAnomaly } from "./anomalies-create-page.utils";
 
 export const AnomaliesCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -90,8 +89,6 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
             });
     };
 
-    const initialAnomaly = useMemo(() => createEmptyAnomaly(), []);
-
     const pageHeaderProps: PageHeaderProps = {
         title: t("label.report-missed-anomaly"),
         breadcrumbs: [
@@ -125,7 +122,6 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
                 <CreateAnomalyWizard
                     alerts={alerts as Alert[]}
                     cancelBtnLabel={t("label.back")}
-                    initialAnomalyData={initialAnomaly}
                     submitBtnLabel={t("label.save-entity", {
                         entity: t("label.anomaly"),
                     })}

@@ -19,6 +19,12 @@ import {
     Alert,
     EnumerationItemConfig,
 } from "../../../rest/dto/alert.interfaces";
+import {
+    AnomalyResultSource,
+    AnomalySeverity,
+    AnomalyType,
+} from "../../../rest/dto/anomaly.interfaces";
+import { Metric } from "../../../rest/dto/metric.interfaces";
 
 export const getEnumerationItemsConfigFromAlert = (
     alert: Alert
@@ -38,8 +44,12 @@ export const getEnumerationItemsConfigFromAlert = (
 export const AlertId = "alertId";
 
 export const getIsAnomalyValid = (
-    editableAnomaly: EditableAnomaly
+    editableAnomaly?: EditableAnomaly | null
 ): boolean => {
+    if (!editableAnomaly) {
+        return false;
+    }
+
     const { alert, startTime, endTime } = editableAnomaly;
 
     // Basic sanity checks for values
@@ -54,4 +64,67 @@ export const getIsAnomalyValid = (
 
     // The anomaly is valid iff all check are valid
     return conditions.every((c) => !!c);
+};
+
+export const createEditableAnomaly = ({
+    alert,
+    enumerationItemId,
+    startTime,
+    endTime,
+    sourceType = AnomalyResultSource.USER_LABELED_ANOMALY,
+    severity,
+    type,
+
+    // If these values are absent, the anomaly chart component tends to crash
+    avgBaselineVal = 0,
+    avgCurrentVal = 0,
+}: {
+    alert: Alert;
+    enumerationItemId?: number;
+    startTime: number;
+    endTime: number;
+    sourceType?: AnomalyResultSource;
+    severity?: AnomalySeverity;
+    type?: AnomalyType;
+
+    avgBaselineVal?: number;
+    avgCurrentVal?: number;
+}): EditableAnomaly => {
+    const { dataset: datasetName, aggregationColumn: metricName } =
+        alert.templateProperties as {
+            dataset: string;
+            aggregationColumn: string;
+        };
+
+    const editableAnomaly: EditableAnomaly = {
+        alert,
+        ...(enumerationItemId && {
+            enumerationItem: { id: enumerationItemId },
+        }),
+        startTime,
+        endTime,
+        sourceType,
+        metric: {
+            name: metricName,
+        } as Metric,
+        metadata: {
+            metric: {
+                name: metricName,
+            },
+            dataset: {
+                name: datasetName,
+            },
+        },
+        ...(severity && { severity }),
+        ...(type && { type }),
+
+        score: 0.0,
+        weight: 0.0,
+        impactToGlobal: 0.0,
+
+        avgBaselineVal,
+        avgCurrentVal,
+    };
+
+    return editableAnomaly;
 };

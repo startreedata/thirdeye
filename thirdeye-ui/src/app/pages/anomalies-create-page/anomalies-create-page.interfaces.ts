@@ -15,26 +15,18 @@
 
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
+    Anomaly,
+    AnomalyFeedback,
     AnomalyMetadata,
     AnomalyResultSource,
+    AnomalySeverity,
+    AnomalyType,
 } from "../../rest/dto/anomaly.interfaces";
 import { Metric } from "../../rest/dto/metric.interfaces";
 
-// TODO: Proper interface
 export interface EditableAnomaly {
     startTime: number;
     endTime: number;
-
-    // avgCurrentVal: number;
-    // avgBaselineVal: number;
-
-    // score: number;
-    // weight: number;
-    // impactToGlobal: number;
-    sourceType: AnomalyResultSource.USER_LABELED_ANOMALY;
-    // created: number;
-    // notified: boolean;
-    // message: string;
 
     alert: Pick<Alert, "id" | "name">;
     metric: Metric;
@@ -43,9 +35,20 @@ export interface EditableAnomaly {
         id: number;
     };
 
-    // children: Anomaly[];
-    // type: AnomalyType;
-    // severity: AnomalySeverity;
-    // child: boolean;
-    // feedback?: AnomalyFeedback;
+    sourceType: AnomalyResultSource;
+
+    avgCurrentVal?: number;
+    avgBaselineVal?: number;
+
+    score?: number;
+    weight?: number;
+    impactToGlobal?: number;
+
+    children?: Anomaly[];
+    type?: AnomalyType;
+    severity?: AnomalySeverity;
+    child?: boolean;
+    feedback?: AnomalyFeedback;
+    notified?: boolean;
+    message?: string;
 }

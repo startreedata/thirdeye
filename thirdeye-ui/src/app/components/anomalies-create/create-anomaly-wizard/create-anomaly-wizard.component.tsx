@@ -15,33 +15,34 @@
 
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import { DateTime } from "luxon";
-import React, {
-    FunctionComponent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
+    NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     SkeletonV1,
+    useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetAlertInsight } from "../../../rest/alerts/alerts.actions";
-import { Alert } from "../../../rest/dto/alert.interfaces";
-import { AnomalyResultSource } from "../../../rest/dto/anomaly.interfaces";
-import { Metric } from "../../../rest/dto/metric.interfaces";
+import {
+    useGetAlertInsight,
+    useGetEvaluation,
+} from "../../../rest/alerts/alerts.actions";
+import { Alert, AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
-import { determineTimezoneFromAlertInEvaluation } from "../../../utils/alerts/alerts.util";
+import {
+    createAlertEvaluation,
+    determineTimezoneFromAlertInEvaluation,
+} from "../../../utils/alerts/alerts.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import {
     generateDateRangeDaysFromNow,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
-import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { CreateAnomalyPropertiesForm } from "../create-anomaly-properties-form/create-anomaly-properties-form.component";
@@ -53,24 +54,18 @@ import {
     HandleSetFields,
 } from "./create-anomaly-wizard.interfaces";
 import {
+    createEditableAnomaly,
     getEnumerationItemsConfigFromAlert,
     getIsAnomalyValid,
 } from "./create-anomaly-wizard.utils";
 
 export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
-    ({
-        alerts,
-
-        submitBtnLabel,
-        cancelBtnLabel,
-        onSubmit,
-        onCancel,
-        initialAnomalyData, // TODO: Implement initialAnomalyData
-    }) => {
+    ({ alerts, submitBtnLabel, cancelBtnLabel, onSubmit, onCancel }) => {
         const { t } = useTranslation();
         const [searchParams, setSearchParams] = useSearchParams();
         const { id: selectedAlertId } = useParams<{ id: string }>();
         const navigate = useNavigate();
+        const { notify } = useNotificationProviderV1();
 
         const selectedAlert = alerts?.find(
             (a) => a.id === Number(selectedAlertId)
@@ -85,8 +80,16 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         const {
             alertInsight,
             getAlertInsight,
-            status: alertInsightStatus,
+            status: alertInsightRequestStatus,
+            errorMessages: alertInsightErrorMessage,
         } = useGetAlertInsight();
+
+        const {
+            evaluation,
+            getEvaluation,
+            errorMessages: evaluationErrorMessages,
+            status: getEvaluationRequestStatus,
+        } = useGetEvaluation();
 
         const [formFields, setFormFields] =
             useState<CreateAnomalyEditableFormFields>({
@@ -126,45 +129,35 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }, [formFields.alert]);
 
         const editableAnomaly: EditableAnomaly | null = useMemo(() => {
-            if (
-                !(
-                    formFields.alert &&
-                    formFields.dateRange &&
-                    // formFields.enumerationItem &&
-                    readOnlyFormFields.dataset &&
-                    readOnlyFormFields.metric
-                )
-            ) {
+            if (!(formFields.alert && formFields.dateRange)) {
                 return null;
             }
 
-            return {
-                sourceType: AnomalyResultSource.USER_LABELED_ANOMALY,
+            return createEditableAnomaly({
+                alert: formFields.alert,
+                enumerationItemId: formFields.enumerationItem?.id,
                 startTime: formFields.dateRange[0],
                 endTime: formFields.dateRange[1],
-                ...(formFields.enumerationItem && {
-                    enumerationItem: formFields.enumerationItem,
-                }),
-                alert: formFields.alert,
-                metadata: {
-                    dataset: { name: readOnlyFormFields.dataset },
-                    metric: { name: readOnlyFormFields.metric } as Metric,
-                },
-                metric: { name: readOnlyFormFields.metric } as Metric,
-
-                // TODO: ?Proper values
-                // avgBaselineVal: 0,
-                // avgCurrentVal: 0,
-
-                // Hardcoded for Anomaly #366, for testing
-                // avgBaselineVal: -0.9689632094628097,
-                // avgCurrentVal: 3,
-
-                // score: 0.0,
-                // weight: 0.0,
-                // impactToGlobal: 0.0,
-            };
+            });
         }, [formFields, readOnlyFormFields]);
+
+        const fetchAlertEvaluation = (): void => {
+            const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+            const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+            if (!formFields.alert || !start || !end) {
+                return;
+            }
+            getEvaluation(
+                createAlertEvaluation(
+                    formFields.alert,
+                    Number(start),
+                    Number(end)
+                ),
+                undefined,
+                formFields.enumerationItem || undefined
+            );
+        };
 
         useEffect(() => {
             // If the alert is valid
@@ -190,13 +183,10 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }
         }, [formFields.alert]);
 
-        // TODO: Remove if not needed for error handling
-        // useEffect(() => {
-        //     if (selectedAlertId) {
-        //         // Get the start and end time for the alert
-        //         getAlertInsight({ alertId: Number(selectedAlertId) });
-        //     }
-        // }, [selectedAlertId]);
+        useEffect(() => {
+            // Fetch alert evaluation when an enumeration item is changed
+            fetchAlertEvaluation();
+        }, [formFields.enumerationItem]);
 
         useEffect(() => {
             if (alertInsight) {
@@ -210,16 +200,20 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 );
                 setSearchParams(searchParams);
 
+                // Fetch the alert evaluation AFTER the datetime query params are extracted from
+                // `alertInsight` and set to avoid duplicate API calls with outdated datetime params
+                fetchAlertEvaluation();
+
                 // TODO: Verify if this is how it should be done
                 // Set the date range to the middle of the anomaly chart by default
                 handleSetField(
                     "dateRange",
                     generateDateRangeDaysFromNow(
-                        2,
-                        DateTime.fromSeconds(
+                        1,
+                        DateTime.fromMillis(
                             (alertInsight.datasetStartTime +
                                 alertInsight.datasetEndTime) /
-                                2_000,
+                                2,
                             {
                                 zone: determineTimezoneFromAlertInEvaluation(
                                     alertInsight?.templateWithProperties
@@ -235,7 +229,16 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             onCancel?.();
         };
         const handleSubmitClick = (): void => {
-            editableAnomaly && onSubmit?.(editableAnomaly);
+            if (editableAnomaly) {
+                onSubmit?.(editableAnomaly);
+            } else {
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.invalid-entity-data", {
+                        entity: t("label.anomaly"),
+                    })
+                );
+            }
         };
 
         const handleSetField: HandleSetFields = (fieldName, fieldValue) => {
@@ -251,10 +254,32 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }));
         };
 
-        const isAnomalyValid = useCallback(
-            () => !!editableAnomaly && getIsAnomalyValid(editableAnomaly),
+        const isAnomalyValid = useMemo<boolean>(
+            () => getIsAnomalyValid(editableAnomaly),
             [editableAnomaly]
         );
+
+        useEffect(() => {
+            notifyIfErrors(
+                alertInsightRequestStatus,
+                alertInsightErrorMessage,
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t("label.chart-data"),
+                })
+            );
+        }, [alertInsightErrorMessage, alertInsightRequestStatus]);
+
+        useEffect(() => {
+            notifyIfErrors(
+                getEvaluationRequestStatus,
+                evaluationErrorMessages,
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t("label.chart-data"),
+                })
+            );
+        }, [evaluationErrorMessages, getEvaluationRequestStatus]);
 
         return (
             <>
@@ -299,17 +324,8 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         </Box>
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <LoadingErrorStateSwitch
-                                            isError={
-                                                alertInsightStatus ===
-                                                ActionStatus.Error
-                                            }
-                                            isLoading={
-                                                !editableAnomaly ||
-                                                alertInsightStatus ===
-                                                    ActionStatus.Working
-                                            }
-                                            loadingState={
+                                        <EmptyStateSwitch
+                                            emptyState={
                                                 <Box p={1} position="relative">
                                                     <SkeletonV1
                                                         animation={false}
@@ -336,22 +352,43 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                     </Box>
                                                 </Box>
                                             }
+                                            isEmpty={!editableAnomaly}
                                         >
                                             <PreviewAnomalyChart
                                                 editableAnomaly={
                                                     editableAnomaly as EditableAnomaly
                                                 }
+                                                evaluation={
+                                                    evaluation as AlertEvaluation
+                                                }
+                                                fetchAlertEvaluation={
+                                                    fetchAlertEvaluation
+                                                }
+                                                isLoading={[
+                                                    alertInsightRequestStatus,
+                                                    getEvaluationRequestStatus,
+                                                    enumerationItemsStatus,
+                                                ].some(
+                                                    (s) =>
+                                                        s ===
+                                                        ActionStatus.Working
+                                                )}
                                             />
-                                        </LoadingErrorStateSwitch>
+                                        </EmptyStateSwitch>
+
+                                        {/* <LoadingErrorStateSwitch
+                                            isError={[
+                                                getEvaluationRequestStatus,
+                                                alertInsightStatus,
+                                            ].some(
+                                                (s) => s === ActionStatus.Error
+                                            )}
+                                            isLoading={
+                                                !editableAnomaly ||
+
+                                            }
+                                        ></LoadingErrorStateSwitch> */}
                                     </Grid>
-                                    {/* <Divider />
-                                    <pre>
-                                        {JSON.stringify(
-                                            formFields,
-                                            undefined,
-                                            4
-                                        )}
-                                    </pre> */}
                                 </Grid>
                             </Grid>
                         </PageContentsCardV1>

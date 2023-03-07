@@ -19,7 +19,6 @@ import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 
 export interface CreateAnomalyWizardProps {
     alerts: Alert[];
-    initialAnomalyData: EditableAnomaly;
     submitBtnLabel: string;
     cancelBtnLabel: string;
     onSubmit: (anomaly: EditableAnomaly) => void;

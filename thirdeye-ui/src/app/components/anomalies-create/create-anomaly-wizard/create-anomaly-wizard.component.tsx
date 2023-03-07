@@ -31,7 +31,7 @@ import {
     useGetAlertInsight,
     useGetEvaluation,
 } from "../../../rest/alerts/alerts.actions";
-import { Alert, AlertEvaluation } from "../../../rest/dto/alert.interfaces";
+import { Alert } from "../../../rest/dto/alert.interfaces";
 import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
 import {
     createAlertEvaluation,
@@ -55,6 +55,7 @@ import {
 } from "./create-anomaly-wizard.interfaces";
 import {
     createEditableAnomaly,
+    getAnomaliesAvgValues,
     getEnumerationItemsConfigFromAlert,
     getIsAnomalyValid,
 } from "./create-anomaly-wizard.utils";
@@ -138,8 +139,13 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 enumerationItemId: formFields.enumerationItem?.id,
                 startTime: formFields.dateRange[0],
                 endTime: formFields.dateRange[1],
+                ...(evaluation &&
+                    getAnomaliesAvgValues({
+                        evaluation,
+                        startTime: formFields.dateRange[0],
+                    })),
             });
-        }, [formFields, readOnlyFormFields]);
+        }, [formFields, readOnlyFormFields, evaluation]);
 
         const fetchAlertEvaluation = (): void => {
             const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
@@ -259,6 +265,14 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             [editableAnomaly]
         );
 
+        const timezone = useMemo(
+            () =>
+                determineTimezoneFromAlertInEvaluation(
+                    alertInsight?.templateWithProperties
+                ),
+            [alertInsight]
+        );
+
         useEffect(() => {
             notifyIfErrors(
                 alertInsightRequestStatus,
@@ -314,9 +328,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         formFields={formFields}
                                         handleSetField={handleSetField}
                                         readOnlyFormFields={readOnlyFormFields}
-                                        timezone={determineTimezoneFromAlertInEvaluation(
-                                            alertInsight?.templateWithProperties
-                                        )}
+                                        timezone={timezone}
                                     />
                                     <Grid item xs={12}>
                                         <Box pb={3} pt={2}>
@@ -326,7 +338,11 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                     <Grid item xs={12}>
                                         <EmptyStateSwitch
                                             emptyState={
-                                                <Box p={1} position="relative">
+                                                <Box
+                                                    mt={8}
+                                                    p={1}
+                                                    position="relative"
+                                                >
                                                     <SkeletonV1
                                                         animation={false}
                                                         height={400}
@@ -358,9 +374,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                 editableAnomaly={
                                                     editableAnomaly as EditableAnomaly
                                                 }
-                                                evaluation={
-                                                    evaluation as AlertEvaluation
-                                                }
+                                                evaluation={evaluation}
                                                 fetchAlertEvaluation={
                                                     fetchAlertEvaluation
                                                 }
@@ -373,21 +387,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                         s ===
                                                         ActionStatus.Working
                                                 )}
+                                                timezone={timezone}
                                             />
                                         </EmptyStateSwitch>
-
-                                        {/* <LoadingErrorStateSwitch
-                                            isError={[
-                                                getEvaluationRequestStatus,
-                                                alertInsightStatus,
-                                            ].some(
-                                                (s) => s === ActionStatus.Error
-                                            )}
-                                            isLoading={
-                                                !editableAnomaly ||
-
-                                            }
-                                        ></LoadingErrorStateSwitch> */}
                                     </Grid>
                                 </Grid>
                             </Grid>

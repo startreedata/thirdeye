@@ -14,84 +14,93 @@
  */
 
 import { CardContent, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
-import {
-    determineTimezoneFromAlertInEvaluation,
-    extractDetectionEvaluation,
-} from "../../../utils/alerts/alerts.util";
+import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
+import { getUiAnomaly } from "../../../utils/anomalies/anomalies.util";
+import { AnomalyCard } from "../../entity-cards/anomaly-card/anomaly-card.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertEvaluationTimeSeriesCard } from "../../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { PreviewAnomalyChartProps } from "./preview-anomaly-chart.interfaces";
 
 export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
-    ({ editableAnomaly, evaluation, isLoading, fetchAlertEvaluation }) => {
-        const [detectionEvaluation, setDetectionEvaluation] =
-            useState<DetectionEvaluation | null>(null);
+    ({
+        editableAnomaly,
+        timezone,
+        isLoading,
+        fetchAlertEvaluation,
+        evaluation,
+    }) => {
         const { t } = useTranslation();
 
-        useEffect(() => {
-            if (!evaluation || !editableAnomaly) {
-                setDetectionEvaluation(null);
+        const uiAnomaly = useMemo(
+            () => getUiAnomaly(editableAnomaly as Anomaly),
+            [editableAnomaly]
+        );
 
-                return;
+        const detectionEvaluation = useMemo<DetectionEvaluation | null>(() => {
+            if (!evaluation || !editableAnomaly) {
+                return null;
             }
 
-            const detectionEvalForAnomaly =
-                extractDetectionEvaluation(evaluation)[0];
-
-            // Only filter for the current anomaly
-            detectionEvalForAnomaly.anomalies = [editableAnomaly as Anomaly];
-            setDetectionEvaluation(detectionEvalForAnomaly);
-        }, [evaluation, editableAnomaly.alert.id]);
+            return {
+                ...extractDetectionEvaluation(evaluation)[0],
+                anomalies: [editableAnomaly as Anomaly],
+            };
+        }, [evaluation, editableAnomaly?.alert.id]);
 
         return (
-            <AlertEvaluationTimeSeriesCard
-                disableNavigation
-                alertEvaluationTimeSeriesHeight={500}
-                anomalies={[editableAnomaly as Anomaly]}
-                detectionEvaluation={detectionEvaluation}
-                header={
-                    <CardContent>
-                        <Grid container justifyContent="space-between">
-                            <Grid item lg="auto" md="auto" sm={4} xs={12}>
-                                <Typography variant="h5">
-                                    {t("label.preview-entity", {
-                                        entity: t("label.anomaly"),
-                                    })}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t(
-                                        "message.visualize-how-the-anomaly-will-look-once-flagged"
-                                    )}
-                                </Typography>
-                            </Grid>
+            <>
+                <AlertEvaluationTimeSeriesCard
+                    disableNavigation
+                    alertEvaluationTimeSeriesHeight={500}
+                    anomalies={[editableAnomaly as Anomaly]}
+                    detectionEvaluation={detectionEvaluation}
+                    header={
+                        <CardContent>
+                            <Grid container justifyContent="space-between">
+                                <Grid item lg="auto" md="auto" sm={4} xs={12}>
+                                    <Typography variant="h5">
+                                        {t("label.preview-entity", {
+                                            entity: t("label.anomaly"),
+                                        })}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {t(
+                                            "message.visualize-how-the-anomaly-will-look-once-reported"
+                                        )}
+                                    </Typography>
+                                </Grid>
 
-                            <Grid item lg="auto" md="auto" sm={8} xs={12}>
-                                <TimeRangeButtonWithContext
-                                    timezone={determineTimezoneFromAlertInEvaluation(
-                                        evaluation?.alert
-                                    )}
-                                    onTimeRangeChange={() =>
-                                        fetchAlertEvaluation()
-                                    }
-                                />
-                                <Typography variant="body2">
-                                    {t(
-                                        "message.set-the-date-range-of-the-alert-chart-below"
-                                    )}
-                                </Typography>
+                                <Grid item lg="auto" md="auto" sm={8} xs={12}>
+                                    <TimeRangeButtonWithContext
+                                        timezone={timezone}
+                                        onTimeRangeChange={() =>
+                                            fetchAlertEvaluation()
+                                        }
+                                    />
+                                    <Typography variant="body2">
+                                        {t(
+                                            "message.set-the-date-range-of-the-alert-chart-below"
+                                        )}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <AnomalyCard
+                                        isLoading={isLoading}
+                                        timezone={timezone}
+                                        uiAnomaly={uiAnomaly}
+                                    />
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </CardContent>
-                }
-                isLoading={isLoading}
-                rootCardProps={{ variant: "elevation" }}
-                timezone={determineTimezoneFromAlertInEvaluation(
-                    evaluation?.alert
-                )}
-            />
+                        </CardContent>
+                    }
+                    isLoading={isLoading}
+                    rootCardProps={{ variant: "elevation" }}
+                    timezone={timezone}
+                />
+            </>
         );
     };

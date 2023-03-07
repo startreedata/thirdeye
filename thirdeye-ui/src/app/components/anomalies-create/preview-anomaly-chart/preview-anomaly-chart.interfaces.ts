@@ -19,7 +19,8 @@ import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface PreviewAnomalyChartProps {
     editableAnomaly: EditableAnomaly | Anomaly;
-    evaluation: AlertEvaluation;
     fetchAlertEvaluation: () => void;
     isLoading: boolean;
+    evaluation: AlertEvaluation | null;
+    timezone: string | undefined;
 }

@@ -650,7 +650,7 @@
         "view-documentation": "View documentation",
         "viewing-saved-investigation-id": "Viewing saved investigation (# {{investigationId}}): {{name}}",
         "visualization-render-error": "Error rendering visualization",
-        "visualize-how-the-anomaly-will-look-once-flagged": "Visualize how the anomaly will look once flagged",
+        "visualize-how-the-anomaly-will-look-once-reported": "Visualize how the anomaly will look once reported",
         "welcome-to-thirdeye": "Welcome to ThirdEye",
         "what-are-entity": "What are {{entity}}?",
         "what-is-an-entity": "What is an {{entity}}?",

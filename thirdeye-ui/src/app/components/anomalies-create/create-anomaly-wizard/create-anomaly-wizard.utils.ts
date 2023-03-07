@@ -17,6 +17,7 @@ import { isNumber } from "lodash";
 import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     Alert,
+    AlertEvaluation,
     EnumerationItemConfig,
 } from "../../../rest/dto/alert.interfaces";
 import {
@@ -25,6 +26,7 @@ import {
     AnomalyType,
 } from "../../../rest/dto/anomaly.interfaces";
 import { Metric } from "../../../rest/dto/metric.interfaces";
+import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 
 export const getEnumerationItemsConfigFromAlert = (
     alert: Alert
@@ -118,6 +120,7 @@ export const createEditableAnomaly = ({
         ...(severity && { severity }),
         ...(type && { type }),
 
+        // TODO: Needed?
         score: 0.0,
         weight: 0.0,
         impactToGlobal: 0.0,
@@ -127,4 +130,29 @@ export const createEditableAnomaly = ({
     };
 
     return editableAnomaly;
+};
+
+export const getAnomaliesAvgValues = ({
+    evaluation,
+    startTime,
+}: {
+    evaluation: AlertEvaluation;
+    startTime: number;
+}): { avgBaselineVal: number; avgCurrentVal: number } | null => {
+    const detectionEvaluation = extractDetectionEvaluation(evaluation)[0];
+
+    if (evaluation) {
+        const { timestamp, current, expected } = detectionEvaluation?.data;
+        const anomalyStartIndex = timestamp.findIndex((v) => v >= startTime);
+
+        if (anomalyStartIndex) {
+            // TODO: Should the avg of all the values in the range be used?
+            return {
+                avgBaselineVal: current?.[anomalyStartIndex] || 0,
+                avgCurrentVal: expected?.[anomalyStartIndex] || 0,
+            };
+        }
+    }
+
+    return null;
 };

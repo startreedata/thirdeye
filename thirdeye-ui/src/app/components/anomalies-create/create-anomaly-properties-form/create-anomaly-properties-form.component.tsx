@@ -164,7 +164,11 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                     loadingState={
                         <InputSection
                             inputComponent={
-                                <SkeletonV1 height={60} width="100%" />
+                                <SkeletonV1
+                                    height={50}
+                                    variant="rect"
+                                    width="100%"
+                                />
                             }
                             label={formLabels.enumerationItem}
                         />
@@ -222,6 +226,9 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                 {!!timezone && (
                     <InputSection
                         fullWidth
+                        helperLabel={t(
+                            "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
+                        )}
                         inputComponent={
                             <TimeRangeButton
                                 timeRangeDuration={timeRangeDuration}

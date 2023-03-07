@@ -311,8 +311,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         color="secondary"
                                         variant="subtitle1"
                                     >
-                                        Configure details for the anomaly
-                                        datetime range and the parent alert
+                                        {t(
+                                            "message.configure-the-parent-alert-and-the-occurrence-date-time-for-the-anomalous-behavior"
+                                        )}
                                     </Typography>
                                 </Grid>
 
@@ -362,8 +363,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                             color="textSecondary"
                                                             variant="body2"
                                                         >
-                                                            Select an alert to
-                                                            preview anomaly
+                                                            {t(
+                                                                "message.select-an-alert-to-generate-the-anomaly-preview"
+                                                            )}
                                                         </Typography>
                                                     </Box>
                                                 </Box>

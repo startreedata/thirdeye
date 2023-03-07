@@ -28,14 +28,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ForkJoinParallelExecutor {
+
+  private static final Logger log = LoggerFactory.getLogger(ForkJoinParallelExecutor.class);
 
   private final ForkJoinConfiguration config;
   private final DetectionPipelineContext detectionPipelineContext;
@@ -52,13 +55,13 @@ public class ForkJoinParallelExecutor {
 
   public List<ForkJoinResultItem> execute(final PlanNode root,
       final List<EnumerationItemDTO> enumerationItems) {
-    final var callables = prepareCallables(root, enumerationItems);
-    return executeAll(callables);
+    final var futures = executeInParallel(root, enumerationItems);
+    return getResults(futures);
   }
 
-  public List<Callable<ForkJoinResultItem>> prepareCallables(
-      final PlanNode root, final List<EnumerationItemDTO> enumerationItems) {
-    final List<Callable<ForkJoinResultItem>> callables = new ArrayList<>();
+  private List<Future<ForkJoinResultItem>> executeInParallel(final PlanNode root,
+      final List<EnumerationItemDTO> enumerationItems) {
+    final List<Future<ForkJoinResultItem>> futures = new ArrayList<>(enumerationItems.size());
 
     for (final var enumerationItem : enumerationItems) {
       /* Clone all nodes for execution. Feed enumeration result */
@@ -71,7 +74,7 @@ public class ForkJoinParallelExecutor {
       final PlanNode rootClone = clonedPipelinePlanNodes.get(root.getName());
 
       /* Create a callable for parallel execution */
-      callables.add((() -> {
+      final var f = subTaskExecutor.submit(() -> {
         /* The context stores all the outputs from all the nodes */
         final Map<ContextKey, OperatorResult> context = new HashMap<>();
 
@@ -82,20 +85,18 @@ public class ForkJoinParallelExecutor {
         final Map<String, OperatorResult> outputs = PlanExecutor.getOutput(context,
             rootClone.getName());
         return new ForkJoinResultItem(enumerationItem, outputs, detectionPipelineContext);
-      }));
+      });
+      futures.add(f);
     }
-    return callables;
+    return futures;
   }
 
-  private List<ForkJoinResultItem> executeAll(final List<Callable<ForkJoinResultItem>> callables) {
-    final var futures = callables.stream()
-        .map(subTaskExecutor::submit)
-        .collect(Collectors.toList());
+  private List<ForkJoinResultItem> getResults(final List<Future<ForkJoinResultItem>> futures) {
     try {
-
+      final long timeoutSec = config.getTimeout().getSeconds();
       final List<ForkJoinResultItem> results = new ArrayList<>();
-      for (final var future : futures) {
-        results.add(future.get(config.getTimeout().getSeconds(), TimeUnit.SECONDS));
+      for (final var f : futures) {
+        results.add(f.get(timeoutSec, TimeUnit.SECONDS));
       }
 
       return results;

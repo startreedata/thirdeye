@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.util;
 
+import static ai.startree.thirdeye.util.StringTemplateUtils.sanitizeValues;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
@@ -52,6 +53,33 @@ public class StringTemplateUtilsTest {
         new HashMap<>(Map.of("k\\testBackslash", "\\withBackSlashes\\${k1}")),
         values);
     assertThat(map1).isEqualTo(Map.of("k\\testBackslash", "\\withBackSlashes\\v1"));
+  }
+
+  @Test
+  public void testStringReplacementWithDoubleQuotes() throws IOException, ClassNotFoundException {
+    final Map<String, Object> values = Map.of(
+        "k1", "value with \"double quotes\"",
+        "k2", "value with \\\"double quotes escaped\\\""
+    );
+
+    final Map<String, String> map1 = StringTemplateUtils.applyContext(
+        new HashMap<>(Map.of("templateKey", "value with ${k1} and ${k2}")),
+        values);
+    assertThat(map1).isEqualTo(Map.of("templateKey",
+        "value with value with \"double quotes\" and value with \"double quotes escaped\""));
+  }
+
+  @Test
+  public void testSanitizeValues() throws IOException, ClassNotFoundException {
+    final Map<String, Object> values = Map.of(
+        "k1", "value with \"double quotes\"",
+        "k2", "value with \\\"double quotes escaped\\\""
+    );
+    final Map<String, Object> sanitizeValues = sanitizeValues(values);
+    assertThat(sanitizeValues).isEqualTo(Map.of(
+        "k1", "value with \\\"double quotes\\\"",
+        "k2", "value with \\\"double quotes escaped\\\""
+    ));
   }
 
   @Test
@@ -192,7 +220,8 @@ public class StringTemplateUtilsTest {
         objectWithNestedTemplatable,
         properties);
 
-    assertThat(output.templatableNested.getValue().templatableDto.getValue()).isEqualTo(datasetConfigDTO);
+    assertThat(output.templatableNested.getValue().templatableDto.getValue()).isEqualTo(
+        datasetConfigDTO);
     assertThat(output.templatableNested.getValue().templatableDto.getTemplatedValue()).isNull();
   }
 

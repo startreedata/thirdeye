@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -70,12 +71,27 @@ public class StringTemplateUtils {
   public static <T> T applyContext(final T template,
       final Map<String, Object> valuesMap)
       throws IOException, ClassNotFoundException {
-
+    final var sanitizeValues = sanitizeValues(valuesMap);
     final Module module = new SimpleModule().addSerializer(Templatable.class,
-        new TemplateEngineTemplatableSerializer(valuesMap));
+        new TemplateEngineTemplatableSerializer(sanitizeValues));
     final ObjectMapper objectMapper = new ObjectMapper().registerModule(module);
 
     final String jsonString = objectMapper.writeValueAsString(template);
-    return (T) objectMapper.readValue(renderTemplate(jsonString, valuesMap), template.getClass());
+    return (T) objectMapper.readValue(renderTemplate(jsonString, sanitizeValues), template.getClass());
+  }
+
+  @VisibleForTesting
+  static Map<String, Object> sanitizeValues(final Map<String, Object> valuesMap) {
+    final Map<String, Object> sanitizedValues = new HashMap<>(valuesMap.size());
+    for (final Map.Entry<String, Object> e : valuesMap.entrySet()) {
+      if (e.getValue() instanceof String) {
+        final String stringValue = (String) e.getValue();
+        // escape double quote without preceding backslash in string value
+        sanitizedValues.put(e.getKey(), stringValue.replaceAll("(?<!\\\\)\"", "\\\\\""));
+      } else {
+        sanitizedValues.put(e.getKey(), e.getValue());
+      }
+    }
+    return sanitizedValues;
   }
 }

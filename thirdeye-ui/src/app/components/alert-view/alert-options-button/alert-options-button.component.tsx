@@ -21,6 +21,7 @@ import {
     getAlertsAlertPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
+    getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
 import { AlertOptionsButtonProps } from "./alert-options-button.interfaces";
 
@@ -100,6 +101,11 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
         handleAlertOptionsClose();
     };
 
+    const handleCreateAlertAnomaly = (): void => {
+        navigate(getAnomaliesCreatePath(alert.id));
+        handleAlertOptionsClose();
+    };
+
     return (
         <>
             {/* Alert options button */}
@@ -152,6 +158,14 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                 <MenuItem onClick={handleAlertDelete}>
                     {t("label.delete-entity", {
                         entity: t("label.alert"),
+                    })}
+                </MenuItem>
+
+                {/* Create anomaly for alert */}
+                <MenuItem onClick={handleCreateAlertAnomaly}>
+                    {t("label.create-child-for-parent", {
+                        child: t("label.anomaly"),
+                        parent: t("label.alert"),
                     })}
                 </MenuItem>
 

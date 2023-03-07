@@ -16,10 +16,12 @@ package ai.startree.thirdeye.util;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -75,7 +77,7 @@ public class StringTemplateUtilsTest {
     final Map<String, Object> values = Map.of("k2", "v2");
     assertThatThrownBy(() -> StringTemplateUtils.applyContext(
         new HashMap<>(Map.of("k", "${k1}")),
-        values)).isInstanceOf(ThirdEyeException.class);
+        values)).isInstanceOf(com.fasterxml.jackson.databind.JsonMappingException.class);
   }
 
   @Test
@@ -214,15 +216,14 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testTemplateRenderingWithRecursiveVariablesForApacheCommons() throws IOException {
+  public void testTemplateRenderingWithRecursiveVariablesForApacheCommons()
+      throws IOException, ClassNotFoundException {
     final String alertTemplateDtoString = IOUtils.resourceToString("/alertTemplateDto.json",
         StandardCharsets.UTF_8);
+    final AlertTemplateDTO template = ThirdEyeSerialization.getObjectMapper()
+        .readValue(alertTemplateDtoString, AlertTemplateDTO.class);
 
-    final String alertTemplateDtoRenderedString = IOUtils.resourceToString(
-        "/alertTemplateDtoRendered.json",
-        StandardCharsets.UTF_8);
-
-    final String s = StringTemplateUtils.renderTemplate(alertTemplateDtoString,
+    final AlertTemplateDTO renderedTemplate = StringTemplateUtils.applyContext(template,
         ImmutableMap.<String, Object>builder()
             .put("aggregationColumn", "views")
             .put("completenessDelay", "P0D")
@@ -231,7 +232,6 @@ public class StringTemplateUtilsTest {
             .put("timezone", "UTC")
             .put("queryFilters", "")
             .put("aggregationFunction", "sum")
-            .put("mergeMaxDuration", "")
             .put("rcaExcludedDimensions", List.of())
             .put("timeColumnFormat", "1,DAYS,SIMPLE_DATE_FORMAT,yyyyMMdd")
             .put("timeColumn", "date")
@@ -242,10 +242,17 @@ public class StringTemplateUtilsTest {
             .put("endTime", 2)
             .put("dataSource", "pinotQuickStartLocal")
             .put("dataset", "pageviews")
-            .put("mergeMaxGap", "")
             .build());
 
-    assertThat(s).isEqualTo(alertTemplateDtoRenderedString);
+    // transforming to string to perform an exact comparison
+    final String renderedTemplateString = ThirdEyeSerialization.getObjectMapper()
+        .writeValueAsString(renderedTemplate);
+    final String expectedRenderedTemplateString = IOUtils.resourceToString(
+        "/alertTemplateDtoRendered.json",
+        StandardCharsets.UTF_8);
+
+    final ObjectMapper mapper =  new ObjectMapper();
+    assertThat(mapper.readTree(renderedTemplateString)).isEqualTo(mapper.readTree(expectedRenderedTemplateString));
   }
 
   private static class ObjectWithTemplatableFields {

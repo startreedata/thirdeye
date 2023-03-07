@@ -120,9 +120,7 @@
       "version": 0,
       "dataset": "${dataset}",
       "completenessDelay": "${completenessDelay}",
-      "rcaExcludedDimensions": {
-        "value": []
-      },
+      "rcaExcludedDimensions": [],
       "additive": true,
       "dimensionsHaveNoPreAggregation": [],
       "preAggregatedKeyword": "all",
@@ -140,9 +138,7 @@
       "where": "${queryFilters}"
     },
     "granularity": "${monitoringGranularity}",
-    "timezone": "${timezone}",
-    "mergeMaxGap": "${mergeMaxGap}",
-    "mergeMaxDuration": "${mergeMaxDuration}"
+    "timezone": "${timezone}"
   },
   "defaultProperties": {
     "aggregationColumn": "views",
@@ -152,7 +148,6 @@
     "timezone": "UTC",
     "queryFilters": "",
     "aggregationFunction": "sum",
-    "mergeMaxDuration": "",
     "rcaExcludedDimensions": [],
     "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
     "timeColumn": "date",
@@ -162,7 +157,6 @@
     "startTime": 1,
     "endTime": 2,
     "dataSource": "pinotQuickStartLocal",
-    "dataset": "pageviews",
-    "mergeMaxGap": ""
+    "dataset": "pageviews"
   }
 }

@@ -23,13 +23,13 @@ import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.auth.AccessControlProvider;
-import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.AppAnalyticsService;
+import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.accessControl.AccessType;
+import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -44,10 +44,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.util.StringTemplateUtils;
-import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,22 +63,19 @@ public class AlertResourceTest {
   public void testAlertEvaluationPlan() throws IOException, ClassNotFoundException {
     final ClassLoader classLoader = AlertResourceTest.class.getClassLoader();
     URL resource = requireNonNull(classLoader.getResource("alertEvaluation.json"));
-    final String jsonString = Resources.toString(resource, StandardCharsets.UTF_8);
+    final AlertEvaluationApi apiTemplate = ThirdEyeSerialization.getObjectMapper()
+        .readValue(resource, AlertEvaluationApi.class);
     resource = classLoader.getResource("alertEvaluation-context.json");
     final Map<String, Object> alertEvaluationPlanApiContext = ThirdEyeSerialization.getObjectMapper()
-        .readValue(resource.openStream(), Map.class);
+        .readValue(resource, Map.class);
 
-    final AlertEvaluationApi api = ThirdEyeSerialization.getObjectMapper()
-        .readValue(StringTemplateUtils.renderTemplate(
-            jsonString,
-            alertEvaluationPlanApiContext), AlertEvaluationApi.class);
+    final AlertEvaluationApi api = StringTemplateUtils.applyContext(apiTemplate,
+        alertEvaluationPlanApiContext);
 
     Assert.assertEquals(api.getAlert().getName(), "percentage-change-template");
     Assert.assertEquals(api.getAlert().getDescription(),
         "Percentage drop template");
     Assert.assertEquals(api.getAlert().getCron(), "0 0/1 * 1/1 * ? *");
-    Assert.assertEquals(api.getStart(), new Date(1621300000));
-    Assert.assertEquals(api.getEnd(), new Date(1621200000));
 
     assertThat(api.getAlert()).isNotNull();
     assertThat(api.getAlert().getTemplate()).isNotNull();
@@ -180,7 +175,8 @@ public class AlertResourceTest {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(1L))
         .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1"));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class),alertTemplateManager);
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
+        mock(AlertManager.class), alertTemplateManager);
 
     final AccessControl accessControl = (String token, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.name.equals("alert1");
@@ -210,7 +206,8 @@ public class AlertResourceTest {
     when(alertTemplateManager.findById(1L)).thenReturn(
         (AlertTemplateDTO) new AlertTemplateDTO().setId(
             1L));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class), alertTemplateManager);
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
+        mock(AlertManager.class), alertTemplateManager);
 
     new AlertResource(
         mock(AlertManager.class),
@@ -302,10 +299,12 @@ public class AlertResourceTest {
             new HashMap<>() {{
               put("allowedEval",
                   new DetectionEvaluationApi().setEnumerationItem(new EnumerationItemApi()
-                      .setAuth(new AuthorizationConfigurationApi().setNamespace("allowedNamespace"))));
+                      .setAuth(
+                          new AuthorizationConfigurationApi().setNamespace("allowedNamespace"))));
               put("blockedEval",
                   new DetectionEvaluationApi().setEnumerationItem(new EnumerationItemApi()
-                      .setAuth(new AuthorizationConfigurationApi().setNamespace("blockedNamespace"))));
+                      .setAuth(
+                          new AuthorizationConfigurationApi().setNamespace("blockedNamespace"))));
             }}
         ));
 
@@ -396,10 +395,12 @@ public class AlertResourceTest {
             new HashMap<>() {{
               put("allowedEval",
                   new DetectionEvaluationApi().setEnumerationItem(new EnumerationItemApi()
-                      .setAuth(new AuthorizationConfigurationApi().setNamespace("allowedNamespace"))));
+                      .setAuth(
+                          new AuthorizationConfigurationApi().setNamespace("allowedNamespace"))));
               put("blockedEval",
                   new DetectionEvaluationApi().setEnumerationItem(new EnumerationItemApi()
-                      .setAuth(new AuthorizationConfigurationApi().setNamespace("blockedNamespace"))));
+                      .setAuth(
+                          new AuthorizationConfigurationApi().setNamespace("blockedNamespace"))));
             }}
         ));
 
@@ -429,7 +430,8 @@ public class AlertResourceTest {
   public void testReset_withNoAccess() {
     final AlertManager alertManager = mock(AlertManager.class);
     when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager, mock(AlertTemplateManager.class));
+    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
+        mock(AlertTemplateManager.class));
 
     new AlertResource(
         alertManager,

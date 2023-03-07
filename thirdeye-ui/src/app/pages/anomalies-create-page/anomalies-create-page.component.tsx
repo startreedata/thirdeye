@@ -14,7 +14,7 @@
  */
 
 import { Icon } from "@iconify/react";
-import { Box, Button } from "@material-ui/core";
+import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -26,8 +26,11 @@ import { PageHeaderProps } from "../../components/page-header/page-header.interf
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     NotificationTypeV1,
+    PageContentsCardV1,
+    PageContentsGridV1,
     PageHeaderActionsV1,
     PageV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../platform/rest/actions.interfaces";
@@ -151,6 +154,50 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
             <LoadingErrorStateSwitch
                 isError={alertsStatus === ActionStatus.Error}
                 isLoading={alertsStatus === ActionStatus.Working}
+                loadingState={
+                    <PageContentsGridV1 fullHeight>
+                        <Grid item xs={12}>
+                            <PageContentsCardV1 fullHeight>
+                                <Grid container alignItems="stretch">
+                                    <Grid item xs={12}>
+                                        <Typography variant="h5">
+                                            {t("label.setup-entity", {
+                                                entity: t("label.anomaly"),
+                                            })}
+                                        </Typography>
+                                        <Typography
+                                            color="secondary"
+                                            variant="subtitle1"
+                                        >
+                                            {t(
+                                                "message.configure-the-parent-alert-and-the-occurrence-date-time-for-the-anomalous-behavior"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <SkeletonV1
+                                            height={250}
+                                            variant="rect"
+                                            width="100%"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Box py={1}>
+                                            <Divider />
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <SkeletonV1
+                                            height={350}
+                                            variant="rect"
+                                            width="100%"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </PageContentsCardV1>
+                        </Grid>
+                    </PageContentsGridV1>
+                }
             >
                 <CreateAnomalyWizard
                     alerts={alerts as Alert[]}

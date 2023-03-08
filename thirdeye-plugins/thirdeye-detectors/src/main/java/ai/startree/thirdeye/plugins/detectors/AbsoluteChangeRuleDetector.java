@@ -37,8 +37,6 @@ import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
-import ai.startree.thirdeye.spi.detection.BaselineProvider;
-import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
@@ -49,8 +47,7 @@ import org.joda.time.ReadableInterval;
  * Absolute change rule detection
  */
 public class AbsoluteChangeRuleDetector implements
-    AnomalyDetector<AbsoluteChangeRuleDetectorSpec>,
-    BaselineProvider<AbsoluteChangeRuleDetectorSpec> {
+    AnomalyDetector<AbsoluteChangeRuleDetectorSpec> {
 
   private double absoluteChange;
   private Pattern pattern;
@@ -71,7 +68,7 @@ public class AbsoluteChangeRuleDetector implements
 
   @Override
   public AnomalyDetectorResult runDetection(final Interval window,
-      final Map<String, DataTable> dataTableMap) throws DetectorException {
+      final Map<String, DataTable> dataTableMap) {
     final DataTable baseline = requireNonNull(dataTableMap.get(KEY_BASELINE), "baseline is null");
     final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
     final DataFrame baselineDf = baseline.getDataFrame();

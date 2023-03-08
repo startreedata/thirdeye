@@ -64,7 +64,6 @@ public class AnomalyReportHelper {
         .setEndTime(getDateString(anomaly.getEndTime(), dateTimeZone))
         .setTimezone(getTimezoneString(dateTimeZone))
         .setIssueType(getIssueType(anomaly))
-        .setAnomalyType(anomaly.getType().getLabel())
         .setProperties(SpiUtils.encodeCompactedProperties(props))
         .setMetricUrn(anomaly.getMetricUrn());
   }

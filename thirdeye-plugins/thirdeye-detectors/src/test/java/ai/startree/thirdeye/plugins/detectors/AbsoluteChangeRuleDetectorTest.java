@@ -23,7 +23,6 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
-import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.HashMap;
@@ -41,7 +40,7 @@ public class AbsoluteChangeRuleDetectorTest {
   private static final long JANUARY_5_2021 = 1609804800000L;
 
   @Test
-  public void testNoAnomalies() throws DetectorException {
+  public void testNoAnomalies() {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
@@ -95,7 +94,7 @@ public class AbsoluteChangeRuleDetectorTest {
   }
 
   @Test
-  public void testDetectionRunsOnIntervalOnly() throws DetectorException {
+  public void testDetectionRunsOnIntervalOnly() {
     // test anomaly analysis is only conducted on the interval
     // notice the interval is smaller than the dataframe data
     Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021, DateTimeZone.UTC);
@@ -123,12 +122,14 @@ public class AbsoluteChangeRuleDetectorTest {
     AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
     DataFrame outputDf = output.getDataFrame();
     BooleanSeries outputTimeSeries = outputDf.getBooleans(Constants.COL_ANOMALY);
-    assertThat(outputTimeSeries.sliceTo(2)).isEqualTo(BooleanSeries.fillValues( 2, BooleanSeries.FALSE));
-    assertThat(outputTimeSeries.sliceFrom(2)).isEqualTo(BooleanSeries.fillValues(3, BooleanSeries.TRUE));
+    assertThat(outputTimeSeries.sliceTo(2)).isEqualTo(
+        BooleanSeries.fillValues(2, BooleanSeries.FALSE));
+    assertThat(outputTimeSeries.sliceFrom(2)).isEqualTo(
+        BooleanSeries.fillValues(3, BooleanSeries.TRUE));
   }
 
   @Test
-  public void testAnomaliesUpAndDown() throws DetectorException {
+  public void testAnomaliesUpAndDown() {
     // test pattern UP_AND_DOWN works
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
@@ -167,7 +168,7 @@ public class AbsoluteChangeRuleDetectorTest {
   }
 
   @Test
-  public void testAnomaliesUpOnly() throws DetectorException {
+  public void testAnomaliesUpOnly() {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()
@@ -206,7 +207,7 @@ public class AbsoluteChangeRuleDetectorTest {
   }
 
   @Test
-  public void testAnomaliesDownOnly() throws DetectorException {
+  public void testAnomaliesDownOnly() {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()

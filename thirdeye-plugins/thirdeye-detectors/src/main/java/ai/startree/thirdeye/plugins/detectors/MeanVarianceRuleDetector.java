@@ -34,8 +34,6 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
-import ai.startree.thirdeye.spi.detection.BaselineProvider;
-import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
@@ -52,8 +50,7 @@ import org.slf4j.LoggerFactory;
  * History mean and standard deviation based forecasting and detection.
  * Forecast using history mean and standard deviation.
  */
-public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRuleDetectorSpec>,
-    BaselineProvider<MeanVarianceRuleDetectorSpec> {
+public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRuleDetectorSpec> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MeanVarianceRuleDetector.class);
   private static final Set<Period> SUPPORTED_SEASONALITIES = Set.of(
@@ -142,7 +139,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   @Override
   public AnomalyDetectorResult runDetection(final Interval window,
       final Map<String, DataTable> dataTableMap
-  ) throws DetectorException {
+  ) {
     final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame().copy();
     currentDf

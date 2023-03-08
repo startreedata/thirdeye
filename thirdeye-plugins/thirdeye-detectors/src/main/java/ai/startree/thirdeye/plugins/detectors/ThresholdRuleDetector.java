@@ -27,8 +27,6 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
-import ai.startree.thirdeye.spi.detection.BaselineProvider;
-import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
 import org.joda.time.Interval;
@@ -37,8 +35,7 @@ import org.joda.time.ReadableInterval;
 /**
  * Simple threshold rule algorithm with (optional) upper and lower bounds on a metric value.
  */
-public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetectorSpec>,
-    BaselineProvider<ThresholdRuleDetectorSpec> {
+public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetectorSpec> {
 
   private static final String COL_TOO_HIGH = "tooHigh";
   private static final String COL_TOO_LOW = "tooLow";
@@ -53,7 +50,7 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
   @Override
   public AnomalyDetectorResult runDetection(final Interval interval,
       final Map<String, DataTable> dataTableMap
-  ) throws DetectorException {
+  ) {
     final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
     final DataFrame currentDf = current.getDataFrame().copy();
     currentDf

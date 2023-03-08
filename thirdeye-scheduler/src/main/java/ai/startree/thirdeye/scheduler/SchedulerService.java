@@ -15,8 +15,6 @@ package ai.startree.thirdeye.scheduler;
 
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
-import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilityEventListenerDriver;
-import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilityTaskScheduler;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.modeldownload.ModelDownloaderManager;
@@ -50,9 +48,7 @@ public class SchedulerService implements Managed {
   private final AutoOnboardService autoOnboardService;
   private final HolidayEventsLoader holidayEventsLoader;
   private final DetectionCronScheduler detectionScheduler;
-  private final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver;
   private final ModelDownloaderManager modelDownloaderManager;
-  private final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler;
   private final SubscriptionCronScheduler subscriptionScheduler;
   private final TaskManager taskManager;
 
@@ -67,9 +63,7 @@ public class SchedulerService implements Managed {
       final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
       final DetectionCronScheduler detectionScheduler,
-      final DataAvailabilityEventListenerDriver dataAvailabilityEventListenerDriver,
       final ModelDownloaderManager modelDownloaderManager,
-      final DataAvailabilityTaskScheduler dataAvailabilityTaskScheduler,
       final SubscriptionCronScheduler subscriptionScheduler,
       final TaskManager taskManager) {
     this.config = config;
@@ -80,9 +74,7 @@ public class SchedulerService implements Managed {
     this.autoOnboardService = autoOnboardService;
     this.holidayEventsLoader = holidayEventsLoader;
     this.detectionScheduler = detectionScheduler;
-    this.dataAvailabilityEventListenerDriver = dataAvailabilityEventListenerDriver;
     this.modelDownloaderManager = modelDownloaderManager;
-    this.dataAvailabilityTaskScheduler = dataAvailabilityTaskScheduler;
     this.subscriptionScheduler = subscriptionScheduler;
     this.taskManager = taskManager;
 
@@ -108,12 +100,6 @@ public class SchedulerService implements Managed {
     }
     if (config.isDetectionAlert()) {
       subscriptionScheduler.start();
-    }
-    if (config.isDataAvailabilityEventListener()) {
-      dataAvailabilityEventListenerDriver.start();
-    }
-    if (config.isDataAvailabilityTaskScheduler()) {
-      dataAvailabilityTaskScheduler.start();
     }
     if (config.getModelDownloaderConfigs() != null) {
       modelDownloaderManager.start();
@@ -181,12 +167,6 @@ public class SchedulerService implements Managed {
     }
     if (config.isDetectionAlert()) {
       subscriptionScheduler.shutdown();
-    }
-    if (dataAvailabilityEventListenerDriver != null) {
-      dataAvailabilityEventListenerDriver.shutdown();
-    }
-    if (config.isDataAvailabilityTaskScheduler()) {
-      dataAvailabilityTaskScheduler.shutdown();
     }
     if (modelDownloaderManager != null) {
       modelDownloaderManager.shutdown();

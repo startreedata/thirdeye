@@ -13,22 +13,11 @@
  */
 package ai.startree.thirdeye.util;
 
-import ai.startree.thirdeye.rootcause.entity.MetricEntity;
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.text.DecimalFormat;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -38,21 +27,6 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeUtils.class);
-  private static final String PROP_METRIC_URNS_KEY = "metricUrn";
-  private static final String PROP_NESTED_METRIC_URNS_KEY = "nestedMetricUrns";
-  private static final String PROP_NESTED_PROPERTIES_KEY = "nested";
-
-  @Deprecated
-  public static List<DatasetConfigDTO> getDatasetConfigsFromMetricUrn(String metricUrn,
-      final DatasetConfigManager datasetConfigManager,
-      final MetricConfigManager metricConfigManager) {
-    MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricConfigDTO metricConfig = metricConfigManager.findById(me.getId());
-    if (metricConfig == null) {
-      return new ArrayList<>();
-    }
-    return Collections.singletonList(datasetConfigManager.findByDataset(metricConfig.getDataset()));
-  }
 
   /**
    * Get rounded double value, according to the value of the double.
@@ -84,43 +58,6 @@ public abstract class ThirdEyeUtils {
     DecimalFormat decimalFormat = new DecimalFormat(decimalFormatBuffer.toString());
 
     return decimalFormat.format(value);
-  }
-
-  /**
-   * Parse job name to get the detection id
-   */
-  public static long getDetectionIdFromJobName(String jobName) {
-    String[] parts = jobName.split("_");
-    if (parts.length < 2) {
-      throw new IllegalArgumentException("Invalid job name: " + jobName);
-    }
-    return Long.parseLong(parts[1]);
-  }
-
-  /**
-   * Extract the list of metric urns in the detection config properties
-   *
-   * @param properties the detection config properties
-   * @return the list of metric urns
-   */
-  public static Set<String> extractMetricUrnsFromProperties(Map<String, Object> properties) {
-    Set<String> metricUrns = new HashSet<>();
-    if (properties == null) {
-      return metricUrns;
-    }
-    if (properties.containsKey(PROP_METRIC_URNS_KEY)) {
-      metricUrns.add((String) properties.get(PROP_METRIC_URNS_KEY));
-    }
-    if (properties.containsKey(PROP_NESTED_METRIC_URNS_KEY)) {
-      metricUrns.addAll(ConfigUtils.getList(properties.get(PROP_NESTED_METRIC_URNS_KEY)));
-    }
-    List<Map<String, Object>> nestedProperties = ConfigUtils
-        .getList(properties.get(PROP_NESTED_PROPERTIES_KEY));
-    // extract the metric urns recursively from the nested properties
-    for (Map<String, Object> nestedProperty : nestedProperties) {
-      metricUrns.addAll(extractMetricUrnsFromProperties(nestedProperty));
-    }
-    return metricUrns;
   }
 
   /**

@@ -13,14 +13,15 @@
  */
 package ai.startree.thirdeye.util;
 
-import static ai.startree.thirdeye.util.StringTemplateUtils.sanitizeValues;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,30 +57,19 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testStringReplacementWithDoubleQuotes() throws IOException, ClassNotFoundException {
+  public void testStringReplacementWithJsonEscapeRequired() throws IOException, ClassNotFoundException {
     final Map<String, Object> values = Map.of(
-        "k1", "value with \"double quotes\"",
-        "k2", "value with \\\"double quotes escaped\\\""
+        "k1", "\"double quotes\"",
+        "k2", "\\\"backslash and quote\""
     );
 
-    final Map<String, String> map1 = StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of("templateKey", "value with ${k1} and ${k2}")),
+    final Map<String, Object> map1 = StringTemplateUtils.applyContext(
+        new HashMap<>(Map.of(
+            "stringKey", "value with ${k1} and ${k2}")),
         values);
-    assertThat(map1).isEqualTo(Map.of("templateKey",
-        "value with value with \"double quotes\" and value with \"double quotes escaped\""));
-  }
-
-  @Test
-  public void testSanitizeValues() throws IOException, ClassNotFoundException {
-    final Map<String, Object> values = Map.of(
-        "k1", "value with \"double quotes\"",
-        "k2", "value with \\\"double quotes escaped\\\""
-    );
-    final Map<String, Object> sanitizeValues = sanitizeValues(values);
-    assertThat(sanitizeValues).isEqualTo(Map.of(
-        "k1", "value with \\\"double quotes\\\"",
-        "k2", "value with \\\"double quotes escaped\\\""
-    ));
+    final Map<String, Object> expected = Map.of(
+        "stringKey", "value with \"double quotes\" and \\\"backslash and quote\"");
+    assertThat(map1).isEqualTo(expected);
   }
 
   @Test
@@ -87,7 +77,7 @@ public class StringTemplateUtilsTest {
     final Map<String, Object> values = Map.of("k2", "v2");
     assertThatThrownBy(() -> StringTemplateUtils.applyContext(
         new HashMap<>(Map.of("k", "${k1}")),
-        values)).isInstanceOf(ThirdEyeException.class);
+        values)).isInstanceOf(com.fasterxml.jackson.databind.JsonMappingException.class);
   }
 
   @Test
@@ -107,7 +97,7 @@ public class StringTemplateUtilsTest {
 
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
     final Map<String, String> map = Map.of("test", "test2");
-    final List<String> list = List.of("test");
+    final List<String> list = List.of("test", "\"quotedValue\"");
     final Map<String, Object> properties = Map.of(datasetKey,
         datasetConfigDTO,
         mapKey,
@@ -226,15 +216,14 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testTemplateRenderingWithRecursiveVariablesForApacheCommons() throws IOException {
+  public void testTemplateRenderingWithRecursiveVariablesForApacheCommons()
+      throws IOException, ClassNotFoundException {
     final String alertTemplateDtoString = IOUtils.resourceToString("/alertTemplateDto.json",
         StandardCharsets.UTF_8);
+    final AlertTemplateDTO template = ThirdEyeSerialization.getObjectMapper()
+        .readValue(alertTemplateDtoString, AlertTemplateDTO.class);
 
-    final String alertTemplateDtoRenderedString = IOUtils.resourceToString(
-        "/alertTemplateDtoRendered.json",
-        StandardCharsets.UTF_8);
-
-    final String s = StringTemplateUtils.renderTemplate(alertTemplateDtoString,
+    final AlertTemplateDTO renderedTemplate = StringTemplateUtils.applyContext(template,
         ImmutableMap.<String, Object>builder()
             .put("aggregationColumn", "views")
             .put("completenessDelay", "P0D")
@@ -243,7 +232,6 @@ public class StringTemplateUtilsTest {
             .put("timezone", "UTC")
             .put("queryFilters", "")
             .put("aggregationFunction", "sum")
-            .put("mergeMaxDuration", "")
             .put("rcaExcludedDimensions", List.of())
             .put("timeColumnFormat", "1,DAYS,SIMPLE_DATE_FORMAT,yyyyMMdd")
             .put("timeColumn", "date")
@@ -254,10 +242,17 @@ public class StringTemplateUtilsTest {
             .put("endTime", 2)
             .put("dataSource", "pinotQuickStartLocal")
             .put("dataset", "pageviews")
-            .put("mergeMaxGap", "")
             .build());
 
-    assertThat(s).isEqualTo(alertTemplateDtoRenderedString);
+    // transforming to string to perform an exact comparison
+    final String renderedTemplateString = ThirdEyeSerialization.getObjectMapper()
+        .writeValueAsString(renderedTemplate);
+    final String expectedRenderedTemplateString = IOUtils.resourceToString(
+        "/alertTemplateDtoRendered.json",
+        StandardCharsets.UTF_8);
+
+    final ObjectMapper mapper =  new ObjectMapper();
+    assertThat(mapper.readTree(renderedTemplateString)).isEqualTo(mapper.readTree(expectedRenderedTemplateString));
   }
 
   private static class ObjectWithTemplatableFields {

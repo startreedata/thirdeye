@@ -13,10 +13,20 @@
  * the License.
  */
 
-import { TextField, Typography } from "@material-ui/core";
+import {
+    Box,
+    Grid,
+    List,
+    ListItem,
+    ListItemText,
+    Paper,
+    TextField,
+    Typography,
+} from "@material-ui/core";
+import InfoOutlined from "@material-ui/icons/InfoOutlined";
 import { Autocomplete } from "@material-ui/lab";
 import { capitalize } from "lodash";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../platform/rest/actions.interfaces";
@@ -29,10 +39,7 @@ import { InputSection } from "../../form-basics/input-section/input-section.comp
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeButton } from "../../time-range/time-range-button/time-range-button.component";
 import { TimeRange } from "../../time-range/time-range-provider/time-range-provider.interfaces";
-import {
-    CreateAnomalyFormKeys,
-    CreateAnomalyReadOnlyFormFields,
-} from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
+import { CreateAnomalyFormKeys } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
 import { getEnumerationItemsConfigFromAlert } from "../create-anomaly-wizard/create-anomaly-wizard.utils";
 import { CreateAnomalyPropertiesFormProps } from "./create-anomaly-properties-form.interfaces";
 
@@ -40,7 +47,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
     ({
         alerts,
         formFields,
-        readOnlyFormFields,
+        selectedAlertDetails,
         handleSetField,
         enumerationItemsForAlert,
         enumerationItemsStatus,
@@ -55,11 +62,8 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
 
         const formLabels: Record<CreateAnomalyFormKeys, string> = {
             alert: t("label.alert"),
-            dataSource: t("label.datasource"),
-            dataset: t("label.dataset"),
             dateRange: t("label.date-range"),
             enumerationItem: t("label.dimension"),
-            metric: t("label.metric"),
         };
 
         const timeRangeDuration = createTimeRangeDuration(
@@ -68,179 +72,219 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
             formFields.dateRange[1]
         );
 
+        const alertDetails = useMemo<string[][] | null>(() => {
+            if (!formFields.alert) {
+                return null;
+            }
+            const details: string[][] = [];
+
+            if (formFields.alert?.description) {
+                details.push([
+                    t("label.description"),
+                    formFields.alert?.description,
+                ]);
+            }
+            if (selectedAlertDetails?.dataSource) {
+                details.push([
+                    t("label.datasource"),
+                    selectedAlertDetails?.dataSource,
+                ]);
+            }
+            if (selectedAlertDetails?.dataset) {
+                details.push([
+                    t("label.dataset"),
+                    selectedAlertDetails?.dataset,
+                ]);
+            }
+            if (selectedAlertDetails?.metric) {
+                details.push([t("label.metric"), selectedAlertDetails?.metric]);
+            }
+
+            return details;
+        }, [formFields.alert]);
+
         return (
-            <>
-                <InputSection
-                    inputComponent={
-                        <Autocomplete
-                            disableClearable
-                            fullWidth
-                            getOptionLabel={(option) => option.name}
-                            options={alerts}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    InputProps={{
-                                        ...params.InputProps,
-                                    }}
-                                    margin="dense"
-                                    placeholder={capitalize(
-                                        t(
-                                            "message.click-here-to-select-entity",
-                                            {
-                                                entity: t("label.alert"),
-                                            }
-                                        )
-                                    )}
-                                    size="small"
-                                    variant="outlined"
-                                />
-                            )}
-                            value={formFields.alert || undefined}
-                            onChange={(_, selectedValue) => {
-                                selectedValue &&
-                                    handleSetField("alert", selectedValue);
-                            }}
-                        />
-                    }
-                    labelComponent={
-                        <>
-                            <Typography variant="body2">
-                                {formLabels.alert}
-                            </Typography>
-                            {!!formFields.alert &&
-                                linkRendererV1(
-                                    t("label.view-entity", {
-                                        entity: t("label.alert"),
-                                    }),
-                                    getAlertsAlertViewPath(formFields.alert.id),
-                                    false,
-                                    undefined,
-                                    true,
-                                    "_blank"
-                                )}
-                        </>
-                    }
-                />
-
-                {/* Since these fields are read-only, only show them when the alert is loaded */}
-                {!!formFields.alert &&
-                    (
-                        Object.keys(
-                            readOnlyFormFields
-                        ) as (keyof CreateAnomalyReadOnlyFormFields)[]
-                    ).map(
-                        (
-                            readOnlyKey: keyof CreateAnomalyReadOnlyFormFields
-                        ) => (
-                            <InputSection
-                                inputComponent={
-                                    <TextField
-                                        fullWidth
-                                        required
-                                        InputProps={{
-                                            margin: "none",
-                                            readOnly: true,
-                                        }}
-                                        name={readOnlyKey}
-                                        title="These properties are derived from the selected alert"
-                                        type="string"
-                                        value={
-                                            readOnlyFormFields[readOnlyKey] ||
-                                            ""
-                                        }
-                                        variant="outlined"
-                                    />
-                                }
-                                key={readOnlyKey}
-                                label={formLabels[readOnlyKey]}
-                            />
-                        )
-                    )}
-
-                <LoadingErrorStateSwitch
-                    isError={enumerationItemsStatus === ActionStatus.Error}
-                    isLoading={enumerationItemsStatus === ActionStatus.Working}
-                    loadingState={
-                        <InputSection
-                            inputComponent={
-                                <SkeletonV1
-                                    height={50}
-                                    variant="rect"
-                                    width="100%"
-                                />
-                            }
-                            label={formLabels.enumerationItem}
-                        />
-                    }
-                >
-                    {!!(
-                        showEnumerationItemsField &&
-                        enumerationItemsForAlert &&
-                        enumerationItemsForAlert.length > 0
-                    ) && (
-                        <InputSection
-                            inputComponent={
-                                <Autocomplete<EnumerationItem>
-                                    fullWidth
-                                    getOptionLabel={(option) =>
-                                        generateNameForEnumerationItem(option)
-                                    }
-                                    options={enumerationItemsForAlert}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            placeholder={capitalize(
-                                                t(
-                                                    "message.click-here-to-select-entity",
-                                                    {
-                                                        entity: t(
-                                                            "label.enumeration-item"
-                                                        ),
-                                                    }
-                                                )
-                                            )}
-                                            variant="outlined"
-                                        />
-                                    )}
-                                    size="small"
-                                    value={formFields.enumerationItem}
-                                    onChange={(_, selectedValue) => {
-                                        handleSetField(
-                                            "enumerationItem",
-                                            selectedValue
-                                        );
-                                    }}
-                                />
-                            }
-                            label={formLabels.enumerationItem}
-                        />
-                    )}
-                </LoadingErrorStateSwitch>
-
-                {/* Only show the datetime picker when the timezone prop is passed, 
-                to have the timezone shown be relevant to the selected alert  */}
-                {!!timezone && (
+            <Grid container justifyContent="space-between">
+                <Grid item lg={6} md={8} xs={12}>
                     <InputSection
                         fullWidth
-                        helperLabel={t(
-                            "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
-                        )}
                         inputComponent={
-                            <TimeRangeButton
-                                timeRangeDuration={timeRangeDuration}
-                                timezone={timezone}
-                                onChange={({ startTime, endTime }) =>
-                                    handleSetField("dateRange", [
-                                        startTime,
-                                        endTime,
-                                    ])
-                                }
+                            <Autocomplete
+                                disableClearable
+                                getOptionLabel={(option) => option.name}
+                                options={alerts}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        InputProps={{
+                                            ...params.InputProps,
+                                        }}
+                                        margin="dense"
+                                        placeholder={capitalize(
+                                            t(
+                                                "message.click-here-to-select-entity",
+                                                {
+                                                    entity: t("label.alert"),
+                                                }
+                                            )
+                                        )}
+                                        size="small"
+                                        variant="outlined"
+                                    />
+                                )}
+                                value={formFields.alert || undefined}
+                                onChange={(_, selectedValue) => {
+                                    selectedValue &&
+                                        handleSetField("alert", selectedValue);
+                                }}
                             />
                         }
-                        label={formLabels.dateRange}
+                        labelComponent={
+                            <>
+                                <Typography variant="body2">
+                                    {formLabels.alert}
+                                </Typography>
+                                {!!formFields.alert &&
+                                    linkRendererV1(
+                                        t("label.view-entity", {
+                                            entity: t("label.alert"),
+                                        }),
+                                        getAlertsAlertViewPath(
+                                            formFields.alert.id
+                                        ),
+                                        false,
+                                        undefined,
+                                        true,
+                                        "_blank"
+                                    )}
+                            </>
+                        }
                     />
-                )}
-            </>
+                    <LoadingErrorStateSwitch
+                        isError={enumerationItemsStatus === ActionStatus.Error}
+                        isLoading={
+                            enumerationItemsStatus === ActionStatus.Working
+                        }
+                        loadingState={
+                            <InputSection
+                                fullWidth
+                                inputComponent={
+                                    <SkeletonV1
+                                        height={50}
+                                        variant="rect"
+                                        width="100%"
+                                    />
+                                }
+                                label={formLabels.enumerationItem}
+                            />
+                        }
+                    >
+                        {!!(
+                            showEnumerationItemsField &&
+                            enumerationItemsForAlert &&
+                            enumerationItemsForAlert.length > 0
+                        ) && (
+                            <InputSection
+                                fullWidth
+                                inputComponent={
+                                    <Autocomplete<EnumerationItem>
+                                        getOptionLabel={(option) =>
+                                            generateNameForEnumerationItem(
+                                                option
+                                            )
+                                        }
+                                        options={enumerationItemsForAlert}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                placeholder={capitalize(
+                                                    t(
+                                                        "message.click-here-to-select-entity",
+                                                        {
+                                                            entity: t(
+                                                                "label.dimension"
+                                                            ),
+                                                        }
+                                                    )
+                                                )}
+                                                variant="outlined"
+                                            />
+                                        )}
+                                        size="small"
+                                        value={formFields.enumerationItem}
+                                        onChange={(_, selectedValue) => {
+                                            handleSetField(
+                                                "enumerationItem",
+                                                selectedValue
+                                            );
+                                        }}
+                                    />
+                                }
+                                label={formLabels.enumerationItem}
+                            />
+                        )}
+                    </LoadingErrorStateSwitch>
+
+                    {/* Only show the datetime picker when the timezone prop is passed, 
+                to have the timezone shown be relevant to the selected alert  */}
+                    {!!timezone && (
+                        <InputSection
+                            fullWidth
+                            helperLabel={t(
+                                "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
+                            )}
+                            inputComponent={
+                                <TimeRangeButton
+                                    timeRangeDuration={timeRangeDuration}
+                                    timezone={timezone}
+                                    onChange={({ startTime, endTime }) =>
+                                        handleSetField("dateRange", [
+                                            startTime,
+                                            endTime,
+                                        ])
+                                    }
+                                />
+                            }
+                            label={formLabels.dateRange}
+                        />
+                    )}
+                </Grid>
+                <Grid item lg={4} md={4} xs={12}>
+                    {!!alertDetails && (
+                        <Paper variant="outlined">
+                            <Box pb={0} pt={3} px={3}>
+                                <Box
+                                    clone
+                                    alignItems="center"
+                                    display="flex"
+                                    gridGap={6}
+                                >
+                                    <Typography
+                                        color="textSecondary"
+                                        variant="body1"
+                                    >
+                                        <InfoOutlined />
+                                        {t("label.alert-details")}
+                                    </Typography>
+                                </Box>
+                                <List dense>
+                                    {alertDetails.map(([label, value]) => (
+                                        <ListItem
+                                            dense
+                                            disableGutters
+                                            key={label}
+                                        >
+                                            <ListItemText
+                                                primary={label}
+                                                secondary={value}
+                                            />
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            </Box>
+                        </Paper>
+                    )}
+                </Grid>
+            </Grid>
         );
     };

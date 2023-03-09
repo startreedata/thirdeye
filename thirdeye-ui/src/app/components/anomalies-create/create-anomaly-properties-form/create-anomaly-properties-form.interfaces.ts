@@ -18,15 +18,15 @@ import { Alert } from "../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import {
     CreateAnomalyEditableFormFields,
-    CreateAnomalyReadOnlyFormFields,
     HandleSetFields,
+    SelectedAlertDetails,
 } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
 
 export interface CreateAnomalyPropertiesFormProps {
     alerts: Alert[];
     enumerationItemsForAlert: EnumerationItem[];
     formFields: CreateAnomalyEditableFormFields;
-    readOnlyFormFields: CreateAnomalyReadOnlyFormFields;
+    selectedAlertDetails: SelectedAlertDetails;
     handleSetField: HandleSetFields;
     enumerationItemsStatus: ActionStatus;
     timezone: string | undefined;

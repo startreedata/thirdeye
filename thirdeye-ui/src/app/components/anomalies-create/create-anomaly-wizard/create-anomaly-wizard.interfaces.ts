@@ -31,15 +31,14 @@ export interface CreateAnomalyEditableFormFields {
     dateRange: [number, number];
 }
 
-export interface CreateAnomalyReadOnlyFormFields {
+export interface SelectedAlertDetails {
     dataSource: string | null;
     dataset: string | null;
     metric: string | null;
+    description: string | null;
 }
 
-export type CreateAnomalyFormKeys =
-    | keyof CreateAnomalyEditableFormFields
-    | keyof CreateAnomalyReadOnlyFormFields;
+export type CreateAnomalyFormKeys = keyof CreateAnomalyEditableFormFields;
 
 export type HandleSetFields = <T extends keyof CreateAnomalyEditableFormFields>(
     fieldName: T,

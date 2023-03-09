@@ -49,9 +49,9 @@ import { CreateAnomalyPropertiesForm } from "../create-anomaly-properties-form/c
 import { PreviewAnomalyChart } from "../preview-anomaly-chart/preview-anomaly-chart.component";
 import {
     CreateAnomalyEditableFormFields,
-    CreateAnomalyReadOnlyFormFields,
     CreateAnomalyWizardProps,
     HandleSetFields,
+    SelectedAlertDetails,
 } from "./create-anomaly-wizard.interfaces";
 import {
     createEditableAnomaly,
@@ -103,31 +103,33 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 dateRange: [0, 0],
             });
 
-        const readOnlyFormFields =
-            useMemo<CreateAnomalyReadOnlyFormFields>(() => {
-                if (!formFields.alert) {
-                    return {
-                        dataSource: null,
-                        dataset: null,
-                        metric: null,
-                    };
-                }
-                const {
-                    dataSource,
-                    dataset,
-                    aggregationColumn: metric,
-                } = formFields.alert.templateProperties as {
-                    dataSource: string;
-                    dataset: string;
-                    aggregationColumn: string;
-                };
-
+        const selectedAlertDetails = useMemo<SelectedAlertDetails>(() => {
+            if (!formFields.alert) {
                 return {
-                    dataSource,
-                    dataset,
-                    metric,
+                    dataSource: null,
+                    dataset: null,
+                    metric: null,
+                    description: null,
                 };
-            }, [formFields.alert]);
+            }
+            const { templateProperties, description } = formFields.alert;
+            const {
+                dataSource,
+                dataset,
+                aggregationColumn: metric,
+            } = templateProperties as {
+                dataSource: string;
+                dataset: string;
+                aggregationColumn: string;
+            };
+
+            return {
+                dataSource,
+                dataset,
+                metric,
+                description,
+            };
+        }, [formFields.alert]);
 
         const editableAnomaly: EditableAnomaly | null = useMemo(() => {
             if (!(formFields.alert && formFields.dateRange)) {
@@ -145,7 +147,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                         startTime: formFields.dateRange[0],
                     })),
             });
-        }, [formFields, readOnlyFormFields, evaluation]);
+        }, [formFields, evaluation]);
 
         const fetchAlertEvaluation = (): void => {
             const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
@@ -341,7 +343,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         }
                                         formFields={formFields}
                                         handleSetField={handleSetField}
-                                        readOnlyFormFields={readOnlyFormFields}
+                                        selectedAlertDetails={
+                                            selectedAlertDetails
+                                        }
                                         timezone={timezone}
                                     />
                                     <Grid item xs={12}>

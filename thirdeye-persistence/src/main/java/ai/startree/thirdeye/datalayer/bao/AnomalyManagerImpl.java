@@ -74,13 +74,8 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
-        return count();
-      }
-    });
-    metricRegistry.register("parentAnomalyCount", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return countParentAnomalies(null);
+        final DaoFilter filter = new DaoFilter().setPredicate(Predicate.EQ("ignored", true));
+        return countParentAnomalies(filter);
       }
     });
     metricRegistry.register("anomalyFeedbackCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {

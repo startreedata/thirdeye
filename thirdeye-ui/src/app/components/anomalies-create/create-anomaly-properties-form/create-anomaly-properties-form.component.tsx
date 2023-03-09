@@ -235,6 +235,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                             )}
                             inputComponent={
                                 <TimeRangeButton
+                                    hideQuickExtend
                                     timeRangeDuration={timeRangeDuration}
                                     timezone={timezone}
                                     onChange={({ startTime, endTime }) =>

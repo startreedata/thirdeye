@@ -76,6 +76,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
 
                                 <Grid item lg="auto" md="auto" sm={8} xs={12}>
                                     <TimeRangeButtonWithContext
+                                        hideQuickExtend
                                         timezone={timezone}
                                         onTimeRangeChange={() =>
                                             fetchAlertEvaluation()

@@ -82,7 +82,11 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                             fetchAlertEvaluation()
                                         }
                                     />
-                                    <Typography variant="body2">
+                                    <Typography
+                                        align="right"
+                                        display="block"
+                                        variant="body2"
+                                    >
                                         {t(
                                             "message.set-the-date-range-of-the-alert-chart-below"
                                         )}

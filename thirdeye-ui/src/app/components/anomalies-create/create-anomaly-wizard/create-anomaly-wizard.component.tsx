@@ -42,6 +42,8 @@ import {
     generateDateRangeDaysFromNow,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
+import { SummaryContainerCard } from "../../entity-cards/summary-container-card/summary-container-card.component";
+import { SummaryContainerCardItem } from "../../entity-cards/summary-container-card/summary-container-card.interfaces";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
@@ -109,15 +111,13 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                     dataSource: null,
                     dataset: null,
                     metric: null,
-                    description: null,
                 };
             }
-            const { templateProperties, description } = formFields.alert;
             const {
                 dataSource,
                 dataset,
                 aggregationColumn: metric,
-            } = templateProperties as {
+            } = formFields.alert.templateProperties as {
                 dataSource: string;
                 dataset: string;
                 aggregationColumn: string;
@@ -127,7 +127,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 dataSource,
                 dataset,
                 metric,
-                description,
             };
         }, [formFields.alert]);
 
@@ -310,9 +309,76 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             );
         }, [evaluationErrorMessages, getEvaluationRequestStatus]);
 
+        const summaryContainerCardItems = useMemo<
+            SummaryContainerCardItem[] | null
+        >(() => {
+            if (!formFields.alert) {
+                return null;
+            }
+            const details: SummaryContainerCardItem[] = [];
+
+            if (selectedAlertDetails?.dataSource) {
+                details.push({
+                    key: "datasource",
+                    xs: 4,
+                    content: (
+                        <Box>
+                            <Typography variant="subtitle1">
+                                {selectedAlertDetails?.dataSource}
+                            </Typography>
+                            <Typography color="textSecondary" variant="body2">
+                                {t("label.datasource")}
+                            </Typography>
+                        </Box>
+                    ),
+                });
+            }
+            if (selectedAlertDetails?.dataset) {
+                details.push({
+                    key: "dataset",
+                    xs: 4,
+                    content: (
+                        <Box>
+                            <Typography variant="subtitle1">
+                                {selectedAlertDetails?.dataset}
+                            </Typography>
+                            <Typography color="textSecondary" variant="body2">
+                                {t("label.dataset")}
+                            </Typography>
+                        </Box>
+                    ),
+                });
+            }
+            if (selectedAlertDetails?.metric) {
+                details.push({
+                    key: "metric",
+                    xs: 4,
+                    content: (
+                        <Box>
+                            <Typography variant="subtitle1">
+                                {selectedAlertDetails?.metric}
+                            </Typography>
+                            <Typography color="textSecondary" variant="body2">
+                                {t("label.metric")}
+                            </Typography>
+                        </Box>
+                    ),
+                });
+            }
+
+            return details;
+        }, [formFields.alert]);
+
         return (
             <>
                 <PageContentsGridV1 fullHeight>
+                    <Grid item xs={12}>
+                        {!!summaryContainerCardItems && (
+                            <SummaryContainerCard
+                                items={summaryContainerCardItems}
+                            />
+                        )}
+                    </Grid>
                     <Grid item xs={12}>
                         <PageContentsCardV1 fullHeight>
                             <Grid container alignItems="stretch">

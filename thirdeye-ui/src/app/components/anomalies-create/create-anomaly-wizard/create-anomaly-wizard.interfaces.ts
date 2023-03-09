@@ -35,7 +35,6 @@ export interface SelectedAlertDetails {
     dataSource: string | null;
     dataset: string | null;
     metric: string | null;
-    description: string | null;
 }
 
 export type CreateAnomalyFormKeys = keyof CreateAnomalyEditableFormFields;

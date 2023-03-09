@@ -157,7 +157,10 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
 
             <LoadingErrorStateSwitch
                 isError={alertsStatus === ActionStatus.Error}
-                isLoading={alertsStatus === ActionStatus.Working}
+                isLoading={[
+                    ActionStatus.Initial,
+                    ActionStatus.Working,
+                ].includes(alertsStatus)}
                 loadingState={
                     <PageContentsGridV1 fullHeight>
                         <Grid item xs={12}>

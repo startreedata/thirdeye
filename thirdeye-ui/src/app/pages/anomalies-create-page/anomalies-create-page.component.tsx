@@ -37,6 +37,7 @@ import { ActionStatus } from "../../platform/rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { createAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { EditableAnomaly } from "../../rest/dto/anomaly.interfaces";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -45,7 +46,6 @@ import {
     getAnomaliesCreatePath,
     getAnomaliesViewPath,
 } from "../../utils/routes/routes.util";
-import { EditableAnomaly } from "./anomalies-create-page.interfaces";
 
 export const AnomaliesCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();

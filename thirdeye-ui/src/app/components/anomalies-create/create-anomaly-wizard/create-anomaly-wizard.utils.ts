@@ -14,7 +14,6 @@
  */
 
 import { isNumber } from "lodash";
-import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     Alert,
     AlertEvaluation,
@@ -24,6 +23,7 @@ import {
     AnomalyResultSource,
     AnomalySeverity,
     AnomalyType,
+    EditableAnomaly,
 } from "../../../rest/dto/anomaly.interfaces";
 import { Metric } from "../../../rest/dto/metric.interfaces";
 import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";

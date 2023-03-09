@@ -91,3 +91,32 @@ export interface AnomalyStats {
     countWithFeedback: number;
     feedbackStats: Record<AnomalyFeedbackType, number>;
 }
+
+export interface EditableAnomaly {
+    startTime: number;
+    endTime: number;
+
+    alert: Pick<Alert, "id" | "name">;
+    metric: Metric;
+    metadata: AnomalyMetadata;
+    enumerationItem?: {
+        id: number;
+    };
+
+    sourceType: AnomalyResultSource;
+
+    avgCurrentVal?: number;
+    avgBaselineVal?: number;
+
+    score?: number;
+    weight?: number;
+    impactToGlobal?: number;
+
+    children?: Anomaly[];
+    type?: AnomalyType;
+    severity?: AnomalySeverity;
+    child?: boolean;
+    feedback?: AnomalyFeedback;
+    notified?: boolean;
+    message?: string;
+}

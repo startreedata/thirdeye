@@ -13,9 +13,8 @@
  * the License.
  */
 
-import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { Anomaly, EditableAnomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface PreviewAnomalyChartProps {
     editableAnomaly: EditableAnomaly | Anomaly;

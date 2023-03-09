@@ -13,12 +13,12 @@
  * the License.
  */
 import axios from "axios";
-import { EditableAnomaly } from "../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import { filterOutIgnoredAnomalies } from "../../utils/anomalies/anomalies.util";
 import type {
     Anomaly,
     AnomalyFeedback,
     AnomalyStats,
+    EditableAnomaly,
 } from "../dto/anomaly.interfaces";
 import type {
     GetAnomaliesProps,

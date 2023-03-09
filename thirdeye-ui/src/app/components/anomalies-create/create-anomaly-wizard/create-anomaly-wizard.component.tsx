@@ -18,7 +18,6 @@ import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
@@ -32,6 +31,7 @@ import {
     useGetEvaluation,
 } from "../../../rest/alerts/alerts.actions";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { EditableAnomaly } from "../../../rest/dto/anomaly.interfaces";
 import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
 import {
     createAlertEvaluation,

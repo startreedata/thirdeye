@@ -13,8 +13,8 @@
  * the License.
  */
 
-import { EditableAnomaly } from "../../../pages/anomalies-create-page/anomalies-create-page.interfaces";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { EditableAnomaly } from "../../../rest/dto/anomaly.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 
 export interface CreateAnomalyWizardProps {

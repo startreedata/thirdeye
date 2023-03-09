@@ -123,8 +123,10 @@ public class AppAnalyticsService {
 
   public ConfusionMatrix computeConfusionMatrixForAnomalies(DaoFilter filter) {
     final ConfusionMatrix matrix = new ConfusionMatrix();
-    // filter to get anomalies without feedback
-    final Predicate predicate = Predicate.EQ("anomalyFeedbackId", 0L);
+    // filter to get anomalies without feedback and which are not ignored
+    final Predicate predicate = Predicate.AND(
+        Predicate.EQ("anomalyFeedbackId", 0L),
+        ignorePredicate(false));
     if (filter != null) {
       filter.setPredicate(Predicate.AND(filter.getPredicate(), predicate));
     } else {
@@ -141,7 +143,8 @@ public class AppAnalyticsService {
   }
 
   private List<AnomalyFeedback> getAllAnomalyFeedbacks() {
-    return getAnomalyFeedbacks(null);
+    final DaoFilter filter = new DaoFilter().setPredicate(ignorePredicate(false));
+    return getAnomalyFeedbacks(filter);
   }
 
   private List<AnomalyFeedback> getAnomalyFeedbacks(final DaoFilter filter) {
@@ -151,13 +154,22 @@ public class AppAnalyticsService {
   }
 
   public AnomalyStatsApi computeAnomalyStats(final DaoFilter filter) {
+    Predicate predicate = ignorePredicate(false);
+    if(filter != null && filter.getPredicate() != null) {
+      predicate = Predicate.AND(predicate, filter.getPredicate());
+    }
+    final DaoFilter finalFilter = new DaoFilter().setPredicate(predicate);
     final List<AnomalyFeedback> allFeedbacks = filter == null
         ? anomalyFeedbacksSupplier.get()
-        : getAnomalyFeedbacks(filter);
+        : getAnomalyFeedbacks(finalFilter);
     return new AnomalyStatsApi()
-        .setTotalCount(anomalyManager.countParentAnomalies(filter))
+        .setTotalCount(anomalyManager.countParentAnomalies(finalFilter))
         .setCountWithFeedback((long) allFeedbacks.size())
         .setFeedbackStats(aggregateFeedbackTypes(allFeedbacks));
+  }
+
+  private static Predicate ignorePredicate(final boolean ignored) {
+    return Predicate.EQ("ignored", ignored);
   }
 
   private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(final List<AnomalyFeedback> feedbacks) {

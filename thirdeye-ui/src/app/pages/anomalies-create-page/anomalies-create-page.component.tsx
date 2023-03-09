@@ -25,6 +25,7 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
+    NotificationScopeV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
@@ -81,10 +82,11 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
             .then((data) => {
                 notify(
                     NotificationTypeV1.Success,
-                    t("message.create-success", { entity: t("label.anomaly") })
+                    t("message.create-success", { entity: t("label.anomaly") }),
+                    false,
+                    NotificationScopeV1.Global
                 );
-                // TODO: Remove
-                window.open(getAnomaliesViewPath(data.id), "_blank");
+                navigate(getAnomaliesViewPath(data.id));
             })
             .catch((error) => {
                 notifyIfErrors(

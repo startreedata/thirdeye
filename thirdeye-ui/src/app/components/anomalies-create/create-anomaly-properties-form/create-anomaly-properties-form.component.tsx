@@ -190,9 +190,6 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
-                                            InputProps={{
-                                                ...params.InputProps,
-                                            }}
                                             placeholder={capitalize(
                                                 t(
                                                     "message.click-here-to-select-entity",

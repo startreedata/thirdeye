@@ -98,48 +98,52 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
             });
     };
 
-    const pageHeaderProps: PageHeaderProps = {
-        title: t("label.report-missed-anomaly"),
-        breadcrumbs: [
-            {
-                link: getAnomaliesAllPath(),
-                label: t("label.anomalies"),
-            },
-            {
-                link: getAnomaliesCreatePath(),
-                label: t("label.create"),
-            },
-            ...(selectedAlert
-                ? [
-                      {
-                          link: getAlertsAlertViewPath(selectedAlert.id),
-                          label: selectedAlert.name,
-                      },
-                  ]
-                : []),
-        ],
-        customActions: (
-            <PageHeaderActionsV1>
-                <Button
-                    color="primary"
-                    size="small"
-                    variant="outlined"
-                    onClick={() => setIsHelpPanelOpen(true)}
-                >
-                    <Box component="span" mr={1}>
-                        {t("label.need-help")}
-                    </Box>
-                    <Box component="span" display="flex">
-                        <Icon
-                            fontSize={24}
-                            icon="mdi:question-mark-circle-outline"
-                        />
-                    </Box>
-                </Button>
-                &nbsp;
-            </PageHeaderActionsV1>
-        ),
-    };
+    const pageHeaderProps = useMemo<PageHeaderProps>(() => {
+        const pageHeader: PageHeaderProps = {
+            title: t("label.report-missed-anomaly"),
+            breadcrumbs: [
+                {
+                    link: getAnomaliesAllPath(),
+                    label: t("label.anomalies"),
+                },
+                {
+                    link: getAnomaliesCreatePath(),
+                    label: t("label.create"),
+                },
+            ],
+            customActions: (
+                <PageHeaderActionsV1>
+                    <Button
+                        color="primary"
+                        size="small"
+                        variant="outlined"
+                        onClick={() => setIsHelpPanelOpen(true)}
+                    >
+                        <Box component="span" mr={1}>
+                            {t("label.need-help")}
+                        </Box>
+                        <Box component="span" display="flex">
+                            <Icon
+                                fontSize={24}
+                                icon="mdi:question-mark-circle-outline"
+                            />
+                        </Box>
+                    </Button>
+                    &nbsp;
+                </PageHeaderActionsV1>
+            ),
+        };
+
+        // Add the selected alert to the breadcrumbs to reflect the URL structure
+        if (selectedAlert) {
+            pageHeader.breadcrumbs?.push({
+                link: getAlertsAlertViewPath(selectedAlert.id),
+                label: selectedAlert.name,
+            });
+        }
+
+        return pageHeader;
+    }, [selectedAlert]);
 
     return (
         <PageV1>

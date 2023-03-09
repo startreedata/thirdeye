@@ -151,6 +151,11 @@ export interface TimeSeriesChartProps {
     height?: number;
     chartEvents?: {
         onZoomChange?: (domain: ZoomDomain | null) => void;
+        /**
+         * Return true to continue the default behavior (chart zoom)
+         * otherwise falsey
+         */
+        onRangeSelection?: (domain: ZoomDomain | null) => boolean | undefined;
     };
     initialZoom?: ZoomDomain;
     events?: Event[];

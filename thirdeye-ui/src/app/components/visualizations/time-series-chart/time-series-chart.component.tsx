@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Button } from "@material-ui/core";
+import { Bounds } from "@visx/brush/lib/types";
 import { ParentSize } from "@visx/responsive";
 import { scaleOrdinal, scaleTime } from "@visx/scale";
 import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
@@ -386,6 +387,26 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
             });
         };
 
+        const shouldRenderSelectionComponent =
+            isZoomEnabled || chartEvents?.onRangeSelection;
+
+        const handleZoomChange = (domain: Bounds | null): void => {
+            let shouldZoom: boolean | undefined = true;
+
+            /**
+             * If chart `onRangeSelection` exists, determine whether to continue
+             * changing the zoom window by the value returned by `onRangeSelection`
+             *
+             * Falsey will prevent the zoom window change and truthy will
+             * continue the window change
+             */
+            if (chartEvents?.onRangeSelection) {
+                shouldZoom = chartEvents.onRangeSelection(domain);
+            }
+
+            shouldZoom && isZoomEnabled && handleBrushChange(domain);
+        };
+
         return (
             <div style={{ position: "relative" }}>
                 {events && events.length > 0 && (
@@ -426,7 +447,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                         {(xScale, yScale) => {
                             return (
                                 <>
-                                    {isZoomEnabled &&
+                                    {shouldRenderSelectionComponent &&
                                         processedMainChartSeries && (
                                             <ChartZoom
                                                 colorScale={colorScale}
@@ -436,7 +457,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                                                     processedMainChartSeries
                                                 }
                                                 width={width}
-                                                onZoomChange={handleBrushChange}
+                                                onZoomChange={handleZoomChange}
                                             />
                                         )}
                                     {tooltipData && (

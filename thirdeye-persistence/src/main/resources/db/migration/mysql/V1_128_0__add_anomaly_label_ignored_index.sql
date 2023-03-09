@@ -11,21 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.detection.annotation;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface PresentationOption {
-
-  @JsonProperty String template() default "";
-
-  @JsonProperty String name() default "";
-
-  @JsonProperty String description() default "";
-}
+ALTER TABLE merged_anomaly_result_index
+    ADD COLUMN ignored boolean DEFAULT FALSE;
+CREATE INDEX ignored_label_idx ON merged_anomaly_result_index (ignored);

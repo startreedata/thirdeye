@@ -29,7 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 
 @Singleton
 public class EvaluationContextProcessor {
@@ -71,11 +70,6 @@ public class EvaluationContextProcessor {
     if (api.getId() != null) {
       return ensureExists(enumerationItemManager.findById(api.getId()),
           "enumeration item id: " + api.getId());
-    }
-    if (api.getName() != null) {
-      final List<EnumerationItemDTO> byName = enumerationItemManager.findByName(api.getName());
-      ensure(byName.size() == 1, "Exactly 1 name should exist. found: " + byName.size());
-      return byName.get(0);
     }
     return ApiBeanMapper.toEnumerationItemDTO(api);
   }

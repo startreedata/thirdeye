@@ -48,7 +48,7 @@ export const promptDeleteConfirmation = (
 
 export const makeDeleteRequest = (
     items: GenericEntityWithNameAndId[],
-    deleteRestFunction: (id: number) => Promise<{ id: number }>,
+    deleteRestFunction: (id: number) => Promise<{ id?: number }>,
     translate: (
         key: string,
         params?: { [key: string]: string | number }

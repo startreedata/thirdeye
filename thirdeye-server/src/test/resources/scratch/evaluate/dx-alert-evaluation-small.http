@@ -1,0 +1,45 @@
+POST http://localhost:8080/api/alerts/evaluate
+accept: application/json
+Content-Type: application/json
+
+{
+  "alert": {
+    "name": "pageviews-dx-large",
+    "description": "Sample description payload for testing",
+    "template": {
+      "name": "startree-threshold-dx"
+    },
+    "templateProperties": {
+      "dataSource": "pinotQuickStartLocal",
+      "dataset": "pageviews",
+      "aggregationFunction": "sum",
+      "aggregationColumn": "views",
+      "monitoringGranularity": "P1D",
+      "timeColumn": "date",
+      "timeColumnFormat": "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+      "queryFilters": "${queryFilters}",
+      "max": "800000",
+      "min": "300000",
+      "enumerationItems": [
+        {
+          "params": {
+            "queryFilters": ""
+          }
+        },
+        {
+          "params": {
+            "queryFilters": " AND country = 'US'"
+          }
+        },
+        {
+          "params": {
+            "queryFilters": " AND country = 'CA'"
+          }
+        }
+      ]
+    },
+    "cron": "0 0 * * * ? *"
+  },
+  "start": 1596067200000,
+  "end": 1627603200000
+}

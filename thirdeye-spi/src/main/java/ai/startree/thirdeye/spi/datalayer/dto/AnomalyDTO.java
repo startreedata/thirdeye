@@ -16,7 +16,6 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
-import ai.startree.thirdeye.spi.detection.AnomalyType;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -65,7 +64,7 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   private boolean isChild;
   @Deprecated
   @JsonIgnore
-  private AnomalyType type;
+  private String type;
   private AnomalySeverity severityLabel = AnomalySeverity.DEFAULT;
   private String source; // expected format: [alert-name]/[node-name]
   // TODO: Remove raw anomaly id list after old merged anomalies are cleaned up
@@ -284,16 +283,12 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   }
 
   @Deprecated
-  public AnomalyType getType() {
-    // default type is deviation
-    if (type == null) {
-      return AnomalyType.DEVIATION;
-    }
+  public String getType() {
     return type;
   }
 
   @Deprecated
-  public void setType(AnomalyType type) {
+  public void setType(String type) {
     this.type = type;
   }
 

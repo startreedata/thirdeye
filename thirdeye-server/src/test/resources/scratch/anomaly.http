@@ -26,3 +26,14 @@ GET http://localhost:8080/api/anomalies?metadata.dataset.name=nonexistentdataset
 GET http://localhost:8080/api/anomalies?metadata.dataset.name=us_monthly_air_passengers_simplified&metadata.metric.name=passenger_count
 
 ###
+
+POST http://localhost:8080/api/anomalies
+content-type: application/json
+
+[
+  {
+    "startTime": 1590000000000,
+    "endTime": 1590000000000,
+    "sourceType": "USER_LABELED_ANOMALY"
+  }
+]

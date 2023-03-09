@@ -68,6 +68,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
       .put("metadata.dataset.name", "collection")
       .put("enumerationItem.id", "enumerationItemId")
       .put("feedback.id", "anomalyFeedbackId")
+      .put("anomalyLabels.ignore", "ignored")
       .build();
   private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;

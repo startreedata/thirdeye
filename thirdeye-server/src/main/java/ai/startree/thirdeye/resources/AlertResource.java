@@ -236,13 +236,15 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     final long safeEndTime = safeEndTime(request.getEnd().getTime());
     request.setEnd(new Date(safeEndTime));
 
-    final AlertApi alert = request.getAlert();
-    ensureExists(alert)
-        .setOwner(new UserApi()
-            .setPrincipal(principal.getName()));
-    // see TE-1172 - ensure the dto passed to the authManager is complete, not only a reference {id:1234}
-    final AlertDTO alertDTO = optional(alert.getId()).map(this::get).orElseGet(() -> toDto(alert));
-    authorizationManager.ensureCanEvaluate(principal, alertDTO);
+    final AlertApi alertApi = ensureExists(request.getAlert())
+        .setOwner(new UserApi().setPrincipal(principal.getName()));
+
+    if (alertApi.getId() != null) {
+      final AlertDTO alertDto = ensureExists(dtoManager.findById(alertApi.getId()));
+      authorizationManager.ensureCanRead(principal, alertDto);
+    } else {
+      authorizationManager.ensureCanCreate(principal, toDto(alertApi));
+    }
 
     final AlertEvaluationApi results = alertEvaluator.evaluate(request);
     results.setDetectionEvaluations(allowedEvaluations(principal,

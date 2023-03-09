@@ -19,7 +19,6 @@ import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
 import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
-import ai.startree.thirdeye.scheduler.dataavailability.DataAvailabilitySchedulingConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
 import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
@@ -75,8 +74,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
   private String phantomJsPath = "";
   private String failureFromAddress;
   private String failureToAddress;
-  private DataAvailabilitySchedulingConfiguration
-      dataAvailabilitySchedulingConfiguration = new DataAvailabilitySchedulingConfiguration();
   private List<String> holidayCountriesWhitelist;
   private String rootDir = "";
 
@@ -163,16 +160,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
 
   public ThirdEyeServerConfiguration setFailureToAddress(final String failureToAddress) {
     this.failureToAddress = failureToAddress;
-    return this;
-  }
-
-  public DataAvailabilitySchedulingConfiguration getDataAvailabilitySchedulingConfiguration() {
-    return dataAvailabilitySchedulingConfiguration;
-  }
-
-  public ThirdEyeServerConfiguration setDataAvailabilitySchedulingConfiguration(
-      final DataAvailabilitySchedulingConfiguration dataAvailabilitySchedulingConfiguration) {
-    this.dataAvailabilitySchedulingConfiguration = dataAvailabilitySchedulingConfiguration;
     return this;
   }
 

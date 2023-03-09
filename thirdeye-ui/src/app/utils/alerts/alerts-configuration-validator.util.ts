@@ -16,6 +16,8 @@ import { AlertTemplatePropertyValidationError } from "../../pages/alerts-create-
 import { MetadataProperty } from "../../rest/dto/alert-template.interfaces";
 import { PropertyConfigValueTypes } from "../../rest/dto/alert.interfaces";
 
+const DIMENSION_EXPLORATION_VALUE_START = "${";
+
 export function validateTemplateProperties(
     alertTemplateProperties: MetadataProperty[],
     propertyValues: { [index: string]: PropertyConfigValueTypes },
@@ -27,12 +29,23 @@ export function validateTemplateProperties(
     const errors: AlertTemplatePropertyValidationError[] = [];
 
     Object.keys(propertyValues).forEach((propertyKey) => {
+        let isDimensionExplorationValue = false;
+        if (typeof propertyValues[propertyKey] === "string") {
+            if (
+                (propertyValues[propertyKey] as string).startsWith(
+                    DIMENSION_EXPLORATION_VALUE_START
+                )
+            ) {
+                isDimensionExplorationValue = true;
+            }
+        }
+
         const matchingPropertyMetadata = alertTemplateProperties.find(
             (propertyMetadataCandidate) =>
                 propertyMetadataCandidate.name === propertyKey
         );
 
-        if (matchingPropertyMetadata) {
+        if (matchingPropertyMetadata && !isDimensionExplorationValue) {
             const valueForProperty = propertyValues[propertyKey];
 
             // Value needs to be in list of predefined options

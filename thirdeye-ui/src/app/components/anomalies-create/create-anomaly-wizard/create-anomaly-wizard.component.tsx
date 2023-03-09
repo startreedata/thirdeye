@@ -170,13 +170,14 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             if (formFields.alert) {
                 const newAlertId = formFields.alert.id;
 
+                // Update the alert id URL param IF it is different from the new selected alert ID
+                if (Number(selectedAlertId) !== newAlertId) {
+                    navigate(getAnomaliesCreatePath(newAlertId), {
+                        replace: true,
+                    });
+                }
                 // Get the insights to get the start and end time for the alert
                 getAlertInsight({ alertId: Number(newAlertId) });
-
-                // Update the alert id URL param
-                navigate(getAnomaliesCreatePath(newAlertId), {
-                    replace: true,
-                });
 
                 // Fetch the enumeration items for this alert
                 if (
@@ -196,36 +197,48 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
 
         useEffect(() => {
             if (alertInsight) {
-                searchParams.set(
-                    TimeRangeQueryStringKey.START_TIME,
-                    `${alertInsight.datasetStartTime}`
+                let start = Number(
+                    searchParams.get(TimeRangeQueryStringKey.START_TIME)
                 );
-                searchParams.set(
-                    TimeRangeQueryStringKey.END_TIME,
-                    `${alertInsight.datasetEndTime}`
+                let end = Number(
+                    searchParams.get(TimeRangeQueryStringKey.END_TIME)
                 );
-                setSearchParams(searchParams);
+
+                // If the start AND end params do not exist, set them from the alert insights
+                if (!(start && end)) {
+                    start = alertInsight.datasetStartTime;
+                    end = alertInsight.datasetEndTime;
+
+                    searchParams.set(
+                        TimeRangeQueryStringKey.START_TIME,
+                        `${start}`
+                    );
+                    searchParams.set(
+                        TimeRangeQueryStringKey.END_TIME,
+                        `${end}`
+                    );
+                    setSearchParams(searchParams);
+                }
 
                 // Fetch the alert evaluation AFTER the datetime query params are extracted from
                 // `alertInsight` and set to avoid duplicate API calls with outdated datetime params
                 fetchAlertEvaluation();
 
-                // TODO: Verify if this is how it should be done
                 // Set the date range to the middle of the anomaly chart by default
                 handleSetField(
                     "dateRange",
                     generateDateRangeDaysFromNow(
                         1,
-                        DateTime.fromMillis(
-                            (alertInsight.datasetStartTime +
-                                alertInsight.datasetEndTime) /
-                                2,
-                            {
-                                zone: determineTimezoneFromAlertInEvaluation(
-                                    alertInsight?.templateWithProperties
-                                ),
-                            }
-                        )
+                        DateTime.fromMillis((start + end) / 2, {
+                            zone: determineTimezoneFromAlertInEvaluation(
+                                alertInsight?.templateWithProperties
+                            ),
+                        }).set({
+                            hour: 0,
+                            minute: 0,
+                            second: 0,
+                            millisecond: 0,
+                        }) // Remove any offsets in the middle value
                     )
                 );
             }

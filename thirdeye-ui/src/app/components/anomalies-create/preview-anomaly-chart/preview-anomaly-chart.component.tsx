@@ -93,7 +93,10 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                                 entity: t("label.anomaly"),
                                             })}
                                         </Typography>
-                                        <Typography variant="body2">
+                                        <Typography
+                                            color="textSecondary"
+                                            variant="body2"
+                                        >
                                             {t(
                                                 "message.visualize-how-the-anomaly-will-look-once-reported"
                                             )}
@@ -116,6 +119,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                         />
                                         <Typography
                                             align="right"
+                                            color="textSecondary"
                                             display="block"
                                             variant="body2"
                                         >

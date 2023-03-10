@@ -43,7 +43,6 @@ import {
     generateDateRangeDaysFromNow,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
-import { SummaryContainerCardItem } from "../../entity-cards/summary-container-card/summary-container-card.interfaces";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
@@ -107,30 +106,31 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 dateRange: [0, 0],
             });
 
-        const selectedAlertDetails = useMemo<SelectedAlertDetails>(() => {
-            if (!formFields.alert) {
-                return {
-                    dataSource: null,
-                    dataset: null,
-                    metric: null,
+        const selectedAlertDetails =
+            useMemo<SelectedAlertDetails | null>(() => {
+                if (!formFields.alert) {
+                    return null;
+                }
+                const {
+                    dataSource,
+                    dataset,
+                    aggregationColumn,
+                    aggregationFunction,
+                } = formFields.alert.templateProperties as {
+                    dataSource: string;
+                    dataset: string;
+                    aggregationColumn: string;
+                    aggregationFunction: string;
                 };
-            }
-            const {
-                dataSource,
-                dataset,
-                aggregationColumn: metric,
-            } = formFields.alert.templateProperties as {
-                dataSource: string;
-                dataset: string;
-                aggregationColumn: string;
-            };
 
-            return {
-                dataSource,
-                dataset,
-                metric,
-            };
-        }, [formFields.alert]);
+                const metric = `${aggregationFunction}(${aggregationColumn})`;
+
+                return {
+                    dataSource,
+                    dataset,
+                    metric,
+                };
+            }, [formFields.alert]);
 
         const editableAnomaly: EditableAnomaly | null = useMemo(() => {
             if (!(formFields.alert && formFields.dateRange)) {
@@ -311,66 +311,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             );
         }, [evaluationErrorMessages, getEvaluationRequestStatus]);
 
-        const summaryContainerCardItems = useMemo<
-            SummaryContainerCardItem[] | null
-        >(() => {
-            if (!formFields.alert) {
-                return null;
-            }
-            const details: SummaryContainerCardItem[] = [];
-
-            if (selectedAlertDetails?.dataSource) {
-                details.push({
-                    key: "datasource",
-                    xs: 4,
-                    content: (
-                        <Box>
-                            <Typography variant="subtitle1">
-                                {selectedAlertDetails?.dataSource}
-                            </Typography>
-                            <Typography color="textSecondary" variant="body2">
-                                {t("label.datasource")}
-                            </Typography>
-                        </Box>
-                    ),
-                });
-            }
-            if (selectedAlertDetails?.dataset) {
-                details.push({
-                    key: "dataset",
-                    xs: 4,
-                    content: (
-                        <Box>
-                            <Typography variant="subtitle1">
-                                {selectedAlertDetails?.dataset}
-                            </Typography>
-                            <Typography color="textSecondary" variant="body2">
-                                {t("label.dataset")}
-                            </Typography>
-                        </Box>
-                    ),
-                });
-            }
-            if (selectedAlertDetails?.metric) {
-                details.push({
-                    key: "metric",
-                    xs: 4,
-                    content: (
-                        <Box>
-                            <Typography variant="subtitle1">
-                                {selectedAlertDetails?.metric}
-                            </Typography>
-                            <Typography color="textSecondary" variant="body2">
-                                {t("label.metric")}
-                            </Typography>
-                        </Box>
-                    ),
-                });
-            }
-
-            return details;
-        }, [formFields.alert]);
-
         return (
             <>
                 <PageContentsGridV1 fullHeight>
@@ -404,6 +344,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         }
                                         formFields={formFields}
                                         handleSetField={handleSetField}
+                                        selectedAlertDetails={
+                                            selectedAlertDetails
+                                        }
                                         timezone={timezone}
                                     />
                                     <Grid item xs={12}>

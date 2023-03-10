@@ -19,10 +19,12 @@ import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import {
     CreateAnomalyEditableFormFields,
     HandleSetFields,
+    SelectedAlertDetails,
 } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
 
 export interface CreateAnomalyPropertiesFormProps {
     alerts: Alert[];
+    selectedAlertDetails: SelectedAlertDetails | null;
     enumerationItemsForAlert: EnumerationItem[];
     formFields: CreateAnomalyEditableFormFields;
     handleSetField: HandleSetFields;

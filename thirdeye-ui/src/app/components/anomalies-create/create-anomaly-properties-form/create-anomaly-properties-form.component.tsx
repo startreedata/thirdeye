@@ -13,14 +13,13 @@
  * the License.
  */
 
-import { TextField, Typography } from "@material-ui/core";
+import { Box, Grid, TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { capitalize } from "lodash";
 import React, { FunctionComponent, ReactNode, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { SkeletonV1 } from "../../../platform/components";
+import { LinkV1, SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../platform/rest/actions.interfaces";
-import { linkRendererV1 } from "../../../platform/utils";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
@@ -43,6 +42,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
         enumerationItemsForAlert,
         enumerationItemsStatus,
         timezone,
+        selectedAlertDetails,
     }) => {
         const { t } = useTranslation();
         const classes = useCreateAnomalyWizardStyles();
@@ -118,6 +118,55 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                         // Override class name so the size of input is smaller
                                         className: classes.autoCompleteInput,
                                     }}
+                                    {...(!!selectedAlertDetails && {
+                                        helperText: (
+                                            <Box ml={-1}>
+                                                <Typography
+                                                    color="secondary"
+                                                    variant="caption"
+                                                >
+                                                    <Grid container spacing={1}>
+                                                        {[
+                                                            [
+                                                                t(
+                                                                    "label.datasource"
+                                                                ),
+                                                                selectedAlertDetails.dataSource,
+                                                            ],
+                                                            [
+                                                                t(
+                                                                    "label.dataset"
+                                                                ),
+                                                                selectedAlertDetails.dataset,
+                                                            ],
+                                                            [
+                                                                t(
+                                                                    "label.metric"
+                                                                ),
+                                                                selectedAlertDetails.metric,
+                                                            ],
+                                                        ].map(
+                                                            ([
+                                                                label,
+                                                                value,
+                                                            ]) => (
+                                                                <Grid
+                                                                    item
+                                                                    key={value}
+                                                                    spacing={1}
+                                                                >
+                                                                    <strong>
+                                                                        {label}
+                                                                    </strong>
+                                                                    : {value}
+                                                                </Grid>
+                                                            )
+                                                        )}
+                                                    </Grid>
+                                                </Typography>
+                                            </Box>
+                                        ),
+                                    })}
                                     margin="normal"
                                     placeholder={capitalize(
                                         t(
@@ -144,17 +193,20 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                             <Typography variant="body2">
                                 {formLabels.alert}
                             </Typography>
-                            {!!formFields.alert &&
-                                linkRendererV1(
-                                    t("label.view-entity", {
+                            {!!formFields.alert && (
+                                <LinkV1
+                                    externalLink
+                                    href={getAlertsAlertViewPath(
+                                        formFields.alert.id
+                                    )}
+                                    target="_blank"
+                                    variant="caption"
+                                >
+                                    {t("label.view-entity", {
                                         entity: t("label.alert"),
-                                    }),
-                                    getAlertsAlertViewPath(formFields.alert.id),
-                                    false,
-                                    undefined,
-                                    true,
-                                    "_blank"
-                                )}
+                                    })}
+                                </LinkV1>
+                            )}
                         </>
                     }
                 />
@@ -228,9 +280,6 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                 to have the timezone shown be relevant to the selected alert  */}
                 {!!timezone && (
                     <InputSection
-                        helperLabel={t(
-                            "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
-                        )}
                         inputComponent={
                             <TimeRangeButton
                                 hideQuickExtend
@@ -244,7 +293,21 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                 }
                             />
                         }
-                        label={formLabels.dateRange}
+                        labelComponent={
+                            <>
+                                <Typography variant="body2">
+                                    {formLabels.dateRange}
+                                </Typography>
+                                <Typography
+                                    color="textSecondary"
+                                    variant="caption"
+                                >
+                                    {t(
+                                        "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
+                                    )}
+                                </Typography>
+                            </>
+                        }
                     />
                 )}
             </>

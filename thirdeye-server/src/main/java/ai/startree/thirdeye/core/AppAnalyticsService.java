@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -123,17 +124,17 @@ public class AppAnalyticsService {
 
   public ConfusionMatrix computeConfusionMatrixForAnomalies(DaoFilter filter) {
     final ConfusionMatrix matrix = new ConfusionMatrix();
-    // filter to get anomalies without feedback and which are not ignored
-    final Predicate predicate = Predicate.AND(
-        Predicate.EQ("anomalyFeedbackId", 0L),
-        ignorePredicate(false));
-    if (filter != null) {
-      filter.setPredicate(Predicate.AND(filter.getPredicate(), predicate));
-    } else {
-      filter = new DaoFilter().setPredicate(predicate);
-    }
-    matrix.addUnclassified((int) anomalyManager.countParentAnomalies(filter));
-    final Map<AnomalyFeedbackType, Long> typeMap = aggregateFeedbackTypes(anomalyFeedbacksSupplier.get());
+    final DaoFilter unclassifiedFilter = new DaoFilter()
+        .andPredicate(notIgnored())
+        .andPredicate(hasNoFeedback());
+    Optional.ofNullable(filter)
+        .ifPresent(daoFilter -> unclassifiedFilter.andPredicate(filter.getPredicate()));
+    matrix.addUnclassified((int) anomalyManager.countParentAnomalies(unclassifiedFilter));
+
+    final List<AnomalyFeedback> allFeedbacks = filter == null
+        ? anomalyFeedbacksSupplier.get()
+        : getAnomalyFeedbacks(filter);
+    final Map<AnomalyFeedbackType, Long> typeMap = aggregateFeedbackTypes(allFeedbacks);
     matrix.addUnclassified(Math.toIntExact(typeMap.get(NO_FEEDBACK)));
     matrix.addFalsePositive(Math.toIntExact(typeMap.get(NOT_ANOMALY)));
     matrix.addTruePositive(Math.toIntExact(typeMap.get(ANOMALY))
@@ -143,33 +144,60 @@ public class AppAnalyticsService {
   }
 
   private List<AnomalyFeedback> getAllAnomalyFeedbacks() {
-    final DaoFilter filter = new DaoFilter().setPredicate(ignorePredicate(false));
-    return getAnomalyFeedbacks(filter);
+    return getAnomalyFeedbacks(null);
   }
 
   private List<AnomalyFeedback> getAnomalyFeedbacks(final DaoFilter filter) {
-    return anomalyManager.findParentAnomaliesWithFeedback(filter).stream()
+    final DaoFilter finalFilter = new DaoFilter()
+        .andPredicate(notIgnored());
+    Optional.ofNullable(filter)
+        .ifPresent(daoFilter -> finalFilter.andPredicate(filter.getPredicate()));
+    return anomalyManager.findParentAnomaliesWithFeedback(finalFilter).stream()
         .map(AnomalyDTO::getFeedback)
         .collect(Collectors.toList());
   }
 
   public AnomalyStatsApi computeAnomalyStats(final DaoFilter filter) {
-    Predicate predicate = ignorePredicate(false);
-    if(filter != null && filter.getPredicate() != null) {
-      predicate = Predicate.AND(predicate, filter.getPredicate());
-    }
-    final DaoFilter finalFilter = new DaoFilter().setPredicate(predicate);
     final List<AnomalyFeedback> allFeedbacks = filter == null
         ? anomalyFeedbacksSupplier.get()
-        : getAnomalyFeedbacks(finalFilter);
+        : getAnomalyFeedbacks(filter);
     return new AnomalyStatsApi()
-        .setTotalCount(anomalyManager.countParentAnomalies(finalFilter))
-        .setCountWithFeedback((long) allFeedbacks.size())
+        .setTotalCount(countTotal(filter))
+        .setCountWithFeedback(countFeedbacks(filter))
         .setFeedbackStats(aggregateFeedbackTypes(allFeedbacks));
   }
 
-  private static Predicate ignorePredicate(final boolean ignored) {
-    return Predicate.EQ("ignored", ignored);
+  private Long countTotal(final DaoFilter filter) {
+    final DaoFilter finalFilter = new DaoFilter()
+        .andPredicate(nonChild())
+        .andPredicate(notIgnored());
+    Optional.ofNullable(filter)
+        .ifPresent(daoFilter -> finalFilter.andPredicate(filter.getPredicate()));
+    return anomalyManager.countParentAnomalies(finalFilter);
+  }
+
+  private Long countFeedbacks(final DaoFilter filter) {
+    final DaoFilter finalFilter = new DaoFilter()
+        .andPredicate(hasFeedback());
+    Optional.ofNullable(filter)
+        .ifPresent(daoFilter -> finalFilter.andPredicate(filter.getPredicate()));
+    return countTotal(finalFilter);
+  }
+
+  private Predicate hasFeedback() {
+    return Predicate.NEQ("anomalyFeedbackId", 0);
+  }
+
+  private Predicate hasNoFeedback() {
+    return Predicate.EQ("anomalyFeedbackId", 0);
+  }
+
+  private Predicate notIgnored() {
+    return Predicate.EQ("ignored", false);
+  }
+
+  private Predicate nonChild() {
+    return Predicate.EQ("child", false);
   }
 
   private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(final List<AnomalyFeedback> feedbacks) {

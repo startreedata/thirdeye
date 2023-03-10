@@ -131,7 +131,6 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
                             />
                         </Box>
                     </Button>
-                    &nbsp;
                 </PageHeaderActionsV1>
             ),
         };

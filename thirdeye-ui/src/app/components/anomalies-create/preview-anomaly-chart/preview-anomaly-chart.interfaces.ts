@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { CardProps } from "@material-ui/core/Card";
-import { ReactNode } from "react";
 
-export interface PageContentsCardV1Props extends CardProps {
-    fullHeight?: boolean;
-    disablePadding?: boolean;
-    className?: string;
-    children?: ReactNode;
+import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
+import { Anomaly, EditableAnomaly } from "../../../rest/dto/anomaly.interfaces";
+
+export interface PreviewAnomalyChartProps {
+    editableAnomaly: EditableAnomaly | Anomaly;
+    fetchAlertEvaluation: () => void;
+    isLoading: boolean;
+    evaluation: AlertEvaluation | null;
+    timezone: string | undefined;
 }

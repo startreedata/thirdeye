@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { CardProps } from "@material-ui/core/Card";
-import { ReactNode } from "react";
 
-export interface PageContentsCardV1Props extends CardProps {
-    fullHeight?: boolean;
-    disablePadding?: boolean;
-    className?: string;
-    children?: ReactNode;
+export interface CreateMenuButtonProps {
+    createAnomalyProps?: {
+        alertId?: number;
+    };
 }

@@ -18,17 +18,22 @@ import { useNavigate } from "react-router-dom";
 import {
     DropdownButtonTypeV1,
     DropdownButtonV1,
+    DropdownMenuItemV1,
 } from "../../platform/components";
 import {
     getAlertsCreatePath,
     getAlertTemplatesCreatePath,
+    getAnomaliesCreatePath,
     getDatasetsOnboardPath,
     getDatasourcesCreatePath,
     getEventsCreatePath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
+import { CreateMenuButtonProps } from "./create-menu-button.interfaces";
 
-export const CreateMenuButton: FunctionComponent = () => {
+export const CreateMenuButton: FunctionComponent<CreateMenuButtonProps> = ({
+    createAnomalyProps,
+}) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -56,7 +61,11 @@ export const CreateMenuButton: FunctionComponent = () => {
         navigate(getEventsCreatePath());
     };
 
-    const shortcutCreateMenuItems = [
+    const handleCreateAnomaly = (): void => {
+        navigate(getAnomaliesCreatePath(createAnomalyProps?.alertId));
+    };
+
+    const shortcutCreateMenuItems: DropdownMenuItemV1[] = [
         {
             id: "createAlert",
             text: t("label.create-entity", {
@@ -93,6 +102,10 @@ export const CreateMenuButton: FunctionComponent = () => {
                 entity: t("label.alert-template"),
             }),
         },
+        {
+            id: "createAnomaly",
+            text: t("label.report-missed-anomaly"),
+        },
     ];
 
     const handleShortcutCreateOnclick = (id: number | string): void => {
@@ -120,6 +133,10 @@ export const CreateMenuButton: FunctionComponent = () => {
                 break;
             case "createEvent":
                 handleCreateEvent();
+
+                break;
+            case "createAnomaly":
+                handleCreateAnomaly();
 
                 break;
             default:

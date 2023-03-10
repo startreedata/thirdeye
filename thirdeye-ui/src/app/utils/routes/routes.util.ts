@@ -54,6 +54,8 @@ export const AppRouteRelative = {
     ANOMALIES_ALL_RANGE: "range",
     ANOMALIES_ANOMALY: `${PLACEHOLDER_ROUTE_ID}`,
     ANOMALIES_ANOMALY_VIEW: `view`,
+    ANOMALIES_CREATE: "create",
+    ANOMALIES_ALERT_CREATE: `${PLACEHOLDER_ROUTE_ID}`,
     CONFIGURATION: "configuration",
     SUBSCRIPTION_GROUPS: "subscription-groups",
     SUBSCRIPTION_GROUPS_SUBSCRIPTION_GROUP: `${PLACEHOLDER_ROUTE_ID}`,
@@ -134,6 +136,8 @@ export const AppRoute = {
     ALERTS_UPDATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
     ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
+    ANOMALIES_CREATE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_CREATE}`,
+    ANOMALIES_ALERT_CREATE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_CREATE}/${AppRouteRelative.ANOMALIES_ALERT_CREATE}`,
     ANOMALIES_ALL_RANGE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}`,
     ANOMALIES_LIST_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}/${AppRouteRelative.ANOMALIES_LIST}`,
     METRICS_REPORT_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}/${AppRouteRelative.ANOMALIES_ALL_RANGE}/${AppRouteRelative.METRICS_REPORT}`,
@@ -273,6 +277,17 @@ export const getAlertsUpdatePath = (id: number): string => {
 
 export const getAnomaliesPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ANOMALIES);
+};
+
+export const getAnomaliesCreatePath = (alertId?: number): string => {
+    if (alertId) {
+        let path: string = AppRoute.ANOMALIES_ALERT_CREATE;
+        path = path.replace(PLACEHOLDER_ROUTE_ID, `${alertId}`);
+
+        return path;
+    }
+
+    return AppRoute.ANOMALIES_CREATE;
 };
 
 export const getAnomaliesAllPath = (searchTerm?: string): string => {

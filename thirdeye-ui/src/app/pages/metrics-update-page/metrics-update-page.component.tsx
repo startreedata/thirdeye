@@ -30,7 +30,7 @@ import {
 } from "../../platform/components";
 import { getAllDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
-import { LogicalMetric, Metric } from "../../rest/dto/metric.interfaces";
+import { LogicalMetric } from "../../rest/dto/metric.interfaces";
 import { getMetric, updateMetric } from "../../rest/metrics/metrics.rest";
 import { PROMISES } from "../../utils/constants/constants.util";
 import { isValidNumberId } from "../../utils/params/params.util";
@@ -40,7 +40,7 @@ import { MetricsUpdatePageParams } from "./metrics-update-page.interfaces";
 
 export const MetricsUpdatePage: FunctionComponent = () => {
     const [loading, setLoading] = useState(true);
-    const [metric, setMetric] = useState<Metric>();
+    const [metric, setMetric] = useState<LogicalMetric>();
     const [datasets, setDatasets] = useState<Dataset[]>([]);
 
     const params = useParams<MetricsUpdatePageParams>();
@@ -119,7 +119,7 @@ export const MetricsUpdatePage: FunctionComponent = () => {
 
                 // Attempt to gather data
                 if (metricResponse.status === PROMISES.FULFILLED) {
-                    setMetric(metricResponse.value);
+                    setMetric(metricResponse.value as LogicalMetric);
                 }
                 if (datasetsResponse.status === PROMISES.FULFILLED) {
                     setDatasets(datasetsResponse.value);

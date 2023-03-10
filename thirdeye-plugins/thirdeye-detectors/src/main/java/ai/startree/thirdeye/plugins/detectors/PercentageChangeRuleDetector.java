@@ -41,8 +41,6 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
-import ai.startree.thirdeye.spi.detection.BaselineProvider;
-import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.Map;
@@ -53,8 +51,7 @@ import org.joda.time.ReadableInterval;
  * Computes a multi-week aggregate baseline and compares the current value based on relative change.
  */
 public class PercentageChangeRuleDetector implements
-    AnomalyDetector<PercentageChangeRuleDetectorSpec>,
-    BaselineProvider<PercentageChangeRuleDetectorSpec> {
+    AnomalyDetector<PercentageChangeRuleDetectorSpec> {
 
   private double percentageChange;
   private Pattern pattern;
@@ -70,7 +67,7 @@ public class PercentageChangeRuleDetector implements
 
   @Override
   public AnomalyDetectorResult runDetection(final Interval window,
-      final Map<String, DataTable> dataTableMap) throws DetectorException {
+      final Map<String, DataTable> dataTableMap) {
     final DataTable baseline = requireNonNull(dataTableMap.get(KEY_BASELINE), "baseline is null");
     final DataTable current = requireNonNull(dataTableMap.get(KEY_CURRENT), "current is null");
     final DataFrame baselineDf = baseline.getDataFrame();

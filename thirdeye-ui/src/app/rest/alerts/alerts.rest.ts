@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import axios, { AxiosRequestConfig, CancelToken } from "axios";
+import axios from "axios";
 import { extractDetectionEvaluation } from "../../utils/alerts/alerts.util";
 import { filterOutIgnoredAnomalies } from "../../utils/anomalies/anomalies.util";
 import type {
@@ -37,13 +37,10 @@ export const getAlertStats = async ({
     alertId,
     startTime,
     endTime,
-    axiosConfig,
 }: {
     alertId: number;
     startTime?: number;
     endTime?: number;
-    cancelToken?: CancelToken;
-    axiosConfig?: AxiosRequestConfig;
 }): Promise<AlertStats> => {
     const queryParams = new URLSearchParams([]);
 
@@ -56,8 +53,7 @@ export const getAlertStats = async ({
     }
 
     const response = await axios.get<AlertStats>(
-        `${BASE_URL_ALERTS}/${alertId}/stats?${queryParams.toString()}`,
-        axiosConfig
+        `${BASE_URL_ALERTS}/${alertId}/stats?${queryParams.toString()}`
     );
 
     return response.data;

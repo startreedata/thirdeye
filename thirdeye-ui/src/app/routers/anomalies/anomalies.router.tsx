@@ -14,6 +14,7 @@
  */
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AnomaliesListAllPage } from "../../pages/anomalies-list-page/anomalies-list-page.component";
 import { MetricsReportAllPage } from "../../pages/anomalies-metrics-report-page/anomalies-metrics-report-page.component";
@@ -30,6 +31,12 @@ const AnomaliesAllPage = lazy(() =>
     import(
         /* webpackChunkName: "anomalies-all-page" */ "../../pages/anomalies-all-page/anomalies-all-page.component"
     ).then((module) => ({ default: module.AnomaliesAllPage }))
+);
+
+const AnomaliesCreatePage = lazy(() =>
+    import(
+        /* webpackChunkName: "anomalies-create-page" */ "../../pages/anomalies-create-page/anomalies-create-page.component"
+    ).then((module) => ({ default: module.AnomaliesCreatePage }))
 );
 
 const AnomaliesViewPage = lazy(() =>
@@ -65,6 +72,29 @@ export const AnomaliesRouter: FunctionComponent = () => {
                     }
                 />
 
+                <Route path={AppRouteRelative.ANOMALIES_CREATE}>
+                    <Route
+                        index
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ANOMALIES_CREATE}
+                            >
+                                <AnomaliesCreatePage />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                    />
+                    <Route
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ANOMALIES_ALERT_CREATE}
+                            >
+                                <AnomaliesCreatePage />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                        path={AppRouteRelative.ANOMALIES_ALERT_CREATE}
+                    />
+                </Route>
+
                 {/* Anomalies all path */}
                 <Route path={AppRouteRelative.ANOMALIES_ALL}>
                     <Route
@@ -91,7 +121,13 @@ export const AnomaliesRouter: FunctionComponent = () => {
                                 to=".."
                             >
                                 <SaveLastUsedSearchParams>
-                                    <AnomaliesAllPage />
+                                    <CancelAPICallsOnPageUnload
+                                        key={
+                                            AppRouteRelative.ANOMALIES_ALL_RANGE
+                                        }
+                                    >
+                                        <AnomaliesAllPage />
+                                    </CancelAPICallsOnPageUnload>
                                 </SaveLastUsedSearchParams>
                             </RedirectValidation>
                         }
@@ -111,11 +147,25 @@ export const AnomaliesRouter: FunctionComponent = () => {
                             }
                         />
                         <Route
-                            element={<AnomaliesListAllPage />}
+                            element={
+                                <CancelAPICallsOnPageUnload
+                                    key={AppRouteRelative.ANOMALIES_LIST}
+                                >
+                                    <AnomaliesListAllPage />
+                                </CancelAPICallsOnPageUnload>
+                            }
                             path={AppRouteRelative.ANOMALIES_LIST}
                         />
                         <Route
-                            element={<MetricsReportAllPage />}
+                            element={
+                                <CancelAPICallsOnPageUnload
+                                    key={
+                                        AppRouteRelative.ANOMALIES_METRICS_REPORT
+                                    }
+                                >
+                                    <MetricsReportAllPage />
+                                </CancelAPICallsOnPageUnload>
+                            }
                             path={AppRouteRelative.ANOMALIES_METRICS_REPORT}
                         />
                     </Route>

@@ -1,0 +1,51 @@
+{
+  "schemaName": "LogisticsData",
+  "dimensionFieldSpecs": [
+    {
+      "name": "City",
+      "dataType": "STRING"
+    },
+    {
+      "name": "Device_Type",
+      "dataType": "STRING"
+    },
+    {
+      "name": "OS_Version",
+      "dataType": "STRING"
+    },
+    {
+      "name": "RideType",
+      "dataType": "STRING"
+    },
+    {
+      "name": "ver",
+      "dataType": "STRING"
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "Driver_Request_API_Errors",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "Ride_Cancellations",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "Ride_Request_WaitTime",
+      "dataType": "DOUBLE"
+    },
+    {
+      "name": "Rides_Completed",
+      "dataType": "DOUBLE"
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "timestamp",
+      "dataType": "LONG",
+      "format": "1:SECONDS:EPOCH",
+      "granularity": "1:SECONDS"
+    }
+  ]
+}

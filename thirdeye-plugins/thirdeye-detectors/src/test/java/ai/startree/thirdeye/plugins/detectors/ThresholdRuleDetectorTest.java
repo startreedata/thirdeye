@@ -22,7 +22,6 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
-import ai.startree.thirdeye.spi.detection.DetectorException;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.HashMap;
@@ -41,7 +40,7 @@ public class ThresholdRuleDetectorTest {
   private static final long JANUARY_5_2021 = 1609804800000L;
 
   @Test
-  public void testNoAnomalies() throws DetectorException {
+  public void testNoAnomalies() {
     // test all dataframes columns expected in a AnomalyDetectorResult dataframe
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
@@ -96,7 +95,7 @@ public class ThresholdRuleDetectorTest {
   @Test
   @Ignore
   //fixme cyril this test should pass - change the current behavior
-  public void testDetectionRunsOnIntervalOnly() throws DetectorException {
+  public void testDetectionRunsOnIntervalOnly() {
     // test anomaly analysis is only conducted on the interval
     // notice the interval is smaller than the dataframe data
     Interval interval = new Interval(JANUARY_3_2021, JANUARY_5_2021, DateTimeZone.UTC);
@@ -127,7 +126,7 @@ public class ThresholdRuleDetectorTest {
   }
 
   @Test
-  public void testAnomaliesUpAndDown() throws DetectorException {
+  public void testAnomaliesUpAndDown() {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
     DataFrame currentDf = new DataFrame()

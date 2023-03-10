@@ -18,6 +18,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 
+/**
+ * NOTE: do not set default values in the fields. See CommonProperties#enrichCommonProperties.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class TemplatePropertyMetadata {
@@ -50,7 +53,7 @@ public class TemplatePropertyMetadata {
   /**
    * Whether multiple options can be selected.
    */
-  private Boolean isMultiselect = false;
+  private Boolean isMultiselect;
   /**
    * Helps the UI build input fields.
    */
@@ -151,8 +154,7 @@ public class TemplatePropertyMetadata {
     return step;
   }
 
-  public TemplatePropertyMetadata setStep(
-      final Step step) {
+  public TemplatePropertyMetadata setStep(final Step step) {
     this.step = step;
     return this;
   }

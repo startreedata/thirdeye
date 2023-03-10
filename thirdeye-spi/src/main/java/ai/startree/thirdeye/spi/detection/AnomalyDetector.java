@@ -29,6 +29,5 @@ public interface AnomalyDetector<T extends AbstractSpec> extends BaseComponent<T
   /**
    * Run detection for a given interval with provided baseline and current DataTable.
    */
-  AnomalyDetectorResult runDetection(Interval interval, Map<String, DataTable> dataTableMap)
-      throws DetectorException;
+  AnomalyDetectorResult runDetection(Interval interval, Map<String, DataTable> dataTableMap);
 }

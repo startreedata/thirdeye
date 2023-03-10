@@ -15,10 +15,9 @@
 import type { CardProps } from "@material-ui/core/Card";
 import { ReactNode } from "react";
 
-export interface PageContentsCardV1Props {
+export interface PageContentsCardV1Props extends CardProps {
     fullHeight?: boolean;
     disablePadding?: boolean;
     className?: string;
     children?: ReactNode;
-    otherProps?: CardProps;
 }

@@ -17,61 +17,19 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
-import ai.startree.thirdeye.subscriptiongroup.suppress.DetectionAlertSuppressor;
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.lang.reflect.Constructor;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class NotificationSchemeFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(NotificationSchemeFactory.class);
-
-  private static final String PROP_CLASS_NAME = "className";
-
-  private final AnomalyManager anomalyManager;
   private final SubscriptionGroupFilter subscriptionGroupFilter;
 
   @Inject
   public NotificationSchemeFactory(final AnomalyManager anomalyManager,
       final SubscriptionGroupFilter subscriptionGroupFilter) {
-    this.anomalyManager = anomalyManager;
     this.subscriptionGroupFilter = subscriptionGroupFilter;
-  }
-
-  public Set<DetectionAlertSuppressor> loadAlertSuppressors(
-      final SubscriptionGroupDTO subscriptionGroup)
-      throws Exception {
-    Preconditions.checkNotNull(subscriptionGroup);
-    final Set<DetectionAlertSuppressor> detectionAlertSuppressors = new HashSet<>();
-    final Map<String, Object> alertSuppressors = subscriptionGroup.getAlertSuppressors();
-    if (alertSuppressors == null || alertSuppressors.isEmpty()) {
-      return detectionAlertSuppressors;
-    }
-
-    for (final String alertSuppressor : alertSuppressors.keySet()) {
-      LOG.debug("Loading Alert Suppressor : {}", alertSuppressor);
-      Preconditions.checkNotNull(alertSuppressors.get(alertSuppressor));
-      Preconditions.checkNotNull(
-          ConfigUtils.getMap(alertSuppressors.get(alertSuppressor)).get(PROP_CLASS_NAME));
-      final Constructor<?> constructor = Class
-          .forName(ConfigUtils.getMap(alertSuppressors.get(alertSuppressor))
-              .get(PROP_CLASS_NAME).toString().trim())
-          .getConstructor(SubscriptionGroupDTO.class, AnomalyManager.class);
-      detectionAlertSuppressors
-          .add((DetectionAlertSuppressor) constructor.newInstance(subscriptionGroup,
-              anomalyManager));
-    }
-
-    return detectionAlertSuppressors;
   }
 
   public SubscriptionGroupFilterResult getDetectionAlertFilterResult(
@@ -81,11 +39,6 @@ public class NotificationSchemeFactory {
     SubscriptionGroupFilterResult result = subscriptionGroupFilter.filter(subscriptionGroup,
         System.currentTimeMillis());
 
-    // Suppress alerts if any and get the filtered anomalies to be notified
-    final Set<DetectionAlertSuppressor> alertSuppressors = loadAlertSuppressors(subscriptionGroup);
-    for (final DetectionAlertSuppressor alertSuppressor : alertSuppressors) {
-      result = alertSuppressor.run(result);
-    }
     return result;
   }
 }

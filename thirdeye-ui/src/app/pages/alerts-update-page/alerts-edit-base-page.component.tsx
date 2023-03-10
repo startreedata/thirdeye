@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Icon } from "@iconify/react";
 import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
 import { isEqual } from "lodash";
 import React, {
@@ -30,6 +31,8 @@ import {
     useSearchParams,
 } from "react-router-dom";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
@@ -91,6 +94,7 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     >([]);
     // This is  used by the guided create alert routes
     const [showBottomBar, setShowBottomBar] = useState<boolean>(true);
+    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
 
     // Allow the children to control the submit button
     const [isSubmitBtnEnabled, setIsSubmitBtnEnabled] = useState<boolean>(true);
@@ -253,6 +257,28 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
                                 {t("label.advanced")}
                             </Button>
                         </ButtonGroup>
+                        <Button
+                            color="primary"
+                            size="small"
+                            variant="outlined"
+                            onClick={() => setIsHelpPanelOpen(true)}
+                        >
+                            <Box component="span" mr={1}>
+                                {t("label.need-help")}
+                            </Box>
+                            <Box component="span" display="flex">
+                                <Icon
+                                    fontSize={24}
+                                    icon="mdi:question-mark-circle-outline"
+                                />
+                            </Box>
+                        </Button>
+                        <HelpDrawerV1
+                            cards={alertsBasicHelpCards}
+                            isOpen={isHelpPanelOpen}
+                            title={`${t("label.need-help")}?`}
+                            onClose={() => setIsHelpPanelOpen(false)}
+                        />
                     </PageHeaderActionsV1>
                 }
             >

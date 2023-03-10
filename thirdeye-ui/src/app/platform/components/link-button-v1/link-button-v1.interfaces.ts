@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { PropTypes } from "@material-ui/core";
+import { ButtonProps, PropTypes } from "@material-ui/core";
 import { HTMLAttributeAnchorTarget, ReactNode } from "react";
 
 export interface LinkButtonV1Props {
@@ -23,4 +23,5 @@ export interface LinkButtonV1Props {
     disabled?: boolean;
     className?: string;
     children?: ReactNode;
+    variant?: ButtonProps["variant"];
 }

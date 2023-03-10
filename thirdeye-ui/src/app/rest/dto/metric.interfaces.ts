@@ -27,19 +27,19 @@ export interface LogicalMetric {
 export interface Metric {
     id: number;
     name: string;
-    urn: string;
+    urn?: string;
     dataset: Dataset;
-    active: boolean;
-    created: number;
-    updated: number;
-    derived: boolean;
+    active?: boolean;
+    created?: number;
+    updated?: number;
+    derived?: boolean;
     datatype: string;
-    derivedMetricExpression: string;
+    derivedMetricExpression?: string;
     aggregationColumn: string;
     aggregationFunction: MetricAggFunction;
-    rollupThreshold: number;
-    views: LogicalView[];
-    where: string;
+    rollupThreshold?: number;
+    views?: LogicalView[];
+    where?: string;
 }
 export interface LogicalView {
     name: string;

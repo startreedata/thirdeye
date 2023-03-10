@@ -56,7 +56,6 @@ public class AnomalyReportDataApi {
   private Double weight;
   private String groupKey;
   private String entityName;
-  private String anomalyType;
   private String properties;
   private String metricUrn;
 
@@ -366,17 +365,6 @@ public class AnomalyReportDataApi {
 
   public AnomalyReportDataApi setEntityName(final String entityName) {
     this.entityName = entityName;
-    return this;
-  }
-
-  @Deprecated
-  public String getAnomalyType() {
-    return anomalyType;
-  }
-
-  @Deprecated
-  public AnomalyReportDataApi setAnomalyType(final String anomalyType) {
-    this.anomalyType = anomalyType;
     return this;
   }
 

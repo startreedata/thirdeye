@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { CardProps } from "@material-ui/core";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 
@@ -24,6 +25,7 @@ export interface AlertEvaluationTimeSeriesCardProps {
     anomalies: Anomaly[];
     disableNavigation?: boolean;
     timezone?: string;
+    rootCardProps?: CardProps;
 }
 
 export interface ViewAnomalyHeaderProps {

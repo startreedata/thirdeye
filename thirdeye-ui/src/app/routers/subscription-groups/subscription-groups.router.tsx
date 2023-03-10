@@ -69,6 +69,21 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
                     path={AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}
                 />
 
+                {/* Subscription group view path without the `view`, redirect to proper URL */}
+                <Route
+                    element={
+                        <Navigate
+                            replace
+                            to={
+                                AppRouteRelative.SUBSCRIPTION_GROUPS_SUBSCRIPTION_GROUP_VIEW
+                            }
+                        />
+                    }
+                    path={
+                        AppRouteRelative.SUBSCRIPTION_GROUPS_SUBSCRIPTION_GROUP
+                    }
+                />
+
                 {/* Subscription groups view path */}
                 <Route
                     element={<SubscriptionGroupsViewPage />}

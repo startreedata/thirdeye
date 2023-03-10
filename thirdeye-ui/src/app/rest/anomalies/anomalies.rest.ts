@@ -18,6 +18,7 @@ import type {
     Anomaly,
     AnomalyFeedback,
     AnomalyStats,
+    EditableAnomaly,
 } from "../dto/anomaly.interfaces";
 import type {
     GetAnomaliesProps,
@@ -95,6 +96,14 @@ export const getAnomalyStats = async ({
     );
 
     return response.data;
+};
+
+export const createAnomaly = async (
+    anomalies: EditableAnomaly
+): Promise<Anomaly> => {
+    const response = await axios.post(BASE_URL_ANOMALIES, [anomalies]);
+
+    return response.data[0];
 };
 
 export const deleteAnomaly = async (id: number): Promise<Anomaly> => {

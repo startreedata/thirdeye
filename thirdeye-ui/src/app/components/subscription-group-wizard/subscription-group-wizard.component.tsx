@@ -75,6 +75,13 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
             editedSubscriptionGroup
         );
 
+        // Let the next button be enabled as long as the final tab
+        // (Alerts and Dimensions) with the "submit" action isn't open
+        const isNextButtonEnabled =
+            selectedTab === SubscriptionGroupViewTabs.GroupDetails
+                ? true
+                : isSubscriptionGroupValid;
+
         return (
             <>
                 <PageContentsGridV1>
@@ -98,7 +105,7 @@ export const SubscriptionGroupWizard: FunctionComponent<SubscriptionGroupWizardP
                     backButtonLabel={cancelBtnLabel}
                     handleBackClick={onCancel}
                     handleNextClick={handleSubmitClick}
-                    nextButtonIsDisabled={!isSubscriptionGroupValid}
+                    nextButtonIsDisabled={!isNextButtonEnabled}
                     nextButtonLabel={submitBtnLabel}
                 />
             </>

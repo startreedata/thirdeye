@@ -46,7 +46,15 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
         <Grid item xs={12}>
             <Card>
                 {customHeader || (
-                    <CardHeader title={t("label.group-details")} />
+                    <CardHeader
+                        subheader={t(
+                            "message.add-details-that-define-the-groups-purpose-and-frequency"
+                        )}
+                        subheaderTypographyProps={{
+                            variant: "subtitle1",
+                        }}
+                        title={t("label.group-details")}
+                    />
                 )}
                 <CardContent>
                     <InputSection

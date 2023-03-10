@@ -19,9 +19,11 @@ import {
     Datasource,
     DatasourceProperties,
 } from "../../rest/dto/datasource.interfaces";
-import { Metric } from "../../rest/dto/metric.interfaces";
+import { Metric, MetricAggFunction } from "../../rest/dto/metric.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
+
+export const STAR_COLUMN = "*";
 
 export const createDefaultDatasource = (): Datasource => {
     if (window.location.host.includes("localhost")) {
@@ -169,6 +171,14 @@ export const buildPinotDatasourcesTree = (
     datasets
         .filter((dataset) => dataset.active)
         .forEach((d) => {
+            metrics.push({
+                id: -1,
+                name: STAR_COLUMN,
+                aggregationColumn: STAR_COLUMN,
+                dataset: d,
+                datatype: "DOUBLE",
+                aggregationFunction: MetricAggFunction.COUNT,
+            });
             datasetToInfo[d.name] = {
                 datasource: d.dataSource.name,
                 dataset: d,

@@ -79,6 +79,18 @@ public class AppAnalyticsService {
         return uniqueMonitoredMetricsCount();
       }
     });
+    metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return countTotal(null);
+      }
+    });
+    metricRegistry.register("anomalyFeedbackCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {
+      @Override
+      protected Long loadValue() {
+        return countFeedbacks(null);
+      }
+    });
     metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
       @Override
       protected Double loadValue() {

@@ -23,8 +23,6 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import com.codahale.metrics.CachedGauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
@@ -68,22 +66,8 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
       new ThreadFactoryBuilder().setNameFormat("anomaly-manager-%d").build());
 
   @Inject
-  public AnomalyManagerImpl(final GenericPojoDao genericPojoDao,
-      final MetricRegistry metricRegistry) {
+  public AnomalyManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AnomalyDTO.class, genericPojoDao);
-    metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        final DaoFilter filter = new DaoFilter().setPredicate(Predicate.EQ("ignored", true));
-        return countParentAnomalies(filter);
-      }
-    });
-    metricRegistry.register("anomalyFeedbackCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return genericPojoDao.count(AnomalyFeedbackDTO.class);
-      }
-    });
   }
 
   @Override

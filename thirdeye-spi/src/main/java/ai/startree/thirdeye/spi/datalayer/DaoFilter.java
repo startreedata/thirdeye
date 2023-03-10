@@ -78,4 +78,16 @@ public class DaoFilter {
     isDesc = desc;
     return this;
   }
+
+  public DaoFilter andPredicate(final Predicate predicate) {
+    if(predicate == null) {
+      return this;
+    }
+    if(this.predicate != null) {
+      Predicate finalPredicate = Predicate.AND(this.predicate, predicate);
+      return this.setPredicate(finalPredicate);
+    } else {
+      return this.setPredicate(predicate);
+    }
+  }
 }

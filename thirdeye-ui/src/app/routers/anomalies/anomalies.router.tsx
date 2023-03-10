@@ -33,6 +33,12 @@ const AnomaliesAllPage = lazy(() =>
     ).then((module) => ({ default: module.AnomaliesAllPage }))
 );
 
+const AnomaliesCreatePage = lazy(() =>
+    import(
+        /* webpackChunkName: "anomalies-create-page" */ "../../pages/anomalies-create-page/anomalies-create-page.component"
+    ).then((module) => ({ default: module.AnomaliesCreatePage }))
+);
+
 const AnomaliesViewPage = lazy(() =>
     import(
         /* webpackChunkName: "anomalies-view-page" */ "../../pages/anomalies-view-page/anomalies-view-page.component"
@@ -65,6 +71,29 @@ export const AnomaliesRouter: FunctionComponent = () => {
                         <Navigate replace to={AppRouteRelative.ANOMALIES_ALL} />
                     }
                 />
+
+                <Route path={AppRouteRelative.ANOMALIES_CREATE}>
+                    <Route
+                        index
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ANOMALIES_CREATE}
+                            >
+                                <AnomaliesCreatePage />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                    />
+                    <Route
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ANOMALIES_ALERT_CREATE}
+                            >
+                                <AnomaliesCreatePage />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                        path={AppRouteRelative.ANOMALIES_ALERT_CREATE}
+                    />
+                </Route>
 
                 {/* Anomalies all path */}
                 <Route path={AppRouteRelative.ANOMALIES_ALL}>

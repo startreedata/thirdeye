@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { CardProps } from "@material-ui/core/Card";
+import { GridProps } from "@material-ui/core";
 import { ReactNode } from "react";
+import { PageContentsCardV1Props } from "../../../platform/components/page-v1/page-contents-grid-v1/page-contents-card-v1/page-contents-card-v1.interfaces";
 
-export interface PageContentsCardV1Props extends CardProps {
-    fullHeight?: boolean;
-    disablePadding?: boolean;
-    className?: string;
-    children?: ReactNode;
+export interface SummaryContainerCardItem extends GridProps {
+    key?: string;
+    content: ReactNode;
+}
+
+export interface SummaryContainerCardProps {
+    gridContainerProps?: Partial<GridProps>;
+    rootCardProps?: Partial<PageContentsCardV1Props>;
+    items: SummaryContainerCardItem[];
 }

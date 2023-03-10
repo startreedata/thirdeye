@@ -20,12 +20,15 @@ const BASE_URL_ENUMERATION_ITEM = "/api/enumeration-items";
 
 export const getEnumerationItems = async ({
     ids,
+    alertId,
 }: GetEnumerationItemsProps = {}): Promise<EnumerationItem[]> => {
     const queryParams = new URLSearchParams([]);
     let url = BASE_URL_ENUMERATION_ITEM;
 
     if (ids) {
         queryParams.set("id", `[in]${ids.join(",")}`);
+    } else if (alertId) {
+        queryParams.set("alert.id", `${alertId}`);
     }
 
     if (queryParams.toString()) {

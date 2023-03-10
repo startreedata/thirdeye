@@ -16,12 +16,15 @@ import { IconButton, Menu, MenuItem } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+    createPathWithRecognizedQueryString,
     getAlertsAlertPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
+    getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
+import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertOptionsButtonProps } from "./alert-options-button.interfaces";
 
 export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
@@ -35,6 +38,7 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     const [alertOptionsAnchorElement, setAlertOptionsAnchorElement] =
         useState<HTMLElement | null>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
     const handleAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
@@ -100,6 +104,28 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
         handleAlertOptionsClose();
     };
 
+    const handleCreateAlertAnomaly = (): void => {
+        const start = Number(
+            searchParams.get(TimeRangeQueryStringKey.START_TIME)
+        );
+        const end = Number(searchParams.get(TimeRangeQueryStringKey.END_TIME));
+
+        let path = getAnomaliesCreatePath(alert.id);
+
+        // Use the start and end query params being used by the current alert
+        if (start && end) {
+            const searchParams = new URLSearchParams([
+                [TimeRangeQueryStringKey.START_TIME, start],
+                [TimeRangeQueryStringKey.END_TIME, end],
+            ] as string[][]);
+
+            path = createPathWithRecognizedQueryString(path, searchParams);
+        }
+
+        navigate(path);
+        handleAlertOptionsClose();
+    };
+
     return (
         <>
             {/* Alert options button */}
@@ -152,6 +178,14 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                 <MenuItem onClick={handleAlertDelete}>
                     {t("label.delete-entity", {
                         entity: t("label.alert"),
+                    })}
+                </MenuItem>
+
+                {/* Create anomaly for alert */}
+                <MenuItem onClick={handleCreateAlertAnomaly}>
+                    {t("label.create-child-for-parent", {
+                        child: t("label.anomaly"),
+                        parent: t("label.alert"),
                     })}
                 </MenuItem>
 

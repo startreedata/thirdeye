@@ -32,6 +32,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
         anomalies,
         disableNavigation,
         timezone,
+        rootCardProps,
     }) => {
         const navigate = useNavigate();
         const { t } = useTranslation();
@@ -45,7 +46,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
         }
 
         return (
-            <Card variant="outlined">
+            <Card variant="outlined" {...rootCardProps}>
                 {header && header}
                 {!header && (
                     <CardHeader

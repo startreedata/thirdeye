@@ -13,14 +13,16 @@
  * the License.
  */
 
-import { CardContent, Grid, Typography } from "@material-ui/core";
+import { Box, CardContent, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { SkeletonV1 } from "../../../platform/components";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../../utils/anomalies/anomalies.util";
 import { AnomalyCard } from "../../entity-cards/anomaly-card/anomaly-card.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertEvaluationTimeSeriesCard } from "../../visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { PreviewAnomalyChartProps } from "./preview-anomaly-chart.interfaces";
@@ -53,59 +55,88 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
 
         return (
             <>
-                <AlertEvaluationTimeSeriesCard
-                    disableNavigation
-                    alertEvaluationTimeSeriesHeight={500}
-                    anomalies={[editableAnomaly as Anomaly]}
-                    detectionEvaluation={detectionEvaluation}
-                    header={
-                        <CardContent>
-                            <Grid container justifyContent="space-between">
-                                <Grid item lg="auto" md="auto" sm={4} xs={12}>
-                                    <Typography variant="h5">
-                                        {t("label.preview-entity", {
-                                            entity: t("label.anomaly"),
-                                        })}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {t(
-                                            "message.visualize-how-the-anomaly-will-look-once-reported"
-                                        )}
-                                    </Typography>
-                                </Grid>
-
-                                <Grid item lg="auto" md="auto" sm={8} xs={12}>
-                                    <TimeRangeButtonWithContext
-                                        hideQuickExtend
-                                        timezone={timezone}
-                                        onTimeRangeChange={() =>
-                                            fetchAlertEvaluation()
-                                        }
-                                    />
-                                    <Typography
-                                        align="right"
-                                        display="block"
-                                        variant="body2"
-                                    >
-                                        {t(
-                                            "message.set-the-date-range-of-the-alert-chart-below"
-                                        )}
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <AnomalyCard
-                                        isLoading={isLoading}
-                                        timezone={timezone}
-                                        uiAnomaly={uiAnomaly}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </CardContent>
+                <EmptyStateSwitch
+                    emptyState={
+                        <>
+                            <SkeletonV1
+                                animation="pulse"
+                                height={80}
+                                variant="rect"
+                            />
+                            <Box py={2} />
+                            <SkeletonV1
+                                animation="pulse"
+                                height={400}
+                                variant="rect"
+                            />
+                        </>
                     }
-                    isLoading={isLoading}
-                    rootCardProps={{ variant: "elevation" }}
-                    timezone={timezone}
-                />
+                    isEmpty={isLoading}
+                >
+                    <AlertEvaluationTimeSeriesCard
+                        disableNavigation
+                        alertEvaluationTimeSeriesHeight={500}
+                        anomalies={[editableAnomaly as Anomaly]}
+                        detectionEvaluation={detectionEvaluation}
+                        header={
+                            <CardContent>
+                                <Grid container justifyContent="space-between">
+                                    <Grid
+                                        item
+                                        lg="auto"
+                                        md="auto"
+                                        sm={4}
+                                        xs={12}
+                                    >
+                                        <Typography variant="h5">
+                                            {t("label.preview-entity", {
+                                                entity: t("label.anomaly"),
+                                            })}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {t(
+                                                "message.visualize-how-the-anomaly-will-look-once-reported"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid
+                                        item
+                                        lg="auto"
+                                        md="auto"
+                                        sm={8}
+                                        xs={12}
+                                    >
+                                        <TimeRangeButtonWithContext
+                                            hideQuickExtend
+                                            timezone={timezone}
+                                            onTimeRangeChange={() =>
+                                                fetchAlertEvaluation()
+                                            }
+                                        />
+                                        <Typography
+                                            align="right"
+                                            display="block"
+                                            variant="body2"
+                                        >
+                                            {t(
+                                                "message.set-the-date-range-of-the-alert-chart-below"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <AnomalyCard
+                                            timezone={timezone}
+                                            uiAnomaly={uiAnomaly}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        }
+                        rootCardProps={{ variant: "elevation" }}
+                        timezone={timezone}
+                    />
+                </EmptyStateSwitch>
             </>
         );
     };

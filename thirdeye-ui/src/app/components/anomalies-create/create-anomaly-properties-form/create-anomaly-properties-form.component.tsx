@@ -16,11 +16,12 @@
 import { TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { capitalize } from "lodash";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, ReactNode, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../platform/rest/actions.interfaces";
 import { linkRendererV1 } from "../../../platform/utils";
+import { Alert } from "../../../rest/dto/alert.interfaces";
 import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
 import { getAlertsAlertViewPath } from "../../../utils/routes/routes.util";
@@ -30,6 +31,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { TimeRangeButton } from "../../time-range/time-range-button/time-range-button.component";
 import { TimeRange } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { CreateAnomalyFormKeys } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
+import { useCreateAnomalyWizardStyles } from "../create-anomaly-wizard/create-anomaly-wizard.styles";
 import { getEnumerationItemsConfigFromAlert } from "../create-anomaly-wizard/create-anomaly-wizard.utils";
 import { CreateAnomalyPropertiesFormProps } from "./create-anomaly-properties-form.interfaces";
 
@@ -37,13 +39,13 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
     ({
         alerts,
         formFields,
-        selectedAlertDetails,
         handleSetField,
         enumerationItemsForAlert,
         enumerationItemsStatus,
         timezone,
     }) => {
         const { t } = useTranslation();
+        const classes = useCreateAnomalyWizardStyles();
 
         const showEnumerationItemsField = !!(
             formFields.alert &&
@@ -62,6 +64,44 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
             formFields.dateRange[1]
         );
 
+        const renderAlertOption = useCallback(
+            (option: Alert): ReactNode => {
+                const {
+                    dataSource,
+                    dataset,
+                    aggregationFunction,
+                    aggregationColumn,
+                } = option.templateProperties as {
+                    dataSource: string;
+                    dataset: string;
+                    aggregationFunction: string;
+                    aggregationColumn: string;
+                };
+                const metric = `${aggregationFunction}(${aggregationColumn})`;
+
+                return (
+                    <div>
+                        <Typography variant="h6">{option.name}</Typography>
+                        {[
+                            [t("label.datasource"), dataSource],
+                            [t("label.dataset"), dataset],
+                            [t("label.metric"), metric],
+                        ].map(([label, value]) => (
+                            <Typography
+                                color="textSecondary"
+                                display="block"
+                                key={label}
+                                variant="caption"
+                            >
+                                <strong>{label}</strong>: {value}
+                            </Typography>
+                        ))}
+                    </div>
+                );
+            },
+            [alerts]
+        );
+
         return (
             <>
                 <InputSection
@@ -75,8 +115,10 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     {...params}
                                     InputProps={{
                                         ...params.InputProps,
+                                        // Override class name so the size of input is smaller
+                                        className: classes.autoCompleteInput,
                                     }}
-                                    margin="dense"
+                                    margin="normal"
                                     placeholder={capitalize(
                                         t(
                                             "message.click-here-to-select-entity",
@@ -89,6 +131,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     variant="outlined"
                                 />
                             )}
+                            renderOption={renderAlertOption}
                             value={formFields.alert || undefined}
                             onChange={(_, selectedValue) => {
                                 selectedValue &&
@@ -122,7 +165,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                         <InputSection
                             inputComponent={
                                 <SkeletonV1
-                                    height={50}
+                                    height={40}
                                     variant="rect"
                                     width="100%"
                                 />
@@ -146,6 +189,13 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                // Override class name so the
+                                                // size of input is smaller
+                                                className:
+                                                    classes.autoCompleteInput,
+                                            }}
                                             placeholder={capitalize(
                                                 t(
                                                     "message.click-here-to-select-entity",

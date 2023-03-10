@@ -12,12 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { CardProps } from "@material-ui/core/Card";
-import { ReactNode } from "react";
+import { makeStyles } from "@material-ui/core";
+import { darken, lighten } from "@material-ui/core/styles/colorManipulator";
 
-export interface PageContentsCardV1Props extends CardProps {
-    fullHeight?: boolean;
-    disablePadding?: boolean;
-    className?: string;
-    children?: ReactNode;
-}
+export const useCreateAnomalyWizardStyles = makeStyles((theme) => ({
+    autoCompleteInput: {
+        paddingRight: "45px",
+    },
+    infoAlert: {
+        backgroundColor: lighten(theme.palette.primary.light, 0.9),
+        color: darken(theme.palette.primary.light, 0.5),
+    },
+}));

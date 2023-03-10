@@ -14,15 +14,16 @@
  */
 
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
+import { Alert as MuiAlert } from "@material-ui/lab";
 import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ReactComponent as ChartSkeleton } from "../../../../assets/images/chart-skeleton.svg";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
-    SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
@@ -42,7 +43,6 @@ import {
     generateDateRangeDaysFromNow,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
-import { SummaryContainerCard } from "../../entity-cards/summary-container-card/summary-container-card.component";
 import { SummaryContainerCardItem } from "../../entity-cards/summary-container-card/summary-container-card.interfaces";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -55,6 +55,7 @@ import {
     HandleSetFields,
     SelectedAlertDetails,
 } from "./create-anomaly-wizard.interfaces";
+import { useCreateAnomalyWizardStyles } from "./create-anomaly-wizard.styles";
 import {
     createEditableAnomaly,
     getAnomaliesAvgValues,
@@ -64,6 +65,7 @@ import {
 
 export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
     ({ alerts, submitBtnLabel, cancelBtnLabel, onSubmit, onCancel }) => {
+        const classes = useCreateAnomalyWizardStyles();
         const { t } = useTranslation();
         const [searchParams, setSearchParams] = useSearchParams();
         const { id: selectedAlertId } = useParams<{ id: string }>();
@@ -373,13 +375,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             <>
                 <PageContentsGridV1 fullHeight>
                     <Grid item xs={12}>
-                        {!!summaryContainerCardItems && (
-                            <SummaryContainerCard
-                                items={summaryContainerCardItems}
-                            />
-                        )}
-                    </Grid>
-                    <Grid item xs={12}>
                         <PageContentsCardV1 fullHeight>
                             <Grid container alignItems="stretch">
                                 <Grid item xs={12}>
@@ -409,9 +404,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         }
                                         formFields={formFields}
                                         handleSetField={handleSetField}
-                                        selectedAlertDetails={
-                                            selectedAlertDetails
-                                        }
                                         timezone={timezone}
                                     />
                                     <Grid item xs={12}>
@@ -423,16 +415,11 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         <EmptyStateSwitch
                                             emptyState={
                                                 <Box
-                                                    mt={8}
+                                                    mt={2}
                                                     p={1}
                                                     position="relative"
                                                 >
-                                                    <SkeletonV1
-                                                        animation={false}
-                                                        height={400}
-                                                        variant="rect"
-                                                        width="100%"
-                                                    />
+                                                    <ChartSkeleton />
                                                     <Box
                                                         alignItems="center"
                                                         display="flex"
@@ -442,14 +429,16 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                         top={0}
                                                         width="100%"
                                                     >
-                                                        <Typography
-                                                            color="textSecondary"
-                                                            variant="body2"
+                                                        <MuiAlert
+                                                            className={
+                                                                classes.infoAlert
+                                                            }
+                                                            severity="info"
                                                         >
                                                             {t(
                                                                 "message.select-an-alert-to-generate-the-anomaly-preview"
                                                             )}
-                                                        </Typography>
+                                                        </MuiAlert>
                                                     </Box>
                                                 </Box>
                                             }

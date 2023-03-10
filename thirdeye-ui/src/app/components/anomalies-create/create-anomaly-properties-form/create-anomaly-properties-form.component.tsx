@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { Box, TextField, Typography } from "@material-ui/core";
+import { TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { capitalize } from "lodash";
 import React, { FunctionComponent, ReactNode, useCallback } from "react";
@@ -129,27 +129,6 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     )}
                                     size="small"
                                     variant="outlined"
-                                    // Only show this once the alert is selected
-                                    {...(!!formFields.alert && {
-                                        helperText: (
-                                            <Box mb={-1} ml={-1}>
-                                                {linkRendererV1(
-                                                    t("label.view-entity", {
-                                                        entity: t(
-                                                            "label.alert"
-                                                        ),
-                                                    }),
-                                                    getAlertsAlertViewPath(
-                                                        formFields.alert.id
-                                                    ),
-                                                    false,
-                                                    undefined,
-                                                    true,
-                                                    "_blank"
-                                                )}
-                                            </Box>
-                                        ),
-                                    })}
                                 />
                             )}
                             renderOption={renderAlertOption}
@@ -160,7 +139,24 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                             }}
                         />
                     }
-                    label={formLabels.alert}
+                    labelComponent={
+                        <>
+                            <Typography variant="body2">
+                                {formLabels.alert}
+                            </Typography>
+                            {!!formFields.alert &&
+                                linkRendererV1(
+                                    t("label.view-entity", {
+                                        entity: t("label.alert"),
+                                    }),
+                                    getAlertsAlertViewPath(formFields.alert.id),
+                                    false,
+                                    undefined,
+                                    true,
+                                    "_blank"
+                                )}
+                        </>
+                    }
                 />
                 <LoadingErrorStateSwitch
                     isError={enumerationItemsStatus === ActionStatus.Error}

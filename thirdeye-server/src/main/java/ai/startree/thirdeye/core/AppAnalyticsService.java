@@ -136,6 +136,7 @@ public class AppAnalyticsService {
 
   public ConfusionMatrix computeConfusionMatrixForAnomalies(DaoFilter filter) {
     final ConfusionMatrix matrix = new ConfusionMatrix();
+    // filter to get anomalies without feedback and which are not ignored
     final DaoFilter unclassifiedFilter = new DaoFilter()
         .andPredicate(notIgnored())
         .andPredicate(hasNoFeedback());

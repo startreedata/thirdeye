@@ -141,7 +141,7 @@ public class AppAnalyticsService {
         .andPredicate(notIgnored())
         .andPredicate(hasNoFeedback());
     Optional.ofNullable(filter)
-        .ifPresent(daoFilter -> unclassifiedFilter.andPredicate(filter.getPredicate()));
+        .ifPresent(daoFilter -> unclassifiedFilter.andPredicate(daoFilter.getPredicate()));
     matrix.addUnclassified((int) anomalyManager.countParentAnomalies(unclassifiedFilter));
 
     final List<AnomalyFeedback> allFeedbacks = filter == null

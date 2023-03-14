@@ -528,6 +528,30 @@
     "defaultIsNull": null
   },
   {
+    "name": "metricMinimumValue",
+    "defaultValue": null,
+    "min": null,
+    "max": null,
+    "description": "If set, the predicted value of the detector and the lower/upper bounds cannot be smaller than the given value. For instance, set it to 0 if your metric cannot have a negative value.",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "NUMBER",
+    "step": "DETECTION",
+    "defaultIsNull": null
+  },
+  {
+    "name": "metricMaximumValue",
+    "defaultValue": null,
+    "min": null,
+    "max": null,
+    "description": "If set, the predicted value of the detector and the lower/upper bounds cannot be bigger than the given value. For instance, set it to 100 if your metric cannot be bigger than 100.",
+    "options": null,
+    "multiselect": false,
+    "jsonType": "NUMBER",
+    "step": "DETECTION",
+    "defaultIsNull": null
+  },
+  {
     "name": "thresholdFilterMax",
     "defaultValue": null,
     "min": null,

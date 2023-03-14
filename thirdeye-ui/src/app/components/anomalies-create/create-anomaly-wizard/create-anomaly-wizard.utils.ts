@@ -44,6 +44,11 @@ export const getEnumerationItemsConfigFromAlert = (
 };
 
 export const AlertId = "alertId";
+export const AnomalyWizardQueryParams = {
+    AnomalyStartTime: "anomalyStartTime",
+    AnomalyEndTime: "anomalyEndTime",
+    EnumerationItemId: "EnumerationItemId",
+} as const;
 
 export const getIsAnomalyValid = (
     editableAnomaly?: EditableAnomaly | null

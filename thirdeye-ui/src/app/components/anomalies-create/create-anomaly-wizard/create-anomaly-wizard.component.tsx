@@ -58,6 +58,7 @@ import {
 } from "./create-anomaly-wizard.interfaces";
 import { useCreateAnomalyWizardStyles } from "./create-anomaly-wizard.styles";
 import {
+    AnomalyWizardQueryParams,
     createEditableAnomaly,
     getAnomaliesAvgValues,
     getEnumerationItemsConfigFromAlert,
@@ -231,9 +232,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 // `alertInsight` and set to avoid duplicate API calls with outdated datetime params
                 fetchAlertEvaluation();
 
-                // Set the date range to the middle of the anomaly chart by default
-                handleSetField(
-                    "dateRange",
+                let dateRangeValues: CreateAnomalyEditableFormFields["dateRange"] =
                     generateDateRangeDaysFromNow(
                         1,
                         DateTime.fromMillis((start + end) / 2, {
@@ -246,8 +245,48 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                             second: 0,
                             millisecond: 0,
                         }) // Remove any offsets in the middle value
-                    )
-                );
+                    );
+
+                // Load params from query params if present
+                if (
+                    searchParams.has(
+                        AnomalyWizardQueryParams.AnomalyStartTime
+                    ) &&
+                    searchParams.has(AnomalyWizardQueryParams.AnomalyEndTime)
+                ) {
+                    const anomalyStartTimeQueryParam = Number(
+                        searchParams.get(
+                            AnomalyWizardQueryParams.AnomalyStartTime
+                        )
+                    );
+                    const anomalyEndTimeQueryParam = Number(
+                        searchParams.get(
+                            AnomalyWizardQueryParams.AnomalyEndTime
+                        )
+                    );
+
+                    if (
+                        anomalyStartTimeQueryParam &&
+                        anomalyEndTimeQueryParam
+                    ) {
+                        dateRangeValues = [
+                            anomalyStartTimeQueryParam,
+                            anomalyEndTimeQueryParam,
+                        ];
+
+                        // Clear out preset query param values
+                        searchParams.delete(
+                            AnomalyWizardQueryParams.AnomalyStartTime
+                        );
+                        searchParams.delete(
+                            AnomalyWizardQueryParams.AnomalyEndTime
+                        );
+                        setSearchParams(searchParams, { replace: true });
+                    }
+                }
+
+                // Set the date range to the middle of the anomaly chart by default
+                handleSetField("dateRange", dateRangeValues);
             }
         }, [alertInsight]);
 
@@ -270,39 +309,43 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         const handleRangeSelection = (
             zoomDomain: ZoomDomain | null
         ): boolean => {
-            if (captureDateRangeFromChart) {
-                setCaptureDateRangeFromChart(false);
-                if (zoomDomain?.x0 && zoomDomain?.x1 && evaluation) {
-                    const detectionEvaluation =
-                        extractDetectionEvaluation(evaluation)[0];
-                    const { timestamp } = detectionEvaluation.data;
-
-                    const anomalyStartTimestamp = timestamp.find(
-                        (t) => t >= zoomDomain.x0
-                    );
-                    const anomalyEndTimestamp = timestamp.find(
-                        (t) => t >= zoomDomain.x1
-                    );
-
-                    if (anomalyStartTimestamp && anomalyEndTimestamp) {
-                        handleSetField("dateRange", [
-                            anomalyStartTimestamp,
-                            anomalyEndTimestamp,
-                        ]);
-
-                        return false;
-                    }
-                }
-
-                notify(
-                    NotificationTypeV1.Error,
-                    "Unable to parse date range from the chart. Please try again."
-                );
-
-                return false;
+            if (!captureDateRangeFromChart) {
+                // Proceed with the default zoom action
+                return true;
             }
 
-            return true;
+            // Disable the drag-select
+            setCaptureDateRangeFromChart(false);
+            if (zoomDomain?.x0 && zoomDomain?.x1 && evaluation) {
+                const detectionEvaluation =
+                    extractDetectionEvaluation(evaluation)[0];
+                const { timestamp } = detectionEvaluation.data;
+
+                const anomalyStartTimestamp = timestamp.find(
+                    (t) => t >= zoomDomain.x0
+                );
+                const anomalyEndTimestamp = timestamp.find(
+                    (t) => t >= zoomDomain.x1
+                );
+
+                if (anomalyStartTimestamp && anomalyEndTimestamp) {
+                    handleSetField("dateRange", [
+                        anomalyStartTimestamp,
+                        anomalyEndTimestamp,
+                    ]);
+
+                    // Cancel the zoom
+                    return false;
+                }
+            }
+
+            notify(
+                NotificationTypeV1.Error,
+                "Unable to parse date range from the chart. Please try again."
+            );
+
+            // Cancel the zoom
+            return false;
         };
 
         const handleSetField: HandleSetFields = (fieldName, fieldValue) => {

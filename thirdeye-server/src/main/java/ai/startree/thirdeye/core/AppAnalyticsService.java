@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.core;
 
+import static ai.startree.thirdeye.spi.Constants.LOW_METRIC_TIMEOUT;
+import static ai.startree.thirdeye.spi.Constants.MEDIUM_METRIC_TIMEOUT;
+import static ai.startree.thirdeye.spi.Constants.METRIC_TIMEOUT_UNIT;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_EXPECTED;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_NEW_TREND;
@@ -41,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
@@ -59,9 +61,11 @@ public class AppAnalyticsService {
   private final AnomalyManager anomalyManager;
 
   public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
-      Suppliers.memoizeWithExpiration(this::getAllAnomalyFeedbacks, 5, TimeUnit.MINUTES)::get;
+      Suppliers.memoizeWithExpiration(this::getAllAnomalyFeedbacks,
+          MEDIUM_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT)::get;
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
-      Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics, 5, TimeUnit.MINUTES)::get;
+      Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
+          MEDIUM_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT)::get;
 
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
@@ -72,19 +76,22 @@ public class AppAnalyticsService {
     this.anomalyManager = anomalyManager;
     this.renderer = renderer;
 
-    metricRegistry.register("nMonitoredMetrics", new CachedGauge<Integer>(5, TimeUnit.MINUTES) {
+    metricRegistry.register("nMonitoredMetrics",
+        new CachedGauge<Integer>(MEDIUM_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
       @Override
       protected Integer loadValue() {
         return uniqueMonitoredMetricsCount();
       }
     });
-    metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
+    metricRegistry.register("anomalyPrecision",
+        new CachedGauge<Double>(LOW_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
       @Override
       protected Double loadValue() {
         return computeConfusionMatrixForAnomalies(null).getPrecision();
       }
     });
-    metricRegistry.register("anomalyResponseRate", new CachedGauge<Double>(1, TimeUnit.HOURS) {
+    metricRegistry.register("anomalyResponseRate",
+        new CachedGauge<Double>(LOW_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
       @Override
       protected Double loadValue() {
         return computeConfusionMatrixForAnomalies(null).getResponseRate();

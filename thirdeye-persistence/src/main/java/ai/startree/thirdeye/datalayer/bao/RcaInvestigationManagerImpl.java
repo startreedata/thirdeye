@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.Constants.HIGH_METRIC_TIMEOUT;
+import static ai.startree.thirdeye.spi.Constants.METRIC_TIMEOUT_UNIT;
+
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
@@ -27,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 
 @Singleton
@@ -45,7 +47,8 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
   public RcaInvestigationManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(RcaInvestigationDTO.class, genericPojoDao);
-    metricRegistry.register("rcaInvestigationCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {
+    metricRegistry.register("rcaInvestigationCount",
+        new CachedGauge<Long>(HIGH_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
       @Override
       protected Long loadValue() {
         return count();

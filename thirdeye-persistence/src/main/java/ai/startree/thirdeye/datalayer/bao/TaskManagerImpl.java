@@ -15,6 +15,9 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
+import static ai.startree.thirdeye.spi.Constants.HIGH_METRIC_TIMEOUT;
+import static ai.startree.thirdeye.spi.Constants.LOW_METRIC_TIMEOUT;
+import static ai.startree.thirdeye.spi.Constants.METRIC_TIMEOUT_UNIT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
@@ -42,7 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -285,21 +287,24 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   private void registerMetrics() {
-    metricRegistry.register("taskCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+    metricRegistry.register("taskCountTotal",
+        new CachedGauge<Long>(LOW_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
       @Override
       protected Long loadValue() {
         return count();
       }
     });
 
-    metricRegistry.register("detectionTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+    metricRegistry.register("detectionTaskLatencyInMillis",
+        new CachedGauge<Long>(HIGH_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
       @Override
       protected Long loadValue() {
         return getTaskLatency(TaskType.DETECTION);
       }
     });
 
-    metricRegistry.register("notificationTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+    metricRegistry.register("notificationTaskLatencyInMillis",
+        new CachedGauge<Long>(HIGH_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
       @Override
       protected Long loadValue() {
         return getTaskLatency(TaskType.NOTIFICATION);
@@ -328,7 +333,7 @@ public class TaskManagerImpl implements TaskManager {
 
   private void registerStatusMetric(final TaskStatus status) {
     metricRegistry.register(String.format("taskCount_%s", status.toString()),
-        new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+        new CachedGauge<Long>(LOW_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
           @Override
           protected Long loadValue() {
             return countByStatus(status);

@@ -16,15 +16,32 @@ package ai.startree.thirdeye.datalayer.bao;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import com.codahale.metrics.CachedGauge;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class SubscriptionGroupManagerImpl extends
     AbstractManagerImpl<SubscriptionGroupDTO> implements SubscriptionGroupManager {
 
   @Inject
-  public SubscriptionGroupManagerImpl(GenericPojoDao genericPojoDao) {
+  public SubscriptionGroupManagerImpl(GenericPojoDao genericPojoDao,
+      MetricRegistry metricRegistry) {
     super(SubscriptionGroupDTO.class, genericPojoDao);
+    metricRegistry.register("subscriptionsCountTotal",
+        new CachedGauge<Integer>(15, TimeUnit.MINUTES) {
+      @Override
+      public Integer loadValue() {
+        return findAll().stream()
+            .map(SubscriptionGroupDTO::getAlertAssociations)
+            .filter(Objects::nonNull)
+            .map(List::size)
+            .reduce(0, Integer::sum);
+      }
+    });
   }
 }

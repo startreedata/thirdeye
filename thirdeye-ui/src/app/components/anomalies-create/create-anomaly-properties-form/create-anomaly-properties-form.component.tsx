@@ -13,7 +13,14 @@
  * the License.
  */
 
-import { Box, Grid, TextField, Typography } from "@material-ui/core";
+import {
+    Box,
+    FormControlLabel,
+    Grid,
+    Switch,
+    TextField,
+    Typography,
+} from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { capitalize } from "lodash";
 import React, { FunctionComponent, ReactNode, useCallback } from "react";
@@ -43,6 +50,8 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
         enumerationItemsStatus,
         timezone,
         selectedAlertDetails,
+        captureDateRangeFromChart,
+        setCaptureDateRangeFromChart,
     }) => {
         const { t } = useTranslation();
         const classes = useCreateAnomalyWizardStyles();
@@ -281,17 +290,37 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                 {!!timezone && (
                     <InputSection
                         inputComponent={
-                            <TimeRangeButton
-                                hideQuickExtend
-                                timeRangeDuration={timeRangeDuration}
-                                timezone={timezone}
-                                onChange={({ startTime, endTime }) =>
-                                    handleSetField("dateRange", [
-                                        startTime,
-                                        endTime,
-                                    ])
-                                }
-                            />
+                            <Box>
+                                <TimeRangeButton
+                                    hideQuickExtend
+                                    timeRangeDuration={timeRangeDuration}
+                                    timezone={timezone}
+                                    onChange={({ startTime, endTime }) =>
+                                        handleSetField("dateRange", [
+                                            startTime,
+                                            endTime,
+                                        ])
+                                    }
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={captureDateRangeFromChart}
+                                            color="primary"
+                                            onChange={() =>
+                                                setCaptureDateRangeFromChart(
+                                                    !captureDateRangeFromChart
+                                                )
+                                            }
+                                        />
+                                    }
+                                    label={
+                                        captureDateRangeFromChart
+                                            ? "Drag selection on chart enabled"
+                                            : "Select by dragging on the chart below"
+                                    }
+                                />
+                            </Box>
                         }
                         labelComponent={
                             <>

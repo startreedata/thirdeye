@@ -15,6 +15,7 @@
 
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
 import { Anomaly, EditableAnomaly } from "../../../rest/dto/anomaly.interfaces";
+import { ZoomDomain } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 
 export interface PreviewAnomalyChartProps {
     editableAnomaly: EditableAnomaly | Anomaly;
@@ -22,4 +23,5 @@ export interface PreviewAnomalyChartProps {
     isLoading: boolean;
     evaluation: AlertEvaluation | null;
     timezone: string | undefined;
+    onRangeSelection?: (z: ZoomDomain | null) => boolean | undefined;
 }

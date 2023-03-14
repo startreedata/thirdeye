@@ -37,6 +37,7 @@ import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumerat
 import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
+    extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import {
@@ -45,6 +46,7 @@ import {
 } from "../../../utils/routes/routes.util";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { ZoomDomain } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { CreateAnomalyPropertiesForm } from "../create-anomaly-properties-form/create-anomaly-properties-form.component";
 import { PreviewAnomalyChart } from "../preview-anomaly-chart/preview-anomaly-chart.component";
@@ -105,6 +107,8 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 // anyways, so these are just dummy values to prevent initiation errors
                 dateRange: [0, 0],
             });
+        const [captureDateRangeFromChart, setCaptureDateRangeFromChart] =
+            useState(false);
 
         const selectedAlertDetails =
             useMemo<SelectedAlertDetails | null>(() => {
@@ -263,6 +267,44 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }
         };
 
+        const handleRangeSelection = (
+            zoomDomain: ZoomDomain | null
+        ): boolean => {
+            if (captureDateRangeFromChart) {
+                setCaptureDateRangeFromChart(false);
+                if (zoomDomain?.x0 && zoomDomain?.x1 && evaluation) {
+                    const detectionEvaluation =
+                        extractDetectionEvaluation(evaluation)[0];
+                    const { timestamp } = detectionEvaluation.data;
+
+                    const anomalyStartTimestamp = timestamp.find(
+                        (t) => t >= zoomDomain.x0
+                    );
+                    const anomalyEndTimestamp = timestamp.find(
+                        (t) => t >= zoomDomain.x1
+                    );
+
+                    if (anomalyStartTimestamp && anomalyEndTimestamp) {
+                        handleSetField("dateRange", [
+                            anomalyStartTimestamp,
+                            anomalyEndTimestamp,
+                        ]);
+
+                        return false;
+                    }
+                }
+
+                notify(
+                    NotificationTypeV1.Error,
+                    "Unable to parse date range from the chart. Please try again."
+                );
+
+                return false;
+            }
+
+            return true;
+        };
+
         const handleSetField: HandleSetFields = (fieldName, fieldValue) => {
             setFormFields((stateProp) => ({
                 ...stateProp,
@@ -336,6 +378,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                 <Grid item xs={12}>
                                     <CreateAnomalyPropertiesForm
                                         alerts={alerts}
+                                        captureDateRangeFromChart={
+                                            captureDateRangeFromChart
+                                        }
                                         enumerationItemsForAlert={
                                             enumerationItems || []
                                         }
@@ -346,6 +391,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         handleSetField={handleSetField}
                                         selectedAlertDetails={
                                             selectedAlertDetails
+                                        }
+                                        setCaptureDateRangeFromChart={
+                                            setCaptureDateRangeFromChart
                                         }
                                         timezone={timezone}
                                     />
@@ -405,6 +453,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                         ActionStatus.Working
                                                 )}
                                                 timezone={timezone}
+                                                onRangeSelection={
+                                                    handleRangeSelection
+                                                }
                                             />
                                         </EmptyStateSwitch>
                                     </Grid>

@@ -34,6 +34,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
         isLoading,
         fetchAlertEvaluation,
         evaluation,
+        onRangeSelection,
     }) => {
         const { t } = useTranslation();
 
@@ -138,6 +139,11 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                             </CardContent>
                         }
                         rootCardProps={{ variant: "elevation" }}
+                        timeSeriesProps={{
+                            chartEvents: {
+                                onRangeSelection,
+                            },
+                        }}
                         timezone={timezone}
                     />
                 </EmptyStateSwitch>

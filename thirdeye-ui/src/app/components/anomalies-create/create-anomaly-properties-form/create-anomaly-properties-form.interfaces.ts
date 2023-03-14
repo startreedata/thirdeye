@@ -30,4 +30,6 @@ export interface CreateAnomalyPropertiesFormProps {
     handleSetField: HandleSetFields;
     enumerationItemsStatus: ActionStatus;
     timezone: string | undefined;
+    captureDateRangeFromChart: boolean;
+    setCaptureDateRangeFromChart: (v: boolean) => void;
 }

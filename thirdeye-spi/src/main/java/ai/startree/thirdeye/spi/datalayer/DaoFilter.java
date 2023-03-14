@@ -83,11 +83,10 @@ public class DaoFilter {
     if(predicate == null) {
       return this;
     }
-    if(this.predicate != null) {
-      Predicate finalPredicate = Predicate.AND(this.predicate, predicate);
-      return this.setPredicate(finalPredicate);
-    } else {
+    if(this.predicate == null) {
       return this.setPredicate(predicate);
     }
+    final Predicate finalPredicate = Predicate.AND(this.predicate, predicate);
+    return this.setPredicate(finalPredicate);
   }
 }

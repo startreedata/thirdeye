@@ -16,18 +16,14 @@ package ai.startree.thirdeye.datalayer.bao;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
@@ -35,7 +31,6 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
 
   @Inject
   public AlertManagerImpl(final GenericPojoDao genericPojoDao,
-      final AlertTemplateManager alertTemplateManager,
       final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
     metricRegistry.register("activeAlertsCount", new CachedGauge<Long>(5, TimeUnit.MINUTES) {
@@ -48,25 +43,9 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
       @Override
       protected Integer loadValue() {
         final List<AlertDTO> activeAlerts = findAllActive();
-        final List<AlertTemplateDTO> usedTemplates = alertTemplateManager.findByPredicate(
-            Predicate.IN("name", activeAlerts.stream()
-                .map(alert -> alert.getTemplate().getName()).distinct().toArray()));
-
-        // get the enumeration item property name for the alert templates
-        final Map<String, String> propertyNameMap = usedTemplates.stream()
-            .collect(Collectors.toMap(AlertTemplateDTO::getName, template -> {
-              for (PlanNodeBean node : template.getNodes()) {
-                if (node.getType().equals("Enumerator")) {
-                  String itemsProperty = node.getParams().get("items").getTemplatedValue();
-                  return itemsProperty.replace("${", "").replace("}", "");
-                }
-              }
-              return "";
-            }));
         return activeAlerts.stream()
-            // look for enumerationItems and get the item count
-            .map(alert -> ((List<?>)alert.getTemplateProperties()
-                .getOrDefault(propertyNameMap.get(alert.getTemplate().getName()), List.of())).size())
+            // Assumes dangling enumeration items are handled and only linked items are present in DB
+            .map(alert -> (int) genericPojoDao.count(Predicate.EQ("alertId", alert.getId()), EnumerationItemDTO.class))
             // add enumerationItems count if present, else just add 1 for simple alert
             .reduce(0, (tsCount, enumCount) -> tsCount + (enumCount == 0 ? 1 : enumCount));
       }

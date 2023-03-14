@@ -20,8 +20,6 @@ import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
@@ -37,11 +35,17 @@ public class SubscriptionGroupManagerImpl extends
       @Override
       public Integer loadValue() {
         return findAll().stream()
-            .map(SubscriptionGroupDTO::getAlertAssociations)
-            .filter(Objects::nonNull)
-            .map(List::size)
+            .filter(SubscriptionGroupManagerImpl::isPairPresent)
+            .map(sg -> sg.getAlertAssociations().size() * sg.getSpecs().size())
             .reduce(0, Integer::sum);
       }
     });
+  }
+  
+  private static boolean isPairPresent(final SubscriptionGroupDTO subscriptionGroup) {
+    return subscriptionGroup.getAlertAssociations() != null &&
+        !subscriptionGroup.getAlertAssociations().isEmpty() &&
+        subscriptionGroup.getSpecs() != null &&
+        !subscriptionGroup.getSpecs().isEmpty();
   }
 }

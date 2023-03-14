@@ -27,8 +27,8 @@ public class SubscriptionGroupManagerImpl extends
     AbstractManagerImpl<SubscriptionGroupDTO> implements SubscriptionGroupManager {
 
   @Inject
-  public SubscriptionGroupManagerImpl(GenericPojoDao genericPojoDao,
-      MetricRegistry metricRegistry) {
+  public SubscriptionGroupManagerImpl(final GenericPojoDao genericPojoDao,
+      final MetricRegistry metricRegistry) {
     super(SubscriptionGroupDTO.class, genericPojoDao);
     metricRegistry.register("subscriptionsCountTotal",
         new CachedGauge<Integer>(15, TimeUnit.MINUTES) {

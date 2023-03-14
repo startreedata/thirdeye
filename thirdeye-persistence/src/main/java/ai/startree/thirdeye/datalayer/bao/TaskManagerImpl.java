@@ -13,11 +13,11 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
-import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.Constants.HIGH_METRIC_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.LOW_METRIC_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.METRIC_TIMEOUT_UNIT;
+import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
+import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.datalayer.dao.TaskDao;

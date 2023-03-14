@@ -47,7 +47,7 @@ export const AlertId = "alertId";
 export const AnomalyWizardQueryParams = {
     AnomalyStartTime: "anomalyStartTime",
     AnomalyEndTime: "anomalyEndTime",
-    EnumerationItemId: "EnumerationItemId",
+    EnumerationItemId: "enumerationItemId",
 } as const;
 
 export const getIsAnomalyValid = (

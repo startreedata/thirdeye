@@ -155,20 +155,6 @@ public class MaintenanceResource {
     return subscriptionGroupCount == 0;
   }
 
-  @DELETE
-  @Path("/enumeration-items/remove-alerts")
-  @Timed
-  @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation("Remove deprecated alerts field from enumeration items")
-  public Response removeDeprecatedAlerts(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
-    enumerationItemManager.findAll().stream()
-        .peek(ei -> authorizationManager.ensureCanEdit(principal, ei, ei))
-        .map(ei -> ei.setAlerts(null))
-        .forEach(enumerationItemManager::update);
-    return Response.ok().build();
-  }
-
   @POST
   @Path("/enumeration-items/fix-incorrect-anomaly-migrations")
   @Timed

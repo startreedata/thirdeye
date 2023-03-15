@@ -17,6 +17,7 @@ import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
@@ -36,6 +37,17 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
       @Override
       public Long loadValue() {
         return countActive();
+      }
+    });
+    metricRegistry.register("activeTimeseriesMonitoredCount", new CachedGauge<Integer>(15, TimeUnit.MINUTES) {
+      @Override
+      protected Integer loadValue() {
+        final List<AlertDTO> activeAlerts = findAllActive();
+        return activeAlerts.stream()
+            // Assumes dangling enumeration items are handled and only linked items are present in DB
+            .map(alert -> (int) genericPojoDao.count(Predicate.EQ("alertId", alert.getId()), EnumerationItemDTO.class))
+            // add enumerationItems count if present, else just add 1 for simple alert
+            .reduce(0, (tsCount, enumCount) -> tsCount + (enumCount == 0 ? 1 : enumCount));
       }
     });
   }

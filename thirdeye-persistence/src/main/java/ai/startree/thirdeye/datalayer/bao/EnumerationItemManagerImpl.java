@@ -101,6 +101,15 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     if (idKeys != null && !idKeys.isEmpty()) {
       final EnumerationItemDTO existing = findUsingIdKeys(source, idKeys);
       if (existing != null) {
+        if (!existing.getParams().equals(source.getParams())) {
+          /*
+           * Overwrite existing params with new params for the same key. The alert is the
+           * source of truth.
+           */
+          save(existing
+              .setParams(source.getParams())
+              .setName(source.getName()));
+        }
         return existing;
       }
 

@@ -30,22 +30,22 @@ public class SubscriptionGroupManagerImpl extends
   public SubscriptionGroupManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(SubscriptionGroupDTO.class, genericPojoDao);
+    registerMetrics(metricRegistry);
+  }
+
+  private void registerMetrics(final MetricRegistry metricRegistry) {
     metricRegistry.register("subscriptionsCountTotal",
         new CachedGauge<Integer>(15, TimeUnit.MINUTES) {
-      @Override
-      public Integer loadValue() {
-        return findAll().stream()
-            .filter(SubscriptionGroupManagerImpl::isPairPresent)
-            .map(sg -> sg.getAlertAssociations().size() * sg.getSpecs().size())
-            .reduce(0, Integer::sum);
-      }
-    });
-  }
-  
-  private static boolean isPairPresent(final SubscriptionGroupDTO subscriptionGroup) {
-    return subscriptionGroup.getAlertAssociations() != null &&
-        !subscriptionGroup.getAlertAssociations().isEmpty() &&
-        subscriptionGroup.getSpecs() != null &&
-        !subscriptionGroup.getSpecs().isEmpty();
+          @Override
+          public Integer loadValue() {
+            return findAll().stream()
+                .filter(sg -> sg.getAlertAssociations() != null)
+                .filter(sg -> !sg.getAlertAssociations().isEmpty())
+                .filter(sg -> sg.getSpecs() != null)
+                .filter(sg -> !sg.getSpecs().isEmpty())
+                .map(sg -> sg.getAlertAssociations().size() * sg.getSpecs().size())
+                .reduce(0, Integer::sum);
+          }
+        });
   }
 }

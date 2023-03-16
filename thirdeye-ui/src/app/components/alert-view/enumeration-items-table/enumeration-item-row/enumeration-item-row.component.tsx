@@ -31,10 +31,6 @@ import {
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
-import {
-    NotificationTypeV1,
-    useNotificationProviderV1,
-} from "../../../../platform/components";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import {
     createPathWithRecognizedQueryString,
@@ -51,10 +47,7 @@ import {
 } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
-import {
-    TimeSeriesChartProps,
-    ZoomDomain,
-} from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
+import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
 import { useEnumerationItemRowStyles } from "./enumeration-item-row.style";
 
@@ -68,7 +61,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     timezone,
 }) => {
     const navigate = useNavigate();
-    const { notify } = useNotificationProviderV1();
+
     const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const [expandedChartHeight, setExpandedChartHeight] =
@@ -78,26 +71,14 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     const [isExpanded, setIsExpanded] = useState(
         expanded.includes(nameForDetectionEvaluation)
     );
-    const [captureDateRangeFromChart, setCaptureDateRangeFromChart] =
-        useState(false);
     const classes = useEnumerationItemRowStyles();
 
     useEffect(() => {
         setIsExpanded(expanded.includes(nameForDetectionEvaluation));
     }, [expanded]);
 
-    const handleCreateAlertAnomaly = ({
-        anomalyStartTime,
-        anomalyEndTime,
-    }: {
-        anomalyStartTime: number;
-        anomalyEndTime: number;
-    }): void => {
+    const handleCreateAlertAnomaly = (): void => {
         // Use the selected start and end time for the anomaly
-        const redirectSearchParams = new URLSearchParams([
-            [AnomalyWizardQueryParams.AnomalyStartTime, `${anomalyStartTime}`],
-            [AnomalyWizardQueryParams.AnomalyEndTime, `${anomalyEndTime}`],
-        ] as string[][]);
 
         const alertChartStartTime = Number(
             searchParams.get(TimeRangeQueryStringKey.START_TIME)
@@ -106,17 +87,10 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
             searchParams.get(TimeRangeQueryStringKey.END_TIME)
         );
 
-        // Use the start and end query params being used by the current alert, if valid
-        if (alertChartStartTime && alertChartEndTime) {
-            redirectSearchParams.set(
-                TimeRangeQueryStringKey.START_TIME,
-                `${alertChartStartTime}`
-            );
-            redirectSearchParams.set(
-                TimeRangeQueryStringKey.END_TIME,
-                `${alertChartEndTime}`
-            );
-        }
+        const redirectSearchParams = new URLSearchParams([
+            [TimeRangeQueryStringKey.START_TIME, `${alertChartStartTime}`],
+            [TimeRangeQueryStringKey.END_TIME, `${alertChartEndTime}`],
+        ] as string[][]);
 
         // Add the enumeration item ID as a query param if present
         if (detectionEvaluation.enumerationId) {
@@ -134,40 +108,6 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         navigate(path);
     };
 
-    const handleRangeSelection = (zoomDomain: ZoomDomain | null): boolean => {
-        if (!captureDateRangeFromChart) {
-            // Proceed with the default zoom action
-            return true;
-        }
-
-        // Disable the drag-select
-        setCaptureDateRangeFromChart(false);
-        if (zoomDomain?.x0 && zoomDomain?.x1 && detectionEvaluation) {
-            const { timestamp } = detectionEvaluation.data;
-
-            const anomalyStartTime = timestamp.find((t) => t >= zoomDomain.x0);
-            const anomalyEndTime = timestamp.find((t) => t >= zoomDomain.x1);
-
-            if (anomalyStartTime && anomalyEndTime) {
-                handleCreateAlertAnomaly({
-                    anomalyStartTime,
-                    anomalyEndTime,
-                });
-
-                // Cancel the zoom
-                return false;
-            }
-        }
-
-        notify(
-            NotificationTypeV1.Error,
-            "Unable to parse date range from the chart. Please try again."
-        );
-
-        // Cancel the zoom
-        return false;
-    };
-
     const tsData = generateChartOptionsForAlert(
         detectionEvaluation,
         anomalies,
@@ -177,9 +117,6 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     );
     const tsDataForExpanded: TimeSeriesChartProps = {
         ...tsData,
-        chartEvents: {
-            onRangeSelection: handleRangeSelection,
-        },
     };
     tsData.brush = false;
     tsData.zoom = true;
@@ -242,14 +179,10 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                                     color="primary"
                                     variant="text"
                                     onClick={() => {
-                                        setCaptureDateRangeFromChart(
-                                            !captureDateRangeFromChart
-                                        );
+                                        handleCreateAlertAnomaly();
                                     }}
                                 >
-                                    {captureDateRangeFromChart
-                                        ? "Cancel anomaly selection"
-                                        : t("label.report-missed-anomaly")}
+                                    {t("label.report-missed-anomaly")}
                                 </Button>
                             </Grid>
                         )}

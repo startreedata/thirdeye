@@ -115,8 +115,12 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                         <TimeRangeButtonWithContext
                                             hideQuickExtend
                                             timezone={timezone}
-                                            onTimeRangeChange={() =>
-                                                fetchAlertEvaluation()
+                                            onTimeRangeChange={(start, end) =>
+                                                // To avoid latency related to updating query params
+                                                fetchAlertEvaluation({
+                                                    start,
+                                                    end,
+                                                })
                                             }
                                         />
                                         <Typography

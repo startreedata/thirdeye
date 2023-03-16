@@ -110,7 +110,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 dateRange: [0, 0],
             });
         const [captureDateRangeFromChart, setCaptureDateRangeFromChart] =
-            useState(false);
+            useState(true);
 
         const selectedAlertDetails =
             useMemo<SelectedAlertDetails | null>(() => {
@@ -167,9 +167,18 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             });
         }, [formFields, evaluation]);
 
-        const fetchAlertEvaluation = (): void => {
-            const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-            const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+        const fetchAlertEvaluation = (params?: {
+            start: number;
+            end: number;
+        }): void => {
+            let start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+            let end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+            // Use custom datetime if passed
+            if (params && params.start && params.end) {
+                start = `${params.start}`;
+                end = `${params.end}`;
+            }
 
             if (!formFields.alert || !start || !end) {
                 return;
@@ -272,7 +281,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                         TimeRangeQueryStringKey.END_TIME,
                         `${end}`
                     );
-                    setSearchParams(searchParams);
+                    setSearchParams(searchParams, { replace: true });
                 }
 
                 // Fetch the alert evaluation AFTER the datetime query params are extracted from
@@ -378,7 +387,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }
 
             // Disable the drag-select
-            setCaptureDateRangeFromChart(false);
             if (zoomDomain?.x0 && zoomDomain?.x1 && evaluation) {
                 const detectionEvaluation =
                     extractDetectionEvaluation(evaluation)[0];
@@ -423,7 +431,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             } else {
                 searchParams.delete(AnomalyWizardQueryParams.EnumerationItemId);
             }
-            setSearchParams(searchParams);
+            setSearchParams(searchParams, { replace: true });
         };
 
         const handleUpdateAnomalyDateRangeQueryParam = (
@@ -437,7 +445,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 AnomalyWizardQueryParams.AnomalyEndTime,
                 `${anomalyDateRangeProp[1]}`
             );
-            setSearchParams(searchParams);
+            setSearchParams(searchParams, { replace: true });
         };
 
         /* Common updater function to update the state and handle the side effects */

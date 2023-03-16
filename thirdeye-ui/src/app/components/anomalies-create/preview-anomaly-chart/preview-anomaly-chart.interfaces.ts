@@ -19,7 +19,7 @@ import { ZoomDomain } from "../../visualizations/time-series-chart/time-series-c
 
 export interface PreviewAnomalyChartProps {
     editableAnomaly: EditableAnomaly | Anomaly;
-    fetchAlertEvaluation: () => void;
+    fetchAlertEvaluation: (v?: { start: number; end: number }) => void;
     isLoading: boolean;
     evaluation: AlertEvaluation | null;
     timezone: string | undefined;

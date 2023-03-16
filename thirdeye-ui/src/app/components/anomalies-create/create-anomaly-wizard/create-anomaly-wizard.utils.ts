@@ -51,16 +51,17 @@ export const AnomalyWizardQueryParams = {
 } as const;
 
 export const getIsAnomalyValid = (
-    editableAnomaly?: EditableAnomaly | null
+    editableAnomaly?: EditableAnomaly | null,
+    alertHasEnumerationItems?: boolean
 ): boolean => {
     if (!editableAnomaly) {
         return false;
     }
 
-    const { alert, startTime, endTime } = editableAnomaly;
+    const { alert, startTime, endTime, enumerationItem } = editableAnomaly;
 
     // Basic sanity checks for values
-    const conditions = [
+    const conditions: boolean[] = [
         isNumber(alert?.id),
         isNumber(startTime),
         isNumber(endTime),
@@ -68,6 +69,11 @@ export const getIsAnomalyValid = (
         endTime > 0,
         endTime > startTime,
     ];
+
+    // If the alert has enumeration items, it must be mandatorily present
+    if (alertHasEnumerationItems) {
+        conditions.push(!!enumerationItem?.id);
+    }
 
     // The anomaly is valid iff all check are valid
     return conditions.every((c) => !!c);
@@ -137,6 +143,15 @@ export const createEditableAnomaly = ({
     return editableAnomaly;
 };
 
+export const findNextClosestTimestampIndex = (
+    needle: number,
+    list: number[]
+): number => {
+    const index = list.findIndex((v) => v >= needle);
+
+    return index;
+};
+
 export const getAnomaliesAvgValues = ({
     evaluation,
     startTime,
@@ -148,7 +163,10 @@ export const getAnomaliesAvgValues = ({
 
     if (evaluation) {
         const { timestamp, current, expected } = detectionEvaluation?.data;
-        const anomalyStartIndex = timestamp.findIndex((v) => v >= startTime);
+        const anomalyStartIndex = findNextClosestTimestampIndex(
+            startTime,
+            timestamp
+        );
 
         if (anomalyStartIndex) {
             // TODO: Should the avg of all the values in the range be used?

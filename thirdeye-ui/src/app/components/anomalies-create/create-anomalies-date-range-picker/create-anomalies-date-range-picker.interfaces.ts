@@ -13,20 +13,16 @@
  * the License.
  */
 
-import { ActionStatus } from "../../../platform/rest/actions.interfaces";
-import { Alert } from "../../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import {
     CreateAnomalyEditableFormFields,
     HandleSetFields,
-    SelectedAlertDetails,
 } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
 
-export interface CreateAnomalyPropertiesFormProps {
-    alerts: Alert[];
-    selectedAlertDetails: SelectedAlertDetails | null;
-    enumerationItemsForAlert: EnumerationItem[];
+export interface CreateAnomaliesDateRangePickerProps {
     formFields: CreateAnomalyEditableFormFields;
     handleSetField: HandleSetFields;
-    enumerationItemsStatus: ActionStatus;
+    timezone: string;
+    captureDateRangeFromChart: boolean;
+    setCaptureDateRangeFromChart: (v: boolean) => void;
+    findClosestAppropriateTimestamp: (v: number) => number | null;
 }

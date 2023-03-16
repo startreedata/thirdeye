@@ -596,6 +596,7 @@
         "return-this-many-results-at-most": "Return this many results at most",
         "review-and-configure-data": "Review and configure data",
         "select-a-date-range-to-filter-data-by": "Select a date range to filter the data by",
+        "select-a-dimension-to-generate-the-anomaly-preview": "Select a dimension to generate the anomaly preview",
         "select-a-template-to-preview": "Select a template to preview the alert",
         "select-aggregation-function": "Select aggregation function",
         "select-alert-type": "Select alert type",

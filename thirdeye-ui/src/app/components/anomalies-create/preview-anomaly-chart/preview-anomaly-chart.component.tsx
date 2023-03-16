@@ -35,6 +35,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
         fetchAlertEvaluation,
         evaluation,
         onRangeSelection,
+        children,
     }) => {
         const { t } = useTranslation();
 
@@ -134,6 +135,9 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                             timezone={timezone}
                                             uiAnomaly={uiAnomaly}
                                         />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        {children}
                                     </Grid>
                                 </Grid>
                             </CardContent>

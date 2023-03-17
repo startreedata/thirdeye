@@ -554,27 +554,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                     </Grid>
                                     <Grid item xs={12}>
                                         <EmptyStateSwitch
-                                            emptyState={null}
-                                            isEmpty={!timezone}
-                                        >
-                                            <CreateAnomaliesDateRangePicker
-                                                captureDateRangeFromChart={
-                                                    captureDateRangeFromChart
-                                                }
-                                                findClosestAppropriateTimestamp={
-                                                    findClosestAppropriateTimestamp
-                                                }
-                                                formFields={formFields}
-                                                handleSetField={handleSetField}
-                                                setCaptureDateRangeFromChart={
-                                                    setCaptureDateRangeFromChart
-                                                }
-                                                timezone={timezone as string}
-                                            />
-                                        </EmptyStateSwitch>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <EmptyStateSwitch
                                             emptyState={
                                                 <Box
                                                     mt={2}
@@ -613,6 +592,26 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                             isEmpty={!editableAnomaly}
                                         >
                                             <PreviewAnomalyChart
+                                                anomalyDateRangeControl={
+                                                    <CreateAnomaliesDateRangePicker
+                                                        captureDateRangeFromChart={
+                                                            captureDateRangeFromChart
+                                                        }
+                                                        findClosestAppropriateTimestamp={
+                                                            findClosestAppropriateTimestamp
+                                                        }
+                                                        formFields={formFields}
+                                                        handleSetField={
+                                                            handleSetField
+                                                        }
+                                                        setCaptureDateRangeFromChart={
+                                                            setCaptureDateRangeFromChart
+                                                        }
+                                                        timezone={
+                                                            timezone as string
+                                                        }
+                                                    />
+                                                }
                                                 editableAnomaly={
                                                     editableAnomaly as EditableAnomaly
                                                 }

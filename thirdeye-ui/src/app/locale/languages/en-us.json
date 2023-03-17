@@ -147,6 +147,7 @@
         "document-title-page-partial-router": "{{router}}: {{title}}",
         "documentation": "Documentation",
         "dont-show-again": "Don't show this again",
+        "drag": "Drag",
         "duplicate": "Duplicate",
         "duplicate-entity": "Duplicate {{entity}}",
         "duration": "Duration",
@@ -321,6 +322,7 @@
         "second-lowercase": "second",
         "seconds": "Seconds",
         "seconds-lowercase": "seconds",
+        "select": "Select",
         "select-all": "Select All",
         "select-subscription-groups": "Select subscription groups",
         "selected-count": "{{count}} selected",
@@ -401,7 +403,8 @@
         "years-lowercase": "years",
         "yes": "Yes",
         "yes-leave-page": "Yes, leave page",
-        "yesterday": "Yesterday"
+        "yesterday": "Yesterday",
+        "zoom": "Zoom"
     },
     "message": {
         "absolute-change-rule-algorithm-description": "Compares current time series to a baseline. If the absolute change is above a certain threshold, detect it as an anomaly.",
@@ -480,6 +483,8 @@
         "delete-error": "Error deleting {{entity}}",
         "delete-success": "{{entity}} deleted successfully",
         "do-you-want-to-leave-this-page": "Do you want to continue and leave this page?",
+        "drag-on-chart-to-select-anomaly-date-range": "Drag on chart to select anomaly date range",
+        "drag-on-chart-to-zoom": "Drag on chart to zoom",
         "email-required": "Email is required",
         "empty-selection-means-all-is-selected": "An empty selection means all are selected",
         "enter-value-to-override-defaults": "Fields with default values, enter a value to override the defaults",
@@ -544,6 +549,7 @@
         "monitor-number-of-page-views-across-multiple": "Monitor number of page views across multiple dimensions such as location, device, browser",
         "monitor-store-sales-for-ecommerce-retail-stores": "Monitor store sales for eCommerce retail stores",
         "monitor-website-traffic-for-consumer-products": "Monitor website traffic for consumer products",
+        "mouse-drag-behavior-on-chart": "Mouse drag behavior on chart",
         "multidimension-setup": "Multidimension setup {{algorithmName}}",
         "needs-to-be-a-boolean-true-or-false": "\"{{propertyKey}}\" needs to be a boolean (true or false)",
         "needs-to-be-an-array": "\"{{propertyKey}}\" needs to be an array",

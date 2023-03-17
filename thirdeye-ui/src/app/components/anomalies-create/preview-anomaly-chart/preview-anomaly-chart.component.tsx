@@ -35,7 +35,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
         fetchAlertEvaluation,
         evaluation,
         onRangeSelection,
-        children,
+        anomalyDateRangeControl,
     }) => {
         const { t } = useTranslation();
 
@@ -56,105 +56,91 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
         }, [evaluation, editableAnomaly?.alert.id]);
 
         return (
-            <>
-                <EmptyStateSwitch
-                    emptyState={
-                        <>
-                            <SkeletonV1
-                                animation="pulse"
-                                height={80}
-                                variant="rect"
-                            />
-                            <Box py={2} />
-                            <SkeletonV1
-                                animation="pulse"
-                                height={400}
-                                variant="rect"
-                            />
-                        </>
-                    }
-                    isEmpty={isLoading}
-                >
-                    <AlertEvaluationTimeSeriesCard
-                        disableNavigation
-                        alertEvaluationTimeSeriesHeight={500}
-                        anomalies={[editableAnomaly as Anomaly]}
-                        detectionEvaluation={detectionEvaluation}
-                        header={
-                            <CardContent>
-                                <Grid container justifyContent="space-between">
-                                    <Grid
-                                        item
-                                        lg="auto"
-                                        md="auto"
-                                        sm={4}
-                                        xs={12}
+            <EmptyStateSwitch
+                emptyState={
+                    <>
+                        <SkeletonV1
+                            animation="pulse"
+                            height={80}
+                            variant="rect"
+                        />
+                        <Box py={2} />
+                        <SkeletonV1
+                            animation="pulse"
+                            height={400}
+                            variant="rect"
+                        />
+                    </>
+                }
+                isEmpty={isLoading}
+            >
+                <AlertEvaluationTimeSeriesCard
+                    disableNavigation
+                    alertEvaluationTimeSeriesHeight={500}
+                    anomalies={[editableAnomaly as Anomaly]}
+                    detectionEvaluation={detectionEvaluation}
+                    header={
+                        <CardContent>
+                            <Grid container justifyContent="space-between">
+                                <Grid item lg="auto" md="auto" sm={4} xs={12}>
+                                    <Typography variant="h5">
+                                        {t("label.preview-entity", {
+                                            entity: t("label.anomaly"),
+                                        })}
+                                    </Typography>
+                                    <Typography
+                                        color="textSecondary"
+                                        variant="body2"
                                     >
-                                        <Typography variant="h5">
-                                            {t("label.preview-entity", {
-                                                entity: t("label.anomaly"),
-                                            })}
-                                        </Typography>
-                                        <Typography
-                                            color="textSecondary"
-                                            variant="body2"
-                                        >
-                                            {t(
-                                                "message.visualize-how-the-anomaly-will-look-once-reported"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-
-                                    <Grid
-                                        item
-                                        lg="auto"
-                                        md="auto"
-                                        sm={8}
-                                        xs={12}
-                                    >
-                                        <TimeRangeButtonWithContext
-                                            hideQuickExtend
-                                            timezone={timezone}
-                                            onTimeRangeChange={(start, end) =>
-                                                // To avoid latency related to updating query params
-                                                fetchAlertEvaluation({
-                                                    start,
-                                                    end,
-                                                })
-                                            }
-                                        />
-                                        <Typography
-                                            align="right"
-                                            color="textSecondary"
-                                            display="block"
-                                            variant="body2"
-                                        >
-                                            {t(
-                                                "message.set-the-date-range-of-the-alert-chart-below"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <AnomalyCard
-                                            timezone={timezone}
-                                            uiAnomaly={uiAnomaly}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        {children}
-                                    </Grid>
+                                        {t(
+                                            "message.visualize-how-the-anomaly-will-look-once-reported"
+                                        )}
+                                    </Typography>
                                 </Grid>
-                            </CardContent>
-                        }
-                        rootCardProps={{ variant: "elevation" }}
-                        timeSeriesProps={{
-                            chartEvents: {
-                                onRangeSelection,
-                            },
-                        }}
-                        timezone={timezone}
-                    />
-                </EmptyStateSwitch>
-            </>
+
+                                <Grid item lg="auto" md="auto" sm={8} xs={12}>
+                                    <TimeRangeButtonWithContext
+                                        hideQuickExtend
+                                        timezone={timezone}
+                                        onTimeRangeChange={(start, end) =>
+                                            // To avoid latency related to updating query params
+                                            fetchAlertEvaluation({
+                                                start,
+                                                end,
+                                            })
+                                        }
+                                    />
+                                    <Typography
+                                        align="right"
+                                        color="textSecondary"
+                                        display="block"
+                                        variant="body2"
+                                    >
+                                        {t(
+                                            "message.set-the-date-range-of-the-alert-chart-below"
+                                        )}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <AnomalyCard
+                                        timezone={timezone}
+                                        uiAnomaly={uiAnomaly}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {anomalyDateRangeControl}
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    }
+                    rootCardProps={{ variant: "elevation" }}
+                    timeSeriesProps={{
+                        chartEvents: {
+                            onRangeSelection,
+                        },
+                    }}
+                    timezone={timezone}
+                />
+            </EmptyStateSwitch>
         );
     };

@@ -19,8 +19,8 @@ public class DaoFilter {
 
   private Class<? extends AbstractDTO> beanClass;
   private Predicate predicate;
-  private Integer limit;
-  private Integer offset;
+  private Long limit;
+  private Long offset;
   private String orderByKey;
   private boolean isDesc = false;
 
@@ -33,20 +33,20 @@ public class DaoFilter {
     return this;
   }
 
-  public Integer getLimit() {
+  public Long getLimit() {
     return limit;
   }
 
-  public DaoFilter setLimit(final Integer limit) {
+  public DaoFilter setLimit(final Long limit) {
     this.limit = limit;
     return this;
   }
 
-  public Integer getOffset() {
+  public Long getOffset() {
     return offset;
   }
 
-  public DaoFilter setOffset(final Integer offset) {
+  public DaoFilter setOffset(final Long offset) {
     this.offset = offset;
     return this;
   }

@@ -80,7 +80,7 @@ public class DaoFilterBuilder {
   public DaoFilter buildFilter(final MultivaluedMap<String, String> queryParameters) {
     final DaoFilter daoFilter = new DaoFilter();
     optional(queryParameters.getFirst("limit"))
-        .map(Integer::valueOf)
+        .map(Long::valueOf)
         .ifPresent(daoFilter::setLimit);
 
     return daoFilter.setPredicate(buildPredicate(queryParameters));

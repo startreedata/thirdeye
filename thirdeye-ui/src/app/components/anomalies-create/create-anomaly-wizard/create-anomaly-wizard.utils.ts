@@ -131,11 +131,6 @@ export const createEditableAnomaly = ({
         ...(severity && { severity }),
         ...(type && { type }),
 
-        // TODO: Needed?
-        score: 0.0,
-        weight: 0.0,
-        impactToGlobal: 0.0,
-
         avgBaselineVal,
         avgCurrentVal,
     };
@@ -169,7 +164,6 @@ export const getAnomaliesAvgValues = ({
         );
 
         if (anomalyStartIndex) {
-            // TODO: Should the avg of all the values in the range be used?
             return {
                 avgBaselineVal: current?.[anomalyStartIndex] || 0,
                 avgCurrentVal: expected?.[anomalyStartIndex] || 0,

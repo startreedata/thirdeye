@@ -373,8 +373,8 @@ public class GenericPojoDao {
       //find the matching ids
       final List<? extends AbstractIndexEntity> indexEntities = transactionService.executeTransaction(
           (connection) -> databaseService.findAll(daoFilter.getPredicate(),
-              null,
-              null,
+              daoFilter.getLimit(),
+              daoFilter.getOffset(),
               indexClass,
               connection), emptyList());
       final List<Long> idsToReturn = new ArrayList<>();

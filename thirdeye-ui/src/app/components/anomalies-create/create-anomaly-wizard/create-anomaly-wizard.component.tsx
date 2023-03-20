@@ -376,7 +376,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         }, [evaluation]);
 
         /** @function Ensure that the date range values are always valid and make sense
-         *  @return *boolean* indicating if the attempted correction was successful or not
+         *  @return {boolean} indicating if the attempted correction was successful or not
          */
         const setValidAnomalyDateRange = ([startTimeArg, endTimeArg]: [
             number,
@@ -437,7 +437,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             start = timestamp.find((t) => t >= startTimeArg) || start;
             end = timestamp.find((t) => t >= endTimeArg) || end;
 
-            // The anomaly must have a non-zero date range
+            // The anomaly must have a non-zero date range length
             if (start === end) {
                 // If the start AND end lie on the last point,
                 // then move the end ahead by the alert granularity

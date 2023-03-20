@@ -21,7 +21,6 @@ import { useTranslation } from "react-i18next";
 import { createTimeRangeDuration } from "../../../utils/time-range/time-range.util";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { TimeRangeButton } from "../../time-range/time-range-button/time-range-button.component";
-import { TimeRangeButtonProps } from "../../time-range/time-range-button/time-range-button.interfaces";
 import { TimeRange } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { CreateAnomaliesDateRangePickerProps } from "./create-anomalies-date-range-picker.interfaces";
 import { DragOptions } from "./create-anomalies-date-range-picker.utils";
@@ -29,31 +28,18 @@ import { DragOptions } from "./create-anomalies-date-range-picker.utils";
 export const CreateAnomaliesDateRangePicker: FunctionComponent<CreateAnomaliesDateRangePickerProps> =
     ({
         timezone,
-        findClosestAppropriateTimestamp,
-        handleSetField,
+        setValidAnomalyDateRange,
         captureDateRangeFromChart,
         setCaptureDateRangeFromChart,
-        formFields,
+        dateRange,
     }) => {
         const { t } = useTranslation();
 
         const timeRangeDuration = createTimeRangeDuration(
             TimeRange.CUSTOM,
-            formFields.dateRange[0],
-            formFields.dateRange[1]
+            dateRange[0],
+            dateRange[1]
         );
-
-        const handleUpdateAnomalyTimeRange: TimeRangeButtonProps["onChange"] =
-            ({ startTime, endTime }) => {
-                const start =
-                    findClosestAppropriateTimestamp(startTime) || startTime;
-
-                const end =
-                    findClosestAppropriateTimestamp(Math.max(start, endTime)) ||
-                    Math.max(start, endTime); // Ensure that the user does not set the end time before the start time
-
-                handleSetField("dateRange", [start, end]);
-            };
 
         const dragState: keyof typeof DragOptions = captureDateRangeFromChart
             ? DragOptions.SELECT
@@ -69,7 +55,12 @@ export const CreateAnomaliesDateRangePicker: FunctionComponent<CreateAnomaliesDa
                                 hideQuickExtend
                                 timeRangeDuration={timeRangeDuration}
                                 timezone={timezone}
-                                onChange={handleUpdateAnomalyTimeRange}
+                                onChange={({ startTime, endTime }) => {
+                                    setValidAnomalyDateRange([
+                                        startTime,
+                                        endTime,
+                                    ]);
+                                }}
                             />
                         </Box>
                     }
@@ -77,11 +68,6 @@ export const CreateAnomaliesDateRangePicker: FunctionComponent<CreateAnomaliesDa
                         <>
                             <Typography variant="body2">
                                 {t("label.date-range")}
-                            </Typography>
-                            <Typography color="textSecondary" variant="caption">
-                                {t(
-                                    "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
-                                )}
                             </Typography>
                         </>
                     }

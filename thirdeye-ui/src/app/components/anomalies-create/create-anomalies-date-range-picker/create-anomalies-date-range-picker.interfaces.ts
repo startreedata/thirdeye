@@ -13,16 +13,12 @@
  * the License.
  */
 
-import {
-    CreateAnomalyEditableFormFields,
-    HandleSetFields,
-} from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
+import { CreateAnomalyEditableFormFields } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
 
 export interface CreateAnomaliesDateRangePickerProps {
-    formFields: CreateAnomalyEditableFormFields;
-    handleSetField: HandleSetFields;
+    dateRange: CreateAnomalyEditableFormFields["dateRange"];
+    setValidAnomalyDateRange: ([s, e]: [number, number]) => void;
     timezone: string;
     captureDateRangeFromChart: boolean;
     setCaptureDateRangeFromChart: (v: boolean) => void;
-    findClosestAppropriateTimestamp: (v: number) => number | null;
 }

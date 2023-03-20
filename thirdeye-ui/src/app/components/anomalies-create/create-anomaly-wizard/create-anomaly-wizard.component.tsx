@@ -15,7 +15,7 @@
 
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -354,10 +354,10 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }
         };
 
-        const findClosestAppropriateTimestamp = (
-            thresholdValue: number
-        ): number | null => {
-            // This function is only useful if evaluation is defined
+        const chartDataBounds = useMemo<{
+            start: number;
+            end: number;
+        } | null>(() => {
             if (!evaluation) {
                 return null;
             }
@@ -365,17 +365,103 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             const detectionEvaluation =
                 extractDetectionEvaluation(evaluation)[0];
             const { timestamp } = detectionEvaluation.data;
-
-            const nextClosestTimestamp = timestamp.find(
-                (v) => v >= thresholdValue
-            );
-
-            // If the list does not have any value greater than thresholdValue, return null
-            if (!nextClosestTimestamp) {
+            if (timestamp.length === 0) {
                 return null;
             }
 
-            return nextClosestTimestamp;
+            return {
+                start: timestamp[0],
+                end: timestamp[timestamp.length - 1],
+            };
+        }, [evaluation]);
+
+        /** @function Ensure that the date range values are always valid and make sense
+         *  @return *boolean* indicating if the attempted correction was successful or not
+         */
+        const setValidAnomalyDateRange = ([startTimeArg, endTimeArg]: [
+            number,
+            number
+        ]): boolean => {
+            if (!evaluation || !chartDataBounds) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.unable-to-parse-date-range-from-the-chart-please-try-again"
+                    )
+                );
+
+                return false;
+            }
+
+            const detectionEvaluation =
+                extractDetectionEvaluation(evaluation)[0];
+            const { timestamp } = detectionEvaluation.data;
+
+            if (timestamp.length === 0) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.unable-to-parse-date-range-from-the-chart-please-try-again"
+                    )
+                );
+
+                return false;
+            }
+
+            let start = startTimeArg;
+            let end = endTimeArg;
+
+            // Something went wrong in invoking this function since this selection is clearly wrong
+            if (end <= start) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.unable-to-parse-date-range-from-the-chart-please-try-again"
+                    )
+                );
+
+                return false;
+            }
+
+            // Respect the data's Lower Bound
+            if (start < chartDataBounds.start) {
+                start = chartDataBounds.start;
+            }
+
+            // Respect the data's Upper Bound
+            if (end > chartDataBounds.end) {
+                end = chartDataBounds.end;
+            }
+
+            // Try the closest valid data-point, or fallback to the old value
+            start = timestamp.find((t) => t >= startTimeArg) || start;
+            end = timestamp.find((t) => t >= endTimeArg) || end;
+
+            // The anomaly must have a non-zero date range
+            if (start === end) {
+                // If the start AND end lie on the last point,
+                // then move the end ahead by the alert granularity
+                if (end === chartDataBounds.end) {
+                    const alertGranularityString =
+                        alertInsight?.templateWithProperties.metadata
+                            .granularity;
+                    if (alertGranularityString) {
+                        const alertGranularity = Duration.fromISO(
+                            alertGranularityString
+                        ).toMillis();
+
+                        end = end + alertGranularity;
+                    }
+                } else {
+                    // If the start AND end don't lie on the last point,
+                    // just move the end ahead by one point
+                    end = timestamp[timestamp.findIndex((v) => v === end) + 1];
+                }
+            }
+
+            handleSetField("dateRange", [start, end]);
+
+            return true;
         };
 
         const handleRangeSelection = (
@@ -388,26 +474,10 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
 
             // Disable the drag-select
             if (zoomDomain?.x0 && zoomDomain?.x1 && evaluation) {
-                const detectionEvaluation =
-                    extractDetectionEvaluation(evaluation)[0];
-                const { timestamp } = detectionEvaluation.data;
-
-                const anomalyStartTimestamp = timestamp.find(
-                    (t) => t >= zoomDomain.x0
-                );
-                const anomalyEndTimestamp = timestamp.find(
-                    (t) => t >= zoomDomain.x1
-                );
-
-                if (anomalyStartTimestamp && anomalyEndTimestamp) {
-                    handleSetField("dateRange", [
-                        anomalyStartTimestamp,
-                        anomalyEndTimestamp,
-                    ]);
-
-                    // Cancel the zoom
-                    return false;
-                }
+                return !setValidAnomalyDateRange([
+                    zoomDomain.x0,
+                    zoomDomain.x1,
+                ]);
             }
 
             notify(
@@ -597,15 +667,14 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                         captureDateRangeFromChart={
                                                             captureDateRangeFromChart
                                                         }
-                                                        findClosestAppropriateTimestamp={
-                                                            findClosestAppropriateTimestamp
-                                                        }
-                                                        formFields={formFields}
-                                                        handleSetField={
-                                                            handleSetField
+                                                        dateRange={
+                                                            formFields.dateRange
                                                         }
                                                         setCaptureDateRangeFromChart={
                                                             setCaptureDateRangeFromChart
+                                                        }
+                                                        setValidAnomalyDateRange={
+                                                            setValidAnomalyDateRange
                                                         }
                                                         timezone={
                                                             timezone as string

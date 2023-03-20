@@ -44,6 +44,7 @@ import {
     generateDateRangeDaysFromNow,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
+import { determineGranularity } from "../../../utils/visualization/visualization.util";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { ZoomDomain } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
@@ -442,16 +443,23 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 // If the start AND end lie on the last point,
                 // then move the end ahead by the alert granularity
                 if (end === chartDataBounds.end) {
+                    let alertGranularity = 0;
+
                     const alertGranularityString =
                         alertInsight?.templateWithProperties.metadata
                             .granularity;
+
+                    // Try to get the alert time-series granularity from the metadata
                     if (alertGranularityString) {
-                        const alertGranularity = Duration.fromISO(
+                        alertGranularity = Duration.fromISO(
                             alertGranularityString
                         ).toMillis();
-
-                        end = end + alertGranularity;
+                    } else {
+                        // If not found, estimate from the raw timestamp data
+                        alertGranularity = determineGranularity(timestamp);
                     }
+
+                    end = end + alertGranularity;
                 } else {
                     // If the start AND end don't lie on the last point,
                     // just move the end ahead by one point

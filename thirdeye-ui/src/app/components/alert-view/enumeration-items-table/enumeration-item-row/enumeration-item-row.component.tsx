@@ -21,20 +21,33 @@ import {
     Grid,
     Typography,
 } from "@material-ui/core";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import {
+    Link as RouterLink,
+    useNavigate,
+    useSearchParams,
+} from "react-router-dom";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
-import { getAlertsAlertAnomaliesPath } from "../../../../utils/routes/routes.util";
+import {
+    createPathWithRecognizedQueryString,
+    getAlertsAlertAnomaliesPath,
+    getAnomaliesCreatePath,
+} from "../../../../utils/routes/routes.util";
 import { AlertAccuracyColored } from "../../../alert-accuracy-colored/alert-accuracy-colored.component";
+import { AnomalyWizardQueryParams } from "../../../anomalies-create/create-anomaly-wizard/create-anomaly-wizard.utils";
 import { Pluralize } from "../../../pluralize/pluralize.component";
 import {
     CHART_SIZE_OPTIONS,
     generateChartOptionsForAlert,
     SMALL_CHART_SIZE,
 } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
+import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
+import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
 import { useEnumerationItemRowStyles } from "./enumeration-item-row.style";
 
@@ -48,7 +61,9 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     timezone,
 }) => {
     const navigate = useNavigate();
+
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
     const [expandedChartHeight, setExpandedChartHeight] =
         useState(SMALL_CHART_SIZE);
     const nameForDetectionEvaluation =
@@ -62,6 +77,37 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         setIsExpanded(expanded.includes(nameForDetectionEvaluation));
     }, [expanded]);
 
+    const handleCreateAlertAnomaly = (): void => {
+        // Use the selected start and end time for the anomaly
+
+        const alertChartStartTime = Number(
+            searchParams.get(TimeRangeQueryStringKey.START_TIME)
+        );
+        const alertChartEndTime = Number(
+            searchParams.get(TimeRangeQueryStringKey.END_TIME)
+        );
+
+        const redirectSearchParams = new URLSearchParams([
+            [TimeRangeQueryStringKey.START_TIME, `${alertChartStartTime}`],
+            [TimeRangeQueryStringKey.END_TIME, `${alertChartEndTime}`],
+        ] as string[][]);
+
+        // Add the enumeration item ID as a query param if present
+        if (detectionEvaluation.enumerationId) {
+            redirectSearchParams.set(
+                AnomalyWizardQueryParams.EnumerationItemId,
+                `${detectionEvaluation.enumerationId}`
+            );
+        }
+
+        // Go to the report anomaly page with new params
+        const path = createPathWithRecognizedQueryString(
+            getAnomaliesCreatePath(alertId),
+            redirectSearchParams
+        );
+        navigate(path);
+    };
+
     const tsData = generateChartOptionsForAlert(
         detectionEvaluation,
         anomalies,
@@ -69,7 +115,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         navigate,
         timezone
     );
-    const tsDataForExpanded = {
+    const tsDataForExpanded: TimeSeriesChartProps = {
         ...tsData,
     };
     tsData.brush = false;
@@ -101,7 +147,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                         <Grid
                             item
                             {...(isExpanded
-                                ? { sm: 6, xs: 12 }
+                                ? { sm: 4, xs: 12 }
                                 : { sm: 2, xs: 12 })}
                         >
                             <Typography
@@ -127,6 +173,19 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                                 }
                             />
                         </Grid>
+                        {isExpanded && (
+                            <Grid item sm={2} xs={12}>
+                                <Button
+                                    color="primary"
+                                    variant="text"
+                                    onClick={() => {
+                                        handleCreateAlertAnomaly();
+                                    }}
+                                >
+                                    {t("label.report-missed-anomaly")}
+                                </Button>
+                            </Grid>
+                        )}
                         <Grid item sm={2} xs={12}>
                             <Button
                                 color="primary"
@@ -138,12 +197,28 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                                     )
                                 }
                             >
-                                {!isExpanded && (
-                                    <span>{t("label.view-details")}</span>
-                                )}
-                                {isExpanded && (
-                                    <span>{t("label.hide-details")}</span>
-                                )}
+                                <Box
+                                    alignItems="center"
+                                    component="span"
+                                    display="flex"
+                                >
+                                    {!isExpanded && (
+                                        <>
+                                            <span>
+                                                {t("label.view-details")}
+                                            </span>
+                                            <ExpandMoreIcon />
+                                        </>
+                                    )}
+                                    {isExpanded && (
+                                        <>
+                                            <span>
+                                                {t("label.hide-details")}
+                                            </span>
+                                            <ExpandLessIcon />
+                                        </>
+                                    )}
+                                </Box>
                             </Button>
                         </Grid>
                         <Grid item sm={2} xs={12}>

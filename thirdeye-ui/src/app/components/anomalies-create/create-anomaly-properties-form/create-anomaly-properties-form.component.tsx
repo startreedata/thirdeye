@@ -21,15 +21,10 @@ import { useTranslation } from "react-i18next";
 import { LinkV1, SkeletonV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../platform/rest/actions.interfaces";
 import { Alert } from "../../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
 import { getAlertsAlertViewPath } from "../../../utils/routes/routes.util";
-import { createTimeRangeDuration } from "../../../utils/time-range/time-range.util";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { TimeRangeButton } from "../../time-range/time-range-button/time-range-button.component";
-import { TimeRange } from "../../time-range/time-range-provider/time-range-provider.interfaces";
-import { CreateAnomalyFormKeys } from "../create-anomaly-wizard/create-anomaly-wizard.interfaces";
 import { useCreateAnomalyWizardStyles } from "../create-anomaly-wizard/create-anomaly-wizard.styles";
 import { getEnumerationItemsConfigFromAlert } from "../create-anomaly-wizard/create-anomaly-wizard.utils";
 import { CreateAnomalyPropertiesFormProps } from "./create-anomaly-properties-form.interfaces";
@@ -41,7 +36,6 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
         handleSetField,
         enumerationItemsForAlert,
         enumerationItemsStatus,
-        timezone,
         selectedAlertDetails,
     }) => {
         const { t } = useTranslation();
@@ -50,18 +44,6 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
         const showEnumerationItemsField = !!(
             formFields.alert &&
             getEnumerationItemsConfigFromAlert(formFields.alert)
-        );
-
-        const formLabels: Record<CreateAnomalyFormKeys, string> = {
-            alert: t("label.alert"),
-            dateRange: t("label.date-range"),
-            enumerationItem: t("label.dimension"),
-        };
-
-        const timeRangeDuration = createTimeRangeDuration(
-            TimeRange.CUSTOM,
-            formFields.dateRange[0],
-            formFields.dateRange[1]
         );
 
         const renderAlertOption = useCallback(
@@ -107,7 +89,12 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                 <InputSection
                     inputComponent={
                         <Autocomplete
-                            disableClearable
+                            // This is to avoid having to switch this input from
+                            // uncontrollable to controllable (react frowns at that)
+                            // Issue link:
+                            // https://github.com/mui/material-ui
+                            // /issues/29046#issuecomment-1379770362
+                            disableClearable={!!formFields.alert} // Only disable clearing once the value is loaded
                             getOptionLabel={(option) => option.name}
                             options={alerts}
                             renderInput={(params) => (
@@ -181,7 +168,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                 />
                             )}
                             renderOption={renderAlertOption}
-                            value={formFields.alert || undefined}
+                            value={formFields.alert}
                             onChange={(_, selectedValue) => {
                                 selectedValue &&
                                     handleSetField("alert", selectedValue);
@@ -191,7 +178,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                     labelComponent={
                         <>
                             <Typography variant="body2">
-                                {formLabels.alert}
+                                {t("label.alert")}
                             </Typography>
                             {!!formFields.alert && (
                                 <LinkV1
@@ -222,7 +209,7 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     width="100%"
                                 />
                             }
-                            label={formLabels.enumerationItem}
+                            label={t("label.dimension")}
                         />
                     }
                 >
@@ -233,7 +220,10 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                     ) && (
                         <InputSection
                             inputComponent={
-                                <Autocomplete<EnumerationItem>
+                                <Autocomplete
+                                    disableClearable={
+                                        !!formFields.enumerationItem
+                                    }
                                     getOptionLabel={(option) =>
                                         generateNameForEnumerationItem(option)
                                     }
@@ -271,45 +261,10 @@ export const CreateAnomalyPropertiesForm: FunctionComponent<CreateAnomalyPropert
                                     }}
                                 />
                             }
-                            label={formLabels.enumerationItem}
+                            label={t("label.dimension")}
                         />
                     )}
                 </LoadingErrorStateSwitch>
-
-                {/* Only show the datetime picker when the timezone prop is passed, 
-                to have the timezone shown be relevant to the selected alert  */}
-                {!!timezone && (
-                    <InputSection
-                        inputComponent={
-                            <TimeRangeButton
-                                hideQuickExtend
-                                timeRangeDuration={timeRangeDuration}
-                                timezone={timezone}
-                                onChange={({ startTime, endTime }) =>
-                                    handleSetField("dateRange", [
-                                        startTime,
-                                        endTime,
-                                    ])
-                                }
-                            />
-                        }
-                        labelComponent={
-                            <>
-                                <Typography variant="body2">
-                                    {formLabels.dateRange}
-                                </Typography>
-                                <Typography
-                                    color="textSecondary"
-                                    variant="caption"
-                                >
-                                    {t(
-                                        "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
-                                    )}
-                                </Typography>
-                            </>
-                        }
-                    />
-                )}
             </>
         );
     };

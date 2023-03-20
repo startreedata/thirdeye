@@ -135,10 +135,6 @@ const editableAnomaly1 = {
         },
     },
 
-    score: 0.0,
-    weight: 0.0,
-    impactToGlobal: 0.0,
-
     avgBaselineVal: 0,
     avgCurrentVal: 0,
 } as EditableAnomaly;

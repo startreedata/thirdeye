@@ -19,7 +19,7 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { CreateAnomalyWizard } from "../../components/anomalies-create/create-anomaly-wizard/create-anomaly-wizard.component";
-import { anomaliesBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { anomalyCreateBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
@@ -150,7 +150,7 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
         <PageV1>
             <PageHeader {...pageHeaderProps} />
             <HelpDrawerV1
-                cards={anomaliesBasicHelpCards}
+                cards={anomalyCreateBasicHelpCards}
                 isOpen={isHelpPanelOpen}
                 title={`${t("label.need-help")}?`}
                 onClose={() => setIsHelpPanelOpen(false)}

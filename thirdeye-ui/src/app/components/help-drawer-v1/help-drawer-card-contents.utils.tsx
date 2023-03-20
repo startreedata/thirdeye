@@ -175,7 +175,7 @@ export const anomalyCreateBasicHelpCards: HelpDrawerV1Card[] = [
                         allowFullScreen
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         frameBorder="0"
-                        src={i18next.t("url.report-missed-anomaly-video-link")}
+                        src={i18next.t("url.report-missed-anomaly-video-embed")}
                     />
                 </IframeVideoPlayerContainer>
                 <LinkButtonV1

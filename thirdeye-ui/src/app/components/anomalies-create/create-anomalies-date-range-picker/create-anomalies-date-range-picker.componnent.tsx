@@ -50,7 +50,7 @@ export const CreateAnomaliesDateRangePicker: FunctionComponent<CreateAnomaliesDa
                 <InputSection
                     fullWidth
                     inputComponent={
-                        <Box display="flex">
+                        <Box display="flex" flexDirection="column" gridGap={4}>
                             <TimeRangeButton
                                 hideQuickExtend
                                 timeRangeDuration={timeRangeDuration}
@@ -62,26 +62,20 @@ export const CreateAnomaliesDateRangePicker: FunctionComponent<CreateAnomaliesDa
                                     ]);
                                 }}
                             />
+                            <Typography color="textSecondary" variant="caption">
+                                {t(
+                                    "message.select-the-start-and-end-date-time-range-for-the-anomalous-behavior"
+                                )}
+                            </Typography>
                         </Box>
                     }
-                    labelComponent={
-                        <>
-                            <Typography variant="body2">
-                                {t("label.date-range")}
-                            </Typography>
-                        </>
-                    }
+                    label={t("label.date-range")}
                 />
                 <br />
                 <InputSection
                     fullWidth
                     inputComponent={
-                        <Box
-                            alignItems="center"
-                            display="flex"
-                            gridGap={2}
-                            ml={2}
-                        >
+                        <Box display="flex" flexDirection="column" gridGap={4}>
                             <ToggleButtonGroup
                                 exclusive
                                 value={dragState}
@@ -136,13 +130,6 @@ export const CreateAnomaliesDateRangePicker: FunctionComponent<CreateAnomaliesDa
                                     </Typography>
                                 </ToggleButton>
                             </ToggleButtonGroup>
-                        </Box>
-                    }
-                    labelComponent={
-                        <>
-                            <Typography variant="body2">
-                                {t("message.mouse-drag-behavior-on-chart")}
-                            </Typography>
                             <Typography color="textSecondary" variant="caption">
                                 {captureDateRangeFromChart
                                     ? t(
@@ -150,8 +137,9 @@ export const CreateAnomaliesDateRangePicker: FunctionComponent<CreateAnomaliesDa
                                       )
                                     : t("message.drag-on-chart-to-zoom")}
                             </Typography>
-                        </>
+                        </Box>
                     }
+                    label={t("message.mouse-drag-behavior")}
                 />
             </>
         );

@@ -80,7 +80,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         frameBorder="0"
                                         src={t(
-                                            "url.startree-te-demo-video-link"
+                                            "url.startree-te-demo-video-embed"
                                         )}
                                     />
                                 </IframeVideoPlayerContainer>

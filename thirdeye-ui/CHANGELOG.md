@@ -1,3 +1,16 @@
+## [2.13.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.12.0...thirdeye-ui-2.13.0) (2023-03-20)
+
+
+### Features
+
+* [TE-1386](https://cortexdata.atlassian.net/browse/TE-1386) updated sidebar logos ([3d194460e](https://github.com/startreedata/thirdeye/commit/3d194460e662cc7ac0d88d1f9a9d381efe2693cb))
+* [TE-1388](https://cortexdata.atlassian.net/browse/TE-1388) enabling drag select to assign daterange to anomalies in create anomaly page ([a1df2f101](https://github.com/startreedata/thirdeye/commit/a1df2f1014f9aed32dbe8440132d330df1853439))
+
+
+### Bug Fixes
+
+* [TE-1398](https://cortexdata.atlassian.net/browse/TE-1398) fixed embed video link in on welcome page ([c515e867a](https://github.com/startreedata/thirdeye/commit/c515e867a9d8eb6608cdb56329a4c25e87d967c7))
+
 ## [2.12.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.11.0...thirdeye-ui-2.12.0) (2023-03-13)
 
 

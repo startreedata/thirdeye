@@ -119,6 +119,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       api.setCron(CRON_EVERY_HOUR);
     }
 
+    // TODO spyne: Slight bug here. Alert is saved twice! once here and once in CrudResource
     return alertCreater.create(api
         .setOwner(new UserApi().setPrincipal(principal.getName()))
     );
@@ -152,6 +153,18 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     if (updated.getCron() == null) {
       updated.setCron(CRON_EVERY_HOUR);
     }
+  }
+
+  @Override
+  protected void postUpdate(final AlertDTO dto) {
+    /*
+     * Running the detection task after updating an alert ensures that enumeration items if
+     * updated are reflected in the dtos as well. Enumeration Items are updated after executing
+     * the Enumerator Operator node.
+     */
+    alertCreater.createDetectionTask(dto.getId(),
+        dto.getLastTimestamp(),
+        System.currentTimeMillis());
   }
 
   @Override
@@ -200,7 +213,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     ensureExists(startTime, "start");
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
 
-    alertCreater.createOnboardingTask(id, startTime, safeEndTime(endTime));
+    alertCreater.createDetectionTask(id, startTime, safeEndTime(endTime));
     return Response.ok().build();
   }
 
@@ -322,7 +335,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     predicates.add(Predicate.EQ("detectionConfigId", id));
 
     // optional filters
-    optional(enumerationId).ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
+    optional(enumerationId).ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId",
+        enumerationId)));
     optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
     optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 

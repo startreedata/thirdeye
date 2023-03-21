@@ -304,8 +304,13 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
     return list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
+        .peek(this::postUpdate)
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
+  }
+
+  protected void postUpdate(final DtoT dto) {
+    // default is a no-op
   }
 
   @DELETE

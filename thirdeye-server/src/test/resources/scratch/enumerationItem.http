@@ -1,0 +1,11 @@
+# curl -X GET "http://localhost:8080/api/enumeration-items" -H "accept: application/json"
+GET http://localhost:8080/api/enumeration-items
+accept: application/json
+
+###
+
+GET http://localhost:8080/api/enumeration-items?alert.id=247243
+accept: application/json
+
+###
+

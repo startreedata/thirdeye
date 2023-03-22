@@ -23,7 +23,10 @@ import type {
     EditableAlert,
 } from "../dto/alert.interfaces";
 import { EnumerationItemParams } from "../dto/detection.interfaces";
-import { GetEvaluationRequestPayload } from "./alerts.interfaces";
+import {
+    GetAlertStatsParams,
+    GetEvaluationRequestPayload,
+} from "./alerts.interfaces";
 
 const BASE_URL_ALERTS = "/api/alerts";
 
@@ -37,11 +40,7 @@ export const getAlertStats = async ({
     alertId,
     startTime,
     endTime,
-}: {
-    alertId: number;
-    startTime?: number;
-    endTime?: number;
-}): Promise<AlertStats> => {
+}: GetAlertStatsParams): Promise<AlertStats> => {
     const queryParams = new URLSearchParams([]);
 
     if (startTime) {

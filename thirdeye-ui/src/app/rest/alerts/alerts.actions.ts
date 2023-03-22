@@ -17,6 +17,7 @@ import {
     Alert,
     AlertEvaluation,
     AlertInsight,
+    AlertStats,
     EditableAlert,
 } from "../dto/alert.interfaces";
 import { EnumerationItem } from "../dto/enumeration-item.interfaces";
@@ -24,6 +25,8 @@ import {
     GetAlert,
     GetAlertInsight,
     GetAlerts,
+    GetAlertStats,
+    GetAlertStatsParams,
     GetEvaluation,
     ResetAlert,
     UseGetEvaluationParams,
@@ -32,6 +35,7 @@ import {
     getAlert as getAlertREST,
     getAlertEvaluation,
     getAlertInsight as getAlertInsightREST,
+    getAlertStats as getAlertStatsREST,
     getAllAlerts,
     resetAlert as resetAlertREST,
 } from "./alerts.rest";
@@ -96,4 +100,17 @@ export const useResetAlert = (): ResetAlert => {
     };
 
     return { alert: data, resetAlert, status, errorMessages };
+};
+
+export const useGetAlertStats = (): GetAlertStats => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<AlertStats>(getAlertStatsREST);
+
+    const getAlertStats = (
+        params: GetAlertStatsParams
+    ): Promise<AlertStats | undefined> => {
+        return makeRequest(params);
+    };
+
+    return { alertStats: data, getAlertStats, status, errorMessages };
 };

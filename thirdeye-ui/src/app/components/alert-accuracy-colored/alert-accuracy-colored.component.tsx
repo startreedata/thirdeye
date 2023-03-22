@@ -15,54 +15,138 @@
 
 import { Typography, useTheme } from "@material-ui/core";
 import { capitalize } from "lodash";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { SkeletonV1 } from "../../platform/components";
+import { useInView } from "react-intersection-observer";
+import { SkeletonV1, TooltipV1 } from "../../platform/components";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetAlertStats } from "../../rest/alerts/alerts.actions";
+import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { getAlertAccuracyData } from "../../utils/alerts/alerts.util";
+import { LoadingErrorStateSwitch } from "../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import type { AlertAccuracyColoredProps } from "./alert-accuracy-colored.interface";
 
 export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> =
-    ({
-        alertStats,
-        renderCustomLoading,
-        typographyProps,
-        renderCustomText,
-        defaultSkeletonProps,
-    }) => {
+    ({ alertId, typographyProps, label, defaultSkeletonProps, start, end }) => {
         const theme = useTheme();
         const { t } = useTranslation();
 
-        if (!alertStats) {
-            return (
-                renderCustomLoading || (
-                    <SkeletonV1 width={50} {...defaultSkeletonProps} />
-                )
-            );
+        const { alertStats, getAlertStats, status } = useGetAlertStats();
+
+        const { ref, inView } = useInView({
+            triggerOnce: true,
+            delay: 250,
+            threshold: 1,
+        });
+
+        useEffect(() => {
+            if (inView) {
+                getAlertStats({ alertId, startTime: start, endTime: end });
+            }
+        }, [inView]);
+
+        const { noAnomalyData, typographyColor, accuracyString } =
+            useMemo(() => {
+                if (alertStats) {
+                    const { accuracy, colorScheme, noAnomalyData } =
+                        getAlertAccuracyData(alertStats);
+
+                    const accuracyString = `${(100 * accuracy).toFixed(2)}%`;
+
+                    const color = theme.palette[colorScheme].main;
+
+                    return {
+                        noAnomalyData,
+                        typographyColor: !noAnomalyData ? { color } : undefined,
+                        accuracyString,
+                    };
+                }
+
+                return {
+                    noAnomalyData: undefined,
+                    typographyColor: undefined,
+                    accuracyString: undefined,
+                };
+            }, [alertStats]);
+
+        let displayValue: string | undefined = capitalize(
+            t("message.no-entity-data", {
+                entity: t("label.anomaly"),
+            })
+        );
+
+        if (!noAnomalyData) {
+            if (label) {
+                displayValue = `${label}: ${accuracyString}`;
+            } else {
+                displayValue = accuracyString;
+            }
         }
-
-        const { accuracy, colorScheme, noAnomalyData } =
-            getAlertAccuracyData(alertStats);
-
-        const accuracyString = `${t("label.accuracy")}: ${(
-            100 * accuracy
-        ).toFixed(2)}%`;
-        const color = theme.palette[colorScheme].main;
 
         return (
             <Typography
                 color="secondary"
-                style={{ ...(!noAnomalyData && { color }) }}
+                innerRef={ref}
+                style={typographyColor}
                 variant="body1"
                 {...typographyProps}
             >
-                {renderCustomText?.({ accuracy, noAnomalyData }) ||
-                    (noAnomalyData
-                        ? capitalize(
-                              t("message.no-entity-data", {
-                                  entity: t("label.anomaly"),
-                              })
-                          )
-                        : accuracyString)}
+                <LoadingErrorStateSwitch
+                    isError={false}
+                    isLoading={
+                        status === ActionStatus.Initial ||
+                        status === ActionStatus.Working
+                    }
+                    loadingState={
+                        <SkeletonV1 width={50} {...defaultSkeletonProps} />
+                    }
+                >
+                    <TooltipV1
+                        title={
+                            !!alertStats && (
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {t(
+                                                    "message.total-reported-anomalies"
+                                                )}
+                                            </td>
+                                            <td>{alertStats.totalCount}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                {t(
+                                                    "message.anomalies-with-feedback"
+                                                )}
+                                            </td>
+                                            <td>
+                                                {alertStats.countWithFeedback}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                {t(
+                                                    "message.misreported-anomalies"
+                                                )}
+                                            </td>
+                                            <td>
+                                                {
+                                                    alertStats.feedbackStats[
+                                                        AnomalyFeedbackType
+                                                            .NOT_ANOMALY
+                                                    ]
+                                                }
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            )
+                        }
+                    >
+                        <>{displayValue}</>
+                    </TooltipV1>
+                </LoadingErrorStateSwitch>
             </Typography>
         );
     };

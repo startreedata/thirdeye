@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { AlertStats } from "../../../../rest/dto/alert.interfaces";
 import type { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 import type { DetectionEvaluationForRender } from "../../enumeration-item-merger/enumeration-item-merger.interfaces";
 
@@ -22,6 +21,5 @@ export interface EnumerationItemRowProps {
     anomalies: Anomaly[];
     expanded: string[];
     onExpandChange: (isOpen: boolean, name: string) => void;
-    alertStats: AlertStats | null;
     timezone?: string;
 }

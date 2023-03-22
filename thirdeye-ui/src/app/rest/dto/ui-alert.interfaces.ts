@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { Alert, AlertStats } from "./alert.interfaces";
+import type { Alert } from "./alert.interfaces";
 
 export interface UiAlert {
     id: number;
     name: string;
     active: boolean;
     activeText: string;
-    accuracyStatistics?: AlertStats;
     userId: number;
     createdBy: string;
     detectionTypes: string[];

@@ -21,7 +21,6 @@ import {
     Grid,
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
-import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -64,11 +63,7 @@ import {
     updateAlert,
 } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
-import {
-    Alert,
-    AlertInEvaluation,
-    AlertStats,
-} from "../../rest/dto/alert.interfaces";
+import { Alert, AlertInEvaluation } from "../../rest/dto/alert.interfaces";
 import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
@@ -93,11 +88,6 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
 
-    // To be used for overall accuracy
-    const [overallAlertStats, setOverallAlertStats] =
-        useState<AlertStats | null>(null);
-    // To be used for accuracy filtered by startTime and endTime
-    const [alertStats, setAlertStats] = useState<AlertStats | null>(null);
     // Used for the scenario when user first creates an alert but no anomalies generated yet
     const [refreshAttempts, setRefreshAttempts] = useState(0);
     const [autoRefreshNotification, setAutoRefreshNotification] =
@@ -159,8 +149,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             alertId: Number(alertId),
             startTime,
             endTime,
-        }).then((alertStatsData) => {
-            setAlertStats(alertStatsData);
         });
     };
 
@@ -227,11 +215,6 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         getAlert(Number(alertId));
-        getAlertStats({
-            alertId: Number(alertId),
-        }).then((overallAlertStatsData) => {
-            setOverallAlertStats(overallAlertStatsData);
-        });
     }, [alertId]);
 
     useEffect(() => {
@@ -521,22 +504,12 @@ export const AlertsViewPage: FunctionComponent = () => {
                 }
                 subtitle={
                     <AlertAccuracyColored
-                        alertStats={overallAlertStats}
-                        renderCustomText={({ accuracy, noAnomalyData }) =>
-                            capitalize(
-                                noAnomalyData
-                                    ? t(
-                                          "message.no-children-present-for-this-parent",
-                                          {
-                                              children: t("label.anomalies"),
-                                              parent: t("label.alert"),
-                                          }
-                                      )
-                                    : `${t("label.overall-entity", {
-                                          entity: t("label.accuracy"),
-                                      })}: ${(100 * accuracy).toFixed(2)}%`
-                            )
-                        }
+                        alertId={Number(alertId) as number}
+                        end={endTime}
+                        label={t("label.overall-entity", {
+                            entity: t("label.accuracy"),
+                        })}
+                        start={startTime}
                     />
                 }
                 title={alert ? alert.name : ""}
@@ -617,9 +590,6 @@ export const AlertsViewPage: FunctionComponent = () => {
                                     return (
                                         <EnumerationItemsTable
                                             alertId={Number(alertId)}
-                                            alertsStats={{
-                                                [Number(alertId)]: alertStats,
-                                            }}
                                             detectionEvaluations={
                                                 detectionEvaluations
                                             }

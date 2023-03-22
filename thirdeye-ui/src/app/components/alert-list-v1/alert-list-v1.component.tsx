@@ -13,7 +13,6 @@
  * the License.
  */
 import { Button, Grid, Link } from "@material-ui/core";
-import { capitalize } from "lodash";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -21,7 +20,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
     DataGridColumnV1,
     DataGridScrollV1,
@@ -29,7 +28,6 @@ import {
     DataGridV1,
     PageContentsCardV1,
 } from "../../platform/components";
-import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
     getAlertsAlertPath,
@@ -78,7 +76,11 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         cellValue: Record<string, unknown>,
         data: UiAlert
     ): ReactElement => {
-        return <Link href={getAlertsAlertPath(data.id)}>{cellValue}</Link>;
+        return (
+            <Link component={RouterLink} to={getAlertsAlertPath(data.id)}>
+                {cellValue}
+            </Link>
+        );
     };
 
     const renderAlertAccuracy = (
@@ -86,61 +88,10 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         data: UiAlert
     ): ReactElement => (
         <AlertAccuracyColored
-            alertStats={data.accuracyStatistics ?? null}
-            renderCustomText={({ accuracy, noAnomalyData }) =>
-                noAnomalyData
-                    ? t("message.no-data")
-                    : `${(100 * accuracy).toFixed(2)}%`
-            }
+            alertId={data.id}
             typographyProps={{ variant: "body2" }}
         />
     );
-
-    const renderAlertAccuracyTooltip = (
-        _: Record<string, unknown>,
-        data: UiAlert
-    ): ReactElement | undefined => {
-        if (!data.accuracyStatistics) {
-            return (
-                <>
-                    {capitalize(
-                        t("message.fetching-entity", {
-                            entity: t("label.data"),
-                        })
-                    )}
-                    ...
-                </>
-            );
-        }
-
-        const { totalCount, countWithFeedback, feedbackStats } =
-            data.accuracyStatistics;
-
-        // Inform the user if there are no anomalies logged for this alert
-        if (totalCount === 0) {
-            return (
-                <>
-                    {capitalize(
-                        t("message.no-children-present-for-this-parent", {
-                            parent: t("label.alert"),
-                            children: t("label.anomalies"),
-                        })
-                    )}
-                </>
-            );
-        }
-
-        return (
-            <>
-                {t("message.total-reported-anomalies")}:&nbsp;{totalCount}
-                <br />
-                {t("message.anomalies-with-feedback")}:&nbsp;{countWithFeedback}
-                <br />
-                {t("message.misreported-anomalies")}:&nbsp;
-                {feedbackStats[AnomalyFeedbackType.NOT_ANOMALY]}
-            </>
-        );
-    };
 
     const renderAlertStatus = (
         _: Record<string, unknown>,
@@ -222,7 +173,6 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
             minWidth: 0,
             flex: 1,
             customCellRenderer: renderAlertAccuracy,
-            customCellTooltipRenderer: renderAlertAccuracyTooltip,
         },
         {
             key: "active",

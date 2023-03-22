@@ -173,6 +173,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
             minWidth: 0,
             flex: 1,
             customCellRenderer: renderAlertAccuracy,
+            cellTooltip: false,
         },
         {
             key: "active",

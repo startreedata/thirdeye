@@ -221,7 +221,7 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const emptyStateParams = {
         emptyState: (
-            <Grid xs={12}>
+            <Grid item xs={12}>
                 <Card variant="outlined">
                     <CardContent>
                         <Box pb={20} pt={20}>

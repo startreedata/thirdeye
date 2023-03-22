@@ -84,69 +84,67 @@ export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> 
         }
 
         return (
-            <Typography
-                color="secondary"
-                innerRef={ref}
-                style={typographyColor}
-                variant="body1"
-                {...typographyProps}
+            <TooltipV1
+                delay={50}
+                placement="bottom"
+                title={
+                    !!alertStats && (
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        {t("message.total-reported-anomalies")}
+                                    </td>
+                                    <td>{alertStats.totalCount}</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        {t("message.anomalies-with-feedback")}
+                                    </td>
+                                    <td>{alertStats.countWithFeedback}</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        {t("message.misreported-anomalies")}
+                                    </td>
+                                    <td>
+                                        {
+                                            alertStats.feedbackStats[
+                                                AnomalyFeedbackType.NOT_ANOMALY
+                                            ]
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    )
+                }
             >
-                <LoadingErrorStateSwitch
-                    isError={false}
-                    isLoading={
-                        status === ActionStatus.Initial ||
-                        status === ActionStatus.Working
-                    }
-                    loadingState={
-                        <SkeletonV1 width={50} {...defaultSkeletonProps} />
-                    }
-                >
-                    <TooltipV1
-                        title={
-                            !!alertStats && (
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                {t(
-                                                    "message.total-reported-anomalies"
-                                                )}
-                                            </td>
-                                            <td>{alertStats.totalCount}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                {t(
-                                                    "message.anomalies-with-feedback"
-                                                )}
-                                            </td>
-                                            <td>
-                                                {alertStats.countWithFeedback}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                {t(
-                                                    "message.misreported-anomalies"
-                                                )}
-                                            </td>
-                                            <td>
-                                                {
-                                                    alertStats.feedbackStats[
-                                                        AnomalyFeedbackType
-                                                            .NOT_ANOMALY
-                                                    ]
-                                                }
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            )
-                        }
+                <div>
+                    <Typography
+                        color="secondary"
+                        innerRef={ref}
+                        style={typographyColor}
+                        variant="body1"
+                        {...typographyProps}
                     >
-                        <>{displayValue}</>
-                    </TooltipV1>
-                </LoadingErrorStateSwitch>
-            </Typography>
+                        <LoadingErrorStateSwitch
+                            isError={false}
+                            isLoading={
+                                status === ActionStatus.Initial ||
+                                status === ActionStatus.Working
+                            }
+                            loadingState={
+                                <SkeletonV1
+                                    width={50}
+                                    {...defaultSkeletonProps}
+                                />
+                            }
+                        >
+                            <>{displayValue}</>
+                        </LoadingErrorStateSwitch>
+                    </Typography>
+                </div>
+            </TooltipV1>
         );
     };

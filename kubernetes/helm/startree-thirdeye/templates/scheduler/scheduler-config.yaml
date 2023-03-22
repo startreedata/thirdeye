@@ -54,7 +54,7 @@ data:
         - type: http
           port: {{ .Values.scheduler.port }}
           idleTimeout: 620s
-  
+
       requestLog:
         appenders:
         - type: console
@@ -83,8 +83,8 @@ data:
     #      ttl: 60000
 
     database:
-      # If internal MySQL is disabled, connection will be made to the provided 'mysql.url' on port 3306
-      url: jdbc:mysql://{{- if .Values.mysql.enabled -}}{{- include "thirdeye.mysql.fullname" . -}}{{- else -}}{{- .Values.mysql.url -}}{{- end -}}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
+      # If internal MySQL is disabled, connection will be made to the provided 'mysql.url' on port 'mysql.port'
+      url: jdbc:mysql://{{- if .Values.mysql.enabled -}}{{- include "thirdeye.mysql.fullname" . -}}{{- else -}}{{- .Values.mysql.url -}}:{{- .Values.mysql.port -}}{{- end -}}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
       user: {{ .Values.mysql.mysqlUser }}
       password: {{ .Values.mysql.mysqlPassword }}
       driver: com.mysql.cj.jdbc.Driver
@@ -111,11 +111,11 @@ data:
       {{- end }}
       heartbeatInterval: {{ .Values.worker.config.heartbeatInterval | default 30 }}
       activeThresholdMultiplier: {{ .Values.worker.config.activeThresholdMultiplier | default 30 }}
-    
+
     time:
       timezone: {{ .Values.time.timezone }}
       minimumOnboardingStartTime: {{ .Values.time.minimumOnboardingStartTime }}
-    
+
     rca:
       topContributors:
         algorithm: {{ .Values.rca.topContributors.algorithm }}

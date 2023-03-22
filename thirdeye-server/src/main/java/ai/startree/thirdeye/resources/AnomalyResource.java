@@ -13,24 +13,12 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.RequestCache.buildCache;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-
-import ai.startree.thirdeye.RequestCache;
-import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.core.AppAnalyticsService;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.AnomalyService;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -39,8 +27,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -59,81 +45,22 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
-      .put("alert.id", "detectionConfigId")
-      .put("startTime", "startTime")
-      .put("endTime", "endTime")
-      .put("isChild", "child")
-      .put("metadata.metric.name", "metric")
-      .put("metadata.dataset.name", "collection")
-      .put("enumerationItem.id", "enumerationItemId")
-      .put("feedback.id", "anomalyFeedbackId")
-      .put("anomalyLabels.ignore", "ignored")
-      .build();
-  private final AnomalyManager anomalyManager;
-  private final AlertManager alertManager;
-  private final AppAnalyticsService analyticsService;
+  private final AnomalyService anomalyService;
 
   @Inject
-  public AnomalyResource(
-      final AnomalyManager anomalyManager,
-      final AlertManager alertManager,
-      final AppAnalyticsService analyticsService,
-      final AuthorizationManager authorizationManager) {
-    super(anomalyManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
-    this.anomalyManager = anomalyManager;
-    this.alertManager = alertManager;
-    this.analyticsService = analyticsService;
-  }
-
-  @Override
-  protected RequestCache createRequestCache() {
-    return super.createRequestCache()
-        .setAlerts(buildCache(alertManager::findById));
-  }
-
-  @Override
-  protected AnomalyDTO createDto(final ThirdEyePrincipal principal,
-      final AnomalyApi api) {
-    return toDto(api);
-  }
-
-  @Override
-  protected AnomalyDTO toDto(final AnomalyApi api) {
-    return ApiBeanMapper.toDto(api);
-  }
-
-  @Override
-  protected AnomalyApi toApi(final AnomalyDTO dto, RequestCache cache) {
-    final AnomalyApi anomalyApi = ApiBeanMapper.toApi(dto);
-    optional(anomalyApi.getAlert())
-        .filter(alertApi -> alertApi.getId() != null)
-        .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
-            .getUnchecked(alertApi.getId())
-            .getName()));
-    return anomalyApi;
+  public AnomalyResource(final AnomalyService anomalyService) {
+    super(anomalyService);
+    this.anomalyService = anomalyService;
   }
 
   @Path("{id}/feedback")
   @POST
   @Timed
   public Response setFeedback(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @PathParam("id") Long id,
-      AnomalyFeedbackApi api) {
-    final AnomalyDTO dto = get(id);
-
-    final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
-    dto.setFeedback(feedbackDTO);
-    anomalyManager.updateAnomalyFeedback(dto);
-
-    if (dto.isChild()) {
-      optional(anomalyManager.findParent(dto))
-          .ifPresent(p -> {
-            p.setFeedback(feedbackDTO);
-            anomalyManager.updateAnomalyFeedback(p);
-          });
-    }
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @PathParam("id") final Long id,
+      final AnomalyFeedbackApi api) {
+    anomalyService.setFeedback(id, api);
 
     return Response
         .ok()
@@ -145,14 +72,10 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAnomalyStats(
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @QueryParam("startTime") final Long startTime,
       @QueryParam("endTime") final Long endTime
   ) {
-    final List<Predicate> predicates = new ArrayList<>();
-    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-    final DaoFilter filter = predicates.isEmpty()
-        ? null : new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
-    return Response.ok(analyticsService.computeAnomalyStats(filter)).build();
+    return Response.ok(anomalyService.stats(startTime, endTime)).build();
   }
 }

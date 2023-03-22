@@ -1,3 +1,26 @@
+## [2.13.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.12.0...thirdeye-ui-2.13.0) (2023-03-20)
+
+
+### Features
+
+* [TE-1386](https://cortexdata.atlassian.net/browse/TE-1386) updated sidebar logos ([3d194460e](https://github.com/startreedata/thirdeye/commit/3d194460e662cc7ac0d88d1f9a9d381efe2693cb))
+* [TE-1388](https://cortexdata.atlassian.net/browse/TE-1388) enabling drag select to assign daterange to anomalies in create anomaly page ([a1df2f101](https://github.com/startreedata/thirdeye/commit/a1df2f1014f9aed32dbe8440132d330df1853439))
+
+
+### Bug Fixes
+
+* [TE-1398](https://cortexdata.atlassian.net/browse/TE-1398) fixed embed video link in on welcome page ([c515e867a](https://github.com/startreedata/thirdeye/commit/c515e867a9d8eb6608cdb56329a4c25e87d967c7))
+
+## [2.12.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.11.0...thirdeye-ui-2.12.0) (2023-03-13)
+
+
+### Features
+
+* [TE-1361](https://cortexdata.atlassian.net/browse/TE-1361) remove holt-winters from guided user flow algorithm selection ([dea706e01](https://github.com/startreedata/thirdeye/commit/dea706e01ed527848901671755531f4938d1f9be))
+* [TE-1377](https://cortexdata.atlassian.net/browse/TE-1377) add rideshare sample alert ([d64e72f44](https://github.com/startreedata/thirdeye/commit/d64e72f44bab0453c4ed85fa590f3778755a8aca))
+* [TE-1378](https://cortexdata.atlassian.net/browse/TE-1378) enable callback function for when users make a range selection in TimeSeriesChart ([59580a914](https://github.com/startreedata/thirdeye/commit/59580a91492e9726bff2476218da3bb0bbc496be))
+* [TE-840](https://cortexdata.atlassian.net/browse/TE-840) report missed anomalies ([c634563b1](https://github.com/startreedata/thirdeye/commit/c634563b14dd1f4122e8d551f4f7b6f077bc9dfe))
+
 ## [2.11.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.10.0...thirdeye-ui-2.11.0) (2023-03-03)
 
 

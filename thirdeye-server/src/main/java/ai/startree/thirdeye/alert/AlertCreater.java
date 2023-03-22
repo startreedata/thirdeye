@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -27,7 +28,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.task.TaskType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -59,7 +59,7 @@ public class AlertCreater {
     final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
     final AlertDTO savedAlert = saveAlert(dto);
 
-    createOnboardingTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
 
     return dto;
   }
@@ -72,7 +72,7 @@ public class AlertCreater {
     dto.setLastTimestamp(0);
     final AlertDTO savedAlert = saveAlert(dto);
 
-    createOnboardingTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
 
     return dto;
   }
@@ -112,18 +112,15 @@ public class AlertCreater {
     }
   }
 
-  public void createOnboardingTask(final Long alertId, final long start, final long end) {
+  public void createDetectionTask(final Long alertId, final long start, final long end) {
     checkArgument(alertId != null && alertId >= 0);
     checkArgument(start <= end);
     final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, start,
         end);
 
     try {
-      final TaskDTO taskDTO = taskManager.createTaskDto(alertId, info, TaskType.DETECTION);
-      LOG.info("Created {} task {} with settings {}",
-          TaskType.DETECTION,
-          taskDTO.getId(),
-          taskDTO);
+      final TaskDTO t = taskManager.createTaskDto(alertId, info, DETECTION);
+      LOG.info("Created {} task {} with settings {}", DETECTION, t.getId(), t);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",
           DetectionPipelineTaskInfo.class.getSimpleName(),

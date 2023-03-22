@@ -21,16 +21,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.auth.AccessControlProvider;
-import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.service.CrudService;
+import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.accessControl.AccessType;
+import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
@@ -49,6 +51,10 @@ import org.testng.annotations.Test;
 
 public class CrudResourceTest {
 
+  static ThirdEyePrincipal nobody() {
+    return new ThirdEyePrincipal("nobody", "");
+  }
+
   @Test
   public void createUserInfoTest() {
     final DummyManager manager = mock(DummyManager.class);// new DummyManager(dao);
@@ -65,7 +71,8 @@ public class CrudResourceTest {
     final DummyApi api = new DummyApi().setData("testData");
 
     final Timestamp before = new Timestamp(1671476530000L);
-    List<DummyApi> response = (List<DummyApi>) resource.createMultiple(owner, singletonList(api)).getEntity();
+    List<DummyApi> response = (List<DummyApi>) resource.createMultiple(owner, singletonList(api))
+        .getEntity();
 
     assertThat(response).isNotNull();
     assertThat(response.isEmpty()).isFalse();
@@ -94,16 +101,17 @@ public class CrudResourceTest {
 
     final DummyDto dbDto = new DummyDto().setData("testData");
     dbDto.setId(1L)
-      .setCreatedBy(owner.getName())
-      .setCreateTime(before)
-      .setUpdatedBy(owner.getName())
-      .setUpdateTime(before);
+        .setCreatedBy(owner.getName())
+        .setCreateTime(before)
+        .setUpdatedBy(owner.getName())
+        .setUpdateTime(before);
     when(manager.findById(1L)).thenReturn(dbDto);
     final DummyApi api = new DummyApi()
-      .setId(1L)
-      .setData("updateTestData");
+        .setId(1L)
+        .setData("updateTestData");
 
-    List<DummyApi> response = (List<DummyApi>) resource.editMultiple(updater, singletonList(api)).getEntity();
+    List<DummyApi> response = (List<DummyApi>) resource.editMultiple(updater, singletonList(api))
+        .getEntity();
 
     assertThat(response).isNotNull();
     assertThat(response.isEmpty()).isFalse();
@@ -123,10 +131,6 @@ public class CrudResourceTest {
     return new Timestamp(new Date().getTime());
   }
 
-  static ThirdEyePrincipal nobody() {
-    return new ThirdEyePrincipal("nobody", "");
-  }
-
   @Test
   public void testGetAll_withNoAccess() {
     final DummyManager manager = mock(DummyManager.class);
@@ -140,7 +144,7 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         AccessControlProvider.alwaysDeny);
-    try (Response resp = resource.getAll(nobody(), uriInfo)) {
+    try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -163,7 +167,7 @@ public class CrudResourceTest {
         (String token, ResourceIdentifier identifiers, AccessType accessType)
             -> identifiers.name.equals("2"));
 
-    try (Response resp = resource.getAll(nobody(), uriInfo)) {
+    try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
@@ -355,16 +359,14 @@ class DummyApi implements ThirdEyeCrudApi<DummyApi> {
   }
 }
 
-class DummyResource extends CrudResource<DummyApi, DummyDto> {
+class DummyService extends CrudService<DummyApi, DummyDto> {
 
   DummyMapper mapper = new DummyMapper();
 
-  public DummyResource(
-    final DummyManager dtoManager,
-    final ImmutableMap<String, String> apiToBeanMap,
-    final AccessControl accessControl) {
-    super(dtoManager, apiToBeanMap, new AuthorizationManager(
-        mock(AlertTemplateRenderer.class), accessControl));
+  public DummyService(final AuthorizationManager authorizationManager,
+      final AbstractManager<DummyDto> dtoManager,
+      final ImmutableMap<String, String> apiToIndexMap) {
+    super(authorizationManager, dtoManager, apiToIndexMap);
   }
 
   @Override
@@ -383,6 +385,19 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
   }
 }
 
+class DummyResource extends CrudResource<DummyApi, DummyDto> {
+
+  public DummyResource(
+      final DummyManager dtoManager,
+      final ImmutableMap<String, String> apiToBeanMap,
+      final AccessControl accessControl) {
+    super(new DummyService(
+        new AuthorizationManager(mock(AlertTemplateRenderer.class), accessControl),
+        dtoManager,
+        apiToBeanMap));
+  }
+}
+
 class DummyManager extends AbstractManagerImpl<DummyDto> {
 
   protected DummyManager(final GenericPojoDao genericPojoDao) {
@@ -394,21 +409,21 @@ class DummyMapper {
 
   DummyDto toDto(DummyApi api) {
     return (DummyDto) new DummyDto()
-      .setData(api.getData())
-      .setId(api.getId())
-      .setCreatedBy(api.getCreatedBy())
-      .setCreateTime(api.getCreateTime())
-      .setUpdatedBy(api.getUpdatedBy())
-      .setUpdateTime(api.getUpdateTime());
+        .setData(api.getData())
+        .setId(api.getId())
+        .setCreatedBy(api.getCreatedBy())
+        .setCreateTime(api.getCreateTime())
+        .setUpdatedBy(api.getUpdatedBy())
+        .setUpdateTime(api.getUpdateTime());
   }
 
   DummyApi toApi(DummyDto dto) {
     return new DummyApi()
-      .setData(dto.getData())
-      .setId(dto.getId())
-      .setCreatedBy(dto.getCreatedBy())
-      .setCreateTime(dto.getCreateTime())
-      .setUpdatedBy(dto.getUpdatedBy())
-      .setUpdateTime(dto.getUpdateTime());
+        .setData(dto.getData())
+        .setId(dto.getId())
+        .setCreatedBy(dto.getCreatedBy())
+        .setCreateTime(dto.getCreateTime())
+        .setUpdatedBy(dto.getUpdatedBy())
+        .setUpdateTime(dto.getUpdateTime());
   }
 }

@@ -25,7 +25,6 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -83,23 +82,16 @@ public class MaintenanceResource {
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final AuthorizationManager authorizationManager;
-  private final AlertManager alertManager;
 
   @Inject
   public MaintenanceResource(final EnumerationItemManager enumerationItemManager,
       final AnomalyManager anomalyManager,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final AuthorizationManager authorizationManager,
-      final AlertManager alertManager) {
+      final AuthorizationManager authorizationManager) {
     this.enumerationItemManager = enumerationItemManager;
     this.anomalyManager = anomalyManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.authorizationManager = authorizationManager;
-    this.alertManager = alertManager;
-  }
-
-  private static AbstractDTO ei(final EnumerationItemDTO existingOrCreated) {
-    return new EnumerationItemDTO().setId(existingOrCreated.getId());
   }
 
   @DELETE
@@ -170,8 +162,8 @@ public class MaintenanceResource {
         .collect(Collectors.toMap(AbstractDTO::getId, ei -> ei));
 
     final Set<Long> alertIds = allEis.stream()
-        .filter(ei -> ei.getAlert() != null)
         .map(EnumerationItemDTO::getAlert)
+        .filter(Objects::nonNull)
         .map(AbstractDTO::getId)
         .collect(Collectors.toSet());
 

@@ -15,14 +15,11 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.TaskService;
 import ai.startree.thirdeye.spi.api.TaskApi;
-import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -32,7 +29,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.time.Duration;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -52,35 +48,15 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
-      .put("type", "type")
-      .put("status", "status")
-      .put("created", "createTime")
-      .put("updated", "updateTime")
-      .put("startTime", "startTime")
-      .put("endTime", "endTime")
-      .build();
   public static final String N_DAYS_TO_DELETE = "30";
   public static final String MAX_ENTRIES_TO_DELETE = "1000";
 
-  private final TaskManager taskManager;
+  private final TaskService taskService;
 
   @Inject
-  public TaskResource(final TaskManager taskManager,
-      final AuthorizationManager authorizationManager) {
-    super(taskManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
-    this.taskManager = taskManager;
-  }
-
-  // Operation not supported to prevent create of tasks
-  @Override
-  protected TaskDTO createDto(final ThirdEyePrincipal principal, final TaskApi taskApi) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  protected TaskApi toApi(final TaskDTO dto) {
-    return ApiBeanMapper.toApi(dto);
+  public TaskResource(final TaskService taskService) {
+    super(taskService);
+    this.taskService = taskService;
   }
 
   // Overridden to disable endpoint
@@ -118,7 +94,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
     final int nDaysToDelete = optional(nDays).orElse(Integer.valueOf(N_DAYS_TO_DELETE));
     final int limit = optional(limitOptional).orElse(Integer.valueOf(MAX_ENTRIES_TO_DELETE));
 
-    taskManager.purge(Duration.ofDays(nDaysToDelete), limit);
+    taskService.purge(nDaysToDelete, limit);
     return Response.ok().build();
   }
 }

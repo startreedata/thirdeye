@@ -54,7 +54,7 @@ data:
         - type: http
           port: {{ .Values.scheduler.port }}
           idleTimeout: 620s
-
+  
       requestLog:
         appenders:
         - type: console

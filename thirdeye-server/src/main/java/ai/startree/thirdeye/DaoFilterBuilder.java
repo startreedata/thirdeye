@@ -103,6 +103,6 @@ public class DaoFilterBuilder {
       final Object[] objects = e.getValue().toArray();
       predicates.add(toPredicate(columnName, objects));
     }
-    return Predicate.AND(predicates.toArray(new Predicate[]{}));
+    return predicates.size() == 0 ? null : Predicate.AND(predicates.toArray(new Predicate[]{}));
   }
 }

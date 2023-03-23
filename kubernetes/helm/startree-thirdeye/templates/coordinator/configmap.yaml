@@ -40,7 +40,7 @@ data:
           keyStorePassword: {{ .Values.tls.password }}
           keyStoreType: {{ .Values.tls.type }}
         {{- end }}
-
+  
       requestLog:
         appenders:
         - type: console

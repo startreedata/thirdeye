@@ -37,7 +37,6 @@ import {
     getAlertsAlertAnomaliesPath,
     getAnomaliesCreatePath,
 } from "../../../../utils/routes/routes.util";
-import { AlertAccuracyColored } from "../../../alert-accuracy-colored/alert-accuracy-colored.component";
 import { AnomalyWizardQueryParams } from "../../../anomalies-create/create-anomaly-wizard/create-anomaly-wizard.utils";
 import { Pluralize } from "../../../pluralize/pluralize.component";
 import {
@@ -57,7 +56,6 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     anomalies,
     expanded,
     onExpandChange,
-    alertStats,
     timezone,
 }) => {
     const navigate = useNavigate();
@@ -147,8 +145,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                         <Grid
                             item
                             {...(isExpanded
-                                ? { sm: 4, xs: 12 }
-                                : { sm: 2, xs: 12 })}
+                                ? { sm: 6, xs: 12 }
+                                : { sm: 4, xs: 12 })}
                         >
                             <Typography
                                 className={classes.name}
@@ -156,22 +154,6 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                             >
                                 {nameForDetectionEvaluation}
                             </Typography>
-                        </Grid>
-                        <Grid item sm={2} xs={12}>
-                            <AlertAccuracyColored
-                                alertStats={alertStats}
-                                defaultSkeletonProps={{
-                                    width: 100,
-                                    height: 30,
-                                }}
-                                renderCustomText={({ noAnomalyData }) =>
-                                    // Returning a null here will have the
-                                    // component render the default string
-                                    // The requirement here is to render nothing
-                                    // if `noAnomalyData` is true
-                                    noAnomalyData ? <>&nbsp;</> : null
-                                }
-                            />
                         </Grid>
                         {isExpanded && (
                             <Grid item sm={2} xs={12}>

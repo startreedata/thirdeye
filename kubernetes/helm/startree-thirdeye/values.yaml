@@ -193,8 +193,9 @@ mysql:
   # Use the MySQL chart dependency
   # Set to false if bringing your own MySQL
   enabled: true
-  # Set the value when internal MySQL server is disabled (mysql.enabled: false)
+  # Set the following values when internal MySQL server is disabled (mysql.enabled: false)
   url: ""
+  port: 3306
 
   imageTag: 8.0.28
   mysqlRootPassword: password

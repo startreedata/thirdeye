@@ -303,6 +303,7 @@ mysql:
 | `prometheus.enabled`                               | Flag to expose prometheus metrics and adding annotations for prometheus to scrape the metrics                        |
 | `mysql.enabled`                                    | Flag to disable MySQL deployment if using external instance                                                          |
 | `mysql.url`                                        | Database URL if using external instance                                                                              |
+| `mysql.port`                                       | Database port if using external instance                                                                             |
 | `mysql.mysqlUser`                                  | Database username                                                                                                    |
 | `mysql.mysqlPassword`                              | Database password                                                                                                    |
 | `mysql.persistence.size`                           | Size of persistent volume created for database storage                                                               |

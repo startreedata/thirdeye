@@ -41,7 +41,10 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
+import {
+    useGetAlertInsight,
+    useGetEvaluation,
+} from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
@@ -95,6 +98,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         status: anomalyRequestStatus,
         errorMessages: anomalyRequestErrors,
     } = useGetAnomaly();
+    // The timezone is derived from the insights
+    const { alertInsight, getAlertInsight } = useGetAlertInsight();
+
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [detectionEvaluation, setDetectionEvaluation] =
         useState<DetectionEvaluation | null>(null);
@@ -123,6 +129,8 @@ export const AnomaliesViewPage: FunctionComponent = () => {
         !!anomaly &&
             anomaly.enumerationItem &&
             getEnumerationItem(anomaly.enumerationItem.id);
+
+        !!anomaly && getAlertInsight({ alertId: anomaly.alert.id });
     }, [anomaly]);
 
     useEffect(() => {
@@ -361,7 +369,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             anomalyRequestStatus === ActionStatus.Working
                         }
                         timezone={determineTimezoneFromAlertInEvaluation(
-                            evaluation?.alert
+                            alertInsight?.templateWithProperties
                         )}
                         uiAnomaly={uiAnomaly}
                     />
@@ -386,7 +394,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                                 <ViewAnomalyHeader
                                     anomaly={anomaly}
                                     timezone={determineTimezoneFromAlertInEvaluation(
-                                        evaluation?.alert
+                                        alertInsight?.templateWithProperties
                                     )}
                                     onRefresh={fetchAlertEvaluation}
                                 />
@@ -396,7 +404,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                                 ActionStatus.Working
                             }
                             timezone={determineTimezoneFromAlertInEvaluation(
-                                evaluation?.alert
+                                alertInsight?.templateWithProperties
                             )}
                         />
                     )}

@@ -42,21 +42,19 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
-  @Timed
-  @Path("/login")
-  @POST
-  public Response login(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal
-  ) {
-      return respondOk(authApi(principal));
-  }
-
-  private AuthApi authApi(final ThirdEyePrincipal thirdEyePrincipal) {
+  private static AuthApi authApi(final ThirdEyePrincipal thirdEyePrincipal) {
     final String principal = thirdEyePrincipal.getName();
     return new AuthApi()
         .setUser(new UserApi()
             .setPrincipal(principal))
         .setAccessToken(NO_AUTH_USER);
+  }
+
+  @Timed
+  @Path("/login")
+  @POST
+  public Response login(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+    return respondOk(authApi(principal));
   }
 
   @Timed

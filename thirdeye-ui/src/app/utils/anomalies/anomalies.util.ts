@@ -406,7 +406,7 @@ export const ALL_OPTIONS_TO_DESCRIPTIONS = {
 
 export const ALL_OPTIONS_WITH_NO_FEEDBACK = {
     ...ALL_OPTIONS_TO_DESCRIPTIONS,
-    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: "Select Feedback",
+    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: "Is this an anomaly?",
 };
 
 export const handleAlertPropertyChangeGenerator = (

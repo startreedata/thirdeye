@@ -65,6 +65,14 @@ export const LoadingErrorStateSwitch: FunctionComponent<LoadingErrorStateSwitchP
                 );
             }
 
+            if (wrapInCard) {
+                return (
+                    <PageContentsCardV1>
+                        {DEFAULT_ERROR_ELEMENT}
+                    </PageContentsCardV1>
+                );
+            }
+
             return DEFAULT_ERROR_ELEMENT;
         }
 
@@ -88,6 +96,14 @@ export const LoadingErrorStateSwitch: FunctionComponent<LoadingErrorStateSwitchP
                     <Grid item xs={12}>
                         {DEFAULT_LOADING_ELEMENT}
                     </Grid>
+                );
+            }
+
+            if (wrapInCard) {
+                return (
+                    <PageContentsCardV1>
+                        {DEFAULT_LOADING_ELEMENT}
+                    </PageContentsCardV1>
                 );
             }
 

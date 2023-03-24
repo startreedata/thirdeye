@@ -30,12 +30,6 @@ export interface AlertEvaluationTimeSeriesCardProps {
     timeSeriesProps?: Partial<TimeSeriesChartProps>;
 }
 
-export interface ViewAnomalyHeaderProps {
-    anomaly: Anomaly | null;
-    onRefresh?: (start?: number, end?: number) => void;
-    timezone?: string;
-}
-
 export interface CreateAlertHeaderProps {
     onRefresh?: (start?: number, end?: number) => void;
     title: string;

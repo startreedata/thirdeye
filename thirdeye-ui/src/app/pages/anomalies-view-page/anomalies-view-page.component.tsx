@@ -72,7 +72,6 @@ import {
 import {
     getAlertsAlertPath,
     getAnomaliesAllPath,
-    getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
@@ -306,18 +305,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             title={`${t("label.need-help")}?`}
                             onClose={() => setIsHelpPanelOpen(false)}
                         />
-                        <Button
-                            color="primary"
-                            component="button"
-                            href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
-                                Number(anomalyId)
-                            )}?${searchParams.toString()}`}
-                            variant="contained"
-                        >
-                            {t("label.investigate-entity", {
-                                entity: t("label.anomaly"),
-                            })}
-                        </Button>
                         <Button
                             component="button"
                             variant="contained"

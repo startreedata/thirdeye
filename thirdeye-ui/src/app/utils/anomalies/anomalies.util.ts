@@ -392,21 +392,29 @@ export const getShortText = (
 };
 
 export const ANOMALY_OPTIONS_TO_DESCRIPTIONS = {
-    [AnomalyFeedbackType.ANOMALY.valueOf()]: "Yes, this is a valid anomaly",
-    [AnomalyFeedbackType.ANOMALY_EXPECTED.valueOf()]:
-        "Yes, this anomaly is expected",
-    [AnomalyFeedbackType.ANOMALY_NEW_TREND.valueOf()]:
-        "Yes, however, this may be a new trend",
+    [AnomalyFeedbackType.ANOMALY.valueOf()]: i18n.t(
+        "message.yes-this-is-a-valid-anomaly"
+    ),
+    [AnomalyFeedbackType.ANOMALY_EXPECTED.valueOf()]: i18n.t(
+        "message.yes-this-anomaly-is-expected"
+    ),
+    [AnomalyFeedbackType.ANOMALY_NEW_TREND.valueOf()]: i18n.t(
+        "message.yes-however-this-may-be-a-new-trend"
+    ),
 };
 
 export const ALL_OPTIONS_TO_DESCRIPTIONS = {
     ...ANOMALY_OPTIONS_TO_DESCRIPTIONS,
-    [AnomalyFeedbackType.NOT_ANOMALY.valueOf()]: "No, this is not an anomaly",
+    [AnomalyFeedbackType.NOT_ANOMALY.valueOf()]: i18n.t(
+        "message.no-this-is-an-anomaly"
+    ),
 };
 
 export const ALL_OPTIONS_WITH_NO_FEEDBACK = {
     ...ALL_OPTIONS_TO_DESCRIPTIONS,
-    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: "Is this an anomaly?",
+    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: i18n.t(
+        "message.is-this-an-anomaly"
+    ),
 };
 
 export const handleAlertPropertyChangeGenerator = (

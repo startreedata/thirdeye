@@ -13,8 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.spi.Constants.MEDIUM_METRIC_TIMEOUT;
-import static ai.startree.thirdeye.spi.Constants.METRIC_TIMEOUT_UNIT;
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -26,6 +25,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
@@ -36,7 +36,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
       final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
     metricRegistry.register("activeAlertsCount",
-        new CachedGauge<Long>(MEDIUM_METRIC_TIMEOUT, METRIC_TIMEOUT_UNIT) {
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       public Long loadValue() {
         return countActive();

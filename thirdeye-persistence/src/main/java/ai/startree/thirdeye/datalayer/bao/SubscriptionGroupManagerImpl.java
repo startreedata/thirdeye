@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -34,8 +36,8 @@ public class SubscriptionGroupManagerImpl extends
   }
 
   private void registerMetrics(final MetricRegistry metricRegistry) {
-    metricRegistry.register("subscriptionsCountTotal",
-        new CachedGauge<Integer>(15, TimeUnit.MINUTES) {
+    metricRegistry.register("notificationFlowCountTotal",
+        new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
           public Integer loadValue() {
             return findAll().stream()

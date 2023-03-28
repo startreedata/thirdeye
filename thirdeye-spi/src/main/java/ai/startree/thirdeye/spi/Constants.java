@@ -119,8 +119,5 @@ public interface Constants {
     EXPIRE
   }
 
-  Integer LOW_METRIC_TIMEOUT = 1;
-  Integer MEDIUM_METRIC_TIMEOUT = 5;
-  Integer HIGH_METRIC_TIMEOUT = 15;
-  TimeUnit METRIC_TIMEOUT_UNIT = TimeUnit.MINUTES;
+  Duration METRICS_CACHE_TIMEOUT = Duration.ofMinutes(10);
 }

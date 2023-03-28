@@ -46,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -80,14 +79,17 @@ public class AppAnalyticsService {
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
     this.renderer = renderer;
+    registerMetrics(metricRegistry);
+  }
 
+  private void registerMetrics(final MetricRegistry metricRegistry) {
     metricRegistry.register("nMonitoredMetrics",
         new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      protected Integer loadValue() {
-        return uniqueMonitoredMetricsCount();
-      }
-    });
+          @Override
+          protected Integer loadValue() {
+            return uniqueMonitoredMetricsCount();
+          }
+        });
     metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
@@ -103,16 +105,16 @@ public class AppAnalyticsService {
     metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
       @Override
       protected Double loadValue() {
-        return computeConfusionMatrixForAnomalies(null).getPrecision();
+        return computeConfusionMatrixForAnomalies().getPrecision();
       }
     });
     metricRegistry.register("anomalyResponseRate",
         new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      protected Double loadValue() {
-        return computeConfusionMatrixForAnomalies(null).getResponseRate();
-      }
-    });
+          @Override
+          protected Double loadValue() {
+            return computeConfusionMatrixForAnomalies().getResponseRate();
+          }
+        });
   }
 
   public static String appVersion() {
@@ -150,19 +152,15 @@ public class AppAnalyticsService {
         .setDatasource(metadata.getDatasource().getName());
   }
 
-  public ConfusionMatrix computeConfusionMatrixForAnomalies(DaoFilter filter) {
+  public ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final ConfusionMatrix matrix = new ConfusionMatrix();
     // filter to get anomalies without feedback and which are not ignored
-    final DaoFilter unclassifiedFilter = new DaoFilter()
-        .andPredicate(notIgnored())
-        .andPredicate(hasNoFeedback());
-    Optional.ofNullable(filter)
-        .ifPresent(daoFilter -> unclassifiedFilter.andPredicate(daoFilter.getPredicate()));
-    matrix.addUnclassified((int) anomalyManager.countParentAnomalies(unclassifiedFilter));
+    Predicate unclassified = Predicate.AND(notIgnored(),
+        Predicate.EQ("anomalyFeedbackId", 0));
+    matrix.addUnclassified((int) anomalyManager.countParentAnomalies(
+        new DaoFilter().setPredicate(unclassified)));
 
-    final List<AnomalyFeedback> allFeedbacks = filter == null
-        ? anomalyFeedbacksSupplier.get()
-        : getAnomalyFeedbacks(filter);
+    final List<AnomalyFeedback> allFeedbacks = anomalyFeedbacksSupplier.get();
     final Map<AnomalyFeedbackType, Long> typeMap = aggregateFeedbackTypes(allFeedbacks);
     matrix.addUnclassified(Math.toIntExact(typeMap.get(NO_FEEDBACK)));
     matrix.addFalsePositive(Math.toIntExact(typeMap.get(NOT_ANOMALY)));
@@ -176,57 +174,46 @@ public class AppAnalyticsService {
     return getAnomalyFeedbacks(null);
   }
 
-  private List<AnomalyFeedback> getAnomalyFeedbacks(final DaoFilter filter) {
-    final DaoFilter finalFilter = new DaoFilter()
-        .andPredicate(notIgnored());
-    Optional.ofNullable(filter)
-        .ifPresent(daoFilter -> finalFilter.andPredicate(filter.getPredicate()));
-    return anomalyManager.findParentAnomaliesWithFeedback(finalFilter).stream()
+  private List<AnomalyFeedback> getAnomalyFeedbacks(final Predicate predicate) {
+    Predicate finalPredicate = notIgnored();
+    if (predicate != null) {
+      finalPredicate = Predicate.AND(finalPredicate, predicate);
+    }
+    return anomalyManager.findParentAnomaliesWithFeedback(
+        new DaoFilter().setPredicate(finalPredicate)).stream()
         .map(AnomalyDTO::getFeedback)
         .collect(Collectors.toList());
   }
 
-  public AnomalyStatsApi computeAnomalyStats(final DaoFilter filter) {
-    final List<AnomalyFeedback> allFeedbacks = filter == null
+  public AnomalyStatsApi computeAnomalyStats(final Predicate predicate) {
+    final List<AnomalyFeedback> allFeedbacks = predicate == null
         ? anomalyFeedbacksSupplier.get()
-        : getAnomalyFeedbacks(filter);
+        : getAnomalyFeedbacks(predicate);
     return new AnomalyStatsApi()
-        .setTotalCount(countTotal(filter))
-        .setCountWithFeedback(countFeedbacks(filter))
+        .setTotalCount(countTotal(predicate))
+        .setCountWithFeedback(countFeedbacks(predicate))
         .setFeedbackStats(aggregateFeedbackTypes(allFeedbacks));
   }
 
-  private Long countTotal(final DaoFilter filter) {
-    final DaoFilter finalFilter = new DaoFilter()
-        .andPredicate(nonChild())
-        .andPredicate(notIgnored());
-    Optional.ofNullable(filter)
-        .ifPresent(daoFilter -> finalFilter.andPredicate(filter.getPredicate()));
-    return anomalyManager.countParentAnomalies(finalFilter);
+  private Long countTotal(final Predicate predicate) {
+    Predicate finalPredicate = Predicate.AND(notIgnored(),
+        Predicate.EQ("child", false));
+    if (predicate != null) {
+      finalPredicate = Predicate.AND(finalPredicate, predicate);
+    }
+    return anomalyManager.countParentAnomalies(new DaoFilter().setPredicate(finalPredicate));
   }
 
-  private Long countFeedbacks(final DaoFilter filter) {
-    final DaoFilter finalFilter = new DaoFilter()
-        .andPredicate(hasFeedback());
-    Optional.ofNullable(filter)
-        .ifPresent(daoFilter -> finalFilter.andPredicate(filter.getPredicate()));
-    return countTotal(finalFilter);
+  private Long countFeedbacks(final Predicate predicate) {
+    Predicate finalPredicate = Predicate.NEQ("anomalyFeedbackId", 0);
+    if (predicate != null) {
+      finalPredicate = Predicate.AND(finalPredicate, predicate);
+    }
+    return countTotal(finalPredicate);
   }
 
-  private Predicate hasFeedback() {
-    return Predicate.NEQ("anomalyFeedbackId", 0);
-  }
-
-  private Predicate hasNoFeedback() {
-    return Predicate.EQ("anomalyFeedbackId", 0);
-  }
-
-  private Predicate notIgnored() {
+  private static Predicate notIgnored() {
     return Predicate.EQ("ignored", false);
-  }
-
-  private Predicate nonChild() {
-    return Predicate.EQ("child", false);
   }
 
   private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(final List<AnomalyFeedback> feedbacks) {
@@ -246,11 +233,11 @@ public class AppAnalyticsService {
     final List<Predicate> predicates = new ArrayList<>();
     optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
     optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-    final DaoFilter filter = predicates.isEmpty()
-        ? null : new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
+    final Predicate predicate = predicates.isEmpty()
+        ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
     return new AppAnalyticsApi()
         .setVersion(appVersion())
         .setnMonitoredMetrics(uniqueMonitoredMetricsCount())
-        .setAnomalyStats(computeAnomalyStats(filter));
+        .setAnomalyStats(computeAnomalyStats(predicate));
   }
 }

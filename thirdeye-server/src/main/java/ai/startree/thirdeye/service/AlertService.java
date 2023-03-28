@@ -271,8 +271,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
-    final DaoFilter filter = new DaoFilter()
-        .setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
-    return analyticsService.computeAnomalyStats(filter);
+    return analyticsService.computeAnomalyStats(Predicate.AND(predicates.toArray(Predicate[]::new)));
   }
 }

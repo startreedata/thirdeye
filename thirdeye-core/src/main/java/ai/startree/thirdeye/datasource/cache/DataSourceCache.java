@@ -18,6 +18,7 @@
 
 package ai.startree.thirdeye.datasource.cache;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
@@ -64,7 +65,8 @@ public class DataSourceCache {
     this.dataSourcesLoader = dataSourcesLoader;
     this.metricRegistry = metricRegistry;
 
-    metricRegistry.register("healthyDatasourceCount", new CachedGauge<Integer>(1, TimeUnit.MINUTES) {
+    metricRegistry.register("healthyDatasourceCount",
+        new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Integer loadValue() {
         return getHealthyDatasourceCount();

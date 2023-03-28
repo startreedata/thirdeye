@@ -90,24 +90,27 @@ public class AppAnalyticsService {
             return uniqueMonitoredMetricsCount();
           }
         });
-    metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return countTotal(null);
-      }
-    });
-    metricRegistry.register("anomalyFeedbackCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return countFeedbacks(null);
-      }
-    });
-    metricRegistry.register("anomalyPrecision", new CachedGauge<Double>(1, TimeUnit.HOURS) {
-      @Override
-      protected Double loadValue() {
-        return computeConfusionMatrixForAnomalies().getPrecision();
-      }
-    });
+    metricRegistry.register("anomalyCountTotal",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
+          @Override
+          protected Long loadValue() {
+            return countTotal(null);
+          }
+        });
+    metricRegistry.register("anomalyFeedbackCount",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
+          @Override
+          protected Long loadValue() {
+            return countFeedbacks(null);
+          }
+        });
+    metricRegistry.register("anomalyPrecision",
+        new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
+          @Override
+          protected Double loadValue() {
+            return computeConfusionMatrixForAnomalies().getPrecision();
+          }
+        });
     metricRegistry.register("anomalyResponseRate",
         new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
@@ -180,7 +183,7 @@ public class AppAnalyticsService {
       finalPredicate = Predicate.AND(finalPredicate, predicate);
     }
     return anomalyManager.findParentAnomaliesWithFeedback(
-        new DaoFilter().setPredicate(finalPredicate)).stream()
+            new DaoFilter().setPredicate(finalPredicate)).stream()
         .map(AnomalyDTO::getFeedback)
         .collect(Collectors.toList());
   }
@@ -216,7 +219,8 @@ public class AppAnalyticsService {
     return Predicate.EQ("ignored", false);
   }
 
-  private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(final List<AnomalyFeedback> feedbacks) {
+  private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(
+      final List<AnomalyFeedback> feedbacks) {
     final Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
     for (final AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
       feedbackStats.put(type, 0L);

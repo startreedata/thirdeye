@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { UiAnomaly } from "../../../rest/dto/ui-anomaly.interfaces";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface AnomalyCardProps {
-    uiAnomaly: UiAnomaly | null;
+    anomaly: Anomaly | null;
     searchWords?: string[];
     className?: string;
     isLoading?: boolean;
     timezone?: string;
+    hideFeedback?: boolean;
 }

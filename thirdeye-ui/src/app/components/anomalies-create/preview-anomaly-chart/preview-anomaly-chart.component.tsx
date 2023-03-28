@@ -20,7 +20,6 @@ import { SkeletonV1 } from "../../../platform/components";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
-import { getUiAnomaly } from "../../../utils/anomalies/anomalies.util";
 import { AnomalyCard } from "../../entity-cards/anomaly-card/anomaly-card.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
@@ -38,11 +37,6 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
         anomalyDateRangeControl,
     }) => {
         const { t } = useTranslation();
-
-        const uiAnomaly = useMemo(
-            () => getUiAnomaly(editableAnomaly as Anomaly),
-            [editableAnomaly]
-        );
 
         const detectionEvaluation = useMemo<DetectionEvaluation | null>(() => {
             if (!evaluation || !editableAnomaly) {
@@ -123,8 +117,9 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                 </Grid>
                                 <Grid item xs={12}>
                                     <AnomalyCard
+                                        hideFeedback
+                                        anomaly={editableAnomaly as Anomaly}
                                         timezone={timezone}
-                                        uiAnomaly={uiAnomaly}
                                     />
                                 </Grid>
                                 <Grid item xs={12}>

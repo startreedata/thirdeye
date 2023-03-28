@@ -15,15 +15,11 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.AlertTemplateService;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -32,8 +28,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.FormParam;
@@ -50,64 +44,23 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertTemplateDTO> {
 
-  private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
+  private final AlertTemplateService alertTemplateService;
 
   @Inject
-  public AlertTemplateResource(final AlertTemplateManager alertTemplateManager,
-      final BootstrapResourcesRegistry bootstrapResourcesRegistry,
-      final AuthorizationManager authorizationManager) {
-    super(alertTemplateManager, ImmutableMap.of(), authorizationManager);
-    this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
-  }
-
-  @Override
-  protected AlertTemplateDTO createDto(final ThirdEyePrincipal principal,
-      final AlertTemplateApi api) {
-    final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(api);
-    alertTemplateDTO.setCreatedBy(principal.getName());
-    return alertTemplateDTO;
-  }
-
-  @Override
-  protected AlertTemplateDTO toDto(final AlertTemplateApi api) {
-    return ApiBeanMapper.toAlertTemplateDto(api);
-  }
-
-  @Override
-  protected AlertTemplateApi toApi(final AlertTemplateDTO dto) {
-    return ApiBeanMapper.toAlertTemplateApi(dto);
+  public AlertTemplateResource(final AlertTemplateService alertTemplateService) {
+    super(alertTemplateService);
+    this.alertTemplateService = alertTemplateService;
   }
 
   @POST
   @Path("load-defaults")
   @Timed
-  @Produces(MediaType.APPLICATION_JSON)
   public Response loadRecommendedTemplates(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @FormParam("updateExisting") boolean updateExisting) {
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @FormParam("updateExisting") final boolean updateExisting) {
 
-    List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
-    List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
-    List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
-    for (AlertTemplateApi templateApi : alertTemplates) {
-      AlertTemplateDTO existingTemplate = dtoManager.findByName(templateApi.getName())
-          .stream()
-          .findFirst()
-          .orElse(null);
-      if (existingTemplate == null) {
-        toCreateTemplates.add(templateApi);
-      } else {
-        templateApi.setId(existingTemplate.getId());
-        toUpdateTemplates.add(templateApi);
-      }
-    }
-
-    List<AlertTemplateApi> upserted = internalCreateMultiple(principal, toCreateTemplates);
-    if (updateExisting) {
-      List<AlertTemplateApi> updated = internalEditMultiple(principal, toUpdateTemplates);
-      upserted.addAll(updated);
-    }
-
-    return respondOk(upserted);
+    return respondOk(alertTemplateService.loadRecommendedTemplates(
+        principal,
+        updateExisting));
   }
 }

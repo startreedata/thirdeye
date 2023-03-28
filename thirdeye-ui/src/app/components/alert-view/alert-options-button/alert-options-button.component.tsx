@@ -115,8 +115,8 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
         // Use the start and end query params being used by the current alert
         if (start && end) {
             const searchParams = new URLSearchParams([
-                [TimeRangeQueryStringKey.START_TIME, start],
-                [TimeRangeQueryStringKey.END_TIME, end],
+                [TimeRangeQueryStringKey.START_TIME, `${start}`],
+                [TimeRangeQueryStringKey.END_TIME, `${end}`],
             ] as string[][]);
 
             path = createPathWithRecognizedQueryString(path, searchParams);

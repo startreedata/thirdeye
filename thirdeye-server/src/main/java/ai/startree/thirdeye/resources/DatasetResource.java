@@ -13,13 +13,9 @@
  */
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.DatasetService;
 import ai.startree.thirdeye.spi.api.DatasetApi;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
@@ -38,31 +34,8 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class DatasetResource extends CrudResource<DatasetApi, DatasetConfigDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
-      .put("name", "dataset")
-      .build();
-
   @Inject
-  public DatasetResource(final DatasetConfigManager datasetConfigManager,
-      final AuthorizationManager authorizationManager) {
-    super(datasetConfigManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
-  }
-
-  @Override
-  protected DatasetConfigDTO createDto(final ThirdEyePrincipal principal,
-      final DatasetApi api) {
-    final DatasetConfigDTO dto = toDto(api);
-    dto.setCreatedBy(principal.getName());
-    return dto;
-  }
-
-  @Override
-  protected DatasetConfigDTO toDto(final DatasetApi api) {
-    return ApiBeanMapper.toDatasetConfigDto(api);
-  }
-
-  @Override
-  protected DatasetApi toApi(final DatasetConfigDTO dto) {
-    return ApiBeanMapper.toApi(dto);
+  public DatasetResource(final DatasetService datasetService) {
+    super(datasetService);
   }
 }

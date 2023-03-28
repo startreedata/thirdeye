@@ -14,17 +14,15 @@
  */
 
 import type { TypographyProps } from "@material-ui/core";
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement } from "react";
 import type { SkeletonV1Props } from "../../platform/components/skeleton-v1/skeleton-v1.interfaces";
-import type { AlertStats } from "../../rest/dto/alert.interfaces";
 
 export interface AlertAccuracyColoredProps {
-    alertStats: AlertStats | null;
+    alertId: number;
     renderCustomLoading?: ReactElement;
     defaultSkeletonProps?: SkeletonV1Props;
     typographyProps?: Partial<TypographyProps>;
-    renderCustomText?: (p: {
-        accuracy: number;
-        noAnomalyData: boolean;
-    }) => ReactNode;
+    label?: string;
+    start?: number;
+    end?: number;
 }

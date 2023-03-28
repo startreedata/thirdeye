@@ -13,16 +13,9 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
-import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
-
-import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.EnumerationItemService;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiKeyAuthDefinition;
 import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
@@ -41,32 +34,8 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class EnumerationItemResource extends CrudResource<EnumerationItemApi, EnumerationItemDTO> {
 
-  public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
-      .put("alert.id", "alertId")
-      .build();
-
   @Inject
-  public EnumerationItemResource(final EnumerationItemManager enumerationItemManager,
-      final AuthorizationManager authorizationManager) {
-    super(enumerationItemManager, API_TO_INDEX_FILTER_MAP, authorizationManager);
-  }
-
-  @Override
-  protected EnumerationItemDTO createDto(final ThirdEyePrincipal principal,
-      final EnumerationItemApi api) {
-    final EnumerationItemDTO dto = ApiBeanMapper.toEnumerationItemDTO(api);
-    dto.setCreatedBy(principal.getName());
-    return dto;
-  }
-
-  @Override
-  protected EnumerationItemDTO toDto(final EnumerationItemApi api) {
-    throw badRequest(ERR_OPERATION_UNSUPPORTED,
-        "Enumeration Items are immutable. You can regenerate from the alert.");
-  }
-
-  @Override
-  protected EnumerationItemApi toApi(final EnumerationItemDTO dto) {
-    return ApiBeanMapper.toApi(dto);
+  public EnumerationItemResource(final EnumerationItemService enumerationItemService) {
+    super(enumerationItemService);
   }
 }

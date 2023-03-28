@@ -17,6 +17,7 @@ import {
     Alert,
     AlertEvaluation,
     AlertInsight,
+    AlertStats,
     EditableAlert,
 } from "../dto/alert.interfaces";
 import { EnumerationItemParams } from "../dto/detection.interfaces";
@@ -65,6 +66,13 @@ export interface ResetAlert extends ActionHook {
     resetAlert: (id: number) => Promise<Alert | undefined>;
 }
 
+export interface GetAlertStats extends ActionHook {
+    alertStats: AlertStats | null;
+    getAlertStats: (
+        params: GetAlertStatsParams
+    ) => Promise<AlertStats | undefined>;
+}
+
 export interface GetEvaluationRequestPayload extends UseGetEvaluationParams {
     evaluationContext?: {
         filters?: string[];
@@ -74,4 +82,10 @@ export interface GetEvaluationRequestPayload extends UseGetEvaluationParams {
               }
             | EnumerationItemParams;
     };
+}
+
+export interface GetAlertStatsParams {
+    alertId: number;
+    startTime?: number;
+    endTime?: number;
 }

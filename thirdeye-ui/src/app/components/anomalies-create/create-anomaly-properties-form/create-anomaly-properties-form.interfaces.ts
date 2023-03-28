@@ -29,5 +29,4 @@ export interface CreateAnomalyPropertiesFormProps {
     formFields: CreateAnomalyEditableFormFields;
     handleSetField: HandleSetFields;
     enumerationItemsStatus: ActionStatus;
-    timezone: string | undefined;
 }

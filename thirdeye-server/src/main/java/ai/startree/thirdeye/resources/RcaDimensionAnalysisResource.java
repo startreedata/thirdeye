@@ -14,21 +14,10 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
-import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
-import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
-import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
-import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ai.startree.thirdeye.service.RcaDimensionAnalysisService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -50,8 +39,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,18 +54,15 @@ public class RcaDimensionAnalysisResource {
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
   private static final Logger LOG = LoggerFactory.getLogger(RcaDimensionAnalysisResource.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String DEFAULT_BASELINE_OFFSET = "P1W";
 
-  private final ContributorsFinderRunner contributorsFinderRunner;
-  private final RcaInfoFetcher rcaInfoFetcher;
+  private final RcaDimensionAnalysisService rcaDimensionAnalysisService;
 
   @Inject
   public RcaDimensionAnalysisResource(
-      final ContributorsFinderRunner contributorsFinderRunner,
-      final RcaInfoFetcher rcaInfoFetcher) {
-    this.contributorsFinderRunner = contributorsFinderRunner;
-    this.rcaInfoFetcher = rcaInfoFetcher;
+      final RcaInfoFetcher rcaInfoFetcher,
+      final RcaDimensionAnalysisService rcaDimensionAnalysisService) {
+    this.rcaDimensionAnalysisService = rcaDimensionAnalysisService;
   }
 
   @GET
@@ -107,53 +91,21 @@ public class RcaDimensionAnalysisResource {
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
   ) {
     try {
-      final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
-          anomalyId);
-      final Interval currentInterval = new Interval(
-          rcaInfo.getAnomaly().getStartTime(),
-          rcaInfo.getAnomaly().getEndTime(),
-          rcaInfo.getChronology());
-
-      Period baselineOffsetPeriod = isoPeriod(baselineOffset);
-      final Interval baselineInterval = new Interval(
-          currentInterval.getStart().minus(baselineOffsetPeriod),
-          currentInterval.getEnd().minus(baselineOffsetPeriod)
-      );
-
-      // override dimensions
-      final DatasetConfigDTO datasetConfigDTO = rcaInfo.getDataset();
-      List<String> rcaDimensions = getRcaDimensions(dimensions,
-          excludedDimensions,
-          datasetConfigDTO);
-      datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
-
-      final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
-
-      final ContributorsSearchConfiguration searchConfiguration = new ContributorsSearchConfiguration(
-          rcaInfo.getMetric(),
-          datasetConfigDTO,
-          currentInterval,
-          baselineInterval,
+      return Response.ok(rcaDimensionAnalysisService.dataCubeSummary(
+          anomalyId,
+          baselineOffset,
+          filters,
           summarySize,
           depth,
           doOneSideError,
-          Predicate.parseAndCombinePredicates(filters),
-          hierarchies);
-
-      final ContributorsFinderResult result = contributorsFinderRunner.run(searchConfiguration);
-
-      return Response.ok(result.getDimensionAnalysisResult()).build();
+          dimensions,
+          excludedDimensions,
+          hierarchiesPayload)).build();
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
       handleRcaAlgorithmException(e);
     }
-
     return null;
-  }
-
-  private List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
-      throws JsonProcessingException {
-    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
   }
 }

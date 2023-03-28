@@ -27,10 +27,8 @@ public interface EnumerationItemMapper {
   EnumerationItemMapper INSTANCE = Mappers.getMapper(EnumerationItemMapper.class);
 
   @Mapping(target = "alert", qualifiedByName = "IdMapper", nullValueCheckStrategy = ALWAYS)
-  @Mapping(target = "alerts", qualifiedByName = "IdMapper")
   EnumerationItemDTO toDto(EnumerationItemApi api);
 
   @Mapping(target = "alert", qualifiedByName = "IdMapper", nullValueCheckStrategy = ALWAYS)
-  @Mapping(target = "alerts", qualifiedByName = "IdMapper")
   EnumerationItemApi toApi(EnumerationItemDTO dto);
 }

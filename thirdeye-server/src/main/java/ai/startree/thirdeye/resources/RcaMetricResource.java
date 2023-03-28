@@ -18,8 +18,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.rca.CohortComputation;
-import ai.startree.thirdeye.rca.HeatmapCalculator;
+import ai.startree.thirdeye.service.RcaMetricService;
 import ai.startree.thirdeye.spi.api.CohortComputationApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import com.google.inject.Inject;
@@ -68,14 +67,11 @@ public class RcaMetricResource {
   private static final int LIMIT_DEFAULT = 100;
   private static final String DEFAULT_BASELINE_OFFSET = "P1W";
 
-  private final HeatmapCalculator heatmapCalculator;
-  private final CohortComputation cohortComputation;
+  private final RcaMetricService rcaMetricService;
 
   @Inject
-  public RcaMetricResource(final HeatmapCalculator heatmapCalculator,
-      final CohortComputation cohortComputation) {
-    this.heatmapCalculator = heatmapCalculator;
-    this.cohortComputation = cohortComputation;
+  public RcaMetricResource(final RcaMetricService rcaMetricService) {
+    this.rcaMetricService = rcaMetricService;
   }
 
   @GET
@@ -104,12 +100,12 @@ public class RcaMetricResource {
       if (limit == null) {
         limit = LIMIT_DEFAULT;
       }
-      final HeatMapResponseApi resultApi = heatmapCalculator.compute(anomalyId,
+      final HeatMapResponseApi resultApi = rcaMetricService.computeHeatmap(anomalyId,
           baselineOffset,
           filters,
-          limit,
           dimensions,
-          excludedDimensions);
+          excludedDimensions,
+          limit);
 
       return respondOk(resultApi);
     } catch (final WebApplicationException e) {
@@ -127,7 +123,7 @@ public class RcaMetricResource {
       final CohortComputationApi request) throws Exception {
     ensure(request.getThreshold() != null ^ request.getPercentage() != null,
         "Either threshold or percentage should be set but not both");
-    final CohortComputationApi resultApi = cohortComputation.compute(request);
+    final CohortComputationApi resultApi = rcaMetricService.generateCohorts(request);
     return respondOk(resultApi);
   }
 }

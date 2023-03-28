@@ -21,15 +21,12 @@ import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Injector;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -41,14 +38,6 @@ public class EnumerationItemManagerImplTest {
   private SubscriptionGroupManager subscriptionGroupManager;
   private EnumerationItemManagerImpl enumerationItemManager;
 
-  private static List<AlertDTO> toAlertList(final Long... alertIds) {
-    return Arrays.stream(alertIds).map(alertId -> {
-      final AlertDTO alert = new AlertDTO();
-      alert.setId(alertId);
-      return alert;
-    }).collect(Collectors.toList());
-  }
-
   private static EnumerationItemDTO ei(final String name) {
     return ei(name, Map.of());
   }
@@ -58,8 +47,7 @@ public class EnumerationItemManagerImplTest {
   }
 
   private static EnumerationItemDTO sourceEi() {
-    return ei("ei1")
-        .setParams(Map.of("a", 1))
+    return ei("ei1", Map.of("a", 1))
         .setAlert(toAlertDTO(ALERT_ID));
   }
 
@@ -67,6 +55,10 @@ public class EnumerationItemManagerImplTest {
     return new AnomalyDTO()
         .setStartTime(startTime)
         .setEndTime(endTime);
+  }
+
+  private static AnomalyDTO anomaly() {
+    return anomaly(1000L, 2000L);
   }
 
   @BeforeClass
@@ -138,21 +130,21 @@ public class EnumerationItemManagerImplTest {
     final var ei2 = ei("ei2", Map.of("a", 1));
     enumerationItemManager.save(ei2);
 
-    final var a1 = anomaly(1000L, 2000L)
+    final var a1 = anomaly()
         .setDetectionConfigId(ALERT_ID)
         .setEnumerationItem(ei1);
     anomalyManager.save(a1);
 
-    final var a2 = anomaly(1000L, 2000L)
+    final var a2 = anomaly()
         .setDetectionConfigId(ALERT_ID)
         .setEnumerationItem(ei2);
     anomalyManager.save(a2);
 
-    final var a3 = anomaly(1000L, 2000L)
+    final var a3 = anomaly()
         .setDetectionConfigId(5678L);
     anomalyManager.save(a3);
 
-    final var a4 = anomaly(1000L, 2000L)
+    final var a4 = anomaly()
         .setDetectionConfigId(5678L)
         .setEnumerationItem(ei1);
     anomalyManager.save(a4);
@@ -253,5 +245,35 @@ public class EnumerationItemManagerImplTest {
     final EnumerationItemDTO found = enumerationItemManager.findUsingIdKeys(source, List.of("a"));
     assertThat(found).isNotNull();
     assertThat(found.getId()).isEqualTo(ei1.getId());
+  }
+
+  @Test
+  public void testWithAugmentedParamsSameIdKeys() {
+    final String key = "key";
+    final EnumerationItemDTO source = ei("ei1", Map.of(key, 1))
+        .setAlert(toAlertDTO(ALERT_ID));
+
+    final var ei1 = ei(source.getName(), source.getParams())
+        .setAlert(source.getAlert());
+    enumerationItemManager.save(ei1);
+
+    final var fromDb = enumerationItemManager.findExistingOrCreate(source, List.of(key));
+    assertThat(fromDb.getId()).isEqualTo(ei1.getId());
+    assertThat(fromDb.getParams()).isEqualTo(ei1.getParams());
+
+    // modify source params keeping the same id keys
+    source.setParams(Map.of(key, 1, "b", 2));
+    final var fromDb2 = enumerationItemManager.findExistingOrCreate(source, List.of(key));
+    assertThat(fromDb2.getId()).isEqualTo(ei1.getId());
+
+    // ei1 params should no longer match the new params from db
+    assertThat(fromDb2.getParams()).isNotEqualTo(ei1.getParams());
+
+    // but they should match the source params
+    assertThat(fromDb2.getParams()).isEqualTo(source.getParams());
+
+    final var ei1Updated = enumerationItemManager.findById(ei1.getId());
+    assertThat(ei1Updated.getId()).isEqualTo(ei1.getId());
+    assertThat(ei1Updated.getParams()).isEqualTo(source.getParams());
   }
 }

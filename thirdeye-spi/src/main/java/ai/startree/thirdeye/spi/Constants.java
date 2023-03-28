@@ -118,4 +118,6 @@ public interface Constants {
     UPDATE,
     EXPIRE
   }
+
+  Duration METRICS_CACHE_TIMEOUT = Duration.ofMinutes(10);
 }

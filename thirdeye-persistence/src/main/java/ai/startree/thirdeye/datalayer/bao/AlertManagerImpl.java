@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -33,7 +35,8 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   public AlertManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
-    metricRegistry.register("activeAlertsCount", new CachedGauge<Long>(5, TimeUnit.MINUTES) {
+    metricRegistry.register("activeAlertsCount",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       public Long loadValue() {
         return countActive();

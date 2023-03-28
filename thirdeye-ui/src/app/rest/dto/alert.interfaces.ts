@@ -123,6 +123,7 @@ export enum AlertNodeType {
 export interface AlertInEvaluation extends Alert {
     metadata: {
         timezone?: string;
+        granularity?: string;
     };
 }
 

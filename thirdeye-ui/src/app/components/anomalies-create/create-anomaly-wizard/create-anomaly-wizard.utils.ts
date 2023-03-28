@@ -44,18 +44,24 @@ export const getEnumerationItemsConfigFromAlert = (
 };
 
 export const AlertId = "alertId";
+export const AnomalyWizardQueryParams = {
+    AnomalyStartTime: "anomalyStartTime",
+    AnomalyEndTime: "anomalyEndTime",
+    EnumerationItemId: "enumerationItemId",
+} as const;
 
 export const getIsAnomalyValid = (
-    editableAnomaly?: EditableAnomaly | null
+    editableAnomaly?: EditableAnomaly | null,
+    alertHasEnumerationItems?: boolean
 ): boolean => {
     if (!editableAnomaly) {
         return false;
     }
 
-    const { alert, startTime, endTime } = editableAnomaly;
+    const { alert, startTime, endTime, enumerationItem } = editableAnomaly;
 
     // Basic sanity checks for values
-    const conditions = [
+    const conditions: boolean[] = [
         isNumber(alert?.id),
         isNumber(startTime),
         isNumber(endTime),
@@ -63,6 +69,11 @@ export const getIsAnomalyValid = (
         endTime > 0,
         endTime > startTime,
     ];
+
+    // If the alert has enumeration items, it must be mandatorily present
+    if (alertHasEnumerationItems) {
+        conditions.push(!!enumerationItem?.id);
+    }
 
     // The anomaly is valid iff all check are valid
     return conditions.every((c) => !!c);
@@ -120,16 +131,20 @@ export const createEditableAnomaly = ({
         ...(severity && { severity }),
         ...(type && { type }),
 
-        // TODO: Needed?
-        score: 0.0,
-        weight: 0.0,
-        impactToGlobal: 0.0,
-
         avgBaselineVal,
         avgCurrentVal,
     };
 
     return editableAnomaly;
+};
+
+export const findNextClosestTimestampIndex = (
+    needle: number,
+    list: number[]
+): number => {
+    const index = list.findIndex((v) => v >= needle);
+
+    return index;
 };
 
 export const getAnomaliesAvgValues = ({
@@ -143,10 +158,12 @@ export const getAnomaliesAvgValues = ({
 
     if (evaluation) {
         const { timestamp, current, expected } = detectionEvaluation?.data;
-        const anomalyStartIndex = timestamp.findIndex((v) => v >= startTime);
+        const anomalyStartIndex = findNextClosestTimestampIndex(
+            startTime,
+            timestamp
+        );
 
         if (anomalyStartIndex) {
-            // TODO: Should the avg of all the values in the range be used?
             return {
                 avgBaselineVal: current?.[anomalyStartIndex] || 0,
                 avgCurrentVal: expected?.[anomalyStartIndex] || 0,

@@ -26,7 +26,8 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.core.AppAnalyticsService;
+import ai.startree.thirdeye.service.AlertService;
+import ai.startree.thirdeye.service.AppAnalyticsService;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
@@ -58,6 +59,35 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class AlertResourceTest {
+
+  static ThirdEyePrincipal nobody() {
+    return new ThirdEyePrincipal("nobody", "");
+  }
+
+  private static AlertResource newAlertResource(final AlertManager alertManager,
+      final AlertTemplateRenderer alertTemplateRenderer,
+      final AccessControl accessControl) {
+    final AuthorizationManager authorizationManager = new AuthorizationManager(
+        alertTemplateRenderer,
+        accessControl
+    );
+    return new AlertResource(
+        newAlertService(alertManager, authorizationManager)
+    );
+  }
+
+  private static AlertService newAlertService(final AlertManager alertManager,
+      final AuthorizationManager authorizationManager) {
+    return new AlertService(
+        mock(AlertCreater.class),
+        mock(AlertDeleter.class),
+        mock(AlertEvaluator.class),
+        alertManager,
+        mock(AppAnalyticsService.class),
+        mock(AlertInsightsProvider.class),
+        authorizationManager
+    );
+  }
 
   @Test
   public void testAlertEvaluationPlan() throws IOException, ClassNotFoundException {
@@ -97,10 +127,6 @@ public class AlertResourceTest {
     Assert.assertEquals(nodes.get(4).getType(), "SqlQueryExecutor");
   }
 
-  static ThirdEyePrincipal nobody() {
-    return new ThirdEyePrincipal("nobody", "");
-  }
-
   @Test(expectedExceptions = ForbiddenException.class)
   public void testCreateMultiple_withNoAccessToTemplate() {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
@@ -112,20 +138,11 @@ public class AlertResourceTest {
     final AccessControl accessControl = (String token, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.name.equals("0");
 
-    new AlertResource(
-        mock(AlertManager.class),
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        mock(AlertEvaluator.class),
-        mock(AppAnalyticsService.class),
-        mock(AlertInsightsProvider.class),
-        new AuthorizationManager(
-            alertTemplateRenderer,
-            accessControl
-        )
-    ).createMultiple(nobody(), Collections.singletonList(
-        new AlertApi().setName("alert1").setTemplate(new AlertTemplateApi().setId(2L))
-    ));
+    newAlertResource(mock(AlertManager.class), alertTemplateRenderer, accessControl).createMultiple(
+        nobody(),
+        Collections.singletonList(
+            new AlertApi().setName("alert1").setTemplate(new AlertTemplateApi().setId(2L))
+        ));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -135,34 +152,18 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
         mock(AlertTemplateManager.class));
 
-    new AlertResource(
-        alertManager,
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        mock(AlertEvaluator.class),
-        mock(AppAnalyticsService.class),
-        mock(AlertInsightsProvider.class),
-        new AuthorizationManager(
-            alertTemplateRenderer,
-            AccessControlProvider.alwaysDeny
-        )
-    ).runTask(nobody(), 1L, 0L, 1L);
+    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.alwaysDeny).runTask(
+        nobody(),
+        1L,
+        0L,
+        1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
   public void testValidate_withNoAccess() {
-    new AlertResource(
-        mock(AlertManager.class),
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        mock(AlertEvaluator.class),
-        mock(AppAnalyticsService.class),
-        mock(AlertInsightsProvider.class),
-        new AuthorizationManager(
-            mock(AlertTemplateRenderer.class),
-            AccessControlProvider.alwaysDeny
-        )
-    ).validateMultiple(
+    newAlertResource(mock(AlertManager.class),
+        mock(AlertTemplateRenderer.class),
+        AccessControlProvider.alwaysDeny).validateMultiple(
         nobody(),
         Collections.singletonList(
             new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
@@ -181,18 +182,9 @@ public class AlertResourceTest {
     final AccessControl accessControl = (String token, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.name.equals("alert1");
 
-    new AlertResource(
-        mock(AlertManager.class),
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        mock(AlertEvaluator.class),
-        mock(AppAnalyticsService.class),
-        mock(AlertInsightsProvider.class),
-        new AuthorizationManager(
-            alertTemplateRenderer,
-            accessControl
-        )
-    ).validateMultiple(
+    newAlertResource(mock(AlertManager.class),
+        alertTemplateRenderer,
+        accessControl).validateMultiple(
         new ThirdEyePrincipal("nobody", ""),
         Collections.singletonList(
             new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
@@ -209,18 +201,9 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
-    new AlertResource(
-        mock(AlertManager.class),
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        mock(AlertEvaluator.class),
-        mock(AppAnalyticsService.class),
-        mock(AlertInsightsProvider.class),
-        new AuthorizationManager(
-            alertTemplateRenderer,
-            AccessControlProvider.alwaysDeny
-        )
-    ).evaluate(nobody(),
+    newAlertResource(mock(AlertManager.class),
+        alertTemplateRenderer,
+        AccessControlProvider.alwaysDeny).evaluate(nobody(),
         new AlertEvaluationApi()
             .setAlert(new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)))
             .setStart(new Date())
@@ -255,17 +238,17 @@ public class AlertResourceTest {
     when(alertEvaluator.evaluate(alertEvaluationApi))
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(new HashMap<>()));
 
-    new AlertResource(
-        alertManager,
+    new AlertResource(new AlertService(
         mock(AlertCreater.class),
         mock(AlertDeleter.class),
         alertEvaluator,
+        alertManager,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
                 id.namespace.equals("allowedNamespace")
-        )
+        ))
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
@@ -308,17 +291,17 @@ public class AlertResourceTest {
             }}
         ));
 
-    final var alertResource = new AlertResource(
-        alertManager,
+    final var alertResource = new AlertResource(new AlertService(
         mock(AlertCreater.class),
         mock(AlertDeleter.class),
         alertEvaluator,
+        alertManager,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
                 accessType == AccessType.READ && id.namespace.equals("allowedNamespace")
-        )
+        ))
     );
 
     try (Response resp = alertResource.evaluate(nobody(), alertEvaluationApi)) {
@@ -354,17 +337,17 @@ public class AlertResourceTest {
     when(alertEvaluator.evaluate(alertEvaluationApi))
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(new HashMap<>()));
 
-    new AlertResource(
-        mock(AlertManager.class),
+    new AlertResource(new AlertService(
         mock(AlertCreater.class),
         mock(AlertDeleter.class),
         alertEvaluator,
+        mock(AlertManager.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
                 id.namespace.equals("readonlyNamespace") && accessType == AccessType.READ
-        )
+        ))
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
@@ -404,17 +387,17 @@ public class AlertResourceTest {
             }}
         ));
 
-    final var resource = new AlertResource(
-        mock(AlertManager.class),
+    final var resource = new AlertResource(new AlertService(
         mock(AlertCreater.class),
         mock(AlertDeleter.class),
         alertEvaluator,
+        mock(AlertManager.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
                 id.namespace.equals("allowedNamespace")
-        )
+        ))
     );
 
     try (Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
@@ -433,17 +416,8 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
         mock(AlertTemplateManager.class));
 
-    new AlertResource(
-        alertManager,
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        mock(AlertEvaluator.class),
-        mock(AppAnalyticsService.class),
-        mock(AlertInsightsProvider.class),
-        new AuthorizationManager(
-            alertTemplateRenderer,
-            AccessControlProvider.alwaysDeny
-        )
-    ).reset(nobody(), 1L);
+    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.alwaysDeny).reset(
+        nobody(),
+        1L);
   }
 }

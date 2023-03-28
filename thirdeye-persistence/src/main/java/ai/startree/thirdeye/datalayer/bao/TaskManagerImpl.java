@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -285,21 +286,24 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   private void registerMetrics() {
-    metricRegistry.register("taskCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+    metricRegistry.register("taskCountTotal",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
         return count();
       }
     });
 
-    metricRegistry.register("detectionTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+    metricRegistry.register("detectionTaskLatencyInMillis",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
         return getTaskLatency(TaskType.DETECTION);
       }
     });
 
-    metricRegistry.register("notificationTaskLatencyInMillis", new CachedGauge<Long>(15, TimeUnit.SECONDS) {
+    metricRegistry.register("notificationTaskLatencyInMillis",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
         return getTaskLatency(TaskType.NOTIFICATION);
@@ -328,7 +332,7 @@ public class TaskManagerImpl implements TaskManager {
 
   private void registerStatusMetric(final TaskStatus status) {
     metricRegistry.register(String.format("taskCount_%s", status.toString()),
-        new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
           protected Long loadValue() {
             return countByStatus(status);

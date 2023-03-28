@@ -15,7 +15,7 @@
 
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import { Alert as MuiAlert } from "@material-ui/lab";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -37,15 +37,19 @@ import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumerat
 import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
+    extractDetectionEvaluation,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import {
     generateDateRangeDaysFromNow,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
+import { determineGranularity } from "../../../utils/visualization/visualization.util";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { ZoomDomain } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
+import { CreateAnomaliesDateRangePicker } from "../create-anomalies-date-range-picker/create-anomalies-date-range-picker.componnent";
 import { CreateAnomalyPropertiesForm } from "../create-anomaly-properties-form/create-anomaly-properties-form.component";
 import { PreviewAnomalyChart } from "../preview-anomaly-chart/preview-anomaly-chart.component";
 import {
@@ -56,6 +60,7 @@ import {
 } from "./create-anomaly-wizard.interfaces";
 import { useCreateAnomalyWizardStyles } from "./create-anomaly-wizard.styles";
 import {
+    AnomalyWizardQueryParams,
     createEditableAnomaly,
     getAnomaliesAvgValues,
     getEnumerationItemsConfigFromAlert,
@@ -71,9 +76,10 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
         const navigate = useNavigate();
         const { notify } = useNotificationProviderV1();
 
-        const selectedAlert = alerts?.find(
-            (a) => a.id === Number(selectedAlertId)
-        );
+        const selectedAlert =
+            (selectedAlertId &&
+                alerts?.find((a) => a.id === Number(selectedAlertId))) ||
+            null;
 
         const {
             enumerationItems,
@@ -97,14 +103,15 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
 
         const [formFields, setFormFields] =
             useState<CreateAnomalyEditableFormFields>({
-                // TODO: Implement initialAnomalyData
-                alert: selectedAlert || null,
+                alert: selectedAlert,
                 enumerationItem: null,
                 // These dateRange values are meaningless without a selectedAlert, and once
                 // the alert insights are fetched, this is set to values from that data
                 // anyways, so these are just dummy values to prevent initiation errors
                 dateRange: [0, 0],
             });
+        const [captureDateRangeFromChart, setCaptureDateRangeFromChart] =
+            useState(true);
 
         const selectedAlertDetails =
             useMemo<SelectedAlertDetails | null>(() => {
@@ -132,8 +139,19 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 };
             }, [formFields.alert]);
 
+        const alertHasEnumerationItems = !!(
+            formFields.alert &&
+            getEnumerationItemsConfigFromAlert(formFields.alert)
+        );
+
         const editableAnomaly: EditableAnomaly | null = useMemo(() => {
             if (!(formFields.alert && formFields.dateRange)) {
+                return null;
+            }
+
+            // If the alert has enumeration items, the editableAnomaly cannot
+            // be created without having a dimension selected first
+            if (alertHasEnumerationItems && !formFields.enumerationItem) {
                 return null;
             }
 
@@ -150,9 +168,18 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             });
         }, [formFields, evaluation]);
 
-        const fetchAlertEvaluation = (): void => {
-            const start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
-            const end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+        const fetchAlertEvaluation = (params?: {
+            start: number;
+            end: number;
+        }): void => {
+            let start = searchParams.get(TimeRangeQueryStringKey.START_TIME);
+            let end = searchParams.get(TimeRangeQueryStringKey.END_TIME);
+
+            // Use custom datetime if passed
+            if (params && params.start && params.end) {
+                start = `${params.start}`;
+                end = `${params.end}`;
+            }
 
             if (!formFields.alert || !start || !end) {
                 return;
@@ -188,6 +215,41 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                 ) {
                     getEnumerationItems({
                         alertId: formFields.alert.id,
+                    }).then((enumerationItemsProp) => {
+                        if (!enumerationItemsProp) {
+                            return;
+                        }
+
+                        // From query params
+                        const selectedEnumerationItemId =
+                            Number(
+                                searchParams.get(
+                                    AnomalyWizardQueryParams.EnumerationItemId
+                                )
+                            ) || null;
+
+                        // If the enumeration item query param is defined AND the form field
+                        // enumeration item is empty, use the query param ID. The query
+                        // param should always be empty if the user is manually selecting a
+                        // new alert, but if redirecting from another page, the query param
+                        // may be present, so should be automatically loaded.
+
+                        if (
+                            selectedEnumerationItemId &&
+                            !formFields.enumerationItem
+                        ) {
+                            const selectedEnumerationItem =
+                                enumerationItemsProp?.find(
+                                    (e) => e.id === selectedEnumerationItemId
+                                ) || null;
+
+                            // Will take care of updating the enumeration item and
+                            // corresponding search param for both "defined" and "not defined" cases
+                            handleSetField(
+                                "enumerationItem",
+                                selectedEnumerationItem
+                            );
+                        }
                     });
                 }
             }
@@ -220,16 +282,14 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                         TimeRangeQueryStringKey.END_TIME,
                         `${end}`
                     );
-                    setSearchParams(searchParams);
+                    setSearchParams(searchParams, { replace: true });
                 }
 
                 // Fetch the alert evaluation AFTER the datetime query params are extracted from
                 // `alertInsight` and set to avoid duplicate API calls with outdated datetime params
                 fetchAlertEvaluation();
 
-                // Set the date range to the middle of the anomaly chart by default
-                handleSetField(
-                    "dateRange",
+                let dateRangeValues: CreateAnomalyEditableFormFields["dateRange"] =
                     generateDateRangeDaysFromNow(
                         1,
                         DateTime.fromMillis((start + end) / 2, {
@@ -242,8 +302,40 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                             second: 0,
                             millisecond: 0,
                         }) // Remove any offsets in the middle value
-                    )
-                );
+                    );
+
+                // Load params from query params if present
+                if (
+                    searchParams.has(
+                        AnomalyWizardQueryParams.AnomalyStartTime
+                    ) &&
+                    searchParams.has(AnomalyWizardQueryParams.AnomalyEndTime)
+                ) {
+                    const anomalyStartTimeQueryParam = Number(
+                        searchParams.get(
+                            AnomalyWizardQueryParams.AnomalyStartTime
+                        )
+                    );
+                    const anomalyEndTimeQueryParam = Number(
+                        searchParams.get(
+                            AnomalyWizardQueryParams.AnomalyEndTime
+                        )
+                    );
+
+                    // Pick from query params if present
+                    if (
+                        anomalyStartTimeQueryParam &&
+                        anomalyEndTimeQueryParam
+                    ) {
+                        dateRangeValues = [
+                            anomalyStartTimeQueryParam,
+                            anomalyEndTimeQueryParam,
+                        ];
+                    }
+                }
+
+                // Set the date range to the middle of the anomaly chart by default
+                handleSetField("dateRange", dateRangeValues);
             }
         }, [alertInsight]);
 
@@ -263,6 +355,178 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
             }
         };
 
+        const chartDataBounds = useMemo<{
+            start: number;
+            end: number;
+        } | null>(() => {
+            if (!evaluation) {
+                return null;
+            }
+
+            const detectionEvaluation =
+                extractDetectionEvaluation(evaluation)[0];
+            const { timestamp } = detectionEvaluation.data;
+            if (timestamp.length === 0) {
+                return null;
+            }
+
+            return {
+                start: timestamp[0],
+                end: timestamp[timestamp.length - 1],
+            };
+        }, [evaluation]);
+
+        /** @function Ensure that the date range values are always valid and make sense
+         *  @return {boolean} indicating if the attempted correction was successful or not
+         */
+        const setValidAnomalyDateRange = ([startTimeArg, endTimeArg]: [
+            number,
+            number
+        ]): boolean => {
+            if (!evaluation || !chartDataBounds) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.unable-to-parse-date-range-from-the-chart-please-try-again"
+                    )
+                );
+
+                return false;
+            }
+
+            const detectionEvaluation =
+                extractDetectionEvaluation(evaluation)[0];
+            const { timestamp } = detectionEvaluation.data;
+
+            if (timestamp.length === 0) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.unable-to-parse-date-range-from-the-chart-please-try-again"
+                    )
+                );
+
+                return false;
+            }
+
+            let start = startTimeArg;
+            let end = endTimeArg;
+
+            // Something went wrong in invoking this function since this selection is clearly wrong
+            if (end <= start) {
+                notify(
+                    NotificationTypeV1.Error,
+                    t(
+                        "message.unable-to-parse-date-range-from-the-chart-please-try-again"
+                    )
+                );
+
+                return false;
+            }
+
+            // Respect the data's Lower Bound
+            if (start < chartDataBounds.start) {
+                start = chartDataBounds.start;
+            }
+
+            // Respect the data's Upper Bound
+            if (end > chartDataBounds.end) {
+                end = chartDataBounds.end;
+            }
+
+            // Try the closest valid data-point, or fallback to the old value
+            start = timestamp.find((t) => t >= startTimeArg) || start;
+            end = timestamp.find((t) => t >= endTimeArg) || end;
+
+            // The anomaly must have a non-zero date range length
+            if (start === end) {
+                // If the start AND end lie on the last point,
+                // then move the end ahead by the alert granularity
+                if (end === chartDataBounds.end) {
+                    let alertGranularity = 0;
+
+                    const alertGranularityString =
+                        alertInsight?.templateWithProperties.metadata
+                            .granularity;
+
+                    // Try to get the alert time-series granularity from the metadata
+                    if (alertGranularityString) {
+                        alertGranularity = Duration.fromISO(
+                            alertGranularityString
+                        ).toMillis();
+                    } else {
+                        // If not found, estimate from the raw timestamp data
+                        alertGranularity = determineGranularity(timestamp);
+                    }
+
+                    end = end + alertGranularity;
+                } else {
+                    // If the start AND end don't lie on the last point,
+                    // just move the end ahead by one point
+                    end = timestamp[timestamp.findIndex((v) => v === end) + 1];
+                }
+            }
+
+            handleSetField("dateRange", [start, end]);
+
+            return true;
+        };
+
+        const handleRangeSelection = (
+            zoomDomain: ZoomDomain | null
+        ): boolean => {
+            if (!captureDateRangeFromChart) {
+                // Proceed with the default zoom action
+                return true;
+            }
+
+            // Disable the drag-select
+            if (zoomDomain?.x0 && zoomDomain?.x1 && evaluation) {
+                return !setValidAnomalyDateRange([
+                    zoomDomain.x0,
+                    zoomDomain.x1,
+                ]);
+            }
+
+            notify(
+                NotificationTypeV1.Error,
+                "Unable to parse date range from the chart. Please try again."
+            );
+
+            // Cancel the zoom
+            return false;
+        };
+
+        const handleUpdateEnumerationItemQueryParam = (
+            enumerationItemProp: CreateAnomalyEditableFormFields["enumerationItem"]
+        ): void => {
+            // If the param passed is truthy
+            if (enumerationItemProp) {
+                searchParams.set(
+                    AnomalyWizardQueryParams.EnumerationItemId,
+                    `${enumerationItemProp.id}`
+                );
+            } else {
+                searchParams.delete(AnomalyWizardQueryParams.EnumerationItemId);
+            }
+            setSearchParams(searchParams, { replace: true });
+        };
+
+        const handleUpdateAnomalyDateRangeQueryParam = (
+            anomalyDateRangeProp: CreateAnomalyEditableFormFields["dateRange"]
+        ): void => {
+            searchParams.set(
+                AnomalyWizardQueryParams.AnomalyStartTime,
+                `${anomalyDateRangeProp[0]}`
+            );
+            searchParams.set(
+                AnomalyWizardQueryParams.AnomalyEndTime,
+                `${anomalyDateRangeProp[1]}`
+            );
+            setSearchParams(searchParams, { replace: true });
+        };
+
+        /* Common updater function to update the state and handle the side effects */
         const handleSetField: HandleSetFields = (fieldName, fieldValue) => {
             setFormFields((stateProp) => ({
                 ...stateProp,
@@ -274,11 +538,24 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                         enumerationItem: null,
                     }),
             }));
+
+            // Handle the side effects
+            if (fieldName === "alert") {
+                handleUpdateEnumerationItemQueryParam(null);
+            } else if (fieldName === "enumerationItem") {
+                handleUpdateEnumerationItemQueryParam(
+                    fieldValue as CreateAnomalyEditableFormFields["enumerationItem"]
+                );
+            } else if (fieldName === "dateRange") {
+                handleUpdateAnomalyDateRangeQueryParam(
+                    fieldValue as CreateAnomalyEditableFormFields["dateRange"]
+                );
+            }
         };
 
         const isAnomalyValid = useMemo<boolean>(
-            () => getIsAnomalyValid(editableAnomaly),
-            [editableAnomaly]
+            () => getIsAnomalyValid(editableAnomaly, alertHasEnumerationItems),
+            [editableAnomaly, alertHasEnumerationItems]
         );
 
         const timezone = useMemo(
@@ -347,7 +624,6 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                         selectedAlertDetails={
                                             selectedAlertDetails
                                         }
-                                        timezone={timezone}
                                     />
                                     <Grid item xs={12}>
                                         <Box pb={3} pt={2}>
@@ -366,7 +642,7 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                     <Box
                                                         alignItems="center"
                                                         display="flex"
-                                                        height={400}
+                                                        height={200}
                                                         justifyContent="center"
                                                         position="absolute"
                                                         top={0}
@@ -378,9 +654,15 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                             }
                                                             severity="info"
                                                         >
-                                                            {t(
-                                                                "message.select-an-alert-to-generate-the-anomaly-preview"
-                                                            )}
+                                                            {formFields.alert &&
+                                                            alertHasEnumerationItems &&
+                                                            !formFields.enumerationItem
+                                                                ? t(
+                                                                      "message.select-a-dimension-to-generate-the-anomaly-preview"
+                                                                  )
+                                                                : t(
+                                                                      "message.select-an-alert-to-generate-the-anomaly-preview"
+                                                                  )}
                                                         </MuiAlert>
                                                     </Box>
                                                 </Box>
@@ -388,6 +670,25 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                             isEmpty={!editableAnomaly}
                                         >
                                             <PreviewAnomalyChart
+                                                anomalyDateRangeControl={
+                                                    <CreateAnomaliesDateRangePicker
+                                                        captureDateRangeFromChart={
+                                                            captureDateRangeFromChart
+                                                        }
+                                                        dateRange={
+                                                            formFields.dateRange
+                                                        }
+                                                        setCaptureDateRangeFromChart={
+                                                            setCaptureDateRangeFromChart
+                                                        }
+                                                        setValidAnomalyDateRange={
+                                                            setValidAnomalyDateRange
+                                                        }
+                                                        timezone={
+                                                            timezone as string
+                                                        }
+                                                    />
+                                                }
                                                 editableAnomaly={
                                                     editableAnomaly as EditableAnomaly
                                                 }
@@ -405,6 +706,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                         ActionStatus.Working
                                                 )}
                                                 timezone={timezone}
+                                                onRangeSelection={
+                                                    handleRangeSelection
+                                                }
                                             />
                                         </EmptyStateSwitch>
                                     </Grid>

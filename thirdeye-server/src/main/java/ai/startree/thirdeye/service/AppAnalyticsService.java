@@ -11,16 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.service;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_EXPECTED;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_NEW_TREND;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NOT_ANOMALY;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NO_FEEDBACK;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.core.ConfusionMatrix;
+import ai.startree.thirdeye.core.MonitoredMetricWrapper;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
+import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -36,6 +41,7 @@ import com.google.common.base.Suppliers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,9 +66,11 @@ public class AppAnalyticsService {
   private final AnomalyManager anomalyManager;
 
   public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
-      Suppliers.memoizeWithExpiration(this::getAllAnomalyFeedbacks, 5, TimeUnit.MINUTES)::get;
+      Suppliers.memoizeWithExpiration(this::getAllAnomalyFeedbacks,
+          METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES)::get;
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
-      Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics, 5, TimeUnit.MINUTES)::get;
+      Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
+          METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES)::get;
 
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
@@ -73,7 +81,8 @@ public class AppAnalyticsService {
     this.anomalyManager = anomalyManager;
     this.renderer = renderer;
 
-    metricRegistry.register("nMonitoredMetrics", new CachedGauge<Integer>(5, TimeUnit.MINUTES) {
+    metricRegistry.register("nMonitoredMetrics",
+        new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Integer loadValue() {
         return uniqueMonitoredMetricsCount();
@@ -97,12 +106,17 @@ public class AppAnalyticsService {
         return computeConfusionMatrixForAnomalies(null).getPrecision();
       }
     });
-    metricRegistry.register("anomalyResponseRate", new CachedGauge<Double>(1, TimeUnit.HOURS) {
+    metricRegistry.register("anomalyResponseRate",
+        new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Double loadValue() {
         return computeConfusionMatrixForAnomalies(null).getResponseRate();
       }
     });
+  }
+
+  public static String appVersion() {
+    return AppAnalyticsService.class.getPackage().getImplementationVersion();
   }
 
   public Integer uniqueMonitoredMetricsCount() {
@@ -122,7 +136,9 @@ public class AppAnalyticsService {
       // Interval does not have significance in this case, just a placeholder.
       return renderer.renderAlert(alertDTO, new Interval(1L, 2L)).getMetadata();
     } catch (final IOException | ClassNotFoundException | BadRequestException e) {
-      log.warn(String.format("Trouble while rendering alert, %s. id : %d", alertDTO.getName(), alertDTO.getId()), e);
+      log.warn(String.format("Trouble while rendering alert, %s. id : %d",
+          alertDTO.getName(),
+          alertDTO.getId()), e);
       return null;
     }
   }
@@ -215,14 +231,26 @@ public class AppAnalyticsService {
 
   private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(final List<AnomalyFeedback> feedbacks) {
     final Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
-    for(final AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
+    for (final AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
       feedbackStats.put(type, 0L);
     }
     feedbacks.forEach(feedback -> {
       final AnomalyFeedbackType type = feedback.getFeedbackType();
       final long count = feedbackStats.get(type);
-      feedbackStats.put(type, count+1);
+      feedbackStats.put(type, count + 1);
     });
     return feedbackStats;
+  }
+
+  public AppAnalyticsApi getAppAnalytics(final Long startTime, final Long endTime) {
+    final List<Predicate> predicates = new ArrayList<>();
+    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
+    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
+    final DaoFilter filter = predicates.isEmpty()
+        ? null : new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
+    return new AppAnalyticsApi()
+        .setVersion(appVersion())
+        .setnMonitoredMetrics(uniqueMonitoredMetricsCount())
+        .setAnomalyStats(computeAnomalyStats(filter));
   }
 }

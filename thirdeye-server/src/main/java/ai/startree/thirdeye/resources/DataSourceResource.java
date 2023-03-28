@@ -18,22 +18,15 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
-import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.core.DataSourceOnboarder;
-import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.DataSourceService;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.StatusApi;
-import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.ImmutableMap;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiKeyAuthDefinition;
@@ -43,7 +36,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
@@ -64,50 +56,12 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDTO> {
 
-  private final DataSourceCache dataSourceCache;
-  private final DataSourceOnboarder dataSourceOnboarder;
+  private final DataSourceService dataSourceService;
 
   @Inject
-  public DataSourceResource(
-      final DataSourceManager dataSourceManager,
-      final DataSourceCache dataSourceCache,
-      final DataSourceOnboarder dataSourceOnboarder,
-      final AuthorizationManager authorizationManager) {
-    super(dataSourceManager, ImmutableMap.of(), authorizationManager);
-    this.dataSourceCache = dataSourceCache;
-    this.dataSourceOnboarder = dataSourceOnboarder;
-  }
-
-  @Override
-  protected DataSourceDTO createDto(final ThirdEyePrincipal principal,
-      final DataSourceApi api) {
-    final DataSourceDTO dto = toDto(api);
-    dto.setCreatedBy(principal.getName());
-    return dto;
-  }
-
-  @Override
-  protected DataSourceDTO toDto(final DataSourceApi api) {
-    return ApiBeanMapper.toDataSourceDto(api);
-  }
-
-  @Override
-  protected DataSourceApi toApi(final DataSourceDTO dto) {
-    return ApiBeanMapper.toApi(dto);
-  }
-
-  @Override
-  protected void deleteDto(DataSourceDTO dto) {
-    super.deleteDto(dto);
-    dataSourceCache.removeDataSource(dto.getName());
-  }
-
-  @Override
-  protected void prepareUpdatedDto(
-      final ThirdEyePrincipal principal,
-      final DataSourceDTO existing,
-      final DataSourceDTO updated) {
-    dataSourceCache.removeDataSource(existing.getName());
+  public DataSourceResource(final DataSourceService dataSourceService) {
+    super(dataSourceService);
+    this.dataSourceService = dataSourceService;
   }
 
   @Timed
@@ -116,12 +70,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   public Response getDatasets(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("name") String name) {
-
-    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
-    final List<DatasetApi> datasets = dataSource.getDatasets().stream()
-        .map(ApiBeanMapper::toApi)
-        .collect(Collectors.toList());
-    return respondOk(datasets);
+    return respondOk(dataSourceService.getDatasets(name));
   }
 
   @POST
@@ -136,10 +85,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     ensureExists(dataSourceName, "dataSourceName is a required field");
     ensureExists(datasetName, "datasetName is a required field");
 
-    final DatasetConfigDTO datasetConfigDTO = dataSourceOnboarder.onboardDataset(dataSourceName,
-        datasetName);
-
-    return respondOk(ApiBeanMapper.toApi(datasetConfigDTO));
+    return respondOk(dataSourceService.onboardDataset(dataSourceName, datasetName));
   }
 
   @POST
@@ -151,11 +97,8 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @FormParam("name") String name) {
 
     ensureExists(name, "name is a required field");
-    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(name);
-
-    return respondOk(datasets.stream()
-        .map(ApiBeanMapper::toApi)
-        .collect(Collectors.toList()));
+    final List<DatasetApi> onboarded = dataSourceService.onboardAll(name);
+    return respondOk(onboarded);
   }
 
   @DELETE
@@ -166,20 +109,16 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("name") String name) {
     ensureExists(name, "name is a required field");
-
-    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.offboardAll(name);
-
-    return respondOk(datasets.stream()
-        .map(ApiBeanMapper::toApi)
-        .collect(Collectors.toList()));
+    return respondOk(dataSourceService.offboardAll(name));
   }
 
   @DELETE
   @Path("cache")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response clearDataSourceCache(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
-    dataSourceCache.clear();
+  public Response clearDataSourceCache(
+      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+    dataSourceService.clearDataSourceCache();
     return Response.ok().build();
   }
 
@@ -193,7 +132,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     try {
       // throws ThirdEyeException on datasource not found in DB
       // returns null when not able to load datasource
-      if (dataSourceCache.getDataSource(name).validate()) {
+      if (dataSourceService.validate(name)) {
         return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));
       }
     } catch (ThirdEyeException e) {

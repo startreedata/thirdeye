@@ -15,6 +15,7 @@
 import { CardProps } from "@material-ui/core";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
+import { TimeSeriesChartProps } from "../time-series-chart/time-series-chart.interfaces";
 
 export interface AlertEvaluationTimeSeriesCardProps {
     alertEvaluationTimeSeriesHeight: number;
@@ -26,6 +27,7 @@ export interface AlertEvaluationTimeSeriesCardProps {
     disableNavigation?: boolean;
     timezone?: string;
     rootCardProps?: CardProps;
+    timeSeriesProps?: Partial<TimeSeriesChartProps>;
 }
 
 export interface ViewAnomalyHeaderProps {

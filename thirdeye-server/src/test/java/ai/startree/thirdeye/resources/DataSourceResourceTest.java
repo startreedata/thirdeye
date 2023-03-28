@@ -23,6 +23,7 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.service.DataSourceService;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
@@ -44,14 +45,14 @@ public class DataSourceResourceTest {
   void setup() {
     dataSource = mock(ThirdEyeDataSource.class);
     dataSourceCache = mock(DataSourceCache.class);
-    dataSourceResource = new DataSourceResource(mock(DataSourceManager.class),
+    dataSourceResource = new DataSourceResource(new DataSourceService(
+        mock(DataSourceManager.class),
         dataSourceCache,
         mock(DataSourceOnboarder.class),
         new AuthorizationManager(
             mock(AlertTemplateRenderer.class),
             AccessControlProvider.alwaysAllow
-        )
-        );
+        )));
   }
 
   @Test

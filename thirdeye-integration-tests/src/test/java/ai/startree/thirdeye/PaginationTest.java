@@ -47,6 +47,7 @@ public class PaginationTest {
 
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
+  private static final int totalAnomalies = 100;
 
   @BeforeClass
   public void beforeClass() throws Exception {
@@ -55,6 +56,12 @@ public class PaginationTest {
     SUPPORT = buildSupport(dbConfiguration, "happypath/config/server.yaml");
     SUPPORT.before();
     client = buildClient("pagination-test-client", SUPPORT);
+
+    final List<AnomalyApi> anomalies = new ArrayList<>();
+    for (int i = 0; i < totalAnomalies; i++) {
+      anomalies.add(anomaly());
+    }
+    request("api/anomalies").post(Entity.json(anomalies));
   }
 
   @AfterClass(alwaysRun = true)
@@ -77,13 +84,6 @@ public class PaginationTest {
   @Test
   public void testResponseSizeWithLimitFilter() {
     final int limit = 20;
-    final int totalAnomalies = 100;
-    final List<AnomalyApi> anomalies = new ArrayList<>();
-    for (int i = 0; i < totalAnomalies; i++) {
-      anomalies.add(anomaly());
-    }
-    request("api/anomalies").post(Entity.json(anomalies));
-
     Response response = request("api/anomalies?limit=" + limit).get();
     assertThat(response.getStatus()).isEqualTo(200);
     List<AnomalyApi> returnedAnomalies = response.readEntity(ANOMALY_LIST_TYPE);
@@ -96,18 +96,21 @@ public class PaginationTest {
     assertThat(returnedAnomalies.size()).isEqualTo(totalAnomalies);
   }
 
-  @Test(dependsOnMethods = "testResponseSizeWithLimitFilter")
+  @Test
   public void testResponseWithLimitAndOffsetFilters() {
     final int limit = 40;
 
     List<AnomalyApi> page1 = getAllWithLimitAndOffset(limit, 0);
     List<Long> allPagesIds = apisToIds(page1);
+    assertThat(page1.size()).isEqualTo(limit);
 
     List<AnomalyApi> page2 = getAllWithLimitAndOffset(limit, 40);
     allPagesIds.addAll(apisToIds(page2));
+    assertThat(page2.size()).isEqualTo(limit);
 
     List<AnomalyApi> page3 = getAllWithLimitAndOffset(limit, 80);
     allPagesIds.addAll(apisToIds(page3));
+    assertThat(page3.size()).isEqualTo(20);
 
     Response response = request("api/anomalies").get();
     List<AnomalyApi> getAll = response.readEntity(ANOMALY_LIST_TYPE);
@@ -116,15 +119,15 @@ public class PaginationTest {
     getAll.forEach(entry -> assertThat(allPagesIds.contains(entry.getId())).isTrue());
   }
 
-  @Test(dependsOnMethods = "testResponseSizeWithLimitFilter")
-  public void testLimitAndOffsetFailures() {
-    Response response = request("api/anomalies?limit=5&offset=-1").get();
+  @Test
+  public void testNegativeLimitValue() {
+    Response response = request("api/anomalies?limit=-10").get();
     List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(results.size()).isZero();
   }
 
-  @Test(dependsOnMethods = "testResponseSizeWithLimitFilter")
+  @Test
   public void testLimitAndOffsetWithOtherFilters() {
     Response response = request("api/anomalies?isChild=true&limit=5&offset=5").get();
     List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);

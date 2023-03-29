@@ -44,10 +44,19 @@ public class PaginationTest {
 
   private static final Logger log = LoggerFactory.getLogger(PaginationTest.class);
   private static final GenericType<List<AnomalyApi>> ANOMALY_LIST_TYPE = new GenericType<>() {};
-
+  private static final int totalAnomalies = 100;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
-  private static final int totalAnomalies = 100;
+
+  private static AnomalyApi anomaly() {
+    return new AnomalyApi();
+  }
+
+  private static List<Long> apisToIds(final List<AnomalyApi> apis) {
+    return apis.stream()
+        .map(ThirdEyeCrudApi::getId)
+        .collect(Collectors.toList());
+  }
 
   @BeforeClass
   public void beforeClass() throws Exception {
@@ -71,16 +80,6 @@ public class PaginationTest {
     MySqlTestDatabase.cleanSharedDatabase();
   }
 
-  private static AnomalyApi anomaly() {
-    return new AnomalyApi();
-  }
-
-  private static List<Long> apisToIds(final List<AnomalyApi> apis) {
-    return apis.stream()
-        .map(ThirdEyeCrudApi::getId)
-        .collect(Collectors.toList());
-  }
-
   @Test
   public void testResponseSizeWithLimitFilter() {
     final int limit = 20;
@@ -100,20 +99,20 @@ public class PaginationTest {
   public void testResponseWithLimitAndOffsetFilters() {
     final int limit = 40;
 
-    List<AnomalyApi> page1 = getAllWithLimitAndOffset(limit, 0);
-    List<Long> allPagesIds = apisToIds(page1);
+    final List<AnomalyApi> page1 = getAllWithLimitAndOffset(limit, 0);
+    final List<Long> allPagesIds = apisToIds(page1);
     assertThat(page1.size()).isEqualTo(limit);
 
-    List<AnomalyApi> page2 = getAllWithLimitAndOffset(limit, 40);
+    final List<AnomalyApi> page2 = getAllWithLimitAndOffset(limit, 40);
     allPagesIds.addAll(apisToIds(page2));
     assertThat(page2.size()).isEqualTo(limit);
 
-    List<AnomalyApi> page3 = getAllWithLimitAndOffset(limit, 80);
+    final List<AnomalyApi> page3 = getAllWithLimitAndOffset(limit, 80);
     allPagesIds.addAll(apisToIds(page3));
     assertThat(page3.size()).isEqualTo(20);
 
-    Response response = request("api/anomalies").get();
-    List<AnomalyApi> getAll = response.readEntity(ANOMALY_LIST_TYPE);
+    final Response response = request("api/anomalies").get();
+    final List<AnomalyApi> getAll = response.readEntity(ANOMALY_LIST_TYPE);
 
     assertThat(allPagesIds.size()).isEqualTo(getAll.size());
     getAll.forEach(entry -> assertThat(allPagesIds.contains(entry.getId())).isTrue());
@@ -121,24 +120,24 @@ public class PaginationTest {
 
   @Test
   public void testNegativeLimitValue() {
-    Response response = request("api/anomalies?limit=-10").get();
-    List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
+    final Response response = request("api/anomalies?limit=-10").get();
+    final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(results.size()).isZero();
   }
 
   @Test
   public void testNegativeOffsetValue() {
-    Response response = request("api/anomalies?limit=5&offset=-10").get();
-    List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
+    final Response response = request("api/anomalies?limit=5&offset=-10").get();
+    final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(results.size()).isZero();
   }
 
   @Test
   public void testOffsetWithoutLimit() {
-    Response response = request("api/anomalies?offset=10").get();
-    List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
+    final Response response = request("api/anomalies?offset=10").get();
+    final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(results.size()).isZero();
   }

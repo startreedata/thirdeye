@@ -46,7 +46,6 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         onSearchTermChange,
         sortOrder,
         onSortOrderChange,
-        alertsStats,
         timezone,
     }) => {
         const [filteredDetectionEvaluations, setFilteredDetectionEvaluations] =
@@ -245,9 +244,6 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                 return (
                                     <EnumerationItemRow
                                         alertId={alertId}
-                                        alertStats={
-                                            alertsStats?.[alertId] ?? null
-                                        }
                                         anomalies={
                                             detectionEvaluation.anomalies
                                         }

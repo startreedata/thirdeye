@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -71,19 +72,22 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   public AnomalyManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(AnomalyDTO.class, genericPojoDao);
-    metricRegistry.register("anomalyCountTotal", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+    metricRegistry.register("anomalyCountTotal",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
         return count();
       }
     });
-    metricRegistry.register("parentAnomalyCount", new CachedGauge<Long>(1, TimeUnit.MINUTES) {
+    metricRegistry.register("parentAnomalyCount",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
         return countParentAnomalies(null);
       }
     });
-    metricRegistry.register("anomalyFeedbackCount", new CachedGauge<Long>(15, TimeUnit.MINUTES) {
+    metricRegistry.register("anomalyFeedbackCount",
+        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
       protected Long loadValue() {
         return genericPojoDao.count(AnomalyFeedbackDTO.class);

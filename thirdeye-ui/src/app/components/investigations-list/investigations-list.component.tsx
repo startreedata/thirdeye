@@ -12,28 +12,40 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Link, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Grid,
+    Link,
+    Typography,
+} from "@material-ui/core";
+import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
+import BarChartIcon from "@material-ui/icons/BarChart";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import React, { FunctionComponent, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 import {
     DataGridScrollV1,
     DataGridV1,
     PageContentsCardV1,
-    SkeletonV1,
 } from "../../platform/components";
 import { formatDateAndTimeV1 } from "../../platform/utils";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
 import { INVESTIGATION_ID_QUERY_PARAM } from "../../utils/investigation/investigation.util";
 import { getRootCauseAnalysisForAnomalyInvestigatePath } from "../../utils/routes/routes.util";
-import { NoDataIndicator } from "../no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { useInvestigationListStyles } from "./investigation-list.styles";
 import { InvestigationsListProps } from "./investigations-list.interfaces";
 
 export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
     investigations,
     getInvestigationsRequestStatus,
+    anomalyId,
 }) => {
     const classes = useInvestigationListStyles();
     const { t } = useTranslation();
@@ -120,58 +132,102 @@ export const InvestigationsList: FunctionComponent<InvestigationsListProps> = ({
         },
     ];
 
-    if (getInvestigationsRequestStatus === ActionStatus.Working) {
-        return (
-            <PageContentsCardV1>
-                <SkeletonV1 animation="pulse" />
-                <SkeletonV1 animation="pulse" />
-                <SkeletonV1 animation="pulse" />
-            </PageContentsCardV1>
-        );
-    }
-
-    if (getInvestigationsRequestStatus === ActionStatus.Error) {
-        return (
-            <PageContentsCardV1>
-                <Box pb={20} pt={20}>
-                    <NoDataIndicator />
-                </Box>
-            </PageContentsCardV1>
-        );
-    }
-
-    if (
-        getInvestigationsRequestStatus === ActionStatus.Done &&
-        investigations &&
-        investigations.length === 0
-    ) {
-        return (
-            <PageContentsCardV1>
-                <Box pb={3} pt={3} textAlign="center">
-                    <Typography variant="h6">
-                        {t("message.no-saved-investigations")}
-                    </Typography>
-                </Box>
-            </PageContentsCardV1>
-        );
-    }
-
     return (
-        <PageContentsCardV1 disablePadding fullHeight>
-            <DataGridV1<Investigation>
-                disableSearch
-                disableSelection
-                hideBorder
-                columns={investigationsColumns}
-                data={investigations as Investigation[]}
-                rowKey="id"
-                scroll={DataGridScrollV1.Body}
-                toolbarComponent={
-                    <Typography variant="h6">
-                        {t("label.saved-investigations-anomaly")}
-                    </Typography>
-                }
-            />
-        </PageContentsCardV1>
+        <LoadingErrorStateSwitch
+            wrapInCard
+            isError={getInvestigationsRequestStatus === ActionStatus.Error}
+            isLoading={
+                getInvestigationsRequestStatus === ActionStatus.Working ||
+                getInvestigationsRequestStatus === ActionStatus.Initial
+            }
+        >
+            <PageContentsCardV1 disablePadding fullHeight>
+                <EmptyStateSwitch
+                    emptyState={
+                        <CardContent>
+                            <Box marginBottom={2}>
+                                <Typography variant="h6">
+                                    {t("label.saved-investigations-anomaly")}
+                                </Typography>
+                            </Box>
+                            <Box>
+                                <Card variant="outlined">
+                                    <Box pb={3} pt={3} textAlign="center">
+                                        <Box>
+                                            <BarChartIcon
+                                                color="primary"
+                                                fontSize="large"
+                                            />
+                                        </Box>
+                                        <Typography variant="h6">
+                                            {t(
+                                                "message.no-saved-investigations"
+                                            )}
+                                        </Typography>
+                                        <Box pt={1}>
+                                            <Button
+                                                color="primary"
+                                                component={RouterLink}
+                                                startIcon={
+                                                    <AddCircleOutlineIcon />
+                                                }
+                                                to={`${getRootCauseAnalysisForAnomalyInvestigatePath(
+                                                    anomalyId
+                                                )}`}
+                                                variant="contained"
+                                            >
+                                                {t("label.investigate-entity", {
+                                                    entity: t("label.anomaly"),
+                                                })}
+                                            </Button>
+                                        </Box>
+                                    </Box>
+                                </Card>
+                            </Box>
+                        </CardContent>
+                    }
+                    isEmpty={!!investigations && investigations.length === 0}
+                >
+                    <DataGridV1<Investigation>
+                        disableSearch
+                        disableSelection
+                        hideBorder
+                        columns={investigationsColumns}
+                        data={investigations as Investigation[]}
+                        rowKey="id"
+                        scroll={DataGridScrollV1.Body}
+                        toolbarComponent={
+                            <Grid
+                                container
+                                alignItems="center"
+                                justifyContent="space-between"
+                            >
+                                <Grid item>
+                                    <Typography variant="h6">
+                                        {t(
+                                            "label.saved-investigations-anomaly"
+                                        )}
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Button
+                                        color="primary"
+                                        component={RouterLink}
+                                        to={`${getRootCauseAnalysisForAnomalyInvestigatePath(
+                                            anomalyId
+                                        )}`}
+                                        variant="contained"
+                                    >
+                                        {t("label.investigate-entity", {
+                                            entity: t("label.anomaly"),
+                                        })}
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        }
+                    />
+                </EmptyStateSwitch>
+            </PageContentsCardV1>
+        </LoadingErrorStateSwitch>
     );
 };

@@ -13,7 +13,6 @@
  * the License.
  */
 import type { DataGridSortOrderV1 } from "../../../platform/components";
-import type { AlertStats } from "../../../rest/dto/alert.interfaces";
 import type { DetectionEvaluationForRender } from "../enumeration-item-merger/enumeration-item-merger.interfaces";
 
 export interface EnumerationItemsTableProps {
@@ -25,6 +24,5 @@ export interface EnumerationItemsTableProps {
     initialSearchTerm: string;
     onSearchTermChange: (newTerm: string) => void;
     onSortOrderChange: (newOrder: DataGridSortOrderV1) => void;
-    alertsStats?: Record<number, AlertStats | null> | null;
     timezone?: string;
 }

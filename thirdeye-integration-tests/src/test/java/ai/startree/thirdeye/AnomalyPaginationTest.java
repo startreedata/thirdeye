@@ -44,7 +44,7 @@ public class AnomalyPaginationTest {
 
   private static final Logger log = LoggerFactory.getLogger(AnomalyPaginationTest.class);
   private static final GenericType<List<AnomalyApi>> ANOMALY_LIST_TYPE = new GenericType<>() {};
-  private static final int totalAnomalies = 100;
+  private static final int TOTAL_ANOMALIES = 100;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -67,7 +67,7 @@ public class AnomalyPaginationTest {
     client = buildClient("pagination-test-client", SUPPORT);
 
     final List<AnomalyApi> anomalies = new ArrayList<>();
-    for (int i = 0; i < totalAnomalies; i++) {
+    for (int i = 0; i < TOTAL_ANOMALIES; i++) {
       anomalies.add(anomaly());
     }
     request("api/anomalies").post(Entity.json(anomalies));
@@ -89,27 +89,27 @@ public class AnomalyPaginationTest {
     assertThat(returnedAnomalies.size()).isEqualTo(limit);
 
     // ensure when limit is higher that actual entity cardinality, it returns all the entries
-    response = request("api/anomalies?limit=" + (limit + totalAnomalies)).get();
+    response = request("api/anomalies?limit=" + (limit + TOTAL_ANOMALIES)).get();
     assertThat(response.getStatus()).isEqualTo(200);
     returnedAnomalies = response.readEntity(ANOMALY_LIST_TYPE);
-    assertThat(returnedAnomalies.size()).isEqualTo(totalAnomalies);
+    assertThat(returnedAnomalies.size()).isEqualTo(TOTAL_ANOMALIES);
   }
 
   @Test
   public void testResponseWithLimitAndOffsetFilters() {
     final int limit = 40;
+    int offset = 0;
+    final List<Long> allPagesIds = new ArrayList<>();
 
-    final List<AnomalyApi> page1 = getAllWithLimitAndOffset(limit, 0);
-    final List<Long> allPagesIds = apisToIds(page1);
-    assertThat(page1.size()).isEqualTo(limit);
-
-    final List<AnomalyApi> page2 = getAllWithLimitAndOffset(limit, 40);
-    allPagesIds.addAll(apisToIds(page2));
-    assertThat(page2.size()).isEqualTo(limit);
-
-    final List<AnomalyApi> page3 = getAllWithLimitAndOffset(limit, 80);
-    allPagesIds.addAll(apisToIds(page3));
-    assertThat(page3.size()).isEqualTo(20);
+    while (offset < TOTAL_ANOMALIES) {
+      final List<AnomalyApi> page = getAllWithLimitAndOffset(limit, offset);
+      allPagesIds.addAll(apisToIds(page));
+      // limit -> for all but the last page
+      // TOTAL_ANOMALIES - offset -> for the last page
+      assertThat(page.size()).isEqualTo(Math.min(limit, TOTAL_ANOMALIES - offset));
+      // increment the page
+      offset += limit;
+    }
 
     final Response response = request("api/anomalies").get();
     final List<AnomalyApi> getAll = response.readEntity(ANOMALY_LIST_TYPE);
@@ -123,7 +123,7 @@ public class AnomalyPaginationTest {
     final Response response = request("api/anomalies?limit=-10").get();
     final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(results.size()).isZero();
+    assertThat(results).isEmpty();
   }
 
   @Test
@@ -131,7 +131,7 @@ public class AnomalyPaginationTest {
     final Response response = request("api/anomalies?limit=5&offset=-10").get();
     final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(results.size()).isZero();
+    assertThat(results).isEmpty();
   }
 
   @Test
@@ -139,14 +139,14 @@ public class AnomalyPaginationTest {
     final Response response = request("api/anomalies?offset=10").get();
     final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(results.size()).isZero();
+    assertThat(results).isEmpty();
   }
 
   @Test
   public void testLimitAndOffsetWithOtherFilters() {
     Response response = request("api/anomalies?isChild=true&limit=5&offset=5").get();
     List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
-    assertThat(results.size()).isZero();
+    assertThat(results).isEmpty();
 
     response = request("api/anomalies?isChild=false&limit=5&offset=5").get();
     results = response.readEntity(ANOMALY_LIST_TYPE);

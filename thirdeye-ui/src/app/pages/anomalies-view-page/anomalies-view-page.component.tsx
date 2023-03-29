@@ -17,25 +17,28 @@ import { Box, Button, Grid, Link } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+    Link as RouterLink,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from "react-router-dom";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { anomaliesInvestigateBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { InvestigationsList } from "../../components/investigations-list/investigations-list.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
-import { ViewAnomalyHeader } from "../../components/visualizations/alert-evaluation-time-series-card/headers/view-anomaly-header.component";
 import {
-    HelpLinkIconV1,
     NotificationTypeV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageV1,
-    TooltipV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -60,7 +63,6 @@ import {
     createAlertEvaluation,
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
-import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { generateNameForEnumerationItem } from "../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
@@ -70,7 +72,6 @@ import {
 import {
     getAlertsAlertPath,
     getAnomaliesAllPath,
-    getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../utils/routes/routes.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
@@ -269,6 +270,7 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader
+                transparentBackground
                 breadcrumbs={[
                     {
                         link: getAnomaliesAllPath(),
@@ -304,18 +306,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             onClose={() => setIsHelpPanelOpen(false)}
                         />
                         <Button
-                            color="primary"
-                            component="button"
-                            href={`${getRootCauseAnalysisForAnomalyInvestigatePath(
-                                Number(anomalyId)
-                            )}?${searchParams.toString()}`}
-                            variant="contained"
-                        >
-                            {t("label.investigate-entity", {
-                                entity: t("label.anomaly"),
-                            })}
-                        </Button>
-                        <Button
                             component="button"
                             variant="contained"
                             onClick={handleAnomalyDelete}
@@ -326,93 +316,75 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 }
                 subtitle={getSubtitle()}
             >
-                <PageHeaderTextV1>
-                    {anomaly && uiAnomaly && (
-                        <>
-                            <Link
-                                href={getAlertsAlertPath(
-                                    anomaly.alert.id,
-                                    enumerationItemSearchParams
-                                )}
-                            >
-                                {anomaly.alert.name}
-                            </Link>
-                            : {getAnomalyName(uiAnomaly)}
-                        </>
-                    )}
-                    <TooltipV1
-                        placement="top"
-                        title={
-                            t(
-                                "label.how-to-perform-root-cause-analysis-doc"
-                            ) as string
-                        }
-                    >
-                        <span>
-                            <HelpLinkIconV1
-                                displayInline
-                                enablePadding
-                                externalLink
-                                href={`${THIRDEYE_DOC_LINK}/how-tos/perform-root-cause-analysis`}
-                            />
-                        </span>
-                    </TooltipV1>
-                </PageHeaderTextV1>
+                {anomaly && uiAnomaly && (
+                    <>
+                        <PageHeaderTextV1>
+                            {getAnomalyName(uiAnomaly)}
+                        </PageHeaderTextV1>
+                        <Link
+                            component={RouterLink}
+                            to={getAlertsAlertPath(
+                                anomaly.alert.id,
+                                enumerationItemSearchParams
+                            )}
+                        >
+                            {anomaly.alert.name}
+                        </Link>
+                    </>
+                )}
             </PageHeader>
 
             <PageContentsGridV1>
                 {/* Anomaly */}
                 <Grid item xs={12}>
                     <AnomalyCard
+                        anomaly={anomaly}
                         className={style.fullHeight}
                         isLoading={
-                            anomalyRequestStatus === ActionStatus.Working
+                            anomalyRequestStatus === ActionStatus.Working ||
+                            anomalyRequestStatus === ActionStatus.Initial
                         }
                         timezone={determineTimezoneFromAlertInEvaluation(
                             alertInsight?.templateWithProperties
                         )}
-                        uiAnomaly={uiAnomaly}
                     />
                 </Grid>
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
-                    {chartDataHasIssues && (
-                        <PageContentsCardV1>
-                            <Box pb={20} pt={20}>
-                                <NoDataIndicator />
-                            </Box>
-                        </PageContentsCardV1>
-                    )}
-                    {!chartDataHasIssues && (
+                    <EmptyStateSwitch
+                        emptyState={
+                            <PageContentsCardV1>
+                                <Box pb={20} pt={20}>
+                                    <NoDataIndicator />
+                                </Box>
+                            </PageContentsCardV1>
+                        }
+                        isEmpty={!!chartDataHasIssues}
+                    >
                         <AlertEvaluationTimeSeriesCard
                             disableNavigation
-                            alertEvaluationTimeSeriesHeight={500}
+                            alertEvaluationTimeSeriesHeight={400}
                             anomalies={[anomaly as Anomaly]}
                             detectionEvaluation={detectionEvaluation}
-                            header={
-                                <ViewAnomalyHeader
-                                    anomaly={anomaly}
-                                    timezone={determineTimezoneFromAlertInEvaluation(
-                                        alertInsight?.templateWithProperties
-                                    )}
-                                    onRefresh={fetchAlertEvaluation}
-                                />
-                            }
                             isLoading={
                                 getEvaluationRequestStatus ===
-                                ActionStatus.Working
+                                    ActionStatus.Working ||
+                                getEvaluationRequestStatus ===
+                                    ActionStatus.Initial
                             }
                             timezone={determineTimezoneFromAlertInEvaluation(
                                 alertInsight?.templateWithProperties
                             )}
+                            onRefresh={fetchAlertEvaluation}
                         />
-                    )}
+                    </EmptyStateSwitch>
                 </Grid>
 
                 {/* Existing investigations */}
                 <Grid item xs={12}>
                     <InvestigationsList
+                        anomalyId={Number(anomalyId)}
                         getInvestigationsRequestStatus={
                             getInvestigationsRequestStatus
                         }

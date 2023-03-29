@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, ButtonGroup, TextField } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Grid, TextField } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { AxiosError } from "axios";
@@ -45,6 +45,7 @@ import { AnomalyFeedbackProps } from "./anomaly-feedback.interfaces";
 export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     anomalyId,
     anomalyFeedback,
+    hideComment,
 }) => {
     const [currentlySelected, setCurrentlySelected] =
         useState<AnomalyFeedbackType>(anomalyFeedback.type);
@@ -182,11 +183,8 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
 
     return (
         <>
-            <Box display="flex">
-                <Box marginRight={1} paddingTop={1}>
-                    <label>{t("message.is-this-an-anomaly")}</label>
-                </Box>
-                <Box>
+            <Grid container alignItems="center">
+                <Grid item>
                     {/** The single dropdown should trigger the menu open */}
                     <ButtonGroup
                         color="primary"
@@ -222,26 +220,28 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         }}
                         onClose={() => setFeedbackMenuAnchorEl(null)}
                     />
-                </Box>
-                <Box marginLeft={1}>
-                    <TooltipV1
-                        placement="top"
-                        title={
-                            anomalyFeedback.comment ||
-                            t("message.click-to-add-comment")
-                        }
-                    >
-                        <Button
-                            color="primary"
-                            size="small"
-                            variant="outlined"
-                            onClick={handleCommentUpdateClick}
+                </Grid>
+                {!hideComment && (
+                    <Grid item>
+                        <TooltipV1
+                            placement="top"
+                            title={
+                                anomalyFeedback.comment ||
+                                t("message.click-to-add-comment")
+                            }
                         >
-                            <CommentIcon />
-                        </Button>
-                    </TooltipV1>
-                </Box>
-            </Box>
+                            <Button
+                                color="primary"
+                                size="small"
+                                variant="outlined"
+                                onClick={handleCommentUpdateClick}
+                            >
+                                <CommentIcon />
+                            </Button>
+                        </TooltipV1>
+                    </Grid>
+                )}
+            </Grid>
         </>
     );
 };

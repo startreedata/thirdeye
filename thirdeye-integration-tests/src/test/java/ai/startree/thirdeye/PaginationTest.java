@@ -128,6 +128,22 @@ public class PaginationTest {
   }
 
   @Test
+  public void testNegativeOffsetValue() {
+    Response response = request("api/anomalies?limit=5&offset=-10").get();
+    List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(results.size()).isZero();
+  }
+
+  @Test
+  public void testOffsetWithoutLimit() {
+    Response response = request("api/anomalies?offset=10").get();
+    List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(results.size()).isZero();
+  }
+
+  @Test
   public void testLimitAndOffsetWithOtherFilters() {
     Response response = request("api/anomalies?isChild=true&limit=5&offset=5").get();
     List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);

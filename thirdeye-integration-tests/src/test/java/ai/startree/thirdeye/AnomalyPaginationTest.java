@@ -40,9 +40,9 @@ import org.testng.annotations.Test;
 /**
  * Use this for testing the bits related to pagination
  */
-public class PaginationTest {
+public class AnomalyPaginationTest {
 
-  private static final Logger log = LoggerFactory.getLogger(PaginationTest.class);
+  private static final Logger log = LoggerFactory.getLogger(AnomalyPaginationTest.class);
   private static final GenericType<List<AnomalyApi>> ANOMALY_LIST_TYPE = new GenericType<>() {};
   private static final int totalAnomalies = 100;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;

@@ -82,6 +82,14 @@ public class AppAnalyticsService {
     registerMetrics(metricRegistry);
   }
 
+  public static String appVersion() {
+    return AppAnalyticsService.class.getPackage().getImplementationVersion();
+  }
+
+  private static Predicate notIgnored() {
+    return Predicate.EQ("ignored", false);
+  }
+
   private void registerMetrics(final MetricRegistry metricRegistry) {
     metricRegistry.register("nMonitoredMetrics",
         new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
@@ -120,10 +128,6 @@ public class AppAnalyticsService {
         });
   }
 
-  public static String appVersion() {
-    return AppAnalyticsService.class.getPackage().getImplementationVersion();
-  }
-
   public Integer uniqueMonitoredMetricsCount() {
     return uniqueMonitoredMetricsSupplier.get().size();
   }
@@ -158,7 +162,7 @@ public class AppAnalyticsService {
   public ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final ConfusionMatrix matrix = new ConfusionMatrix();
     // filter to get anomalies without feedback and which are not ignored
-    Predicate unclassified = Predicate.AND(notIgnored(),
+    final Predicate unclassified = Predicate.AND(notIgnored(),
         Predicate.EQ("anomalyFeedbackId", 0));
     matrix.addUnclassified((int) anomalyManager.countParentAnomalies(
         new DaoFilter().setPredicate(unclassified)));
@@ -213,10 +217,6 @@ public class AppAnalyticsService {
       finalPredicate = Predicate.AND(finalPredicate, predicate);
     }
     return countTotal(finalPredicate);
-  }
-
-  private static Predicate notIgnored() {
-    return Predicate.EQ("ignored", false);
   }
 
   private Map<AnomalyFeedbackType, Long> aggregateFeedbackTypes(

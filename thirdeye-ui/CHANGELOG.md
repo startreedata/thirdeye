@@ -1,3 +1,16 @@
+## [2.14.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.13.0...thirdeye-ui-2.14.0) (2023-03-29)
+
+
+### Features
+
+* [TE-1441](https://cortexdata.atlassian.net/browse/TE-1441) remove 2.13.1 entry in changelog and forcing new version ([28808d5bd](https://github.com/startreedata/thirdeye/commit/28808d5bdeaef12946276de8e1423d5495206a00))
+
+
+### Bug Fixes
+
+* [TE-1399](https://cortexdata.atlassian.net/browse/TE-1399) fix canceled apis when using filters for anomalies ([390949e3e](https://github.com/startreedata/thirdeye/commit/390949e3e564d3135f9cb05b7fc9b24a4df36b1f))
+* [TE-1412](https://cortexdata.atlassian.net/browse/TE-1412) use insights api to derive timezone for anomaly chart ([57770c9b1](https://github.com/startreedata/thirdeye/commit/57770c9b170e13d603b9f15470d2d5d61352d639))
+
 ## [2.13.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.12.0...thirdeye-ui-2.13.0) (2023-03-20)
 
 

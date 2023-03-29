@@ -117,9 +117,8 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-    final DaoFilter filter = predicates.isEmpty()
-        ? null : new DaoFilter().setPredicate(Predicate.AND(predicates.toArray(Predicate[]::new)));
-    final AnomalyStatsApi stats = analyticsService.computeAnomalyStats(filter);
-    return stats;
+    final Predicate predicate = predicates.isEmpty()
+        ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
+    return analyticsService.computeAnomalyStats(predicate);
   }
 }

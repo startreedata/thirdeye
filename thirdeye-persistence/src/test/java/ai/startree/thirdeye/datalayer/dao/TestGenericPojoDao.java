@@ -16,9 +16,12 @@ package ai.startree.thirdeye.datalayer.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import java.util.List;
+import java.util.Random;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -26,21 +29,35 @@ import org.testng.annotations.Test;
 public class TestGenericPojoDao {
 
   private static final String NAME = "name";
+  private static final String BASE_ID = "baseId";
   private static final String TYPE = "type";
   private static final String VERSION = "version";
   private static final List<String> TEST_NAMES = List.of("test1", "test2");
   private static final List<String> TEST_TYPES = List.of("type", "test");
+  private static final int TOTAL_ANOMALIES = 100;
 
   private GenericPojoDao dao;
+
+  private static long getRandomLimit() {
+    return new Random().nextInt(TOTAL_ANOMALIES);
+  }
+
+  private static AnomalyDTO anomaly() {
+    return new AnomalyDTO();
+  }
 
   @BeforeClass
   void beforeClass() {
     dao = MySqlTestDatabase.sharedInjector().getInstance(GenericPojoDao.class);
+    for(int i=0; i<TOTAL_ANOMALIES; i++) {
+      dao.create(anomaly());
+    }
   }
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     dao.deleteByPredicate(Predicate.NEQ(NAME, "null"), DataSourceDTO.class);
+    dao.deleteByPredicate(Predicate.NEQ(BASE_ID, 0), AnomalyDTO.class);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
@@ -96,5 +113,86 @@ public class TestGenericPojoDao {
         DataSourceDTO.class);
     assertThat(deletedEntries).isEqualTo(2);
     assertThat(dao.getAll(DataSourceDTO.class).size()).isEqualTo(0);
+  }
+
+  @Test
+  public void filterWithLimitTest() {
+    final long limit = getRandomLimit();
+    final DaoFilter filter = new DaoFilter()
+        .setLimit(limit)
+        .setBeanClass(AnomalyDTO.class);
+    final List<AnomalyDTO> anomalies = dao.filter(filter);
+    assertThat(anomalies).isNotNull();
+    assertThat(anomalies.size()).isEqualTo(limit);
+  }
+
+  @Test
+  public void filterWithLimitAndOffsetTest() {
+    final long limit = getRandomLimit();
+    // ensure last page entries are fetched
+    final long offset = TOTAL_ANOMALIES - (TOTAL_ANOMALIES % limit);
+    final DaoFilter filter = new DaoFilter()
+        .setLimit(limit)
+        .setOffset(offset)
+        .setBeanClass(AnomalyDTO.class);
+    final List<AnomalyDTO> anomalies = dao.filter(filter);
+    assertThat(anomalies).isNotNull();
+    assertThat(anomalies.size()).isEqualTo(TOTAL_ANOMALIES - offset);
+  }
+
+  @Test
+  public void filterWithOffsetWithoutLimitTest() {
+    final long offset = TOTAL_ANOMALIES/2;
+    final DaoFilter filter = new DaoFilter()
+        .setOffset(offset)
+        .setBeanClass(AnomalyDTO.class);
+    final List<AnomalyDTO> anomalies = dao.filter(filter);
+    assertThat(anomalies).isNotNull();
+    assertThat(anomalies).isEmpty();
+  }
+
+  @Test
+  public void testNegativeLimitValue() {
+    final DaoFilter filter = new DaoFilter()
+        .setLimit(-5L)
+        .setBeanClass(AnomalyDTO.class);
+    final List<AnomalyDTO> anomalies = dao.filter(filter);
+    assertThat(anomalies).isNotNull();
+    assertThat(anomalies).isEmpty();
+  }
+
+  @Test
+  public void testNegativeOffsetValue() {
+    final DaoFilter filter = new DaoFilter()
+        .setLimit((long) TOTAL_ANOMALIES)
+        .setOffset(-5L)
+        .setBeanClass(AnomalyDTO.class);
+    final List<AnomalyDTO> anomalies = dao.filter(filter);
+    assertThat(anomalies).isNotNull();
+    assertThat(anomalies).isEmpty();
+  }
+
+  @Test
+  public void pageBoundariesTest() {
+    // ensure more than 2 pages are formed
+    final long limit = TOTAL_ANOMALIES/3;
+    long offset = 0;
+    long entryCount = 0;
+    final DaoFilter filter = new DaoFilter()
+        .setBeanClass(AnomalyDTO.class)
+        .setLimit(limit);
+
+    while (offset < TOTAL_ANOMALIES) {
+      filter.setOffset(offset);
+      final List<AnomalyDTO> anomalies = dao.filter(filter);
+      assertThat(anomalies).isNotNull();
+      entryCount += anomalies.size();
+      // limit -> for all but the last page
+      // TOTAL_ANOMALIES - offset -> for the last page
+      assertThat(anomalies.size()).isEqualTo(Math.min(limit, TOTAL_ANOMALIES - offset));
+      // increment the page
+      offset += limit;
+    }
+    assertThat(entryCount).isEqualTo(TOTAL_ANOMALIES);
   }
 }

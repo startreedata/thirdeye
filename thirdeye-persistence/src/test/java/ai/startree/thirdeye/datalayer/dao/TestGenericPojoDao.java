@@ -39,7 +39,8 @@ public class TestGenericPojoDao {
   private GenericPojoDao dao;
 
   private static long getRandomLimit() {
-    return new Random().nextInt(TOTAL_ANOMALIES);
+    // avoid limit as 0
+    return new Random().nextInt(TOTAL_ANOMALIES-1)+1;
   }
 
   private static AnomalyDTO anomaly() {

@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
+import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.mapstruct.Mapper;
@@ -81,15 +82,26 @@ public interface DatasetMapper {
     return datasetApi;
   }
 
-  private static void updateTimeGranularityOnDataset(final DatasetConfigDTO dto,
+  @VisibleForTesting
+  static void updateTimeGranularityOnDataset(final DatasetConfigDTO dto,
       final TimeColumnApi timeColumn) {
-    TimeGranularity timeGranularity = TimeGranularity.fromDuration(timeColumn.getInterval());
     /*
-     * TODO spyne fixme. this covers up the 86400 bug where 1_DAYS is different from 86400_SECONDS.
+     * TODO cyril fixme. best would be to use a ISO-8601 period instead of a Duration, or directly expose the TimeDuration in the API.
+     *  minute or hourly
      */
-    if (isDaily(timeGranularity)) {
+    final TimeGranularity timeGranularity = TimeGranularity.fromDuration(timeColumn.getInterval());
+    if (timeGranularity.toMillis() < 1000) {
+      dto.setTimeDuration((int) timeGranularity.toMillis());
+      dto.setTimeUnit(TimeUnit.MILLISECONDS);
+    } else if (isDaily(timeGranularity)) {
       dto.setTimeDuration((int) timeGranularity.toDuration().toDays());
       dto.setTimeUnit(TimeUnit.DAYS);
+    } else if (isHourly(timeGranularity)) {
+      dto.setTimeDuration((int) timeGranularity.toDuration().toHours());
+      dto.setTimeUnit(TimeUnit.HOURS);
+    } else if (isMinutely(timeGranularity)) {
+      dto.setTimeDuration((int) timeGranularity.toDuration().toMinutes());
+      dto.setTimeUnit(TimeUnit.MINUTES);
     } else {
       dto.setTimeDuration((int) timeGranularity.toDuration().getSeconds());
       dto.setTimeUnit(TimeUnit.SECONDS);
@@ -97,6 +109,14 @@ public interface DatasetMapper {
   }
 
   private static boolean isDaily(final TimeGranularity timeGranularity) {
-    return timeGranularity.toDuration().getSeconds() % Duration.ofDays(1).getSeconds() == 0;
+    return timeGranularity.toMillis() % Duration.ofDays(1).toMillis() == 0;
+  }
+
+  static boolean isHourly(TimeGranularity timeGranularity) {
+    return timeGranularity.toMillis() % Duration.ofHours(1).toMillis() == 0;
+  }
+
+  static boolean isMinutely(TimeGranularity timeGranularity) {
+    return timeGranularity.toMillis() % Duration.ofMinutes(1).toMillis() == 0;
   }
 }

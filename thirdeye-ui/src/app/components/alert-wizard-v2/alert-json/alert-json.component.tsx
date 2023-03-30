@@ -21,6 +21,7 @@ import { JSONEditorV1 } from "../../../platform/components";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { THIRDEYE_DOC_LINK } from "../../../utils/constants/constants.util";
 import { getAlertTemplatesAllPath } from "../../../utils/routes/routes.util";
+import { NavigateAlertCreationFlowsDropdown } from "../../alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertJsonProps } from "./alert-json.interfaces";
 
@@ -38,13 +39,27 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     };
 
     return (
-        <Grid container item xs={12}>
+        <Grid container>
             <Grid item xs={12}>
-                <Box marginBottom={2}>
-                    <Typography variant="h5">
-                        {t("label.advanced-template-configuration-json-editor")}
-                    </Typography>
-                </Box>
+                <Grid
+                    container
+                    alignContent="center"
+                    justifyContent="space-between"
+                >
+                    <Grid item>
+                        <Typography variant="h5">
+                            {t(
+                                "label.advanced-template-configuration-json-editor"
+                            )}
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <NavigateAlertCreationFlowsDropdown />
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Grid item xs={12}>
                 <Alert
                     className={classes.infoAlert}
                     icon={<InfoIcon />}
@@ -55,20 +70,24 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
                         {t("label.template-configuration").toLowerCase()}
                     </Link>
                 </Alert>
-                <Box paddingTop={2}>
-                    <Typography variant="body2">
-                        {t("message.you-can-use-our")}
-                        <Link
-                            color="primary"
-                            href={`${THIRDEYE_DOC_LINK}/getting-started/alert-create-examples`}
-                            target="_blank"
-                            underline="always"
-                        >
-                            {t("label.example-alert-configurations")}
-                        </Link>
-                        . {t("message.properties-and-values-may-differ")}
-                    </Typography>
-                </Box>
+            </Grid>
+
+            <Grid item xs={12}>
+                <Typography variant="body2">
+                    {t("message.you-can-use-our")}
+                    <Link
+                        color="primary"
+                        href={`${THIRDEYE_DOC_LINK}/getting-started/alert-create-examples`}
+                        target="_blank"
+                        underline="always"
+                    >
+                        {t("label.example-alert-configurations")}
+                    </Link>
+                    . {t("message.properties-and-values-may-differ")}
+                </Typography>
+            </Grid>
+
+            <Grid item xs={12}>
                 <Box paddingBottom={2} paddingTop={2}>
                     <Divider />
                 </Box>

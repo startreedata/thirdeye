@@ -71,6 +71,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
         hideCurrentlySelected,
         navigateToAlertDetailAfterSampleAlertCreate,
         showEmailOnlyForSubscriptionGroup,
+        showEditorSwitchButton,
     }) => {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
@@ -142,7 +143,11 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                                         AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
                                     }
                                 >
-                                    <SetupMonitoringPage />
+                                    <SetupMonitoringPage
+                                        showEditorSwitchButton={
+                                            showEditorSwitchButton
+                                        }
+                                    />
                                 </CancelAPICallsOnPageUnload>
                             }
                             path={

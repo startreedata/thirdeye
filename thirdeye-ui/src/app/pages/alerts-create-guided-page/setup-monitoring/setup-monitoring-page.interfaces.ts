@@ -12,15 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
-import { AvailableAlgorithmOption } from "../algorithm-selection/algorithm-selection.interfaces";
 
-export interface ThresholdSetupProps {
-    alert: EditableAlert;
-    onAlertPropertyChange: (
-        contents: Partial<EditableAlert>,
-        isTotalReplace?: boolean
-    ) => void;
-    algorithmOptionConfig: AvailableAlgorithmOption | undefined;
+export interface SetupMonitoringPageProps {
     showEditorSwitchButton?: boolean;
 }

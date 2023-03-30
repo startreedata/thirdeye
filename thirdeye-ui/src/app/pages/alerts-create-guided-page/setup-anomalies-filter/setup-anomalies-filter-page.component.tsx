@@ -213,7 +213,7 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                     color="primary"
                                     onClick={handleAdvancedEditorBtnClick}
                                 >
-                                    {t("label.advanced-editor")}
+                                    {t("label.json-editor")}
                                 </Button>
                             </Grid>
                         </Grid>

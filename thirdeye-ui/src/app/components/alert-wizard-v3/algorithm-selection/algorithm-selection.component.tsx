@@ -17,6 +17,7 @@ import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
+import { AlertTemplatesInformationLinks } from "../alert-templates-information-links/alert-templates-information-links";
 import { AlgorithmOptionCard } from "./algorithm-option-card/algorithm-option-card.component";
 import {
     AlgorithmOption,
@@ -58,6 +59,7 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                             "message.select-the-algorithm-type-best-fit-for-your-alert"
                         )}
                     </Typography>
+                    <AlertTemplatesInformationLinks />
                 </Grid>
 
                 <Grid item xs={12}>

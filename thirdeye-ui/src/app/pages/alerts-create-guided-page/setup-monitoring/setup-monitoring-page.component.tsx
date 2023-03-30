@@ -12,59 +12,49 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid, Typography } from "@material-ui/core";
 import { default as React, FunctionComponent, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
-import { PageContentsGridV1 } from "../../../platform/components";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
+import { SetupMonitoringPageProps } from "./setup-monitoring-page.interfaces";
 
-export const SetupMonitoringPage: FunctionComponent = () => {
-    const navigate = useNavigate();
-    const { t } = useTranslation();
+export const SetupMonitoringPage: FunctionComponent<SetupMonitoringPageProps> =
+    ({ showEditorSwitchButton }) => {
+        const navigate = useNavigate();
 
-    const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
-        useOutletContext<AlertCreatedGuidedPageOutletContext>();
+        const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
+            useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
-    useEffect(() => {
-        // On initial render, ensure there is already an alert template selected
-        if (!alert.template?.name) {
-            navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`);
-        }
-    }, []);
+        useEffect(() => {
+            // On initial render, ensure there is already an alert template selected
+            if (!alert.template?.name) {
+                navigate(
+                    `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
+                );
+            }
+        }, []);
 
-    return (
-        <>
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <Typography variant="h5">
-                        {t("label.alert-setup")}
-                    </Typography>
-                    <Typography variant="body1">
-                        {t("message.alert-setup-description")}
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <ThresholdSetup
-                        alert={alert}
-                        algorithmOptionConfig={selectedAlgorithmOption}
-                        onAlertPropertyChange={onAlertPropertyChange}
-                    />
-                </Grid>
-            </PageContentsGridV1>
+        return (
+            <>
+                <ThresholdSetup
+                    alert={alert}
+                    algorithmOptionConfig={selectedAlgorithmOption}
+                    showEditorSwitchButton={showEditorSwitchButton}
+                    onAlertPropertyChange={onAlertPropertyChange}
+                />
 
-            <WizardBottomBar
-                backBtnLink={
-                    selectedAlgorithmOption.algorithmOption
-                        .alertTemplateForMultidimension === alert.template?.name
-                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
-                        : `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
-                }
-                nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
-            />
-        </>
-    );
-};
+                <WizardBottomBar
+                    backBtnLink={
+                        selectedAlgorithmOption.algorithmOption
+                            .alertTemplateForMultidimension ===
+                        alert.template?.name
+                            ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
+                            : `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
+                    }
+                    nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
+                />
+            </>
+        );
+    };

@@ -302,12 +302,17 @@ public class GenericPojoDao {
     return results;
   }
 
+  /**
+   * Use this method when you want to filter out a subset of the entities based on predicates,
+   * limits, offsets, etc.
+   * If you wish to get all the entities then please use {@link #getAll} as the filter method does a
+   * two-step operation to get the entities whereas {@link #getAll} gets the entities in a single
+   * operation.
+   *
+   * @param daoFilter required filters to filter the result
+   */
   @SuppressWarnings("unchecked")
   public <E extends AbstractDTO> List<E> filter(final DaoFilter daoFilter) {
-    requireNonNull(daoFilter.getPredicate(),
-        "If the predicate is null, you can just do "
-            + "getAll() which doesn't need to fetch IDs first");
-
     final Class<? extends AbstractDTO> beanClass = daoFilter.getBeanClass();
     final List<Long> ids = filterIds(daoFilter);
     if (ids.isEmpty()) {
@@ -373,8 +378,8 @@ public class GenericPojoDao {
       //find the matching ids
       final List<? extends AbstractIndexEntity> indexEntities = transactionService.executeTransaction(
           (connection) -> databaseService.findAll(daoFilter.getPredicate(),
-              null,
-              null,
+              daoFilter.getLimit(),
+              daoFilter.getOffset(),
               indexClass,
               connection), emptyList());
       final List<Long> idsToReturn = new ArrayList<>();

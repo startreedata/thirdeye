@@ -37,7 +37,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 public class DaoFilterBuilder {
 
-  private static final ImmutableSet<String> KEYWORDS = ImmutableSet.of("limit");
+  private static final ImmutableSet<String> KEYWORDS = ImmutableSet.of("limit", "offset");
   private static final ImmutableMap<String, OPER> OPERATOR_MAP = ImmutableMap.<String, OPER>builder()
       .put("eq", OPER.EQ)
       .put("gt", OPER.GT)
@@ -80,8 +80,11 @@ public class DaoFilterBuilder {
   public DaoFilter buildFilter(final MultivaluedMap<String, String> queryParameters) {
     final DaoFilter daoFilter = new DaoFilter();
     optional(queryParameters.getFirst("limit"))
-        .map(Integer::valueOf)
+        .map(Long::valueOf)
         .ifPresent(daoFilter::setLimit);
+    optional(queryParameters.getFirst("offset"))
+        .map(Long::valueOf)
+        .ifPresent(daoFilter::setOffset);
 
     return daoFilter.setPredicate(buildPredicate(queryParameters));
   }
@@ -100,6 +103,6 @@ public class DaoFilterBuilder {
       final Object[] objects = e.getValue().toArray();
       predicates.add(toPredicate(columnName, objects));
     }
-    return Predicate.AND(predicates.toArray(new Predicate[]{}));
+    return predicates.size() == 0 ? null : Predicate.AND(predicates.toArray(new Predicate[]{}));
   }
 }

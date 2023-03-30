@@ -247,7 +247,7 @@ public class TaskManagerImpl implements TaskManager {
     final long startTime = System.nanoTime();
     final List<TaskDTO> tasksToBeDeleted = filter(new DaoFilter()
         .setPredicate(Predicate.LT("createTime", formattedDate))
-        .setLimit(limit)
+        .setLimit((long) limit)
     );
 
     /* Delete each task */

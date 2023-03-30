@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
@@ -42,10 +43,12 @@ public class ApplicationContext {
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
-    this.datasetConfigManager = datasetConfigManager;
     this.subTaskExecutor = subTaskExecutor;
     this.enumerationItemManager = enumerationItemManager;
     this.configuration = detectionPipelineConfiguration;
+
+    /* Use a cached instance for pipeline execution */
+    this.datasetConfigManager = new CachedDatasetConfigManager(datasetConfigManager);
   }
 
   public DataSourceCache getDataSourceCache() {

@@ -1,4 +1,9 @@
-### [2.13.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.13.0...thirdeye-ui-2.13.1) (2023-03-27)
+## [2.14.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.13.0...thirdeye-ui-2.14.0) (2023-03-29)
+
+
+### Features
+
+* [TE-1441](https://cortexdata.atlassian.net/browse/TE-1441) remove 2.13.1 entry in changelog and forcing new version ([28808d5bd](https://github.com/startreedata/thirdeye/commit/28808d5bdeaef12946276de8e1423d5495206a00))
 
 
 ### Bug Fixes

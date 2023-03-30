@@ -22,4 +22,5 @@ export interface AlertsGuidedCreateRouterProps {
     hideCurrentlySelected?: boolean;
     createLabel: string;
     inProgressLabel: string;
+    showEditorSwitchButton?: boolean;
 }

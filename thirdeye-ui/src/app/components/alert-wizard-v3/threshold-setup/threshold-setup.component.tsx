@@ -31,6 +31,7 @@ import { useTranslation } from "react-i18next";
 import {
     JSONEditorV1,
     PageContentsCardV1,
+    PageContentsGridV1,
     useDialogProviderV1,
 } from "../../../platform/components";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
@@ -48,6 +49,7 @@ import {
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { NavigateAlertCreationFlowsDropdown } from "../navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { PreviewChart } from "../preview-chart/preview-chart.component";
 import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
@@ -60,6 +62,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,
     alert,
     algorithmOptionConfig,
+    showEditorSwitchButton,
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
@@ -215,254 +218,304 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     };
 
     return (
-        <PageContentsCardV1>
-            <LoadingErrorStateSwitch
-                isError={
-                    getDatasourcesStatus === ActionStatus.Error ||
-                    getDatasetsStatus === ActionStatus.Error ||
-                    getMetricsStatus === ActionStatus.Error
-                }
-                isLoading={isPinotInfraLoading}
-            >
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Grid
-                            container
-                            alignItems="center"
-                            justifyContent="space-between"
+        <PageContentsGridV1>
+            <Grid item xs={12}>
+                <Grid
+                    container
+                    alignItems="center"
+                    justifyContent="space-between"
+                >
+                    <Grid item>
+                        <Typography variant="h5">
+                            {t("label.alert-setup")}
+                        </Typography>
+                        <Typography variant="body1">
+                            {t("message.alert-setup-description")}
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            color="primary"
+                            onClick={handleAdvancedEditorBtnClick}
                         >
-                            <Grid item>
-                                <Typography variant="h5">
-                                    {algorithmOptionConfig &&
-                                        t("label.entity-setup", {
-                                            entity: algorithmOptionConfig
-                                                .algorithmOption.title,
-                                            multidimension:
-                                                algorithmOptionConfig
-                                                    .algorithmOption
-                                                    .alertTemplateForMultidimension ===
-                                                alert.template?.name
-                                                    ? `(${t(
-                                                          "label.multidimension"
-                                                      )})`
-                                                    : "",
-                                        })}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t("message.threshold-setup-description")}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <Button
-                                    color="primary"
-                                    onClick={handleAdvancedEditorBtnClick}
-                                >
-                                    {t("label.advanced-editor")}
-                                </Button>
-                            </Grid>
-                        </Grid>
+                            {t("label.json-editor")}
+                        </Button>
                     </Grid>
-
-                    <Grid item xs={12}>
-                        <Box padding={1} />
-                    </Grid>
-
-                    <InputSection
-                        inputComponent={
-                            <Autocomplete<DatasetInfo>
-                                fullWidth
-                                getOptionLabel={(option) =>
-                                    option.dataset.name as string
-                                }
-                                noOptionsText={t(
-                                    "message.no-options-available-entity",
-                                    {
-                                        entity: t("label.dataset"),
-                                    }
-                                )}
-                                options={datasetsInfo || []}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={t(
-                                            "message.select-dataset"
-                                        )}
-                                        variant="outlined"
-                                    />
-                                )}
-                                renderOption={(
-                                    option: DatasetInfo
-                                ): JSX.Element => {
-                                    return (
-                                        <li>
-                                            <Typography variant="h6">
-                                                {option.dataset.name}
-                                            </Typography>
-                                            <Typography variant="caption">
-                                                {t("message.num-metrics", {
-                                                    num: option.metrics.length,
-                                                })}
-                                            </Typography>
-                                        </li>
-                                    );
-                                }}
-                                value={selectedTable}
-                                onChange={(_, selectedTableInfo) => {
-                                    if (!selectedTableInfo) {
-                                        return;
-                                    }
-
-                                    setSelectedMetric(null);
-                                    setSelectedTable(selectedTableInfo);
-                                }}
-                            />
+                </Grid>
+            </Grid>
+            <Grid item xs={12}>
+                <PageContentsCardV1>
+                    <LoadingErrorStateSwitch
+                        isError={
+                            getDatasourcesStatus === ActionStatus.Error ||
+                            getDatasetsStatus === ActionStatus.Error ||
+                            getMetricsStatus === ActionStatus.Error
                         }
-                        label={t("label.dataset")}
-                    />
-
-                    <InputSection
-                        inputComponent={
-                            <Autocomplete<string>
-                                fullWidth
-                                disabled={!selectedTable}
-                                noOptionsText={t(
-                                    "message.no-options-available-entity",
-                                    {
-                                        entity: t("label.metric"),
-                                    }
-                                )}
-                                options={
-                                    selectedTable
-                                        ? selectedTable.metrics.map(
-                                              (m) => m.name
-                                          )
-                                        : []
-                                }
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={
-                                            !selectedTable
-                                                ? t(
-                                                      "message.select-dataset-first"
-                                                  )
-                                                : t("message.select-metric")
-                                        }
-                                        variant="outlined"
-                                    />
-                                )}
-                                value={selectedMetric}
-                                onChange={(_, metric) => {
-                                    metric && handleMetricSelection(metric);
-                                }}
-                            />
-                        }
-                        label={t("label.metric")}
-                    />
-
-                    <InputSection
-                        inputComponent={
-                            <Autocomplete
-                                disableClearable
-                                fullWidth
-                                // Disable selection if selected column is *
-                                disabled={selectedMetric === STAR_COLUMN}
-                                options={
-                                    selectedMetric === STAR_COLUMN
-                                        ? [MetricAggFunction.COUNT]
-                                        : [
-                                              MetricAggFunction.SUM,
-                                              MetricAggFunction.AVG,
-                                              MetricAggFunction.COUNT,
-                                              MetricAggFunction.MIN,
-                                              MetricAggFunction.MAX,
-                                          ]
-                                }
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={t(
-                                            "message.select-aggregation-function"
-                                        )}
-                                        variant="outlined"
-                                    />
-                                )}
-                                value={selectedAggregationFunction}
-                                onChange={(_, aggregationFunction) => {
-                                    aggregationFunction &&
-                                        handleAggregationFunctionSelect(
-                                            aggregationFunction
-                                        );
-                                }}
-                            />
-                        }
-                        label={`${t("label.aggregation-function")}`}
-                    />
-
-                    {algorithmOptionConfig &&
-                        algorithmOptionConfig.algorithmOption
-                            .inputFieldConfigs && (
+                        isLoading={isPinotInfraLoading}
+                    >
+                        <Grid container>
                             <Grid item xs={12}>
-                                <Box marginBottom={1} padding={1}>
-                                    <Divider />
-                                </Box>
+                                <Grid
+                                    container
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                >
+                                    <Grid item>
+                                        <Typography variant="h5">
+                                            {algorithmOptionConfig &&
+                                                t("label.entity-setup", {
+                                                    entity: algorithmOptionConfig
+                                                        .algorithmOption.title,
+                                                    multidimension:
+                                                        algorithmOptionConfig
+                                                            .algorithmOption
+                                                            .alertTemplateForMultidimension ===
+                                                        alert.template?.name
+                                                            ? `(${t(
+                                                                  "label.multidimension"
+                                                              )})`
+                                                            : "",
+                                                })}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {t(
+                                                "message.threshold-setup-description"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        {showEditorSwitchButton && (
+                                            <NavigateAlertCreationFlowsDropdown />
+                                        )}
+                                    </Grid>
+                                </Grid>
                             </Grid>
-                        )}
-                    {algorithmOptionConfig &&
-                        algorithmOptionConfig.algorithmOption
-                            .inputFieldConfigs &&
-                        algorithmOptionConfig.algorithmOption.inputFieldConfigs.map(
-                            (config) => {
-                                return (
-                                    <InputSection
-                                        helperLabel={config.description}
-                                        inputComponent={
-                                            <SpecificPropertiesRenderer
-                                                alert={alert}
-                                                inputFieldConfig={config}
-                                                onAlertPropertyChange={
-                                                    onAlertPropertyChange
-                                                }
-                                            />
+
+                            <Grid item xs={12}>
+                                <Box padding={1} />
+                            </Grid>
+
+                            <InputSection
+                                inputComponent={
+                                    <Autocomplete<DatasetInfo>
+                                        fullWidth
+                                        getOptionLabel={(option) =>
+                                            option.dataset.name as string
                                         }
-                                        key={config.templatePropertyName}
-                                        label={config.label}
+                                        noOptionsText={t(
+                                            "message.no-options-available-entity",
+                                            {
+                                                entity: t("label.dataset"),
+                                            }
+                                        )}
+                                        options={datasetsInfo || []}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    /**
+                                                     * Override class name so
+                                                     * the size of input is smaller
+                                                     */
+                                                    className:
+                                                        classes.autoCompleteInput,
+                                                }}
+                                                placeholder={t(
+                                                    "message.select-dataset"
+                                                )}
+                                                variant="outlined"
+                                            />
+                                        )}
+                                        renderOption={(
+                                            option: DatasetInfo
+                                        ): JSX.Element => {
+                                            return (
+                                                <li>
+                                                    <Typography variant="h6">
+                                                        {option.dataset.name}
+                                                    </Typography>
+                                                    <Typography variant="caption">
+                                                        {t(
+                                                            "message.num-metrics",
+                                                            {
+                                                                num: option
+                                                                    .metrics
+                                                                    .length,
+                                                            }
+                                                        )}
+                                                    </Typography>
+                                                </li>
+                                            );
+                                        }}
+                                        value={selectedTable}
+                                        onChange={(_, selectedTableInfo) => {
+                                            if (!selectedTableInfo) {
+                                                return;
+                                            }
+
+                                            setSelectedMetric(null);
+                                            setSelectedTable(selectedTableInfo);
+                                        }}
                                     />
-                                );
-                            }
-                        )}
-                </Grid>
+                                }
+                                label={t("label.dataset")}
+                            />
 
-                <Grid item xs={12}>
-                    <Box marginBottom={2} marginTop={2} padding={1}>
-                        <Divider />
-                    </Box>
-                </Grid>
+                            <InputSection
+                                inputComponent={
+                                    <Autocomplete<string>
+                                        fullWidth
+                                        disabled={!selectedTable}
+                                        noOptionsText={t(
+                                            "message.no-options-available-entity",
+                                            {
+                                                entity: t("label.metric"),
+                                            }
+                                        )}
+                                        options={
+                                            selectedTable
+                                                ? selectedTable.metrics.map(
+                                                      (m) => m.name
+                                                  )
+                                                : []
+                                        }
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    /**
+                                                     * Override class name so
+                                                     * the size of input is smaller
+                                                     */
+                                                    className:
+                                                        classes.autoCompleteInput,
+                                                }}
+                                                placeholder={
+                                                    !selectedTable
+                                                        ? t(
+                                                              "message.select-dataset-first"
+                                                          )
+                                                        : t(
+                                                              "message.select-metric"
+                                                          )
+                                                }
+                                                variant="outlined"
+                                            />
+                                        )}
+                                        value={selectedMetric}
+                                        onChange={(_, metric) => {
+                                            metric &&
+                                                handleMetricSelection(metric);
+                                        }}
+                                    />
+                                }
+                                label={t("label.metric")}
+                            />
 
-                <PreviewChart
-                    alert={alert}
-                    showLoadButton={!!selectedMetric}
-                    onAlertPropertyChange={onAlertPropertyChange}
-                />
-            </LoadingErrorStateSwitch>
-        </PageContentsCardV1>
+                            <InputSection
+                                inputComponent={
+                                    <Autocomplete
+                                        disableClearable
+                                        fullWidth
+                                        // Disable selection if selected column is *
+                                        disabled={
+                                            selectedMetric === STAR_COLUMN
+                                        }
+                                        options={
+                                            selectedMetric === STAR_COLUMN
+                                                ? [MetricAggFunction.COUNT]
+                                                : [
+                                                      MetricAggFunction.SUM,
+                                                      MetricAggFunction.AVG,
+                                                      MetricAggFunction.COUNT,
+                                                      MetricAggFunction.MIN,
+                                                      MetricAggFunction.MAX,
+                                                  ]
+                                        }
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    /**
+                                                     * Override class name so
+                                                     * the size of input is smaller
+                                                     */
+                                                    className:
+                                                        classes.autoCompleteInput,
+                                                }}
+                                                placeholder={t(
+                                                    "message.select-aggregation-function"
+                                                )}
+                                                variant="outlined"
+                                            />
+                                        )}
+                                        value={selectedAggregationFunction}
+                                        onChange={(_, aggregationFunction) => {
+                                            aggregationFunction &&
+                                                handleAggregationFunctionSelect(
+                                                    aggregationFunction
+                                                );
+                                        }}
+                                    />
+                                }
+                                label={`${t("label.aggregation-function")}`}
+                            />
+
+                            {algorithmOptionConfig &&
+                                algorithmOptionConfig.algorithmOption
+                                    .inputFieldConfigs && (
+                                    <Grid item xs={12}>
+                                        <Box marginBottom={1} padding={1}>
+                                            <Divider />
+                                        </Box>
+                                    </Grid>
+                                )}
+                            {algorithmOptionConfig &&
+                                algorithmOptionConfig.algorithmOption
+                                    .inputFieldConfigs &&
+                                algorithmOptionConfig.algorithmOption.inputFieldConfigs.map(
+                                    (config) => {
+                                        return (
+                                            <InputSection
+                                                helperLabel={config.description}
+                                                inputComponent={
+                                                    <SpecificPropertiesRenderer
+                                                        alert={alert}
+                                                        inputFieldConfig={
+                                                            config
+                                                        }
+                                                        onAlertPropertyChange={
+                                                            onAlertPropertyChange
+                                                        }
+                                                    />
+                                                }
+                                                key={
+                                                    config.templatePropertyName
+                                                }
+                                                label={config.label}
+                                            />
+                                        );
+                                    }
+                                )}
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Box marginBottom={2} marginTop={2} padding={1}>
+                                <Divider />
+                            </Box>
+                        </Grid>
+
+                        <PreviewChart
+                            alert={alert}
+                            showLoadButton={!!selectedMetric}
+                            onAlertPropertyChange={onAlertPropertyChange}
+                        />
+                    </LoadingErrorStateSwitch>
+                </PageContentsCardV1>
+            </Grid>
+        </PageContentsGridV1>
     );
 };

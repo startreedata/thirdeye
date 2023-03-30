@@ -13,7 +13,7 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
-import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
+import { Box, Button, Typography } from "@material-ui/core";
 import { isEqual } from "lodash";
 import React, {
     FunctionComponent,
@@ -23,13 +23,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    NavLink,
-    Outlet,
-    useLocation,
-    useNavigate,
-    useSearchParams,
-} from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
@@ -55,10 +49,7 @@ import { validateTemplateProperties } from "../../utils/alerts/alerts-configurat
 import { handleAlertPropertyChangeGenerator } from "../../utils/anomalies/anomalies.util";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import {
-    AppRouteRelative,
-    getAlertsAllPath,
-} from "../../utils/routes/routes.util";
+import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsEditPageProps } from "./alerts-update-page.interfaces";
 
 export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
@@ -72,8 +63,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     onNewSubscriptionGroupChange,
 }) => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const location = useLocation();
     const { notify } = useNotificationProviderV1();
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
@@ -203,60 +192,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
             <PageHeader
                 customActions={
                     <PageHeaderActionsV1>
-                        <Box padding={1}>{t("label.view")}:</Box>
-                        <ButtonGroup color="primary" variant="outlined">
-                            <Button
-                                component={NavLink}
-                                to={{
-                                    pathname:
-                                        AppRouteRelative.ALERTS_CREATE_NEW_USER,
-                                    search: searchParams.toString(),
-                                }}
-                                variant={
-                                    location.pathname.includes(
-                                        AppRouteRelative.ALERTS_CREATE_NEW_USER
-                                    )
-                                        ? "contained"
-                                        : "outlined"
-                                }
-                            >
-                                {t("label.new-user")}
-                            </Button>
-                            <Button
-                                component={NavLink}
-                                to={{
-                                    pathname:
-                                        AppRouteRelative.ALERTS_CREATE_SIMPLE,
-                                    search: searchParams.toString(),
-                                }}
-                                variant={
-                                    location.pathname.includes(
-                                        AppRouteRelative.ALERTS_CREATE_SIMPLE
-                                    )
-                                        ? "contained"
-                                        : "outlined"
-                                }
-                            >
-                                {t("label.simple")}
-                            </Button>
-                            <Button
-                                component={NavLink}
-                                to={{
-                                    pathname:
-                                        AppRouteRelative.ALERTS_CREATE_ADVANCED,
-                                    search: searchParams.toString(),
-                                }}
-                                variant={
-                                    location.pathname.includes(
-                                        AppRouteRelative.ALERTS_CREATE_ADVANCED
-                                    )
-                                        ? "contained"
-                                        : "outlined"
-                                }
-                            >
-                                {t("label.advanced")}
-                            </Button>
-                        </ButtonGroup>
                         <Button
                             color="primary"
                             size="small"

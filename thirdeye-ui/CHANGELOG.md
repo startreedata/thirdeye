@@ -1,3 +1,10 @@
+## [2.15.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.14.0...thirdeye-ui-2.15.0) (2023-03-31)
+
+
+### Features
+
+* [TE-1437](https://cortexdata.atlassian.net/browse/TE-1437) move switch to different create pages and links to alert template documentation ([fd2851001](https://github.com/startreedata/thirdeye/commit/fd2851001bc93da1680ec8466eb4a8e795543bac))
+
 ## [2.14.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.13.0...thirdeye-ui-2.14.0) (2023-03-29)
 
 

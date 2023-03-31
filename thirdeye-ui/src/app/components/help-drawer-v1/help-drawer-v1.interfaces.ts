@@ -22,7 +22,6 @@ export interface HelpDrawerV1Card {
 
 export interface HelpDrawerV1Props {
     title: string | ReactNode;
-    isOpen: boolean;
-    onClose: () => void;
     cards?: HelpDrawerV1Card[];
+    trigger: (handleOpen: () => void) => ReactNode;
 }

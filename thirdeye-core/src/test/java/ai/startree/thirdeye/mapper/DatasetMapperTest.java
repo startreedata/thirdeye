@@ -1,0 +1,79 @@
+/*
+ * Copyright 2023 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package ai.startree.thirdeye.mapper;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import ai.startree.thirdeye.spi.api.TimeColumnApi;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import org.testng.annotations.Test;
+
+@Test
+public class DatasetMapperTest {
+
+  @Test
+  public void testMillisecondsGranularity() {
+    final DatasetConfigDTO dto = new DatasetConfigDTO();
+    DatasetMapper.updateTimeGranularityOnDataset(dto,
+        new TimeColumnApi().setInterval(Duration.ofMillis(1)));
+    assertThat(dto.getTimeDuration()).isEqualTo(1);
+    assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.MILLISECONDS);
+  }
+
+  @Test
+  public void testSecondsGranularity() {
+    final DatasetConfigDTO dto = new DatasetConfigDTO();
+    // 1 sec granularity
+    DatasetMapper.updateTimeGranularityOnDataset(dto,
+        new TimeColumnApi().setInterval(Duration.ofMillis(1000)));
+    assertThat(dto.getTimeDuration()).isEqualTo(1);
+    assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.SECONDS);
+
+    // 34.xxx sec granularity is rounded - this kind of input should not happen
+    DatasetMapper.updateTimeGranularityOnDataset(dto,
+        new TimeColumnApi().setInterval(Duration.ofMillis(34567)));
+    assertThat(dto.getTimeDuration()).isEqualTo(34);
+    assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.SECONDS);
+
+  }
+
+  @Test
+  public void testMinutesGranularity() {
+    final DatasetConfigDTO dto = new DatasetConfigDTO();
+    DatasetMapper.updateTimeGranularityOnDataset(dto,
+        new TimeColumnApi().setInterval(Duration.ofMillis(60_000)));
+    assertThat(dto.getTimeDuration()).isEqualTo(1);
+    assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.MINUTES);
+  }
+
+  @Test
+  public void testHoursGranularity() {
+    final DatasetConfigDTO dto = new DatasetConfigDTO();
+    DatasetMapper.updateTimeGranularityOnDataset(dto,
+        new TimeColumnApi().setInterval(Duration.ofMillis(3600_000)));
+    assertThat(dto.getTimeDuration()).isEqualTo(1);
+    assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.HOURS);
+  }
+
+  @Test
+  public void testDaysGranularity() {
+    final DatasetConfigDTO dto = new DatasetConfigDTO();
+    DatasetMapper.updateTimeGranularityOnDataset(dto,
+        new TimeColumnApi().setInterval(Duration.ofMillis(86_400_000)));
+    assertThat(dto.getTimeDuration()).isEqualTo(1);
+    assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.DAYS);
+  }
+}

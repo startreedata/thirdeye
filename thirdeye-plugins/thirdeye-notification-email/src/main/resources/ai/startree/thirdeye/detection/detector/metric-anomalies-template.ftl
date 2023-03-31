@@ -123,7 +123,7 @@
                         <a style="font-weight: bold; text-decoration: none; font-size:14px; line-height:20px; color: #0073B1;" href="${anomaly.anomalyURL}${anomaly.anomalyId}"
                            target="_blank">(view)</a>
                       </td>
-                      <td style="color: rgba(0,0,0,0.9); font-size:14px; line-height:20px; text-align:center;">${anomaly.anomalyType}</td>
+                      <!--<td style="color: rgba(0,0,0,0.9); font-size:14px; line-height:20px; text-align:center;">${anomaly.anomalyType}</td> NOTE: anomaly type is deprecated-->
                       <td style="word-break: break-all; width: 200px; padding-right:4px 20px 4px 0">
                         <#list anomaly.dimensions as dimension>
                           <span style="color: rgba(0,0,0,0.6); font-size: 12px; line-height: 16px;">${dimension}</span>

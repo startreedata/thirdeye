@@ -191,6 +191,7 @@ export const CreateAlertPage: FunctionComponent = () => {
             <LoadingErrorStateSwitch
                 wrapInCard
                 wrapInGrid
+                wrapInGridContainer
                 isError={false}
                 isLoading={
                     alertTemplatesRequestStatus === ActionStatus.Working ||

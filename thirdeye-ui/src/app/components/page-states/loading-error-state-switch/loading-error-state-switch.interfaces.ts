@@ -22,4 +22,5 @@ export interface LoadingErrorStateSwitchProps {
     isError: boolean;
     wrapInGrid?: boolean;
     wrapInCard?: boolean;
+    wrapInGridContainer?: boolean;
 }

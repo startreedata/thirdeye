@@ -83,7 +83,6 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
     >([]);
     // This is  used by the guided create alert routes
     const [showBottomBar, setShowBottomBar] = useState<boolean>(true);
-    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
 
     // Allow the children to control the submit button
     const [isSubmitBtnEnabled, setIsSubmitBtnEnabled] = useState<boolean>(true);
@@ -192,27 +191,27 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
             <PageHeader
                 customActions={
                     <PageHeaderActionsV1>
-                        <Button
-                            color="primary"
-                            size="small"
-                            variant="outlined"
-                            onClick={() => setIsHelpPanelOpen(true)}
-                        >
-                            <Box component="span" mr={1}>
-                                {t("label.need-help")}
-                            </Box>
-                            <Box component="span" display="flex">
-                                <Icon
-                                    fontSize={24}
-                                    icon="mdi:question-mark-circle-outline"
-                                />
-                            </Box>
-                        </Button>
                         <HelpDrawerV1
                             cards={alertsBasicHelpCards}
-                            isOpen={isHelpPanelOpen}
                             title={`${t("label.need-help")}?`}
-                            onClose={() => setIsHelpPanelOpen(false)}
+                            trigger={(handleOpen) => (
+                                <Button
+                                    color="primary"
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={handleOpen}
+                                >
+                                    <Box component="span" mr={1}>
+                                        {t("label.need-help")}
+                                    </Box>
+                                    <Box component="span" display="flex">
+                                        <Icon
+                                            fontSize={24}
+                                            icon="mdi:question-mark-circle-outline"
+                                        />
+                                    </Box>
+                                </Button>
+                            )}
                         />
                     </PageHeaderActionsV1>
                 }

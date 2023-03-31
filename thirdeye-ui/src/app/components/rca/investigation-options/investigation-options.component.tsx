@@ -40,7 +40,6 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
         onSuccessfulUpdate,
         onRemoveInvestigationAssociation,
     }) => {
-        const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
         const [
@@ -134,22 +133,29 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
 
         return (
             <>
-                <Button
-                    color="primary"
-                    size="small"
-                    variant="outlined"
-                    onClick={() => setIsHelpPanelOpen(true)}
-                >
-                    <Box component="span" mr={1}>
-                        {t("label.need-help")}
-                    </Box>
-                    <Box component="span" display="flex">
-                        <Icon
-                            fontSize={24}
-                            icon="mdi:question-mark-circle-outline"
-                        />
-                    </Box>
-                </Button>
+                <HelpDrawerV1
+                    cards={anomaliesInvestigateBasicHelpCards}
+                    title={`${t("label.need-help")}?`}
+                    trigger={(handleOpen) => (
+                        <Button
+                            color="primary"
+                            size="small"
+                            variant="outlined"
+                            onClick={handleOpen}
+                        >
+                            <Box component="span" mr={1}>
+                                {t("label.need-help")}
+                            </Box>
+                            <Box component="span" display="flex">
+                                <Icon
+                                    fontSize={24}
+                                    icon="mdi:question-mark-circle-outline"
+                                />
+                            </Box>
+                        </Button>
+                    )}
+                />
+
                 {investigationId === null && (
                     <Button
                         color="primary"
@@ -212,13 +218,6 @@ export const InvestigationOptions: FunctionComponent<InvestigationOptionsProps> 
                         Remove Investigation Association
                     </Button>
                 )}
-
-                <HelpDrawerV1
-                    cards={anomaliesInvestigateBasicHelpCards}
-                    isOpen={isHelpPanelOpen}
-                    title={`${t("label.need-help")}?`}
-                    onClose={() => setIsHelpPanelOpen(false)}
-                />
             </>
         );
     };

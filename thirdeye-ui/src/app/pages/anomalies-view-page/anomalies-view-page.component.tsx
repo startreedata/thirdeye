@@ -105,7 +105,6 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const [detectionEvaluation, setDetectionEvaluation] =
         useState<DetectionEvaluation | null>(null);
-    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const { showDialog } = useDialogProviderV1();
     const { id: anomalyId } = useParams<AnomaliesViewPageParams>();
@@ -283,35 +282,35 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                 customActions={
                     <PageHeaderActionsV1>
                         <Button
-                            color="primary"
-                            component="button"
-                            size="small"
-                            variant="outlined"
-                            onClick={() => setIsHelpPanelOpen(true)}
-                        >
-                            <Box component="span" mr={1}>
-                                {t("label.need-help")}
-                            </Box>
-                            <Box component="span" display="flex">
-                                <Icon
-                                    fontSize={24}
-                                    icon="mdi:question-mark-circle-outline"
-                                />
-                            </Box>
-                        </Button>
-                        <HelpDrawerV1
-                            cards={anomaliesInvestigateBasicHelpCards}
-                            isOpen={isHelpPanelOpen}
-                            title={`${t("label.need-help")}?`}
-                            onClose={() => setIsHelpPanelOpen(false)}
-                        />
-                        <Button
                             component="button"
                             variant="contained"
                             onClick={handleAnomalyDelete}
                         >
                             {t("label.delete")}
                         </Button>
+                        <HelpDrawerV1
+                            cards={anomaliesInvestigateBasicHelpCards}
+                            title={`${t("label.need-help")}?`}
+                            trigger={(handleOpen) => (
+                                <Button
+                                    color="primary"
+                                    component="button"
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => handleOpen}
+                                >
+                                    <Box component="span" mr={1}>
+                                        {t("label.need-help")}
+                                    </Box>
+                                    <Box component="span" display="flex">
+                                        <Icon
+                                            fontSize={24}
+                                            icon="mdi:question-mark-circle-outline"
+                                        />
+                                    </Box>
+                                </Button>
+                            )}
+                        />
                     </PageHeaderActionsV1>
                 }
                 subtitle={getSubtitle()}

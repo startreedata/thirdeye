@@ -15,7 +15,7 @@
 
 import { Icon } from "@iconify/react";
 import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { CreateAnomalyWizard } from "../../components/anomalies-create/create-anomaly-wizard/create-anomaly-wizard.component";
@@ -54,7 +54,6 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
     const { id: selectedAlertId } = useParams<{ id?: string }>();
-    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
 
     useEffect(() => {
         getAlerts();
@@ -115,22 +114,28 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
             ],
             customActions: (
                 <PageHeaderActionsV1>
-                    <Button
-                        color="primary"
-                        size="small"
-                        variant="outlined"
-                        onClick={() => setIsHelpPanelOpen(true)}
-                    >
-                        <Box component="span" mr={1}>
-                            {t("label.need-help")}
-                        </Box>
-                        <Box component="span" display="flex">
-                            <Icon
-                                fontSize={24}
-                                icon="mdi:question-mark-circle-outline"
-                            />
-                        </Box>
-                    </Button>
+                    <HelpDrawerV1
+                        cards={anomalyCreateBasicHelpCards}
+                        title={`${t("label.need-help")}?`}
+                        trigger={(handleOpen) => (
+                            <Button
+                                color="primary"
+                                size="small"
+                                variant="outlined"
+                                onClick={handleOpen}
+                            >
+                                <Box component="span" mr={1}>
+                                    {t("label.need-help")}
+                                </Box>
+                                <Box component="span" display="flex">
+                                    <Icon
+                                        fontSize={24}
+                                        icon="mdi:question-mark-circle-outline"
+                                    />
+                                </Box>
+                            </Button>
+                        )}
+                    />
                 </PageHeaderActionsV1>
             ),
         };
@@ -149,12 +154,6 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
     return (
         <PageV1>
             <PageHeader {...pageHeaderProps} />
-            <HelpDrawerV1
-                cards={anomalyCreateBasicHelpCards}
-                isOpen={isHelpPanelOpen}
-                title={`${t("label.need-help")}?`}
-                onClose={() => setIsHelpPanelOpen(false)}
-            />
 
             <LoadingErrorStateSwitch
                 isError={alertsStatus === ActionStatus.Error}

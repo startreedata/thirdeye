@@ -14,7 +14,7 @@
  */
 import { Icon } from "@iconify/react";
 import { Box, Button } from "@material-ui/core";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { PageHeaderActionsV1 } from "../../platform/components";
@@ -30,7 +30,6 @@ import { PageHeader } from "../page-header/page-header.component";
 
 export const AnomaliesPageHeader: FunctionComponent = () => {
     const { search, pathname } = useLocation();
-    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
     const { t } = useTranslation();
     const crumbs: Crumb[] = [
         {
@@ -61,23 +60,29 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
                 breadcrumbs={crumbs}
                 customActions={
                     <PageHeaderActionsV1>
-                        <Button
-                            color="primary"
-                            size="small"
-                            variant="outlined"
-                            onClick={() => setIsHelpPanelOpen(true)}
-                        >
-                            <Box component="span" mr={1}>
-                                {t("label.need-help")}
-                            </Box>
-                            <Box component="span" display="flex">
-                                <Icon
-                                    fontSize={24}
-                                    icon="mdi:question-mark-circle-outline"
-                                />
-                            </Box>
-                        </Button>{" "}
-                        {/* Rendering the create button here instead of using the 
+                        <HelpDrawerV1
+                            cards={anomaliesBasicHelpCards}
+                            title={`${t("label.need-help")}?`}
+                            trigger={(handleOpen) => (
+                                <Button
+                                    color="primary"
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={handleOpen}
+                                >
+                                    <Box component="span" mr={1}>
+                                        {t("label.need-help")}
+                                    </Box>
+                                    <Box component="span" display="flex">
+                                        <Icon
+                                            fontSize={24}
+                                            icon="mdi:question-mark-circle-outline"
+                                        />
+                                    </Box>
+                                </Button>
+                            )}
+                        />{" "}
+                        {/* Rendering the create button here instead of using the
                         `showCreateButton` to show it in the same row as the help button */}
                         <CreateMenuButton />
                     </PageHeaderActionsV1>
@@ -94,12 +99,6 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
                 ]}
                 subNavigationSelected={selectedSubNavigation}
                 title={t("label.anomalies")}
-            />
-            <HelpDrawerV1
-                cards={anomaliesBasicHelpCards}
-                isOpen={isHelpPanelOpen}
-                title={`${t("label.need-help")}?`}
-                onClose={() => setIsHelpPanelOpen(false)}
             />
         </>
     );

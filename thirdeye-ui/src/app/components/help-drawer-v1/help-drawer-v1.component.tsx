@@ -22,57 +22,64 @@ import {
     Drawer,
     Typography,
 } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { HelpDrawerV1Props } from "./help-drawer-v1.interfaces";
 import { useHelperDrawerV1Styles } from "./help-drawer-v1.styles";
 
+/**
+ * Convenience wrapper on top of HelpDrawerCoreV1 so consumers do not have
+ * to maintain isOpen state
+ */
 export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
-    isOpen,
-    onClose,
     title,
     cards,
     children,
+    trigger,
 }) => {
     const classes = useHelperDrawerV1Styles();
+    const [isOpen, setIsOpen] = useState<boolean>(false);
 
     return (
-        <Drawer
-            PaperProps={{
-                className: classes.drawerPaper,
-            }}
-            anchor="right"
-            open={isOpen}
-            onClose={onClose}
-        >
-            <Box pb={2}>
-                <Card>
-                    <CardContent>
-                        <Box
-                            alignItems="center"
-                            display="flex"
-                            justifyContent="space-between"
-                        >
-                            <Typography variant="h5">{title}</Typography>
-                            <Icon
-                                cursor="pointer"
-                                fontSize={24}
-                                icon="ic:round-close"
-                                onClick={onClose}
-                            />
+        <>
+            {trigger(() => setIsOpen(true))}
+            <Drawer
+                PaperProps={{
+                    className: classes.drawerPaper,
+                }}
+                anchor="right"
+                open={isOpen}
+                onClose={() => setIsOpen(false)}
+            >
+                <Box pb={2}>
+                    <Card>
+                        <CardContent>
+                            <Box
+                                alignItems="center"
+                                display="flex"
+                                justifyContent="space-between"
+                            >
+                                <Typography variant="h5">{title}</Typography>
+                                <Icon
+                                    cursor="pointer"
+                                    fontSize={24}
+                                    icon="ic:round-close"
+                                    onClick={() => setIsOpen(false)}
+                                />
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Box>
+                {!!cards &&
+                    cards.map((card, idx) => (
+                        <Box key={idx} px={2} py={1}>
+                            <Card variant="outlined">
+                                <CardHeader title={card.title} />
+                                <CardContent>{card.body}</CardContent>
+                            </Card>
                         </Box>
-                    </CardContent>
-                </Card>
-            </Box>
-            {!!cards &&
-                cards.map((card, idx) => (
-                    <Box key={idx} px={2} py={1}>
-                        <Card variant="outlined">
-                            <CardHeader title={card.title} />
-                            <CardContent>{card.body}</CardContent>
-                        </Card>
-                    </Box>
-                ))}
-            {children}
-        </Drawer>
+                    ))}
+                {children}
+            </Drawer>
+        </>
     );
 };

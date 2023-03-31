@@ -51,7 +51,6 @@ export const AlertsAllPage: FunctionComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
-    const [isHelpPanelOpen, setIsHelpPanelOpen] = useState<boolean>(false);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -266,34 +265,34 @@ export const AlertsAllPage: FunctionComponent = () => {
                 transparentBackground
                 customActions={
                     <PageHeaderActionsV1>
-                        <Button
-                            color="primary"
-                            size="small"
-                            variant="outlined"
-                            onClick={() => setIsHelpPanelOpen(true)}
-                        >
-                            <Box component="span" mr={1}>
-                                {t("label.need-help")}
-                            </Box>
-                            <Box component="span" display="flex">
-                                <Icon
-                                    fontSize={24}
-                                    icon="mdi:question-mark-circle-outline"
-                                />
-                            </Box>
-                        </Button>{" "}
+                        <HelpDrawerV1
+                            cards={alertsBasicHelpCards}
+                            title={`${t("label.need-help")}?`}
+                            trigger={(handleOpen) => (
+                                <Button
+                                    color="primary"
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={handleOpen}
+                                >
+                                    <Box component="span" mr={1}>
+                                        {t("label.need-help")}
+                                    </Box>
+                                    <Box component="span" display="flex">
+                                        <Icon
+                                            fontSize={24}
+                                            icon="mdi:question-mark-circle-outline"
+                                        />
+                                    </Box>
+                                </Button>
+                            )}
+                        />{" "}
                         {/* Rendering the create button here instead of using the
                         `showCreateButton` to show it in the same row as the help button */}
                         <CreateMenuButton />
                     </PageHeaderActionsV1>
                 }
                 title={t("label.alerts")}
-            />
-            <HelpDrawerV1
-                cards={alertsBasicHelpCards}
-                isOpen={isHelpPanelOpen}
-                title={`${t("label.need-help")}?`}
-                onClose={() => setIsHelpPanelOpen(false)}
             />
 
             <PageContentsGridV1 fullHeight>

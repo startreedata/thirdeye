@@ -606,7 +606,7 @@
     "defaultValue": null,
     "min": null,
     "max": null,
-    "description": "Timezone used to group by time.",
+    "description": "Timezone used to group by time. In [TZ-identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) format.\nFor instance, `UTC` or `US/Pacific`.",
     "options": null,
     "multiselect": false,
     "jsonType": "STRING",

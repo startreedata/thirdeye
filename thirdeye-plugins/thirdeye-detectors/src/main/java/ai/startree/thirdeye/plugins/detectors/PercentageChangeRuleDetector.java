@@ -34,7 +34,7 @@ import org.joda.time.Interval;
 import org.joda.time.ReadableInterval;
 
 /**
- * Computes the current value to a baseline value.
+ * Compares the current value to a baseline value.
  * The lower/upper bounds are computed with: [baseline * (1-percentage), baseline * (1 + percentage)].
  * If a value is outside of this range, it is detected as an anomaly.
  */

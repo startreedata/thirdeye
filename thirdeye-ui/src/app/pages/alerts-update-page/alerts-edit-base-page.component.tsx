@@ -237,6 +237,7 @@ export const AlertsEditBasePage: FunctionComponent<AlertsEditPageProps> = ({
             <LoadingErrorStateSwitch
                 wrapInCard
                 wrapInGrid
+                wrapInGridContainer
                 isError={false}
                 isLoading={
                     alertTemplatesRequestStatus === ActionStatus.Working ||

@@ -14,7 +14,11 @@
  */
 import { Box, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
+import {
+    PageContentsCardV1,
+    PageContentsGridV1,
+    SkeletonV1,
+} from "../../../platform/components";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitchProps } from "./loading-error-state-switch.interfaces";
 
@@ -41,73 +45,47 @@ export const LoadingErrorStateSwitch: FunctionComponent<LoadingErrorStateSwitchP
         children,
         wrapInGrid,
         wrapInCard,
+        wrapInGridContainer,
     }) => {
-        if (isError) {
-            if (errorState) {
-                return <>{errorState}</>;
+        if (isError || isLoading) {
+            let outputState;
+
+            if (isError) {
+                if (errorState) {
+                    return <>{errorState}</>;
+                }
+
+                outputState = DEFAULT_ERROR_ELEMENT;
             }
 
-            if (wrapInGrid && wrapInCard) {
-                return (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            {DEFAULT_ERROR_ELEMENT}
-                        </PageContentsCardV1>
-                    </Grid>
-                );
-            }
+            if (isLoading) {
+                if (loadingState) {
+                    return <>{loadingState}</>;
+                }
 
-            if (wrapInGrid) {
-                return (
-                    <Grid item xs={12}>
-                        {DEFAULT_ERROR_ELEMENT}
-                    </Grid>
-                );
+                outputState = DEFAULT_LOADING_ELEMENT;
             }
 
             if (wrapInCard) {
-                return (
-                    <PageContentsCardV1>
-                        {DEFAULT_ERROR_ELEMENT}
-                    </PageContentsCardV1>
+                outputState = (
+                    <PageContentsCardV1>{outputState}</PageContentsCardV1>
                 );
             }
-
-            return DEFAULT_ERROR_ELEMENT;
-        }
-
-        if (isLoading) {
-            if (loadingState) {
-                return <>{loadingState}</>;
-            }
-
-            if (wrapInGrid && wrapInCard) {
-                return (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            {DEFAULT_LOADING_ELEMENT}
-                        </PageContentsCardV1>
-                    </Grid>
-                );
-            }
-
             if (wrapInGrid) {
-                return (
+                outputState = (
                     <Grid item xs={12}>
-                        {DEFAULT_LOADING_ELEMENT}
+                        {outputState}
                     </Grid>
                 );
             }
 
-            if (wrapInCard) {
-                return (
-                    <PageContentsCardV1>
-                        {DEFAULT_LOADING_ELEMENT}
-                    </PageContentsCardV1>
+            if (wrapInGridContainer) {
+                outputState = (
+                    <PageContentsGridV1>{outputState}</PageContentsGridV1>
                 );
             }
 
-            return DEFAULT_LOADING_ELEMENT;
+            return <>{outputState}</>;
         }
 
         return <>{children}</>;

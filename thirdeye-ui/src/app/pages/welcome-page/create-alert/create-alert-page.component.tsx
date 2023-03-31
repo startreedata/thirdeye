@@ -73,12 +73,10 @@ export const CreateAlertPage: FunctionComponent = () => {
             const subscriptionGroup = createEmptySubscriptionGroup();
             const newEmailConfiguration =
                 generateEmptyEmailSendGridConfiguration();
-            newEmailConfiguration.params.emailRecipients.to = emails;
             subscriptionGroup.specs = [newEmailConfiguration];
 
             return subscriptionGroup;
         });
-    const [emails, setEmails] = useState<string[]>([]);
     const [createAlertStatus, setCreateAlertStatus] = useState<ActionStatus>(
         ActionStatus.Initial
     );
@@ -165,12 +163,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                 );
             }
         },
-        [
-            alert,
-            createAndHandleSubscriptionGroup,
-            emails,
-            singleNewSubscriptionGroup,
-        ]
+        [alert, createAndHandleSubscriptionGroup, singleNewSubscriptionGroup]
     );
 
     useEffect(() => {
@@ -186,7 +179,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                         color="primary"
                         href={t("url.documentation-homepage")}
                         target="_blank"
-                        variant="contained"
+                        variant="outlined"
                     >
                         {t("label.help")}
                     </Button>
@@ -207,7 +200,6 @@ export const CreateAlertPage: FunctionComponent = () => {
                 <CreateAlertGuidedPage
                     alert={alert}
                     alertTemplates={alertTemplates || []}
-                    emails={emails}
                     getAlertTemplates={getAlertTemplates}
                     isCreatingAlert={
                         createSubscriptionGroupStatus ===
@@ -215,7 +207,6 @@ export const CreateAlertPage: FunctionComponent = () => {
                         createAlertStatus === ActionStatus.Working
                     }
                     newSubscriptionGroup={singleNewSubscriptionGroup}
-                    setEmails={setEmails}
                     onAlertPropertyChange={handleAlertPropertyChange}
                     onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
                     onSubmit={handleCreateAlertClick}

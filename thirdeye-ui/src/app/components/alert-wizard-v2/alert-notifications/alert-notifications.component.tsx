@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Switch, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Switch, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
+import { getSubscriptionGroupsCreatePath } from "../../../utils/routes/routes.util";
 import { AlertNotificationsProps } from "./alert-notifications.interfaces";
 import { SubscriptionGroups } from "./subscription-groups/subscription-groups.component";
 
@@ -58,6 +59,18 @@ export const AlertNotifications: FunctionComponent<AlertNotificationsProps> = ({
                 {isNotificationsOn && (
                     <SubscriptionGroups
                         alert={alert}
+                        emptySubscriptionGroupButton={
+                            <Button
+                                color="primary"
+                                href={getSubscriptionGroupsCreatePath()}
+                                target="_blank"
+                                variant="outlined"
+                            >
+                                {t("label.create-entity", {
+                                    entity: t("label.subscription-group"),
+                                })}
+                            </Button>
+                        }
                         initialSubscriptionGroups={
                             initiallySelectedSubscriptionGroups
                         }

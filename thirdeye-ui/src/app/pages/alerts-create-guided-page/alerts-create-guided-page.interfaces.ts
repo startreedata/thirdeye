@@ -24,8 +24,6 @@ export interface AlertsCreateGuidedPageProps {
     onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
     onSubmit: (alert: EditableAlert, suggestedName: string) => void;
     isCreatingAlert: boolean;
-    emails?: string[];
-    setEmails?: (emails: string[]) => void;
     selectedSubscriptionGroups?: SubscriptionGroup[];
     onSubscriptionGroupChange?: (groups: SubscriptionGroup[]) => void;
     getAlertTemplates: () => void;

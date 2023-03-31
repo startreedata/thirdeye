@@ -62,7 +62,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,
     alert,
     algorithmOptionConfig,
-    showEditorSwitchButton,
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
@@ -284,9 +283,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                         </Typography>
                                     </Grid>
                                     <Grid item>
-                                        {showEditorSwitchButton && (
-                                            <NavigateAlertCreationFlowsDropdown />
-                                        )}
+                                        <NavigateAlertCreationFlowsDropdown />
                                     </Grid>
                                 </Grid>
                             </Grid>

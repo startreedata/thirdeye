@@ -12,33 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Button,
-    Divider,
-    Grid,
-    TextField,
-    Typography,
-} from "@material-ui/core";
+import { Box, Divider, Grid, TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import React, {
-    FunctionComponent,
-    useCallback,
-    useEffect,
-    useState,
-} from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    JSONEditorV1,
     PageContentsCardV1,
     PageContentsGridV1,
-    useDialogProviderV1,
 } from "../../../platform/components";
-import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import {
@@ -65,10 +49,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
-    const { showDialog } = useDialogProviderV1();
 
-    const advancedEditorAlertState = useState(alert);
-    const setAdvancedEditorAlert = advancedEditorAlertState[1];
     const {
         datasources,
         getDatasources,
@@ -156,52 +137,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
         });
     };
 
-    const handleAdvancedEditorOk = (configToReplace: EditableAlert): void => {
-        onAlertPropertyChange(configToReplace, true);
-
-        datasetsInfo &&
-            resetSelectedMetrics(
-                datasetsInfo,
-                configToReplace,
-                setSelectedTable,
-                setSelectedMetric,
-                setSelectedAggregationFunction
-            );
-    };
-
-    const handleAdvancedEditorBtnClick = useCallback((): void => {
-        showDialog({
-            type: DialogType.CUSTOM,
-            headerText: t("label.detection-configuration"),
-            contents: (
-                <JSONEditorV1<EditableAlert>
-                    disableValidation
-                    value={alert}
-                    onChange={(updates) => {
-                        try {
-                            const parsedString = JSON.parse(updates);
-                            setAdvancedEditorAlert(() => parsedString);
-                        } catch {
-                            // do nothing if invalid JSON string
-                        }
-                    }}
-                />
-            ),
-            width: "md",
-            okButtonText: t("label.apply-changes"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => {
-                setAdvancedEditorAlert((current) => {
-                    // Wait for previous state updates to finish before
-                    // calling handleAdvancedEditorOk
-                    handleAdvancedEditorOk(current);
-
-                    return current;
-                });
-            },
-        });
-    }, [showDialog, alert]);
-
     const handleAggregationFunctionSelect = (
         aggregationFunction: MetricAggFunction
     ): void => {
@@ -233,12 +168,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                         </Typography>
                     </Grid>
                     <Grid item>
-                        <Button
-                            color="primary"
-                            onClick={handleAdvancedEditorBtnClick}
-                        >
-                            {t("label.json-editor")}
-                        </Button>
+                        <NavigateAlertCreationFlowsDropdown />
                     </Grid>
                 </Grid>
             </Grid>
@@ -254,38 +184,25 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     >
                         <Grid container>
                             <Grid item xs={12}>
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                >
-                                    <Grid item>
-                                        <Typography variant="h5">
-                                            {algorithmOptionConfig &&
-                                                t("label.entity-setup", {
-                                                    entity: algorithmOptionConfig
-                                                        .algorithmOption.title,
-                                                    multidimension:
-                                                        algorithmOptionConfig
-                                                            .algorithmOption
-                                                            .alertTemplateForMultidimension ===
-                                                        alert.template?.name
-                                                            ? `(${t(
-                                                                  "label.multidimension"
-                                                              )})`
-                                                            : "",
-                                                })}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            {t(
-                                                "message.threshold-setup-description"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        <NavigateAlertCreationFlowsDropdown />
-                                    </Grid>
-                                </Grid>
+                                <Typography variant="h5">
+                                    {algorithmOptionConfig &&
+                                        t("label.entity-setup", {
+                                            entity: algorithmOptionConfig
+                                                .algorithmOption.title,
+                                            multidimension:
+                                                algorithmOptionConfig
+                                                    .algorithmOption
+                                                    .alertTemplateForMultidimension ===
+                                                alert.template?.name
+                                                    ? `(${t(
+                                                          "label.multidimension"
+                                                      )})`
+                                                    : "",
+                                        })}
+                                </Typography>
+                                <Typography variant="body2">
+                                    {t("message.threshold-setup-description")}
+                                </Typography>
                             </Grid>
 
                             <Grid item xs={12}>

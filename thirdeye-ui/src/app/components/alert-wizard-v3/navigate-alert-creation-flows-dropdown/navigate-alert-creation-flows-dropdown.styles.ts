@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { makeStyles } from "@material-ui/core";
 
-export interface WizardBottomBarProps {
-    handleBackClick?: () => void;
-    handleNextClick?: () => void;
-    nextButtonLabel?: string;
-    backButtonLabel?: string;
-    backBtnLink?: string;
-    nextBtnLink?: string;
-    nextButtonIsDisabled?: boolean;
-    doNotWrapInContainer?: boolean;
-}
+export const useNavigateAlertCreationFlowsDropdownStyles = makeStyles({
+    autoCompleteInput: {
+        paddingRight: "45px",
+    },
+    autocomplete: {
+        backgroundColor: "#FFF",
+    },
+});

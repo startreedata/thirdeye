@@ -25,13 +25,7 @@ import {
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { Skeleton } from "@material-ui/lab";
 import { reduce } from "lodash";
-import {
-    default as React,
-    FunctionComponent,
-    useCallback,
-    useMemo,
-    useState,
-} from "react";
+import { default as React, FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Link as RouterLink,
@@ -41,17 +35,13 @@ import {
 import { AnomaliesFilterPanel } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.component";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { PreviewChart } from "../../../components/alert-wizard-v3/preview-chart/preview-chart.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { Portal } from "../../../components/portal/portal.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
-import {
-    JSONEditorV1,
-    PageContentsGridV1,
-    useDialogProviderV1,
-} from "../../../platform/components";
-import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { PageContentsGridV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
@@ -65,7 +55,6 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
     ({ hideCurrentlySelected }) => {
         const { t } = useTranslation();
         const navigate = useNavigate();
-        const { showDialog } = useDialogProviderV1();
         const classes = useAlertsCreateGuidedPage();
 
         const {
@@ -98,9 +87,6 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
             alertConfigurationWithFilterChanges,
             setAlertConfigurationWithFilterChanges,
         ] = useState(alertConfigurationBeforeFilterChanges);
-        const [, setAdvancedEditorAlert] = useState(
-            alertConfigurationWithFilterChanges
-        );
         const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
         const selectedAlertTemplate = useMemo(() => {
@@ -120,50 +106,11 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
             return getAvailableFilterOptions(selectedAlertTemplate, t);
         }, [selectedAlertTemplate]);
 
-        const handleAdvancedEditorOk = (
-            configToReplace: EditableAlert
-        ): void => {
-            setAlertConfigurationWithFilterChanges(configToReplace);
-        };
-
         const fetchAlertEvaluation = (start: number, end: number): void => {
             const copiedAlert = { ...alertConfigurationBeforeFilterChanges };
             delete copiedAlert.id;
             getEvaluation(createAlertEvaluation(copiedAlert, start, end));
         };
-
-        const handleAdvancedEditorBtnClick = useCallback((): void => {
-            showDialog({
-                type: DialogType.CUSTOM,
-                headerText: t("label.detection-configuration"),
-                contents: (
-                    <JSONEditorV1<EditableAlert>
-                        disableValidation
-                        value={alertConfigurationWithFilterChanges}
-                        onChange={(updates) => {
-                            try {
-                                const parsedString = JSON.parse(updates);
-                                setAdvancedEditorAlert(() => parsedString);
-                            } catch {
-                                // do nothing if invalid JSON string
-                            }
-                        }}
-                    />
-                ),
-                width: "md",
-                okButtonText: t("label.apply-changes"),
-                cancelButtonText: t("label.cancel"),
-                onOk: () => {
-                    setAdvancedEditorAlert((current) => {
-                        // Wait for previous state updates to finish before
-                        // calling handleAdvancedEditorOk
-                        handleAdvancedEditorOk(current);
-
-                        return current;
-                    });
-                },
-            });
-        }, [showDialog, alertConfigurationWithFilterChanges]);
 
         const handleFilterPanelOnCloseClick = (): void => {
             setIsFilterPanelOpen(false);
@@ -209,12 +156,7 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                 </Typography>
                             </Grid>
                             <Grid item>
-                                <Button
-                                    color="primary"
-                                    onClick={handleAdvancedEditorBtnClick}
-                                >
-                                    {t("label.json-editor")}
-                                </Button>
+                                <NavigateAlertCreationFlowsDropdown />
                             </Grid>
                         </Grid>
                     </Grid>

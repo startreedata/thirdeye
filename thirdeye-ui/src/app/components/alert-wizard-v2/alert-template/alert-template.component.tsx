@@ -34,7 +34,6 @@ import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-temp
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { getAlertTemplatesCreatePath } from "../../../utils/routes/routes.util";
 import { AlertTemplatesInformationLinks } from "../../alert-wizard-v3/alert-templates-information-links/alert-templates-information-links";
-import { NavigateAlertCreationFlowsDropdown } from "../../alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertTemplatePropertiesBuilder } from "./alert-template-properties-builder/alert-template-properties-builder.component";
@@ -179,25 +178,12 @@ function AlertTemplate({
             <Grid container>
                 <Grid item xs={12}>
                     <Box marginBottom={2}>
-                        <Grid
-                            container
-                            alignContent="center"
-                            justifyContent="space-between"
-                        >
-                            <Grid item>
-                                <Typography variant="h5">
-                                    {t("label.detection-template")}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t(
-                                        "message.select-template-to-preview-alert"
-                                    )}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <NavigateAlertCreationFlowsDropdown />
-                            </Grid>
-                        </Grid>
+                        <Typography variant="h5">
+                            {t("label.detection-template")}
+                        </Typography>
+                        <Typography variant="body2">
+                            {t("message.select-template-to-preview-alert")}
+                        </Typography>
                     </Box>
                 </Grid>
 

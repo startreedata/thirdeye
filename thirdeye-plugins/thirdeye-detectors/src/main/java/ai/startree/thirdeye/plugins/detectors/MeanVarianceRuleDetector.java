@@ -13,13 +13,11 @@
  */
 package ai.startree.thirdeye.plugins.detectors;
 
+import static ai.startree.thirdeye.plugins.detectors.AbsoluteChangeRuleDetector.windowMatch;
 import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
-import static ai.startree.thirdeye.spi.Constants.COL_DIFF_VIOLATION;
-import static ai.startree.thirdeye.spi.Constants.COL_ERROR;
 import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
-import static ai.startree.thirdeye.spi.Constants.COL_PATTERN;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
@@ -157,12 +155,11 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         // rename current which is still called "value" to "current"
         .renameSeries(COL_VALUE, COL_CURRENT)
         // left join baseline values
-        .addSeries(baselineDf, COL_VALUE, COL_ERROR, COL_LOWER_BOUND, COL_UPPER_BOUND)
-        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
-        .addSeries(COL_PATTERN, patternMatch(pattern, inputDf))
-        .addSeries(COL_DIFF_VIOLATION,
-            inputDf.getDoubles(COL_DIFF).abs().gt(inputDf.getDoubles(COL_ERROR)))
-        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY, COL_PATTERN, COL_DIFF_VIOLATION);
+        .addSeries(baselineDf, COL_VALUE, COL_LOWER_BOUND, COL_UPPER_BOUND)
+        .addSeries(COL_ANOMALY,
+            pattern.isAnomaly(inputDf.getDoubles(COL_CURRENT), inputDf.getDoubles(COL_LOWER_BOUND),
+                    inputDf.getDoubles(COL_UPPER_BOUND))
+                .and(windowMatch(inputDf.getLongs(COL_TIME), window)));
 
     return new SimpleAnomalyDetectorResult(inputDf);
   }
@@ -180,7 +177,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final double[] upperBoundArray = new double[size];
     final double[] lowerBoundArray = new double[size];
     final long[] resultTimeArray = new long[size];
-    final double[] errorArray = new double[size];
 
     // todo cyril compute mean and std in a single pass
     // https://nestedsoftware.com/2018/03/20/calculating-a-moving-average-on-streaming-data-5a7k.22879.html
@@ -195,9 +191,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       //calculate baseline, error , upper and lower bound for prediction window.
       resultTimeArray[k] = forecastTime;
       baselineArray[k] = mean;
-      errorArray[k] = sigma(sensitivity) * std;
-      upperBoundArray[k] = baselineArray[k] + errorArray[k];
-      lowerBoundArray[k] = baselineArray[k] - errorArray[k];
+      final double error = sigma(sensitivity) * std;
+      upperBoundArray[k] = baselineArray[k] + error;
+      lowerBoundArray[k] = baselineArray[k] - error;
     }
     //Construct the dataframe.
     resultDF
@@ -207,8 +203,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     resultDF
         .addSeries(COL_VALUE, DoubleSeries.buildFrom(baselineArray))
         .addSeries(COL_UPPER_BOUND, DoubleSeries.buildFrom(upperBoundArray))
-        .addSeries(COL_LOWER_BOUND, DoubleSeries.buildFrom(lowerBoundArray))
-        .addSeries(COL_ERROR, DoubleSeries.buildFrom(errorArray));
+        .addSeries(COL_LOWER_BOUND, DoubleSeries.buildFrom(lowerBoundArray));
 
     return resultDF;
   }

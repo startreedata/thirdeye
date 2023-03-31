@@ -78,11 +78,8 @@ public interface Constants {
   String COL_UPPER_BOUND = "upper_bound";
   String COL_LOWER_BOUND = "lower_bound";
   String COL_ANOMALY = "anomaly";
-  String COL_PATTERN = "pattern";
   String COL_ERROR = "error";
   String COL_DIFF = "diff";
-  String COL_DIFF_VIOLATION = "diff_violation";
-  String COL_IN_WINDOW = "is_in_window";
 
   // constants for event dataframes
   String COL_EVENT_NAME = "event_name";

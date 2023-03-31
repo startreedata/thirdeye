@@ -15,24 +15,15 @@ package ai.startree.thirdeye.plugins.detectors;
 
 import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
-import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
-import static ai.startree.thirdeye.spi.Constants.COL_DIFF_VIOLATION;
-import static ai.startree.thirdeye.spi.Constants.COL_IN_WINDOW;
 import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
-import static ai.startree.thirdeye.spi.Constants.COL_PATTERN;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
-import static ai.startree.thirdeye.spi.dataframe.DoubleSeries.POSITIVE_INFINITY;
-import static ai.startree.thirdeye.spi.detection.Pattern.DOWN;
-import static ai.startree.thirdeye.spi.detection.Pattern.UP;
-import static ai.startree.thirdeye.spi.detection.Pattern.UP_OR_DOWN;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
@@ -44,7 +35,9 @@ import org.joda.time.Interval;
 import org.joda.time.ReadableInterval;
 
 /**
- * Absolute change rule detection
+ * Compares the current value to a baseline value.
+ * The lower/upper bounds are computed with: [baseline - absoluteDeviation, baseline + absoluteDeviation].
+ * If a value is outside of this range, it is detected as an anomaly.
  */
 public class AbsoluteChangeRuleDetector implements
     AnomalyDetector<AbsoluteChangeRuleDetectorSpec> {
@@ -87,32 +80,13 @@ public class AbsoluteChangeRuleDetector implements
       final ReadableInterval window) {
     // calculate absolute change
     inputDf
-        .addSeries(COL_DIFF, inputDf.getDoubles(COL_CURRENT).subtract(inputDf.get(COL_VALUE)))
-        .addSeries(COL_PATTERN, MeanVarianceRuleDetector.patternMatch(pattern, inputDf))
-        .addSeries(COL_DIFF_VIOLATION, inputDf.getDoubles(COL_DIFF).abs().gte(absoluteChange))
-        .addSeries(COL_IN_WINDOW, windowMatch(inputDf.getLongs(COL_TIME), window))
-        .mapInPlace(BooleanSeries.ALL_TRUE, COL_ANOMALY,
-            COL_PATTERN,
-            COL_DIFF_VIOLATION,
-            COL_IN_WINDOW);
-    addBoundaries(inputDf);
+        .addSeries(COL_UPPER_BOUND, inputDf.getDoubles(COL_VALUE).add(absoluteChange))
+        .addSeries(COL_LOWER_BOUND, inputDf.getDoubles(COL_VALUE).subtract(absoluteChange))
+        .addSeries(COL_ANOMALY,
+            pattern.isAnomaly(inputDf.getDoubles(COL_CURRENT), inputDf.getDoubles(COL_LOWER_BOUND),
+                    inputDf.getDoubles(COL_UPPER_BOUND))
+                .and(windowMatch(inputDf.getLongs(COL_TIME), window)));
 
-    return
-        new SimpleAnomalyDetectorResult(inputDf);
-  }
-
-  private void addBoundaries(final DataFrame inputDf) {
-    //default bounds
-    DoubleSeries upperBound = DoubleSeries.fillValues(inputDf.size(), POSITIVE_INFINITY);
-    //fixme cyril this not consistent with threshold rule detector default values
-    DoubleSeries lowerBound = DoubleSeries.zeros(inputDf.size());
-    if (pattern == UP || pattern == UP_OR_DOWN) {
-      upperBound = inputDf.getDoubles(COL_VALUE).add(absoluteChange);
-    }
-    if (pattern == DOWN || pattern == UP_OR_DOWN) {
-      lowerBound = inputDf.getDoubles(COL_VALUE).add(-absoluteChange);
-    }
-    inputDf.addSeries(COL_UPPER_BOUND, upperBound);
-    inputDf.addSeries(COL_LOWER_BOUND, lowerBound);
+    return new SimpleAnomalyDetectorResult(inputDf);
   }
 }

@@ -70,8 +70,6 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
         inProgressLabel,
         hideCurrentlySelected,
         navigateToAlertDetailAfterSampleAlertCreate,
-        showEmailOnlyForSubscriptionGroup,
-        showEditorSwitchButton,
     }) => {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
@@ -143,11 +141,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                                         AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
                                     }
                                 >
-                                    <SetupMonitoringPage
-                                        showEditorSwitchButton={
-                                            showEditorSwitchButton
-                                        }
-                                    />
+                                    <SetupMonitoringPage />
                                 </CancelAPICallsOnPageUnload>
                             }
                             path={
@@ -180,9 +174,6 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                                     <SetupDetailsPage
                                         createLabel={createLabel}
                                         inProgressLabel={inProgressLabel}
-                                        showEmailOnlyForSubscriptionGroup={
-                                            showEmailOnlyForSubscriptionGroup
-                                        }
                                     />
                                 </CancelAPICallsOnPageUnload>
                             }

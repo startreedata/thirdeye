@@ -18,43 +18,37 @@ import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-se
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
-import { SetupMonitoringPageProps } from "./setup-monitoring-page.interfaces";
 
-export const SetupMonitoringPage: FunctionComponent<SetupMonitoringPageProps> =
-    ({ showEditorSwitchButton }) => {
-        const navigate = useNavigate();
+export const SetupMonitoringPage: FunctionComponent = () => {
+    const navigate = useNavigate();
 
-        const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
-            useOutletContext<AlertCreatedGuidedPageOutletContext>();
+    const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
+        useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
-        useEffect(() => {
-            // On initial render, ensure there is already an alert template selected
-            if (!alert.template?.name) {
-                navigate(
-                    `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
-                );
-            }
-        }, []);
+    useEffect(() => {
+        // On initial render, ensure there is already an alert template selected
+        if (!alert.template?.name) {
+            navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`);
+        }
+    }, []);
 
-        return (
-            <>
-                <ThresholdSetup
-                    alert={alert}
-                    algorithmOptionConfig={selectedAlgorithmOption}
-                    showEditorSwitchButton={showEditorSwitchButton}
-                    onAlertPropertyChange={onAlertPropertyChange}
-                />
+    return (
+        <>
+            <ThresholdSetup
+                alert={alert}
+                algorithmOptionConfig={selectedAlgorithmOption}
+                onAlertPropertyChange={onAlertPropertyChange}
+            />
 
-                <WizardBottomBar
-                    backBtnLink={
-                        selectedAlgorithmOption.algorithmOption
-                            .alertTemplateForMultidimension ===
-                        alert.template?.name
-                            ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
-                            : `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
-                    }
-                    nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
-                />
-            </>
-        );
-    };
+            <WizardBottomBar
+                backBtnLink={
+                    selectedAlgorithmOption.algorithmOption
+                        .alertTemplateForMultidimension === alert.template?.name
+                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
+                        : `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
+                }
+                nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
+            />
+        </>
+    );
+};

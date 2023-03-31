@@ -33,6 +33,7 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
     onSubscriptionGroupsChange,
     initialSubscriptionGroups,
     hideCreateButton,
+    emptySubscriptionGroupButton,
 }) => {
     const { t } = useTranslation();
     const { subscriptionGroups, getSubscriptionGroups, status } =
@@ -135,18 +136,7 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
                                     </Typography>
 
                                     <Box marginTop={3}>
-                                        <Button
-                                            color="primary"
-                                            href={getSubscriptionGroupsCreatePath()}
-                                            target="_blank"
-                                            variant="outlined"
-                                        >
-                                            {t("label.create-entity", {
-                                                entity: t(
-                                                    "label.subscription-group"
-                                                ),
-                                            })}
-                                        </Button>
+                                        {emptySubscriptionGroupButton}
                                     </Box>
                                 </Box>
                             </Grid>

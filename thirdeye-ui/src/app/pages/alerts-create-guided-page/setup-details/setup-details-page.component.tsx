@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlertFrequency } from "../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
 import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
-import { OnlyEmails } from "../../../components/alert-wizard-v3/notification-configuration/only-emails/only-emails.component";
 import { InputSection } from "../../../components/form-basics/input-section/input-section.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
@@ -38,7 +37,6 @@ import { SetupDetailsPageProps } from "./setup-details-page.interface";
 export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
     inProgressLabel,
     createLabel,
-    showEmailOnlyForSubscriptionGroup,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -193,33 +191,21 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                                 />
                             </Grid>
 
-                            {isNotificationsOn &&
-                                showEmailOnlyForSubscriptionGroup && (
-                                    <OnlyEmails
-                                        subscriptionGroup={newSubscriptionGroup}
-                                        onSubscriptionGroupChange={
-                                            onNewSubscriptionGroupChange
-                                        }
-                                    />
-                                )}
-                            {isNotificationsOn &&
-                                !showEmailOnlyForSubscriptionGroup && (
-                                    <NotificationConfiguration
-                                        alert={alert}
-                                        initiallySelectedSubscriptionGroups={
-                                            selectedSubscriptionGroups
-                                        }
-                                        newSubscriptionGroup={
-                                            newSubscriptionGroup
-                                        }
-                                        onNewSubscriptionGroupChange={
-                                            onNewSubscriptionGroupChange
-                                        }
-                                        onSubscriptionGroupsChange={
-                                            handleSubscriptionGroupChange
-                                        }
-                                    />
-                                )}
+                            {isNotificationsOn && (
+                                <NotificationConfiguration
+                                    alert={alert}
+                                    initiallySelectedSubscriptionGroups={
+                                        selectedSubscriptionGroups
+                                    }
+                                    newSubscriptionGroup={newSubscriptionGroup}
+                                    onNewSubscriptionGroupChange={
+                                        onNewSubscriptionGroupChange
+                                    }
+                                    onSubscriptionGroupsChange={
+                                        handleSubscriptionGroupChange
+                                    }
+                                />
+                            )}
                         </Grid>
                     </PageContentsCardV1>
                 </Grid>

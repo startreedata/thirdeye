@@ -22,5 +22,4 @@ export interface ThresholdSetupProps {
         isTotalReplace?: boolean
     ) => void;
     algorithmOptionConfig: AvailableAlgorithmOption | undefined;
-    showEditorSwitchButton?: boolean;
 }

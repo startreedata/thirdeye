@@ -164,7 +164,6 @@ export const AlertsRouter: FunctionComponent = () => {
                                     <AlertsCreateGuidedRouter
                                         navigateToAlertDetailAfterSampleAlertCreate
                                         sampleAlertsBottom
-                                        showEditorSwitchButton
                                         useParentForNonWelcomeFlow
                                         createLabel={t("label.create")}
                                         inProgressLabel={t("label.creating")}
@@ -301,7 +300,6 @@ export const AlertsRouter: FunctionComponent = () => {
                                 <AlertsCreateGuidedRouter
                                     hideSampleAlerts
                                     navigateToAlertDetailAfterSampleAlertCreate
-                                    showEditorSwitchButton
                                     useParentForNonWelcomeFlow
                                     createLabel={t("label.update-entity", {
                                         entity: t("label.alert"),

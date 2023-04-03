@@ -164,7 +164,6 @@ export const AlertsRouter: FunctionComponent = () => {
                                     <AlertsCreateGuidedRouter
                                         navigateToAlertDetailAfterSampleAlertCreate
                                         sampleAlertsBottom
-                                        useParentForNonWelcomeFlow
                                         createLabel={t("label.create")}
                                         inProgressLabel={t("label.creating")}
                                     />
@@ -175,11 +174,11 @@ export const AlertsRouter: FunctionComponent = () => {
 
                         <Route
                             element={<AlertsCreateSimplePage />}
-                            path={AppRouteRelative.ALERTS_CREATE_SIMPLE}
+                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                         />
                         <Route
                             element={<AlertsCreateAdvancePage />}
-                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                            path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
                         />
                     </Route>
 
@@ -196,7 +195,9 @@ export const AlertsRouter: FunctionComponent = () => {
                                             1
                                         );
                                     }}
-                                    to={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                                    to={
+                                        AppRouteRelative.ALERTS_CREATE_JSON_EDITOR
+                                    }
                                 />
                             }
                         />
@@ -206,7 +207,6 @@ export const AlertsRouter: FunctionComponent = () => {
                                 <AlertsCreateGuidedRouter
                                     hideSampleAlerts
                                     navigateToAlertDetailAfterSampleAlertCreate
-                                    useParentForNonWelcomeFlow
                                     createLabel={t("label.create")}
                                     inProgressLabel={t("label.creating")}
                                 />
@@ -216,11 +216,11 @@ export const AlertsRouter: FunctionComponent = () => {
 
                         <Route
                             element={<AlertsCreateSimplePage />}
-                            path={AppRouteRelative.ALERTS_CREATE_SIMPLE}
+                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                         />
                         <Route
                             element={<AlertsCreateAdvancePage />}
-                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                            path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
                         />
                     </Route>
 
@@ -290,7 +290,9 @@ export const AlertsRouter: FunctionComponent = () => {
                                             1
                                         );
                                     }}
-                                    to={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
+                                    to={
+                                        AppRouteRelative.ALERTS_UPDATE_JSON_EDITOR
+                                    }
                                 />
                             }
                         />
@@ -300,7 +302,6 @@ export const AlertsRouter: FunctionComponent = () => {
                                 <AlertsCreateGuidedRouter
                                     hideSampleAlerts
                                     navigateToAlertDetailAfterSampleAlertCreate
-                                    useParentForNonWelcomeFlow
                                     createLabel={t("label.update-entity", {
                                         entity: t("label.alert"),
                                     })}
@@ -312,11 +313,11 @@ export const AlertsRouter: FunctionComponent = () => {
 
                         <Route
                             element={<AlertsUpdateSimplePage />}
-                            path={AppRouteRelative.ALERTS_UPDATE_SIMPLE}
+                            path={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
                         />
                         <Route
                             element={<AlertsUpdateAdvancedPage />}
-                            path={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
+                            path={AppRouteRelative.ALERTS_UPDATE_JSON_EDITOR}
                         />
                     </Route>
 

@@ -19,16 +19,10 @@ import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 import { AlertsGuidedCreateRouterProps } from "./alerts-guided-create.router.interface";
 
-const CreateAlertPageNewUser = lazy(() =>
+const CreateAlertGuidedPage = lazy(() =>
     import(
-        /* webpackChunkName: "create-alert-new-user-page" */ "../../pages/alerts-create-page/create-alert-new-user-page.component"
-    ).then((module) => ({ default: module.CreateAlertNewUserPage }))
-);
-
-const CreateAlertWelcomeFlow = lazy(() =>
-    import(
-        /* webpackChunkName: "create-alert-welcome-flow-page" */ "../../pages/welcome-page/create-alert/create-alert-page.component"
-    ).then((module) => ({ default: module.CreateAlertPage }))
+        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"
+    ).then((module) => ({ default: module.CreateAlertGuidedPage }))
 );
 
 const SelectTypePage = lazy(() =>
@@ -63,7 +57,6 @@ const SetupDimensionGroupsPage = lazy(() =>
 
 export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRouterProps> =
     ({
-        useParentForNonWelcomeFlow,
         sampleAlertsBottom,
         hideSampleAlerts,
         createLabel,
@@ -74,16 +67,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
                 <Routes>
-                    <Route
-                        element={
-                            useParentForNonWelcomeFlow ? (
-                                <CreateAlertPageNewUser />
-                            ) : (
-                                <CreateAlertWelcomeFlow />
-                            )
-                        }
-                        path="*"
-                    >
+                    <Route element={<CreateAlertGuidedPage />} path="*">
                         <Route
                             index
                             element={

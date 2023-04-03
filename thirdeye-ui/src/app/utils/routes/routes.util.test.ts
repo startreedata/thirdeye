@@ -19,7 +19,7 @@ import {
     generateDateRangeMonthsFromNow,
     getAlertsAlertViewPath,
     getAlertsAllPath,
-    getAlertsCreateNewAdvancedPath,
+    getAlertsCreateNewJsonEditorPath,
     getAlertsCreateNewSimplePath,
     getAlertsCreatePath,
     getAlertsPath,
@@ -91,7 +91,7 @@ describe("Routes Util", () => {
     });
 
     it("getAlertsCreateAdvancedPath should return appropriate path with appropriate query string", () => {
-        expect(getAlertsCreateNewAdvancedPath()).toEqual(
+        expect(getAlertsCreateNewJsonEditorPath()).toEqual(
             "/alerts/create/new/advanced?testQueryString"
         );
     });

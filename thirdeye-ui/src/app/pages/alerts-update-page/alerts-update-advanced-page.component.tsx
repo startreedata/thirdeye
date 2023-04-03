@@ -24,27 +24,37 @@ import {
 } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { MessageDisplayState } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
+import { Portal } from "../../components/portal/portal.component";
+import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
 } from "../../platform/components";
-import { AlertEditPageOutletContextProps } from "./alerts-update-page.interfaces";
+import {
+    AlertsSimpleAdvancedJsonContainerPageOutletContextProps,
+    BOTTOM_BAR_ELEMENT_ID,
+} from "../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
 
 export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
         useState(false);
+    const [submitBtnLabel, setSubmitBtnLabel] = useState<string>(
+        t("label.update-entity", {
+            entity: t("label.alert"),
+        })
+    );
+    const [isSubmitBtnEnabled, setIsSubmitBtnEnabled] = useState(false);
     const {
         alert,
         handleAlertPropertyChange: onAlertPropertyChange,
         selectedSubscriptionGroups,
         handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
-        setShowBottomBar,
-        setIsSubmitBtnEnabled,
-        setSubmitBtnLabel,
-        resetSubmitButtonLabel,
-    } = useOutletContext<AlertEditPageOutletContextProps>();
+        isEditRequestInFlight,
+        handleSubmitAlertClick,
+        onPageExit,
+    } = useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
     const availableFields = useMemo(() => {
         if (selectedAlertTemplate) {
@@ -66,7 +76,6 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     }, [selectedAlertTemplate, alert]);
 
     useEffect(() => {
-        setShowBottomBar(true);
         setIsSubmitBtnEnabled(false);
         setSubmitBtnLabel(
             t("message.preview-alert-in-chart-before-submitting")
@@ -74,46 +83,65 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     }, []);
 
     return (
-        <PageContentsGridV1>
-            <Grid item xs={12}>
-                <PageContentsCardV1>
-                    <AlertJson
-                        alert={alert}
-                        onAlertPropertyChange={onAlertPropertyChange}
-                    />
-                    <Box marginBottom={3} marginTop={3}>
-                        <Divider />
-                    </Box>
-                    <Box>
-                        <PreviewChart
+        <>
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <PageContentsCardV1>
+                        <AlertJson
                             alert={alert}
-                            displayState={
-                                selectedAlertTemplate
-                                    ? isRequiredPropertyValuesSet
-                                        ? MessageDisplayState.GOOD_TO_PREVIEW
-                                        : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
-                                    : MessageDisplayState.SELECT_TEMPLATE
-                            }
-                            subtitle={t(
-                                "message.configure-or-input-template-to-preview-alert"
-                            )}
-                            onChartDataLoadSuccess={() => {
-                                setIsSubmitBtnEnabled(true);
-                                resetSubmitButtonLabel();
-                            }}
+                            onAlertPropertyChange={onAlertPropertyChange}
                         />
-                    </Box>
-                </PageContentsCardV1>
-            </Grid>
-            <Grid item xs={12}>
-                <AlertNotifications
-                    alert={alert}
-                    initiallySelectedSubscriptionGroups={
-                        selectedSubscriptionGroups
+                        <Box marginBottom={3} marginTop={3}>
+                            <Divider />
+                        </Box>
+                        <Box>
+                            <PreviewChart
+                                alert={alert}
+                                displayState={
+                                    selectedAlertTemplate
+                                        ? isRequiredPropertyValuesSet
+                                            ? MessageDisplayState.GOOD_TO_PREVIEW
+                                            : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
+                                        : MessageDisplayState.SELECT_TEMPLATE
+                                }
+                                subtitle={t(
+                                    "message.configure-or-input-template-to-preview-alert"
+                                )}
+                                onChartDataLoadSuccess={() => {
+                                    setIsSubmitBtnEnabled(true);
+                                    setSubmitBtnLabel(
+                                        t("label.update-entity", {
+                                            entity: t("label.alert"),
+                                        })
+                                    );
+                                }}
+                            />
+                        </Box>
+                    </PageContentsCardV1>
+                </Grid>
+                <Grid item xs={12}>
+                    <AlertNotifications
+                        alert={alert}
+                        initiallySelectedSubscriptionGroups={
+                            selectedSubscriptionGroups
+                        }
+                        onSubscriptionGroupsChange={onSubscriptionGroupsChange}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+
+            <Portal containerId={BOTTOM_BAR_ELEMENT_ID}>
+                <WizardBottomBar
+                    doNotWrapInContainer
+                    backButtonLabel={t("label.cancel")}
+                    handleBackClick={onPageExit}
+                    handleNextClick={() => handleSubmitAlertClick(alert)}
+                    nextButtonIsDisabled={
+                        !isSubmitBtnEnabled || isEditRequestInFlight
                     }
-                    onSubscriptionGroupsChange={onSubscriptionGroupsChange}
+                    nextButtonLabel={submitBtnLabel}
                 />
-            </Grid>
-        </PageContentsGridV1>
+            </Portal>
+        </>
     );
 };

@@ -26,7 +26,7 @@ import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
-import { AlertsEditBasePage } from "../alerts-update-page/alerts-edit-base-page.component";
+import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
 import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
 
@@ -39,6 +39,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
     >([]);
+    const [isEditRequestInFlight, setIsEditRequestInFlight] = useState(false);
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
@@ -60,6 +61,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             singleNewSubscriptionGroup.specs?.length > 0
         ) {
             try {
+                setIsEditRequestInFlight(true);
                 const newlyCreatedSubGroup = await createSubscriptionGroup(
                     singleNewSubscriptionGroup
                 );
@@ -78,6 +80,8 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                         "message.experienced-error-creating-subscription-group-while-creating-alert"
                     )
                 );
+            } finally {
+                setIsEditRequestInFlight(false);
             }
         } else {
             createAlertAndUpdateSubscriptionGroups(alert, subscriptionGroups);
@@ -85,16 +89,14 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
     };
 
     return (
-        <AlertsEditBasePage
+        <AlertsEditCreateBasePageComponent
+            isEditRequestInFlight={isEditRequestInFlight}
             newSubscriptionGroup={singleNewSubscriptionGroup}
             pageTitle={t("label.create-entity", {
                 entity: t("label.alert"),
             })}
             selectedSubscriptionGroups={subscriptionGroups}
             startingAlertConfiguration={startingAlertConfiguration}
-            submitButtonLabel={t("label.create-entity", {
-                entity: t("label.alert"),
-            })}
             onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
             onSubmit={handleCreateAlertClick}
             onSubscriptionGroupChange={setSubscriptionGroups}

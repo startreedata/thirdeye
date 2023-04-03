@@ -134,7 +134,12 @@ export const FormComponentForTemplateField: FunctionComponent<FormComponentForTe
                     <Grid item>
                         <Switch
                             data-testid={`switch-${propertyKey}`}
-                            defaultChecked={!!value}
+                            defaultChecked={
+                                value === undefined
+                                    ? templateFieldProperty.defaultValue ===
+                                      "true"
+                                    : !!value
+                            }
                             onChange={(_, checked) => {
                                 onChange && onChange(checked);
                             }}

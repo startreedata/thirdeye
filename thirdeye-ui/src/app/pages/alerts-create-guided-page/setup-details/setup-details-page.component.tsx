@@ -22,6 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlertFrequency } from "../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
+import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { InputSection } from "../../../components/form-basics/input-section/input-section.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
@@ -78,12 +79,25 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
         <>
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <Typography variant="h5">
-                        {t("message.setup-alert-details")}
-                    </Typography>
-                    <Typography variant="body1">
-                        {t("message.add-the-final-details-for-your-alert")}
-                    </Typography>
+                    <Grid
+                        container
+                        alignItems="center"
+                        justifyContent="space-between"
+                    >
+                        <Grid item>
+                            <Typography variant="h5">
+                                {t("message.setup-alert-details")}
+                            </Typography>
+                            <Typography variant="body1">
+                                {t(
+                                    "message.add-the-final-details-for-your-alert"
+                                )}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <NavigateAlertCreationFlowsDropdown />
+                        </Grid>
+                    </Grid>
                 </Grid>
 
                 <Grid item xs={12}>

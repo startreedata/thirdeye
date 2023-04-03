@@ -23,6 +23,7 @@ import {
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
+import { NavigateAlertCreationFlowsDropdown } from "../../alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertDetailsProps } from "./alert-details.interfaces";
@@ -60,9 +61,20 @@ function AlertDetails({
             <Grid container>
                 <Grid item xs={12}>
                     <Box marginBottom={2}>
-                        <Typography variant="h5">
-                            {t("label.alert-details")}
-                        </Typography>
+                        <Grid
+                            container
+                            alignContent="center"
+                            justifyContent="space-between"
+                        >
+                            <Grid item>
+                                <Typography variant="h5">
+                                    {t("label.alert-details")}
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <NavigateAlertCreationFlowsDropdown />
+                            </Grid>
+                        </Grid>
                     </Box>
                 </Grid>
 

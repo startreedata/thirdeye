@@ -23,6 +23,13 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
+jest.mock("react-router-dom", () => ({
+    useNavigate: jest.fn().mockReturnValue(jest.fn()),
+    useLocation: jest.fn().mockReturnValue({
+        pathname: "randomPath",
+    }),
+}));
+
 describe("AlertDetails", () => {
     it("should render name and description from passed alert", async () => {
         render(

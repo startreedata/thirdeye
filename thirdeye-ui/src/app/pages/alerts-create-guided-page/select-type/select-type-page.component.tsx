@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlgorithmSelection } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
 import { filterOptionWithTemplateNames } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
+import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { SampleAlertSelection } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
 import { SampleAlertOption } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.interfaces";
 import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
@@ -127,14 +128,25 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         <>
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <Typography variant="h5">
-                        {t("message.select-alert-type")}
-                    </Typography>
-                    <Typography variant="body1">
-                        {t(
-                            "message.this-is-the-detector-algorithm-that-will-rule-alert"
-                        )}
-                    </Typography>
+                    <Grid
+                        container
+                        alignContent="center"
+                        justifyContent="space-between"
+                    >
+                        <Grid item>
+                            <Typography variant="h5">
+                                {t("message.select-alert-type")}
+                            </Typography>
+                            <Typography variant="body1">
+                                {t(
+                                    "message.this-is-the-detector-algorithm-that-will-rule-alert"
+                                )}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <NavigateAlertCreationFlowsDropdown />
+                        </Grid>
+                    </Grid>
                 </Grid>
                 {!hideSampleAlerts && !sampleAlertsBottom && (
                     <SampleAlertSelection

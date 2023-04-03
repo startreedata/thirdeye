@@ -29,54 +29,63 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
     backButtonLabel,
     nextButtonIsDisabled,
     children,
+    doNotWrapInContainer,
 }) => {
     const { t } = useTranslation();
 
-    return (
-        <Box bottom={0} marginTop="auto" position="sticky" width="100%">
-            <PageContentsCardV1>
-                <Grid container alignItems="center" justifyContent="flex-end">
-                    {children && <Grid item>{children}</Grid>}
+    let mainContent = (
+        <PageContentsCardV1>
+            <Grid container alignItems="center" justifyContent="flex-end">
+                {children && <Grid item>{children}</Grid>}
 
-                    <Grid item>
-                        {handleBackClick && (
-                            <Button color="secondary" onClick={handleBackClick}>
-                                {backButtonLabel || t("label.back")}
-                            </Button>
-                        )}
-                        {backBtnLink && (
-                            <Button
-                                color="secondary"
-                                component={RouterLink}
-                                to={backBtnLink}
-                            >
-                                {backButtonLabel || t("label.back")}
-                            </Button>
-                        )}
-                    </Grid>
-                    <Grid item>
-                        {handleNextClick && (
-                            <Button
-                                color="primary"
-                                disabled={nextButtonIsDisabled}
-                                onClick={handleNextClick}
-                            >
-                                {nextButtonLabel || t("label.next")}
-                            </Button>
-                        )}
-                        {nextBtnLink && (
-                            <Button
-                                color="primary"
-                                component={RouterLink}
-                                disabled={nextButtonIsDisabled}
-                                to={nextBtnLink}
-                            >
-                                {nextButtonLabel || t("label.next")}
-                            </Button>
-                        )}
-                    </Grid>
+                <Grid item>
+                    {handleBackClick && (
+                        <Button color="secondary" onClick={handleBackClick}>
+                            {backButtonLabel || t("label.back")}
+                        </Button>
+                    )}
+                    {backBtnLink && (
+                        <Button
+                            color="secondary"
+                            component={RouterLink}
+                            to={backBtnLink}
+                        >
+                            {backButtonLabel || t("label.back")}
+                        </Button>
+                    )}
                 </Grid>
-            </PageContentsCardV1>
-        </Box>
+                <Grid item>
+                    {handleNextClick && (
+                        <Button
+                            color="primary"
+                            disabled={nextButtonIsDisabled}
+                            onClick={handleNextClick}
+                        >
+                            {nextButtonLabel || t("label.next")}
+                        </Button>
+                    )}
+                    {nextBtnLink && (
+                        <Button
+                            color="primary"
+                            component={RouterLink}
+                            disabled={nextButtonIsDisabled}
+                            to={nextBtnLink}
+                        >
+                            {nextButtonLabel || t("label.next")}
+                        </Button>
+                    )}
+                </Grid>
+            </Grid>
+        </PageContentsCardV1>
     );
+
+    if (!doNotWrapInContainer) {
+        mainContent = (
+            <Box bottom={0} marginTop="auto" position="sticky" width="100%">
+                {mainContent}
+            </Box>
+        );
+    }
+
+    return mainContent;
 };

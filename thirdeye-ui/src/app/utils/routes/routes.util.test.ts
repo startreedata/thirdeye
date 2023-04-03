@@ -86,13 +86,13 @@ describe("Routes Util", () => {
 
     it("getAlertsCreateSimplePath should return appropriate path with appropriate query string", () => {
         expect(getAlertsCreateNewSimplePath()).toEqual(
-            "/alerts/create/new/simple?testQueryString"
+            "/alerts/create/new/advanced?testQueryString"
         );
     });
 
     it("getAlertsCreateAdvancedPath should return appropriate path with appropriate query string", () => {
         expect(getAlertsCreateNewJsonEditorPath()).toEqual(
-            "/alerts/create/new/advanced?testQueryString"
+            "/alerts/create/new/json-editor?testQueryString"
         );
     });
 

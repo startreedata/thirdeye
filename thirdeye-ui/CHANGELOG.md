@@ -1,3 +1,10 @@
+### [2.15.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.15.0...thirdeye-ui-2.15.1) (2023-04-03)
+
+
+### Bug Fixes
+
+* [TE-1449](https://cortexdata.atlassian.net/browse/TE-1449) cosmetic fix to padding on left and right sides with loading switch component ([caa2bcab2](https://github.com/startreedata/thirdeye/commit/caa2bcab29c582af9f54320a5210db5e2f928701))
+
 ## [2.15.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.14.0...thirdeye-ui-2.15.0) (2023-03-31)
 
 

@@ -25,7 +25,7 @@ public enum ThirdEyeStatus {
   ERR_DATASOURCE_VALIDATION_FAILED("Data source validation failed! name: %s. %s"),
   ERR_DATA_UNAVAILABLE("Data not available! %s"),
   ERR_DETECTION_INTERVAL_COMPUTATION("Failed to compute detection interval. Error caused by : %s"),
-  ERR_DUPLICATE_NAME("Name must be unique!"),
+  ERR_DUPLICATE_NAME("Please provide a unique name. '%s' already exists."),
   ERR_ID_UNEXPECTED_AT_CREATION("ID should be null at creation time."),
   ERR_INVALID_JSON_FORMAT("Invalid json format"),
   ERR_INVALID_QUERY_PARAM_OPERATOR("Invalid operator for query param. Allowed Values:"),

@@ -14,6 +14,9 @@
 
 package ai.startree.thirdeye.service;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
@@ -28,6 +31,7 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -46,6 +50,15 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     super(authorizationManager, dataSourceManager, ImmutableMap.of());
     this.dataSourceCache = dataSourceCache;
     this.dataSourceOnboarder = dataSourceOnboarder;
+  }
+
+  @Override
+  protected void validate(final DataSourceApi api, @Nullable final DataSourceDTO existing) {
+    super.validate(api, existing);
+    /* new entity creation or name change in existing entity */
+    if (existing == null || !existing.getName().equals(api.getName())) {
+      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
+    }
   }
 
   @Override

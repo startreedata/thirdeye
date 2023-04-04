@@ -29,6 +29,14 @@ public interface AbstractManager<E extends AbstractDTO> {
 
   E findById(Long id);
 
+  /**
+   * Find entity by name.
+   * The name is intended to be unique, but it is not enforced by the database for all entities.
+   * Therefore, this method returns a list of entities.
+   *
+   * @param name
+   * @return
+   */
   List<E> findByName(String name);
 
   List<E> findByIds(List<Long> id);

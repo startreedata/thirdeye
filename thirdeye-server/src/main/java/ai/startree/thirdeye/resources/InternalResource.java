@@ -20,8 +20,8 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
-import ai.startree.thirdeye.notification.NotificationSchemeFactory;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
+import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -72,9 +72,9 @@ public class InternalResource {
   private final NotificationTaskRunner notificationTaskRunner;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final NotificationSchemeFactory notificationSchemeFactory;
   private final TaskDriverConfiguration taskDriverConfiguration;
   private final TaskDriver taskDriver;
+  private final SubscriptionGroupFilter subscriptionGroupFilter;
 
   @Inject
   public InternalResource(
@@ -84,18 +84,18 @@ public class InternalResource {
       final NotificationTaskRunner notificationTaskRunner,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final NotificationSchemeFactory notificationSchemeFactory,
       final TaskDriverConfiguration taskDriverConfiguration,
-      final TaskDriver taskDriver) {
+      final TaskDriver taskDriver,
+      final SubscriptionGroupFilter subscriptionGroupFilter) {
     this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.notificationSchemeFactory = notificationSchemeFactory;
     this.taskDriverConfiguration = taskDriverConfiguration;
     this.taskDriver = taskDriver;
+    this.subscriptionGroupFilter = subscriptionGroupFilter;
   }
 
   @Path("http-detector")
@@ -129,8 +129,10 @@ public class InternalResource {
       subscriptionGroupManager.save(sg);
     }
 
-    final SubscriptionGroupFilterResult result = requireNonNull(notificationSchemeFactory
-        .getDetectionAlertFilterResult(sg), "DetectionAlertFilterResult is null");
+    requireNonNull(sg, "subscription Group is null");
+    final SubscriptionGroupFilterResult result = requireNonNull(subscriptionGroupFilter.filter(
+        sg,
+        System.currentTimeMillis()), "DetectionAlertFilterResult is null");
 
     if (result.getAllAnomalies().size() == 0) {
       return Response.ok("No anomalies!").build();

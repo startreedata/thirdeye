@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
-import ai.startree.thirdeye.notification.NotificationSchemeFactory;
+import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -48,41 +48,40 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Detection alert task runner. This runner looks for the new anomalies and run the detection
- * alert filter to get
- * mappings from anomalies to recipients and then send email to the recipients.
+ * alert filter to get mappings from anomalies to recipients and then send email to the recipients.
  */
 @Singleton
 public class NotificationTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
-  private final NotificationSchemeFactory notificationSchemeFactory;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final AnomalyManager anomalyManager;
+  private final NotificationDispatcher notificationDispatcher;
+  private final NotificationPayloadBuilder notificationPayloadBuilder;
+  private final SubscriptionGroupFilter subscriptionGroupFilter;
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
   private final Histogram notificationTaskDuration;
-  private final NotificationDispatcher notificationDispatcher;
-  private final NotificationPayloadBuilder notificationPayloadBuilder;
 
   @Inject
   public NotificationTaskRunner(
-      final NotificationSchemeFactory notificationSchemeFactory,
       final SubscriptionGroupManager subscriptionGroupManager,
       final AnomalyManager anomalyManager,
       final MetricRegistry metricRegistry,
       final NotificationDispatcher notificationDispatcher,
-      final NotificationPayloadBuilder notificationPayloadBuilder) {
-    this.notificationSchemeFactory = notificationSchemeFactory;
+      final NotificationPayloadBuilder notificationPayloadBuilder,
+      final SubscriptionGroupFilter subscriptionGroupFilter) {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.anomalyManager = anomalyManager;
+    this.notificationDispatcher = notificationDispatcher;
+    this.notificationPayloadBuilder = notificationPayloadBuilder;
+    this.subscriptionGroupFilter = subscriptionGroupFilter;
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
     notificationTaskDuration = metricRegistry.histogram("notificationTaskDuration");
-    this.notificationDispatcher = notificationDispatcher;
-    this.notificationPayloadBuilder = notificationPayloadBuilder;
   }
 
   private static Map<Long, Long> buildVectorClock(Collection<AnomalyDTO> anomalies) {
@@ -156,8 +155,10 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   private void executeInternal(final SubscriptionGroupDTO subscriptionGroup) throws Exception {
-    final SubscriptionGroupFilterResult result = requireNonNull(notificationSchemeFactory
-        .getDetectionAlertFilterResult(subscriptionGroup), "DetectionAlertFilterResult is null");
+    requireNonNull(subscriptionGroup, "subscription Group is null");
+    final SubscriptionGroupFilterResult result = requireNonNull(subscriptionGroupFilter.filter(
+        subscriptionGroup,
+        System.currentTimeMillis()), "DetectionAlertFilterResult is null");
 
     if (result.getAllAnomalies().size() == 0) {
       LOG.debug("Zero anomalies found, skipping notification for subscription group: {}",

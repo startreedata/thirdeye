@@ -146,6 +146,7 @@ public class SubscriptionGroupFilter {
       final Map<Long, Long> vectorClocks,
       final long endTime) {
     return alertAssociations.stream()
+        .filter(aa -> isAlertActive(aa.getAlert().getId()))
         .map(alertAssociation -> findAnomaliesForAlertAssociation(alertAssociation,
             vectorClocks,
             endTime))
@@ -153,17 +154,16 @@ public class SubscriptionGroupFilter {
         .collect(toSet());
   }
 
+  private boolean isAlertActive(final long alertId) {
+    final AlertDTO alert = alertManager.findById(alertId);
+    return alert != null && alert.isActive();
+  }
+
   private Set<AnomalyDTO> findAnomaliesForAlertAssociation(
       final AlertAssociationDto aa,
       final Map<Long, Long> vectorClocks,
       final long endTime) {
     final long alertId = aa.getAlert().getId();
-    final AlertDTO alert = alertManager.findById(alertId);
-    // Ignore disabled detections
-    if (alert == null || !alert.isActive()) {
-      return Set.of();
-    }
-
     final long startTime = findStartTime(vectorClocks, endTime, alertId);
 
     final AnomalyFilter anomalyFilter = new AnomalyFilter()

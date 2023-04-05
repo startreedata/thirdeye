@@ -14,12 +14,13 @@
 package ai.startree.thirdeye.subscriptiongroup.filter;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The Detection alert filter result.
@@ -53,11 +54,10 @@ public class SubscriptionGroupFilterResult {
    * @return the all anomalies
    */
   public List<AnomalyDTO> getAllAnomalies() {
-    final List<AnomalyDTO> allAnomalies = new ArrayList<>();
-    for (final Set<AnomalyDTO> anomalies : result.values()) {
-      allAnomalies.addAll(anomalies);
-    }
-    return allAnomalies;
+    return result.values()
+        .stream()
+        .flatMap(Collection::stream)
+        .collect(Collectors.toList());
   }
 
   /**

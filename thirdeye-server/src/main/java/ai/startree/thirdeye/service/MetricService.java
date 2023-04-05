@@ -63,7 +63,7 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      ensure(metricConfigManager.findByMetricName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME);
+      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
     }
   }
 

@@ -11,9 +11,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.subscriptiongroup.filter;
+package ai.startree.thirdeye.notification;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,24 +28,14 @@ import java.util.stream.Collectors;
  */
 public class SubscriptionGroupFilterResult {
 
-  /**
-   * The Result.
-   */
-  private final Map<DetectionAlertFilterNotification, Set<AnomalyDTO>> result;
-
-  /**
-   * Instantiates a new Detection alert filter result.
-   */
-  public SubscriptionGroupFilterResult() {
-    result = new HashMap<>();
-  }
+  private final Map<SubscriptionGroupDTO, Set<AnomalyDTO>> result = new HashMap<>();
 
   /**
    * Gets result.
    *
    * @return the result
    */
-  public Map<DetectionAlertFilterNotification, Set<AnomalyDTO>> getResult() {
+  public Map<SubscriptionGroupDTO, Set<AnomalyDTO>> getResult() {
     return result;
   }
 
@@ -63,16 +54,16 @@ public class SubscriptionGroupFilterResult {
   /**
    * Add a mapping from anomalies to recipients in this detection alert filter result.
    *
-   * @param alertProp the alert properties
+   * @param sg the alert properties
    * @param anomalies the anomalies
    * @return the detection alert filter result
    */
-  public SubscriptionGroupFilterResult addMapping(final DetectionAlertFilterNotification alertProp,
+  public SubscriptionGroupFilterResult addMapping(final SubscriptionGroupDTO sg,
       final Set<AnomalyDTO> anomalies) {
-    if (!result.containsKey(alertProp)) {
-      result.put(alertProp, new HashSet<>());
+    if (!result.containsKey(sg)) {
+      result.put(sg, new HashSet<>());
     }
-    result.get(alertProp).addAll(anomalies);
+    result.get(sg).addAll(anomalies);
     return this;
   }
 }

@@ -19,13 +19,13 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
+import ai.startree.thirdeye.notification.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
-import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
@@ -189,7 +189,7 @@ public class NotificationTaskRunner implements TaskRunner {
         .getResult()
         .entrySet()
         .stream()
-        .filter(result -> subscriptionGroup.equals(result.getKey().getSubscriptionConfig()))
+        .filter(result -> subscriptionGroup.equals(result.getKey()))
         .findFirst()
         .map(Entry::getValue)
         .orElse(null);

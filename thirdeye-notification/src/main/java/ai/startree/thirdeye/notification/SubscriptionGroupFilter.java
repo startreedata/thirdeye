@@ -29,8 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterNotification;
-import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
@@ -138,7 +136,7 @@ public class SubscriptionGroupFilter {
         endTime);
 
     return new SubscriptionGroupFilterResult()
-        .addMapping(new DetectionAlertFilterNotification(sg), anomalies);
+        .addMapping(sg, anomalies);
   }
 
   private Set<AnomalyDTO> findAnomalies(

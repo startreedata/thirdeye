@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { default as React, FunctionComponent, useEffect } from "react";
+import { default as React, FunctionComponent, useEffect, useMemo } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
@@ -22,8 +22,12 @@ import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-pag
 export const SetupMonitoringPage: FunctionComponent = () => {
     const navigate = useNavigate();
 
-    const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
-        useOutletContext<AlertCreatedGuidedPageOutletContext>();
+    const {
+        alert,
+        onAlertPropertyChange,
+        selectedAlgorithmOption,
+        alertTemplates,
+    } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     useEffect(() => {
         // On initial render, ensure there is already an alert template selected
@@ -32,10 +36,17 @@ export const SetupMonitoringPage: FunctionComponent = () => {
         }
     }, []);
 
+    const selectedAlertTemplate = useMemo(() => {
+        return alertTemplates.find((alertTemplateCandidate) => {
+            return alertTemplateCandidate.name === alert.template?.name;
+        });
+    }, [alertTemplates, alert]);
+
     return (
         <>
             <ThresholdSetup
                 alert={alert}
+                alertTemplate={selectedAlertTemplate}
                 algorithmOptionConfig={selectedAlgorithmOption}
                 onAlertPropertyChange={onAlertPropertyChange}
             />

@@ -30,24 +30,6 @@ export const generateOptions = (
                 alertTemplate: "startree-threshold",
                 alertTemplateForMultidimension: "startree-threshold-dx",
                 alertTemplateForPercentile: "startree-threshold-percentile",
-                inputFieldConfigs: [
-                    {
-                        templatePropertyName: "min",
-                        label: t("label.minimum"),
-                        description: t(
-                            "message.minimum-alert-template-value-property-description"
-                        ),
-                        type: "number",
-                    },
-                    {
-                        templatePropertyName: "max",
-                        label: t("label.maximum"),
-                        description: t(
-                            "message.maximum-alert-template-value-property-description"
-                        ),
-                        type: "number",
-                    },
-                ],
             },
             {
                 title: t("label.mean-variance-rule"),
@@ -57,16 +39,6 @@ export const generateOptions = (
                 alertTemplate: "startree-mean-variance",
                 alertTemplateForMultidimension: "startree-mean-variance-dx",
                 alertTemplateForPercentile: "startree-mean-variance-percentile",
-                inputFieldConfigs: [
-                    {
-                        templatePropertyName: "sensitivity",
-                        label: t("label.sensitivity"),
-                        description: "",
-                        type: "slider",
-                        min: -26,
-                        max: 14,
-                    },
-                ],
             },
             {
                 title: t("label.percentage-rule"),
@@ -74,20 +46,6 @@ export const generateOptions = (
                 alertTemplate: "startree-percentage-rule",
                 alertTemplateForMultidimension: "startree-percentage-rule-dx",
                 alertTemplateForPercentile: "startree-percentage-percentile",
-                inputFieldConfigs: [
-                    {
-                        templatePropertyName: "baselineOffset",
-                        label: t("label.baseline-offset"),
-                        description: t("message.in-iso8601-format-eg-p21d"),
-                        type: "string",
-                    },
-                    {
-                        templatePropertyName: "percentageChange",
-                        label: t("label.percentage-change"),
-                        description: "",
-                        type: "number",
-                    },
-                ],
             },
             {
                 title: t("label.absolute-change-rule"),
@@ -97,20 +55,6 @@ export const generateOptions = (
                 alertTemplate: "startree-absolute-rule",
                 alertTemplateForMultidimension: "startree-absolute-rule-dx",
                 alertTemplateForPercentile: "startree-absolute-percentile",
-                inputFieldConfigs: [
-                    {
-                        templatePropertyName: "baselineOffset",
-                        label: t("label.baseline-offset"),
-                        description: t("message.in-iso8601-format-eg-p21d"),
-                        type: "string",
-                    },
-                    {
-                        templatePropertyName: "absoluteChange",
-                        label: t("label.absolute-change"),
-                        description: "",
-                        type: "number",
-                    },
-                ],
             },
         ],
         // advanced
@@ -121,16 +65,6 @@ export const generateOptions = (
                 alertTemplate: "startree-ets",
                 alertTemplateForMultidimension: "startree-ets-dx",
                 alertTemplateForPercentile: "startree-ets-percentile",
-                inputFieldConfigs: [
-                    {
-                        templatePropertyName: "sensitivity",
-                        label: t("label.sensitivity"),
-                        description: "",
-                        type: "slider",
-                        min: -26,
-                        max: 14,
-                    },
-                ],
             },
         ],
     ];

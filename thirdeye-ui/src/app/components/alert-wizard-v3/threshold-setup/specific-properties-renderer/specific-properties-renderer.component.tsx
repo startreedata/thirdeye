@@ -15,7 +15,7 @@
 import { Slider, TextField } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { SliderAlgorithmOptionInputFieldConfig } from "../../algorithm-selection/algorithm-selection.interfaces";
+import { SliderAlgorithmOptionInputFieldConfig } from "../threshold-setup.interfaces";
 import { SpecificPropertiesRendererProps } from "./specific-properties-renderer.interfaces";
 
 export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRendererProps> =

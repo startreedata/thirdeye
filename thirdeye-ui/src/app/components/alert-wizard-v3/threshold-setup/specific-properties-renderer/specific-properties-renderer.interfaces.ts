@@ -13,7 +13,7 @@
  * the License.
  */
 import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-import { AlgorithmOptionInputFieldConfig } from "../../algorithm-selection/algorithm-selection.interfaces";
+import { AlgorithmOptionInputFieldConfig } from "../threshold-setup.interfaces";
 
 export interface SpecificPropertiesRendererProps {
     inputFieldConfig: AlgorithmOptionInputFieldConfig;

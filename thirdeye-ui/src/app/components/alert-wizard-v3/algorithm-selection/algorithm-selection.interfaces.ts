@@ -21,32 +21,12 @@ export interface AlgorithmSelectionProps {
     advancedOptions: AvailableAlgorithmOption[];
 }
 
-export interface AlgorithmOptionInputFieldConfig {
-    label: string;
-    description: string;
-    templatePropertyName: string;
-    type: string;
-    min?: number;
-    max?: number;
-}
-
-export interface SliderAlgorithmOptionInputFieldConfig
-    extends AlgorithmOptionInputFieldConfig {
-    type: "slider";
-    min: number;
-    max: number;
-}
-
 export interface AlgorithmOption {
     title: string;
     description: string;
     alertTemplate: string;
     alertTemplateForMultidimension: string;
     alertTemplateForPercentile: string;
-    inputFieldConfigs?: (
-        | AlgorithmOptionInputFieldConfig
-        | SliderAlgorithmOptionInputFieldConfig
-    )[];
 }
 
 export interface AvailableAlgorithmOption {

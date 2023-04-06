@@ -111,6 +111,28 @@ public class SubscriptionGroupFilter {
   }
 
   /**
+   * Find anomalies for the given subscription group given an end time.
+   *
+   * @param sg subscription group
+   * @param endTime end time
+   * @return set of anomalies
+   */
+  public Set<AnomalyDTO> filter(final SubscriptionGroupDTO sg, final long endTime) {
+    final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
+        .orElseGet(() -> generate(sg));
+
+    // Fetch all the anomalies to be notified to the recipients
+    final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
+    return alertAssociations.stream()
+        .filter(aa -> isAlertActive(aa.getAlert().getId()))
+        .map(alertAssociation -> findAnomaliesForAlertAssociation(alertAssociation,
+            vectorClocks,
+            endTime))
+        .flatMap(Collection::stream)
+        .collect(toSet());
+  }
+
+  /**
    * Generate List of Alert Association objects from existing subscription group
    *
    * @return List of Alert Association objects
@@ -123,33 +145,6 @@ public class SubscriptionGroupFilter {
         .map(SubscriptionGroupFilter::fromId)
         .map(alert -> new AlertAssociationDto().setAlert(alert))
         .collect(Collectors.toList());
-  }
-
-  public SubscriptionGroupFilterResult filter(final SubscriptionGroupDTO sg, final long endTime) {
-    final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
-        .orElseGet(() -> generate(sg));
-
-    // Fetch all the anomalies to be notified to the recipients
-    final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
-    final Set<AnomalyDTO> anomalies = findAnomalies(alertAssociations,
-        vectorClocks,
-        endTime);
-
-    return new SubscriptionGroupFilterResult()
-        .addMapping(sg, anomalies);
-  }
-
-  private Set<AnomalyDTO> findAnomalies(
-      final List<AlertAssociationDto> alertAssociations,
-      final Map<Long, Long> vectorClocks,
-      final long endTime) {
-    return alertAssociations.stream()
-        .filter(aa -> isAlertActive(aa.getAlert().getId()))
-        .map(alertAssociation -> findAnomaliesForAlertAssociation(alertAssociation,
-            vectorClocks,
-            endTime))
-        .flatMap(Collection::stream)
-        .collect(toSet());
   }
 
   private boolean isAlertActive(final long alertId) {

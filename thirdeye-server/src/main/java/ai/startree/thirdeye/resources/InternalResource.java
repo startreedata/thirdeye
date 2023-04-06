@@ -22,7 +22,6 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
-import ai.startree.thirdeye.notification.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -120,8 +119,7 @@ public class InternalResource {
   public Response generateHtmlEmail(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("subscriptionGroupId") Long subscriptionGroupManagerById,
-      @QueryParam("reset") Boolean reset
-  ) throws Exception {
+      @QueryParam("reset") Boolean reset) {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
     if (reset == Boolean.TRUE) {
@@ -130,16 +128,14 @@ public class InternalResource {
     }
 
     requireNonNull(sg, "subscription Group is null");
-    final SubscriptionGroupFilterResult result = requireNonNull(subscriptionGroupFilter.filter(
+    final var anomalies = requireNonNull(subscriptionGroupFilter.filter(
         sg,
         System.currentTimeMillis()), "DetectionAlertFilterResult is null");
 
-    if (result.getAllAnomalies().size() == 0) {
+    if (anomalies.size() == 0) {
       return Response.ok("No anomalies!").build();
     }
-    final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
-        sg,
-        notificationTaskRunner.getAnomalies(sg, result));
+    final var payload = notificationPayloadBuilder.buildNotificationPayload(sg, anomalies);
 
     final NotificationService emailNotificationService = notificationServiceRegistry.get(
         "email-smtp",

@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
-import ai.startree.thirdeye.notification.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -41,8 +40,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +122,7 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   private void updateSubscriptionWatermarks(final SubscriptionGroupDTO subscriptionConfig,
-      final List<AnomalyDTO> allAnomalies) {
+      final Collection<AnomalyDTO> allAnomalies) {
     if (!allAnomalies.isEmpty()) {
       subscriptionConfig.setVectorClocks(
           mergeVectorClock(subscriptionConfig.getVectorClocks(),
@@ -146,28 +143,27 @@ public class NotificationTaskRunner implements TaskRunner {
     final long tStart = System.currentTimeMillis();
     notificationTaskCounter.inc();
 
-    final SubscriptionGroupDTO subscriptionGroupDTO = getSubscriptionGroupDTO(subscriptionGroupId);
+    final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
 
-    executeInternal(subscriptionGroupDTO);
+    executeInternal(sg);
     notificationTaskSuccessCounter.inc();
     notificationTaskDuration.update(System.currentTimeMillis() - tStart);
     return Collections.emptyList();
   }
 
-  private void executeInternal(final SubscriptionGroupDTO subscriptionGroup) throws Exception {
+  private void executeInternal(final SubscriptionGroupDTO subscriptionGroup) {
     requireNonNull(subscriptionGroup, "subscription Group is null");
-    final SubscriptionGroupFilterResult result = requireNonNull(subscriptionGroupFilter.filter(
+    final var anomalies = subscriptionGroupFilter.filter(
         subscriptionGroup,
-        System.currentTimeMillis()), "DetectionAlertFilterResult is null");
+        System.currentTimeMillis());
 
-    if (result.getAllAnomalies().size() == 0) {
+    if (anomalies.size() == 0) {
       LOG.debug("Zero anomalies found, skipping notification for subscription group: {}",
           subscriptionGroup.getId());
       return;
     }
 
     /* Dispatch notifications */
-    final Set<AnomalyDTO> anomalies = getAnomalies(subscriptionGroup, result);
     final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
         subscriptionGroup,
         anomalies);
@@ -176,22 +172,10 @@ public class NotificationTaskRunner implements TaskRunner {
     notificationDispatcher.dispatch(subscriptionGroup, payload);
 
     /* Record watermarks and update entities */
-    for (final AnomalyDTO anomaly : result.getAllAnomalies()) {
+    for (final AnomalyDTO anomaly : anomalies) {
       anomaly.setNotified(true);
       anomalyManager.update(anomaly);
     }
-    updateSubscriptionWatermarks(subscriptionGroup, result.getAllAnomalies());
-  }
-
-  public Set<AnomalyDTO> getAnomalies(SubscriptionGroupDTO subscriptionGroup,
-      final SubscriptionGroupFilterResult results) {
-    return results
-        .getResult()
-        .entrySet()
-        .stream()
-        .filter(result -> subscriptionGroup.equals(result.getKey()))
-        .findFirst()
-        .map(Entry::getValue)
-        .orElse(null);
+    updateSubscriptionWatermarks(subscriptionGroup, anomalies);
   }
 }

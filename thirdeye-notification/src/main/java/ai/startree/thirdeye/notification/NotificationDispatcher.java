@@ -46,6 +46,7 @@ public class NotificationDispatcher {
       final MetricRegistry metricRegistry) {
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationSchemesMigrator = notificationSchemesMigrator;
+
     this.notificationDispatchCounter = metricRegistry.counter("notificationDispatchCounter");
     this.notificationDispatchSuccessCounter = metricRegistry.counter(
         "notificationDispatchSuccessCounter");
@@ -63,19 +64,22 @@ public class NotificationDispatcher {
         .stream()
         .map(this::substituteEnvironmentVariables)
         .map(this::getNotificationService)
-        .forEach(service -> {
-          try {
-            final long tStart = System.currentTimeMillis();
-            service.notify(payload);
-            notificationDispatchDuration.update(System.currentTimeMillis() - tStart);
-            notificationDispatchSuccessCounter.inc();
-          } catch (Exception exception) {
-            notificationDispatchExceptionCounter.inc();
-            throw exception;
-          } finally {
-            notificationDispatchCounter.inc();
-          }
-        });
+        .forEach(service -> notifyService(service, payload));
+  }
+
+  private void notifyService(final NotificationService service,
+      final NotificationPayloadApi payload) {
+    try {
+      final long tStart = System.currentTimeMillis();
+      service.notify(payload);
+      notificationDispatchDuration.update(System.currentTimeMillis() - tStart);
+      notificationDispatchSuccessCounter.inc();
+    } catch (Exception exception) {
+      notificationDispatchExceptionCounter.inc();
+      throw exception;
+    } finally {
+      notificationDispatchCounter.inc();
+    }
   }
 
   private NotificationService getNotificationService(final NotificationSpecDTO spec) {

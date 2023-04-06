@@ -17,6 +17,7 @@ package ai.startree.thirdeye.service;
 import static ai.startree.thirdeye.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
@@ -36,7 +37,6 @@ import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -113,8 +113,10 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensure(!StringUtils.containsWhitespace(api.getName()), "Name must not contain white space");
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
-    if (existing == null) {
-      alertCreater.ensureCreationIsPossible(api);
+
+    /* new entity creation or name change in existing entity */
+    if (existing == null || !existing.getName().equals(api.getName())) {
+      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
     }
   }
 

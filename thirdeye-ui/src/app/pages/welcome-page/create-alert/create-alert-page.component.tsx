@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import {
     default as React,
     FunctionComponent,
     useCallback,
-    useEffect,
     useMemo,
     useState,
 } from "react";
@@ -26,7 +25,6 @@ import { useNavigate } from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageHeader } from "../../../components/page-header/page-header.component";
-import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { generateEmptyEmailSendGridConfiguration } from "../../../components/subscription-group-wizard/subscription-group-details/recipient-details/groups-editor/groups-editor.utils";
 import {
     NotificationTypeV1,
@@ -34,21 +32,18 @@ import {
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import {
     SpecType,
     SubscriptionGroup,
 } from "../../../rest/dto/subscription-group.interfaces";
 import { useCreateSubscriptionGroup } from "../../../rest/subscription-groups/subscription-groups.actions";
-import {
-    handleAlertPropertyChangeGenerator,
-    handleCreateAlertClickGenerator,
-} from "../../../utils/anomalies/anomalies.util";
+import { handleCreateAlertClickGenerator } from "../../../utils/anomalies/anomalies.util";
 import { QUERY_PARAM_KEYS } from "../../../utils/constants/constants.util";
 import { getHomePath } from "../../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../../utils/subscription-groups/subscription-groups.util";
-import { CreateAlertGuidedPage } from "../../alerts-create-guided-page/alerts-create-guided-page.component";
+import { BOTTOM_BAR_ELEMENT_ID } from "../../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
+import { AlertsSimpleAdvancedJsonContainerPage } from "../../alerts-edit-create-common/alerts-simple-advanced-json-container-page.component";
 
 export const CreateAlertPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -57,17 +52,12 @@ export const CreateAlertPage: FunctionComponent = () => {
     const { setShowAppNavBar } = useAppBarConfigProvider();
 
     const {
-        alertTemplates,
-        getAlertTemplates,
-        status: alertTemplatesRequestStatus,
-    } = useGetAlertTemplates();
-
-    const {
         createNewSubscriptionGroup,
         status: createSubscriptionGroupStatus,
     } = useCreateSubscriptionGroup();
 
-    const [alert, setAlert] = useState<EditableAlert>(createNewStartingAlert());
+    const [alert] = useState<EditableAlert>(createNewStartingAlert());
+
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(() => {
             const subscriptionGroup = createEmptySubscriptionGroup();
@@ -80,25 +70,6 @@ export const CreateAlertPage: FunctionComponent = () => {
     const [createAlertStatus, setCreateAlertStatus] = useState<ActionStatus>(
         ActionStatus.Initial
     );
-
-    const handleAlertPropertyChange = useMemo(() => {
-        const localHandleAlertPropertyChange =
-            handleAlertPropertyChangeGenerator(
-                setAlert,
-                [],
-                () => {
-                    return;
-                },
-                t
-            );
-
-        return (
-            contentsToReplace: Partial<EditableAlert>,
-            isTotalReplace = false
-        ): void => {
-            localHandleAlertPropertyChange(contentsToReplace, isTotalReplace);
-        };
-    }, [setAlert]);
 
     const createAndHandleSubscriptionGroup = useMemo(() => {
         const queryParams = new URLSearchParams([
@@ -166,10 +137,6 @@ export const CreateAlertPage: FunctionComponent = () => {
         [alert, createAndHandleSubscriptionGroup, singleNewSubscriptionGroup]
     );
 
-    useEffect(() => {
-        getAlertTemplates();
-    }, []);
-
     return (
         <PageV1>
             <PageHeader
@@ -188,31 +155,25 @@ export const CreateAlertPage: FunctionComponent = () => {
                 title={t("message.lets-create-your-first-alert")}
             />
 
-            <LoadingErrorStateSwitch
-                wrapInCard
-                wrapInGrid
-                wrapInGridContainer
-                isError={false}
-                isLoading={
-                    alertTemplatesRequestStatus === ActionStatus.Working ||
-                    alertTemplatesRequestStatus === ActionStatus.Initial
+            <AlertsSimpleAdvancedJsonContainerPage
+                isEditRequestInFlight={
+                    createAlertStatus === ActionStatus.Working ||
+                    createSubscriptionGroupStatus === ActionStatus.Working
                 }
-            >
-                <CreateAlertGuidedPage
-                    alert={alert}
-                    alertTemplates={alertTemplates || []}
-                    getAlertTemplates={getAlertTemplates}
-                    isCreatingAlert={
-                        createSubscriptionGroupStatus ===
-                            ActionStatus.Working ||
-                        createAlertStatus === ActionStatus.Working
-                    }
-                    newSubscriptionGroup={singleNewSubscriptionGroup}
-                    onAlertPropertyChange={handleAlertPropertyChange}
-                    onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
-                    onSubmit={handleCreateAlertClick}
-                />
-            </LoadingErrorStateSwitch>
+                newSubscriptionGroup={singleNewSubscriptionGroup}
+                selectedSubscriptionGroups={[]}
+                startingAlertConfiguration={alert}
+                onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
+                onSubmit={handleCreateAlertClick}
+            />
+
+            <Box
+                bottom={0}
+                id={BOTTOM_BAR_ELEMENT_ID}
+                marginTop="auto"
+                position="sticky"
+                width="100%"
+            />
         </PageV1>
     );
 };

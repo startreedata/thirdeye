@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.notification;
 
+import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.findStartTime;
+import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.newVectorClocks;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -29,8 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.ConfigUtils;
-import ai.startree.thirdeye.subscriptiongroup.filter.DetectionAlertFilterNotification;
-import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
@@ -82,34 +80,32 @@ public class SubscriptionGroupFilter {
         && ANOMALY_RESULT_SOURCES.contains(anomaly.getAnomalyResultSource());
   }
 
-  private static long findStartTime(final Map<Long, Long> vectorClocks, final long endTime,
-      final Long alertId) {
-    long startTime = vectorClocks.get(alertId);
-
-    // No point in fetching anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
-    if (startTime < endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME) {
-      startTime = endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME;
-    }
-    return startTime;
-  }
-
-  private static Map<Long, Long> newVectorClocks(final List<AlertAssociationDto> alertAssociations,
-      final Map<Long, Long> vectorClocks) {
-    final Map<Long, Long> vc = optional(vectorClocks).orElse(Map.of());
-    return alertAssociations.stream()
-        .map(AlertAssociationDto::getAlert)
-        .map(AbstractDTO::getId)
-        .collect(toMap(
-            id -> id,
-            id -> vc.getOrDefault(id, 0L),
-            (a, b) -> b)
-        );
-  }
-
   private static AlertDTO fromId(final Long id) {
     final AlertDTO alert = new AlertDTO();
     alert.setId(id);
     return alert;
+  }
+
+  /**
+   * Find anomalies for the given subscription group given an end time.
+   *
+   * @param sg subscription group
+   * @param endTime end time
+   * @return set of anomalies
+   */
+  public Set<AnomalyDTO> filter(final SubscriptionGroupDTO sg, final long endTime) {
+    final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
+        .orElseGet(() -> generate(sg));
+
+    // Fetch all the anomalies to be notified to the recipients
+    final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
+    return alertAssociations.stream()
+        .filter(aa -> isAlertActive(aa.getAlert().getId()))
+        .map(alertAssociation -> findAnomaliesForAlertAssociation(alertAssociation,
+            vectorClocks,
+            endTime))
+        .flatMap(Collection::stream)
+        .collect(toSet());
   }
 
   /**
@@ -127,30 +123,9 @@ public class SubscriptionGroupFilter {
         .collect(Collectors.toList());
   }
 
-  public SubscriptionGroupFilterResult filter(final SubscriptionGroupDTO sg, final long endTime) {
-    final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
-        .orElseGet(() -> generate(sg));
-
-    // Fetch all the anomalies to be notified to the recipients
-    final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
-    final Set<AnomalyDTO> anomalies = findAnomalies(alertAssociations,
-        vectorClocks,
-        endTime);
-
-    return new SubscriptionGroupFilterResult()
-        .addMapping(new DetectionAlertFilterNotification(sg), anomalies);
-  }
-
-  private Set<AnomalyDTO> findAnomalies(
-      final List<AlertAssociationDto> alertAssociations,
-      final Map<Long, Long> vectorClocks,
-      final long endTime) {
-    return alertAssociations.stream()
-        .map(alertAssociation -> findAnomaliesForAlertAssociation(alertAssociation,
-            vectorClocks,
-            endTime))
-        .flatMap(Collection::stream)
-        .collect(toSet());
+  private boolean isAlertActive(final long alertId) {
+    final AlertDTO alert = alertManager.findById(alertId);
+    return alert != null && alert.isActive();
   }
 
   private Set<AnomalyDTO> findAnomaliesForAlertAssociation(
@@ -158,12 +133,6 @@ public class SubscriptionGroupFilter {
       final Map<Long, Long> vectorClocks,
       final long endTime) {
     final long alertId = aa.getAlert().getId();
-    final AlertDTO alert = alertManager.findById(alertId);
-    // Ignore disabled detections
-    if (alert == null || !alert.isActive()) {
-      return Set.of();
-    }
-
     final long startTime = findStartTime(vectorClocks, endTime, alertId);
 
     final AnomalyFilter anomalyFilter = new AnomalyFilter()

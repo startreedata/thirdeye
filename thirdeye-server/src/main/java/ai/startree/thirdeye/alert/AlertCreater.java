@@ -13,16 +13,13 @@
  */
 package ai.startree.thirdeye.alert;
 
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -54,8 +51,13 @@ public class AlertCreater {
     this.minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
   }
 
+  /**
+   * Create a new alert. Basic validations should be done before calling this method.
+   *
+   * @param api the alert api
+   * @return the created alert
+   */
   public AlertDTO create(AlertApi api) {
-    ensureCreationIsPossible(api);
     final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
     final AlertDTO savedAlert = saveAlert(dto);
 
@@ -83,11 +85,6 @@ public class AlertCreater {
     }
     alertManager.save(dto);
     return dto;
-  }
-
-  public void ensureCreationIsPossible(final AlertApi api) {
-    ensure(alertManager.findByPredicate(Predicate.EQ("name", api.getName())).isEmpty(),
-        ERR_DUPLICATE_NAME);
   }
 
   private long minimumLastTimestamp(final AlertDTO dto) {

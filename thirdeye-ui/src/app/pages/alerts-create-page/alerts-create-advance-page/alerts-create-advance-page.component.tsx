@@ -24,11 +24,16 @@ import {
 } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { MessageDisplayState } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
+import { Portal } from "../../../components/portal/portal.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
 } from "../../../platform/components";
-import { AlertEditPageOutletContextProps } from "../../alerts-update-page/alerts-update-page.interfaces";
+import {
+    AlertsSimpleAdvancedJsonContainerPageOutletContextProps,
+    BOTTOM_BAR_ELEMENT_ID,
+} from "../../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
 
 export const AlertsCreateAdvancePage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -39,8 +44,10 @@ export const AlertsCreateAdvancePage: FunctionComponent = () => {
         handleAlertPropertyChange: onAlertPropertyChange,
         handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
-        setShowBottomBar,
-    } = useOutletContext<AlertEditPageOutletContextProps>();
+        isEditRequestInFlight,
+        handleSubmitAlertClick,
+        onPageExit,
+    } = useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
     const availableFields = useMemo(() => {
         if (selectedAlertTemplate) {
@@ -61,45 +68,55 @@ export const AlertsCreateAdvancePage: FunctionComponent = () => {
         setIsRequiredPropertyValuesSet(isValid);
     }, [selectedAlertTemplate, alert]);
 
-    useEffect(() => {
-        setShowBottomBar(true);
-    }, []);
-
     return (
-        <PageContentsGridV1>
-            <Grid item xs={12}>
-                <PageContentsCardV1>
-                    <AlertJson
-                        alert={alert}
-                        onAlertPropertyChange={onAlertPropertyChange}
-                    />
-                    <Box marginBottom={3} marginTop={3}>
-                        <Divider />
-                    </Box>
-                    <Box>
-                        <PreviewChart
+        <>
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <PageContentsCardV1>
+                        <AlertJson
                             alert={alert}
-                            displayState={
-                                selectedAlertTemplate
-                                    ? isRequiredPropertyValuesSet
-                                        ? MessageDisplayState.GOOD_TO_PREVIEW
-                                        : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
-                                    : MessageDisplayState.SELECT_TEMPLATE
-                            }
-                            subtitle={t(
-                                "message.configure-or-input-template-to-preview-alert"
-                            )}
+                            onAlertPropertyChange={onAlertPropertyChange}
                         />
-                    </Box>
-                </PageContentsCardV1>
-            </Grid>
-            <Grid item xs={12}>
-                <AlertNotifications
-                    alert={alert}
-                    initiallySelectedSubscriptionGroups={[]}
-                    onSubscriptionGroupsChange={onSubscriptionGroupsChange}
+                        <Box marginBottom={3} marginTop={3}>
+                            <Divider />
+                        </Box>
+                        <Box>
+                            <PreviewChart
+                                alert={alert}
+                                displayState={
+                                    selectedAlertTemplate
+                                        ? isRequiredPropertyValuesSet
+                                            ? MessageDisplayState.GOOD_TO_PREVIEW
+                                            : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
+                                        : MessageDisplayState.SELECT_TEMPLATE
+                                }
+                                subtitle={t(
+                                    "message.configure-or-input-template-to-preview-alert"
+                                )}
+                            />
+                        </Box>
+                    </PageContentsCardV1>
+                </Grid>
+                <Grid item xs={12}>
+                    <AlertNotifications
+                        alert={alert}
+                        initiallySelectedSubscriptionGroups={[]}
+                        onSubscriptionGroupsChange={onSubscriptionGroupsChange}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+            <Portal containerId={BOTTOM_BAR_ELEMENT_ID}>
+                <WizardBottomBar
+                    doNotWrapInContainer
+                    backButtonLabel={t("label.cancel")}
+                    handleBackClick={onPageExit}
+                    handleNextClick={() => handleSubmitAlertClick(alert)}
+                    nextButtonIsDisabled={isEditRequestInFlight}
+                    nextButtonLabel={t("label.create-entity", {
+                        entity: t("label.alert"),
+                    })}
                 />
-            </Grid>
-        </PageContentsGridV1>
+            </Portal>
+        </>
     );
 };

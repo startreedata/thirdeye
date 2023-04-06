@@ -20,7 +20,7 @@ public enum AnomalyFeedbackType {
   ANOMALY_NEW_TREND("New Trend"),
   NO_FEEDBACK("Not Resolved");
 
-  String userReadableName;
+  final String userReadableName;
 
   AnomalyFeedbackType(String userReadableName) {
     this.userReadableName = userReadableName;

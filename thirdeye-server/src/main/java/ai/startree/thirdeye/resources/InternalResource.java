@@ -20,14 +20,13 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
-import ai.startree.thirdeye.notification.NotificationSchemeFactory;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
+import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
-import ai.startree.thirdeye.subscriptiongroup.filter.SubscriptionGroupFilterResult;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
@@ -72,9 +71,9 @@ public class InternalResource {
   private final NotificationTaskRunner notificationTaskRunner;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final NotificationSchemeFactory notificationSchemeFactory;
   private final TaskDriverConfiguration taskDriverConfiguration;
   private final TaskDriver taskDriver;
+  private final SubscriptionGroupFilter subscriptionGroupFilter;
 
   @Inject
   public InternalResource(
@@ -84,18 +83,18 @@ public class InternalResource {
       final NotificationTaskRunner notificationTaskRunner,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final NotificationSchemeFactory notificationSchemeFactory,
       final TaskDriverConfiguration taskDriverConfiguration,
-      final TaskDriver taskDriver) {
+      final TaskDriver taskDriver,
+      final SubscriptionGroupFilter subscriptionGroupFilter) {
     this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationTaskRunner = notificationTaskRunner;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.notificationSchemeFactory = notificationSchemeFactory;
     this.taskDriverConfiguration = taskDriverConfiguration;
     this.taskDriver = taskDriver;
+    this.subscriptionGroupFilter = subscriptionGroupFilter;
   }
 
   @Path("http-detector")
@@ -120,8 +119,7 @@ public class InternalResource {
   public Response generateHtmlEmail(
       @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("subscriptionGroupId") Long subscriptionGroupManagerById,
-      @QueryParam("reset") Boolean reset
-  ) throws Exception {
+      @QueryParam("reset") Boolean reset) {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
     if (reset == Boolean.TRUE) {
@@ -129,15 +127,15 @@ public class InternalResource {
       subscriptionGroupManager.save(sg);
     }
 
-    final SubscriptionGroupFilterResult result = requireNonNull(notificationSchemeFactory
-        .getDetectionAlertFilterResult(sg), "DetectionAlertFilterResult is null");
+    requireNonNull(sg, "subscription Group is null");
+    final var anomalies = requireNonNull(subscriptionGroupFilter.filter(
+        sg,
+        System.currentTimeMillis()), "DetectionAlertFilterResult is null");
 
-    if (result.getAllAnomalies().size() == 0) {
+    if (anomalies.size() == 0) {
       return Response.ok("No anomalies!").build();
     }
-    final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
-        sg,
-        notificationTaskRunner.getAnomalies(sg, result));
+    final var payload = notificationPayloadBuilder.buildNotificationPayload(sg, anomalies);
 
     final NotificationService emailNotificationService = notificationServiceRegistry.get(
         "email-smtp",

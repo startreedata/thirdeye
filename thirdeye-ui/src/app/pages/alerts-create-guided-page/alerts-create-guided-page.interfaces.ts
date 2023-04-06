@@ -18,19 +18,6 @@ import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
-export interface AlertsCreateGuidedPageProps {
-    alert: EditableAlert;
-    alertTemplates: AlertTemplate[];
-    onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
-    onSubmit: (alert: EditableAlert, suggestedName: string) => void;
-    isCreatingAlert: boolean;
-    selectedSubscriptionGroups?: SubscriptionGroup[];
-    onSubscriptionGroupChange?: (groups: SubscriptionGroup[]) => void;
-    getAlertTemplates: () => void;
-    newSubscriptionGroup: SubscriptionGroup;
-    onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
-}
-
 export interface AlertCreatedGuidedPageOutletContext {
     alert: EditableAlert;
     onAlertPropertyChange: (

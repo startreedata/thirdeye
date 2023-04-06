@@ -27,7 +27,6 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.common.base.Strings;
@@ -71,8 +70,7 @@ public class SubscriptionGroupService extends
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      ensure(subscriptionGroupManager.findByPredicate(
-          Predicate.EQ("name", api.getName())).size() == 0, ERR_DUPLICATE_NAME);
+      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
     }
     optional(api.getAlertAssociations())
         .ifPresent(l -> l.forEach(alertAssociation -> {

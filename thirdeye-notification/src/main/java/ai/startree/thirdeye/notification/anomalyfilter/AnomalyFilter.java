@@ -17,7 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.List;
 import java.util.Map;
 
-public interface AnomalyFilter {
+public interface  AnomalyFilter {
 
   List<String> getPropertyNames();
 

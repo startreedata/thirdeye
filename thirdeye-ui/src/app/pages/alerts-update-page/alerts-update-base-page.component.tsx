@@ -42,7 +42,7 @@ import {
     createEmptySubscriptionGroup,
     getSubscriptionGroupAlertsList,
 } from "../../utils/subscription-groups/subscription-groups.util";
-import { AlertsEditBasePage } from "./alerts-edit-base-page.component";
+import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateBasePage: FunctionComponent = () => {
@@ -70,6 +70,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
     } = useGetAlert();
     const params = useParams<AlertsUpdatePageParams>();
     const [loading, setLoading] = useState(true);
+    const [isEditRequestInFlight, setIsEditRequestInFlight] = useState(false);
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
@@ -273,6 +274,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             return;
         }
 
+        setIsEditRequestInFlight(true);
         updateAlert(modifiedAlert as Alert)
             .then((alert: Alert): void => {
                 notify(
@@ -290,6 +292,9 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                         entity: t("label.alert"),
                     })
                 );
+            })
+            .finally(() => {
+                setIsEditRequestInFlight(false);
             });
     };
 
@@ -299,16 +304,14 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             isLoading={loading}
             loadingState={<AppLoadingIndicatorV1 />}
         >
-            <AlertsEditBasePage
+            <AlertsEditCreateBasePageComponent
+                isEditRequestInFlight={isEditRequestInFlight}
                 newSubscriptionGroup={singleNewSubscriptionGroup}
                 pageTitle={t("label.update-entity", {
                     entity: t("label.alert"),
                 })}
                 selectedSubscriptionGroups={currentlySelectedSubscriptionGroups}
                 startingAlertConfiguration={originalAlert as EditableAlert}
-                submitButtonLabel={t("label.update-entity", {
-                    entity: t("label.alert"),
-                })}
                 onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
                 onSubmit={handleUpdateAlertClick}
                 onSubscriptionGroupChange={

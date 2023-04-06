@@ -52,14 +52,14 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
         },
         {
             matcher: (path: string) =>
-                path.endsWith(AppRouteRelative.ALERTS_CREATE_SIMPLE),
-            navLink: AppRouteRelative.ALERTS_CREATE_SIMPLE,
+                path.endsWith(AppRouteRelative.ALERTS_CREATE_ADVANCED),
+            navLink: AppRouteRelative.ALERTS_CREATE_ADVANCED,
             text: t("label.advanced"),
         },
         {
             matcher: (path: string) =>
-                path.endsWith(AppRouteRelative.ALERTS_CREATE_ADVANCED),
-            navLink: AppRouteRelative.ALERTS_CREATE_ADVANCED,
+                path.endsWith(AppRouteRelative.ALERTS_CREATE_JSON_EDITOR),
+            navLink: AppRouteRelative.ALERTS_CREATE_JSON_EDITOR,
             text: t("label.json-editor"),
         },
     ];

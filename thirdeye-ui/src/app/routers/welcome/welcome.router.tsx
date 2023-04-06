@@ -17,8 +17,13 @@ import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { PageNotFoundPage } from "../../pages/page-not-found-page/page-not-found-page.component";
+import { CreateAlertPage } from "../../pages/welcome-page/create-alert/create-alert-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
+import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
+import {
+    AppRouteRelative,
+    generateDateRangeMonthsFromNow,
+} from "../../utils/routes/routes.util";
 
 const WelcomeLandingPage = lazy(() =>
     import(
@@ -48,6 +53,18 @@ const AlertsCreateGuidedRouter = lazy(() =>
     import(
         /* webpackChunkName: "alerts-guided-create" */ "../alerts-guided-create/alerts-guided-create.router"
     ).then((module) => ({ default: module.AlertsCreateGuidedRouter }))
+);
+
+const AlertsCreateSimplePage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component"
+    ).then((module) => ({ default: module.AlertsCreateSimplePage }))
+);
+
+const AlertsCreateAdvancePage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.component"
+    ).then((module) => ({ default: module.AlertsCreateAdvancePage }))
 );
 
 export const WelcomeRouter: FunctionComponent = () => {
@@ -129,15 +146,41 @@ export const WelcomeRouter: FunctionComponent = () => {
 
                 {/* Welcome create alert path */}
                 <Route
-                    element={
-                        <AlertsCreateGuidedRouter
-                            hideCurrentlySelected
-                            createLabel={t("label.create")}
-                            inProgressLabel={t("label.creating")}
-                        />
-                    }
+                    element={<CreateAlertPage />}
                     path={`${AppRouteRelative.WELCOME_CREATE_ALERT}/*`}
-                />
+                >
+                    <Route
+                        index
+                        element={
+                            <RedirectWithDefaultParams
+                                customDurationGenerator={() => {
+                                    return generateDateRangeMonthsFromNow(1);
+                                }}
+                                to={AppRouteRelative.ALERTS_CREATE_NEW_USER}
+                            />
+                        }
+                    />
+
+                    <Route
+                        element={
+                            <AlertsCreateGuidedRouter
+                                hideCurrentlySelected
+                                createLabel={t("label.create")}
+                                inProgressLabel={t("label.creating")}
+                            />
+                        }
+                        path={`${AppRouteRelative.ALERTS_CREATE_NEW_USER}/*`}
+                    />
+
+                    <Route
+                        element={<AlertsCreateSimplePage />}
+                        path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
+                    />
+                    <Route
+                        element={<AlertsCreateAdvancePage />}
+                        path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
+                    />
+                </Route>
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

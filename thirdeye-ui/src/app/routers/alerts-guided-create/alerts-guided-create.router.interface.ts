@@ -15,7 +15,6 @@
 
 export interface AlertsGuidedCreateRouterProps {
     navigateToAlertDetailAfterSampleAlertCreate?: boolean;
-    useParentForNonWelcomeFlow?: boolean;
     sampleAlertsBottom?: boolean;
     hideSampleAlerts?: boolean;
     hideCurrentlySelected?: boolean;

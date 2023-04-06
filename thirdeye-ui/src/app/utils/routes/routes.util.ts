@@ -41,12 +41,12 @@ export const AppRouteRelative = {
     ALERTS_CREATE: "create",
     ALERTS_CREATE_NEW: "new",
     ALERTS_CREATE_COPY: `copy/${PLACEHOLDER_ROUTE_ID}`,
-    ALERTS_CREATE_SIMPLE: "simple",
-    ALERTS_CREATE_NEW_USER: "new-user",
     ALERTS_CREATE_ADVANCED: "advanced",
+    ALERTS_CREATE_NEW_USER: "new-user",
+    ALERTS_CREATE_JSON_EDITOR: "json-editor",
     ALERTS_UPDATE: "update",
-    ALERTS_UPDATE_SIMPLE: "simple",
     ALERTS_UPDATE_ADVANCED: "advanced",
+    ALERTS_UPDATE_JSON_EDITOR: "json-editor",
     ANOMALIES: "anomalies",
     ANOMALIES_LIST: "anomalies-list",
     ANOMALIES_ALL: "all",
@@ -124,16 +124,16 @@ export const AppRoute = {
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
     ALERTS_CREATE_NEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}`,
     ALERTS_CREATE_EXISTING: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}`,
-    ALERTS_CREATE_NEW_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
     ALERTS_CREATE_NEW_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
-    ALERTS_CREATE_EXISTING_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
+    ALERTS_CREATE_NEW_JSON_EDITOR: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}`,
     ALERTS_CREATE_EXISTING_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
+    ALERTS_CREATE_EXISTING_JSON_EDITOR: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}`,
     ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
     ALERTS_ALERT_VIEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_VIEW}`,
     ALERTS_ALERT_ANOMALIES: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_ANOMALIES}`,
     ALERTS_UPDATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}`,
-    ALERTS_UPDATE_SIMPLE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_SIMPLE}`,
     ALERTS_UPDATE_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
+    ALERTS_UPDATE_JSON_EDITOR: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}/${AppRouteRelative.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}`,
     ANOMALIES: `/${AppRouteRelative.ANOMALIES}`,
     ANOMALIES_ALL: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_ALL}`,
     ANOMALIES_CREATE: `/${AppRouteRelative.ANOMALIES}/${AppRouteRelative.ANOMALIES_CREATE}`,
@@ -258,13 +258,13 @@ export const getAlertsCreatePath = (): string => {
 
 export const getAlertsCreateNewSimplePath = (): string => {
     return createPathWithRecognizedQueryString(
-        AppRoute.ALERTS_CREATE_NEW_SIMPLE
+        AppRoute.ALERTS_CREATE_NEW_ADVANCED
     );
 };
 
-export const getAlertsCreateNewAdvancedPath = (): string => {
+export const getAlertsCreateNewJsonEditorPath = (): string => {
     return createPathWithRecognizedQueryString(
-        AppRoute.ALERTS_CREATE_NEW_ADVANCED
+        AppRoute.ALERTS_CREATE_NEW_JSON_EDITOR
     );
 };
 

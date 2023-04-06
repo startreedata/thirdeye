@@ -12,47 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
 export type AlertsUpdatePageParams = {
     id: string;
 };
-
-export interface AlertsEditPageProps {
-    submitButtonLabel: string;
-    startingAlertConfiguration: EditableAlert;
-    pageTitle: string;
-    onSubmit: (alert: EditableAlert) => void;
-    selectedSubscriptionGroups: SubscriptionGroup[];
-    onSubscriptionGroupChange: (newGroups: SubscriptionGroup[]) => void;
-
-    newSubscriptionGroup: SubscriptionGroup;
-    onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
-}
-
-export interface AlertEditPageOutletContextProps {
-    alert: EditableAlert;
-    handleAlertPropertyChange: (
-        contents: Partial<EditableAlert>,
-        isTotalReplace?: boolean
-    ) => void;
-    selectedSubscriptionGroups: SubscriptionGroup[];
-    handleSubscriptionGroupChange: (groups: SubscriptionGroup[]) => void;
-    selectedAlertTemplate: AlertTemplateType;
-    setSelectedAlertTemplate: (
-        newAlertTemplate: AlertTemplateType | null
-    ) => void;
-    alertTemplateOptions: AlertTemplateType[];
-    setShowBottomBar: (flag: boolean) => void;
-    handleSubmitAlertClick: (alert: EditableAlert) => void;
-    refreshAlertTemplates: () => void;
-
-    newSubscriptionGroup: SubscriptionGroup;
-    onNewSubscriptionGroupChange: (editedGroup: SubscriptionGroup) => void;
-
-    setIsSubmitBtnEnabled: (flag: boolean) => void;
-    setSubmitBtnLabel: (label: string) => void;
-    resetSubmitButtonLabel: () => void;
-}

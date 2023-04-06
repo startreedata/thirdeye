@@ -90,7 +90,7 @@ describe("Routes Util", () => {
         );
     });
 
-    it("getAlertsCreateAdvancedPath should return appropriate path with appropriate query string", () => {
+    it("getAlertsCreateNewJsonEditorPath should return appropriate path with appropriate query string", () => {
         expect(getAlertsCreateNewJsonEditorPath()).toEqual(
             "/alerts/create/new/json-editor?testQueryString"
         );

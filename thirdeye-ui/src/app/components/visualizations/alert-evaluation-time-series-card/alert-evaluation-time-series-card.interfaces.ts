@@ -29,8 +29,3 @@ export interface AlertEvaluationTimeSeriesCardProps {
     rootCardProps?: CardProps;
     timeSeriesProps?: Partial<TimeSeriesChartProps>;
 }
-
-export interface CreateAlertHeaderProps {
-    onRefresh?: (start?: number, end?: number) => void;
-    title: string;
-}

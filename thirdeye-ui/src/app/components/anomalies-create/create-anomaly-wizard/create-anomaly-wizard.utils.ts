@@ -43,7 +43,6 @@ export const getEnumerationItemsConfigFromAlert = (
     return null;
 };
 
-export const AlertId = "alertId";
 export const AnomalyWizardQueryParams = {
     AnomalyStartTime: "anomalyStartTime",
     AnomalyEndTime: "anomalyEndTime",

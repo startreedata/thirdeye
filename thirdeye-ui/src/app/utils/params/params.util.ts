@@ -13,9 +13,8 @@
  * the License.
  */
 import { isInteger, isNumber, toNumber } from "lodash";
-import { useSearchParams } from "react-router-dom";
 import { AnomalyFilterOption } from "../../components/rca/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
-import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
+// import { SearchQueryStringKey } from "../../components/search-bar/search-bar.interfaces";
 import {
     TimeRange,
     TimeRangeDuration,
@@ -27,64 +26,6 @@ const SINGLE_SEARCH_PARAM_SEPARATOR = ",";
 
 export const QUERY_PARAM_KEY_FOR_EXPANDED = "expanded";
 export const HASH_KEY_ACCESS_TOKEN = "access_token";
-export const SEARCH_TERM_QUERY_PARAM_KEY =
-    SearchQueryStringKey.SEARCH.toLowerCase();
-
-interface UseSetQueryParamsUtil {
-    setQueryString: (key: string, value: string) => void;
-    setSearchInQueryString: (search: string) => void;
-    setSearchTextInQueryString: (searchText: string) => void;
-    setTimeRangeDurationInQueryString: (
-        timeRangeDuration: TimeRangeDuration
-    ) => void;
-}
-
-export function useSetQueryParamsUtil(): UseSetQueryParamsUtil {
-    const [urlSearchParams, setSearchParams] = useSearchParams();
-
-    const setQueryString = (key: string, value: string): void => {
-        if (!key) {
-            return;
-        }
-
-        // Get existing query string
-        urlSearchParams.set(key, value);
-
-        // Update URL
-        setSearchParams(urlSearchParams, { replace: true });
-    };
-
-    return {
-        setQueryString,
-        setSearchInQueryString: (search: string): void => {
-            setQueryString(SearchQueryStringKey.SEARCH.toLowerCase(), search);
-        },
-        setSearchTextInQueryString: (searchText: string): void => {
-            setQueryString(SearchQueryStringKey.SEARCH_TEXT, searchText);
-        },
-        setTimeRangeDurationInQueryString: (
-            timeRangeDuration: TimeRangeDuration
-        ): void => {
-            if (!timeRangeDuration) {
-                return;
-            }
-
-            urlSearchParams.set(
-                TimeRangeQueryStringKey.TIME_RANGE,
-                timeRangeDuration.timeRange
-            );
-            urlSearchParams.set(
-                TimeRangeQueryStringKey.START_TIME,
-                timeRangeDuration.startTime.toString()
-            );
-            urlSearchParams.set(
-                TimeRangeQueryStringKey.END_TIME,
-                timeRangeDuration.endTime.toString()
-            );
-            setSearchParams(urlSearchParams);
-        },
-    };
-}
 
 export const getAccessTokenFromHashParams = (): string => {
     let accessToken = "";
@@ -94,14 +35,6 @@ export const getAccessTokenFromHashParams = (): string => {
     }
 
     return accessToken;
-};
-
-export const getSearchFromQueryString = (): string => {
-    return getQueryString(SearchQueryStringKey.SEARCH);
-};
-
-export const getSearchTextFromQueryString = (): string => {
-    return getQueryString(SearchQueryStringKey.SEARCH_TEXT);
 };
 
 export const getTimeRangeDurationFromQueryString =

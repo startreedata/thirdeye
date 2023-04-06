@@ -12,16 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TimeRangeDuration } from "../time-range-provider/time-range-provider.interfaces";
-
-export interface TimeRangeButtonProps {
-    timeRangeDuration: TimeRangeDuration;
-    recentCustomTimeRangeDurations?: TimeRangeDuration[];
-    onChange?: (timeRangeDuration: TimeRangeDuration) => void;
-    maxDate?: number;
-    minDate?: number;
-    timezone?: string;
-}
 
 export interface TimeRangeButtonWithContextProps {
     btnGroupColor?: "secondary" | "inherit" | "primary" | "default";

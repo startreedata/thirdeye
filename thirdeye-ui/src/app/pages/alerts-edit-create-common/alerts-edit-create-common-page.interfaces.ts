@@ -18,10 +18,6 @@ import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces"
 
 export const BOTTOM_BAR_ELEMENT_ID = "bottom-bar-container";
 
-export type AlertsUpdatePageParams = {
-    id: string;
-};
-
 export interface AlertsSimpleAdvancedJsonContainerPageProps {
     startingAlertConfiguration: EditableAlert;
     onSubmit: (alert: EditableAlert, suggestedName?: string) => void;

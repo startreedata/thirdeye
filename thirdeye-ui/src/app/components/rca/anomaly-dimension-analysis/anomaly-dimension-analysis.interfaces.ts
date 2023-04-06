@@ -13,10 +13,6 @@
  * the License.
  */
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
-import {
-    AnomalyDimensionAnalysisData,
-    AnomalyDimensionAnalysisMetricRow,
-} from "../../../rest/dto/rca.interfaces";
 
 export interface AnomalyDimensionAnalysisProps {
     anomalyId: number;
@@ -25,30 +21,6 @@ export interface AnomalyDimensionAnalysisProps {
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
     onCheckClick: (filters: AnomalyFilterOption[]) => void;
     timezone: string | undefined;
-}
-export interface AnomalyDimensionAnalysisTableProps {
-    anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;
-    anomaly: Anomaly;
-}
-
-export interface AnomalyDimensionAnalysisMetricRowProps {
-    dataset: string;
-    metric: string;
-    row: AnomalyDimensionAnalysisMetricRow;
-    totalSum: number;
-    dimensionColumns: string[];
-}
-
-export interface SummaryData {
-    [key: string]: {
-        count: number;
-        percentage: number;
-        totalCount: number;
-    };
-}
-
-export interface SummarizeDataFunctionParams {
-    [key: string]: number;
 }
 
 export interface AnomalyBreakdownComparisonData {

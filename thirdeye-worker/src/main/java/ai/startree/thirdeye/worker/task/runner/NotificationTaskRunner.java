@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
+import ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -34,12 +34,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +53,7 @@ public class NotificationTaskRunner implements TaskRunner {
   private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final SubscriptionGroupFilter subscriptionGroupFilter;
+  private final SubscriptionGroupWatermarkManager subscriptionGroupWatermarkManager;
 
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
@@ -69,68 +66,28 @@ public class NotificationTaskRunner implements TaskRunner {
       final MetricRegistry metricRegistry,
       final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder,
-      final SubscriptionGroupFilter subscriptionGroupFilter) {
+      final SubscriptionGroupFilter subscriptionGroupFilter,
+      final SubscriptionGroupWatermarkManager subscriptionGroupWatermarkManager) {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.anomalyManager = anomalyManager;
     this.notificationDispatcher = notificationDispatcher;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.subscriptionGroupFilter = subscriptionGroupFilter;
+    this.subscriptionGroupWatermarkManager = subscriptionGroupWatermarkManager;
 
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
     notificationTaskDuration = metricRegistry.histogram("notificationTaskDuration");
   }
 
-  private static Map<Long, Long> buildVectorClock(Collection<AnomalyDTO> anomalies) {
-    final Map<Long, Long> alertIdToAnomalyCreateTimeMax = new HashMap<>();
-    for (final AnomalyDTO a : anomalies) {
-      final Long alertId = a.getDetectionConfigId();
-      if (alertId == null) {
-        continue;
-      }
-      final long createTime = optional(a.getCreateTime()).map(Timestamp::getTime).orElse(-1L);
-      final long currentMax = alertIdToAnomalyCreateTimeMax.getOrDefault(alertId, createTime);
-      final long newMax = Math.max(currentMax, createTime);
-      alertIdToAnomalyCreateTimeMax.put(alertId, newMax);
-    }
-    return alertIdToAnomalyCreateTimeMax;
-  }
-
-  private static Map<Long, Long> mergeVectorClock(final Map<Long, Long> a,
-      final Map<Long, Long> b) {
-    if (a == null) {
-      return b;
-    }
-    if (b == null) {
-      return a;
-    }
-    final Map<Long, Long> result = new HashMap<>(a);
-    b.forEach((key, value) -> result.merge(key, value, Math::max));
-
-    return result;
-  }
-
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
-    final SubscriptionGroupDTO subscriptionGroupDTO = requireNonNull(
-        subscriptionGroupManager.findById(id),
+    final SubscriptionGroupDTO sg = requireNonNull(subscriptionGroupManager.findById(id),
         "Cannot find subscription group: " + id);
 
-    if (subscriptionGroupDTO.getProperties() == null) {
+    if (sg.getProperties() == null) {
       LOG.warn(String.format("Detection alert %d contains no properties", id));
     }
-    return subscriptionGroupDTO;
-  }
-
-  private void updateSubscriptionWatermarks(final SubscriptionGroupDTO subscriptionConfig,
-      final Collection<AnomalyDTO> allAnomalies) {
-    if (!allAnomalies.isEmpty()) {
-      subscriptionConfig.setVectorClocks(
-          mergeVectorClock(subscriptionConfig.getVectorClocks(),
-              buildVectorClock(allAnomalies)));
-
-      LOG.info("Updating watermarks for subscription config : {}", subscriptionConfig.getId());
-      subscriptionGroupManager.save(subscriptionConfig);
-    }
+    return sg;
   }
 
   @Override
@@ -171,11 +128,11 @@ public class NotificationTaskRunner implements TaskRunner {
     /* fire notifications */
     notificationDispatcher.dispatch(subscriptionGroup, payload);
 
-    /* Record watermarks and update entities */
+    /* Update anomalies */
     for (final AnomalyDTO anomaly : anomalies) {
-      anomaly.setNotified(true);
-      anomalyManager.update(anomaly);
+      anomalyManager.update(anomaly.setNotified(true));
     }
-    updateSubscriptionWatermarks(subscriptionGroup, anomalies);
+    /* Record watermarks */
+    subscriptionGroupWatermarkManager.updateWatermarks(subscriptionGroup, anomalies);
   }
 }

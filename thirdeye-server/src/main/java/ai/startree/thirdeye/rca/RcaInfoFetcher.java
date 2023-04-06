@@ -15,8 +15,8 @@ package ai.startree.thirdeye.rca;
 
 import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
+import static ai.startree.thirdeye.spi.metric.MetricAggFunction.COUNT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -37,7 +37,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -153,12 +152,11 @@ public class RcaInfoFetcher {
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metricName, datasetName);
     if (metricConfigDTO == null) {
       LOG.warn("Could not find metric {} for dataset {}. Building a custom metric for RCA.", metricName, datasetName);
-      final String metricAggFunction = metadataMetricDTO.getDefaultAggFunction();
-      ensure(StringUtils.isNotBlank(metricAggFunction),
-          ERR_MISSING_CONFIGURATION_FIELD,
-          String.format(
-              "metadata$metric$aggregationFunction. It must be set when using a custom metric. Possible values: %s",
-              List.of(MetricAggFunction.values())));
+      String metricAggFunction = metadataMetricDTO.getDefaultAggFunction();
+      if (StringUtils.isBlank(metricAggFunction)) {
+        LOG.warn("Custom aggregation function not provided in alert configuration for metric {} for dataset {}. Defaulting to COUNT", metricName, datasetName);
+        metricAggFunction = COUNT.toString();
+      }
       metricConfigDTO = new MetricConfigDTO().setDataset(datasetName)
           .setName(metricName)
           .setDefaultAggFunction(metricAggFunction);

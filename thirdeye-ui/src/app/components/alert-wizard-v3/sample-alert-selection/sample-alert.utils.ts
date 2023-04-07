@@ -146,6 +146,8 @@ export const generateOptions = (
             description: t(
                 "message.monitor-number-of-clicks-across-multiple-dimension"
             ),
+            recipeLink:
+                "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/ad_campaign_performance_monitoring",
             alertConfiguration: {
                 name: "AdCampaignData-seasonal-dx-sample-alert",
                 description: t(

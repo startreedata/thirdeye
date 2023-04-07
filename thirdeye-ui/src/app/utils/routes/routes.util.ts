@@ -15,13 +15,11 @@
 import { DateTime } from "luxon";
 import { DateTimeUnit } from "luxon/src/datetime";
 import { ENUMERATION_ITEM_QUERY_PARAM_KEY } from "../../pages/alerts-anomalies-page/alerts-anomalies-page.interfaces";
-import {
-    getRecognizedQuery,
-    SEARCH_TERM_QUERY_PARAM_KEY,
-} from "../params/params.util";
+import { getRecognizedQuery } from "../params/params.util";
 
 const PLACEHOLDER_ROUTE_ID = ":id";
 const PLACEHOLDER_ROUTE_NAME = ":name";
+const SEARCH_TERM_QUERY_PARAM_KEY = "search";
 
 export const AppRouteRelative = {
     ADMIN: "admin",

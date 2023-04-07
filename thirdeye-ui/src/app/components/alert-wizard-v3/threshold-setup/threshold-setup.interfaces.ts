@@ -12,14 +12,32 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { AvailableAlgorithmOption } from "../algorithm-selection/algorithm-selection.interfaces";
 
 export interface ThresholdSetupProps {
     alert: EditableAlert;
+    alertTemplate: AlertTemplate | undefined;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean
     ) => void;
     algorithmOptionConfig: AvailableAlgorithmOption | undefined;
+}
+
+export interface AlgorithmOptionInputFieldConfig {
+    label: string;
+    description?: string;
+    templatePropertyName: string;
+    type: string;
+    min?: number;
+    max?: number;
+}
+
+export interface SliderAlgorithmOptionInputFieldConfig
+    extends AlgorithmOptionInputFieldConfig {
+    type: "slider";
+    min: number;
+    max: number;
 }

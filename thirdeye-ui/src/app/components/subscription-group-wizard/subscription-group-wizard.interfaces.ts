@@ -33,10 +33,6 @@ export enum SubscriptionGroupViewTabs {
     AlertDimensions,
 }
 
-export type SubscriptionGroupsWizardParams = {
-    id: string;
-};
-
 export interface Association {
     id: string;
     alertId: number;

@@ -13,8 +13,6 @@
  * the License.
  */
 
-import type { Dispatch, SetStateAction } from "react";
-import type { Datasource } from "../../../../rest/dto/datasource.interfaces";
 import type { ADD_NEW_DATASOURCE } from "./onboard-datasource-page.utils";
 
 export interface DatasourceOption {
@@ -30,9 +28,3 @@ export interface DatasourceOptionGroups {
 }
 
 export type SelectedDatasource = typeof ADD_NEW_DATASOURCE | string | null;
-export interface WelcomeSelectDatasourceOutletContext {
-    editedDatasource: Datasource;
-    setEditedDatasource: Dispatch<SetStateAction<Datasource>>;
-    selectedDatasourceName: SelectedDatasource;
-    setSelectedDatasourceName: Dispatch<SetStateAction<SelectedDatasource>>;
-}

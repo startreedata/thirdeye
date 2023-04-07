@@ -25,9 +25,3 @@ export interface EventPropertiesFormProps {
     onSubmit?: (event: Event) => void;
     fullWidth?: boolean;
 }
-
-export interface DynamicFormType {
-    key: string;
-    propertyName: string;
-    propertyValue: string[];
-}

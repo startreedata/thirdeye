@@ -37,8 +37,6 @@ export interface SelectedAlertDetails {
     metric: string | null;
 }
 
-export type CreateAnomalyFormKeys = keyof CreateAnomalyEditableFormFields;
-
 export type HandleSetFields = <T extends keyof CreateAnomalyEditableFormFields>(
     fieldName: T,
     fieldValue: CreateAnomalyEditableFormFields[T]

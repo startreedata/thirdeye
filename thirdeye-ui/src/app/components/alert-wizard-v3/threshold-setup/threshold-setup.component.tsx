@@ -14,7 +14,7 @@
  */
 import { Box, Divider, Grid, TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     PageContentsCardV1,
@@ -33,11 +33,13 @@ import {
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
 import { NavigateAlertCreationFlowsDropdown } from "../navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { PreviewChart } from "../preview-chart/preview-chart.component";
 import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
 import {
+    generateInputFieldConfigsForAlertTemplate,
     generateTemplateProperties,
     resetSelectedMetrics,
 } from "./threshold-setup.utils";
@@ -45,6 +47,7 @@ import {
 export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,
     alert,
+    alertTemplate,
     algorithmOptionConfig,
 }) => {
     const classes = useAlertWizardV2Styles();
@@ -110,6 +113,14 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
 
         setIsPinotInfraLoading(false);
     }, [metrics, datasets, datasources]);
+
+    const inputFieldConfigs = useMemo(() => {
+        if (alertTemplate) {
+            return generateInputFieldConfigsForAlertTemplate(alertTemplate);
+        }
+
+        return [];
+    }, [alertTemplate]);
 
     const handleMetricSelection = (metric: string): void => {
         if (!metric || !selectedTable) {
@@ -378,24 +389,19 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                 label={`${t("label.aggregation-function")}`}
                             />
 
-                            {algorithmOptionConfig &&
-                                algorithmOptionConfig.algorithmOption
-                                    .inputFieldConfigs && (
-                                    <Grid item xs={12}>
-                                        <Box marginBottom={1} padding={1}>
-                                            <Divider />
-                                        </Box>
-                                    </Grid>
-                                )}
-                            {algorithmOptionConfig &&
-                                algorithmOptionConfig.algorithmOption
-                                    .inputFieldConfigs &&
-                                algorithmOptionConfig.algorithmOption.inputFieldConfigs.map(
-                                    (config) => {
-                                        return (
-                                            <InputSection
-                                                helperLabel={config.description}
-                                                inputComponent={
+                            {inputFieldConfigs.length > 0 && inputFieldConfigs && (
+                                <Grid item xs={12}>
+                                    <Box marginBottom={1} padding={1}>
+                                        <Divider />
+                                    </Box>
+                                </Grid>
+                            )}
+                            {inputFieldConfigs.length > 0 &&
+                                inputFieldConfigs.map((config) => {
+                                    return (
+                                        <InputSection
+                                            inputComponent={
+                                                <>
                                                     <SpecificPropertiesRenderer
                                                         alert={alert}
                                                         inputFieldConfig={
@@ -405,15 +411,22 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                                             onAlertPropertyChange
                                                         }
                                                     />
-                                                }
-                                                key={
-                                                    config.templatePropertyName
-                                                }
-                                                label={config.label}
-                                            />
-                                        );
-                                    }
-                                )}
+                                                    {!!config.description && (
+                                                        <Typography variant="caption">
+                                                            <ParseMarkdown>
+                                                                {
+                                                                    config.description
+                                                                }
+                                                            </ParseMarkdown>
+                                                        </Typography>
+                                                    )}
+                                                </>
+                                            }
+                                            key={config.templatePropertyName}
+                                            label={config.label}
+                                        />
+                                    );
+                                })}
                         </Grid>
 
                         <Grid item xs={12}>

@@ -2,7 +2,7 @@
 name: pr-workflow
 
 on:
-    pull_request:
+    pull_request_target:
         types:
             - opened
             - reopened
@@ -13,6 +13,8 @@ jobs:
     pr-title:
         # Job to validate PR title
         name: pr-title
+        permissions:
+            pull-requests: read
         runs-on: ubuntu-latest
         timeout-minutes: 5
         steps:
@@ -47,11 +49,14 @@ jobs:
     pr-labels:
         # Job to assign PR labels
         name: pr-labels
+        permissions:
+            contents: read
+            pull-requests: write
         runs-on: ubuntu-latest
         timeout-minutes: 5
         steps:
             - name: Assign labels
-              uses: actions/labeler@v2
+              uses: actions/labeler@v4
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
                   configuration-path: .github/pr-labels.yaml

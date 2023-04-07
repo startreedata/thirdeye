@@ -1,0 +1,63 @@
+# Workflow to triage pull requests, validate title and assign labels
+name: pr-workflow
+
+on:
+    pull_request_target:
+        types:
+            - opened
+            - reopened
+            - edited
+            - synchronize
+
+jobs:
+    pr-title:
+        # Job to validate PR title
+        name: pr-title
+        permissions:
+            pull-requests: read
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - id: filter
+              name: Filter
+              uses: dorny/paths-filter@v2
+              with:
+                  filters: |
+                      ui:
+                          - thirdeye-ui/**
+            - name: Validate title
+              if: steps.filter.outputs.ui == 'true'
+              uses: amannn/action-semantic-pull-request@v3.4.0
+              with:
+                  types: |
+                      major
+                      feat
+                      fix
+                      wip
+                      test
+                      refactor
+                      chore
+                  scopes: |
+                      ui
+                  requireScope: true
+                  subjectPattern: ^(([A-Z]+\-[0-9]+( {1}))+|\[auto\] )(?![A-Z, ]).+[^.…]$
+                  subjectPatternError: |
+                      Please make sure the subject "{subject}" in pull request title follows pull request naming standards (see UI contributing guidelines).
+                  validateSingleCommit: true
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    pr-labels:
+        # Job to assign PR labels
+        name: pr-labels
+        permissions:
+            contents: read
+            pull-requests: write
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - name: Assign labels
+              uses: actions/labeler@v4
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  configuration-path: .github/pr-labels.yaml
+                  sync-labels: true

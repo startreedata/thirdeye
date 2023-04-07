@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.dataframe;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
 import java.io.IOException;

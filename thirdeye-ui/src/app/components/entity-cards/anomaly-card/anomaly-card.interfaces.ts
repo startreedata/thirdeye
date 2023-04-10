@@ -20,5 +20,4 @@ export interface AnomalyCardProps {
     className?: string;
     isLoading?: boolean;
     timezone?: string;
-    hideFeedback?: boolean;
 }

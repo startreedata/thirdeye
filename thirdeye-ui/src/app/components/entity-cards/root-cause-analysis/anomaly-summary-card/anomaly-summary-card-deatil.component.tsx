@@ -13,27 +13,19 @@
  * the License.
  */
 import { Typography } from "@material-ui/core";
-import React, { FC } from "react";
+import React, { FunctionComponent } from "react";
+import { AnomalySummaryCardDetailProps } from "./anomaly-summary-card.interfaces";
 
-interface Props {
-    label: string;
-    value: string;
-    valueClassName?: string;
-}
-
-export const AnomalySummaryCardDetail: FC<Props> = ({
-    label,
-    value,
-    valueClassName,
-}: Props) => {
-    return (
-        <>
-            <Typography className={valueClassName} variant="subtitle1">
-                {value}
-            </Typography>
-            <Typography color="textSecondary" variant="body2">
-                {label}
-            </Typography>
-        </>
-    );
-};
+export const AnomalySummaryCardDetail: FunctionComponent<AnomalySummaryCardDetailProps> =
+    ({ label, value, valueClassName }) => {
+        return (
+            <>
+                <Typography className={valueClassName} variant="subtitle1">
+                    {value}
+                </Typography>
+                <Typography color="textSecondary" variant="body2">
+                    {label}
+                </Typography>
+            </>
+        );
+    };

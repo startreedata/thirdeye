@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ReactNode } from "react";
 import { Alert } from "../../../../rest/dto/alert.interfaces";
 import { UiAnomaly } from "../../../../rest/dto/ui-anomaly.interfaces";
 
@@ -21,4 +22,10 @@ export interface AnomalySummaryCardProps {
     className?: string;
     timezone?: string;
     alert: Alert | null;
+}
+
+export interface AnomalySummaryCardDetailProps {
+    label: string;
+    value: ReactNode;
+    valueClassName?: string;
 }

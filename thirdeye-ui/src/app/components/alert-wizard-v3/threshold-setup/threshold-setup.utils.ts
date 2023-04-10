@@ -53,11 +53,6 @@ export function generateTemplateProperties(
         dataset: dataset.name,
         aggregationColumn: metric,
         aggregationFunction: aggregationFunction,
-        /**
-         * See https://cortex-data.slack.com/archives/C031NQQNDPX
-         *     /p1677746148239239?thread_ts=1677723158.158859&cid=C031NQQNDPX
-         */
-        rcaAggregationFunction: aggregationFunction,
     };
 
     templateProperties.timezone = dataset.timeColumn.timezone;

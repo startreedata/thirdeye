@@ -53,7 +53,6 @@ describe("AlertWizardV3/Threshold Setup Utils", () => {
             aggregationFunction: "mockAggregationFunction",
             aggregationColumn: "mockMetric",
             timezone: "pst",
-            rcaAggregationFunction: "mockAggregationFunction",
         });
     });
 

@@ -13,26 +13,6 @@
  * the License.
  */
 
-import { Alert } from "../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-
-export interface SubscriptionGroupWizardProps {
-    alerts: Alert[];
-    submitBtnLabel: string;
-    cancelBtnLabel: string;
-    subscriptionGroup: SubscriptionGroup;
-    enumerationItems: EnumerationItem[];
-    onCancel?: () => void;
-    onFinish?: (subscriptionGroup: SubscriptionGroup) => void;
-    selectedTab: SubscriptionGroupViewTabs;
-}
-
-export enum SubscriptionGroupViewTabs {
-    GroupDetails,
-    AlertDimensions,
-}
-
 export interface Association {
     id: string;
     alertId: number;

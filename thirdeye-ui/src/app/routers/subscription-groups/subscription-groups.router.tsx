@@ -32,6 +32,18 @@ const SubscriptionGroupsViewPage = lazy(() =>
     ).then((module) => ({ default: module.SubscriptionGroupsViewPage }))
 );
 
+const SubscriptionGroupsWizardDetailsPage = lazy(() =>
+    import(
+        /* webpackChunkName: "setup-details-page" */ "../../pages/subscription-groups-wizard-page/setup-details/setup-details-page.component"
+    ).then((module) => ({ default: module.SetupDetailsPage }))
+);
+
+const SubscriptionGroupsWizardAlertDimensionsPage = lazy(() =>
+    import(
+        /* webpackChunkName: "setup-alert-dimensions-page" */ "../../pages/subscription-groups-wizard-page/setup-alert-dimensions/setup-alert-dimensions-page.component"
+    ).then((module) => ({ default: module.SetupAlertDimensionsPage }))
+);
+
 const SubscriptionGroupsCreatePage = lazy(() =>
     import(
         /* webpackChunkName: "subscription-groups-create-page" */ "../../pages/subscription-groups-create-page/subscription-groups-create-page.component"
@@ -93,14 +105,66 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
                 {/* Subscription groups create path */}
                 <Route
                     element={<SubscriptionGroupsCreatePage />}
-                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}
-                />
+                    path={`${AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}`}
+                >
+                    <Route
+                        index
+                        element={
+                            <Navigate
+                                replace
+                                to={
+                                    AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
+                                }
+                            />
+                        }
+                    />
+                    <Route
+                        element={<SubscriptionGroupsWizardDetailsPage />}
+                        path={
+                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
+                        }
+                    />
+                    <Route
+                        element={
+                            <SubscriptionGroupsWizardAlertDimensionsPage />
+                        }
+                        path={
+                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS
+                        }
+                    />
+                </Route>
 
                 {/* Subscription groups update path */}
                 <Route
                     element={<SubscriptionGroupsUpdatePage />}
                     path={AppRouteRelative.SUBSCRIPTION_GROUPS_UPDATE}
-                />
+                >
+                    <Route
+                        index
+                        element={
+                            <Navigate
+                                replace
+                                to={
+                                    AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
+                                }
+                            />
+                        }
+                    />
+                    <Route
+                        element={<SubscriptionGroupsWizardDetailsPage />}
+                        path={
+                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
+                        }
+                    />
+                    <Route
+                        element={
+                            <SubscriptionGroupsWizardAlertDimensionsPage />
+                        }
+                        path={
+                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS
+                        }
+                    />
+                </Route>
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

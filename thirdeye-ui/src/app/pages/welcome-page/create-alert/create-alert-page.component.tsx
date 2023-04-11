@@ -32,7 +32,6 @@ import {
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import {
     SpecType,
     SubscriptionGroup,
@@ -55,8 +54,6 @@ export const CreateAlertPage: FunctionComponent = () => {
         createNewSubscriptionGroup,
         status: createSubscriptionGroupStatus,
     } = useCreateSubscriptionGroup();
-
-    const [alert] = useState<EditableAlert>(createNewStartingAlert());
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(() => {
@@ -83,7 +80,7 @@ export const CreateAlertPage: FunctionComponent = () => {
     }, [navigate, notify, t]);
 
     const handleCreateAlertClick = useCallback(
-        (_, suggestedName) => {
+        (alert, suggestedName) => {
             const alertWithName = { ...alert };
 
             if (!alertWithName.name) {
@@ -134,7 +131,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                 );
             }
         },
-        [alert, createAndHandleSubscriptionGroup, singleNewSubscriptionGroup]
+        [createAndHandleSubscriptionGroup, singleNewSubscriptionGroup]
     );
 
     return (
@@ -162,7 +159,7 @@ export const CreateAlertPage: FunctionComponent = () => {
                 }
                 newSubscriptionGroup={singleNewSubscriptionGroup}
                 selectedSubscriptionGroups={[]}
-                startingAlertConfiguration={alert}
+                startingAlertConfiguration={createNewStartingAlert()}
                 onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
                 onSubmit={handleCreateAlertClick}
             />

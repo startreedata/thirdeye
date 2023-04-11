@@ -150,7 +150,7 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                         <Grid container>
                             <Grid item lg={4} md={4} sm={12} xs={12}>
                                 <Typography variant="body2">
-                                    {t("message.why-this-is-an-anomaly")}
+                                    {t("message.why-is-this-an-anomaly")}
                                 </Typography>
                             </Grid>
                             <Grid item lg={8} md={8} sm={12} xs={12}>

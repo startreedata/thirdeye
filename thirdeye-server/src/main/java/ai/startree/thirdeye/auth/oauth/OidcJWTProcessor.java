@@ -15,7 +15,10 @@ package ai.startree.thirdeye.auth.oauth;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
@@ -24,48 +27,26 @@ import com.nimbusds.jwt.proc.JWTClaimsSetVerifier;
 import java.net.URL;
 import java.security.Key;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+@Singleton
 public class OidcJWTProcessor extends DefaultJWTProcessor<OidcContext> {
 
-  private boolean authServerRunning = false;
+  private final AtomicBoolean authServerRunning = new AtomicBoolean(false);
 
-  public void init(final OidcContext context, final MetricRegistry metricRegistry) {
+  @Inject
+  public OidcJWTProcessor(final MetricRegistry metricRegistry,
+      final OidcContext oidcContext) {
+    setJWTClaimsSetVerifier(createJWTClaimsSetVerifier(oidcContext));
+    setJWSKeySelector(this::keySelector);
+
     metricRegistry.register("authServerRunning",
-        new Gauge<Integer>() {
-          @Override
-          public Integer getValue() {
-            return authServerRunning ? 1 : 0;
-          }
-        });
-    init(context);
+        (Gauge<Integer>) () -> authServerRunning.get() ? 1 : 0);
   }
 
-  public void init(final OidcContext context) {
-    final JWTClaimsSetVerifier verifier = new DefaultJWTClaimsVerifier(
-      context.getExactMatchClaimsSet(),
-      context.getRequiredClaims());
-    setJWTClaimsSetVerifier(verifier);
-    setJWSKeySelector((header, c) -> {
-      final Key key = fetchKeys(c.getKeysUrl()).getKeys().stream()
-          .collect(Collectors.toMap(JWK::getKeyID, value -> toPublicKey(value)))
-          .get(header.getKeyID());
-      return key != null ? Collections.singletonList(key) : Collections.emptyList();
-    });
-  }
-
-  private JWKSet fetchKeys(final String keysUrl) {
-    try {
-      authServerRunning = true;
-      return JWKSet.load(new URL(keysUrl).openStream());
-    } catch (final Exception e) {
-      authServerRunning = false;
-      throw new IllegalArgumentException(String.format("Could not retrieve keys from '%s'",
-          keysUrl), e);
-    }
-  }
-
-  private Key toPublicKey(final JWK jwk) {
+  private static Key toPublicKey(final JWK jwk) {
     try {
       switch (jwk.getKeyType().getValue()) {
         case "EC":
@@ -78,6 +59,32 @@ public class OidcJWTProcessor extends DefaultJWTProcessor<OidcContext> {
       }
     } catch (final JOSEException e) {
       throw new IllegalStateException("Could not infer public key", e);
+    }
+  }
+
+  private static JWTClaimsSetVerifier<OidcContext> createJWTClaimsSetVerifier(
+      final OidcContext context) {
+    return new DefaultJWTClaimsVerifier<>(
+        context.getExactMatchClaimsSet(),
+        context.getRequiredClaims());
+  }
+
+  private List<Key> keySelector(final JWSHeader header, final OidcContext c) {
+    final Key key = fetchKeys(c.getKeysUrl()).getKeys().stream()
+        .collect(Collectors.toMap(JWK::getKeyID, OidcJWTProcessor::toPublicKey))
+        .get(header.getKeyID());
+    return key != null ? Collections.singletonList(key) : Collections.emptyList();
+  }
+
+  private JWKSet fetchKeys(final String keysUrl) {
+    try {
+      authServerRunning.set(true);
+      return JWKSet.load(new URL(keysUrl).openStream());
+    } catch (final Exception e) {
+      authServerRunning.set(false);
+      throw new IllegalArgumentException(
+          String.format("Could not retrieve keys from '%s'", keysUrl),
+          e);
     }
   }
 }

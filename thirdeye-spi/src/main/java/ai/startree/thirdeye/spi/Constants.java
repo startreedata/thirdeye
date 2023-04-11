@@ -38,9 +38,12 @@ public interface Constants {
       "Etc/Zulu",
       "Zulu");
 
+  // Auth related constants
   String NO_AUTH_USER = "no-auth-user";
   String AUTH_BEARER = "Bearer";
   String AUTH_BASIC = "Basic";
+  String OAUTH_ISSUER = "issuer";
+  String OAUTH_JWKS_URI = "jwks_uri";
 
   // Used in Quartz Scheduler context
   String CTX_INJECTOR = "CTX_INJECTOR";

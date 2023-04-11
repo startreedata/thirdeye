@@ -16,32 +16,47 @@ package ai.startree.thirdeye.auth.oauth;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
-import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ThirdEyeOAuthAuthenticator implements Authenticator<String, ThirdEyePrincipal> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeOAuthAuthenticator.class);
+
+  private final OidcJWTProcessor processor;
+  private final OidcContext oidcContext;
   private final LoadingCache<String, ThirdEyePrincipal> bindingsCache;
 
   @Inject
-  public ThirdEyeOAuthAuthenticator(final OAuthManager oAuthManager) {
-    this.bindingsCache = oAuthManager.getDefaultCache();
+  public ThirdEyeOAuthAuthenticator(final OidcJWTProcessor processor,
+      final OidcContext oidcContext) {
+    this.processor = processor;
+    this.oidcContext = oidcContext;
+    this.bindingsCache = getDefaultCache();
   }
 
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(final String authToken)
-    throws AuthenticationException {
+  public Optional<ThirdEyePrincipal> authenticate(final String authToken) {
     try {
       return optional(bindingsCache.get(authToken));
     } catch (final Exception exception) {
       LOG.info("Authentication failed. ", exception);
       return Optional.empty();
     }
+  }
+
+  public LoadingCache<String, ThirdEyePrincipal> getDefaultCache() {
+    return CacheBuilder.newBuilder()
+        .maximumSize(oidcContext.getCacheSize())
+        .expireAfterWrite(oidcContext.getCacheTtl(), TimeUnit.MILLISECONDS)
+        .build(new OidcBindingsCache()
+            .setProcessor(processor)
+            .setContext(oidcContext));
   }
 }

@@ -14,7 +14,7 @@
 
 package ai.startree.thirdeye.service;
 
-import ai.startree.thirdeye.auth.oauth.OAuthManager;
+import ai.startree.thirdeye.auth.oauth.OpenIdInfoService;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,14 +22,14 @@ import com.google.inject.Singleton;
 @Singleton
 public class AuthService {
 
-  private final OAuthManager oAuthManager;
+  private final OpenIdInfoService openIdInfoService;
 
   @Inject
-  public AuthService(final OAuthManager oAuthManager) {
-    this.oAuthManager = oAuthManager;
+  public AuthService(final OpenIdInfoService openIdInfoService) {
+    this.openIdInfoService = openIdInfoService;
   }
 
   public AuthInfoApi getAuthInfo() {
-    return oAuthManager.getInfo();
+    return openIdInfoService.getAuthInfoApi();
   }
 }

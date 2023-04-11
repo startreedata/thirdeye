@@ -1,3 +1,10 @@
+### [2.16.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.16.0...thirdeye-ui-2.16.1) (2023-04-11)
+
+
+### Bug Fixes
+
+* [TE-1495](https://cortexdata.atlassian.net/browse/TE-1495) fix bug where alert name was not being passed to POST ([b16958550](https://github.com/startreedata/thirdeye/commit/b169585509e20a6dcf74359ff73a4a7827f67c69))
+
 ## [2.16.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.15.1...thirdeye-ui-2.16.0) (2023-04-11)
 
 

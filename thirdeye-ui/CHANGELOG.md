@@ -1,3 +1,19 @@
+## [2.16.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.15.1...thirdeye-ui-2.16.0) (2023-04-11)
+
+
+### Features
+
+* [TE-1449](https://cortexdata.atlassian.net/browse/TE-1449) add json and advanced editor to the welcome create alert flow ([833d4cba1](https://github.com/startreedata/thirdeye/commit/833d4cba15bbaf0d385f3176cf2ce727a484d145))
+* [TE-1449](https://cortexdata.atlassian.net/browse/TE-1449) add page switch to welcome create alert flow ([2aff713e1](https://github.com/startreedata/thirdeye/commit/2aff713e1dd5e7b50bc1147f509380eb37ecd5c1))
+* [TE-1456](https://cortexdata.atlassian.net/browse/TE-1456) support monitoringGranularity, seasonalityPeriod, and lookback ([ed192bed4](https://github.com/startreedata/thirdeye/commit/ed192bed4a9ad0b1f9cdef695de3e6330ba8b1e9))
+* [TE-1492](https://cortexdata.atlassian.net/browse/TE-1492) add link to recipe for ads monitoring sample alert ([1c25ca5dc](https://github.com/startreedata/thirdeye/commit/1c25ca5dc6f6b843f89ba59f3747abeecea5cd3d))
+
+
+### Bug Fixes
+
+* [TE-1439](https://cortexdata.atlassian.net/browse/TE-1439) make rcaAggregationFunction optional for JSON editor only ([fcf323d40](https://github.com/startreedata/thirdeye/commit/fcf323d40ca44ed01ddc0d9865ee1e899b695f76))
+* [TE-1451](https://cortexdata.atlassian.net/browse/TE-1451) boolean type field take show state of default value if no value set ([1f14df73b](https://github.com/startreedata/thirdeye/commit/1f14df73bd329aeef6d829b5f6e3f1b666e2c5b8))
+
 ### [2.15.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.15.0...thirdeye-ui-2.15.1) (2023-04-03)
 
 

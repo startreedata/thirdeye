@@ -117,7 +117,6 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                 </Grid>
                                 <Grid item xs={12}>
                                     <AnomalyCard
-                                        hideFeedback
                                         anomaly={editableAnomaly as Anomaly}
                                         timezone={timezone}
                                     />

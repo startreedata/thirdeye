@@ -19,6 +19,7 @@
         "add-entity": "Add {{entity}}",
         "add-metadata-entry": "Add metadata entry",
         "add-more-channels": "Add More Channels",
+        "add-previous-period-to-compare": "Add previous period to compare",
         "add-property-key": "Add property key",
         "add-property-value": "Add property value for {{key}}",
         "add-to-chart": "Add to Chart",

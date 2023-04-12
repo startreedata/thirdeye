@@ -15,12 +15,16 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_LIMIT_VALUE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_OFFSET_VALUE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OFFSET_WITHOUT_LIMIT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.util.ArrayList;
@@ -44,6 +48,7 @@ public class AnomalyPaginationTest {
 
   private static final Logger log = LoggerFactory.getLogger(AnomalyPaginationTest.class);
   private static final GenericType<List<AnomalyApi>> ANOMALY_LIST_TYPE = new GenericType<>() {};
+  private static final GenericType<StatusListApi> ERROR_LIST_TYPE = new GenericType<>() {};
   private static final int TOTAL_ANOMALIES = 100;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
@@ -121,25 +126,28 @@ public class AnomalyPaginationTest {
   @Test
   public void testNegativeLimitValue() {
     final Response response = request("api/anomalies?limit=-10").get();
-    final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
-    assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(results).isEmpty();
+    final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
+    assertThat(response.getStatus()).isEqualTo(400);
+    assertThat(results.getList()).isNotEmpty();
+    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_NEGATIVE_LIMIT_VALUE);
   }
 
   @Test
   public void testNegativeOffsetValue() {
     final Response response = request("api/anomalies?limit=5&offset=-10").get();
-    final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
-    assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(results).isEmpty();
+    final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
+    assertThat(response.getStatus()).isEqualTo(400);
+    assertThat(results.getList()).isNotEmpty();
+    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_NEGATIVE_OFFSET_VALUE);
   }
 
   @Test
   public void testOffsetWithoutLimit() {
     final Response response = request("api/anomalies?offset=10").get();
-    final List<AnomalyApi> results = response.readEntity(ANOMALY_LIST_TYPE);
-    assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(results).isEmpty();
+    final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
+    assertThat(response.getStatus()).isEqualTo(400);
+    assertThat(results.getList()).isNotEmpty();
+    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_OFFSET_WITHOUT_LIMIT);
   }
 
   @Test

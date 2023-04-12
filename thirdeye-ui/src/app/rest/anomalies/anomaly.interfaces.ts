@@ -13,7 +13,11 @@
  * the License.
  */
 import { ActionHook } from "../actions.interfaces";
-import { Anomaly, AnomalyStats } from "../dto/anomaly.interfaces";
+import {
+    Anomaly,
+    AnomalyFeedback,
+    AnomalyStats,
+} from "../dto/anomaly.interfaces";
 
 export interface GetAnomaly extends ActionHook {
     anomaly: Anomaly | null;
@@ -46,4 +50,12 @@ export interface GetAnomalyStats extends ActionHook {
     getAnomalyStats: (
         getAnomalyStatsParams?: GetAnomalyStatsProps
     ) => Promise<AnomalyStats | undefined>;
+}
+
+export interface UpdateAnomalyFeedback extends ActionHook {
+    anomalyFeedback: AnomalyFeedback | null;
+    updateAnomalyFeedback: (
+        anomalyId: number,
+        feedback: AnomalyFeedback
+    ) => Promise<AnomalyFeedback | undefined>;
 }

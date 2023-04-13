@@ -134,6 +134,7 @@
         "html-webpack-plugin": "5.3.2",
         "husky": "7.0.2",
         "identity-obj-proxy": "^3.0.0",
+        "iso8601-duration": "2.1.1",
         "jest": "^26.6.3",
         "jest-environment-jsdom": "^26.6.2",
         "license-check-and-add": "4.0.5",

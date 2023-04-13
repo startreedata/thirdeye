@@ -110,13 +110,13 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
     return (
         <TableBody>
             <TableRow>
-                <TableCell align="left" padding="checkbox">
+                <TableCell align="left">
                     <Checkbox
                         checked={isChecked}
                         onChange={handleAlertRowCheckedChange}
                     />
                 </TableCell>
-                <TableCell align="left" padding="checkbox">
+                <TableCell align="left">
                     {enumerationItems.length > 0 && (
                         <IconButton
                             color="primary"

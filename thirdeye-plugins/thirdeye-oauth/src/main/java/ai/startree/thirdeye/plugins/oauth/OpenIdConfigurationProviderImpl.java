@@ -12,12 +12,13 @@
  * the License.
  */
 
-package ai.startree.thirdeye.auth.oauth;
+package ai.startree.thirdeye.plugins.oauth;
 
 import static ai.startree.thirdeye.spi.Constants.OAUTH_ISSUER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
+import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -28,7 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Call;
@@ -38,16 +39,16 @@ import retrofit2.Retrofit.Builder;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @Singleton
-public class OpenIdInfoService {
+public class OpenIdConfigurationProviderImpl implements OpenIdConfigurationProvider {
 
   public static final String OIDC_CONFIG_SUFFIX = ".well-known/openid-configuration";
-  private static final Logger log = LoggerFactory.getLogger(OpenIdInfoService.class);
+  private static final Logger log = LoggerFactory.getLogger(OpenIdConfigurationProviderImpl.class);
 
   private final OAuthConfiguration oAuthConfig;
   private final LoadingCache<String, Map<String, Object>> openidConfigCache;
 
   @Inject
-  public OpenIdInfoService(@Nullable OAuthConfiguration oAuthConfig) {
+  public OpenIdConfigurationProviderImpl(@Nullable OAuthConfiguration oAuthConfig) {
     this.oAuthConfig = oAuthConfig;
     openidConfigCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -87,7 +88,8 @@ public class OpenIdInfoService {
     return Collections.emptyMap();
   }
 
-  public AuthInfoApi getAuthInfoApi() {
+  @Override
+  public AuthInfoApi getOpenIdConfiguration() {
     final AuthInfoApi authInfo = new AuthInfoApi();
     if (oAuthConfig == null || oAuthConfig.getServerUrl() == null) {
       return authInfo;

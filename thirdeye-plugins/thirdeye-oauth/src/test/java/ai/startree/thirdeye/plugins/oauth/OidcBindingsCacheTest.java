@@ -11,20 +11,24 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.auth.AuthTestUtils.getJWK;
-import static ai.startree.thirdeye.auth.AuthTestUtils.getToken;
-import static org.mockito.Mockito.any;
+package ai.startree.thirdeye.plugins.oauth;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.expectThrows;
 
-import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
-import ai.startree.thirdeye.auth.oauth.OidcContext;
-import ai.startree.thirdeye.auth.oauth.OidcJWTProcessor;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -35,11 +39,26 @@ public class OidcBindingsCacheTest {
 
   private OidcBindingsCache cache;
 
+  public static JWK getJWK(String kid) throws JOSEException {
+    return new RSAKeyGenerator(2048)
+        .keyID(kid)
+        .generate();
+  }
+
+  public static String getToken(JWK key, JWTClaimsSet claims) throws JOSEException {
+    JWSObject jwsObject = new JWSObject(
+        new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(key.getKeyID()).build(),
+        claims.toPayload());
+    jwsObject.sign(new RSASSASigner((RSAKey) key));
+    return jwsObject.serialize();
+  }
+
   @BeforeClass
   public void init() throws Exception {
     OidcJWTProcessor processor = mock(OidcJWTProcessor.class);
     when(processor.process(any(SignedJWT.class),
-        any(OidcContext.class))).thenReturn(new JWTClaimsSet.Builder().claim("email","test").build());
+        any(OidcContext.class))).thenReturn(new JWTClaimsSet.Builder().claim("email", "test")
+        .build());
     cache = new OidcBindingsCache()
         .setProcessor(processor)
         .setContext(mock(OidcContext.class));
@@ -48,7 +67,7 @@ public class OidcBindingsCacheTest {
   @Test
   public void cachedEntriesTest() throws Exception {
     ThirdEyePrincipal principal = cache.load(getToken(getJWK(
-        RandomStringUtils.randomAlphanumeric(16)),
+            RandomStringUtils.randomAlphanumeric(16)),
         new JWTClaimsSet.Builder().build()));
     assertNotNull(principal);
     assertEquals(principal.getName(), "test");

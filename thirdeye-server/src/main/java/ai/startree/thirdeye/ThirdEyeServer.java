@@ -41,6 +41,7 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -109,13 +110,13 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
             .getInstance(PluginLoaderConfiguration.class)
             .setPluginsPath(pluginsPath));
 
-    injector.getInstance(PluginLoader.class).loadPlugins();
+    loadPlugins();
 
     env.jersey().register(injector.getInstance(RootResource.class));
     env.jersey().register(new ThirdEyeJsonProcessingExceptionMapper());
 
     // Expose dropwizard metrics in prometheus compatible format
-    if(configuration.getPrometheusConfiguration().isEnabled()) {
+    if (configuration.getPrometheusConfiguration().isEnabled()) {
       CollectorRegistry collectorRegistry = new CollectorRegistry();
       collectorRegistry.register(new DropwizardExports(env.metrics()));
       env.admin()
@@ -126,7 +127,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
 
-    registerAuthFilter(env, injector);
+    registerAuthFilter(injector, env.jersey());
 
     // Enable CORS. Opens up the API server to respond to requests from all external domains.
     addCorsFilter(env);
@@ -134,6 +135,10 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     // Load mock events if enabled.
     injector.getInstance(MockEventsLoader.class).run();
     env.lifecycle().manage(lifecycleManager(configuration));
+  }
+
+  protected void loadPlugins() {
+    injector.getInstance(PluginLoader.class).loadPlugins();
   }
 
   private Managed lifecycleManager(ThirdEyeServerConfiguration config) {
@@ -199,14 +204,14 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
   }
 
-  private void registerAuthFilter(final Environment environment, final Injector injector) {
+  private void registerAuthFilter(final Injector injector, final JerseyEnvironment jersey) {
     try {
-      if(!injector.getInstance(AuthConfiguration.class).isEnabled()){
-        environment.jersey().register(injector.getInstance(AuthDisabledRequestFilter.class));
+      if (!injector.getInstance(AuthConfiguration.class).isEnabled()) {
+        jersey.register(injector.getInstance(AuthDisabledRequestFilter.class));
       }
-      environment.jersey().register(new AuthDynamicFeature(injector.getInstance(AuthFilter.class)));
-      environment.jersey().register(RolesAllowedDynamicFeature.class);
-      environment.jersey().register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
+      jersey.register(new AuthDynamicFeature(injector.getInstance(AuthFilter.class)));
+      jersey.register(RolesAllowedDynamicFeature.class);
+      jersey.register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
     } catch (Exception e) {
       throw new IllegalStateException("Failed to configure Authentication filter", e);
     }

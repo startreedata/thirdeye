@@ -47,7 +47,7 @@ public class AuthInfoResource {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    final AuthInfoApi info = authService.getAuthInfo();
+    final AuthInfoApi info = authService.getOpenIdConfiguration();
     if (authConfig.isEnabled() && info == null) {
       throw serverError(ThirdEyeStatus.ERR_AUTH_SERVER_NOT_RESPONDING,
           authConfig.getOAuthConfig().getServerUrl());

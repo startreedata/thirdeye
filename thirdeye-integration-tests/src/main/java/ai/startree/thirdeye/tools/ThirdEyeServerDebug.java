@@ -24,10 +24,10 @@ import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlug
 import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
 import ai.startree.thirdeye.plugins.enumerator.ThirdEyeEnumeratorsPlugin;
 import ai.startree.thirdeye.plugins.notification.email.EmailNotificationPlugin;
+import ai.startree.thirdeye.plugins.oauth.ThirdEyeOAuthPlugin;
 import ai.startree.thirdeye.plugins.postprocessor.PostProcessorsPlugin;
 import ai.startree.thirdeye.plugins.rca.contributors.simple.SimpleContributorsFinderPlugin;
 import ai.startree.thirdeye.spi.Plugin;
-import com.google.inject.Injector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
@@ -41,24 +41,29 @@ public class ThirdEyeServerDebug {
   public static void main(String[] args) throws Exception {
     logJvmSettings();
 
-    final ThirdEyeServer thirdEyeServer = new ThirdEyeServer();
+    final ThirdEyeServer thirdEyeServer = new ThirdEyeServer() {
+      /**
+       * override loadPlugins() to install plugins in the same classloader for debugging purposes.
+       */
+      @Override
+      protected void loadPlugins() {
+        final PluginLoader pluginLoader = getInjector().getInstance(PluginLoader.class);
+        Stream.of(
+                new ThirdEyeOAuthPlugin(),
+                new OpenCoreBoostrapResourcesProviderPlugin(),
+                new SimpleContributorsFinderPlugin(),
+                new DefaultDataSourcesPlugin(),
+                new DetectionComponentsPlugin(),
+                new DetectorsPlugin(),
+                new EmailNotificationPlugin(),
+                new PinotDataSourcePlugin(),
+                new ThirdEyeEnumeratorsPlugin(),
+                new PostProcessorsPlugin()
+            )
+            .forEach(plugin -> installPlugin(pluginLoader, plugin));
+      }
+    };
     thirdEyeServer.run(args);
-
-    final Injector injector = thirdEyeServer.getInjector();
-
-    final PluginLoader pluginLoader = injector.getInstance(PluginLoader.class);
-    Stream.of(
-            new OpenCoreBoostrapResourcesProviderPlugin(),
-            new SimpleContributorsFinderPlugin(),
-            new DefaultDataSourcesPlugin(),
-            new DetectionComponentsPlugin(),
-            new DetectorsPlugin(),
-            new EmailNotificationPlugin(),
-            new PinotDataSourcePlugin(),
-            new ThirdEyeEnumeratorsPlugin(),
-            new PostProcessorsPlugin()
-        )
-        .forEach(plugin -> installPlugin(pluginLoader, plugin));
   }
 
   /**

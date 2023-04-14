@@ -12,12 +12,10 @@
  * the License.
  */
 
-package ai.startree.thirdeye.auth.oauth;
+package ai.startree.thirdeye.plugins.oauth;
 
 import static java.util.stream.Collectors.toMap;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -49,7 +47,7 @@ public class CachedJWSKeySelector implements JWSKeySelector<OidcContext> {
   private final LoadingCache<String, Map<String, Key>> keyCache;
 
   @Inject
-  public CachedJWSKeySelector(final OidcContext oidcContext, MetricRegistry metricRegistry) {
+  public CachedJWSKeySelector(final OidcContext oidcContext) {
     this.keysUrl = oidcContext.getKeysUrl();
 
     this.keyCache = CacheBuilder.newBuilder()
@@ -57,8 +55,8 @@ public class CachedJWSKeySelector implements JWSKeySelector<OidcContext> {
         .expireAfterWrite(oidcContext.getCacheTtl(), TimeUnit.MILLISECONDS)
         .build(new KeyCacheLoader(authServerRunning));
 
-    metricRegistry.register("authServerRunning",
-        (Gauge<Integer>) () -> authServerRunning.get() ? 1 : 0);
+//    metricRegistry.register("authServerRunning",
+//        (Gauge<Integer>) () -> authServerRunning.get() ? 1 : 0);
   }
 
   // NOTE: is there a better way with little complexity?

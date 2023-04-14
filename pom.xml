@@ -502,6 +502,11 @@
       </dependency>
       <dependency>
         <groupId>ai.startree.thirdeye.plugins</groupId>
+        <artifactId>thirdeye-oauth</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-notification-email</artifactId>
         <version>${project.version}</version>
       </dependency>

@@ -235,6 +235,21 @@
                 <version>${aspectj.version}</version>
               </configuration>
             </execution>
+            <!-- failing build on dependency analysis warnings -->
+            <execution>
+              <id>analyze</id>
+              <goals>
+                <goal>analyze-only</goal>
+              </goals>
+              <configuration>
+                <!-- workaround for https://issues.apache.org/jira/browse/MDEP-791 -->
+                <ignoredNonTestScopedDependencies>
+                  <ignoredNonTestScopedDependency>*</ignoredNonTestScopedDependency>
+                </ignoredNonTestScopedDependencies>
+                <!--TODO(TE-1501): turn on failure once all existing dependency warnings are resolved. -->
+                <failOnWarning>false</failOnWarning>
+              </configuration>
+            </execution>
           </executions>
         </plugin>
         <plugin>

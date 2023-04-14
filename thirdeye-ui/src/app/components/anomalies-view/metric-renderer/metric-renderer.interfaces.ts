@@ -14,10 +14,6 @@
  */
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
-export interface AnomalyCardProps {
-    anomaly: Anomaly | null;
-    searchWords?: string[];
-    className?: string;
-    isLoading?: boolean;
-    timezone?: string;
+export interface MetricRendererProps {
+    anomaly: Anomaly;
 }

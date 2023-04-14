@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,12 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
-export interface AnomalyCardProps {
-    anomaly: Anomaly | null;
-    searchWords?: string[];
-    className?: string;
-    isLoading?: boolean;
-    timezone?: string;
+import { Dispatch, SetStateAction } from "react";
+import { Alert } from "../../../../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../../../../rest/dto/enumeration-item.interfaces";
+import { Association } from "../../../subscription-group-wizard.interfaces";
+
+export interface EnumerationItemRowProps {
+    alert: Alert;
+    enumerationItem: EnumerationItem;
+    associations: Association[];
+    onAssociationChange: Dispatch<SetStateAction<Association[]>>;
 }

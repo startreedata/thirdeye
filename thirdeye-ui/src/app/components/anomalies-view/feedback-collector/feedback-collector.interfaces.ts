@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { Anomaly, AnomalyFeedback } from "../../../rest/dto/anomaly.interfaces";
 
-export interface AnomalyCardProps {
-    anomaly: Anomaly | null;
-    searchWords?: string[];
-    className?: string;
-    isLoading?: boolean;
-    timezone?: string;
+export interface FeedbackCollectorProps {
+    anomaly: Anomaly;
+    onFeedbackUpdate: (feedback: AnomalyFeedback) => void;
 }

@@ -23,8 +23,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
 import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
+import ai.startree.thirdeye.auth.oauth.CachedJWSKeySelector;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.auth.oauth.OidcContext;
+import ai.startree.thirdeye.auth.oauth.OidcJWTProcessor;
 import ai.startree.thirdeye.auth.oauth.OpenIdInfoService;
 import ai.startree.thirdeye.auth.oauth.ThirdEyeOAuthAuthenticator;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
@@ -32,6 +34,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.nimbusds.jose.proc.JWSKeySelector;
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import com.nimbusds.jwt.proc.JWTClaimsSetVerifier;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
@@ -50,7 +57,19 @@ public class ThirdEyeAuthModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // no-op. All bindings are done in the @Provides methods
+    bind(new TypeLiteral<DefaultJWTProcessor<OidcContext>>() {})
+        .to(OidcJWTProcessor.class);
+    bind(new TypeLiteral<JWSKeySelector<OidcContext>>() {})
+        .to(CachedJWSKeySelector.class);
+  }
+
+  @Singleton
+  @Provides
+  public JWTClaimsSetVerifier<OidcContext> createJWTClaimsSetVerifier(
+      final OidcContext context) {
+    return new DefaultJWTClaimsVerifier<>(
+        context.getExactMatchClaimsSet(),
+        context.getRequiredClaims());
   }
 
   @Provides

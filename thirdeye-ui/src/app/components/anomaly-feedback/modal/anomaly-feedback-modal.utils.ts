@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
-
-export interface AnomalyCardProps {
-    anomaly: Anomaly | null;
-    searchWords?: string[];
-    className?: string;
-    isLoading?: boolean;
-    timezone?: string;
-}
+export const REASONS = [
+    "Holiday effect",
+    "User error",
+    "Software failure",
+    "Environmental factors (like Storm, EQ ... )",
+    "Fraudulent activities",
+    "Platform upgrades",
+    "External events (Ex: Campaigns, Price changes etc)",
+    "Others",
+];

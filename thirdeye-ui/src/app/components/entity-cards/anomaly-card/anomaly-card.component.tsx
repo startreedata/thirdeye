@@ -12,17 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Card, CardContent, Grid, Typography } from "@material-ui/core";
+import { Card, CardContent, Grid } from "@material-ui/core";
 import classnames from "classnames";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
-import { DEFAULT_FEEDBACK } from "../../../utils/alerts/alerts.util";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { useGetAlert } from "../../../rest/alerts/alerts.actions";
 import { getUiAnomaly } from "../../../utils/anomalies/anomalies.util";
 import { timezoneStringShort } from "../../../utils/time/time.util";
-import { AnomalyFeedback } from "../../anomaly-feedback/anomaly-feedback.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card/anomaly-summary-card-deatil.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
@@ -33,14 +34,18 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
     className,
     anomaly,
     timezone,
-    hideFeedback,
 }) => {
     const anomalyCardClasses = useAnomalyCardStyles();
     const { t } = useTranslation();
+    const { alert, getAlert, status } = useGetAlert();
 
     const uiAnomaly = anomaly && getUiAnomaly(anomaly);
 
-    const resetMargin = { paddingTop: 2, paddingBottom: 2 };
+    useEffect(() => {
+        if (anomaly) {
+            getAlert(anomaly.alert.id);
+        }
+    }, [anomaly]);
 
     return (
         <LoadingErrorStateSwitch
@@ -60,102 +65,90 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             alignItems="center"
                             justifyContent="space-between"
                         >
+                            {/* Start */}
                             <Grid item>
-                                <Grid container alignItems="center">
-                                    <Grid item style={resetMargin}>
-                                        <Typography
-                                            color="textSecondary"
-                                            component="span"
-                                            variant="body2"
-                                        >
-                                            {t("label.start")}:
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item style={resetMargin}>
-                                        <Typography
-                                            component="span"
-                                            variant="subtitle1"
-                                        >
-                                            {`${formatDateAndTimeV1(
-                                                uiAnomaly.startTimeVal,
-                                                timezone
-                                            )} (${timezoneStringShort(
-                                                timezone
-                                            )})`}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Grid container alignItems="center">
-                                    <Grid item style={resetMargin}>
-                                        <Typography
-                                            color="textSecondary"
-                                            component="span"
-                                            variant="body2"
-                                        >
-                                            {t("label.end")}:
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item style={resetMargin}>
-                                        <Typography
-                                            component="span"
-                                            variant="subtitle1"
-                                        >
-                                            {`${formatDateAndTimeV1(
-                                                uiAnomaly.endTimeVal,
-                                                timezone
-                                            )} (${timezoneStringShort(
-                                                timezone
-                                            )})`}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.anomaly-start")}
+                                    value={`${formatDateAndTimeV1(
+                                        uiAnomaly.startTimeVal,
+                                        timezone
+                                    )} (${timezoneStringShort(timezone)})`}
+                                />
+                            </Grid>
+
+                            {/* End */}
+                            <Grid item>
+                                <AnomalySummaryCardDetail
+                                    label={t("label.anomaly-end")}
+                                    value={`${formatDateAndTimeV1(
+                                        uiAnomaly.endTimeVal,
+                                        timezone
+                                    )} (${timezoneStringShort(timezone)})`}
+                                />
                             </Grid>
 
                             {/* Duration */}
                             <Grid item>
                                 <AnomalySummaryCardDetail
-                                    label={t("label.duration")}
+                                    label="Anomaly duration"
                                     value={uiAnomaly.duration}
                                 />
                             </Grid>
 
-                            {/* Current/Predicted */}
+                            {/* Seasonality */}
                             <Grid item>
-                                <AnomalySummaryCardDetail
-                                    label={`${t("label.current")}${t(
-                                        "label.pair-separator"
-                                    )}${t("label.predicted")}`}
-                                    value={`${uiAnomaly.current}${t(
-                                        "label.pair-separator"
-                                    )}${uiAnomaly.predicted}`}
-                                />
+                                <LoadingErrorStateSwitch
+                                    isError={status === ActionStatus.Error}
+                                    isLoading={
+                                        status === ActionStatus.Working ||
+                                        status === ActionStatus.Initial
+                                    }
+                                    loadingState={
+                                        <AnomalySummaryCardDetail
+                                            label="Seasonality"
+                                            value={<SkeletonV1 />}
+                                        />
+                                    }
+                                >
+                                    <EmptyStateSwitch
+                                        emptyState={
+                                            <>{/** Purposely empty **/}</>
+                                        }
+                                        isEmpty={
+                                            alert?.templateProperties
+                                                .seasonalityPeriod === undefined
+                                        }
+                                    >
+                                        <AnomalySummaryCardDetail
+                                            label="Seasonality"
+                                            value={
+                                                alert?.templateProperties
+                                                    .seasonalityPeriod
+                                            }
+                                        />
+                                    </EmptyStateSwitch>
+                                </LoadingErrorStateSwitch>
                             </Grid>
 
-                            {/* Deviation */}
+                            {/* Deviation (Current/Predicted) */}
                             <Grid item>
                                 <AnomalySummaryCardDetail
-                                    label={t("label.deviation")}
-                                    value={uiAnomaly.deviation}
+                                    label={`${t("label.deviation")} (${t(
+                                        "label.current"
+                                    )}${t("label.pair-separator")}${t(
+                                        "label.predicted"
+                                    )})`}
+                                    value={`${uiAnomaly.deviation} (${
+                                        uiAnomaly.current
+                                    }${t("label.pair-separator")}${
+                                        uiAnomaly.predicted
+                                    })`}
                                     valueClassName={classnames({
                                         [anomalyCardClasses.deviation]:
                                             uiAnomaly.negativeDeviation,
                                     })}
                                 />
                             </Grid>
-
-                            {!hideFeedback && anomaly && (
-                                <Grid item>
-                                    <AnomalyFeedback
-                                        hideComment
-                                        anomalyFeedback={
-                                            anomaly.feedback || {
-                                                ...DEFAULT_FEEDBACK,
-                                            }
-                                        }
-                                        anomalyId={anomaly.id}
-                                    />
-                                </Grid>
-                            )}
                         </Grid>
                     )}
 

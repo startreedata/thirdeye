@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
-export interface AnomalyCardProps {
-    anomaly: Anomaly | null;
-    searchWords?: string[];
-    className?: string;
-    isLoading?: boolean;
-    timezone?: string;
+import { ReactNode } from "react";
+
+export interface SubscriptionGroupsCreateEditRouterProps {
+    containerPage: ReactNode;
 }

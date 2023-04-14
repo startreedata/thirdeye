@@ -13,16 +13,9 @@
  * the License.
  */
 
-import { Alert } from "../../../../rest/dto/alert.interfaces";
-import { Association } from "../../subscription-group-wizard.interfaces";
+import { Anomaly, AnomalyFeedback } from "../../../rest/dto/anomaly.interfaces";
 
-export interface DimensionRow {
-    id: string;
-    name: string;
-}
-
-export interface AddDimensionDialogProps {
-    alerts: Alert[];
-    associations: Association[];
-    updateAssociations: (p: Association[]) => void;
+export interface FeedbackCardProps {
+    anomaly: Anomaly;
+    onFeedbackUpdate: (feedback: AnomalyFeedback) => void;
 }

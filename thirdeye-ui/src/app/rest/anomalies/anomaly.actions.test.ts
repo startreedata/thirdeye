@@ -16,7 +16,12 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import axios from "axios";
 import { ActionStatus } from "../actions.interfaces";
 import type { AnomalyStats } from "../dto/anomaly.interfaces";
-import { useGetAnomaly, useGetAnomalyStats } from "./anomaly.actions";
+import { AnomalyFeedbackType } from "../dto/anomaly.interfaces";
+import {
+    useGetAnomaly,
+    useGetAnomalyStats,
+    useUpdateAnomalyFeedback,
+} from "./anomaly.actions";
 
 const mockAnomaly = {
     id: 1,
@@ -112,6 +117,51 @@ describe("Anomaly Actions", () => {
                         mockAnomalyStats
                     );
                     expect(result.current.getAnomalyStats).toBeDefined();
+                    expect(result.current.status).toEqual(ActionStatus.Done);
+                    expect(result.current.errorMessages).toEqual([]);
+                });
+            });
+        });
+    });
+
+    describe("useUpdateAnomalyFeedback", () => {
+        it("should return initial default values", () => {
+            const { result } = renderHook(() => useUpdateAnomalyFeedback());
+
+            expect(result.current.anomalyFeedback).toBeNull();
+            expect(result.current.updateAnomalyFeedback).toBeDefined();
+            expect(result.current.status).toEqual(ActionStatus.Initial);
+            expect(result.current.errorMessages).toEqual([]);
+        });
+
+        it("should update data appropriately when making a successful REST call", async () => {
+            mockedAxios.post.mockResolvedValueOnce({ data: mockAnomalyStats });
+            const { result, waitFor } = renderHook(() =>
+                useUpdateAnomalyFeedback()
+            );
+            await act(async () => {
+                const promise = result.current.updateAnomalyFeedback(1, {
+                    type: "ANOMALY" as AnomalyFeedbackType,
+                    comment: "hello world",
+                });
+
+                // Wait for state update
+                await waitFor(
+                    () => result.current.status === ActionStatus.Initial
+                );
+
+                // When REST call is in progress
+                expect(result.current.anomalyFeedback).toBeNull();
+                expect(result.current.updateAnomalyFeedback).toBeDefined();
+                expect(result.current.status).toEqual(ActionStatus.Working);
+                expect(result.current.errorMessages).toEqual([]);
+
+                return promise.then(() => {
+                    // When REST call is completed
+                    expect(result.current.anomalyFeedback).toEqual(
+                        mockAnomalyStats
+                    );
+                    expect(result.current.updateAnomalyFeedback).toBeDefined();
                     expect(result.current.status).toEqual(ActionStatus.Done);
                     expect(result.current.errorMessages).toEqual([]);
                 });

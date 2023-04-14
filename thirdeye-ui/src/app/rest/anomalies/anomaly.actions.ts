@@ -13,11 +13,16 @@
  * the License.
  */
 import { useHTTPAction } from "../create-rest-action";
-import { Anomaly, AnomalyStats } from "../dto/anomaly.interfaces";
+import {
+    Anomaly,
+    AnomalyFeedback,
+    AnomalyStats,
+} from "../dto/anomaly.interfaces";
 import {
     getAnomalies as getAnomaliesRest,
     getAnomaly as getAnomalyRest,
     getAnomalyStats as getAnomalyStatsRest,
+    updateAnomalyFeedback as updateAnomalyFeedbackPOST,
 } from "./anomalies.rest";
 import {
     GetAnomalies,
@@ -25,6 +30,7 @@ import {
     GetAnomaly,
     GetAnomalyStats,
     GetAnomalyStatsProps,
+    UpdateAnomalyFeedback,
 } from "./anomaly.interfaces";
 
 export const useGetAnomaly = (): GetAnomaly => {
@@ -67,4 +73,23 @@ export const useGetAnomalyStats = (): GetAnomalyStats => {
     };
 
     return { anomalyStats: data, getAnomalyStats, status, errorMessages };
+};
+
+export const useUpdateAnomalyFeedback = (): UpdateAnomalyFeedback => {
+    const { data, makeRequest, status, errorMessages } =
+        useHTTPAction<AnomalyFeedback>(updateAnomalyFeedbackPOST);
+
+    const updateAnomalyFeedback = (
+        anomalyId: number,
+        feedback: AnomalyFeedback
+    ): Promise<AnomalyFeedback | undefined> => {
+        return makeRequest(anomalyId, feedback);
+    };
+
+    return {
+        anomalyFeedback: data,
+        updateAnomalyFeedback,
+        status,
+        errorMessages,
+    };
 };

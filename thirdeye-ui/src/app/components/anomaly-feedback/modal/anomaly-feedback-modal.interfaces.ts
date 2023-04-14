@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ReactNode } from "react";
+import { AnomalyFeedback } from "../../../rest/dto/anomaly.interfaces";
 
-import { Alert } from "../../../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
-import { Association } from "../../subscription-group-wizard.interfaces";
-
-export interface AlertDimensionTableProps {
-    selectedAlert: Alert;
-    associations: Association[];
-    onChangeAssociations: (p: string[]) => void;
-    enumerationItemsForAlert: EnumerationItem[];
+export interface AnomalyFeedbackModalProps {
+    anomalyId: number;
+    anomalyFeedback?: AnomalyFeedback;
+    trigger: (callback: () => void) => ReactNode;
+    showNo?: boolean;
+    onFeedbackUpdate: (feedback: AnomalyFeedback) => void;
 }

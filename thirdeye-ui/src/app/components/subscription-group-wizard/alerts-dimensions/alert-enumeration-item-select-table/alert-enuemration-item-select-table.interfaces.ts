@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,19 +14,16 @@
  */
 
 import { Dispatch, SetStateAction } from "react";
-import { Alert } from "../../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
-import { Association } from "../subscription-group-wizard.interfaces";
+import { Alert } from "../../../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
+import { Association } from "../../subscription-group-wizard.interfaces";
 
-export interface AlertsDimensionsProps {
+export interface AlertEnumerationItemSelectTableProps {
     alerts: Alert[];
     enumerationItems: EnumerationItem[];
     associations: Association[];
-    setAssociations: Dispatch<SetStateAction<Association[]>>;
-}
-
-export enum FilterChoices {
-    ALL = "ALL",
-    BASIC = "BASIC",
-    DIM = "DIM",
+    onAssociationChange: Dispatch<SetStateAction<Association[]>>;
+    showOnlyDimensionExploration?: boolean;
+    showOnlyBasic?: boolean;
+    filterTerm?: string;
 }

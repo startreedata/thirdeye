@@ -19,6 +19,7 @@ import {
     AppRouteRelative,
     getSubscriptionGroupsAllPath,
 } from "../../utils/routes/routes.util";
+import { SubscriptionGroupsCreateEditRouter } from "./subscription-groups-create-edit.router";
 
 const SubscriptionGroupsAllPage = lazy(() =>
     import(
@@ -30,18 +31,6 @@ const SubscriptionGroupsViewPage = lazy(() =>
     import(
         /* webpackChunkName: "subscription-groups-view-page" */ "../../pages/subscription-groups-view-page/subscription-groups-view-page.component"
     ).then((module) => ({ default: module.SubscriptionGroupsViewPage }))
-);
-
-const SubscriptionGroupsWizardDetailsPage = lazy(() =>
-    import(
-        /* webpackChunkName: "setup-details-page" */ "../../pages/subscription-groups-wizard-page/setup-details/setup-details-page.component"
-    ).then((module) => ({ default: module.SetupDetailsPage }))
-);
-
-const SubscriptionGroupsWizardAlertDimensionsPage = lazy(() =>
-    import(
-        /* webpackChunkName: "setup-alert-dimensions-page" */ "../../pages/subscription-groups-wizard-page/setup-alert-dimensions/setup-alert-dimensions-page.component"
-    ).then((module) => ({ default: module.SetupAlertDimensionsPage }))
 );
 
 const SubscriptionGroupsCreatePage = lazy(() =>
@@ -104,67 +93,23 @@ export const SubscriptionGroupsRouter: FunctionComponent = () => {
 
                 {/* Subscription groups create path */}
                 <Route
-                    element={<SubscriptionGroupsCreatePage />}
-                    path={`${AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}`}
-                >
-                    <Route
-                        index
-                        element={
-                            <Navigate
-                                replace
-                                to={
-                                    AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
-                                }
-                            />
-                        }
-                    />
-                    <Route
-                        element={<SubscriptionGroupsWizardDetailsPage />}
-                        path={
-                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
-                        }
-                    />
-                    <Route
-                        element={
-                            <SubscriptionGroupsWizardAlertDimensionsPage />
-                        }
-                        path={
-                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS
-                        }
-                    />
-                </Route>
+                    element={
+                        <SubscriptionGroupsCreateEditRouter
+                            containerPage={<SubscriptionGroupsCreatePage />}
+                        />
+                    }
+                    path={`${AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}/*`}
+                />
 
                 {/* Subscription groups update path */}
                 <Route
-                    element={<SubscriptionGroupsUpdatePage />}
-                    path={AppRouteRelative.SUBSCRIPTION_GROUPS_UPDATE}
-                >
-                    <Route
-                        index
-                        element={
-                            <Navigate
-                                replace
-                                to={
-                                    AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
-                                }
-                            />
-                        }
-                    />
-                    <Route
-                        element={<SubscriptionGroupsWizardDetailsPage />}
-                        path={
-                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
-                        }
-                    />
-                    <Route
-                        element={
-                            <SubscriptionGroupsWizardAlertDimensionsPage />
-                        }
-                        path={
-                            AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS
-                        }
-                    />
-                </Route>
+                    element={
+                        <SubscriptionGroupsCreateEditRouter
+                            containerPage={<SubscriptionGroupsUpdatePage />}
+                        />
+                    }
+                    path={`${AppRouteRelative.SUBSCRIPTION_GROUPS_UPDATE}/*`}
+                />
 
                 {/* No match found, render page not found */}
                 <Route element={<PageNotFoundPage />} path="*" />

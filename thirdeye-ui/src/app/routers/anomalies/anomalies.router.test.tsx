@@ -14,7 +14,7 @@
  */
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Outlet } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
 import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { AnomaliesRouter } from "./anomalies.router";
@@ -50,9 +50,80 @@ jest.mock(
 );
 
 jest.mock(
-    "../../pages/anomalies-view-page/anomalies-view-page.component",
+    "../../pages/anomalies-view-page/anomalies-view-container-page.component",
     () => ({
-        AnomaliesViewPage: jest.fn().mockReturnValue("testAnomaliesViewPage"),
+        AnomaliesViewContainerPage: jest.fn().mockReturnValue(
+            <div>
+                testAnomaliesViewContainerPage
+                <div>
+                    <Outlet />
+                </div>
+            </div>
+        ),
+    })
+);
+
+jest.mock(
+    "../../pages/anomalies-view-page/anomalies-view-container-page.component",
+    () => ({
+        AnomaliesViewContainerPage: jest.fn().mockReturnValue(
+            <div>
+                testAnomaliesViewContainerPage
+                <div>
+                    <Outlet />
+                </div>
+            </div>
+        ),
+    })
+);
+
+jest.mock(
+    "../../pages/anomalies-view-page/anomalies-view-validate-page.component",
+    () => ({
+        AnomaliesViewValidatePage: jest.fn().mockReturnValue(
+            <div>
+                testAnomaliesViewValidatePage
+                <div>
+                    <Outlet />
+                </div>
+            </div>
+        ),
+    })
+);
+
+jest.mock(
+    "../../pages/anomalies-view-page/anomalies-view-information-page.component",
+    () => ({
+        AnomaliesViewInformationPage: jest.fn().mockReturnValue(
+            <div>
+                testAnomaliesViewInformationPage
+                <div>
+                    <Outlet />
+                </div>
+            </div>
+        ),
+    })
+);
+
+jest.mock(
+    "../../pages/anomalies-view-page/anomalies-view-information-page.component",
+    () => ({
+        AnomaliesViewInformationPage: jest.fn().mockReturnValue(
+            <div>
+                testAnomaliesViewInformationPage
+                <div>
+                    <Outlet />
+                </div>
+            </div>
+        ),
+    })
+);
+jest.mock(
+    "../../pages/anomalies-view-page/anomalies-view-index-page.component",
+    () => ({
+        AnomaliesViewIndexPage: jest
+            .fn()
+            .mockReturnValue("AnomaliesViewIndexPage"),
     })
 );
 
@@ -138,7 +209,10 @@ describe("Anomalies Router", () => {
         );
 
         await expect(
-            screen.findByText("testAnomaliesViewPage")
+            screen.findByText("testAnomaliesViewContainerPage")
+        ).resolves.toBeInTheDocument();
+        await expect(
+            screen.findByText("testAnomaliesViewInformationPage")
         ).resolves.toBeInTheDocument();
     });
 

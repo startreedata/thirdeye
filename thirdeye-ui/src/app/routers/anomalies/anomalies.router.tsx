@@ -18,6 +18,7 @@ import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AnomaliesListAllPage } from "../../pages/anomalies-list-page/anomalies-list-page.component";
 import { MetricsReportAllPage } from "../../pages/anomalies-metrics-report-page/anomalies-metrics-report-page.component";
+import { AnomaliesViewValidatePage } from "../../pages/anomalies-view-page/anomalies-view-validate-page.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
@@ -39,15 +40,33 @@ const AnomaliesCreatePage = lazy(() =>
     ).then((module) => ({ default: module.AnomaliesCreatePage }))
 );
 
-const AnomaliesViewPage = lazy(() =>
+const AnomaliesViewV1Page = lazy(() =>
     import(
-        /* webpackChunkName: "anomalies-view-page" */ "../../pages/anomalies-view-page/anomalies-view-page.component"
-    ).then((module) => ({ default: module.AnomaliesViewPage }))
+        /* webpackChunkName: "anomalies-view-v1-page" */ "../../pages/anomalies-view-page/anomalies-view-v1-page.component"
+    ).then((module) => ({ default: module.AnomaliesViewV1Page }))
+);
+
+const AnomaliesViewIndexV1Page = lazy(() =>
+    import(
+        /* webpackChunkName: "anomalies-index-v1-page" */ "../../pages/anomalies-view-index-page/anomalies-view-index-v1-page.component"
+    ).then((module) => ({ default: module.AnomaliesViewIndexV1Page }))
+);
+
+const AnomaliesViewInformationPage = lazy(() =>
+    import(
+        /* webpackChunkName: "anomalies-view-page" */ "../../pages/anomalies-view-page/anomalies-view-information-page.component"
+    ).then((module) => ({ default: module.AnomaliesViewInformationPage }))
+);
+
+const AnomaliesViewContainerPage = lazy(() =>
+    import(
+        /* webpackChunkName: "anomalies-view-page.container" */ "../../pages/anomalies-view-page/anomalies-view-container-page.component"
+    ).then((module) => ({ default: module.AnomaliesViewContainerPage }))
 );
 
 const AnomaliesViewIndexPage = lazy(() =>
     import(
-        /* webpackChunkName: "anomalies-view-page" */ "../../pages/anomalies-view-index-page/anomalies-view-index-page.component"
+        /* webpackChunkName: "anomalies-index-page" */ "../../pages/anomalies-view-index-page/anomalies-view-index-page.component"
     ).then((module) => ({ default: module.AnomaliesViewIndexPage }))
 );
 
@@ -157,9 +176,9 @@ export const AnomaliesRouter: FunctionComponent = () => {
                     </Route>
                 </Route>
 
-                <Route path={`${AppRouteRelative.ALERTS_ALERT}/*`}>
+                <Route path={`${AppRouteRelative.ANOMALIES_ANOMALY}/*`}>
                     {/* Anomalies view index path to default the time range params */}
-                    <Route index element={<AnomaliesViewIndexPage />} />
+                    <Route index element={<AnomaliesViewIndexV1Page />} />
 
                     {/* Anomalies view path */}
                     <Route
@@ -172,11 +191,59 @@ export const AnomaliesRouter: FunctionComponent = () => {
                                 ]}
                                 to=".."
                             >
-                                <AnomaliesViewPage />
+                                <AnomaliesViewV1Page />
                             </RedirectValidation>
                         }
                         path={AppRouteRelative.ANOMALIES_ANOMALY_VIEW}
                     />
+
+                    {/* No match found, render page not found */}
+                    <Route element={<PageNotFoundPage />} path="*" />
+                </Route>
+
+                <Route
+                    element={<AnomaliesViewContainerPage />}
+                    path={`${AppRouteRelative.ANOMALIES_ANOMALY_V2}/*`}
+                >
+                    <Route
+                        index
+                        element={
+                            <Navigate
+                                replace
+                                to={`${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}`}
+                            />
+                        }
+                    />
+
+                    {/* Anomalies view path */}
+                    <Route
+                        element={<AnomaliesViewInformationPage />}
+                        path={`${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}/*`}
+                    >
+                        {/* Anomalies view index path to default the time range params */}
+                        <Route index element={<AnomaliesViewIndexPage />} />
+
+                        <Route
+                            element={
+                                <RedirectValidation
+                                    queryParams={[
+                                        TimeRangeQueryStringKey.TIME_RANGE,
+                                        TimeRangeQueryStringKey.START_TIME,
+                                        TimeRangeQueryStringKey.END_TIME,
+                                    ]}
+                                    to=".."
+                                >
+                                    <AnomaliesViewValidatePage />
+                                </RedirectValidation>
+                            }
+                            path={
+                                AppRouteRelative.ANOMALIES_ANOMALY_VIEW_VALIDATE
+                            }
+                        />
+
+                        {/* No match found, render page not found */}
+                        <Route element={<PageNotFoundPage />} path="*" />
+                    </Route>
 
                     {/* No match found, render page not found */}
                     <Route element={<PageNotFoundPage />} path="*" />

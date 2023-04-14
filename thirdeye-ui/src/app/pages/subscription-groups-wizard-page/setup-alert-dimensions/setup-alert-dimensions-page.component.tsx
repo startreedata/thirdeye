@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Grid } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -76,12 +77,14 @@ export const SetupAlertDimensionsPage: FunctionComponent = () => {
     return (
         <>
             <PageContentsGridV1>
-                <AlertsDimensions
-                    alerts={alerts}
-                    associations={associations}
-                    enumerationItems={enumerationItems}
-                    setAssociations={setAssociations}
-                />
+                <Grid item xs={12}>
+                    <AlertsDimensions
+                        alerts={alerts}
+                        associations={associations}
+                        enumerationItems={enumerationItems}
+                        setAssociations={setAssociations}
+                    />
+                </Grid>
             </PageContentsGridV1>
             <WizardBottomBar
                 backButtonLabel={t("label.back")}

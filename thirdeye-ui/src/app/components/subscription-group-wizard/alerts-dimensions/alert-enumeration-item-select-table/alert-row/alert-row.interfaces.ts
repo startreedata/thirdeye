@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -13,13 +13,14 @@
  * the License.
  */
 
-import { Alert } from "../../../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
-import { Association } from "../../subscription-group-wizard.interfaces";
+import { Dispatch, SetStateAction } from "react";
+import { Alert } from "../../../../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../../../../rest/dto/enumeration-item.interfaces";
+import { Association } from "../../../subscription-group-wizard.interfaces";
 
-export interface AlertDimensionTableProps {
-    selectedAlert: Alert;
+export interface AlertRowProps {
+    alert: Alert;
+    enumerationItems: EnumerationItem[];
     associations: Association[];
-    onChangeAssociations: (p: string[]) => void;
-    enumerationItemsForAlert: EnumerationItem[];
+    onAssociationChange: Dispatch<SetStateAction<Association[]>>;
 }

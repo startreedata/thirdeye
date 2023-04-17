@@ -50,6 +50,15 @@ jest.mock(
 );
 
 jest.mock(
+    "../../pages/anomalies-view-page/anomalies-view-v1-page.component",
+    () => ({
+        AnomaliesViewV1Page: jest
+            .fn()
+            .mockReturnValue("testAnomaliesViewV1Page"),
+    })
+);
+
+jest.mock(
     "../../pages/anomalies-view-page/anomalies-view-container-page.component",
     () => ({
         AnomaliesViewContainerPage: jest.fn().mockReturnValue(
@@ -119,7 +128,7 @@ jest.mock(
     })
 );
 jest.mock(
-    "../../pages/anomalies-view-page/anomalies-view-index-page.component",
+    "../../pages/anomalies-view-index-page/anomalies-view-index-page.component",
     () => ({
         AnomaliesViewIndexPage: jest
             .fn()
@@ -197,11 +206,27 @@ describe("Anomalies Router", () => {
         ).resolves.toBeInTheDocument();
     });
 
-    it("should render anomalies view page at exact anomalies view path", async () => {
+    it("should render anomalies view page at exact old anomalies view path", async () => {
         render(
             <MemoryRouter
                 initialEntries={[
                     `/${AppRouteRelative.ANOMALIES_ANOMALY}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}?startTime=1&endTime=2&timeRange=CUSTOM`,
+                ]}
+            >
+                <AnomaliesRouter />
+            </MemoryRouter>
+        );
+
+        await expect(
+            screen.findByText("testAnomaliesViewV1Page")
+        ).resolves.toBeInTheDocument();
+    });
+
+    it("should render anomalies view page at exact anomalies view path", async () => {
+        render(
+            <MemoryRouter
+                initialEntries={[
+                    `/${AppRouteRelative.ANOMALIES_ANOMALY_V2}/${AppRouteRelative.ANOMALIES_ANOMALY_VIEW}?startTime=1&endTime=2&timeRange=CUSTOM`,
                 ]}
             >
                 <AnomaliesRouter />

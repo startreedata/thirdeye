@@ -26,6 +26,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-dataframe</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-db</artifactId>
     </dependency>

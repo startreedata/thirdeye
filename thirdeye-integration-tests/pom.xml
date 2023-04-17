@@ -27,6 +27,18 @@
   <dependencies>
     <dependency>
       <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-persistence</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-server</artifactId>
       <scope>compile</scope>
     </dependency>

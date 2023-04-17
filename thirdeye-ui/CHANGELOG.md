@@ -1,3 +1,14 @@
+## [2.17.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.16.1...thirdeye-ui-2.17.0) (2023-04-17)
+
+
+### Features
+
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) anomalies details v2 ([d3e480fef](https://github.com/startreedata/thirdeye/commit/d3e480fef2c52bc999e3ae87720ceb1eb28ae159))
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) anomaly feedback component changes for anomaly details page ([824b2c2df](https://github.com/startreedata/thirdeye/commit/824b2c2df5213fff679fd02e37a98397da8cf3ea))
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) anomaly view chart and page skeleton component ([423c10f82](https://github.com/startreedata/thirdeye/commit/423c10f82eaf4893df58d5dfcc0a1aa80d318bbd))
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) past duration picker ([4dba98a23](https://github.com/startreedata/thirdeye/commit/4dba98a23c38dddd33d8b3fad368988827a0cbfd))
+* [TE-1500](https://cortexdata.atlassian.net/browse/TE-1500) less clicks to add alert in subscription group edit flow ([594f3e7f3](https://github.com/startreedata/thirdeye/commit/594f3e7f30736d3721b65fdf297429f155cb9d25))
+
 ### [2.16.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.16.0...thirdeye-ui-2.16.1) (2023-04-11)
 
 

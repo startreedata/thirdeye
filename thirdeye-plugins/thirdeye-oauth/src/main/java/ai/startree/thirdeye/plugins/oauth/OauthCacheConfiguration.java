@@ -11,26 +11,30 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
+package ai.startree.thirdeye.plugins.oauth;
 
-import java.security.Principal;
+public class OauthCacheConfiguration {
 
-public class ThirdEyePrincipal implements Principal {
+  public static final long DEFAULT_SIZE = 64;
+  public static final long DEFAULT_TTL = 60000;
+  private long size = DEFAULT_SIZE;
+  private long ttl = DEFAULT_TTL;
 
-  private final String name;
-  private final String authToken;
-
-  public ThirdEyePrincipal(final String name, final String authToken) {
-    this.name = name;
-    this.authToken = authToken;
+  public long getSize() {
+    return size;
   }
 
-  @Override
-  public String getName() {
-    return name;
+  public OauthCacheConfiguration setSize(final long size) {
+    this.size = size;
+    return this;
   }
 
-  public String getAuthToken() {
-    return authToken;
+  public long getTtl() {
+    return ttl;
+  }
+
+  public OauthCacheConfiguration setTtl(final long ttl) {
+    this.ttl = ttl;
+    return this;
   }
 }

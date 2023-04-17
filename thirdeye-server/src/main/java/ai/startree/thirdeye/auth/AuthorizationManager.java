@@ -107,7 +107,7 @@ public class AuthorizationManager {
 
   public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
-    return accessControl.hasAccess(principal.authToken, identifier, accessType);
+    return accessControl.hasAccess(principal.getAuthToken(), identifier, accessType);
   }
 
   public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
@@ -120,7 +120,7 @@ public class AuthorizationManager {
   }
 
   public boolean hasRootAccess(final ThirdEyePrincipal principal) {
-    return accessControl.hasAccess(principal.authToken, ROOT_RESOURCE_ID, AccessType.WRITE);
+    return accessControl.hasAccess(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
   static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {

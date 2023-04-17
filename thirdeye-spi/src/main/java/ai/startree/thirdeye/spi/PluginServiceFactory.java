@@ -11,26 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
 
-import java.security.Principal;
+package ai.startree.thirdeye.spi;
 
-public class ThirdEyePrincipal implements Principal {
+public interface PluginServiceFactory<PluginServiceT, ContextT> {
 
-  private final String name;
-  private final String authToken;
+  String getName();
 
-  public ThirdEyePrincipal(final String name, final String authToken) {
-    this.name = name;
-    this.authToken = authToken;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  public String getAuthToken() {
-    return authToken;
-  }
+  PluginServiceT build(ContextT context);
 }

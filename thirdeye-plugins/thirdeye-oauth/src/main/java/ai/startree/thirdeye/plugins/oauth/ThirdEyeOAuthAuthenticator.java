@@ -11,21 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth.oauth;
+package ai.startree.thirdeye.plugins.oauth;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.Authenticator;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
-import io.dropwizard.auth.Authenticator;
+import java.security.Principal;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThirdEyeOAuthAuthenticator implements Authenticator<String, ThirdEyePrincipal> {
+public class ThirdEyeOAuthAuthenticator implements Authenticator<String, Principal> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeOAuthAuthenticator.class);
 
@@ -42,7 +42,7 @@ public class ThirdEyeOAuthAuthenticator implements Authenticator<String, ThirdEy
   }
 
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(final String authToken) {
+  public Optional<Principal> authenticate(final String authToken) {
     try {
       return optional(bindingsCache.get(authToken));
     } catch (final Exception exception) {

@@ -48,6 +48,10 @@
 
     <!-- Copy all plugins -->
     <fileSet>
+      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-oauth/target/thirdeye-oauth-${project.version}-dist</directory>
+      <outputDirectory>plugins/oauth-default/</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-plugin-example/target/thirdeye-plugin-example-${project.version}-dist</directory>
       <outputDirectory>plugins/example/</outputDirectory>
     </fileSet>

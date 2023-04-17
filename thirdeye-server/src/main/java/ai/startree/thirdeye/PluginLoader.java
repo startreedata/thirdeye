@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.AccessControlProvider;
+import ai.startree.thirdeye.auth.AuthRegistry;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
@@ -25,6 +26,8 @@ import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
+import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
+import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
@@ -60,6 +63,7 @@ public class PluginLoader {
 
   private static final Logger log = LoggerFactory.getLogger(PluginLoader.class);
 
+  private final AuthRegistry authRegistry;
   private final DataSourcesLoader dataSourcesLoader;
   private final DetectionRegistry detectionRegistry;
   private final NotificationServiceRegistry notificationServiceRegistry;
@@ -73,6 +77,7 @@ public class PluginLoader {
 
   @Inject
   public PluginLoader(
+      final AuthRegistry authRegistry,
       final DataSourcesLoader dataSourcesLoader,
       final DetectionRegistry detectionRegistry,
       final NotificationServiceRegistry notificationServiceRegistry,
@@ -81,6 +86,7 @@ public class PluginLoader {
       final PostProcessorRegistry postProcessorRegistry,
       final AccessControlProvider accessControlProvider,
       final PluginLoaderConfiguration config) {
+    this.authRegistry = authRegistry;
     this.dataSourcesLoader = dataSourcesLoader;
     this.detectionRegistry = detectionRegistry;
     this.notificationServiceRegistry = notificationServiceRegistry;
@@ -123,6 +129,12 @@ public class PluginLoader {
 
   private void installPlugin(final Plugin plugin) {
     log.info("Installing plugin: " + plugin.getClass().getName());
+    for(OpenIdConfigurationProvider.Factory f : plugin.getOpenIdConfigurationProviderFactories()) {
+      authRegistry.registerOpenIdConfigurationFactory(f);
+    }
+    for(OauthAuthenticatorFactory f : plugin.getOAuthAuthenticatorFactories()) {
+      authRegistry.registerOAuthFactory(f);
+    }
     for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {
       dataSourcesLoader.addThirdEyeDataSourceFactory(f);
     }

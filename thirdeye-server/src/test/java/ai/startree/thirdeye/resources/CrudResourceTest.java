@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.auth.oauth.OidcBindingsCache.NAME_CLAIM;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +23,6 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.auth.oauth.OidcBindingsCache;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.service.CrudService;
@@ -35,10 +33,8 @@ import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
-import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -123,12 +119,7 @@ public class CrudResourceTest {
   }
 
   private ThirdEyePrincipal getPrincipal(String name) {
-    final String name1 = OidcBindingsCache.getName(new Builder().claim(NAME_CLAIM, name).build());
-    return new ThirdEyePrincipal(name1, "");
-  }
-
-  private Timestamp getCurrentTime() {
-    return new Timestamp(new Date().getTime());
+    return new ThirdEyePrincipal(name, "");
   }
 
   @Test

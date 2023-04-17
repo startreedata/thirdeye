@@ -20,6 +20,7 @@ import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.IntegrationTestUtils;
 import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
@@ -62,6 +63,9 @@ public class AuthIntegrationTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
+    // Setup plugins dir so ThirdEye can load it
+    IntegrationTestUtils.setupPluginsDirAbsolutePath();
+
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     oauthSetup();

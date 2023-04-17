@@ -16,29 +16,15 @@ package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.spi.Constants.AUTH_BASIC;
 import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
-import static ai.startree.thirdeye.spi.Constants.OAUTH_ISSUER;
-import static ai.startree.thirdeye.spi.Constants.OAUTH_JWKS_URI;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
 import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
-import ai.startree.thirdeye.auth.oauth.CachedJWSKeySelector;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
-import ai.startree.thirdeye.auth.oauth.OidcContext;
-import ai.startree.thirdeye.auth.oauth.OidcJWTProcessor;
-import ai.startree.thirdeye.auth.oauth.OpenIdInfoService;
-import ai.startree.thirdeye.auth.oauth.ThirdEyeOAuthAuthenticator;
-import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
-import com.nimbusds.jose.proc.JWSKeySelector;
-import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import com.nimbusds.jwt.proc.JWTClaimsSetVerifier;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
@@ -55,48 +41,13 @@ public class ThirdEyeAuthModule extends AbstractModule {
     this.config = config;
   }
 
-  @Override
-  protected void configure() {
-    bind(new TypeLiteral<DefaultJWTProcessor<OidcContext>>() {})
-        .to(OidcJWTProcessor.class);
-    bind(new TypeLiteral<JWSKeySelector<OidcContext>>() {})
-        .to(CachedJWSKeySelector.class);
-  }
-
-  @Singleton
-  @Provides
-  public JWTClaimsSetVerifier<OidcContext> createJWTClaimsSetVerifier(
-      final OidcContext context) {
-    return new DefaultJWTClaimsVerifier<>(
-        context.getExactMatchClaimsSet(),
-        context.getRequiredClaims());
-  }
-
-  @Provides
-  @Singleton
-  public OidcContext getOidcContext(final OAuthConfiguration oauthConfig,
-      final OpenIdInfoService openIdInfoService) {
-    final AuthInfoApi info = openIdInfoService.getAuthInfoApi();
-
-    optional(info.getOpenidConfiguration())
-        .map(oidcConfig -> oidcConfig.get(OAUTH_ISSUER))
-        .map(Object::toString)
-        .ifPresent(iss -> oauthConfig.getExactMatch().put("iss", iss));
-
-    optional(info.getOpenidConfiguration())
-        .map(oidcConfig -> oidcConfig.get(OAUTH_JWKS_URI))
-        .map(Object::toString)
-        .ifPresent(oauthConfig::setKeysUrl);
-
-    return new OidcContext(oauthConfig);
-  }
-
   @Singleton
   @Provides
   public OAuthCredentialAuthFilter<ThirdEyePrincipal> getOAuthFilter(
-      final ThirdEyeOAuthAuthenticator authenticator) {
+      final AuthRegistry authRegistry,
+      final OAuthConfiguration oauthConfig) {
     return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
-        .setAuthenticator(authenticator)
+        .setAuthenticator(authRegistry.createOAuthAuthenticator(oauthConfig))
         .setPrefix(AUTH_BEARER)
         .buildAuthFilter();
   }
@@ -116,7 +67,7 @@ public class ThirdEyeAuthModule extends AbstractModule {
   @Singleton
   @Provides
   @SuppressWarnings("rawtypes")
-  public AuthFilter getAuthFilters(
+  public AuthFilter getAuthFilter(
       final AuthConfiguration authConfig,
       @Nullable final BasicAuthConfiguration basicAuthConfig,
       @Nullable final OAuthConfiguration oauthConfig,

@@ -11,14 +11,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth.oauth;
+package ai.startree.thirdeye.plugins.oauth;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import com.google.common.cache.CacheLoader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import java.text.ParseException;
-import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +48,10 @@ public class OidcBindingsCache extends CacheLoader<String, ThirdEyePrincipal> {
   }
 
   @Override
-  public ThirdEyePrincipal load(@NotNull String authToken)
+  public ThirdEyePrincipal load(String authToken)
       throws Exception {
     SignedJWT jwt = SignedJWT.parse(authToken);
     JWTClaimsSet claims = processor.process(jwt, context);
-    return new ThirdEyePrincipal(getName(claims), authToken);
+    return new ThirdEyePrincipal(getName(claims));
   }
 }

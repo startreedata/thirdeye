@@ -11,26 +11,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth;
 
-import java.security.Principal;
+package ai.startree.thirdeye.spi.auth;
 
-public class ThirdEyePrincipal implements Principal {
+import ai.startree.thirdeye.spi.PluginServiceFactory;
+import ai.startree.thirdeye.spi.api.AuthInfoApi;
+import java.util.Map;
 
-  private final String name;
-  private final String authToken;
+public interface OpenIdConfigurationProvider {
 
-  public ThirdEyePrincipal(final String name, final String authToken) {
-    this.name = name;
-    this.authToken = authToken;
-  }
+  AuthInfoApi getOpenIdConfiguration();
 
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  public String getAuthToken() {
-    return authToken;
-  }
+  interface Factory extends PluginServiceFactory<OpenIdConfigurationProvider, Map> {}
 }

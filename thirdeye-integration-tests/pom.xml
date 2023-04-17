@@ -32,6 +32,10 @@
     </dependency>
     <dependency>
       <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-oauth</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
       <artifactId>thirdeye-datasources</artifactId>
     </dependency>
     <dependency>

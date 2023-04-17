@@ -15,6 +15,7 @@
 import { AxiosError } from "axios";
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
+import { parse, toSeconds } from "iso8601-duration";
 import { cloneDeep, every, isEmpty, isNil, isNumber } from "lodash";
 import { Dispatch, SetStateAction } from "react";
 import { NotificationTypeV1 } from "../../platform/components";
@@ -579,4 +580,37 @@ export const filterAnomaliesByFunctions = (
     return anomalies.filter((anomaly) => {
         return filters.every((f) => f(anomaly));
     });
+};
+
+/**
+ * Depending on the granularity, return how much padding to provide.
+ *
+ * Return string format will be in iso8601
+ *
+ * @param granularity - String representing a duration in iso8601 format
+ * @param offset - offset the default number of granularity by this many times
+ */
+export const getTimePaddingForGranularity = (
+    granularity: string | undefined,
+    offset = 1
+): string => {
+    if (granularity) {
+        const durationInSeconds = toSeconds(parse(granularity));
+
+        if (durationInSeconds < toSeconds(parse("P1D"))) {
+            // Hourly
+            return `P${offset}W`;
+        } else if (durationInSeconds < toSeconds(parse("P1W"))) {
+            // Daily
+            return `P${2 * offset}W`;
+        } else if (durationInSeconds < toSeconds(parse("P1M"))) {
+            // Weekly
+            return `P${offset}M`;
+        } else if (durationInSeconds < toSeconds(parse("P3M"))) {
+            // Monthly
+            return `P${offset}Y`;
+        }
+    }
+
+    return "P2W";
 };

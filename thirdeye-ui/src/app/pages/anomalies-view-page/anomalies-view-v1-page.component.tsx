@@ -14,6 +14,7 @@
  */
 import { Icon } from "@iconify/react";
 import { Box, Button, Grid, Link } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -76,7 +77,7 @@ import {
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
-export const AnomaliesViewPage: FunctionComponent = () => {
+export const AnomaliesViewV1Page: FunctionComponent = () => {
     const {
         enumerationItem,
         getEnumerationItem,
@@ -112,6 +113,8 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const style = useAnomaliesViewPageStyles();
+
+    const [showV2Link, setShowV2Link] = useState(true);
 
     useEffect(() => {
         anomalyId && getInvestigations(Number(anomalyId));
@@ -334,6 +337,23 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             </PageHeader>
 
             <PageContentsGridV1>
+                {showV2Link && (
+                    <Grid item xs={12}>
+                        <Alert
+                            severity="info"
+                            variant="outlined"
+                            onClose={() => setShowV2Link(false)}
+                        >
+                            {t(
+                                "message.try-out-the-new-version-of-this-page-by-clicking"
+                            )}
+                            <Link component={RouterLink} to="../v2">
+                                {t("label.here")}
+                            </Link>
+                        </Alert>
+                    </Grid>
+                )}
+
                 {/* Anomaly */}
                 <Grid item xs={12}>
                     <AnomalyCard

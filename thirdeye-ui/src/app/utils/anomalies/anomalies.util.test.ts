@@ -22,6 +22,7 @@ import {
     filterAnomaliesByTime,
     getAnomaliesAtTime,
     getAnomalyName,
+    getTimePaddingForGranularity,
     getUiAnomalies,
     getUiAnomaly,
 } from "./anomalies.util";
@@ -212,6 +213,12 @@ describe("Anomalies Util", () => {
         expect(getAnomaliesAtTime(mockAnomalies, 9)).toEqual([mockAnomaly2]);
         expect(getAnomaliesAtTime(mockAnomalies, 1)).toEqual([]);
         expect(getAnomaliesAtTime(mockAnomalies, 10)).toEqual([]);
+    });
+
+    it("getTimePaddingForGranularity should return appropriate string for granularity", () => {
+        expect(getTimePaddingForGranularity("P1D", 2)).toEqual("P4W");
+        expect(getTimePaddingForGranularity("P1W")).toEqual("P1M");
+        expect(getTimePaddingForGranularity("P3M")).toEqual("P2W");
     });
 });
 

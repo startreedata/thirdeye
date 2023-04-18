@@ -26,7 +26,9 @@ export const AlertNotifications: FunctionComponent<AlertNotificationsProps> = ({
     initiallySelectedSubscriptionGroups,
 }) => {
     const { t } = useTranslation();
-    const [isNotificationsOn, setIsNotificationsOn] = useState(false);
+    const [isNotificationsOn, setIsNotificationsOn] = useState(
+        initiallySelectedSubscriptionGroups.length > 0
+    );
 
     return (
         <PageContentsCardV1 fullHeight>

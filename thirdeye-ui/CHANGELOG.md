@@ -1,3 +1,10 @@
+### [2.17.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.17.0...thirdeye-ui-2.17.1) (2023-04-18)
+
+
+### Bug Fixes
+
+* [TE-1507](https://cortexdata.atlassian.net/browse/TE-1507) account for missing `notificationSchemes` field ([f5e041c19](https://github.com/startreedata/thirdeye/commit/f5e041c1955ea0dba2afbb33e0d5e0a37fdcfa59))
+
 ## [2.17.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.16.1...thirdeye-ui-2.17.0) (2023-04-17)
 
 

@@ -19,7 +19,6 @@ import type { Alert } from "../../rest/dto/alert.interfaces";
 import type { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import {
     AlertAssociation,
-    EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
 import type {
@@ -34,11 +33,6 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
         cron: "0 */5 * * * ?",
         alerts: [] as Alert[] /** @deprecated */,
         alertAssociations: [] as AlertAssociation[],
-        notificationSchemes: {
-            email: {
-                to: [],
-            } as unknown as EmailScheme,
-        },
     } as SubscriptionGroup;
 };
 

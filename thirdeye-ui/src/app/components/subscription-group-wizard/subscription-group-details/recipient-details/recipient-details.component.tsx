@@ -33,14 +33,16 @@ export const RecipientDetails: FunctionComponent<RecipientDetailsProps> = ({
     const onSubscriptionGroupEmailsChange = (emails: string[]): void => {
         // Update subscription group with subscribed emails
         onChange((newSubscriptionGroup): SubscriptionGroup => {
-            if (newSubscriptionGroup.notificationSchemes.email) {
-                // Add to existing email settings
-                newSubscriptionGroup.notificationSchemes.email.to = emails;
-            } else {
-                // Create and add to email settings
-                newSubscriptionGroup.notificationSchemes.email = {
-                    to: emails,
-                } as EmailScheme;
+            if (newSubscriptionGroup.notificationSchemes) {
+                if (newSubscriptionGroup.notificationSchemes.email) {
+                    // Add to existing email settings
+                    newSubscriptionGroup.notificationSchemes.email.to = emails;
+                } else {
+                    // Create and add to email settings
+                    newSubscriptionGroup.notificationSchemes.email = {
+                        to: emails,
+                    } as EmailScheme;
+                }
             }
 
             return newSubscriptionGroup;

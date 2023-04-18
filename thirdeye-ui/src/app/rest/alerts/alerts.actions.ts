@@ -23,13 +23,13 @@ import {
 import { EnumerationItem } from "../dto/enumeration-item.interfaces";
 import {
     GetAlert,
+    GetAlertEvaluationPayload,
     GetAlertInsight,
     GetAlerts,
     GetAlertStats,
     GetAlertStatsParams,
     GetEvaluation,
     ResetAlert,
-    UseGetEvaluationParams,
 } from "./alerts.interfaces";
 import {
     getAlert as getAlertREST,
@@ -45,7 +45,7 @@ export const useGetEvaluation = (): GetEvaluation => {
         useHTTPAction<AlertEvaluation>(getAlertEvaluation);
 
     const getEvaluation = (
-        evaluationParams: UseGetEvaluationParams,
+        evaluationParams: GetAlertEvaluationPayload,
         filters?: string[],
         enumerationItem?: { id: number } | EnumerationItem
     ): Promise<AlertEvaluation | undefined> => {

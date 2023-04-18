@@ -13,7 +13,8 @@
  * the License.
  */
 import axios from "axios";
-import { Alert, AlertEvaluation } from "../dto/alert.interfaces";
+import { Alert } from "../dto/alert.interfaces";
+import { GetAlertEvaluationPayload } from "./alerts.interfaces";
 import {
     createAlert,
     createAlerts,
@@ -260,7 +261,7 @@ const mockAlertResponse = {
 
 const mockAlertEvaluationRequest = {
     alert: mockAlertRequest,
-} as AlertEvaluation;
+} as GetAlertEvaluationPayload;
 
 const mockAlertEvaluationResponse = {
     alert: mockAlertResponse,

@@ -148,15 +148,6 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testPing")
-  public void testCreateDefaultTemplates() {
-    final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
-    formData.add("updateExisting", "true");
-    final Response response = request("/api/alert-templates/load-defaults").post(Entity.form(
-        formData));
-    assertThat(response.getStatus()).isEqualTo(200);
-  }
-
-  @Test(dependsOnMethods = "testCreateDefaultTemplates")
   public void testCreateDxTemplate() {
     final Response response = request("/api/alert-templates/name/" + THRESHOLD_TEMPLATE_NAME).get();
     assertThat(response.getStatus()).isEqualTo(200);

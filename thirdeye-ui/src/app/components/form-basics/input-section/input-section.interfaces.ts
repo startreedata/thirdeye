@@ -13,11 +13,11 @@
  * the License.
  */
 import type { GridProps } from "@material-ui/core";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 export interface InputSectionProps {
     label?: string;
-    helperLabel?: string;
+    helperLabel?: ReactNode;
     labelComponent?: ReactElement;
     inputComponent: ReactElement;
     fullWidth?: boolean;

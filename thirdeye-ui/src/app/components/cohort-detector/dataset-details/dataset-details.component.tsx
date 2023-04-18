@@ -244,9 +244,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                     }
 
                                     setSelectedMetric(null);
-                                    setSelectedDimensions(
-                                        selectedTableInfo.dimensions
-                                    );
                                     setSelectedTable(selectedTableInfo);
                                 }}
                             />
@@ -350,10 +347,11 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                         label={`${t("label.aggregation-function")}`}
                     />
 
+                    <Grid item xs={12}>
+                        <Divider />
+                    </Grid>
+
                     <InputSection
-                        helperLabel={t(
-                            "message.empty-selection-means-all-is-selected"
-                        )}
                         inputComponent={
                             <Autocomplete
                                 fullWidth
@@ -372,6 +370,11 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 }
                                 renderInput={(params) => (
                                     <TextField
+                                        error={
+                                            !!selectedTable &&
+                                            !!selectedMetric &&
+                                            selectedDimensions.length === 0
+                                        }
                                         {...params}
                                         InputProps={{
                                             ...params.InputProps,
@@ -476,7 +479,11 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                             <Box>
                                 <Button
                                     color="primary"
-                                    disabled={!selectedTable || !selectedMetric}
+                                    disabled={
+                                        !selectedTable ||
+                                        !selectedMetric ||
+                                        selectedDimensions.length === 0
+                                    }
                                     onClick={handleSearchClick}
                                 >
                                     {submitButtonLabel}

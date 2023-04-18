@@ -1,6 +1,5 @@
 package ai.startree.thirdeye.service;
 
-import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class ResourcesBootstrapService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeServer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ResourcesBootstrapService.class);
 
   private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
   private final AlertTemplateService alertTemplateService;

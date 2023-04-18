@@ -268,11 +268,6 @@ const mockEmptySubscriptionGroup = {
     cron: "0 */5 * * * ?",
     alerts: [],
     alertAssociations: [] as AlertAssociation[],
-    notificationSchemes: {
-        email: {
-            to: [],
-        },
-    },
 };
 
 const mockEmptyUiSubscriptionGroup = {

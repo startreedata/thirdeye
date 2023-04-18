@@ -13,9 +13,12 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import ai.startree.thirdeye.spi.detection.AnomalyFeedbackReason;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Date;
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
 public class AnomalyFeedbackApi {
@@ -24,6 +27,10 @@ public class AnomalyFeedbackApi {
   private UserApi owner;
   private AnomalyFeedbackType type;
   private String comment;
+  private Date created;
+  private Date updated;
+  private String updatedBy;
+  private List<AnomalyFeedbackReason> reasons;
 
   public Long getId() {
     return id;
@@ -58,6 +65,42 @@ public class AnomalyFeedbackApi {
 
   public AnomalyFeedbackApi setComment(final String comment) {
     this.comment = comment;
+    return this;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public AnomalyFeedbackApi setCreated(Date created) {
+    this.created = created;
+    return this;
+  }
+
+  public Date getUpdated() {
+    return updated;
+  }
+
+  public AnomalyFeedbackApi setUpdated(Date updated) {
+    this.updated = updated;
+    return this;
+  }
+
+  public String getUpdatedBy() {
+    return updatedBy;
+  }
+
+  public AnomalyFeedbackApi setUpdatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
+    return this;
+  }
+
+  public List<AnomalyFeedbackReason> getReasons() {
+    return reasons;
+  }
+
+  public AnomalyFeedbackApi setReasons(List<AnomalyFeedbackReason> reasons) {
+    this.reasons = reasons;
     return this;
   }
 }

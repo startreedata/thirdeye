@@ -244,6 +244,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
     if (feedbackDTO != null) {
       if (feedbackDTO.getId() == null) {
+        feedbackDTO.setCreatedBy(feedbackDTO.getUpdatedBy());
         final Long feedbackId = genericPojoDao.create(feedbackDTO);
         feedbackDTO.setId(feedbackId);
       } else {
@@ -251,7 +252,9 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
             .get(feedbackDTO.getId(), AnomalyFeedbackDTO.class);
         existingFeedback
             .setFeedbackType(feedbackDTO.getFeedbackType())
-            .setComment(feedbackDTO.getComment());
+            .setComment(feedbackDTO.getComment())
+            .setReasons(feedbackDTO.getReasons())
+            .setUpdatedBy(feedbackDTO.getUpdatedBy());
         genericPojoDao.update(existingFeedback);
       }
       entity.setAnomalyFeedbackId(feedbackDTO.getId());

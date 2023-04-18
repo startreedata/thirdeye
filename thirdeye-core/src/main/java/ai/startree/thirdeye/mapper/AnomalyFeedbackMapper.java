@@ -28,5 +28,7 @@ public interface AnomalyFeedbackMapper {
   AnomalyFeedbackDTO toDto(AnomalyFeedbackApi api);
 
   @Mapping(source = "feedbackType", target = "type")
+  @Mapping(source = "createTime", target = "created")
+  @Mapping(source = "updateTime", target = "updated")
   AnomalyFeedbackApi toApi(AnomalyFeedbackDTO dto);
 }

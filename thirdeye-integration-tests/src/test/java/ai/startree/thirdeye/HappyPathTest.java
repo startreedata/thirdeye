@@ -44,9 +44,11 @@ import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.detection.AnomalyFeedbackReason;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -314,6 +316,41 @@ public class HappyPathTest {
     assertThat(actual.getId()).isNotNull();
     assertThat(actual.getType()).isEqualTo(feedback.getType());
     assertThat(actual.getComment()).isEqualTo(feedback.getComment());
+    assertThat(actual.getCreated()).isNotNull();
+    assertThat(actual.getUpdated()).isNotNull();
+    assertThat(actual.getUpdatedBy()).isEqualTo("no-auth-user");
+  }
+
+  @Test(dependsOnMethods = "testAnomalyFeedback")
+  public void testAnomalyFeedback_updateFeedback() {
+    final Response responseBeforeFeedback = request("api/anomalies/" + anomalyId).get();
+    assertThat(responseBeforeFeedback.getStatus()).isEqualTo(200);
+    final AnomalyApi anomalyApiBefore = responseBeforeFeedback.readEntity(AnomalyApi.class);
+    final AnomalyFeedbackApi feedbackBefore = anomalyApiBefore.getFeedback();
+    assertThat(feedbackBefore).isNotNull();
+
+    final AnomalyFeedbackApi feedback = new AnomalyFeedbackApi()
+        .setId(feedbackBefore.getId())
+        .setType(AnomalyFeedbackType.NOT_ANOMALY)
+        .setReasons(Arrays.asList(
+            AnomalyFeedbackReason.PLATFORM_UPGRADE,
+            AnomalyFeedbackReason.EXTERNAL_EVENT));
+    final Response response = request(String.format("api/anomalies/%d/feedback", anomalyId))
+        .post(Entity.json(feedback));
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    // test get a single anomaly
+    final Response responseAfterFeedback = request("api/anomalies/" + anomalyId).get();
+    final AnomalyApi anomalyApi = responseAfterFeedback.readEntity(AnomalyApi.class);
+
+    assertThat(responseAfterFeedback.getStatus()).isEqualTo(200);
+    final AnomalyFeedbackApi actual = anomalyApi.getFeedback();
+    assertThat(actual).isNotNull();
+    assertThat(actual.getId()).isEqualTo(feedbackBefore.getId());
+    assertThat(actual.getType()).isEqualTo(feedback.getType());
+    assertThat(actual.getComment()).isEmpty();
+    assertThat(actual.getReasons()).isEqualTo(feedback.getReasons());
+    assertThat(actual.getUpdated()).isAfter(feedbackBefore.getUpdated());
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")

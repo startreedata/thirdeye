@@ -14,8 +14,11 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
+import ai.startree.thirdeye.spi.detection.AnomalyFeedbackReason;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
+import com.google.common.collect.ImmutableList;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,9 +30,12 @@ public class AnomalyFeedbackDTO extends AbstractDTO implements AnomalyFeedback, 
 
   private String comment;
 
+  private List<AnomalyFeedbackReason> reasons;
+
   public AnomalyFeedbackDTO() {
     this.setFeedbackType(AnomalyFeedbackType.NO_FEEDBACK);
     this.setComment("");
+    this.reasons = ImmutableList.of();
   }
 
   public AnomalyFeedbackDTO(AnomalyFeedback anomalyFeedback) {
@@ -41,6 +47,7 @@ public class AnomalyFeedbackDTO extends AbstractDTO implements AnomalyFeedback, 
       if (StringUtils.isNotBlank(anomalyFeedback.getComment())) {
         this.setComment(anomalyFeedback.getComment());
       }
+      this.setReasons(anomalyFeedback.getReasons());
     }
   }
 
@@ -62,6 +69,15 @@ public class AnomalyFeedbackDTO extends AbstractDTO implements AnomalyFeedback, 
     return this;
   }
 
+  public List<AnomalyFeedbackReason> getReasons() {
+    return ImmutableList.copyOf(reasons);
+  }
+
+  public AnomalyFeedbackDTO setReasons(List<AnomalyFeedbackReason> reasons) {
+    this.reasons = reasons;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -72,13 +88,14 @@ public class AnomalyFeedbackDTO extends AbstractDTO implements AnomalyFeedback, 
     }
 
     AnomalyFeedbackDTO that = (AnomalyFeedbackDTO) o;
-    return Objects.equals(getId(), that.getId()) && Objects
-        .equals(feedbackType, that.getFeedbackType())
-        && Objects.equals(comment, that.getComment());
+    return Objects.equals(getId(), that.getId())
+        && Objects.equals(feedbackType, that.getFeedbackType())
+        && Objects.equals(comment, that.getComment())
+        && Objects.equals(reasons, that.getReasons());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), feedbackType, comment);
+    return Objects.hash(getId(), feedbackType, comment, reasons);
   }
 }

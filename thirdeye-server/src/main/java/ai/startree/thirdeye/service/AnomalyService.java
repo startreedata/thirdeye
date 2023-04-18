@@ -95,9 +95,10 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     return anomalyApi;
   }
 
-  public void setFeedback(final Long id, final AnomalyFeedbackApi api) {
+  public void setFeedback(final ThirdEyePrincipal principal, final Long id, final AnomalyFeedbackApi api) {
     final AnomalyDTO dto = getDto(id);
 
+    api.setUpdatedBy(principal.getName());
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
     dto.setFeedback(feedbackDTO);
     anomalyManager.updateAnomalyFeedback(dto);

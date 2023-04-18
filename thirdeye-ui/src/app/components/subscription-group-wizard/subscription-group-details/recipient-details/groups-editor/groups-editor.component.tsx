@@ -37,7 +37,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
         subscriptionGroup.specs || []
     );
     const [legacyEmailList, setLegacyEmailList] = useState<string[]>(
-        subscriptionGroup.notificationSchemes.email.to || []
+        subscriptionGroup.notificationSchemes?.email.to || []
     );
     const { t } = useTranslation();
 
@@ -46,8 +46,8 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
     }, [currentSpecs]);
 
     const hasSomeConfig =
-        (subscriptionGroup.notificationSchemes.email &&
-            subscriptionGroup.notificationSchemes.email.to.length > 0) ||
+        (subscriptionGroup.notificationSchemes?.email &&
+            subscriptionGroup.notificationSchemes?.email.to.length > 0) ||
         currentSpecs.length > 0;
 
     const handleShortcutCreateOnclick = (id: number | string): void => {

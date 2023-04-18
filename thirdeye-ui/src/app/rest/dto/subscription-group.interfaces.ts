@@ -31,7 +31,7 @@ export interface SubscriptionGroup {
     created: number;
     updated: number;
     owner: User;
-    notificationSchemes: NotificationSchemes;
+    notificationSchemes?: NotificationSchemes;
     specs: NotificationSpec[];
 }
 

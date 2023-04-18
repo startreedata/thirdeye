@@ -87,7 +87,7 @@ export const Email: FunctionComponent<EmailProps> = ({
                     inputComponent={
                         <EmailListInput
                             emails={
-                                (subscriptionGroup &&
+                                (subscriptionGroup?.notificationSchemes &&
                                     subscriptionGroup.notificationSchemes
                                         .email &&
                                     subscriptionGroup.notificationSchemes.email

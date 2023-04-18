@@ -25,9 +25,11 @@ import {
     DataGridColumnV1,
     DataGridScrollV1,
     DataGridSelectionModelV1,
+    DataGridSortOrderV1,
     DataGridV1,
     PageContentsCardV1,
 } from "../../platform/components";
+import { formatDateAndTimeV1 } from "../../platform/utils";
 import type { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import {
     getAlertsAlertPath,
@@ -100,6 +102,17 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
         const active = data.active;
 
         return <ActiveIndicator active={active} />;
+    };
+
+    const renderCreatedString = (
+        _: Record<string, unknown>,
+        data: UiAlert
+    ): ReactElement => {
+        if (data.alert?.created) {
+            return <>{formatDateAndTimeV1(data.alert?.created)}</>;
+        }
+
+        return <></>;
     };
 
     const isActionButtonDisable = !(
@@ -183,6 +196,15 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
             flex: 1,
             customCellRenderer: renderAlertStatus,
         },
+        {
+            key: "created",
+            dataKey: "alert.created",
+            header: t("label.created"),
+            minWidth: 0,
+            flex: 1,
+            sortable: true,
+            customCellRenderer: renderCreatedString,
+        },
     ];
 
     return (
@@ -193,6 +215,10 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                     columns={alertGroupColumns}
                     data={alertsData as UiAlert[]}
                     expandColumnKey="name"
+                    initialSortState={{
+                        key: "created",
+                        order: DataGridSortOrderV1.DESC,
+                    }}
                     rowKey="id"
                     scroll={DataGridScrollV1.Body}
                     searchPlaceholder={t("label.search-entity", {

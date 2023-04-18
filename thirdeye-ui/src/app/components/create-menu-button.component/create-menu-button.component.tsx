@@ -29,11 +29,8 @@ import {
     getEventsCreatePath,
     getSubscriptionGroupsCreatePath,
 } from "../../utils/routes/routes.util";
-import { CreateMenuButtonProps } from "./create-menu-button.interfaces";
 
-export const CreateMenuButton: FunctionComponent<CreateMenuButtonProps> = ({
-    createAnomalyProps,
-}) => {
+export const CreateMenuButton: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -62,10 +59,28 @@ export const CreateMenuButton: FunctionComponent<CreateMenuButtonProps> = ({
     };
 
     const handleCreateAnomaly = (): void => {
-        navigate(getAnomaliesCreatePath(createAnomalyProps?.alertId));
+        navigate(getAnomaliesCreatePath());
     };
 
     const shortcutCreateMenuItems: DropdownMenuItemV1[] = [
+        {
+            id: "createDatasource",
+            text: t("label.create-entity", {
+                entity: t("label.datasource"),
+            }),
+        },
+        {
+            id: "onboardDataset",
+            text: t("label.onboard-entity", {
+                entity: t("label.dataset"),
+            }),
+        },
+        {
+            id: "createAlertTemplate",
+            text: t("label.create-entity", {
+                entity: t("label.alert-template"),
+            }),
+        },
         {
             id: "createAlert",
             text: t("label.create-entity", {
@@ -79,27 +94,9 @@ export const CreateMenuButton: FunctionComponent<CreateMenuButtonProps> = ({
             }),
         },
         {
-            id: "onboardDataset",
-            text: t("label.onboard-entity", {
-                entity: t("label.dataset"),
-            }),
-        },
-        {
-            id: "createDatasource",
-            text: t("label.create-entity", {
-                entity: t("label.datasource"),
-            }),
-        },
-        {
             id: "createEvent",
             text: t("label.create-entity", {
                 entity: t("label.event"),
-            }),
-        },
-        {
-            id: "createAlertTemplate",
-            text: t("label.create-entity", {
-                entity: t("label.alert-template"),
             }),
         },
         {

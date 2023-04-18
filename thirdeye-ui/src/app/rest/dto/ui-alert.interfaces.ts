@@ -24,13 +24,7 @@ export interface UiAlert {
     detectionTypes: string[];
     datasetAndMetrics: UiAlertDatasetAndMetric[];
     subscriptionGroups: UiAlertSubscriptionGroup[];
-    renderedMetadata: RenderedMetadata[];
     alert: Alert | null;
-}
-
-interface RenderedMetadata {
-    key: string;
-    value: string;
 }
 
 export interface UiAlertDatasetAndMetric {

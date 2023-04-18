@@ -28,4 +28,5 @@ export interface TooltipPopoverProps {
     series: NormalizedSeries[];
     colorScale: (name: string) => string;
     timezoneOverride?: string;
+    hideTime?: boolean;
 }

@@ -38,6 +38,7 @@ import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import {
@@ -696,6 +697,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
                                                 fetchAlertEvaluation={
                                                     fetchAlertEvaluation
                                                 }
+                                                hideTime={shouldHideTimeInDatetimeFormat(
+                                                    evaluation?.alert.template
+                                                )}
                                                 isLoading={[
                                                     alertInsightRequestStatus,
                                                     getEvaluationRequestStatus,

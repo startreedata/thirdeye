@@ -159,8 +159,7 @@ export const RecentAnomalies: FunctionComponent = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>
-                                        {t("label.anomaly")}&nbsp;
-                                        {t("label.id")}
+                                        {t("label.anomaly-id")}
                                     </TableCell>
                                     <TableCell>
                                         {t("label.alert-name")}

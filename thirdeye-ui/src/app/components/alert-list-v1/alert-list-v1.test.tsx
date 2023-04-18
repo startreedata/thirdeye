@@ -198,7 +198,6 @@ const mockUiAlert = {
             name: "label.no-data-marker",
         },
     ],
-    renderedMetadata: [],
     alert: mockAlert,
 };
 

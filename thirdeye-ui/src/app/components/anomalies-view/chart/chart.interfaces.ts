@@ -25,5 +25,6 @@ export interface ChartProps {
     chartHeight?: number;
     startEndShift?: string;
     timezone?: string;
+    hideTime: boolean;
     hideChartBrush?: boolean;
 }

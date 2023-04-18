@@ -26,6 +26,7 @@ export interface AlertEvaluationTimeSeriesCardProps {
     anomalies: Anomaly[];
     disableNavigation?: boolean;
     timezone?: string;
+    hideTime: boolean;
     rootCardProps?: CardProps;
     timeSeriesProps?: Partial<TimeSeriesChartProps>;
 }

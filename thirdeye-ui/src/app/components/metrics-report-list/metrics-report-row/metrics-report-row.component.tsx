@@ -39,7 +39,9 @@ import {
 } from "../../../rest/alerts/alerts.actions";
 import {
     createAlertEvaluation,
+    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../../utils/alerts/alerts.util";
 import { getAlertsAlertViewPath } from "../../../utils/routes/routes.util";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -70,7 +72,7 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
         status: evaluationRequestStatus,
         errorMessages: getEvaluationErrors,
     } = useGetEvaluation();
-    const { alert, getAlert, status: getAlertStatus } = useGetAlert();
+    const { getAlert, status: getAlertStatus } = useGetAlert();
 
     const [chartOptions, setChartOptions] =
         useState<TimeSeriesChartProps | null>(null);
@@ -108,7 +110,10 @@ export const MetricsReportRow: FunctionComponent<MetricsReportRowProps> = ({
                     extractDetectionEvaluation(evaluation)[0],
                     anomalyAlert.anomalies,
                     t,
-                    (alert?.templateProperties?.timezone as string) ?? "UTC"
+                    determineTimezoneFromAlertInEvaluation(
+                        evaluation.alert.template
+                    ),
+                    shouldHideTimeInDatetimeFormat(evaluation.alert.template)
                 );
                 options.zoom = true;
                 options.brush = false;

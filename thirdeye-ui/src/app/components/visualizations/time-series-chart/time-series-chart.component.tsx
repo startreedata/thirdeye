@@ -503,6 +503,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                     >
                         <TooltipPopover
                             colorScale={colorScale}
+                            hideTime={xAxis?.hideTime}
                             series={processedMainChartSeries}
                             timezoneOverride={xAxis?.timezone}
                             xValue={tooltipData.xValue}

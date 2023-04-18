@@ -26,6 +26,7 @@ export interface AlgorithmTableProps {
     onCheckClick?: (filters: AnomalyFilterOption[]) => void;
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
     timezone: string | undefined;
+    hideTime: boolean | undefined;
 }
 
 export interface AlgorithmRowProps {
@@ -41,6 +42,7 @@ export interface AlgorithmRowProps {
     checked: boolean;
     onCheckClick?: (filters: AnomalyFilterOption[]) => void;
     timezone: string | undefined;
+    hideTime: boolean | undefined;
 }
 
 export interface AlgorithmRowExpandedProps {
@@ -51,4 +53,5 @@ export interface AlgorithmRowExpandedProps {
     dimensionColumns: string[];
     comparisonOffset: string;
     timezone: string | undefined;
+    hideTime: boolean | undefined;
 }

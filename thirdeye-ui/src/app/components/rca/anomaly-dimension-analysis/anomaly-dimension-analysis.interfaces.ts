@@ -21,6 +21,7 @@ export interface AnomalyDimensionAnalysisProps {
     chartTimeSeriesFilterSet: AnomalyFilterOption[][];
     onCheckClick: (filters: AnomalyFilterOption[]) => void;
     timezone: string | undefined;
+    hideTime: boolean | undefined;
 }
 
 export interface AnomalyBreakdownComparisonData {

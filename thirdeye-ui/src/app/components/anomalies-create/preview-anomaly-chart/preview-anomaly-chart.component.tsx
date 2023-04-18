@@ -19,7 +19,10 @@ import { useTranslation } from "react-i18next";
 import { SkeletonV1 } from "../../../platform/components";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
-import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
+import {
+    extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
+} from "../../../utils/alerts/alerts.util";
 import { AnomalyCard } from "../../entity-cards/anomaly-card/anomaly-card.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
@@ -30,6 +33,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
     ({
         editableAnomaly,
         timezone,
+        hideTime,
         isLoading,
         fetchAlertEvaluation,
         evaluation,
@@ -118,6 +122,9 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                                 <Grid item xs={12}>
                                     <AnomalyCard
                                         anomaly={editableAnomaly as Anomaly}
+                                        hideTime={shouldHideTimeInDatetimeFormat(
+                                            evaluation?.alert.template
+                                        )}
                                         timezone={timezone}
                                     />
                                 </Grid>
@@ -127,6 +134,7 @@ export const PreviewAnomalyChart: FunctionComponent<PreviewAnomalyChartProps> =
                             </Grid>
                         </CardContent>
                     }
+                    hideTime={hideTime}
                     rootCardProps={{ variant: "elevation" }}
                     timeSeriesProps={{
                         chartEvents: {

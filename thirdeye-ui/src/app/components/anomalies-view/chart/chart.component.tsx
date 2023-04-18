@@ -59,6 +59,7 @@ export const Chart: FunctionComponent<ChartProps> = ({
     // ISO-8601 format
     startEndShift = "P0D",
     timezone,
+    hideTime,
     hideChartBrush,
     chartHeight,
 }) => {
@@ -126,7 +127,8 @@ export const Chart: FunctionComponent<ChartProps> = ({
             anomalyToDisplay,
             t,
             undefined,
-            timezone
+            timezone,
+            hideTime
         );
 
         if (hideChartBrush) {

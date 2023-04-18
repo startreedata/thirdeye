@@ -13,15 +13,17 @@
  * the License.
  */
 import i18n from "i18next";
-import { cloneDeep, isEmpty, kebabCase, omit, sortBy } from "lodash";
+import { parse, toSeconds } from "iso8601-duration";
+import { cloneDeep, isEmpty, kebabCase, omit } from "lodash";
+import { GetAlertEvaluationPayload } from "../../rest/alerts/alerts.interfaces";
 import {
     Alert,
     AlertAnomalyDetectorNode,
     AlertEvaluation,
-    AlertInEvaluation,
     AlertNodeType,
     AlertStats,
     EditableAlert,
+    EvaluatedTemplateMetadata,
 } from "../../rest/dto/alert.interfaces";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
@@ -33,6 +35,7 @@ import {
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 import { getSubscriptionGroupAlertsList } from "../subscription-groups/subscription-groups.util";
+import { DAY_IN_MILLISECONDS } from "../time/time.util";
 
 export const DEFAULT_FEEDBACK = {
     type: AnomalyFeedbackType.NO_FEEDBACK,
@@ -127,7 +130,6 @@ export const createEmptyUiAlert = (): UiAlert => {
         detectionTypes: [],
         datasetAndMetrics: [],
         subscriptionGroups: [],
-        renderedMetadata: [],
         alert: null,
     };
 };
@@ -156,12 +158,12 @@ export const createAlertEvaluation = (
     alert: Alert | EditableAlert | Pick<Alert, "id">,
     startTime: number,
     endTime: number
-): AlertEvaluation => {
+): GetAlertEvaluationPayload => {
     return {
         alert: alert,
         start: startTime,
         end: endTime,
-    } as AlertEvaluation;
+    };
 };
 
 export const getUiAlert = (
@@ -290,53 +292,7 @@ const getUiAlertInternal = (
         });
     }
 
-    if (alert.templateProperties && alert.template) {
-        renderMetadataFromAlert(alert, uiAlert);
-    }
-
     return uiAlert;
-};
-
-const renderMetadataFromAlert = (alert: Alert, uiAlert: UiAlert): void => {
-    if (!alert.template || !alert.template.metadata) {
-        return;
-    }
-
-    const metadataValueKeyExtractor = /\$\{(.*)\}/;
-
-    // This is done so we avoid a weird typescript error
-    // `alert.template.metadata` may be null even though its checked
-    const metadata = alert.template.metadata;
-
-    Object.keys(metadata).forEach((metadataKey) => {
-        const metadataObjectForKey = metadata[metadataKey];
-
-        if (metadataObjectForKey.name) {
-            const templatePropKeySearch = metadataObjectForKey.name.match(
-                metadataValueKeyExtractor
-            );
-
-            if (templatePropKeySearch && templatePropKeySearch.length > 1) {
-                const value =
-                    alert.templateProperties[templatePropKeySearch[1]];
-                if (value) {
-                    uiAlert.renderedMetadata.push({
-                        key: metadataKey,
-                        value: value.toString(),
-                    });
-                }
-            } else {
-                // If regex doesn't match then assume no value is being
-                // taken from template properties
-                uiAlert.renderedMetadata.push({
-                    key: metadataKey,
-                    value: metadataObjectForKey.name,
-                });
-            }
-        }
-    });
-
-    uiAlert.renderedMetadata = sortBy(uiAlert.renderedMetadata, "key");
 };
 
 const mapSubscriptionGroupsToAlertIds = (
@@ -457,7 +413,7 @@ export const getAlertAccuracyData = (
 };
 
 export const determineTimezoneFromAlertInEvaluation = (
-    alert: Pick<AlertInEvaluation, "metadata"> | undefined | null
+    alert: { metadata: EvaluatedTemplateMetadata } | undefined | null
 ): string | undefined => {
     if (alert === undefined || alert === null) {
         return undefined;
@@ -468,4 +424,21 @@ export const determineTimezoneFromAlertInEvaluation = (
     }
 
     return "UTC";
+};
+
+export const shouldHideTimeInDatetimeFormat = (
+    alert: { metadata: EvaluatedTemplateMetadata } | undefined | null
+): boolean => {
+    if (alert === undefined || alert === null) {
+        return false;
+    }
+
+    if (alert.metadata?.granularity) {
+        return (
+            toSeconds(parse(alert.metadata?.granularity as string)) >=
+            DAY_IN_MILLISECONDS / 1000
+        );
+    }
+
+    return false;
 };

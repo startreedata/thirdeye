@@ -35,6 +35,7 @@ import java.util.Objects;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public class AuthorizationManager {
 
@@ -42,6 +43,9 @@ public class AuthorizationManager {
   static final ResourceIdentifier ROOT_RESOURCE_ID = ResourceIdentifier.from("thirdeye-root",
       "thirdeye-root",
       "thirdeye-root");
+
+  private static final ThirdEyePrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyePrincipal(
+      "thirdeye-internal", RandomStringUtils.random(1024, true, true));
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
@@ -107,7 +111,8 @@ public class AuthorizationManager {
 
   public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
-    return accessControl.hasAccess(principal.getAuthToken(), identifier, accessType);
+    return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
+        accessControl.hasAccess(principal.getAuthToken(), identifier, accessType);
   }
 
   public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
@@ -120,7 +125,8 @@ public class AuthorizationManager {
   }
 
   public boolean hasRootAccess(final ThirdEyePrincipal principal) {
-    return accessControl.hasAccess(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
+    return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
+        accessControl.hasAccess(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
   static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
@@ -151,5 +157,9 @@ public class AuthorizationManager {
         String.format("%s access denied to %s for entity %s %s",
             accessType, principal.getName(), resourceIdentifier.entityType, resourceIdentifier.name)
     ).build());
+  }
+
+  public static ThirdEyePrincipal getInternalValidPrincipal() {
+    return INTERNAL_VALID_PRINCIPAL;
   }
 }

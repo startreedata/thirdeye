@@ -31,6 +31,7 @@ import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
+import ai.startree.thirdeye.service.ResourcesBootstrapService;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import com.google.inject.Guice;
@@ -154,6 +155,10 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
               .addToContext(CTX_INJECTOR, injector);
 
           schedulerService = injector.getInstance(SchedulerService.class);
+
+          // bootstrap resources before starting the scheduler
+          // bootstrapping runs on the main thread. If it fails, the scheduler will not start.
+          injector.getInstance(ResourcesBootstrapService.class).bootstrap();
 
           // Start the scheduler
           schedulerService.start();

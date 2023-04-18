@@ -18,6 +18,7 @@ import {
     AlertEvaluation,
     AlertInEvaluation,
     AlertNodeType,
+    EvaluatedTemplateMetadata,
 } from "../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -35,6 +36,7 @@ import {
     getUiAlert,
     getUiAlerts,
     omitNonUpdatableData,
+    shouldHideTimeInDatetimeFormat,
 } from "./alerts.util";
 
 jest.mock("i18next", () => ({
@@ -229,14 +231,43 @@ describe("Alerts Util", () => {
             determineTimezoneFromAlertInEvaluation({
                 metadata: {
                     timezone: "America/Los_Angeles",
-                },
+                } as EvaluatedTemplateMetadata,
             })
         ).toEqual("America/Los_Angeles");
         expect(
             determineTimezoneFromAlertInEvaluation({
-                metadata: {},
+                metadata: {} as EvaluatedTemplateMetadata,
             })
         ).toEqual("UTC");
+    });
+
+    it("shouldHideTimeInDatetimeFormat should return expected results given the inputs", () => {
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {} as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(false);
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {
+                    granularity: "P1D",
+                } as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(true);
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {
+                    granularity: "P1W",
+                } as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(true);
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {
+                    granularity: "PT1H",
+                } as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(false);
     });
 });
 

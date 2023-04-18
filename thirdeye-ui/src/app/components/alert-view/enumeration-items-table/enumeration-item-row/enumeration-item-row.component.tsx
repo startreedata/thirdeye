@@ -57,6 +57,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     expanded,
     onExpandChange,
     timezone,
+    hideTime,
 }) => {
     const navigate = useNavigate();
 
@@ -111,7 +112,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         anomalies,
         t,
         navigate,
-        timezone
+        timezone,
+        hideTime
     );
     const tsDataForExpanded: TimeSeriesChartProps = {
         ...tsData,

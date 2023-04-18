@@ -98,7 +98,8 @@ export const generateComparisonChartOptions = (
     endTime: number,
     comparisonOffset: string,
     translation: (labelName: string) => string = (s) => s,
-    timezone?: string
+    timezone?: string,
+    hideTime?: boolean
 ): TimeSeriesChartProps => {
     const filteredTimeSeriesData = extractDetectionEvaluation(filtered)[0].data;
     const nonFilteredTimeSeriesData =
@@ -159,6 +160,7 @@ export const generateComparisonChartOptions = (
         zoom: true,
         series,
         xAxis: {
+            hideTime: hideTime,
             plotBands: [
                 {
                     start: startTime,

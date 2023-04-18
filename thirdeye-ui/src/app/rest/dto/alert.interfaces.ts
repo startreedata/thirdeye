@@ -41,9 +41,7 @@ export interface EditableAlert {
             | AlertTimeIndexFillerNode
             | AlertAnomalyDetectorNode
         >;
-        metadata?: {
-            [index: string]: { [index: string]: string };
-        };
+        metadata?: { [index: string]: string | { [index: string]: string } };
         name?: string;
     };
     templateProperties: TemplatePropertiesObject;
@@ -58,12 +56,20 @@ export interface Alert extends EditableAlert {
     updated: number;
 }
 
+export interface EvaluatedTemplateMetadata {
+    [index: string]: string | { [index: string]: string };
+    granularity: string;
+    timezone: string;
+}
+
 export interface AlertInsight {
     datasetStartTime: number;
     datasetEndTime: number;
     defaultStartTime: number;
     defaultEndTime: number;
-    templateWithProperties: Pick<AlertInEvaluation, "metadata">;
+    templateWithProperties: {
+        metadata: EvaluatedTemplateMetadata;
+    };
 }
 
 export interface AlertDataFetcherNode {
@@ -120,10 +126,10 @@ export enum AlertNodeType {
     DATA_FETCHER = "DataFetcher",
 }
 
-export interface AlertInEvaluation extends Alert {
-    metadata: {
-        timezone?: string;
-        granularity?: string;
+export interface AlertInEvaluation extends EditableAlert {
+    id?: number;
+    template: {
+        metadata: EvaluatedTemplateMetadata;
     };
 }
 

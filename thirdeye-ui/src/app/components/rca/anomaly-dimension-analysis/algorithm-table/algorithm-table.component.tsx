@@ -35,6 +35,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
         chartTimeSeriesFilterSet,
         onCheckClick,
         timezone,
+        hideTime,
     }) => {
         const { t } = useTranslation();
         const totalSum = anomalyDimensionAnalysisData.responseRows.reduce(
@@ -115,6 +116,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
                                         anomalyDimensionAnalysisData.dimensions
                                     }
                                     endTime={anomaly.endTime}
+                                    hideTime={hideTime}
                                     key={row.names.join()}
                                     metric={
                                         anomalyDimensionAnalysisData.metric.name

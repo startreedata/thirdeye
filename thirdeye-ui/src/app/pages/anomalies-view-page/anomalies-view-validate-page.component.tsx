@@ -18,7 +18,10 @@ import { useTranslation } from "react-i18next";
 import { useOutletContext, useSearchParams } from "react-router-dom";
 import { Chart } from "../../components/anomalies-view/chart/chart.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { determineTimezoneFromAlertInEvaluation } from "../../utils/alerts/alerts.util";
+import {
+    determineTimezoneFromAlertInEvaluation,
+    shouldHideTimeInDatetimeFormat,
+} from "../../utils/alerts/alerts.util";
 import { AnomalyViewContainerPageOutletContext } from "./anomalies-view-page.interfaces";
 
 const ADDITIONAL_CHARTS_QUERY_PARAM_KEY = "timePeriodCharts";
@@ -118,6 +121,9 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
                         }
                         end={end}
                         hideChartBrush={additionalCharts.length > 0}
+                        hideTime={shouldHideTimeInDatetimeFormat(
+                            alertInsight?.templateWithProperties
+                        )}
                         start={start}
                         timezone={determineTimezoneFromAlertInEvaluation(
                             alertInsight?.templateWithProperties
@@ -132,6 +138,9 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
                                 hideChartBrush
                                 anomaly={anomaly}
                                 end={end}
+                                hideTime={shouldHideTimeInDatetimeFormat(
+                                    alertInsight?.templateWithProperties
+                                )}
                                 start={start}
                                 startEndShift={pastPeriod}
                                 timezone={determineTimezoneFromAlertInEvaluation(

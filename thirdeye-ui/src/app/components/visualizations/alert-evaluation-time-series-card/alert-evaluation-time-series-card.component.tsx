@@ -33,6 +33,7 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
         anomalies,
         disableNavigation,
         timezone,
+        hideTime,
         rootCardProps,
         timeSeriesProps,
     }) => {
@@ -80,7 +81,8 @@ export const AlertEvaluationTimeSeriesCard: FunctionComponent<AlertEvaluationTim
                                     anomalies,
                                     t,
                                     disableNavigation ? undefined : navigate,
-                                    timezone
+                                    timezone,
+                                    hideTime
                                 )}
                                 {...timeSeriesProps}
                             />

@@ -42,6 +42,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     anomalies,
     onDeleteClick,
     timezone,
+    hideTime,
 }) => {
     const { t } = useTranslation();
     const [expandedChartHeight, setExpandedChartHeight] =
@@ -55,7 +56,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         anomalies,
         t,
         undefined,
-        timezone
+        timezone,
+        hideTime
     );
     const tsDataForExpanded = {
         ...tsData,

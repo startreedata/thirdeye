@@ -14,7 +14,7 @@
  */
 import { Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { AnomalySummaryCardDetailProps } from "./anomaly-summary-card.interfaces";
+import { AnomalySummaryCardDetailProps } from "./anomaly-summary-card-detail.interfaces";
 
 export const AnomalySummaryCardDetail: FunctionComponent<AnomalySummaryCardDetailProps> =
     ({ label, value, valueClassName }) => {

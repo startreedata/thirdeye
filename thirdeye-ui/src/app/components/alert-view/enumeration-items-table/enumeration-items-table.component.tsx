@@ -47,6 +47,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         sortOrder,
         onSortOrderChange,
         timezone,
+        hideTime,
     }) => {
         const [filteredDetectionEvaluations, setFilteredDetectionEvaluations] =
             useState(
@@ -251,6 +252,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                             detectionEvaluation
                                         }
                                         expanded={expanded}
+                                        hideTime={hideTime}
                                         key={generateNameForDetectionResult(
                                             detectionEvaluation
                                         )}

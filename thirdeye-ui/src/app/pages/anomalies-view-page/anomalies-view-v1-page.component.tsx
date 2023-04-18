@@ -59,6 +59,7 @@ import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import {
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
@@ -359,6 +360,9 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
                     <AnomalyCard
                         anomaly={anomaly}
                         className={style.fullHeight}
+                        hideTime={shouldHideTimeInDatetimeFormat(
+                            alertInsight?.templateWithProperties
+                        )}
                         isLoading={
                             anomalyRequestStatus === ActionStatus.Working ||
                             anomalyRequestStatus === ActionStatus.Initial
@@ -386,6 +390,9 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
                             alertEvaluationTimeSeriesHeight={400}
                             anomalies={[anomaly as Anomaly]}
                             detectionEvaluation={detectionEvaluation}
+                            hideTime={shouldHideTimeInDatetimeFormat(
+                                alertInsight?.templateWithProperties
+                            )}
                             isLoading={
                                 getEvaluationRequestStatus ===
                                     ActionStatus.Working ||

@@ -25,4 +25,5 @@ export interface EnumerationItemsTableProps {
     onSearchTermChange: (newTerm: string) => void;
     onSortOrderChange: (newOrder: DataGridSortOrderV1) => void;
     timezone?: string;
+    hideTime?: boolean;
 }

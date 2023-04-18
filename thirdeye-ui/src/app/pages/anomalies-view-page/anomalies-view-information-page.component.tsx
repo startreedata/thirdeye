@@ -44,7 +44,10 @@ import {
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { determineTimezoneFromAlertInEvaluation } from "../../utils/alerts/alerts.util";
+import {
+    determineTimezoneFromAlertInEvaluation,
+    shouldHideTimeInDatetimeFormat,
+} from "../../utils/alerts/alerts.util";
 import {
     getAnomalyName,
     isAnomalyIgnored,
@@ -242,6 +245,9 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                     <AnomalyCard
                         anomaly={anomaly}
                         className={style.fullHeight}
+                        hideTime={shouldHideTimeInDatetimeFormat(
+                            alertInsight?.templateWithProperties
+                        )}
                         isLoading={false}
                         timezone={determineTimezoneFromAlertInEvaluation(
                             alertInsight?.templateWithProperties

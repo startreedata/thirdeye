@@ -24,6 +24,7 @@ export interface PreviewAnomalyChartProps {
     isLoading: boolean;
     evaluation: AlertEvaluation | null;
     timezone: string | undefined;
+    hideTime: boolean;
     onRangeSelection?: (z: ZoomDomain | null) => boolean | undefined;
     anomalyDateRangeControl?: ReactNode;
 }

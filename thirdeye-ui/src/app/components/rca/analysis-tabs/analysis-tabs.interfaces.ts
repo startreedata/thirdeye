@@ -24,5 +24,6 @@ export interface AnalysisTabsProps {
     selectedEvents: Event[];
     onEventSelectionChange: (events: Event[]) => void;
     isLoading: boolean;
+    hideTime?: boolean;
     timezone: string | undefined;
 }

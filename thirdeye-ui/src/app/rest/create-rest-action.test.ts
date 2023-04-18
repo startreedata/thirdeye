@@ -33,6 +33,7 @@ describe("Create Rest Action (useHTTPAction)", () => {
         expect(result.current.makeRequest).toBeDefined();
         expect(result.current.status).toEqual(ActionStatus.Initial);
         expect(result.current.errorMessages).toEqual([]);
+        expect(result.current.resetData).toBeDefined();
     });
 
     it("should invoke passed fetch function when calling makeRequest", async () => {
@@ -77,6 +78,7 @@ describe("Create Rest Action (useHTTPAction)", () => {
             expect(result.current.makeRequest).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Working);
             expect(result.current.errorMessages).toEqual([]);
+            expect(result.current.resetData).toBeDefined();
 
             return promise.then(() => {
                 // When REST call is completed
@@ -84,6 +86,7 @@ describe("Create Rest Action (useHTTPAction)", () => {
                 expect(result.current.makeRequest).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Done);
                 expect(result.current.errorMessages).toEqual([]);
+                expect(result.current.resetData).toBeDefined();
             });
         });
     });
@@ -107,6 +110,7 @@ describe("Create Rest Action (useHTTPAction)", () => {
             expect(result.current.makeRequest).toBeDefined();
             expect(result.current.status).toEqual(ActionStatus.Working);
             expect(result.current.errorMessages).toEqual([]);
+            expect(result.current.resetData).toBeDefined();
 
             return promise.then(() => {
                 // When REST call is completed
@@ -114,7 +118,26 @@ describe("Create Rest Action (useHTTPAction)", () => {
                 expect(result.current.makeRequest).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Error);
                 expect(result.current.errorMessages).toEqual(["testError"]);
+                expect(result.current.resetData).toBeDefined();
             });
         });
+    });
+
+    it("should set the right state after calling resetData", async () => {
+        const mockFetchFunction = jest.fn();
+        const { result } = renderHook(() => useHTTPAction(mockFetchFunction));
+        await act(async () => {
+            await result.current.makeRequest(
+                "/api/hello/world",
+                "another",
+                "param"
+            );
+        });
+        await act(async () => {
+            result.current.resetData();
+        });
+
+        expect(result.current.data).toBeNull();
+        expect(result.current.status).toEqual(ActionStatus.ManualReset);
     });
 });

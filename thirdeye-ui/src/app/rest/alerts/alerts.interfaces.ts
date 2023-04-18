@@ -23,18 +23,10 @@ import {
 import { EnumerationItemParams } from "../dto/detection.interfaces";
 import { EnumerationItem } from "../dto/enumeration-item.interfaces";
 
-export interface UseGetEvaluationParams {
-    alert: {
-        id: number;
-    };
-    start: number;
-    end: number;
-}
-
 export interface GetEvaluation extends ActionHook {
     evaluation: AlertEvaluation | null;
     getEvaluation: (
-        evaluationParams: UseGetEvaluationParams,
+        evaluationParams: GetAlertEvaluationPayload,
         filters?: string[],
         enumerationItem?: { id: number } | EnumerationItem
     ) => Promise<AlertEvaluation | undefined>;
@@ -73,7 +65,13 @@ export interface GetAlertStats extends ActionHook {
     ) => Promise<AlertStats | undefined>;
 }
 
-export interface GetEvaluationRequestPayload extends UseGetEvaluationParams {
+export interface GetAlertEvaluationPayload {
+    alert: Alert | EditableAlert | Pick<Alert, "id">;
+    start: number;
+    end: number;
+}
+
+export interface GetEvaluationRequestPayload extends GetAlertEvaluationPayload {
     evaluationContext?: {
         filters?: string[];
         enumerationItem?:

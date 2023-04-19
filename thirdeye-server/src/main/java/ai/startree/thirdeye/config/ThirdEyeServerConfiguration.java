@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.config;
 
+import ai.startree.thirdeye.auth.AccessControlConfiguration;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
@@ -20,7 +21,6 @@ import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
-import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;

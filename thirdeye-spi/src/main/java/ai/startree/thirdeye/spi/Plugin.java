@@ -13,8 +13,7 @@
  */
 package ai.startree.thirdeye.spi;
 
-import ai.startree.thirdeye.spi.accessControl.AccessControl;
-import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
+import ai.startree.thirdeye.spi.accessControl.AccessControlFactory;
 import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
@@ -69,7 +68,7 @@ public interface Plugin {
     return Collections.emptyList();
   }
 
-  default AccessControl getAccessControl(AccessControlConfiguration config) {
-    return null;
+  default Iterable<AccessControlFactory> getAccessControlFactories() {
+    return Collections.emptyList();
   }
 }

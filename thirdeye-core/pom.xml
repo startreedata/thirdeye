@@ -40,10 +40,6 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
     </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
 
     <!-- Pin jackson version and omit from third party dependencies-->
     <dependency>
@@ -70,11 +66,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.couchbase.client</groupId>
-      <artifactId>java-client</artifactId>
-      <version>2.7.9</version>
-    </dependency>
 
     <!-- This is used to replace params in a string template -->
     <dependency>
@@ -98,6 +89,11 @@
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <!-- Swagger -->
     <dependency>
@@ -107,37 +103,6 @@
     <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-annotations</artifactId>
-    </dependency>
-
-    <!-- Subscription/Notification dependencies -->
-    <!-- https://mvnrepository.com/artifact/com.atlassian.jira/jira-rest-java-client-api -->
-    <dependency>
-      <groupId>com.atlassian.jira</groupId>
-      <artifactId>jira-rest-java-client-core</artifactId>
-      <version>5.1.6</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-client</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-json</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.atlassian.fugue</groupId>
-      <artifactId>fugue</artifactId>
-      <version>4.7.2</version>
-    </dependency>
-
-
-    <!-- yaml validator -->
-    <dependency>
-      <groupId>com.github.java-json-tools</groupId>
-      <artifactId>json-schema-validator</artifactId>
-      <version>${json-schema-validator.version}</version>
     </dependency>
   </dependencies>
 </project>

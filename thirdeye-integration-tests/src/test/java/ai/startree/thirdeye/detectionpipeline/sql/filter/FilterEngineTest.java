@@ -235,10 +235,9 @@ public class FilterEngineTest {
         List.of(STRING_FILTER_EQUAL, STRING_FILTER_NOT_EQUAL));
     final String output = filterEngine.prepareQuery();
 
-    final String quotedQuery = "WITH \"t\" AS (SELECT \"a\" FROM \"tableName\") (SELECT \"timeCol\" AS \"ts\", \"t\".\"a\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654)";
-    final String expected =
-        quotedQuery.substring(0, quotedQuery.length() - 1) + QUOTED_STRING_FILTER_EQUAL_TO_STRING
-            + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING + ")";
+    final String quotedQuery = "WITH \"t\" AS (SELECT \"a\" FROM \"tableName\") SELECT \"timeCol\" AS \"ts\", \"t\".\"a\" AS \"met\" FROM \"tableName\" WHERE \"ts\" >= 1232456765 AND \"ts\" < 5432987654";
+    final String expected = quotedQuery + QUOTED_STRING_FILTER_EQUAL_TO_STRING
+            + QUOTED_STRING_FILTER_NOT_EQUAL_TO_STRING;
 
     Assertions.assertThat(IntegrationTestUtils.cleanSql(output))
         .isEqualTo(IntegrationTestUtils.cleanSql(expected));

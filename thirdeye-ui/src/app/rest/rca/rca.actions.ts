@@ -38,7 +38,7 @@ import {
 } from "./rca.rest";
 
 export const useGetAnomalyMetricBreakdown = (): GetAnomalyMetricBreakdown => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AnomalyBreakdown>(getAnomalyMetricBreakdown);
 
     const getMetricBreakdown = (
@@ -53,12 +53,13 @@ export const useGetAnomalyMetricBreakdown = (): GetAnomalyMetricBreakdown => {
         getMetricBreakdown,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useGetAnomalyDimensionAnalysis =
     (): GetAnomalyDimensionAnalysis => {
-        const { data, makeRequest, status, errorMessages } =
+        const { data, makeRequest, status, errorMessages, resetData } =
             useHTTPAction<AnomalyDimensionAnalysisData>(
                 getDimensionAnalysisForAnomaly
             );
@@ -75,13 +76,13 @@ export const useGetAnomalyDimensionAnalysis =
             getDimensionAnalysisData,
             status,
             errorMessages,
+            resetData,
         };
     };
 
 export const useGetInvestigations = (): GetInvestigations => {
-    const { data, makeRequest, status, errorMessages } = useHTTPAction<
-        Investigation[]
-    >(getInvestigationsRest);
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<Investigation[]>(getInvestigationsRest);
 
     const getInvestigations = (
         anomalyId?: number
@@ -94,11 +95,12 @@ export const useGetInvestigations = (): GetInvestigations => {
         getInvestigations,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useGetInvestigation = (): GetInvestigation => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Investigation>(getInvestigationRest);
 
     const getInvestigation = (
@@ -112,11 +114,12 @@ export const useGetInvestigation = (): GetInvestigation => {
         getInvestigation,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useGetCohort = (): GetCohorts => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<CohortDetectionResponse>(getCohortsRest);
 
     const getCohorts = (
@@ -125,5 +128,11 @@ export const useGetCohort = (): GetCohorts => {
         return makeRequest(params);
     };
 
-    return { cohortsResponse: data, getCohorts, status, errorMessages };
+    return {
+        cohortsResponse: data,
+        getCohorts,
+        status,
+        errorMessages,
+        resetData,
+    };
 };

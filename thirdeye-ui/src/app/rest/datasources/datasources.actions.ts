@@ -32,7 +32,7 @@ import {
 } from "./datasources.rest";
 
 export const useGetDatasourceStatus = (): GetDatasourceStatus => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<GetStatusResponse>(getStatusForDatasource);
 
     const getDatasourceStatus = (
@@ -41,34 +41,52 @@ export const useGetDatasourceStatus = (): GetDatasourceStatus => {
         return makeRequest(datasourceName);
     };
 
-    return { healthStatus: data, getDatasourceStatus, status, errorMessages };
+    return {
+        healthStatus: data,
+        getDatasourceStatus,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 export const useGetDatasources = (): GetDatasources => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Datasource[]>(getAllDatasources);
 
     const getDatasources = (): Promise<Datasource[] | undefined> => {
         return makeRequest();
     };
 
-    return { datasources: data, getDatasources, status, errorMessages };
+    return {
+        datasources: data,
+        getDatasources,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 export const useGetDatasource = (): GetDatasource => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Datasource>(getDatasourceREST);
 
     const getDatasource = (id: number): Promise<Datasource | undefined> => {
         return makeRequest(id);
     };
 
-    return { datasource: data, getDatasource, status, errorMessages };
+    return {
+        datasource: data,
+        getDatasource,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 // Datasource may also be fetched by name
 export const useGetDatasourceByName = (): GetDatasourceByName => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Datasource>(getDatasourceByNameREST);
 
     const getDatasourceByName = (
@@ -77,14 +95,19 @@ export const useGetDatasourceByName = (): GetDatasourceByName => {
         return makeRequest(name);
     };
 
-    return { datasource: data, getDatasourceByName, status, errorMessages };
+    return {
+        datasource: data,
+        getDatasourceByName,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 export const useGetTablesForDatasourceName =
     (): GetTablesForDatasourceByName => {
-        const { data, makeRequest, status, errorMessages } = useHTTPAction<
-            Dataset[]
-        >(getTablesForDatasource);
+        const { data, makeRequest, status, errorMessages, resetData } =
+            useHTTPAction<Dataset[]>(getTablesForDatasource);
 
         const getTableForDatasourceName = (
             name: string
@@ -97,5 +120,6 @@ export const useGetTablesForDatasourceName =
             getTableForDatasourceName,
             status,
             errorMessages,
+            resetData,
         };
     };

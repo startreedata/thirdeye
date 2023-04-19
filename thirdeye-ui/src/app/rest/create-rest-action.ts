@@ -27,6 +27,7 @@ export interface UseHTTPActionHook<DataResponseType> {
     makeRequest: FetchFunction<DataResponseType | undefined>;
     status: ActionStatus;
     errorMessages: string[];
+    resetData: () => void;
 }
 
 function useHTTPAction<DataResponseType>(
@@ -69,7 +70,12 @@ function useHTTPAction<DataResponseType>(
         return undefined;
     }, []);
 
-    return { data, makeRequest, status, errorMessages };
+    const resetData = useCallback(() => {
+        setStatus(ActionStatus.ManualReset);
+        setData(null);
+    }, [setData]);
+
+    return { data, makeRequest, status, errorMessages, resetData };
 }
 
 export { useHTTPAction };

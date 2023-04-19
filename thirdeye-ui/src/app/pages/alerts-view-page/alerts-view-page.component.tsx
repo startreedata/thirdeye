@@ -118,6 +118,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         getAnomalies,
         errorMessages: getAnomaliesErrorsMessages,
         status: anomaliesRequestStatus,
+        resetData: resetAnomaliesData,
     } = useGetAnomalies();
     const [searchParams, setSearchParams] = useSearchParams();
     const [expanded, setExpanded] = useState<string[]>(
@@ -444,6 +445,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => {
+                resetAnomaliesData();
                 resetAlert(alert.id).then(() => {
                     getAnomalies({
                         alertId: alert.id,

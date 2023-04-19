@@ -24,6 +24,7 @@ import type {
 } from "../dto/alert.interfaces";
 import { EnumerationItemParams } from "../dto/detection.interfaces";
 import {
+    GetAlertEvaluationPayload,
     GetAlertStatsParams,
     GetEvaluationRequestPayload,
 } from "./alerts.interfaces";
@@ -124,7 +125,7 @@ export const resetAlert = async (id: number): Promise<Alert> => {
 };
 
 export const getAlertEvaluation = async (
-    alertEvaluation: AlertEvaluation,
+    alertEvaluation: GetAlertEvaluationPayload,
     filters?: string[], // array of strings in `column=value` format
     enumerationItem?: { id: number } | EnumerationItemParams
 ): Promise<AlertEvaluation> => {

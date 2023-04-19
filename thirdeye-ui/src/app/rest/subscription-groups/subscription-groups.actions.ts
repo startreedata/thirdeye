@@ -25,9 +25,8 @@ import {
 } from "./subscription-groups.rest";
 
 export const useGetSubscriptionGroups = (): GetSubscriptionGroups => {
-    const { data, makeRequest, status, errorMessages } = useHTTPAction<
-        SubscriptionGroup[]
-    >(getAllSubscriptionGroups);
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<SubscriptionGroup[]>(getAllSubscriptionGroups);
 
     const getSubscriptionGroups = (): Promise<
         SubscriptionGroup[] | undefined
@@ -40,11 +39,12 @@ export const useGetSubscriptionGroups = (): GetSubscriptionGroups => {
         getSubscriptionGroups,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useCreateSubscriptionGroup = (): CreateSubscriptionGroup => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<SubscriptionGroup>(createSubscriptionGroup);
 
     const createNewSubscriptionGroup = (
@@ -58,5 +58,6 @@ export const useCreateSubscriptionGroup = (): CreateSubscriptionGroup => {
         createNewSubscriptionGroup,
         status,
         errorMessages,
+        resetData,
     };
 };

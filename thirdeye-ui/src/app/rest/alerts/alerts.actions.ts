@@ -23,13 +23,13 @@ import {
 import { EnumerationItem } from "../dto/enumeration-item.interfaces";
 import {
     GetAlert,
+    GetAlertEvaluationPayload,
     GetAlertInsight,
     GetAlerts,
     GetAlertStats,
     GetAlertStatsParams,
     GetEvaluation,
     ResetAlert,
-    UseGetEvaluationParams,
 } from "./alerts.interfaces";
 import {
     getAlert as getAlertREST,
@@ -41,44 +41,50 @@ import {
 } from "./alerts.rest";
 
 export const useGetEvaluation = (): GetEvaluation => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AlertEvaluation>(getAlertEvaluation);
 
     const getEvaluation = (
-        evaluationParams: UseGetEvaluationParams,
+        evaluationParams: GetAlertEvaluationPayload,
         filters?: string[],
         enumerationItem?: { id: number } | EnumerationItem
     ): Promise<AlertEvaluation | undefined> => {
         return makeRequest(evaluationParams, filters, enumerationItem);
     };
 
-    return { evaluation: data, getEvaluation, status, errorMessages };
+    return {
+        evaluation: data,
+        getEvaluation,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 export const useGetAlert = (): GetAlert => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Alert>(getAlertREST);
 
     const getAlert = (alertId: number): Promise<Alert | undefined> => {
         return makeRequest(alertId);
     };
 
-    return { alert: data, getAlert, status, errorMessages };
+    return { alert: data, getAlert, status, errorMessages, resetData };
 };
 
 export const useGetAlerts = (): GetAlerts => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Alert[]>(getAllAlerts);
 
     const getAlerts = (): Promise<Alert[] | undefined> => {
         return makeRequest();
     };
 
-    return { alerts: data, getAlerts, status, errorMessages };
+    return { alerts: data, getAlerts, status, errorMessages, resetData };
 };
 
 export const useGetAlertInsight = (): GetAlertInsight => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AlertInsight>(getAlertInsightREST);
 
     const getAlertInsight = (params: {
@@ -88,22 +94,28 @@ export const useGetAlertInsight = (): GetAlertInsight => {
         return makeRequest(params);
     };
 
-    return { alertInsight: data, getAlertInsight, status, errorMessages };
+    return {
+        alertInsight: data,
+        getAlertInsight,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 export const useResetAlert = (): ResetAlert => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Alert>(resetAlertREST);
 
     const resetAlert = (alertId: number): Promise<Alert | undefined> => {
         return makeRequest(alertId);
     };
 
-    return { alert: data, resetAlert, status, errorMessages };
+    return { alert: data, resetAlert, status, errorMessages, resetData };
 };
 
 export const useGetAlertStats = (): GetAlertStats => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AlertStats>(getAlertStatsREST);
 
     const getAlertStats = (
@@ -112,5 +124,11 @@ export const useGetAlertStats = (): GetAlertStats => {
         return makeRequest(params);
     };
 
-    return { alertStats: data, getAlertStats, status, errorMessages };
+    return {
+        alertStats: data,
+        getAlertStats,
+        status,
+        errorMessages,
+        resetData,
+    };
 };

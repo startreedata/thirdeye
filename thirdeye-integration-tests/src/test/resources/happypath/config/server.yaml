@@ -56,6 +56,14 @@ swagger:
   # package to scan for jersey resources
   resourcePackage: ai.startree.thirdeye.resources
 
+scheduler:
+  # enable the scheduler - to have templates loaded
+  enabled: true
+  alertUpdateDelay: 1
+
+  detectionPipeline: false
+  detectionAlert: false
+
 # Start the Task Driver. This module runs the detection and notification tasks
 taskDriver:
   enabled: true

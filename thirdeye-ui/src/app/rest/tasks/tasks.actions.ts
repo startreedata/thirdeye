@@ -18,7 +18,7 @@ import { GetTasks, GetTasksProps } from "./tasks.interfaces";
 import { getTasks as getTasksREST } from "./tasks.rest";
 
 export const useGetTasks = (): GetTasks => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Task[]>(getTasksREST);
 
     const getTasks = (
@@ -32,5 +32,6 @@ export const useGetTasks = (): GetTasks => {
         getTasks,
         status,
         errorMessages,
+        resetData,
     };
 };

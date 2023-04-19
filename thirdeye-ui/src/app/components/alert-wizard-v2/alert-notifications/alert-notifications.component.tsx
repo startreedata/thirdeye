@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Button, Grid, Switch, Typography } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
@@ -27,7 +28,7 @@ export const AlertNotifications: FunctionComponent<AlertNotificationsProps> = ({
 }) => {
     const { t } = useTranslation();
     const [isNotificationsOn, setIsNotificationsOn] = useState(
-        initiallySelectedSubscriptionGroups.length > 0
+        !isEmpty(initiallySelectedSubscriptionGroups)
     );
 
     return (

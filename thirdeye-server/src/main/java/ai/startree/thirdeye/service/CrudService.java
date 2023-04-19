@@ -24,7 +24,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
-import static com.couchbase.client.core.lang.backport.java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
@@ -41,6 +40,7 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -122,7 +122,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
-        .peek(dto -> requireNonNull(dto.getId(), "DB update failed!"))
+        .peek(dto -> Objects.requireNonNull(dto.getId(), "DB update failed!"))
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
   }

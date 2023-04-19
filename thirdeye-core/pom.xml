@@ -70,11 +70,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.couchbase.client</groupId>
-      <artifactId>java-client</artifactId>
-      <version>2.7.9</version>
-    </dependency>
 
     <!-- This is used to replace params in a string template -->
     <dependency>

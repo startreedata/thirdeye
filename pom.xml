@@ -77,7 +77,6 @@
     <jackson.version>2.10.5</jackson.version>
     <jetty.version>9.4.48.v20220622</jetty.version>
     <jodatime.version>2.7</jodatime.version>
-    <json-schema-validator.version>2.2.14</json-schema-validator.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <mockito.version>4.3.1</mockito.version>
     <modelmapper.version>3.1.0</modelmapper.version>

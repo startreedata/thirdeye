@@ -126,13 +126,5 @@
       <artifactId>fugue</artifactId>
       <version>4.7.2</version>
     </dependency>
-
-
-    <!-- yaml validator -->
-    <dependency>
-      <groupId>com.github.java-json-tools</groupId>
-      <artifactId>json-schema-validator</artifactId>
-      <version>${json-schema-validator.version}</version>
-    </dependency>
   </dependencies>
 </project>

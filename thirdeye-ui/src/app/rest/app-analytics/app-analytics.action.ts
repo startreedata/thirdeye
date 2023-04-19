@@ -18,12 +18,18 @@ import { GetAppAnalytics } from "./app-analytics.interfaces";
 import { getAppAnalytics as getAppAnalyticsREST } from "./app-analytics.rest";
 
 export const useGetAppAnalytics = (): GetAppAnalytics => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AppAnalytics>(getAppAnalyticsREST);
 
     const getAppAnalytics = (): Promise<AppAnalytics | undefined> => {
         return makeRequest();
     };
 
-    return { appAnalytics: data, getAppAnalytics, status, errorMessages };
+    return {
+        appAnalytics: data,
+        getAppAnalytics,
+        status,
+        errorMessages,
+        resetData,
+    };
 };

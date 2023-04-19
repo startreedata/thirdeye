@@ -17,9 +17,11 @@ export enum ActionStatus {
     Working,
     Done,
     Error,
+    ManualReset,
 }
 
 export interface ActionHook {
     status: ActionStatus;
     errorMessages: string[];
+    resetData: () => void;
 }

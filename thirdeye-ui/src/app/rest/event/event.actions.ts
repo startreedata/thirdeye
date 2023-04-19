@@ -28,18 +28,18 @@ import {
 } from "./events.rest";
 
 export const useGetEvent = (): GetEvent => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Event>(getEventRest);
 
     const getEvent = (id: number): Promise<Event | undefined> => {
         return makeRequest(id);
     };
 
-    return { event: data, getEvent, status, errorMessages };
+    return { event: data, getEvent, status, errorMessages, resetData };
 };
 
 export const useGetEvents = (): GetEvents => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Event[]>(getAllEventsRest);
 
     const getEvents = (
@@ -53,13 +53,13 @@ export const useGetEvents = (): GetEvents => {
         getEvents,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useGetEventsForAnomaly = (): GetEventsForAnomaly => {
-    const { data, makeRequest, status, errorMessages } = useHTTPAction<Event[]>(
-        getEventsForAnomalyRest
-    );
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<Event[]>(getEventsForAnomalyRest);
 
     const getEventsForAnomaly = (
         getEventsParams: GetEventsForAnomalyRestProps
@@ -72,5 +72,6 @@ export const useGetEventsForAnomaly = (): GetEventsForAnomaly => {
         getEventsForAnomaly,
         status,
         errorMessages,
+        resetData,
     };
 };

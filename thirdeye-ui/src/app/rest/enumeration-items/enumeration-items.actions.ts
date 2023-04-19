@@ -25,9 +25,8 @@ import {
 } from "./enumeration-items.rest";
 
 export const useGetEnumerationItems = (): GetEnumerationItems => {
-    const { data, makeRequest, status, errorMessages } = useHTTPAction<
-        EnumerationItem[]
-    >(getEnumerationItemsREST);
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<EnumerationItem[]>(getEnumerationItemsREST);
 
     const getEnumerationItems = (
         getEnumerationItemsParams: GetEnumerationItemsProps = {}
@@ -40,11 +39,12 @@ export const useGetEnumerationItems = (): GetEnumerationItems => {
         getEnumerationItems,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useGetEnumerationItem = (): GetEnumerationItem => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<EnumerationItem>(getEnumerationItemREST);
 
     const getEnumerationItem = (
@@ -58,5 +58,6 @@ export const useGetEnumerationItem = (): GetEnumerationItem => {
         getEnumerationItem,
         status,
         errorMessages,
+        resetData,
     };
 };

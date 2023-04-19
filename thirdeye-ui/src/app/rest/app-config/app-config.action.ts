@@ -18,12 +18,18 @@ import { GetAppConfiguration } from "./app-config.interfaces";
 import { getAppConfiguration as getAppConfigurationRest } from "./app-config.rest";
 
 export const useGetAppConfiguration = (): GetAppConfiguration => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AppConfiguration>(getAppConfigurationRest);
 
     const getAppConfiguration = (): Promise<AppConfiguration | undefined> => {
         return makeRequest();
     };
 
-    return { appConfig: data, getAppConfiguration, status, errorMessages };
+    return {
+        appConfig: data,
+        getAppConfiguration,
+        status,
+        errorMessages,
+        resetData,
+    };
 };

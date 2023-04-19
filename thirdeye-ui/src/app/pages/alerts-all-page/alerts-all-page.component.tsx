@@ -17,8 +17,8 @@ import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
 import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
-import { CreateMenuButton } from "../../components/create-menu-button.component/create-menu-button.component";
 import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -286,10 +286,14 @@ export const AlertsAllPage: FunctionComponent = () => {
                                     </Box>
                                 </Button>
                             )}
-                        />{" "}
-                        {/* Rendering the create button here instead of using the
-                        `showCreateButton` to show it in the same row as the help button */}
-                        <CreateMenuButton />
+                        />
+                        <Button
+                            color="primary"
+                            component={RouterLink}
+                            to={getAlertsCreatePath()}
+                        >
+                            {t("label.create")}
+                        </Button>
                     </PageHeaderActionsV1>
                 }
                 title={t("label.alerts")}

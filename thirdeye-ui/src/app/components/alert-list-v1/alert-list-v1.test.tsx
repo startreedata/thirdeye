@@ -68,6 +68,9 @@ jest.mock("../../platform/components", () => ({
     DataGridScrollV1: {
         Body: jest.fn().mockImplementation((props) => props.children),
     },
+    DataGridSortOrderV1: {
+        DESC: "DESC",
+    },
 }));
 
 describe("AlertListV1", () => {

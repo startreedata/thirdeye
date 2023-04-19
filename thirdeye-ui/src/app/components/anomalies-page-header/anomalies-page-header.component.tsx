@@ -16,14 +16,14 @@ import { Icon } from "@iconify/react";
 import { Box, Button } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import { PageHeaderActionsV1 } from "../../platform/components";
 import {
     AppRouteRelative,
     getAnomaliesAllPath,
+    getAnomaliesCreatePath,
 } from "../../utils/routes/routes.util";
 import { Crumb } from "../breadcrumbs/breadcrumbs.interfaces";
-import { CreateMenuButton } from "../create-menu-button.component/create-menu-button.component";
 import { anomaliesBasicHelpCards } from "../help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../page-header/page-header.component";
@@ -81,10 +81,15 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
                                     </Box>
                                 </Button>
                             )}
-                        />{" "}
-                        {/* Rendering the create button here instead of using the
-                        `showCreateButton` to show it in the same row as the help button */}
-                        <CreateMenuButton />
+                        />
+
+                        <Button
+                            color="primary"
+                            component={RouterLink}
+                            to={getAnomaliesCreatePath()}
+                        >
+                            {t("label.create")}
+                        </Button>
                     </PageHeaderActionsV1>
                 }
                 subNavigation={[

@@ -176,7 +176,7 @@ export const getUiAlert = (
 
     // Map subscription groups to alert ids
     const subscriptionGroupsToAlertIdsMap =
-        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
+        generateAlertIdToSubscriptionGroupMap(subscriptionGroups);
 
     return getUiAlertInternal(alert as Alert, subscriptionGroupsToAlertIdsMap);
 };
@@ -191,7 +191,7 @@ export const getUiAlerts = (
 
     // Map subscription groups to alert ids
     const subscriptionGroupsToAlertIdsMap =
-        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
+        generateAlertIdToSubscriptionGroupMap(subscriptionGroups);
 
     const uiAlerts = [];
     for (const alert of alerts) {
@@ -295,17 +295,20 @@ const getUiAlertInternal = (
     return uiAlert;
 };
 
-const mapSubscriptionGroupsToAlertIds = (
+const generateAlertIdToSubscriptionGroupMap = (
     subscriptionGroups: SubscriptionGroup[]
 ): Map<number, UiAlertSubscriptionGroup[]> => {
-    const subscriptionGroupsToAlertIdsMap = new Map();
+    const alertIdToSubscriptionGroup = new Map();
 
     if (isEmpty(subscriptionGroups)) {
-        return subscriptionGroupsToAlertIdsMap;
+        return alertIdToSubscriptionGroup;
     }
 
     for (const subscriptionGroup of subscriptionGroups) {
-        if (isEmpty(subscriptionGroup.alerts)) {
+        if (
+            isEmpty(subscriptionGroup.alerts) &&
+            isEmpty(subscriptionGroup.alertAssociations)
+        ) {
             continue;
         }
 
@@ -315,24 +318,37 @@ const mapSubscriptionGroupsToAlertIds = (
             subscriptionGroup.name || i18n.t("label.no-data-marker");
 
         const alerts = getSubscriptionGroupAlertsList(subscriptionGroup);
-
         for (const alert of alerts) {
-            const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(
-                alert.id
+            const subscriptionGroupsForAlert =
+                alertIdToSubscriptionGroup.get(alert.id) || [];
+
+            subscriptionGroupsForAlert.push(uiAlertSubscriptionGroup);
+            alertIdToSubscriptionGroup.set(
+                alert.id,
+                subscriptionGroupsForAlert
             );
-            if (subscriptionGroups) {
-                // Add to existing list
-                subscriptionGroups.push(uiAlertSubscriptionGroup);
-            } else {
-                // Create and add to list
-                subscriptionGroupsToAlertIdsMap.set(alert.id, [
-                    uiAlertSubscriptionGroup,
-                ]);
-            }
         }
     }
 
-    return subscriptionGroupsToAlertIdsMap;
+    // Ensure subscription group is unique i nlist
+    for (const [alertId, subscriptionGroups] of alertIdToSubscriptionGroup) {
+        const idToSubscriptionGroup: {
+            [index: number]: UiAlertSubscriptionGroup;
+        } = {};
+
+        subscriptionGroups.forEach(
+            (subscriptionGroup: UiAlertSubscriptionGroup) => {
+                idToSubscriptionGroup[subscriptionGroup.id] = subscriptionGroup;
+            }
+        );
+
+        alertIdToSubscriptionGroup.set(
+            alertId,
+            Object.values(idToSubscriptionGroup)
+        );
+    }
+
+    return alertIdToSubscriptionGroup;
 };
 
 export const extractDetectionEvaluation = (

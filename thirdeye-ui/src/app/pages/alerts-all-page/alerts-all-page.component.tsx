@@ -14,7 +14,6 @@
  */
 import { Icon } from "@iconify/react";
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
-import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -35,21 +34,16 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useResetAlert } from "../../rest/alerts/alerts.actions";
-import { deleteAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
+import { useGetAlerts, useResetAlert } from "../../rest/alerts/alerts.actions";
+import { deleteAlert } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
-import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
+import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { getUiAlerts } from "../../utils/alerts/alerts.util";
-import { PROMISES } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsCreatePath } from "../../utils/routes/routes.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isError, setIsError] = useState(false);
     const [uiAlerts, setUiAlerts] = useState<UiAlert[] | null>(null);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
@@ -60,8 +54,20 @@ export const AlertsAllPage: FunctionComponent = () => {
         status,
         errorMessages,
     } = useResetAlert();
+    const {
+        alerts,
+        getAlerts,
+        status: getAlertsStatus,
+        errorMessages: getAlertsErrors,
+    } = useGetAlerts();
+    const {
+        subscriptionGroups,
+        getSubscriptionGroups,
+        status: getSubscriptionGroupStatus,
+        errorMessages: getSubscriptionGroupErrors,
+    } = useGetSubscriptionGroups();
 
-    // Handle communicating status to the user
+    // Handle communicating alert reset status to the user
     useEffect(() => {
         if (status === ActionStatus.Done && alertThatWasReset) {
             notify(
@@ -79,80 +85,42 @@ export const AlertsAllPage: FunctionComponent = () => {
         );
     }, [status]);
 
-    let isMounted = true;
-
     useEffect(() => {
-        // Time range refreshed, fetch alerts
-        fetchAllAlerts();
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
-    const fetchAllAlerts = (): void => {
-        setIsLoading(true);
-        setUiAlerts(null);
-
-        let fetchedUiAlerts: UiAlert[] = [];
-        let fetchedSubscriptionGroups: SubscriptionGroup[] = [];
-        Promise.allSettled([getAllAlerts(), getAllSubscriptionGroups()])
-            .then(([alertsResponse, subscriptionGroupsResponse]) => {
-                if (!isMounted) {
-                    return;
-                }
-                // Determine if any of the calls failed
-                if (
-                    subscriptionGroupsResponse.status === PROMISES.REJECTED ||
-                    alertsResponse.status === PROMISES.REJECTED
-                ) {
-                    setIsError(true);
-                    const axiosError =
-                        alertsResponse.status === PROMISES.REJECTED
-                            ? alertsResponse.reason
-                            : subscriptionGroupsResponse.status ===
-                              PROMISES.REJECTED
-                            ? subscriptionGroupsResponse.reason
-                            : ({} as AxiosError);
-
-                    notifyIfErrors(
-                        ActionStatus.Error,
-                        getErrorMessages(axiosError),
-                        notify,
-                        t("message.error-while-fetching", {
-                            entity: t(
-                                alertsResponse.status === PROMISES.REJECTED
-                                    ? "label.alerts"
-                                    : "label.subscription-groups"
-                            ),
-                        })
-                    );
-                } else {
-                    setIsError(false);
-                }
-
-                // Attempt to gather data
-                if (subscriptionGroupsResponse.status === PROMISES.FULFILLED) {
-                    fetchedSubscriptionGroups =
-                        subscriptionGroupsResponse.value;
-                }
-                if (alertsResponse.status === PROMISES.FULFILLED) {
-                    fetchedUiAlerts = getUiAlerts(
-                        alertsResponse.value,
-                        fetchedSubscriptionGroups
-                    );
-                }
+        notifyIfErrors(
+            getAlertsStatus,
+            getAlertsErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.alerts"),
             })
-            .finally(() => {
-                if (!isMounted) {
-                    return;
-                }
-                setIsLoading(false);
-                setUiAlerts(fetchedUiAlerts);
-            });
-    };
+        );
+    }, [getAlertsErrors]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            getSubscriptionGroupStatus,
+            getSubscriptionGroupErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.subscription-groups"),
+            })
+        );
+    }, [getSubscriptionGroupErrors]);
+
+    useEffect(() => {
+        getAlerts();
+        getSubscriptionGroups();
+    }, []);
+
+    useEffect(() => {
+        if (alerts) {
+            if (subscriptionGroups) {
+                setUiAlerts(getUiAlerts(alerts, subscriptionGroups));
+            } else {
+                setUiAlerts(getUiAlerts(alerts, []));
+            }
+        }
+    }, [alerts, subscriptionGroups]);
 
     const handleAlertDelete = (uiAlert: UiAlert): void => {
         showDialog({
@@ -212,8 +180,12 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const loadingErrorStateParams = {
-        isError,
-        isLoading,
+        isError: getAlertsStatus === ActionStatus.Error,
+        isLoading:
+            getAlertsStatus === ActionStatus.Working ||
+            getAlertsStatus === ActionStatus.Initial ||
+            getSubscriptionGroupStatus === ActionStatus.Initial ||
+            getSubscriptionGroupStatus === ActionStatus.Working,
         wrapInGrid: true,
         wrapInCard: true,
     };

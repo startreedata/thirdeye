@@ -367,11 +367,13 @@ export const getSubscriptionGroupAlertsList = (
     const { alertAssociations, alerts } = subscriptionGroup;
 
     if (alertAssociations && !isEmpty(alertAssociations)) {
-        extractedAlerts = alertAssociations.map(
-            (association) => association.alert
+        alertAssociations.forEach((association) =>
+            extractedAlerts.push(association.alert)
         );
-    } else if (alerts && !isEmpty(alerts)) {
-        extractedAlerts = alerts;
+    }
+
+    if (alerts && !isEmpty(alerts)) {
+        extractedAlerts = [...extractedAlerts, ...alerts];
     }
 
     return extractedAlerts;

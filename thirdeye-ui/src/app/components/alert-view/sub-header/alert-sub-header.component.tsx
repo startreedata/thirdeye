@@ -17,12 +17,14 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
     JSONEditorV1,
     useDialogProviderV1,
 } from "../../../platform/components";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { getAlertsUpdatePath } from "../../../utils/routes/routes.util";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
 
@@ -30,6 +32,7 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     alert,
     timezone,
 }) => {
+    const navigate = useNavigate();
     const { showDialog, hideDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const theme = useTheme();
@@ -42,7 +45,8 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
                 <JSONEditorV1<Alert> disableValidation readOnly value={alert} />
             ),
             width: "md",
-            hideCancelButton: true,
+            cancelButtonText: t("label.edit"),
+            onCancel: () => navigate(getAlertsUpdatePath(alert.id)),
             okButtonText: t("label.close"),
             onOk: hideDialog,
         });

@@ -36,3 +36,5 @@ tableSpec:
   tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/pageviews_with_floats'
 pinotClusterSpecs:
   - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'
+pushJobSpec:
+  pushAttempts: 1

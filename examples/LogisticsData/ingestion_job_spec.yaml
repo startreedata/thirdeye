@@ -36,3 +36,5 @@ tableSpec:
   tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/LogisticsData'
 pinotClusterSpecs:
   - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'
+pushJobSpec:
+  pushAttempts: 1

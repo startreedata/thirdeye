@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datasource.loader;
 
+import static ai.startree.thirdeye.datasource.calcite.SelectQueryTranslator.TIME_AGGREGATION_ALIAS;
+import static ai.startree.thirdeye.datasource.calcite.SelectQueryTranslator.getTimeColumnProjection;
 import static ai.startree.thirdeye.util.CalciteUtils.addAlias;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
@@ -27,7 +29,6 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
-import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -38,7 +39,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,7 +53,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultMinMaxTimeLoader.class);
 
-  private static final String TIME_ALIAS = "timeMillis";
+  private static final String TIME_ALIAS = TIME_AGGREGATION_ALIAS;
 
   private final DataSourceCache dataSourceCache;
   private final ExecutorService executorService;
@@ -135,21 +135,26 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
    */
   private String extremumTimeSqlQuery(final DatasetConfigDTO datasetConfigDTO,
       final ThirdEyeDataSource thirdEyeDataSource, final Extremum extremum,
-      final Interval timeFilterInterval) {
+      final @Nullable Interval timeFilterInterval) {
     final SqlExpressionBuilder sqlExpressionBuilder = thirdEyeDataSource.getSqlExpressionBuilder();
     final SqlLanguage sqlLanguage = thirdEyeDataSource.getSqlLanguage();
     final SqlDialect dialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
     final Config sqlParserConfig = SqlLanguageTranslator.translate(
         sqlLanguage.getSqlParserConfig());
 
-    final SqlNode projection = getTimeColumnToMillisProjection(datasetConfigDTO,
-        sqlExpressionBuilder,
-        dialect, sqlParserConfig);
+    final SqlNode timeColumnProjection = getTimeColumnProjection(sqlExpressionBuilder, dialect,
+        sqlParserConfig,
+        datasetConfigDTO.getTimeColumn(),
+        datasetConfigDTO.getTimeFormat(),
+        Period.millis(1),
+        datasetConfigDTO.getTimeUnit().toString(),
+        DateTimeZone.UTC.toString());
+    final SqlNode timeColumnWithAlias = addAlias(timeColumnProjection, TIME_ALIAS);
 
     final SqlNode orderByNode = extremum.orderByNode(datasetConfigDTO.getTimeColumn());
 
     final SelectQuery calciteRequestBuilder = new SelectQuery(datasetConfigDTO.getDataset())
-        .select(projection)
+        .select(timeColumnWithAlias)
         .orderBy(orderByNode)
         .limit(1);
 
@@ -161,23 +166,6 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     }
 
     return calciteRequestBuilder.build().getSql(sqlLanguage, sqlExpressionBuilder);
-  }
-
-  // fixme cyril code is duplicated with timeAggregation in calciteRequest - remove this see CalciteRequest L212
-  private SqlNode getTimeColumnToMillisProjection(final DatasetConfigDTO datasetConfigDTO,
-      final SqlExpressionBuilder sqlExpressionBuilder, final SqlDialect dialect,
-      final SqlParser.Config sqlParserConfig) {
-    final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
-    final String timeGroupExpression = sqlExpressionBuilder.getTimeGroupExpression(
-        quoteSafeTimeColumn,
-        datasetConfigDTO.getTimeFormat(),
-        Period.millis(1),
-        datasetConfigDTO.getTimeUnit().toString(),
-        DateTimeZone.UTC.toString());
-
-    final SqlNode timeGroupNode = CalciteUtils.expressionToNode(timeGroupExpression,
-        sqlParserConfig);
-    return addAlias(timeGroupNode, TIME_ALIAS);
   }
 
   private enum Extremum {

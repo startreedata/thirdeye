@@ -48,7 +48,7 @@ import org.joda.time.Period;
  **/
 public class SelectQueryTranslator {
 
-  public static final String TIME_AGGREGATION_ALIAS = "teTimeGroup";
+  public static final String TIME_AGGREGATION_ALIAS = "formattedTime";
   public static final boolean QUOTE_IDENTIFIERS = true;
 
   // SELECT clause
@@ -144,7 +144,8 @@ public class SelectQueryTranslator {
 
   public String getSql(final SqlLanguage sqlLanguage,
       final SqlExpressionBuilder expressionBuilder) {
-    final SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(sqlLanguage.getSqlParserConfig());
+    final SqlParser.Config sqlParserConfig = SqlLanguageTranslator.translate(
+        sqlLanguage.getSqlParserConfig());
     final SqlDialect sqlDialect = SqlLanguageTranslator.translate(sqlLanguage.getSqlDialect());
 
     final SqlNode sqlNode = getSqlNode(sqlParserConfig, expressionBuilder, sqlDialect);
@@ -171,24 +172,36 @@ public class SelectQueryTranslator {
   }
 
   private SqlNodeList getSelectList(final SqlParser.Config sqlParserConfig,
-      final SqlExpressionBuilder expressionBuilder, final SqlDialect dialect) {
-    final List<SqlNode> selectIdentifiers = mergeProjectionsLists(sqlParserConfig, expressionBuilder,
+      final SqlExpressionBuilder sqlExpressionBuilder, final SqlDialect dialect) {
+    final List<SqlNode> selectIdentifiers = mergeProjectionsLists(sqlParserConfig,
+        sqlExpressionBuilder,
         selectProjections, freeTextSelectProjections, sqlNodeSelectProjections
     );
     // add time aggregation projection
     if (timeAggregationGranularity != null) {
-      final String timeGroupExpression = expressionBuilder.getTimeGroupExpression(
-          quoteIdentifierIfReserved(timeAggregationColumn, sqlParserConfig, dialect),
-          timeAggregationColumnFormat,
-          timeAggregationGranularity,
-          timeAggregationColumnUnit,
-          timeAggregationTimezone);
-      final SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
+      final SqlNode timeGroupNode = getTimeColumnProjection(sqlExpressionBuilder, dialect,
+          sqlParserConfig,
+          timeAggregationColumn, timeAggregationColumnFormat, timeAggregationGranularity,
+          timeAggregationColumnUnit, timeAggregationTimezone);
       final SqlNode timeGroupWithAlias = addAlias(timeGroupNode, TIME_AGGREGATION_ALIAS);
       selectIdentifiers.add(timeGroupWithAlias);
     }
 
     return SqlNodeList.of(SqlParserPos.ZERO, selectIdentifiers);
+  }
+
+  public static SqlNode getTimeColumnProjection(final SqlExpressionBuilder sqlExpressionBuilder,
+      final SqlDialect dialect, final SqlParser.Config sqlParserConfig,
+      final String timeAggregationColumn, final String timeAggregationColumnFormat,
+      final Period timeAggregationGranularity, final String timeAggregationColumnUnit,
+      final String timeAggregationTimezone) {
+    final String timeGroupExpression = sqlExpressionBuilder.getTimeGroupExpression(
+        quoteIdentifierIfReserved(timeAggregationColumn, sqlParserConfig, dialect),
+        timeAggregationColumnFormat,
+        timeAggregationGranularity,
+        timeAggregationColumnUnit,
+        timeAggregationTimezone);
+    return expressionToNode(timeGroupExpression, sqlParserConfig);
   }
 
   private SqlNode getFrom() {

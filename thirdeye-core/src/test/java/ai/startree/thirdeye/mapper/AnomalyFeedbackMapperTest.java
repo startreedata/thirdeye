@@ -16,7 +16,9 @@ package ai.startree.thirdeye.mapper;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
+import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -25,64 +27,57 @@ import org.testng.annotations.Test;
 public class AnomalyFeedbackMapperTest {
 
   @Test
-  public void toApi_convertsFeedbackType() {
-    final AnomalyFeedbackDTO dto = new AnomalyFeedbackDTO();
-    dto.setFeedbackType(AnomalyFeedbackType.ANOMALY);
+  public void toApi() {
+    final AnomalyFeedbackDTO dto = new AnomalyFeedbackDTO()
+        .setFeedbackType(AnomalyFeedbackType.ANOMALY)
+        .setCause(AnomalyCause.FRAUD)
+        .setComment("comment");
+    Instant expectedTime = Instant.now();
+    dto.setCreateTime(Timestamp.from(expectedTime))
+        .setUpdateTime(Timestamp.from(expectedTime))
+        .setUpdatedBy("updatedBy")
+        .setCreatedBy("createdBy");
 
     AnomalyFeedbackApi api = AnomalyFeedbackMapper.INSTANCE.toApi(dto);
 
     assertThat(api.getType()).isEqualTo(AnomalyFeedbackType.ANOMALY);
+    assertThat(api.getCause()).isEqualTo(AnomalyCause.FRAUD);
+    assertThat(api.getComment()).isEqualTo("comment");
+    assertThat(api.getOwner().getPrincipal()).isEqualTo("createdBy");
+    assertThat(api.getUpdatedBy().getPrincipal()).isEqualTo("updatedBy");
+    assertThat(api.getCreated().toInstant()).isEqualTo(expectedTime);
+    assertThat(api.getUpdated().toInstant()).isEqualTo(expectedTime);
   }
 
   @Test
-  public void toApi_convertsCreateTime() {
-    final AnomalyFeedbackDTO dto = new AnomalyFeedbackDTO();
-    Instant createTime = Instant.now();
-    dto.setCreateTime(Timestamp.from(createTime));
-
-    AnomalyFeedbackApi api = AnomalyFeedbackMapper.INSTANCE.toApi(dto);
-
-    assertThat(api.getCreated().toInstant()).isEqualTo(createTime);
-  }
-
-  @Test
-  public void toApi_convertsUpdateTime() {
-    final AnomalyFeedbackDTO dto = new AnomalyFeedbackDTO();
-    Instant updateTime = Instant.now();
-    dto.setUpdateTime(Timestamp.from(updateTime));
-
-    AnomalyFeedbackApi api = AnomalyFeedbackMapper.INSTANCE.toApi(dto);
-
-    assertThat(api.getUpdated().toInstant()).isEqualTo(updateTime);
-  }
-
-  @Test
-  public void toDto_convertsType() {
-    final AnomalyFeedbackApi api = new AnomalyFeedbackApi();
-    api.setType(AnomalyFeedbackType.ANOMALY_EXPECTED);
+  public void toDto() {
+    final AnomalyFeedbackApi api = new AnomalyFeedbackApi()
+        .setType(AnomalyFeedbackType.ANOMALY_EXPECTED)
+        .setCause(AnomalyCause.FRAUD)
+        .setComment("comment")
+        .setId(1234L);
 
     AnomalyFeedbackDTO dto = AnomalyFeedbackMapper.INSTANCE.toDto(api);
 
     assertThat(dto.getFeedbackType()).isEqualTo(AnomalyFeedbackType.ANOMALY_EXPECTED);
+    assertThat(dto.getCause()).isEqualTo(AnomalyCause.FRAUD);
+    assertThat(dto.getComment()).isEqualTo("comment");
+    assertThat(dto.getId()).isEqualTo(1234L);
   }
 
   @Test
-  public void toDto_createdIgnored() {
-    final AnomalyFeedbackApi api = new AnomalyFeedbackApi();
-    api.setCreated(Timestamp.from(Instant.now()));
+  public void toDto_withIgnoredFields() {
+    final AnomalyFeedbackApi api = new AnomalyFeedbackApi()
+        .setCreated(Timestamp.from(Instant.now()))
+        .setUpdated(Timestamp.from(Instant.now()))
+        .setOwner(new UserApi().setPrincipal("test user"))
+        .setUpdatedBy(new UserApi().setPrincipal("test user"));
 
     AnomalyFeedbackDTO dto = AnomalyFeedbackMapper.INSTANCE.toDto(api);
 
     assertThat(dto.getCreateTime()).isNull();
-  }
-
-  @Test
-  public void toDto_updatedIgnored() {
-    final AnomalyFeedbackApi api = new AnomalyFeedbackApi();
-    api.setUpdated(Timestamp.from(Instant.now()));
-
-    AnomalyFeedbackDTO dto = AnomalyFeedbackMapper.INSTANCE.toDto(api);
-
-    assertThat(dto.getCreateTime()).isNull();
+    assertThat(dto.getUpdateTime()).isNull();
+    assertThat(dto.getCreatedBy()).isNull();
+    assertThat(dto.getUpdatedBy()).isNull();
   }
 }

@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
-import java.util.List;
-
 public interface AnomalyFeedback {
 
   /**
@@ -46,16 +44,16 @@ public interface AnomalyFeedback {
   String getComment();
 
   /**
-   * Set reasons for this feedback.
+   * Set cause for this anomaly.
    *
-   * @param reasons a list of {@code AnomalyFeedbackReason}
+   * @param cause {@code AnomalyCause}
    */
-  AnomalyFeedback setReasons(List<AnomalyFeedbackReason> reasons);
+  AnomalyFeedback setCause(AnomalyCause cause);
 
   /**
-   * Get reasons of this feedback. If no reason is associated with this feedback, an empty list is returned.
+   * Get cause of this anomaly.
    *
    * @return reasons of this feedback.
    */
-  List<AnomalyFeedbackReason> getReasons();
+  AnomalyCause getCause();
 }

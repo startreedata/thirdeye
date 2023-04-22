@@ -28,7 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.detection.AnomalyFeedbackReason;
+import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.google.inject.Injector;
 import java.sql.Timestamp;
@@ -214,7 +214,7 @@ public class TestAnomalyManager {
     AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
         .setComment(expectedComment)
         .setFeedbackType(AnomalyFeedbackType.ANOMALY)
-        .setReasons(List.of(AnomalyFeedbackReason.FRAUD));
+        .setCause(AnomalyCause.FRAUD);
     feedback = (AnomalyFeedbackDTO) feedback.setUpdatedBy(expectedUser);
 
     anomalyMergedResult.setFeedback(feedback);
@@ -227,7 +227,7 @@ public class TestAnomalyManager {
     Assert.assertEquals(actualFeedback.getFeedbackType(), AnomalyFeedbackType.ANOMALY);
     Assert.assertEquals(actualFeedback.getComment(), expectedComment);
     Assert.assertEquals(actualFeedback.getUpdatedBy(), expectedUser);
-    Assert.assertEquals(actualFeedback.getReasons(), List.of(AnomalyFeedbackReason.FRAUD));
+    Assert.assertEquals(actualFeedback.getCause(), AnomalyCause.FRAUD);
   }
 
   @Test(dependsOnMethods = {"testFeedback"})
@@ -249,7 +249,7 @@ public class TestAnomalyManager {
     assertThat(actualFeedback.getFeedbackType()).isEqualTo(AnomalyFeedbackType.NOT_ANOMALY);
     assertThat(actualFeedback.getUpdatedBy()).isEqualTo(expectedUser);
     assertThat(actualFeedback.getComment()).isEmpty();
-    assertThat(actualFeedback.getReasons().size()).isEqualTo(0);
+    assertThat(actualFeedback.getCause()).isNull();
   }
 
   @Test

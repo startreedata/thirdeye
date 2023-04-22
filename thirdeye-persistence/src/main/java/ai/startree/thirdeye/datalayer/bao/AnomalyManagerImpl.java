@@ -253,7 +253,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         existingFeedback
             .setFeedbackType(feedbackDTO.getFeedbackType())
             .setComment(feedbackDTO.getComment())
-            .setReasons(feedbackDTO.getReasons())
+            .setCause(feedbackDTO.getCause())
             .setUpdatedBy(feedbackDTO.getUpdatedBy());
         genericPojoDao.update(existingFeedback);
       }

@@ -44,11 +44,10 @@ import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
-import ai.startree.thirdeye.spi.detection.AnomalyFeedbackReason;
+import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -318,7 +317,8 @@ public class HappyPathTest {
     assertThat(actual.getComment()).isEqualTo(feedback.getComment());
     assertThat(actual.getCreated()).isNotNull();
     assertThat(actual.getUpdated()).isNotNull();
-    assertThat(actual.getUpdatedBy()).isEqualTo("no-auth-user");
+    assertThat(actual.getOwner().getPrincipal()).isEqualTo("no-auth-user");
+    assertThat(actual.getUpdatedBy().getPrincipal()).isEqualTo("no-auth-user");
   }
 
   @Test(dependsOnMethods = "testAnomalyFeedback")
@@ -332,9 +332,7 @@ public class HappyPathTest {
     final AnomalyFeedbackApi feedback = new AnomalyFeedbackApi()
         .setId(feedbackBefore.getId())
         .setType(AnomalyFeedbackType.NOT_ANOMALY)
-        .setReasons(Arrays.asList(
-            AnomalyFeedbackReason.PLATFORM_UPGRADE,
-            AnomalyFeedbackReason.EXTERNAL_EVENT));
+        .setCause(AnomalyCause.PLATFORM_UPGRADE);
     final Response response = request(String.format("api/anomalies/%d/feedback", anomalyId))
         .post(Entity.json(feedback));
     assertThat(response.getStatus()).isEqualTo(200);
@@ -349,7 +347,7 @@ public class HappyPathTest {
     assertThat(actual.getId()).isEqualTo(feedbackBefore.getId());
     assertThat(actual.getType()).isEqualTo(feedback.getType());
     assertThat(actual.getComment()).isEmpty();
-    assertThat(actual.getReasons()).isEqualTo(feedback.getReasons());
+    assertThat(actual.getCause()).isEqualTo(feedback.getCause());
     assertThat(actual.getUpdated()).isAfter(feedbackBefore.getUpdated());
   }
 

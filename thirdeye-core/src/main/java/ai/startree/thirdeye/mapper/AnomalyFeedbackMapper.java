@@ -25,10 +25,13 @@ public interface AnomalyFeedbackMapper {
   AnomalyFeedbackMapper INSTANCE = Mappers.getMapper(AnomalyFeedbackMapper.class);
 
   @Mapping(source = "type", target = "feedbackType")
+  @Mapping(source = "updatedBy.principal", target = "updatedBy", ignore = true)
   AnomalyFeedbackDTO toDto(AnomalyFeedbackApi api);
 
   @Mapping(source = "feedbackType", target = "type")
   @Mapping(source = "createTime", target = "created")
   @Mapping(source = "updateTime", target = "updated")
+  @Mapping(source = "createdBy", target = "owner.principal")
+  @Mapping(source = "updatedBy", target = "updatedBy.principal")
   AnomalyFeedbackApi toApi(AnomalyFeedbackDTO dto);
 }

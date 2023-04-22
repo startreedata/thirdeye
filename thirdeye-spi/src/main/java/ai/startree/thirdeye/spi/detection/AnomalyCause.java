@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
-public enum AnomalyFeedbackReason {
+public enum AnomalyCause {
   HOLIDAY_EFFECT("Holiday effect"),
 
   USER_ERROR("User error"),
@@ -32,7 +32,7 @@ public enum AnomalyFeedbackReason {
 
   final String userReadableName;
 
-  AnomalyFeedbackReason(String userReadableName) {
+  AnomalyCause(String userReadableName) {
     this.userReadableName = userReadableName;
   }
 

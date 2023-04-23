@@ -19,13 +19,14 @@ import java.util.List;
 import java.util.Map;
 
 public class OAuthConfiguration {
+
   private boolean enabled = true;
   private String serverUrl;
   private String keysUrl;
   private String clientId;
   private List<String> required = new ArrayList<>();
   private Map<String, Object> exactMatch = new HashMap<>();
-  private OauthCacheConfiguration cache;
+  private OauthCacheConfiguration cache = new OauthCacheConfiguration();
 
   public boolean isEnabled() {
     return enabled;

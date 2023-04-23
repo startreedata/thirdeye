@@ -31,13 +31,16 @@ public class ThirdEyeOAuthAuthenticator implements Authenticator<String, Princip
 
   private final OidcJWTProcessor processor;
   private final OidcContext oidcContext;
+  private final OAuthConfiguration config;
   private final LoadingCache<String, ThirdEyePrincipal> bindingsCache;
 
   @Inject
   public ThirdEyeOAuthAuthenticator(final OidcJWTProcessor processor,
-      final OidcContext oidcContext) {
+      final OidcContext oidcContext,
+      final OAuthConfiguration config) {
     this.processor = processor;
     this.oidcContext = oidcContext;
+    this.config = config;
     this.bindingsCache = getDefaultCache();
   }
 
@@ -46,15 +49,15 @@ public class ThirdEyeOAuthAuthenticator implements Authenticator<String, Princip
     try {
       return optional(bindingsCache.get(authToken));
     } catch (final Exception exception) {
-      LOG.info("Authentication failed. ", exception);
+      LOG.error("Authentication failed. msg: {}", exception.getMessage());
       return Optional.empty();
     }
   }
 
   public LoadingCache<String, ThirdEyePrincipal> getDefaultCache() {
     return CacheBuilder.newBuilder()
-        .maximumSize(oidcContext.getCacheSize())
-        .expireAfterWrite(oidcContext.getCacheTtl(), TimeUnit.MILLISECONDS)
+        .maximumSize(config.getCache().getSize())
+        .expireAfterWrite(config.getCache().getTtl(), TimeUnit.MILLISECONDS)
         .build(new OidcBindingsCache()
             .setProcessor(processor)
             .setContext(oidcContext));

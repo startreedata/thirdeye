@@ -15,10 +15,8 @@ package ai.startree.thirdeye.plugins.oauth;
 
 public class OauthCacheConfiguration {
 
-  public static final long DEFAULT_SIZE = 64;
-  public static final long DEFAULT_TTL = 60000;
-  private long size = DEFAULT_SIZE;
-  private long ttl = DEFAULT_TTL;
+  private long size = 64;
+  private long ttl = 60000;
 
   public long getSize() {
     return size;

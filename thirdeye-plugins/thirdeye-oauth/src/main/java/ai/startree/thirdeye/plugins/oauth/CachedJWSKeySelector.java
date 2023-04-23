@@ -14,6 +14,7 @@
 
 package ai.startree.thirdeye.plugins.oauth;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.common.cache.CacheBuilder;
@@ -47,12 +48,13 @@ public class CachedJWSKeySelector implements JWSKeySelector<OidcContext> {
   private final LoadingCache<String, Map<String, Key>> keyCache;
 
   @Inject
-  public CachedJWSKeySelector(final OidcContext oidcContext) {
-    this.keysUrl = oidcContext.getKeysUrl();
+  public CachedJWSKeySelector(final OAuthConfiguration config) {
+    this.keysUrl = requireNonNull(config.getKeysUrl(), "keysUrl must not be null");
+    final long ttl = requireNonNull(config.getCache(), "cache config cannot be null").getTtl();
 
     this.keyCache = CacheBuilder.newBuilder()
         .maximumSize(CACHE_SIZE)
-        .expireAfterWrite(oidcContext.getCacheTtl(), TimeUnit.MILLISECONDS)
+        .expireAfterWrite(ttl, TimeUnit.MILLISECONDS)
         .build(new KeyCacheLoader(authServerRunning));
 
 //    metricRegistry.register("authServerRunning",

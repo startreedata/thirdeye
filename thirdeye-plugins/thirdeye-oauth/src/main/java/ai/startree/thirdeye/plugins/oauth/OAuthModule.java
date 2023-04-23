@@ -14,11 +14,6 @@
 
 package ai.startree.thirdeye.plugins.oauth;
 
-import static ai.startree.thirdeye.spi.Constants.OAUTH_ISSUER;
-import static ai.startree.thirdeye.spi.Constants.OAUTH_JWKS_URI;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-
-import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -26,9 +21,11 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.nimbusds.jose.proc.JWSKeySelector;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.jwt.proc.JWTClaimsSetVerifier;
+import java.util.HashSet;
 
 public class OAuthModule extends AbstractModule {
 
@@ -53,28 +50,17 @@ public class OAuthModule extends AbstractModule {
   @Singleton
   @Provides
   public JWTClaimsSetVerifier<OidcContext> createJWTClaimsSetVerifier(
-      final OidcContext context) {
-    return new DefaultJWTClaimsVerifier<>(
-        context.getExactMatchClaimsSet(),
-        context.getRequiredClaims());
+      final OAuthConfiguration config) {
+    final JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
+    config.getExactMatch().forEach(builder::claim);
+    var exactMatchClaimsSet = builder.build();
+
+    return new DefaultJWTClaimsVerifier<>(exactMatchClaimsSet, new HashSet<>(config.getRequired()));
   }
 
   @Provides
   @Singleton
-  public OidcContext getOidcContext(final OAuthConfiguration oauthConfig,
-      final OpenIdConfigurationProviderImpl openIdConfigurationProviderImpl) {
-    final AuthInfoApi info = openIdConfigurationProviderImpl.getOpenIdConfiguration();
-
-    optional(info.getOpenidConfiguration())
-        .map(oidcConfig -> oidcConfig.get(OAUTH_ISSUER))
-        .map(Object::toString)
-        .ifPresent(iss -> oauthConfig.getExactMatch().put("iss", iss));
-
-    optional(info.getOpenidConfiguration())
-        .map(oidcConfig -> oidcConfig.get(OAUTH_JWKS_URI))
-        .map(Object::toString)
-        .ifPresent(oauthConfig::setKeysUrl);
-
-    return new OidcContext(oauthConfig);
+  public OidcContext getOidcContext() {
+    return new OidcContext();
   }
 }

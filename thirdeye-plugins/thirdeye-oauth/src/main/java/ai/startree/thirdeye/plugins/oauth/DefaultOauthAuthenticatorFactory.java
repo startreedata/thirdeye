@@ -13,8 +13,14 @@
  */
 package ai.startree.thirdeye.plugins.oauth;
 
+import static ai.startree.thirdeye.spi.Constants.OAUTH_ISSUER;
+import static ai.startree.thirdeye.spi.Constants.OAUTH_JWKS_URI;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
+import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import ai.startree.thirdeye.spi.auth.Authenticator;
 import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
+import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -33,6 +39,23 @@ public class DefaultOauthAuthenticatorFactory implements OauthAuthenticatorFacto
     final OAuthConfiguration oAuthConfiguration = new ObjectMapper().convertValue(configMap,
         OAuthConfiguration.class);
     final Injector injector = Guice.createInjector(new OAuthModule(oAuthConfiguration));
+
+    /* TODO spyne fix anti-pattern. oauth config should not be mutated and it definitely should not
+     *            be here */
+    final OpenIdConfigurationProvider instance = injector.getInstance(OpenIdConfigurationProvider.class);
+    final AuthInfoApi info = instance.getOpenIdConfiguration();
+    optional(info.getOpenidConfiguration())
+        .map(oidcConfig -> oidcConfig.get(OAUTH_ISSUER))
+        .map(Object::toString)
+        .ifPresent(iss -> oAuthConfiguration.getExactMatch().put("iss", iss));
+
+    optional(info.getOpenidConfiguration())
+        .map(oidcConfig -> oidcConfig.get(OAUTH_JWKS_URI))
+        .map(Object::toString)
+        .ifPresent(oAuthConfiguration::setKeysUrl);
+    if (oAuthConfiguration.getCache() == null) {
+      oAuthConfiguration.setCache(new OauthCacheConfiguration());
+    }
 
     return injector.getInstance(ThirdEyeOAuthAuthenticator.class);
   }

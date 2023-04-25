@@ -33,5 +33,5 @@
         "allowUnreachableCode": false
     },
     "include": ["./src/**/*"],
-    "exclude": ["./src/test/e2e/user-flows/**/*"] // Exclude Cypress end to end tests
+    "exclude": ["./src/test/e2e/**/*", "./cypress.config.ts"] // Exclude Cypress end to end tests
 }

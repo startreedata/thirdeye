@@ -26,6 +26,7 @@ export interface FilterOptionsAutoCompleteProps<FetchedDataType> {
     ) => FilterOption;
 
     onSelectionChange: (option: FilterOption | null) => void;
+    "data-testid"?: string;
 }
 
 export interface FilterOption {

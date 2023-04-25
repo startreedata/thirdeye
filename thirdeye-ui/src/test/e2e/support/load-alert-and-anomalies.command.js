@@ -45,6 +45,12 @@ Cypress.Commands.add("loadAlertAndAnomalies", () => {
                     anomaly.alert = {
                         id: body[0].id,
                     };
+                    anomaly.metadata = {
+                        dataset: { name: body[0].templateProperties.dataset },
+                        metric: {
+                            name: body[0].templateProperties.aggregationColumn,
+                        },
+                    };
 
                     return anomaly;
                 });

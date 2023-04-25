@@ -56,7 +56,7 @@ export const MetricsReportList: FunctionComponent<MetricsReportListProps> = ({
                     <TableCell>{t("label.chart")}</TableCell>
                 </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody data-testid="metrics-report-list-tbody">
                 {anomaliesByAlert.map((row) => (
                     <MetricsReportRow
                         anomalyAlert={row}

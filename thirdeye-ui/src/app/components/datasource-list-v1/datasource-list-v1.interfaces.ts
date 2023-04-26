@@ -18,3 +18,9 @@ export interface DatasourceListV1Props {
     datasources: UiDatasource[] | null;
     onDelete?: (uiDatasource: UiDatasource) => void;
 }
+
+export const TEST_IDS = {
+    TABLE: "datasource-list-table",
+    EDIT_BUTTON: "datasource-list-edit-button",
+    DELETE_BUTTON: "datasource-list-delete-button",
+};

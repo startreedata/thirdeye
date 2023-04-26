@@ -72,6 +72,7 @@ export const EmailListInput: FunctionComponent<EmailListInputProps> = ({
             <TextField
                 fullWidth
                 multiline
+                data-testid="email-list-input"
                 minRows={4}
                 value={emailInputString}
                 variant="outlined"

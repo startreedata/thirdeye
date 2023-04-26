@@ -36,7 +36,10 @@ import {
 } from "../../utils/routes/routes.util";
 import { getUiAssociation } from "../subscription-group-view/alert-associations-view-table/alert-associations-view-table.utils";
 import { subscriptionGroupChannelIconsMap } from "../subscription-group-view/notification-channels-card/notification-channels-card.utils";
-import { SubscriptionGroupListV1Props } from "./subscription-group-list-v1.interfaces";
+import {
+    SubscriptionGroupListV1Props,
+    TEST_IDS,
+} from "./subscription-group-list-v1.interfaces";
 
 export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1Props> =
     ({ onDelete, subscriptionGroups }) => {
@@ -222,6 +225,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                         hideBorder
                         columns={subscriptionGroupColumns}
                         data={subscriptionGroups as UiSubscriptionGroup[]}
+                        data-testid={TEST_IDS.TABLE}
                         rowKey="id"
                         scroll={DataGridScrollV1.Contents}
                         searchPlaceholder={t("label.search-entity", {
@@ -231,6 +235,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                             <Grid container alignItems="center" spacing={2}>
                                 <Grid item>
                                     <Button
+                                        data-testid={TEST_IDS.EDIT_BUTTON}
                                         disabled={isActionButtonDisable}
                                         variant="contained"
                                         onClick={handleSubscriptionGroupEdit}
@@ -241,6 +246,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
 
                                 <Grid>
                                     <Button
+                                        data-testid={TEST_IDS.DELETE_BUTTON}
                                         disabled={
                                             !selectedSubscriptionGroup ||
                                             selectedSubscriptionGroup

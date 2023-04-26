@@ -12,11 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import { Box, Card, CardContent, Grid } from "@material-ui/core";
 import { isEmpty } from "lodash";
 import { default as React, FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { AlertsDimensions } from "../../../components/subscription-group-wizard/alerts-dimensions/alerts-dimensions.component";
 import { validateSubscriptionGroup } from "../../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
@@ -78,12 +80,36 @@ export const SetupAlertDimensionsPage: FunctionComponent = () => {
         <>
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    <AlertsDimensions
-                        alerts={alerts}
-                        associations={associations}
-                        enumerationItems={enumerationItems}
-                        setAssociations={setAssociations}
-                    />
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Card>
+                                <CardContent>
+                                    <Box padding={20} textAlign="center">
+                                        <NoDataIndicator>
+                                            <Box textAlign="center">
+                                                {t(
+                                                    "message.no-entity-created",
+                                                    {
+                                                        entity: t(
+                                                            "label.alerts"
+                                                        ),
+                                                    }
+                                                )}
+                                            </Box>
+                                        </NoDataIndicator>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        }
+                        isEmpty={isEmpty(alerts)}
+                    >
+                        <AlertsDimensions
+                            alerts={alerts}
+                            associations={associations}
+                            enumerationItems={enumerationItems}
+                            setAssociations={setAssociations}
+                        />
+                    </EmptyStateSwitch>
                 </Grid>
             </PageContentsGridV1>
             <WizardBottomBar

@@ -18,6 +18,7 @@ import classnames from "classnames";
 import { DateTime } from "luxon";
 import React, { FunctionComponent } from "react";
 import { switchMeridiemV1 } from "../../../../platform/utils";
+import { TIME_SELECTOR_TEST_IDS } from "../time-range-selector/time-range-selector.interfaces";
 import { useDateTimePickerToolbarStyles } from "./date-time-picker-toolbar.styles";
 
 const GRANULARITY_TO_FORMAT = {
@@ -80,6 +81,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                     [dateTimePickerToolbarClasses.linkSelected]:
                         props.openView === "month",
                 })}
+                data-testid={TIME_SELECTOR_TEST_IDS.MONTH_LINK}
                 variant="subtitle1"
                 onClick={handleMonthClick}
             >
@@ -92,6 +94,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                     [dateTimePickerToolbarClasses.linkSelected]:
                         props.openView === "date",
                 })}
+                data-testid={TIME_SELECTOR_TEST_IDS.DATE_LINK}
                 variant="subtitle1"
                 onClick={handleDayClick}
             >
@@ -104,6 +107,7 @@ export const DateTimePickerToolbar: FunctionComponent<ToolbarComponentProps> = (
                     [dateTimePickerToolbarClasses.linkSelected]:
                         props.openView === "year",
                 })}
+                data-testid={TIME_SELECTOR_TEST_IDS.YEAR_LINK}
                 variant="subtitle1"
                 onClick={handleYearClick}
             >

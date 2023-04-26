@@ -160,6 +160,23 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
     }, [alertId, startTime, endTime]);
 
+    useEffect(() => {
+        if (!evaluation) {
+            return;
+        }
+        const extracted = extractDetectionEvaluation(evaluation);
+
+        // Automatically expand the only item in the response
+        if (extracted.length === 1) {
+            const nameForOnlyItem = generateNameForDetectionResult(
+                extracted[0]
+            );
+            searchParams.set(QUERY_PARAM_KEY_FOR_EXPANDED, nameForOnlyItem);
+            setSearchParams(searchParams, { replace: true });
+            setExpanded([nameForOnlyItem]);
+        }
+    }, [evaluation]);
+
     const fetchData = (): void => {
         if (!alert || !startTime || !endTime) {
             return;
@@ -169,27 +186,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             startTime,
             endTime,
         });
-        getEvaluation(createAlertEvaluation(alert, startTime, endTime)).then(
-            (evaluation) => {
-                if (!evaluation) {
-                    return;
-                }
-                const extracted = extractDetectionEvaluation(evaluation);
-
-                // Automatically expand the only item in the response
-                if (extracted.length === 1) {
-                    const nameForOnlyItem = generateNameForDetectionResult(
-                        extracted[0]
-                    );
-                    searchParams.set(
-                        QUERY_PARAM_KEY_FOR_EXPANDED,
-                        nameForOnlyItem
-                    );
-                    setSearchParams(searchParams, { replace: true });
-                    setExpanded([nameForOnlyItem]);
-                }
-            }
-        );
+        getEvaluation(createAlertEvaluation(alert, startTime, endTime));
     };
 
     // Handle communicating status to the user

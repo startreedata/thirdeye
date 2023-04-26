@@ -16,6 +16,7 @@ import { Button, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
+import { TIME_SELECTOR_TEST_IDS } from "../time-range-selector/time-range-selector.interfaces";
 import { TimeRangeSelectorControlsProps } from "./time-range-selector-controls.interfaces";
 
 export const TimeRangeSelectorControls: FunctionComponent<TimeRangeSelectorControlsProps> =
@@ -39,6 +40,7 @@ export const TimeRangeSelectorControls: FunctionComponent<TimeRangeSelectorContr
                 <Grid item>
                     <Button
                         color="primary"
+                        data-testid={TIME_SELECTOR_TEST_IDS.APPLY_BUTTON}
                         variant="contained"
                         onClick={props.onApply}
                     >

@@ -23,7 +23,10 @@ import {
 import { timezoneStringShort } from "../../../../utils/time/time.util";
 import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { TimeRangeSelectorPopoverContent } from "../../time-range-selector-popover-content/time-range-selector-popover-content.component";
-import { TimeRangeSelectorProps } from "./time-range-selector.interfaces";
+import {
+    TimeRangeSelectorProps,
+    TIME_SELECTOR_TEST_IDS,
+} from "./time-range-selector.interfaces";
 import { useTimeRangeSelectorStyles } from "./time-range-selector.styles";
 
 export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
@@ -51,7 +54,12 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
     };
 
     return (
-        <Grid container alignItems="center" justifyContent="flex-end">
+        <Grid
+            container
+            alignItems="center"
+            data-testid={TIME_SELECTOR_TEST_IDS.TIME_RANGE_SELECTOR}
+            justifyContent="flex-end"
+        >
             {/* Time range */}
             {!hideTimeRange && timeRangeDuration && (
                 <Grid item>
@@ -76,6 +84,7 @@ export const TimeRangeSelector: FunctionComponent<TimeRangeSelectorProps> = ({
                             timeRangeSelectorClasses.timeRangeSelectorButton
                         }
                         color="primary"
+                        data-testid={TIME_SELECTOR_TEST_IDS.OPEN_BUTTON}
                         variant="outlined"
                         onClick={handleTimeRangeSelectorClick}
                     >

@@ -1,0 +1,149 @@
+[
+    {
+        "startTime": 1577750400000,
+        "endTime": 1577836800000,
+        "avgCurrentVal": 46582.152,
+        "avgBaselineVal": 19446.348,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1578873600000,
+        "endTime": 1578960000000,
+        "avgCurrentVal": 14589.116000000002,
+        "avgBaselineVal": 28556.538999999997,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1580774400000,
+        "endTime": 1580860800000,
+        "avgCurrentVal": 13857.207999999999,
+        "avgBaselineVal": 30120.4195,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1582329600000,
+        "endTime": 1582416000000,
+        "avgCurrentVal": 46179.48200000001,
+        "avgBaselineVal": 17649.341,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1584489600000,
+        "endTime": 1584576000000,
+        "avgCurrentVal": 12319.289999999999,
+        "avgBaselineVal": 27895.885500000004,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1585440000000,
+        "endTime": 1585526400000,
+        "avgCurrentVal": 42100.79,
+        "avgBaselineVal": 18454.848500000004,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1585872000000,
+        "endTime": 1585958400000,
+        "avgCurrentVal": 33389.048,
+        "avgBaselineVal": 9648.268,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1593820800000,
+        "endTime": 1593907200000,
+        "avgCurrentVal": 42941.63999999999,
+        "avgBaselineVal": 21837.477499999997,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1594080000000,
+        "endTime": 1594166400000,
+        "avgCurrentVal": 36404.986,
+        "avgBaselineVal": 15561.989500000001,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1595462400000,
+        "endTime": 1595548800000,
+        "avgCurrentVal": 4194.87,
+        "avgBaselineVal": 29272.4675,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1596240000000,
+        "endTime": 1596326400000,
+        "avgCurrentVal": 6820.734,
+        "avgBaselineVal": 39198.75199999999,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1597708800000,
+        "endTime": 1597795200000,
+        "avgCurrentVal": 45658.89200000001,
+        "avgBaselineVal": 26777.153,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1597795200000,
+        "endTime": 1597881600000,
+        "avgCurrentVal": 10385.268,
+        "avgBaselineVal": 22248.020000000004,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1598572800000,
+        "endTime": 1598659200000,
+        "avgCurrentVal": 3841.512,
+        "avgBaselineVal": 28304.016000000003,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1600646400000,
+        "endTime": 1600732800000,
+        "avgCurrentVal": 48961.456,
+        "avgBaselineVal": 25934.561,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1603238400000,
+        "endTime": 1603324800000,
+        "avgCurrentVal": 40341.236,
+        "avgBaselineVal": 18878.1545,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1603324800000,
+        "endTime": 1603411200000,
+        "avgCurrentVal": 21981.494,
+        "avgBaselineVal": 32918.44,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1605744000000,
+        "endTime": 1605830400000,
+        "avgCurrentVal": 17658.252,
+        "avgBaselineVal": 24078.895500000002,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1607472000000,
+        "endTime": 1607558400000,
+        "avgCurrentVal": 36308.104,
+        "avgBaselineVal": 28946.881,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1608163200000,
+        "endTime": 1608249600000,
+        "avgCurrentVal": 51788.721999999994,
+        "avgBaselineVal": 18744.6905,
+        "sourceType": "USER_LABELED_ANOMALY"
+    },
+    {
+        "startTime": 1608508800000,
+        "endTime": 1608595200000,
+        "avgCurrentVal": 42910.954,
+        "avgBaselineVal": 21036.995,
+        "sourceType": "USER_LABELED_ANOMALY"
+    }
+]

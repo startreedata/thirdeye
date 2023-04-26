@@ -19,7 +19,7 @@ export default defineConfig({
         specPattern: "src/test/e2e/user-flows/**/*.cy.{js,jsx,ts,tsx}",
         supportFile: "src/test/e2e/support/e2e.{js,jsx,ts,tsx}",
     },
-    fixturesFolder: "src/test/e2e/mocks",
+    fixturesFolder: "src/test/e2e/fixtures",
     downloadsFolder: "src/test/e2e/downloads",
     screenshotsFolder: "src/test/e2e/screenshots",
     videosFolder: "src/test/e2e/videos",

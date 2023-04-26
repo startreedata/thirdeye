@@ -24,3 +24,12 @@ export interface TimeRangeSelectorProps {
     onRefresh?: () => void;
     timezone?: string;
 }
+
+export const TIME_SELECTOR_TEST_IDS = {
+    TIME_RANGE_SELECTOR: "time-range-selector",
+    OPEN_BUTTON: "open-button",
+    APPLY_BUTTON: "apply-button",
+    MONTH_LINK: "month-link",
+    DATE_LINK: "date-link",
+    YEAR_LINK: "year-link",
+};

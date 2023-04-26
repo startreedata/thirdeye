@@ -20,3 +20,11 @@ export interface AlertListV1Props {
     onDelete?: (uiAlert: UiAlert) => void;
     onAlertReset?: (alert: Alert) => void;
 }
+
+export const TEST_IDS = {
+    TABLE: "alert-list-table",
+    DUPLICATE_BUTTON: "alert-list-duplicate-button",
+    EDIT_BUTTON: "alert-list-edit-button",
+    DELETE_BUTTON: "alert-list-delete-button",
+    RESET_BUTTON: "alert-list-reset-button",
+};

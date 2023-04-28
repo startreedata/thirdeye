@@ -107,12 +107,18 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
                   candidate.enumerationId === undefined
           ) !== undefined;
 
+    const isIndeterminate = isDimensionExplorationAlert
+        ? associatedEnumerationItems.length > 0 &&
+          associatedEnumerationItems.length !== enumerationItems.length
+        : false;
+
     return (
         <TableBody>
             <TableRow>
                 <TableCell align="left">
                     <Checkbox
                         checked={isChecked}
+                        indeterminate={isIndeterminate}
                         onChange={handleAlertRowCheckedChange}
                     />
                 </TableCell>

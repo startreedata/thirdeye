@@ -68,10 +68,10 @@ export const SubscriptionGroupsCreateEditRouter: FunctionComponent<SubscriptionG
                                 AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS
                             }
                         />
-                    </Route>
 
-                    {/* No match found, render page not found */}
-                    <Route element={<PageNotFoundPage />} path="*" />
+                        {/* No match found, render page not found */}
+                        <Route element={<PageNotFoundPage />} path="*" />
+                    </Route>
                 </Routes>
             </Suspense>
         );

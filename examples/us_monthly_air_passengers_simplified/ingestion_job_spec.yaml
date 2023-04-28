@@ -36,3 +36,5 @@ tableSpec:
   tableConfigURI: '${controllerProtocol}://${controllerHost}:${controllerPort}/tables/us_monthly_air_passengers_simplified'
 pinotClusterSpecs:
   - controllerURI: '${controllerProtocol}://${controllerHost}:${controllerPort}'
+pushJobSpec:
+  pushAttempts: 1

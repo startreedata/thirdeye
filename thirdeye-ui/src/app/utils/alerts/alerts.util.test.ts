@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,6 +18,7 @@ import {
     AlertEvaluation,
     AlertInEvaluation,
     AlertNodeType,
+    EvaluatedTemplateMetadata,
 } from "../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -35,6 +36,7 @@ import {
     getUiAlert,
     getUiAlerts,
     omitNonUpdatableData,
+    shouldHideTimeInDatetimeFormat,
 } from "./alerts.util";
 
 jest.mock("i18next", () => ({
@@ -56,7 +58,6 @@ describe("Alerts Util", () => {
         const result = createEmptyUiAlert();
 
         expect(result.name).not.toBeNull();
-        expect(result.renderedMetadata).not.toBeNull();
         expect(result.active).not.toBeNull();
         expect(result.activeText).not.toBeNull();
         expect(result.userId).not.toBeNull();
@@ -229,14 +230,43 @@ describe("Alerts Util", () => {
             determineTimezoneFromAlertInEvaluation({
                 metadata: {
                     timezone: "America/Los_Angeles",
-                },
+                } as EvaluatedTemplateMetadata,
             })
         ).toEqual("America/Los_Angeles");
         expect(
             determineTimezoneFromAlertInEvaluation({
-                metadata: {},
+                metadata: {} as EvaluatedTemplateMetadata,
             })
         ).toEqual("UTC");
+    });
+
+    it("shouldHideTimeInDatetimeFormat should return expected results given the inputs", () => {
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {} as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(false);
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {
+                    granularity: "P1D",
+                } as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(true);
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {
+                    granularity: "P1W",
+                } as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(true);
+        expect(
+            shouldHideTimeInDatetimeFormat({
+                metadata: {
+                    granularity: "PT1H",
+                } as EvaluatedTemplateMetadata,
+            })
+        ).toEqual(false);
     });
 });
 
@@ -245,13 +275,12 @@ const mockEmptyUiAlert = {
     name: "label.no-data-marker",
     active: false,
     activeText: "label.no-data-marker",
+    alert: null,
     userId: -1,
     createdBy: "label.no-data-marker",
     detectionTypes: [],
     datasetAndMetrics: [],
     subscriptionGroups: [],
-    renderedMetadata: [],
-    alert: null,
 };
 
 const mockEmptyUiAlertDatasetAndMetric = {
@@ -414,20 +443,6 @@ const mockUiAlert1 = {
             name: "label.no-data-marker",
         },
     ],
-    renderedMetadata: [
-        {
-            key: "dataset",
-            value: "pageviews",
-        },
-        {
-            key: "datasource",
-            value: "pinotQuickStartAzure",
-        },
-        {
-            key: "metric",
-            value: "orders",
-        },
-    ],
     alert: mockAlert1,
 };
 
@@ -446,7 +461,6 @@ const mockUiAlert2 = {
             name: "testNameSubscriptionGroup11",
         },
     ],
-    renderedMetadata: [],
     alert: mockAlert2,
 };
 
@@ -460,7 +474,6 @@ const mockUiAlert3 = {
     detectionTypes: [],
     datasetAndMetrics: [],
     subscriptionGroups: [],
-    renderedMetadata: [],
     alert: mockAlert3,
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,7 +18,7 @@ import { GetAllMetricsParams, GetMetrics } from "./metrics.interface";
 import { getAllMetrics } from "./metrics.rest";
 
 export const useGetMetrics = (): GetMetrics => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Metric[]>(getAllMetrics);
 
     const getMetrics = (
@@ -27,5 +27,5 @@ export const useGetMetrics = (): GetMetrics => {
         return makeRequest(params);
     };
 
-    return { metrics: data, getMetrics, status, errorMessages };
+    return { metrics: data, getMetrics, status, errorMessages, resetData };
 };

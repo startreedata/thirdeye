@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -13,15 +13,17 @@
  * the License.
  */
 import i18n from "i18next";
-import { cloneDeep, isEmpty, kebabCase, omit, sortBy } from "lodash";
+import { parse, toSeconds } from "iso8601-duration";
+import { cloneDeep, isEmpty, kebabCase, omit } from "lodash";
+import { GetAlertEvaluationPayload } from "../../rest/alerts/alerts.interfaces";
 import {
     Alert,
     AlertAnomalyDetectorNode,
     AlertEvaluation,
-    AlertInEvaluation,
     AlertNodeType,
     AlertStats,
     EditableAlert,
+    EvaluatedTemplateMetadata,
 } from "../../rest/dto/alert.interfaces";
 import { AnomalyFeedbackType } from "../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../rest/dto/detection.interfaces";
@@ -33,6 +35,7 @@ import {
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 import { getSubscriptionGroupAlertsList } from "../subscription-groups/subscription-groups.util";
+import { DAY_IN_MILLISECONDS } from "../time/time.util";
 
 export const DEFAULT_FEEDBACK = {
     type: AnomalyFeedbackType.NO_FEEDBACK,
@@ -127,7 +130,6 @@ export const createEmptyUiAlert = (): UiAlert => {
         detectionTypes: [],
         datasetAndMetrics: [],
         subscriptionGroups: [],
-        renderedMetadata: [],
         alert: null,
     };
 };
@@ -156,12 +158,12 @@ export const createAlertEvaluation = (
     alert: Alert | EditableAlert | Pick<Alert, "id">,
     startTime: number,
     endTime: number
-): AlertEvaluation => {
+): GetAlertEvaluationPayload => {
     return {
         alert: alert,
         start: startTime,
         end: endTime,
-    } as AlertEvaluation;
+    };
 };
 
 export const getUiAlert = (
@@ -174,7 +176,7 @@ export const getUiAlert = (
 
     // Map subscription groups to alert ids
     const subscriptionGroupsToAlertIdsMap =
-        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
+        generateAlertIdToSubscriptionGroupMap(subscriptionGroups);
 
     return getUiAlertInternal(alert as Alert, subscriptionGroupsToAlertIdsMap);
 };
@@ -189,7 +191,7 @@ export const getUiAlerts = (
 
     // Map subscription groups to alert ids
     const subscriptionGroupsToAlertIdsMap =
-        mapSubscriptionGroupsToAlertIds(subscriptionGroups);
+        generateAlertIdToSubscriptionGroupMap(subscriptionGroups);
 
     const uiAlerts = [];
     for (const alert of alerts) {
@@ -290,66 +292,23 @@ const getUiAlertInternal = (
         });
     }
 
-    if (alert.templateProperties && alert.template) {
-        renderMetadataFromAlert(alert, uiAlert);
-    }
-
     return uiAlert;
 };
 
-const renderMetadataFromAlert = (alert: Alert, uiAlert: UiAlert): void => {
-    if (!alert.template || !alert.template.metadata) {
-        return;
-    }
-
-    const metadataValueKeyExtractor = /\$\{(.*)\}/;
-
-    // This is done so we avoid a weird typescript error
-    // `alert.template.metadata` may be null even though its checked
-    const metadata = alert.template.metadata;
-
-    Object.keys(metadata).forEach((metadataKey) => {
-        const metadataObjectForKey = metadata[metadataKey];
-
-        if (metadataObjectForKey.name) {
-            const templatePropKeySearch = metadataObjectForKey.name.match(
-                metadataValueKeyExtractor
-            );
-
-            if (templatePropKeySearch && templatePropKeySearch.length > 1) {
-                const value =
-                    alert.templateProperties[templatePropKeySearch[1]];
-                if (value) {
-                    uiAlert.renderedMetadata.push({
-                        key: metadataKey,
-                        value: value.toString(),
-                    });
-                }
-            } else {
-                // If regex doesn't match then assume no value is being
-                // taken from template properties
-                uiAlert.renderedMetadata.push({
-                    key: metadataKey,
-                    value: metadataObjectForKey.name,
-                });
-            }
-        }
-    });
-
-    uiAlert.renderedMetadata = sortBy(uiAlert.renderedMetadata, "key");
-};
-
-const mapSubscriptionGroupsToAlertIds = (
+const generateAlertIdToSubscriptionGroupMap = (
     subscriptionGroups: SubscriptionGroup[]
 ): Map<number, UiAlertSubscriptionGroup[]> => {
-    const subscriptionGroupsToAlertIdsMap = new Map();
+    const alertIdToSubscriptionGroup = new Map();
 
     if (isEmpty(subscriptionGroups)) {
-        return subscriptionGroupsToAlertIdsMap;
+        return alertIdToSubscriptionGroup;
     }
 
     for (const subscriptionGroup of subscriptionGroups) {
-        if (isEmpty(subscriptionGroup.alerts)) {
+        if (
+            isEmpty(subscriptionGroup.alerts) &&
+            isEmpty(subscriptionGroup.alertAssociations)
+        ) {
             continue;
         }
 
@@ -359,24 +318,37 @@ const mapSubscriptionGroupsToAlertIds = (
             subscriptionGroup.name || i18n.t("label.no-data-marker");
 
         const alerts = getSubscriptionGroupAlertsList(subscriptionGroup);
-
         for (const alert of alerts) {
-            const subscriptionGroups = subscriptionGroupsToAlertIdsMap.get(
-                alert.id
+            const subscriptionGroupsForAlert =
+                alertIdToSubscriptionGroup.get(alert.id) || [];
+
+            subscriptionGroupsForAlert.push(uiAlertSubscriptionGroup);
+            alertIdToSubscriptionGroup.set(
+                alert.id,
+                subscriptionGroupsForAlert
             );
-            if (subscriptionGroups) {
-                // Add to existing list
-                subscriptionGroups.push(uiAlertSubscriptionGroup);
-            } else {
-                // Create and add to list
-                subscriptionGroupsToAlertIdsMap.set(alert.id, [
-                    uiAlertSubscriptionGroup,
-                ]);
-            }
         }
     }
 
-    return subscriptionGroupsToAlertIdsMap;
+    // Ensure subscription group is unique i nlist
+    for (const [alertId, subscriptionGroups] of alertIdToSubscriptionGroup) {
+        const idToSubscriptionGroup: {
+            [index: number]: UiAlertSubscriptionGroup;
+        } = {};
+
+        subscriptionGroups.forEach(
+            (subscriptionGroup: UiAlertSubscriptionGroup) => {
+                idToSubscriptionGroup[subscriptionGroup.id] = subscriptionGroup;
+            }
+        );
+
+        alertIdToSubscriptionGroup.set(
+            alertId,
+            Object.values(idToSubscriptionGroup)
+        );
+    }
+
+    return alertIdToSubscriptionGroup;
 };
 
 export const extractDetectionEvaluation = (
@@ -457,7 +429,7 @@ export const getAlertAccuracyData = (
 };
 
 export const determineTimezoneFromAlertInEvaluation = (
-    alert: Pick<AlertInEvaluation, "metadata"> | undefined | null
+    alert: { metadata: EvaluatedTemplateMetadata } | undefined | null
 ): string | undefined => {
     if (alert === undefined || alert === null) {
         return undefined;
@@ -468,4 +440,21 @@ export const determineTimezoneFromAlertInEvaluation = (
     }
 
     return "UTC";
+};
+
+export const shouldHideTimeInDatetimeFormat = (
+    alert: { metadata: EvaluatedTemplateMetadata } | undefined | null
+): boolean => {
+    if (alert === undefined || alert === null) {
+        return false;
+    }
+
+    if (alert.metadata?.granularity) {
+        return (
+            toSeconds(parse(alert.metadata?.granularity as string)) >=
+            DAY_IN_MILLISECONDS / 1000
+        );
+    }
+
+    return false;
 };

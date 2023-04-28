@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -13,8 +13,18 @@
  * the License.
  */
 
-export interface CreateMenuButtonProps {
-    createAnomalyProps?: {
-        alertId?: number;
-    };
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+
+export interface ChartProps {
+    onDateChange?: (start: number, end: number) => void;
+    onDeleteClick?: () => void;
+    onPastPeriodChange?: (newPeriod: string) => void;
+    anomaly: Anomaly;
+    start: number;
+    end: number;
+    chartHeight?: number;
+    startEndShift?: string;
+    timezone?: string;
+    hideTime: boolean;
+    hideChartBrush?: boolean;
 }

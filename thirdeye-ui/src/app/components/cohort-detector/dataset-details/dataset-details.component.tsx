@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -26,11 +26,13 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
+import { useGetAlertInsight } from "../../../rest/alerts/alerts.actions";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
 import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
+import { createAlertConfigForInsights } from "../../../utils/cohort-detector/cohort-detector.util";
 import {
     buildPinotDatasourcesTree,
     DatasetInfo,
@@ -64,6 +66,11 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
         getDatasets,
         status: getDatasetsStatus,
     } = useGetDatasets();
+    const {
+        alertInsight,
+        getAlertInsight,
+        status: alertInsightRequestStatus,
+    } = useGetAlertInsight();
     const { metrics, getMetrics, status: getMetricsStatus } = useGetMetrics();
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
@@ -71,6 +78,7 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     const [datasetsInfo, setDatasetsInfo] = useState<DatasetInfo[] | null>(
         null
     );
+    const [shouldFetchInsight, setShouldFetchInsight] = useState(true);
     const [isPinotInfraLoading, setIsPinotInfraLoading] = useState(true);
     const [selectedStart, setSelectedStart] = useState<number>(
         generateDateRangeMonthsFromNow(3)[0]
@@ -130,6 +138,14 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
             if (matchingDataset) {
                 setSelectedTable(matchingDataset);
                 setSelectedMetric(initialSelectedMetric);
+                getAlertInsight({
+                    alert: createAlertConfigForInsights(
+                        matchingDataset.datasource,
+                        matchingDataset.dataset.name,
+                        initialSelectedMetric,
+                        selectedAggregationFunction
+                    ),
+                });
             }
         }
 
@@ -137,6 +153,32 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
 
         setIsPinotInfraLoading(false);
     }, [metrics, datasets, datasources]);
+
+    useEffect(() => {
+        if (shouldFetchInsight) {
+            if (selectedTable && selectedMetric) {
+                getAlertInsight({
+                    alert: createAlertConfigForInsights(
+                        selectedTable.datasource,
+                        selectedTable.dataset.name,
+                        selectedMetric,
+                        selectedAggregationFunction
+                    ),
+                }).then((insights) => {
+                    if (insights) {
+                        if (selectedStart > insights.datasetEndTime) {
+                            setSelectedStart(insights.datasetStartTime);
+                        }
+
+                        if (selectedEnd > insights.datasetEndTime) {
+                            setSelectedEnd(insights.datasetEndTime);
+                        }
+                    }
+                    setShouldFetchInsight(false);
+                });
+            }
+        }
+    }, [selectedTable, selectedMetric]);
 
     const handleSearchClick = (): void => {
         if (!selectedTable) {
@@ -244,10 +286,8 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                     }
 
                                     setSelectedMetric(null);
-                                    setSelectedDimensions(
-                                        selectedTableInfo.dimensions
-                                    );
                                     setSelectedTable(selectedTableInfo);
+                                    setShouldFetchInsight(true);
                                 }}
                             />
                         }
@@ -350,10 +390,11 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                         label={`${t("label.aggregation-function")}`}
                     />
 
+                    <Grid item xs={12}>
+                        <Divider />
+                    </Grid>
+
                     <InputSection
-                        helperLabel={t(
-                            "message.empty-selection-means-all-is-selected"
-                        )}
                         inputComponent={
                             <Autocomplete
                                 fullWidth
@@ -372,6 +413,11 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 }
                                 renderInput={(params) => (
                                     <TextField
+                                        error={
+                                            !!selectedTable &&
+                                            !!selectedMetric &&
+                                            selectedDimensions.length === 0
+                                        }
                                         {...params}
                                         InputProps={{
                                             ...params.InputProps,
@@ -408,6 +454,18 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 <TimeRangeSelectorButton
                                     fullWidth
                                     end={selectedEnd}
+                                    maxDate={
+                                        alertInsightRequestStatus ===
+                                        ActionStatus.Done
+                                            ? alertInsight?.datasetEndTime
+                                            : undefined
+                                    }
+                                    minDate={
+                                        alertInsightRequestStatus ===
+                                        ActionStatus.Done
+                                            ? alertInsight?.datasetStartTime
+                                            : undefined
+                                    }
                                     placeholder={t(
                                         "message.click-to-select-date-range"
                                     )}
@@ -476,7 +534,11 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                             <Box>
                                 <Button
                                     color="primary"
-                                    disabled={!selectedTable || !selectedMetric}
+                                    disabled={
+                                        !selectedTable ||
+                                        !selectedMetric ||
+                                        selectedDimensions.length === 0
+                                    }
                                     onClick={handleSearchClick}
                                 >
                                     {submitButtonLabel}

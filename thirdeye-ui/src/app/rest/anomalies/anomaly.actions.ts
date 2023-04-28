@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -34,18 +34,18 @@ import {
 } from "./anomaly.interfaces";
 
 export const useGetAnomaly = (): GetAnomaly => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Anomaly>(getAnomalyRest);
 
     const getAnomaly = (id: number): Promise<Anomaly | undefined> => {
         return makeRequest(id);
     };
 
-    return { anomaly: data, getAnomaly, status, errorMessages };
+    return { anomaly: data, getAnomaly, status, errorMessages, resetData };
 };
 
 export const useGetAnomalies = (): GetAnomalies => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Anomaly[]>(getAnomaliesRest);
 
     const getAnomalies = (
@@ -59,11 +59,12 @@ export const useGetAnomalies = (): GetAnomalies => {
         getAnomalies,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useGetAnomalyStats = (): GetAnomalyStats => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AnomalyStats>(getAnomalyStatsRest);
 
     const getAnomalyStats = (
@@ -72,11 +73,17 @@ export const useGetAnomalyStats = (): GetAnomalyStats => {
         return makeRequest(getAnomalyStatsParams);
     };
 
-    return { anomalyStats: data, getAnomalyStats, status, errorMessages };
+    return {
+        anomalyStats: data,
+        getAnomalyStats,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 export const useUpdateAnomalyFeedback = (): UpdateAnomalyFeedback => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AnomalyFeedback>(updateAnomalyFeedbackPOST);
 
     const updateAnomalyFeedback = (
@@ -91,5 +98,6 @@ export const useUpdateAnomalyFeedback = (): UpdateAnomalyFeedback => {
         updateAnomalyFeedback,
         status,
         errorMessages,
+        resetData,
     };
 };

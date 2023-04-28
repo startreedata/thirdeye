@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -67,6 +67,9 @@ jest.mock("../../platform/components", () => ({
     )),
     DataGridScrollV1: {
         Body: jest.fn().mockImplementation((props) => props.children),
+    },
+    DataGridSortOrderV1: {
+        DESC: "DESC",
     },
 }));
 
@@ -195,7 +198,6 @@ const mockUiAlert = {
             name: "label.no-data-marker",
         },
     ],
-    renderedMetadata: [],
     alert: mockAlert,
 };
 

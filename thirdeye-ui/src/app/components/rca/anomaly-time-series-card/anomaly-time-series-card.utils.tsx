@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -21,6 +21,7 @@ import React from "react";
 import { NavigateFunction } from "react-router";
 import {
     formatDateAndTimeV1,
+    formatDateV1,
     formatLargeNumberV1,
 } from "../../../platform/utils";
 import { AlertEvaluation } from "../../../rest/dto/alert.interfaces";
@@ -216,7 +217,8 @@ export const generateChartOptions = (
     anomaly: Anomaly,
     filteredAlertEvaluation: [AlertEvaluation, AnomalyFilterOption[]][],
     translation: (id: string) => string,
-    timezone?: string
+    timezone?: string,
+    hideTime?: boolean
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
@@ -235,7 +237,8 @@ export const generateChartOptions = (
                 timeseriesData.timestamp,
                 timeseriesData.current,
                 undefined,
-                timezone
+                timezone,
+                hideTime
             )
         );
     }
@@ -245,6 +248,9 @@ export const generateChartOptions = (
         yAxis: {
             position: Orientation.right,
         },
+        xAxis: {
+            hideTime: hideTime,
+        },
         legend: true,
         brush: true,
         zoom: true,
@@ -252,9 +258,7 @@ export const generateChartOptions = (
     };
 
     if (timezone) {
-        chartOptions.xAxis = {
-            timezone,
-        };
+        chartOptions.xAxis!.timezone = timezone;
     }
 
     return chartOptions;
@@ -266,9 +270,11 @@ export const generateSeriesForAnomalies = (
     timestamps: number[],
     valuesToTrackAgainst: number[],
     navigate?: NavigateFunction,
-    timezone?: string
+    timezone?: string,
+    hideTime?: boolean
 ): Series => {
     const granularityBestGuess = determineGranularity(timestamps);
+    const dateFormatter = hideTime ? formatDateV1 : formatDateAndTimeV1;
 
     const pointerStyleOrNot = navigate ? CURSOR_POINTER_STYLE : {};
     const dataPointsByAnomalies: [Anomaly, DataPoint<Anomaly>[]][] =
@@ -352,7 +358,7 @@ export const generateSeriesForAnomalies = (
                             <tr>
                                 <td>{translation("label.start")}</td>
                                 <td align="right">
-                                    {formatDateAndTimeV1(
+                                    {dateFormatter(
                                         dataPoint.extraData.startTime,
                                         timezone
                                     )}
@@ -361,7 +367,7 @@ export const generateSeriesForAnomalies = (
                             <tr>
                                 <td>{translation("label.end")}</td>
                                 <td align="right">
-                                    {formatDateAndTimeV1(
+                                    {dateFormatter(
                                         dataPoint.extraData.endTime,
                                         timezone
                                     )}
@@ -487,7 +493,8 @@ export const generateChartOptionsForAlert = (
     anomalies: Anomaly[],
     translation: (id: string) => string,
     navigate?: NavigateFunction,
-    timezone?: string
+    timezone?: string,
+    hideTime?: boolean
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
@@ -507,7 +514,8 @@ export const generateChartOptionsForAlert = (
                 detectionEvaluation.data.timestamp,
                 detectionEvaluation.data.current,
                 navigate,
-                timezone
+                timezone,
+                hideTime
             )
         );
     }
@@ -526,6 +534,7 @@ export const generateChartOptionsForAlert = (
     if (timezone) {
         chartOptions.xAxis = {
             timezone,
+            hideTime: hideTime,
         };
     }
 
@@ -536,7 +545,8 @@ export const generateChartOptionsForMetricsReport = (
     detectionEvaluation: DetectionEvaluation,
     anomalies: Anomaly[],
     translation: (id: string) => string,
-    timezone?: string
+    timezone?: string,
+    hideTime?: boolean
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
@@ -557,7 +567,10 @@ export const generateChartOptionsForMetricsReport = (
                 anomalies,
                 translation,
                 detectionEvaluation.data.timestamp,
-                detectionEvaluation.data.current
+                detectionEvaluation.data.current,
+                undefined,
+                timezone,
+                hideTime
             )
         );
     }
@@ -574,6 +587,7 @@ export const generateChartOptionsForMetricsReport = (
     if (timezone) {
         chartOptions.xAxis = {
             timezone,
+            hideTime,
         };
     }
 

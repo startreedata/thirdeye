@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -67,6 +67,7 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
     checked,
     onCheckClick,
     timezone,
+    hideTime,
 }) => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
@@ -135,7 +136,6 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                 </TableCell>
                 <TableCell align="center">
                     <IconButton
-                        aria-label="expand row"
                         color="inherit"
                         size="small"
                         onClick={() => setOpen(!open)}
@@ -157,6 +157,7 @@ export const AlgorithmRow: FunctionComponent<AlgorithmRowProps> = ({
                                 comparisonOffset={comparisonOffset}
                                 dimensionColumns={dimensionColumns}
                                 endTime={endTime}
+                                hideTime={hideTime}
                                 row={row}
                                 startTime={startTime}
                                 timezone={timezone}

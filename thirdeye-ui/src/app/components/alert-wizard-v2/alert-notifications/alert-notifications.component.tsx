@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Button, Grid, Switch, Typography } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
@@ -26,7 +27,9 @@ export const AlertNotifications: FunctionComponent<AlertNotificationsProps> = ({
     initiallySelectedSubscriptionGroups,
 }) => {
     const { t } = useTranslation();
-    const [isNotificationsOn, setIsNotificationsOn] = useState(false);
+    const [isNotificationsOn, setIsNotificationsOn] = useState(
+        !isEmpty(initiallySelectedSubscriptionGroups)
+    );
 
     return (
         <PageContentsCardV1 fullHeight>

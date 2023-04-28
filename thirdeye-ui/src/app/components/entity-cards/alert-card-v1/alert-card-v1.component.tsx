@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -13,7 +13,7 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
-import { capitalize, forEach } from "lodash";
+import { forEach } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { UiAlert } from "../../../rest/dto/ui-alert.interfaces";
@@ -105,26 +105,6 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
                     </Typography>
                 </Grid>
             </Grid>
-
-            {props.uiAlert.renderedMetadata.length > 0 &&
-                props.uiAlert.renderedMetadata.map((metadata) => (
-                    <Grid item key={metadata.key} xs={6}>
-                        <Grid item>
-                            <Typography
-                                className={classes.fontMedium}
-                                variant="body2"
-                            >
-                                {capitalize(metadata.key)}:
-                            </Typography>
-                        </Grid>
-
-                        <Grid item>
-                            <Typography variant="body2">
-                                {metadata.value}
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                ))}
         </Grid>
     );
 };

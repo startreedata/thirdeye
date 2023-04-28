@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -13,7 +13,8 @@
  * the License.
  */
 import axios from "axios";
-import { Alert, AlertEvaluation } from "../dto/alert.interfaces";
+import { Alert } from "../dto/alert.interfaces";
+import { GetAlertEvaluationPayload } from "./alerts.interfaces";
 import {
     createAlert,
     createAlerts,
@@ -260,7 +261,7 @@ const mockAlertResponse = {
 
 const mockAlertEvaluationRequest = {
     alert: mockAlertRequest,
-} as AlertEvaluation;
+} as GetAlertEvaluationPayload;
 
 const mockAlertEvaluationResponse = {
     alert: mockAlertResponse,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -19,7 +19,6 @@ import type { Alert } from "../../rest/dto/alert.interfaces";
 import type { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import {
     AlertAssociation,
-    EmailScheme,
     SubscriptionGroup,
 } from "../../rest/dto/subscription-group.interfaces";
 import type {
@@ -34,11 +33,6 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
         cron: "0 */5 * * * ?",
         alerts: [] as Alert[] /** @deprecated */,
         alertAssociations: [] as AlertAssociation[],
-        notificationSchemes: {
-            email: {
-                to: [],
-            } as unknown as EmailScheme,
-        },
     } as SubscriptionGroup;
 };
 
@@ -373,11 +367,13 @@ export const getSubscriptionGroupAlertsList = (
     const { alertAssociations, alerts } = subscriptionGroup;
 
     if (alertAssociations && !isEmpty(alertAssociations)) {
-        extractedAlerts = alertAssociations.map(
-            (association) => association.alert
+        alertAssociations.forEach((association) =>
+            extractedAlerts.push(association.alert)
         );
-    } else if (alerts && !isEmpty(alerts)) {
-        extractedAlerts = alerts;
+    }
+
+    if (alerts && !isEmpty(alerts)) {
+        extractedAlerts = [...extractedAlerts, ...alerts];
     }
 
     return extractedAlerts;

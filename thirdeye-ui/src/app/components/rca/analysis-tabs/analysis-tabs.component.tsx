@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -24,7 +24,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { AxiosError } from "axios";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -36,7 +36,7 @@ import {
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { formatDateAndTimeV1 } from "../../../platform/utils";
+import { formatDateAndTimeV1, formatDateV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { EditableEvent, Event } from "../../../rest/dto/event.interfaces";
@@ -67,6 +67,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     onEventSelectionChange,
     isLoading,
     timezone,
+    hideTime,
 }) => {
     const { notify } = useNotificationProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -85,6 +86,10 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     const [comparisonOffset, setComparisonOffset] = useState(() => {
         return searchParams.get(ANALYSIS_TAB_OFFSET) ?? "P1W";
     });
+
+    const dateFormatter = useMemo(() => {
+        return hideTime ? formatDateV1 : formatDateAndTimeV1;
+    }, [hideTime]);
 
     const handleBaselineChange = (newValue: string): void => {
         setComparisonOffset(newValue);
@@ -218,7 +223,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                 <CardContent>
                     <Grid container>
                         <Grid item xs={12}>
-                            <Typography variant="h6">Date Reference</Typography>
+                            <Typography variant="h6">
+                                {t("label.date-reference")}
+                            </Typography>
                         </Grid>
                         <Grid item xs={6}>
                             <div>
@@ -228,12 +235,9 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                 Data Date Range
                             </div>
                             <div>
-                                {formatDateAndTimeV1(
-                                    anomaly.startTime,
-                                    timezone
-                                )}
+                                {dateFormatter(anomaly.startTime, timezone)}
                                 <strong> to </strong>
-                                {formatDateAndTimeV1(anomaly.endTime, timezone)}
+                                {dateFormatter(anomaly.endTime, timezone)}
                             </div>
                         </Grid>
                         <Grid item xs={6}>
@@ -251,7 +255,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                 </span>
                             </div>
                             <div>
-                                {formatDateAndTimeV1(
+                                {dateFormatter(
                                     anomaly.startTime -
                                         baselineOffsetToMilliseconds(
                                             comparisonOffset
@@ -259,7 +263,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                                     timezone
                                 )}
                                 <strong> to </strong>
-                                {formatDateAndTimeV1(
+                                {dateFormatter(
                                     anomaly.endTime -
                                         baselineOffsetToMilliseconds(
                                             comparisonOffset
@@ -282,6 +286,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                         anomalyId={anomalyId}
                         chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
                         comparisonOffset={comparisonOffset}
+                        hideTime={hideTime}
                         timezone={timezone}
                         onCheckClick={onAddFilterSetClick}
                     />

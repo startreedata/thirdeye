@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -25,9 +25,8 @@ import {
 } from "./subscription-groups.rest";
 
 export const useGetSubscriptionGroups = (): GetSubscriptionGroups => {
-    const { data, makeRequest, status, errorMessages } = useHTTPAction<
-        SubscriptionGroup[]
-    >(getAllSubscriptionGroups);
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<SubscriptionGroup[]>(getAllSubscriptionGroups);
 
     const getSubscriptionGroups = (): Promise<
         SubscriptionGroup[] | undefined
@@ -40,11 +39,12 @@ export const useGetSubscriptionGroups = (): GetSubscriptionGroups => {
         getSubscriptionGroups,
         status,
         errorMessages,
+        resetData,
     };
 };
 
 export const useCreateSubscriptionGroup = (): CreateSubscriptionGroup => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<SubscriptionGroup>(createSubscriptionGroup);
 
     const createNewSubscriptionGroup = (
@@ -58,5 +58,6 @@ export const useCreateSubscriptionGroup = (): CreateSubscriptionGroup => {
         createNewSubscriptionGroup,
         status,
         errorMessages,
+        resetData,
     };
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -37,6 +37,7 @@ export const AnomalyDimensionAnalysis: FunctionComponent<AnomalyDimensionAnalysi
         chartTimeSeriesFilterSet,
         onCheckClick,
         timezone,
+        hideTime,
     }) => {
         const { notify } = useNotificationProviderV1();
         const { t } = useTranslation();
@@ -103,6 +104,7 @@ export const AnomalyDimensionAnalysis: FunctionComponent<AnomalyDimensionAnalysi
                                     chartTimeSeriesFilterSet
                                 }
                                 comparisonOffset={comparisonOffset}
+                                hideTime={hideTime}
                                 timezone={timezone}
                                 onCheckClick={onCheckClick}
                             />

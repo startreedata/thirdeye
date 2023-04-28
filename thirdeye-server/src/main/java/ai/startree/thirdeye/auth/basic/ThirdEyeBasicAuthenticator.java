@@ -15,13 +15,13 @@ package ai.startree.thirdeye.auth.basic;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
-import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-public class ThirdEyeBasicAuthenticator implements Authenticator<BasicCredentials, ThirdEyePrincipal> {
+public class ThirdEyeBasicAuthenticator implements
+    Authenticator<BasicCredentials, ThirdEyePrincipal> {
 
   private final BasicAuthConfiguration configuration;
 
@@ -31,8 +31,7 @@ public class ThirdEyeBasicAuthenticator implements Authenticator<BasicCredential
   }
 
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(final BasicCredentials basicCredentials)
-      throws AuthenticationException {
+  public Optional<ThirdEyePrincipal> authenticate(final BasicCredentials basicCredentials) {
     final UserCredentialConfiguration user = new UserCredentialConfiguration()
         .setUsername(basicCredentials.getUsername())
         .setPassword(basicCredentials.getPassword());

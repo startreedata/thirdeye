@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -22,6 +22,7 @@ import {
     filterAnomaliesByTime,
     getAnomaliesAtTime,
     getAnomalyName,
+    getTimePaddingForGranularity,
     getUiAnomalies,
     getUiAnomaly,
 } from "./anomalies.util";
@@ -212,6 +213,12 @@ describe("Anomalies Util", () => {
         expect(getAnomaliesAtTime(mockAnomalies, 9)).toEqual([mockAnomaly2]);
         expect(getAnomaliesAtTime(mockAnomalies, 1)).toEqual([]);
         expect(getAnomaliesAtTime(mockAnomalies, 10)).toEqual([]);
+    });
+
+    it("getTimePaddingForGranularity should return appropriate string for granularity", () => {
+        expect(getTimePaddingForGranularity("P1D", 2)).toEqual("P4W");
+        expect(getTimePaddingForGranularity("P1W")).toEqual("P1M");
+        expect(getTimePaddingForGranularity("P3M")).toEqual("P2W");
     });
 });
 

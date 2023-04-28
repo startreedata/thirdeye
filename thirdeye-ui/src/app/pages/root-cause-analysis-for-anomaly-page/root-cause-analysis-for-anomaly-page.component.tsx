@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -17,14 +17,13 @@ import { clone } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
-import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
-import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnalysisTabs } from "../../components/rca/analysis-tabs/analysis-tabs.component";
 import { AnomalyFilterOption } from "../../components/rca/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { AnomalyTimeSeriesCard } from "../../components/rca/anomaly-time-series-card/anomaly-time-series-card.component";
 import {
     NotificationTypeV1,
-    PageContentsCardV1,
     PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -32,9 +31,10 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { AlertEvaluation } from "../../rest/dto/alert.interfaces";
 import { Event } from "../../rest/dto/event.interfaces";
 import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
-import { determineTimezoneFromAlertInEvaluation } from "../../utils/alerts/alerts.util";
-import { getUiAnomaly } from "../../utils/anomalies/anomalies.util";
+import {
+    determineTimezoneFromAlertInEvaluation,
+    shouldHideTimeInDatetimeFormat,
+} from "../../utils/alerts/alerts.util";
 import { getFromSavedInvestigationOrDefault } from "../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
@@ -47,7 +47,6 @@ import { useRootCauseAnalysisForAnomalyPageStyles } from "./root-cause-analysis-
 
 export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
-    const [uiAnomaly, setUiAnomaly] = useState<UiAnomaly | null>(null);
     const { t } = useTranslation();
     const style = useRootCauseAnalysisForAnomalyPageStyles();
     const { id: anomalyId } =
@@ -60,10 +59,10 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         anomaly,
         getAnomalyRequestStatus,
         anomalyRequestErrors,
-        alert,
     } = useOutletContext<InvestigationContext>();
 
     const [timezone, setTimezone] = useState<string | undefined>("UTC");
+    const [hideTime, setHideTime] = useState<boolean>(false);
     const [chartTimeSeriesFilterSet, setChartTimeSeriesFilterSet] = useState<
         AnomalyFilterOption[][]
     >(
@@ -103,10 +102,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
         }
     }, [selectedEvents]);
 
-    useEffect(() => {
-        !!anomaly && setUiAnomaly(getUiAnomaly(anomaly));
-    }, [anomaly]);
-
     if (!!anomalyId && !isValidNumberId(anomalyId)) {
         // Invalid id
         notify(
@@ -116,8 +111,6 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                 id: anomalyId,
             })
         );
-
-        setUiAnomaly(null);
     }
 
     useEffect(() => {
@@ -166,25 +159,26 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     alignItems="stretch"
                     justifyContent="space-between"
                 >
-                    <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <AnomalySummaryCard
-                            alert={alert}
-                            className={style.fullHeight}
+                    <Grid item xs={12}>
+                        <LoadingErrorStateSwitch
+                            wrapInCard
+                            isError={
+                                getAnomalyRequestStatus === ActionStatus.Error
+                            }
                             isLoading={
                                 getAnomalyRequestStatus === ActionStatus.Working
                             }
-                            timezone={timezone}
-                            uiAnomaly={uiAnomaly}
-                        />
+                        >
+                            <AnomalyCard
+                                anomaly={anomaly}
+                                className={style.fullHeight}
+                                hideTime={hideTime}
+                                isLoading={false}
+                                timezone={timezone}
+                            />
+                        </LoadingErrorStateSwitch>
                     </Grid>
                 </Grid>
-                {getAnomalyRequestStatus === ActionStatus.Error && (
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <NoDataIndicator />
-                        </PageContentsCardV1>
-                    </Grid>
-                )}
             </Grid>
 
             {/* Trending */}
@@ -200,13 +194,20 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                         getAnomalyRequestStatus === ActionStatus.Initial
                     }
                     timeSeriesFiltersSet={chartTimeSeriesFilterSet}
-                    onAlertEvaluationDidFetch={(evaluation: AlertEvaluation) =>
+                    onAlertEvaluationDidFetch={(
+                        evaluation: AlertEvaluation
+                    ) => {
                         setTimezone(
                             determineTimezoneFromAlertInEvaluation(
-                                evaluation?.alert
+                                evaluation?.alert.template
                             )
-                        )
-                    }
+                        );
+                        setHideTime(
+                            shouldHideTimeInDatetimeFormat(
+                                evaluation?.alert.template
+                            )
+                        );
+                    }}
                     onEventSelectionChange={handleEventSelectionChange}
                     onRemoveBtnClick={handleRemoveBtnClick}
                 />
@@ -218,6 +219,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                     anomaly={anomaly}
                     anomalyId={parsedAnomalyId}
                     chartTimeSeriesFilterSet={chartTimeSeriesFilterSet}
+                    hideTime={hideTime}
                     isLoading={getAnomalyRequestStatus === ActionStatus.Working}
                     selectedEvents={selectedEvents}
                     timezone={timezone}

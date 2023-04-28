@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -24,7 +24,7 @@ import {
 } from "./alert-templates.rest";
 
 export const useGetAlertTemplate = (): GetAlertTemplate => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<AlertTemplate>(getAlertTemplateREST);
 
     const getAlertTemplate = (
@@ -33,17 +33,28 @@ export const useGetAlertTemplate = (): GetAlertTemplate => {
         return makeRequest(alertTemplateId);
     };
 
-    return { alertTemplate: data, getAlertTemplate, status, errorMessages };
+    return {
+        alertTemplate: data,
+        getAlertTemplate,
+        status,
+        errorMessages,
+        resetData,
+    };
 };
 
 export const useGetAlertTemplates = (): GetAlertTemplates => {
-    const { data, makeRequest, status, errorMessages } = useHTTPAction<
-        AlertTemplate[]
-    >(getAlertTemplatesREST);
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<AlertTemplate[]>(getAlertTemplatesREST);
 
     const getAlertTemplates = (): Promise<AlertTemplate[] | undefined> => {
         return makeRequest();
     };
 
-    return { alertTemplates: data, getAlertTemplates, status, errorMessages };
+    return {
+        alertTemplates: data,
+        getAlertTemplates,
+        status,
+        errorMessages,
+        resetData,
+    };
 };

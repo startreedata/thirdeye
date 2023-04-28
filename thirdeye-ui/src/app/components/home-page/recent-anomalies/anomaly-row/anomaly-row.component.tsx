@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -15,11 +15,12 @@
 import { Box, Button, Link, TableBody, Typography } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../../platform/components";
+import { formatDateAndTimeV1, formatDateV1 } from "../../../../platform/utils";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { UiAnomaly } from "../../../../rest/dto/ui-anomaly.interfaces";
@@ -27,6 +28,7 @@ import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../../../utils/alerts/alerts.util";
 import { getUiAnomaly } from "../../../../utils/anomalies/anomalies.util";
 import {
@@ -63,6 +65,12 @@ export const AnomalyRow: FunctionComponent<AnomalyRowProps> = ({ anomaly }) => {
         status: evaluationRequestStatus,
     } = useGetEvaluation();
 
+    const dateFormatter = useMemo(() => {
+        return shouldHideTimeInDatetimeFormat(evaluation?.alert.template)
+            ? formatDateV1
+            : formatDateAndTimeV1;
+    }, [evaluation]);
+
     useEffect(() => {
         // Fetched alert changed, fetch alert evaluation
         if (inView) {
@@ -90,14 +98,24 @@ export const AnomalyRow: FunctionComponent<AnomalyRowProps> = ({ anomaly }) => {
         }
 
         setLargeChartOptions(
-            generateChartOptions(detectionEvalForAnomaly, anomaly, [], t)
+            generateChartOptions(
+                detectionEvalForAnomaly,
+                anomaly,
+                [],
+                t,
+                determineTimezoneFromAlertInEvaluation(
+                    evaluation.alert.template
+                ),
+                shouldHideTimeInDatetimeFormat(evaluation.alert.template)
+            )
         );
 
         const options = generateChartOptionsForMetricsReport(
             detectionEvalForAnomaly,
             [anomaly],
             t,
-            determineTimezoneFromAlertInEvaluation(evaluation.alert)
+            determineTimezoneFromAlertInEvaluation(evaluation.alert.template),
+            shouldHideTimeInDatetimeFormat(evaluation.alert.template)
         );
 
         options.zoom = true;
@@ -135,8 +153,11 @@ export const AnomalyRow: FunctionComponent<AnomalyRowProps> = ({ anomaly }) => {
                     </Link>
                 </TableCell>
                 <TableCell>{uiAnomaly.metricName}</TableCell>
-                <TableCell>{uiAnomaly.startTime}</TableCell>
-                <TableCell>{uiAnomaly.endTime}</TableCell>
+                <TableCell>{dateFormatter(anomaly.startTime)}</TableCell>
+                <TableCell>
+                    {/** TODO match timezone **/}
+                    {dateFormatter(anomaly.endTime)}
+                </TableCell>
                 <TableCell>
                     <Typography
                         color={

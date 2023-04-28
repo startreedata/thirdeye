@@ -14,22 +14,40 @@
 
 package ai.startree.thirdeye.service;
 
-import ai.startree.thirdeye.auth.oauth.OpenIdInfoService;
+import ai.startree.thirdeye.auth.AuthRegistry;
+import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
+import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import javax.annotation.Nullable;
 
 @Singleton
 public class AuthService {
 
-  private final OpenIdInfoService openIdInfoService;
+  private final AuthRegistry authRegistry;
+  private final OAuthConfiguration oAuthConfiguration;
+  private OpenIdConfigurationProvider openIdConfigurationProvider = null;
 
   @Inject
-  public AuthService(final OpenIdInfoService openIdInfoService) {
-    this.openIdInfoService = openIdInfoService;
+  public AuthService(final AuthRegistry authRegistry,
+      @Nullable final OAuthConfiguration oAuthConfiguration) {
+    this.authRegistry = authRegistry;
+    this.oAuthConfiguration = oAuthConfiguration;
   }
 
-  public AuthInfoApi getAuthInfo() {
-    return openIdInfoService.getAuthInfoApi();
+  public AuthInfoApi getOpenIdConfiguration() {
+    if (oAuthConfiguration != null) {
+      if (openIdConfigurationProvider == null) {
+        // TODO: fix hack. This is loaded via a plugin and is not available at startup
+        openIdConfigurationProvider =
+            authRegistry.createDefaultOpenIdConfigurationProvider(oAuthConfiguration);
+      }
+      return openIdConfigurationProvider.getOpenIdConfiguration();
+    }
+    /* When oauth is disabled return an empty object.
+     * TODO spyne. remove. kept for legacy reasons.
+     */
+    return new AuthInfoApi();
   }
 }

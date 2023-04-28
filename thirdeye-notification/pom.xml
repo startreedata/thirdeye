@@ -19,7 +19,7 @@
   <parent>
     <groupId>ai.startree.thirdeye</groupId>
     <artifactId>thirdeye</artifactId>
-    <version>1.139.0-SNAPSHOT</version>
+    <version>1.142.0-SNAPSHOT</version>
   </parent>
   <artifactId>thirdeye-notification</artifactId>
 
@@ -27,6 +27,10 @@
     <dependency>
       <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-spi</artifactId>
     </dependency>
 
     <!-- test dependencies -->

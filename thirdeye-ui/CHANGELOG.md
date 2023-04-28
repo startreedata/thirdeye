@@ -1,3 +1,40 @@
+## [2.18.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.17.1...thirdeye-ui-2.18.0) (2023-04-24)
+
+
+### Features
+
+* [TE-1438](https://cortexdata.atlassian.net/browse/TE-1438) add `resetData` function to all actions ([83fa539c7](https://github.com/startreedata/thirdeye/commit/83fa539c7fdd2d7dd5354a8ecc49fb314e2e14da))
+* [TE-1457](https://cortexdata.atlassian.net/browse/TE-1457) add edit link in modal in alert view ([fe8903fe5](https://github.com/startreedata/thirdeye/commit/fe8903fe5f056f3059b6a5d0a26c1bc8c2d665f5))
+* [TE-1494](https://cortexdata.atlassian.net/browse/TE-1494) hide time for daily granularity alerts ([3fd562986](https://github.com/startreedata/thirdeye/commit/3fd562986064e6ad61e2f91e4d6e21a757ece988))
+* [TE-1513](https://cortexdata.atlassian.net/browse/TE-1513) use insights api during cohort detection to better default selected dates ([8e2405cd8](https://github.com/startreedata/thirdeye/commit/8e2405cd88a37d937e94acabf7987fd9c5138a90))
+
+
+### Bug Fixes
+
+* [TE-1438](https://cortexdata.atlassian.net/browse/TE-1438) delete anomalies from chart when alert is reset ([4ad65571e](https://github.com/startreedata/thirdeye/commit/4ad65571eb96957afddc42bce07f9236d824a973))
+* [TE-1496](https://cortexdata.atlassian.net/browse/TE-1496) auto-open notifications if subscription groups are selected ([8cebff6b2](https://github.com/startreedata/thirdeye/commit/8cebff6b2140c440d957915623f1f5b6d34fc149))
+* [TE-1496](https://cortexdata.atlassian.net/browse/TE-1496) do not autoselect all dimensions in cohort detector ([147a88457](https://github.com/startreedata/thirdeye/commit/147a884570b16aa7552254829ebf2e65c8bc4ad1))
+* [TE-1496](https://cortexdata.atlassian.net/browse/TE-1496) show all subscription groups for alert in all alerts page ([f3c391591](https://github.com/startreedata/thirdeye/commit/f3c391591a3eaa899d7b48cf0ea418aa65a02d5a))
+* [TE-1499](https://cortexdata.atlassian.net/browse/TE-1499) default lookback 28D, alerts sorted by created, create button changes ([fc2b8ab6b](https://github.com/startreedata/thirdeye/commit/fc2b8ab6b49afa38e8f775e2b87d1cd157d607e9))
+
+### [2.17.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.17.0...thirdeye-ui-2.17.1) (2023-04-18)
+
+
+### Bug Fixes
+
+* [TE-1507](https://cortexdata.atlassian.net/browse/TE-1507) account for missing `notificationSchemes` field ([f5e041c19](https://github.com/startreedata/thirdeye/commit/f5e041c1955ea0dba2afbb33e0d5e0a37fdcfa59))
+
+## [2.17.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.16.1...thirdeye-ui-2.17.0) (2023-04-17)
+
+
+### Features
+
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) anomalies details v2 ([d3e480fef](https://github.com/startreedata/thirdeye/commit/d3e480fef2c52bc999e3ae87720ceb1eb28ae159))
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) anomaly feedback component changes for anomaly details page ([824b2c2df](https://github.com/startreedata/thirdeye/commit/824b2c2df5213fff679fd02e37a98397da8cf3ea))
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) anomaly view chart and page skeleton component ([423c10f82](https://github.com/startreedata/thirdeye/commit/423c10f82eaf4893df58d5dfcc0a1aa80d318bbd))
+* [TE-1471](https://cortexdata.atlassian.net/browse/TE-1471) past duration picker ([4dba98a23](https://github.com/startreedata/thirdeye/commit/4dba98a23c38dddd33d8b3fad368988827a0cbfd))
+* [TE-1500](https://cortexdata.atlassian.net/browse/TE-1500) less clicks to add alert in subscription group edit flow ([594f3e7f3](https://github.com/startreedata/thirdeye/commit/594f3e7f30736d3721b65fdf297429f155cb9d25))
+
 ### [2.16.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.16.0...thirdeye-ui-2.16.1) (2023-04-11)
 
 

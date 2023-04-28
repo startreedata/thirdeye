@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,10 +14,10 @@
  */
 import { Card, CardContent, Grid } from "@material-ui/core";
 import classnames from "classnames";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { formatDateAndTimeV1 } from "../../../platform/utils";
+import { formatDateAndTimeV1, formatDateV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../rest/alerts/alerts.actions";
 import { getUiAnomaly } from "../../../utils/anomalies/anomalies.util";
@@ -25,7 +25,7 @@ import { timezoneStringShort } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card/anomaly-summary-card-deatil.component";
+import { AnomalySummaryCardDetail } from "../root-cause-analysis/anomaly-summary-card-detail/anomaly-summary-card-detail.component";
 import { AnomalyCardProps } from "./anomaly-card.interfaces";
 import { useAnomalyCardStyles } from "./anomaly-card.styles";
 
@@ -34,6 +34,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
     className,
     anomaly,
     timezone,
+    hideTime,
 }) => {
     const anomalyCardClasses = useAnomalyCardStyles();
     const { t } = useTranslation();
@@ -46,6 +47,16 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
             getAlert(anomaly.alert.id);
         }
     }, [anomaly]);
+
+    const dateFormatter = useMemo(() => {
+        let formatter = formatDateAndTimeV1;
+
+        if (hideTime) {
+            formatter = formatDateV1;
+        }
+
+        return formatter;
+    }, [hideTime]);
 
     return (
         <LoadingErrorStateSwitch
@@ -69,7 +80,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             <Grid item>
                                 <AnomalySummaryCardDetail
                                     label={t("label.anomaly-start")}
-                                    value={`${formatDateAndTimeV1(
+                                    value={`${dateFormatter(
                                         uiAnomaly.startTimeVal,
                                         timezone
                                     )} (${timezoneStringShort(timezone)})`}
@@ -80,7 +91,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             <Grid item>
                                 <AnomalySummaryCardDetail
                                     label={t("label.anomaly-end")}
-                                    value={`${formatDateAndTimeV1(
+                                    value={`${dateFormatter(
                                         uiAnomaly.endTimeVal,
                                         timezone
                                     )} (${timezoneStringShort(timezone)})`}

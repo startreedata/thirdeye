@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,7 +14,7 @@
  */
 import { Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { AnomalySummaryCardDetailProps } from "./anomaly-summary-card.interfaces";
+import { AnomalySummaryCardDetailProps } from "./anomaly-summary-card-detail.interfaces";
 
 export const AnomalySummaryCardDetail: FunctionComponent<AnomalySummaryCardDetailProps> =
     ({ label, value, valueClassName }) => {

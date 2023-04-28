@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -39,7 +39,6 @@ import {
 } from "../../../../rest/alerts/alerts.actions";
 import {
     AlertEvaluation,
-    AlertInEvaluation,
     EditableAlert,
 } from "../../../../rest/dto/alert.interfaces";
 import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
@@ -47,6 +46,7 @@ import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
@@ -174,11 +174,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 t,
                 undefined,
                 determineTimezoneFromAlertInEvaluation(
-                    evaluation?.alert.template as Pick<
-                        AlertInEvaluation,
-                        "metadata"
-                    >
-                )
+                    evaluation?.alert.template
+                ),
+                shouldHideTimeInDatetimeFormat(evaluation?.alert.template)
             );
 
             timeseriesConfiguration.brush = false;
@@ -442,10 +440,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                 <Grid item>
                                     <TimeRangeButtonWithContext
                                         timezone={determineTimezoneFromAlertInEvaluation(
-                                            evaluation?.alert.template as Pick<
-                                                AlertInEvaluation,
-                                                "metadata"
-                                            >
+                                            evaluation?.alert.template
                                         )}
                                         onTimeRangeChange={(start, end) =>
                                             displayState ===

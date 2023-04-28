@@ -13,17 +13,12 @@
  */
 package ai.startree.thirdeye.config;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Config file for cache-related stuff.
  * Mapped from cache-config.yml
  */
 @Deprecated  // todo cache needs reimplementation with v2 query system - kept to not break config yaml - can be removed
 public class CacheConfig {
-
-  @JsonProperty("centralizedCacheSettings")
-  private CentralizedCacheConfig centralizedCacheConfig = new CentralizedCacheConfig();
 
   private boolean useInMemoryCache = true;
   private boolean useCentralizedCache = false;
@@ -34,15 +29,6 @@ public class CacheConfig {
 
   public boolean useInMemoryCache() {
     return useInMemoryCache;
-  }
-
-  public CentralizedCacheConfig getCentralizedCacheConfig() {
-    return centralizedCacheConfig;
-  }
-
-  public CacheConfig setCentralizedCacheConfig(CentralizedCacheConfig centralizedCacheConfig) {
-    this.centralizedCacheConfig = centralizedCacheConfig;
-    return this;
   }
 
   public CacheConfig setUseCentralizedCache(boolean useCentralizedCache) {

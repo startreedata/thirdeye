@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,23 +18,23 @@ import { GetDataset, GetDatasets } from "./dataset.interfaces";
 import { getAllDatasets, getDataset as getDatasetREST } from "./datasets.rest";
 
 export const useGetDataset = (): GetDataset => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Dataset>(getDatasetREST);
 
     const getDataset = (id: number): Promise<Dataset | undefined> => {
         return makeRequest(id);
     };
 
-    return { dataset: data, getDataset, status, errorMessages };
+    return { dataset: data, getDataset, status, errorMessages, resetData };
 };
 
 export const useGetDatasets = (): GetDatasets => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Dataset[]>(getAllDatasets);
 
     const getDatasets = (): Promise<Dataset[] | undefined> => {
         return makeRequest();
     };
 
-    return { datasets: data, getDatasets, status, errorMessages };
+    return { datasets: data, getDatasets, status, errorMessages, resetData };
 };

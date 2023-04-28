@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,6 +14,7 @@
  */
 import { Icon } from "@iconify/react";
 import { Box, Button, Grid, Link } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -58,6 +59,7 @@ import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import {
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../utils/alerts/alerts.util";
 import {
     createAlertEvaluation,
@@ -76,7 +78,7 @@ import {
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
-export const AnomaliesViewPage: FunctionComponent = () => {
+export const AnomaliesViewV1Page: FunctionComponent = () => {
     const {
         enumerationItem,
         getEnumerationItem,
@@ -112,6 +114,8 @@ export const AnomaliesViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const style = useAnomaliesViewPageStyles();
+
+    const [showV2Link, setShowV2Link] = useState(true);
 
     useEffect(() => {
         anomalyId && getInvestigations(Number(anomalyId));
@@ -334,11 +338,31 @@ export const AnomaliesViewPage: FunctionComponent = () => {
             </PageHeader>
 
             <PageContentsGridV1>
+                {showV2Link && (
+                    <Grid item xs={12}>
+                        <Alert
+                            severity="info"
+                            variant="outlined"
+                            onClose={() => setShowV2Link(false)}
+                        >
+                            {t(
+                                "message.try-out-the-new-version-of-this-page-by-clicking"
+                            )}
+                            <Link component={RouterLink} to="../v2">
+                                {t("label.here")}
+                            </Link>
+                        </Alert>
+                    </Grid>
+                )}
+
                 {/* Anomaly */}
                 <Grid item xs={12}>
                     <AnomalyCard
                         anomaly={anomaly}
                         className={style.fullHeight}
+                        hideTime={shouldHideTimeInDatetimeFormat(
+                            alertInsight?.templateWithProperties
+                        )}
                         isLoading={
                             anomalyRequestStatus === ActionStatus.Working ||
                             anomalyRequestStatus === ActionStatus.Initial
@@ -366,6 +390,9 @@ export const AnomaliesViewPage: FunctionComponent = () => {
                             alertEvaluationTimeSeriesHeight={400}
                             anomalies={[anomaly as Anomaly]}
                             detectionEvaluation={detectionEvaluation}
+                            hideTime={shouldHideTimeInDatetimeFormat(
+                                alertInsight?.templateWithProperties
+                            )}
                             isLoading={
                                 getEvaluationRequestStatus ===
                                     ActionStatus.Working ||

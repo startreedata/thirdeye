@@ -18,7 +18,7 @@ import java.security.Principal;
 public class ThirdEyePrincipal implements Principal {
 
   private final String name;
-  public final String authToken;
+  private final String authToken;
 
   public ThirdEyePrincipal(final String name, final String authToken) {
     this.name = name;
@@ -28,5 +28,9 @@ public class ThirdEyePrincipal implements Principal {
   @Override
   public String getName() {
     return name;
+  }
+
+  public String getAuthToken() {
+    return authToken;
   }
 }

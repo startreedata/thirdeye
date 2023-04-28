@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi;
 
 public enum ThirdEyeStatus {
 
+  ERR_UNAUTHENTICATED("User authentication failed!"),
   ERR_ALERT_PIPELINE_EXECUTION("Failed to run alert pipeline. Error caused by : %s"),
   ERR_AUTH_SERVER_NOT_RESPONDING("Auth server is not responding. Auth Server URL : %s"),
   ERR_CONFIG("Configuration Error! %s"),

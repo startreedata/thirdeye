@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -46,6 +46,7 @@ import {
     DEFAULT_FEEDBACK,
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../../utils/alerts/alerts.util";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
@@ -252,7 +253,10 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
                     filteredAlertEvaluation,
                     t,
                     determineTimezoneFromAlertInEvaluation(
-                        alertEvaluation.alert
+                        alertEvaluation.alert.template
+                    ),
+                    shouldHideTimeInDatetimeFormat(
+                        alertEvaluation.alert.template
                     )
                 )
             );
@@ -348,7 +352,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
                                 <Box>
                                     <TimeRangeButtonWithContext
                                         timezone={determineTimezoneFromAlertInEvaluation(
-                                            alertEvaluation?.alert
+                                            alertEvaluation?.alert.template
                                         )}
                                     />
                                 </Box>

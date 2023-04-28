@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -31,7 +31,6 @@ import {
 } from "../../../rest/alerts/alerts.actions";
 import {
     AlertEvaluation,
-    AlertInEvaluation,
     EditableAlert,
     EnumerationItemConfig,
 } from "../../../rest/dto/alert.interfaces";
@@ -40,6 +39,7 @@ import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
+    shouldHideTimeInDatetimeFormat,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
@@ -138,12 +138,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             detectionEvaluations[0].anomalies,
             t,
             undefined,
-            determineTimezoneFromAlertInEvaluation(
-                evaluation?.alert.template as Pick<
-                    AlertInEvaluation,
-                    "metadata"
-                >
-            )
+            determineTimezoneFromAlertInEvaluation(evaluation?.alert.template),
+            shouldHideTimeInDatetimeFormat(evaluation?.alert.template)
         );
 
         timeseriesConfiguration.brush = false;
@@ -264,10 +260,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                     hideQuickExtend
                                     btnGroupColor="primary"
                                     timezone={determineTimezoneFromAlertInEvaluation(
-                                        evaluation?.alert.template as Pick<
-                                            AlertInEvaluation,
-                                            "metadata"
-                                        >
+                                        evaluation?.alert.template
                                     )}
                                     onTimeRangeChange={(start, end) =>
                                         fetchAlertEvaluation(start, end)
@@ -387,11 +380,11 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         detectionEvaluations={
                                             detectionEvaluations
                                         }
+                                        hideTime={shouldHideTimeInDatetimeFormat(
+                                            evaluation?.alert.template
+                                        )}
                                         timezone={determineTimezoneFromAlertInEvaluation(
-                                            evaluation?.alert.template as Pick<
-                                                AlertInEvaluation,
-                                                "metadata"
-                                            >
+                                            evaluation?.alert.template
                                         )}
                                         onDeleteClick={
                                             handleDeleteEnumerationItemClick

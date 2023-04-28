@@ -16,7 +16,6 @@ package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
@@ -29,14 +28,11 @@ import java.util.List;
 
 @Singleton
 public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTemplateDTO> {
-  private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
 
   @Inject
   public AlertTemplateService(final AlertTemplateManager alertTemplateManager,
-      final AuthorizationManager authorizationManager,
-      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
+      final AuthorizationManager authorizationManager) {
     super(authorizationManager, alertTemplateManager, ImmutableMap.of());
-    this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
   }
 
   @Override
@@ -58,9 +54,8 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   }
 
 
-  public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyePrincipal principal,
-      final boolean updateExisting) {
-    final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
+  protected List<AlertTemplateApi> loadTemplates(final ThirdEyePrincipal principal,
+      final List<AlertTemplateApi> alertTemplates, final boolean updateExisting) {
     final List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     final List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
     for (final AlertTemplateApi templateApi : alertTemplates) {

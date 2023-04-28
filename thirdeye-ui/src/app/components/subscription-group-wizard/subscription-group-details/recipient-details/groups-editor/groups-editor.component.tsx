@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -37,7 +37,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
         subscriptionGroup.specs || []
     );
     const [legacyEmailList, setLegacyEmailList] = useState<string[]>(
-        subscriptionGroup.notificationSchemes.email.to || []
+        subscriptionGroup.notificationSchemes?.email.to || []
     );
     const { t } = useTranslation();
 
@@ -46,8 +46,8 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
     }, [currentSpecs]);
 
     const hasSomeConfig =
-        (subscriptionGroup.notificationSchemes.email &&
-            subscriptionGroup.notificationSchemes.email.to.length > 0) ||
+        (subscriptionGroup.notificationSchemes?.email &&
+            subscriptionGroup.notificationSchemes?.email.to.length > 0) ||
         currentSpecs.length > 0;
 
     const handleShortcutCreateOnclick = (id: number | string): void => {

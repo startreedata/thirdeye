@@ -11,14 +11,28 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.auth.oauth;
+package ai.startree.thirdeye.plugins.oauth;
 
-import java.util.Map;
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Url;
+public class OauthCacheConfiguration {
 
-public interface AuthInfoService {
-  @GET
-  Call<Map<String, Object>> getInfo(@Url String url);
+  private long size = 64;
+  private long ttl = 60000;
+
+  public long getSize() {
+    return size;
+  }
+
+  public OauthCacheConfiguration setSize(final long size) {
+    this.size = size;
+    return this;
+  }
+
+  public long getTtl() {
+    return ttl;
+  }
+
+  public OauthCacheConfiguration setTtl(final long ttl) {
+    this.ttl = ttl;
+    return this;
+  }
 }

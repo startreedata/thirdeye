@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -35,6 +35,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
         chartTimeSeriesFilterSet,
         onCheckClick,
         timezone,
+        hideTime,
     }) => {
         const { t } = useTranslation();
         const totalSum = anomalyDimensionAnalysisData.responseRows.reduce(
@@ -115,6 +116,7 @@ export const AnomalyDimensionAnalysisTable: FunctionComponent<AlgorithmTableProp
                                         anomalyDimensionAnalysisData.dimensions
                                     }
                                     endTime={anomaly.endTime}
+                                    hideTime={hideTime}
                                     key={row.names.join()}
                                     metric={
                                         anomalyDimensionAnalysisData.metric.name

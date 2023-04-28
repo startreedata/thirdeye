@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -209,14 +209,11 @@ describe("Subscription Groups Router", () => {
     it("should render subscription groups create page at exact subscription groups create path", async () => {
         render(
             <MemoryRouter
-                initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_CREATE]}
+                initialEntries={[
+                    `/${AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}`,
+                ]}
             >
-                <Routes>
-                    <Route
-                        element={<SubscriptionGroupsRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
-                    />
-                </Routes>
+                <SubscriptionGroupsRouter />
             </MemoryRouter>
         );
 
@@ -243,15 +240,8 @@ describe("Subscription Groups Router", () => {
 
     it("should render subscription groups update page at exact subscription groups update path", async () => {
         render(
-            <MemoryRouter
-                initialEntries={[AppRoute.SUBSCRIPTION_GROUPS_UPDATE]}
-            >
-                <Routes>
-                    <Route
-                        element={<SubscriptionGroupsRouter />}
-                        path={`${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/*`}
-                    />
-                </Routes>
+            <MemoryRouter initialEntries={[`/123/update`]}>
+                <SubscriptionGroupsRouter />
             </MemoryRouter>
         );
 
@@ -279,18 +269,6 @@ describe("Subscription Groups Router", () => {
     it("should render page not found page at invalid subscription group path (no path after an id of an subscription group)", async () => {
         render(
             <MemoryRouter initialEntries={["/1234/testPath"]}>
-                <SubscriptionGroupsRouter />
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testPageNotFoundPage")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render page not found page by default", async () => {
-        render(
-            <MemoryRouter>
                 <SubscriptionGroupsRouter />
             </MemoryRouter>
         );

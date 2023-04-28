@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
 import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
 import ai.startree.thirdeye.auth.basic.UserCredentialConfiguration;
-import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.basic.BasicCredentials;
 import java.util.List;
 import org.testng.annotations.Test;
@@ -26,7 +25,7 @@ import org.testng.annotations.Test;
 public class BasicAuthenticatorTest {
 
   @Test
-  public void basicAuthenticationTest() throws AuthenticationException {
+  public void basicAuthenticationTest() {
     final List<UserCredentialConfiguration> users = List.of(
         new UserCredentialConfiguration()
             .setUsername("user1")

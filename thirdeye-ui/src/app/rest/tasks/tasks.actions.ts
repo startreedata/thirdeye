@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,7 +18,7 @@ import { GetTasks, GetTasksProps } from "./tasks.interfaces";
 import { getTasks as getTasksREST } from "./tasks.rest";
 
 export const useGetTasks = (): GetTasks => {
-    const { data, makeRequest, status, errorMessages } =
+    const { data, makeRequest, status, errorMessages, resetData } =
         useHTTPAction<Task[]>(getTasksREST);
 
     const getTasks = (
@@ -32,5 +32,6 @@ export const useGetTasks = (): GetTasks => {
         getTasks,
         status,
         errorMessages,
+        resetData,
     };
 };

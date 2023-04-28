@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -98,7 +98,8 @@ export const generateComparisonChartOptions = (
     endTime: number,
     comparisonOffset: string,
     translation: (labelName: string) => string = (s) => s,
-    timezone?: string
+    timezone?: string,
+    hideTime?: boolean
 ): TimeSeriesChartProps => {
     const filteredTimeSeriesData = extractDetectionEvaluation(filtered)[0].data;
     const nonFilteredTimeSeriesData =
@@ -159,6 +160,7 @@ export const generateComparisonChartOptions = (
         zoom: true,
         series,
         xAxis: {
+            hideTime: hideTime,
             plotBands: [
                 {
                     start: startTime,

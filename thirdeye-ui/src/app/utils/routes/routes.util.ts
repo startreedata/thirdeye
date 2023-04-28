@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -51,7 +51,9 @@ export const AppRouteRelative = {
     ANOMALIES_METRICS_REPORT: "metrics-report",
     ANOMALIES_ALL_RANGE: "range",
     ANOMALIES_ANOMALY: `${PLACEHOLDER_ROUTE_ID}`,
+    ANOMALIES_ANOMALY_V2: `${PLACEHOLDER_ROUTE_ID}/v2`,
     ANOMALIES_ANOMALY_VIEW: `view`,
+    ANOMALIES_ANOMALY_VIEW_VALIDATE: `validate`,
     ANOMALIES_CREATE: "create",
     ANOMALIES_ALERT_CREATE: `${PLACEHOLDER_ROUTE_ID}`,
     CONFIGURATION: "configuration",

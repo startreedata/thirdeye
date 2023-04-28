@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -20,4 +20,5 @@ export interface EnumerationItemRowProps {
     anomalies: Anomaly[];
     onDeleteClick?: () => void;
     timezone: string | undefined;
+    hideTime: boolean;
 }

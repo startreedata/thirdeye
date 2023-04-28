@@ -17,12 +17,34 @@ import static ai.startree.thirdeye.DaoFilterBuilder.toPair;
 import static ai.startree.thirdeye.DaoFilterBuilder.toPredicate;
 import static ai.startree.thirdeye.spi.util.Pair.pair;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
+import com.google.common.collect.ImmutableMap;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import org.testng.annotations.Test;
 
 public class DaoFilterBuilderTest {
+
+  private DaoFilterBuilder builder() {
+    return new DaoFilterBuilder(ImmutableMap.of());
+  }
+
+  private MultivaluedMap<String, String> queryParams(final String... args) {
+    final MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<>();
+    for (int i=0; i < args.length; i += 2) {
+      queryParams.add(args[i], args[i+1]);
+    }
+    return queryParams;
+  }
+
+  private void assertBadRequestException(final MultivaluedMap<String, String> queryParams) {
+    assertThatThrownBy(() -> builder().buildFilter(queryParams))
+        .isInstanceOf(BadRequestException.class);
+  }
 
   @Test
   public void testToPair() {
@@ -49,5 +71,39 @@ public class DaoFilterBuilderTest {
         Predicate.GT("col", "1"),
         Predicate.LE("col", "-1")
     ));
+  }
+
+  @Test
+  public void testValidLimitOffsetParams() {
+    final long limit = 5;
+    assertThat(builder()
+        .buildFilter(queryParams("limit", String.valueOf(limit)))
+        .getLimit()
+    ).isEqualTo(limit);
+
+    final long offset = 10;
+    assertThat(builder()
+        .buildFilter(queryParams(
+                "limit", String.valueOf(limit),
+                "offset", String.valueOf(offset)))
+        .getOffset()
+    ).isEqualTo(offset);
+  }
+
+  @Test
+  public void testNegativeLimitValue() {
+    assertBadRequestException(queryParams("limit", "-1"));
+  }
+
+  @Test
+  public void testNegativeOffsetValue() {
+    assertBadRequestException(queryParams(
+        "limit", "5",
+        "offset", "-10"));
+  }
+
+  @Test
+  public void testOffsetWithoutLimit() {
+    assertBadRequestException(queryParams("offset", "10"));
   }
 }

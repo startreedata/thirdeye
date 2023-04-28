@@ -38,6 +38,7 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Field;
@@ -72,19 +73,13 @@ public class GenericPojoDao {
         "Entity Metadata is inconsistent!");
   }
 
-  private static void validateLimitOffset(final DaoFilter filter) {
+  private static void validate(final DaoFilter filter) {
     optional(filter.getLimit()).ifPresent(limit -> {
-      if (limit < 0) {
-        throw new ThirdEyeException(ERR_NEGATIVE_LIMIT_VALUE);
-      }
+      Preconditions.checkArgument(limit >= 0, ERR_NEGATIVE_LIMIT_VALUE.getMessage());
     });
     optional(filter.getOffset()).ifPresent(offset -> {
-      if (filter.getLimit() == null) {
-        throw new ThirdEyeException(ERR_OFFSET_WITHOUT_LIMIT);
-      }
-      if(offset < 0) {
-        throw new ThirdEyeException(ERR_NEGATIVE_OFFSET_VALUE);
-      }
+      Preconditions.checkArgument(filter.getLimit() != null, ERR_OFFSET_WITHOUT_LIMIT.getMessage());
+      Preconditions.checkArgument(offset >= 0, ERR_NEGATIVE_OFFSET_VALUE.getMessage());
     });
   }
 
@@ -395,7 +390,7 @@ public class GenericPojoDao {
     //apply the predicates and fetch the primary key ids
     final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(daoFilter.getBeanClass());
     try {
-      validateLimitOffset(daoFilter);
+      validate(daoFilter);
       //find the matching ids
       final List<? extends AbstractIndexEntity> indexEntities = transactionService.executeTransaction(
           (connection) -> databaseService.findAll(daoFilter.getPredicate(),

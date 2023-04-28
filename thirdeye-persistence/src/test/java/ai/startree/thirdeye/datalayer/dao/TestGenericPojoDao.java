@@ -152,7 +152,9 @@ public class TestGenericPojoDao {
     final DaoFilter filter = new DaoFilter()
         .setOffset(offset)
         .setBeanClass(AnomalyDTO.class);
-    assertThatThrownBy(() -> dao.filter(filter)).hasMessage(ERR_OFFSET_WITHOUT_LIMIT.getMessage());
+    assertThatThrownBy(() -> dao.filter(filter))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(ERR_OFFSET_WITHOUT_LIMIT.getMessage());
   }
 
   @Test
@@ -160,7 +162,9 @@ public class TestGenericPojoDao {
     final DaoFilter filter = new DaoFilter()
         .setLimit(-5L)
         .setBeanClass(AnomalyDTO.class);
-    assertThatThrownBy(() -> dao.filter(filter)).hasMessage(ERR_NEGATIVE_LIMIT_VALUE.getMessage());
+    assertThatThrownBy(() -> dao.filter(filter))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(ERR_NEGATIVE_LIMIT_VALUE.getMessage());
   }
 
   @Test
@@ -169,7 +173,9 @@ public class TestGenericPojoDao {
         .setLimit((long) TOTAL_ANOMALIES)
         .setOffset(-5L)
         .setBeanClass(AnomalyDTO.class);
-    assertThatThrownBy(() -> dao.filter(filter)).hasMessage(ERR_NEGATIVE_OFFSET_VALUE.getMessage());
+    assertThatThrownBy(() -> dao.filter(filter))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(ERR_NEGATIVE_OFFSET_VALUE.getMessage());
   }
 
   @Test

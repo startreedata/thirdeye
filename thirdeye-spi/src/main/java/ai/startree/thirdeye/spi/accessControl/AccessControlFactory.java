@@ -13,9 +13,10 @@
  */
 package ai.startree.thirdeye.spi.accessControl;
 
+import ai.startree.thirdeye.spi.PluginServiceFactory;
 import java.util.Map;
 
-public interface AccessControlFactory {
+public interface AccessControlFactory extends PluginServiceFactory<AccessControl, Map<String, Object>> {
 
   String name();
 

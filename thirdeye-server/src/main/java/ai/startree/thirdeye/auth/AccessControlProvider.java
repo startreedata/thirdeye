@@ -54,7 +54,7 @@ public class AccessControlProvider implements AccessControl {
       return;
     }
 
-    var accessControl = f.build(config.getPlugins().get(f.name()));
+    var accessControl = f.build(config.getPlugins().get(f.getName()));
     if (accessControl == null) {
       return;
     }

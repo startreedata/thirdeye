@@ -50,6 +50,9 @@ public enum ThirdEyeStatus {
   ERR_INVALID_PARAMS_COMPONENTS("Invalid param components: %s for Class %s"),
   ERR_INVALID_DETECTION_REGRESSORS("Invalid regressors configuration. Too few or too many regressors?"),
   ERR_INVALID_SQL("Invalid SQL:\n%s"),
+  ERR_NEGATIVE_LIMIT_VALUE("Negative 'limit' value provided."),
+  ERR_NEGATIVE_OFFSET_VALUE("Negative 'offset' value provided."),
+  ERR_OFFSET_WITHOUT_LIMIT("'offset' value provided without 'limit' value."),
 
   OK("OK"),
   ;

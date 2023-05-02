@@ -13,7 +13,11 @@
  */
 package ai.startree.thirdeye.datalayer.dao;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_LIMIT_VALUE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_OFFSET_VALUE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OFFSET_WITHOUT_LIMIT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -148,9 +152,9 @@ public class TestGenericPojoDao {
     final DaoFilter filter = new DaoFilter()
         .setOffset(offset)
         .setBeanClass(AnomalyDTO.class);
-    final List<AnomalyDTO> anomalies = dao.filter(filter);
-    assertThat(anomalies).isNotNull();
-    assertThat(anomalies).isEmpty();
+    assertThatThrownBy(() -> dao.filter(filter))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(ERR_OFFSET_WITHOUT_LIMIT.getMessage());
   }
 
   @Test
@@ -158,9 +162,9 @@ public class TestGenericPojoDao {
     final DaoFilter filter = new DaoFilter()
         .setLimit(-5L)
         .setBeanClass(AnomalyDTO.class);
-    final List<AnomalyDTO> anomalies = dao.filter(filter);
-    assertThat(anomalies).isNotNull();
-    assertThat(anomalies).isEmpty();
+    assertThatThrownBy(() -> dao.filter(filter))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(ERR_NEGATIVE_LIMIT_VALUE.getMessage());
   }
 
   @Test
@@ -169,9 +173,9 @@ public class TestGenericPojoDao {
         .setLimit((long) TOTAL_ANOMALIES)
         .setOffset(-5L)
         .setBeanClass(AnomalyDTO.class);
-    final List<AnomalyDTO> anomalies = dao.filter(filter);
-    assertThat(anomalies).isNotNull();
-    assertThat(anomalies).isEmpty();
+    assertThatThrownBy(() -> dao.filter(filter))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(ERR_NEGATIVE_OFFSET_VALUE.getMessage());
   }
 
   @Test

@@ -17,6 +17,10 @@ import static ai.startree.thirdeye.datalayer.dao.SubEntities.BEAN_INDEX_MAP;
 import static ai.startree.thirdeye.datalayer.mapper.DtoIndexMapper.toAbstractIndexEntity;
 import static ai.startree.thirdeye.datalayer.mapper.GenericJsonEntityDtoMapper.toDto;
 import static ai.startree.thirdeye.datalayer.mapper.GenericJsonEntityDtoMapper.toGenericJsonEntity;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_LIMIT_VALUE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_OFFSET_VALUE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OFFSET_WITHOUT_LIMIT;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
@@ -34,6 +38,7 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Field;
@@ -66,6 +71,16 @@ public class GenericPojoDao {
 
     checkState(BEAN_INDEX_MAP.size() == SubEntities.BEAN_TYPE_MAP.size(),
         "Entity Metadata is inconsistent!");
+  }
+
+  private static void validate(final DaoFilter filter) {
+    optional(filter.getLimit()).ifPresent(limit -> {
+      Preconditions.checkArgument(limit >= 0, ERR_NEGATIVE_LIMIT_VALUE.getMessage());
+    });
+    optional(filter.getOffset()).ifPresent(offset -> {
+      Preconditions.checkArgument(filter.getLimit() != null, ERR_OFFSET_WITHOUT_LIMIT.getMessage());
+      Preconditions.checkArgument(offset >= 0, ERR_NEGATIVE_OFFSET_VALUE.getMessage());
+    });
   }
 
   public Set<Class<? extends AbstractDTO>> getAllBeanClasses() {
@@ -109,7 +124,7 @@ public class GenericPojoDao {
           return pojo.getId();
         }
       }, null);
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       LOG.error(e.getMessage(), e);
       return null;
     }
@@ -211,7 +226,7 @@ public class GenericPojoDao {
       return transactionService.executeTransaction(
           (connection) -> databaseService.count(null, indexClass, connection),
           -1L);
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       LOG.error(e.getMessage(), e);
       return -1L;
     }
@@ -223,7 +238,7 @@ public class GenericPojoDao {
       return transactionService.executeTransaction(
           (connection) -> databaseService.count(predicate, indexClass, connection),
           -1L);
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       LOG.error(e.getMessage(), e);
       return -1L;
     }
@@ -344,7 +359,7 @@ public class GenericPojoDao {
       if (!idsToFind.isEmpty()) {
         return get(idsToFind, pojoClass);
       }
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       LOG.error(e.getMessage(), e);
     }
     return emptyList();
@@ -375,6 +390,7 @@ public class GenericPojoDao {
     //apply the predicates and fetch the primary key ids
     final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(daoFilter.getBeanClass());
     try {
+      validate(daoFilter);
       //find the matching ids
       final List<? extends AbstractIndexEntity> indexEntities = transactionService.executeTransaction(
           (connection) -> databaseService.findAll(daoFilter.getPredicate(),
@@ -389,7 +405,7 @@ public class GenericPojoDao {
         }
       }
       return idsToReturn;
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       LOG.error(e.getMessage(), e);
       return emptyList();
     }
@@ -415,7 +431,7 @@ public class GenericPojoDao {
         for (final AbstractEntity entity : entities) {
           LOG.debug("{}", entity);
         }
-      } catch (SQLException e) {
+      } catch (final SQLException e) {
         LOG.error(e.getMessage(), e);
       }
     }
@@ -442,7 +458,7 @@ public class GenericPojoDao {
             indexEntityClass,
             connection);
       }, 0);
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       LOG.error(e.getMessage(), e);
       return 0;
     }

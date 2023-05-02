@@ -13,20 +13,7 @@
  */
 package ai.startree.thirdeye.spi.accessControl;
 
+import ai.startree.thirdeye.spi.PluginServiceFactory;
 import java.util.Map;
 
-/**
- * Plugin specific configuration is provided as plugin name -> properties.
- * Example server.yaml:
- * ---
- * accessControl:
- *   enabled: true
- *   plugins:
- *     my-plugin:
- *       prop1: val1
- * ...
- */
-public class AccessControlConfiguration {
-  public boolean enabled;
-  public Map<String, Map<String, Object>> plugins;
-}
+public interface AccessControlFactory extends PluginServiceFactory<AccessControl, Map<String, Object>> {}

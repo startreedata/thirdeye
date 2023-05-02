@@ -16,9 +16,12 @@ package ai.startree.thirdeye.auth;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
-import ai.startree.thirdeye.spi.accessControl.AccessControlConfiguration;
+import ai.startree.thirdeye.spi.accessControl.AccessControlFactory;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
@@ -45,7 +48,17 @@ public class AccessControlProvider implements AccessControl {
     this.config = config;
   }
 
-  public void setAccessControl(AccessControl accessControl) {
+  public void addAccessControlFactory(AccessControlFactory f) {
+    // No lazy-loading here. Immediately build the access control handler.
+    if (!config.isEnabled()) {
+      return;
+    }
+
+    var accessControl = f.build(config.getPlugins().get(f.getName()));
+    if (accessControl == null) {
+      return;
+    }
+
     if (this.accessControl != null) {
       throw new RuntimeException("Access control source can only be set once!");
     }
@@ -53,7 +66,7 @@ public class AccessControlProvider implements AccessControl {
   }
 
   public AccessControl getAccessControl() {
-    if (!config.enabled) {
+    if (!config.isEnabled()) {
       return alwaysAllow;
     }
 

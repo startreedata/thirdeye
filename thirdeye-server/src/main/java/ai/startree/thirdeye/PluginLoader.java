@@ -26,6 +26,7 @@ import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
+import ai.startree.thirdeye.spi.accessControl.AccessControlFactory;
 import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
@@ -159,9 +160,8 @@ public class PluginLoader {
     for (EnumeratorFactory f : plugin.getEnumeratorFactories()) {
       detectionRegistry.addEnumeratorFactory(f);
     }
-    if (accessControlProvider.getConfig().enabled) {
-      optional(plugin.getAccessControl(accessControlProvider.getConfig()))
-          .ifPresent(accessControlProvider::setAccessControl);
+    for (AccessControlFactory f: plugin.getAccessControlFactories()) {
+      accessControlProvider.addAccessControlFactory(f);
     }
 
     log.info("Installed plugin: " + plugin.getClass().getName());

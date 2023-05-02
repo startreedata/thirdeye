@@ -113,7 +113,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
     loadPlugins();
 
-    env.jersey().register(injector.getInstance(RootResource.class));
+    registerResources(env.jersey());
     env.jersey().register(new ThirdEyeJsonProcessingExceptionMapper());
 
     // Expose dropwizard metrics in prometheus compatible format
@@ -136,6 +136,10 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     // Load mock events if enabled.
     injector.getInstance(MockEventsLoader.class).run();
     env.lifecycle().manage(lifecycleManager(configuration));
+  }
+
+  protected void registerResources(final JerseyEnvironment jersey) {
+    jersey.register(injector.getInstance(RootResource.class));
   }
 
   protected void loadPlugins() {

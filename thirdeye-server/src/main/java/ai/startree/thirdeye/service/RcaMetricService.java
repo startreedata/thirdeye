@@ -14,9 +14,7 @@
 
 package ai.startree.thirdeye.service;
 
-import ai.startree.thirdeye.rca.CohortComputation;
 import ai.startree.thirdeye.rca.HeatmapCalculator;
-import ai.startree.thirdeye.spi.api.CohortComputationApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,13 +24,10 @@ import java.util.List;
 public class RcaMetricService {
 
   private final HeatmapCalculator heatmapCalculator;
-  private final CohortComputation cohortComputation;
 
   @Inject
-  public RcaMetricService(final HeatmapCalculator heatmapCalculator,
-      final CohortComputation cohortComputation) {
+  public RcaMetricService(final HeatmapCalculator heatmapCalculator) {
     this.heatmapCalculator = heatmapCalculator;
-    this.cohortComputation = cohortComputation;
   }
 
   public HeatMapResponseApi computeHeatmap(final long anomalyId,
@@ -47,10 +42,5 @@ public class RcaMetricService {
         limit,
         dimensions,
         excludedDimensions);
-  }
-
-  public CohortComputationApi generateCohorts(final CohortComputationApi request)
-      throws Exception {
-    return cohortComputation.compute(request);
   }
 }

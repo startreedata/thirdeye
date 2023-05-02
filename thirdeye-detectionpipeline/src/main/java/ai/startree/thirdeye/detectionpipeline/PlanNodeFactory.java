@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
@@ -62,11 +64,11 @@ public class PlanNodeFactory {
    * Contains the list of built in as well as node/operators coming from plugins.
    * TODO spyne implement loading nodes from plugins
    */
-  private final Map<String, Class<? extends PlanNode>> planNodeTypeToClassMap;
+  private final Map<String, Class<? extends PlanNode>> typeVsPlanNodeClassMap = new HashMap<>();
 
   @Inject
   public PlanNodeFactory() {
-    this.planNodeTypeToClassMap = buildPlanNodeTypeToClassMap();
+    BUILT_IN_PLAN_NODE_CLASSES.forEach(this::registerPlanNodeClass);
   }
 
   public static PlanNode build(
@@ -79,16 +81,20 @@ public class PlanNodeFactory {
     return planNode;
   }
 
-  private Map<String, Class<? extends PlanNode>> buildPlanNodeTypeToClassMap() {
-    final HashMap<String, Class<? extends PlanNode>> stringClassHashMap = new HashMap<>();
-    for (Class<? extends PlanNode> c : BUILT_IN_PLAN_NODE_CLASSES) {
-      try {
-        stringClassHashMap.put(c.newInstance().getType(), c);
-      } catch (InstantiationException | IllegalAccessException e) {
-        throw new RuntimeException("Failed to initialize PlanNode: " + c.getSimpleName(), e);
-      }
+  public void registerPlanNodeClass(final Class<? extends PlanNode> c) {
+    final String type;
+    try {
+      // TODO spyne this interface needs enhancement. We should not need to instantiate the class
+      type = c.getDeclaredConstructor().newInstance().getType();
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException("Failed to initialize PlanNode: " + c.getSimpleName(), e);
     }
-    return stringClassHashMap;
+    checkState(!typeVsPlanNodeClassMap.containsKey(type),
+        String.format("PlanNode with type: %s is already registered. class: %s",
+            type,
+            optional(typeVsPlanNodeClassMap.get(type)).map(Class::getName).orElse("null")));
+
+    typeVsPlanNodeClassMap.put(type, c);
   }
 
   public PlanNode build(final PlanNodeBean planNodeBean,
@@ -101,7 +107,7 @@ public class PlanNodeFactory {
         .setPipelinePlanNodes(pipelinePlanNodes);
 
     final String type = requireNonNull(planNodeBean.getType(), "node type is null");
-    final Class<? extends PlanNode> planNodeClass = requireNonNull(planNodeTypeToClassMap.get(type),
+    final Class<? extends PlanNode> planNodeClass = requireNonNull(typeVsPlanNodeClassMap.get(type),
         "Unknown node type: " + type);
     try {
       return build(planNodeClass, context);

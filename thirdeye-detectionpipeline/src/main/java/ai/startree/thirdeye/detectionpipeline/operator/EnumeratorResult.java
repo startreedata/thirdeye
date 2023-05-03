@@ -11,21 +11,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
 
-public class ForkJoinResult implements OperatorResult {
+/**
+ * TODO spyne - refactor the results as part of an interface. This is a temporary solution.
+ */
+public class EnumeratorResult implements OperatorResult {
 
-  private final List<ForkJoinResultItem> results;
+  private final List<EnumerationItemDTO> results;
 
-  public ForkJoinResult(
-      final List<ForkJoinResultItem> results) {
+  public EnumeratorResult(final List<EnumerationItemDTO> results) {
     this.results = results;
   }
 
-  public List<ForkJoinResultItem> getResults() {
+  public List<EnumerationItemDTO> getResults() {
     return results;
   }
 }

@@ -38,8 +38,16 @@ public class DropwizardTestUtils {
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   public static DropwizardTestSupport<ThirdEyeServerConfiguration> buildSupport(
-      final DatabaseConfiguration dbConfiguration, final String serverConfigPath) {
-    return new DropwizardTestSupport<>(ThirdEyeServer.class, resourceFilePath(serverConfigPath),
+      final DatabaseConfiguration dbConfiguration,
+      final String serverConfigPath) {
+    return launchTestServerInstance(ThirdEyeServer.class, dbConfiguration, serverConfigPath);
+  }
+
+  public static DropwizardTestSupport<ThirdEyeServerConfiguration> launchTestServerInstance(
+      final Class<? extends ThirdEyeServer> serverClass,
+      final DatabaseConfiguration dbConfiguration,
+      final String serverConfigPath) {
+    return new DropwizardTestSupport<>(serverClass, resourceFilePath(serverConfigPath),
         config("server.connector.port", "0"), // port: 0 implies any port
         config("database.url", dbConfiguration.getUrl()),
         config("database.user", dbConfiguration.getUser()),

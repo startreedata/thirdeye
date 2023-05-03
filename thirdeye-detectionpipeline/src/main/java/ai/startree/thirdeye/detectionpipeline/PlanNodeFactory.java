@@ -18,14 +18,11 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.plan.AnomalyDetectorPlanNode;
-import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DelayPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
-import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EventFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EventTriggerPlanNode;
-import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.PostProcessorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.SqlExecutionPlanNode;
@@ -48,13 +45,10 @@ public class PlanNodeFactory {
   /* List of plan node classes that are built in with thirdeye */
   private static final List<Class<? extends PlanNode>> BUILT_IN_PLAN_NODE_CLASSES = ImmutableList.of(
       AnomalyDetectorPlanNode.class,
-      CombinerPlanNode.class,
       DataFetcherPlanNode.class,
       EchoPlanNode.class,
-      EnumeratorPlanNode.class,
       EventTriggerPlanNode.class,
       EventFetcherPlanNode.class,
-      ForkJoinPlanNode.class,
       IndexFillerPlanNode.class,
       SqlExecutionPlanNode.class,
       DelayPlanNode.class,

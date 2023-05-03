@@ -13,39 +13,25 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
-import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_COMBINER;
-import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ENUMERATOR;
-import static ai.startree.thirdeye.detectionpipeline.operator.ForkJoinOperator.K_ROOT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.detectionpipeline.operator.CombinerOperator;
-import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator.EchoResult;
-import ai.startree.thirdeye.detectionpipeline.plan.CombinerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
-import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
-import ai.startree.thirdeye.detectionpipeline.plan.ForkJoinPlanNode;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.BeforeMethod;
@@ -112,82 +98,5 @@ public class PlanExecutorTest {
 
     final EchoResult echoResult = (EchoResult) result;
     assertThat(echoResult.text()).isEqualTo(echoInput);
-  }
-
-  @Test
-  public void testExecuteSingleForkJoin() throws Exception {
-    final PlanNodeBean echoNode = new PlanNodeBean()
-        .setName("echo")
-        .setType(EchoPlanNode.TYPE)
-        .setParams(TemplatableMap.ofValue(
-            EchoOperator.DEFAULT_INPUT_KEY, "${key}"
-        ));
-
-    final List<Map<String, Map<String, Object>>> items = List.of(
-        Map.of("params", Map.of("key", 1)),
-        Map.of("params", Map.of("key", 2)),
-        Map.of("params", Map.of("key", 3))
-    );
-    final PlanNodeBean enumeratorNode = new PlanNodeBean()
-        .setName("enumerator")
-        .setType(EnumeratorPlanNode.TYPE)
-        .setParams(TemplatableMap.ofValue("items", items));
-
-    when(enumerator.enumerate(any())).thenReturn(items
-        .stream()
-        .map(m -> new EnumerationItemDTO().setParams(m.get("params")))
-        .collect(Collectors.toList())
-    );
-
-    final PlanNodeBean combinerNode = new PlanNodeBean()
-        .setName("combiner")
-        .setType(CombinerPlanNode.TYPE);
-
-    final PlanNodeBean forkJoinNode = new PlanNodeBean()
-        .setName("root")
-        .setType(ForkJoinPlanNode.TYPE)
-        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of(
-            K_ENUMERATOR, enumeratorNode.getName(),
-            K_ROOT, echoNode.getName(),
-            K_COMBINER, combinerNode.getName()
-        )));
-
-    final List<PlanNodeBean> planNodeBeans = Arrays.asList(
-        echoNode,
-        enumeratorNode,
-        combinerNode,
-        forkJoinNode
-    );
-
-    final Map<ContextKey, OperatorResult> resultMap = new HashMap<>();
-    final Interval detectionInterval = new Interval(
-        0L,
-        System.currentTimeMillis(),
-        DateTimeZone.UTC);
-    final DetectionPipelineContext runTimeContext = new DetectionPipelineContext()
-        .setUsage(DetectionPipelineUsage.EVALUATION)
-        .setApplicationContext(planExecutor.applicationContext)
-        .setDetectionInterval(detectionInterval);
-    final Map<String, PlanNode> pipelinePlanNodes = planExecutor.buildPlanNodeMap(planNodeBeans,
-        runTimeContext);
-    PlanExecutor.executePlanNode(
-        pipelinePlanNodes,
-        pipelinePlanNodes.get("root"),
-        resultMap
-    );
-
-    assertThat(resultMap.size()).isEqualTo(1);
-
-    final OperatorResult detectionPipelineResult = resultMap.get(PlanExecutor.key("root",
-        CombinerOperator.DEFAULT_OUTPUT_KEY));
-
-    assertThat(detectionPipelineResult).isInstanceOf(CombinerResult.class);
-
-    final CombinerResult combinerResult = (CombinerResult) detectionPipelineResult;
-    final Map<String, OperatorResult> outputMap = combinerResult.getResults();
-
-    assertThat(outputMap).isNotNull();
-
-    assertThat(outputMap.values().size()).isEqualTo(3);
   }
 }

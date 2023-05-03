@@ -16,7 +16,7 @@ package ai.startree.thirdeye.alert;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
-import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorOperator.EnumeratorResult;
+import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorResult;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -42,7 +42,8 @@ public abstract class AlertEvaluatorResponseMapper {
       final Map<String, DetectionEvaluationApi> detectionEvaluationApiMap = operatorResultToApi(
           entry.getValue());
       detectionEvaluationApiMap.keySet()
-          .forEach(apiKey -> map.put(entry.getKey() + "_" + apiKey, detectionEvaluationApiMap.get(apiKey)));
+          .forEach(apiKey -> map.put(entry.getKey() + "_" + apiKey,
+              detectionEvaluationApiMap.get(apiKey)));
     }
     return new AlertEvaluationApi().setDetectionEvaluations(map);
   }

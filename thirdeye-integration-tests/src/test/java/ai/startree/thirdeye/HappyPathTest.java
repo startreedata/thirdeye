@@ -214,8 +214,7 @@ public class HappyPathTest {
         {"startree-percentage-rule-alert.json"},
         {"startree-percentage-rule-percentile-alert.json"},
         {"startree-threshold-alert.json"},
-        {"startree-threshold-percentile-alert.json"},
-        {"startree-threshold-dx-alert.json"}
+        {"startree-threshold-percentile-alert.json"}
     };
   }
 

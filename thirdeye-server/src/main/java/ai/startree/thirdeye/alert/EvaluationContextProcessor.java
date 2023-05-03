@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
-import ai.startree.thirdeye.detectionpipeline.plan.EnumeratorPlanNode;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
@@ -57,7 +56,7 @@ public class EvaluationContextProcessor {
     if (templateWithProperties != null) {
       final long count = templateWithProperties.getNodes()
           .stream()
-          .filter(p -> EnumeratorPlanNode.TYPE.equals(p.getType()))
+          .filter(p -> "Enumerator".equals(p.getType())) // TODO spyne - use enumerator node type
           .count();
       ensure(count <= 1, "Max 1 enumerator node supported at this time. found: " + count);
     }

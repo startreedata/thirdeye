@@ -16,6 +16,7 @@ package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
@@ -25,14 +26,23 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTemplateDTO> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(AlertTemplateService.class);
+
+  private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
+
   @Inject
   public AlertTemplateService(final AlertTemplateManager alertTemplateManager,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
     super(authorizationManager, alertTemplateManager, ImmutableMap.of());
+    this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
   }
 
   @Override
@@ -53,8 +63,20 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return ApiBeanMapper.toAlertTemplateApi(dto);
   }
 
+  public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyePrincipal principal,
+      final boolean updateExisting) {
+    LOG.info("Loading recommended templates: START.");
+    final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
+    LOG.info("Loading recommended templates: templates to load: {}",
+        alertTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
+    final List<AlertTemplateApi> loadedTemplates = loadTemplates(principal, alertTemplates, updateExisting);
+    LOG.info("Loading recommended templates: SUCCESS. Templates loaded: {}",
+        loadedTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
 
-  protected List<AlertTemplateApi> loadTemplates(final ThirdEyePrincipal principal,
+    return loadedTemplates;
+  }
+
+  private List<AlertTemplateApi> loadTemplates(final ThirdEyePrincipal principal,
       final List<AlertTemplateApi> alertTemplates, final boolean updateExisting) {
     final List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     final List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();

@@ -40,6 +40,7 @@ import { ActiveIndicator } from "../active-indicator/active-indicator.component"
 import { AlertAccuracyColored } from "../alert-accuracy-colored/alert-accuracy-colored.component";
 import { AlertCardV1 } from "../entity-cards/alert-card-v1/alert-card-v1.component";
 import type { AlertListV1Props } from "./alert-list-v1.interfaces";
+import { TEST_IDS } from "./alert-list-v1.interfaces";
 
 export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     alerts,
@@ -214,6 +215,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                     hideBorder
                     columns={alertGroupColumns}
                     data={alertsData as UiAlert[]}
+                    data-testId={TEST_IDS.TABLE}
                     expandColumnKey="name"
                     initialSortState={{
                         key: "created",
@@ -229,6 +231,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                             {/* Duplicate */}
                             <Grid item>
                                 <Button
+                                    data-testId={TEST_IDS.DUPLICATE_BUTTON}
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleAlertDuplicate}
@@ -240,6 +243,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                             {/* Edit */}
                             <Grid item>
                                 <Button
+                                    data-testId={TEST_IDS.EDIT_BUTTON}
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleAlertEdit}
@@ -251,6 +255,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                             {/* Delete */}
                             <Grid item>
                                 <Button
+                                    data-testId={TEST_IDS.DELETE_BUTTON}
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleAlertDelete}
@@ -262,6 +267,7 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                             {/* Reset */}
                             <Grid item>
                                 <Button
+                                    data-testId={TEST_IDS.RESET_BUTTON}
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleAlertReset}

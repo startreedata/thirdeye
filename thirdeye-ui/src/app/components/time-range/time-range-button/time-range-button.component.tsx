@@ -24,6 +24,7 @@ import {
     WEEK_IN_MILLISECONDS,
 } from "../../../utils/time/time.util";
 import { TimeRangeSelectorPopoverContent } from "../time-range-selector-popover-content/time-range-selector-popover-content.component";
+import { TIME_SELECTOR_TEST_IDS } from "../time-range-selector/time-range-selector/time-range-selector.interfaces";
 import { TimeRangeButtonProps } from "./time-range-button.interfaces";
 
 enum Direction {
@@ -103,6 +104,7 @@ export const TimeRangeButton: FunctionComponent<TimeRangeButtonProps> = ({
 
                 <Button
                     color={btnGroupColor}
+                    data-testid={TIME_SELECTOR_TEST_IDS.OPEN_BUTTON}
                     variant="outlined"
                     onClick={handleTimeRangeSelectorClick}
                 >

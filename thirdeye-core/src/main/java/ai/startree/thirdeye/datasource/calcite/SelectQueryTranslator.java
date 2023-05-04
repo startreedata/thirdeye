@@ -195,6 +195,10 @@ public class SelectQueryTranslator {
       final String timeAggregationColumn, final String timeAggregationColumnFormat,
       final Period timeAggregationGranularity, final String timeAggregationColumnUnit,
       final String timeAggregationTimezone) {
+
+    // TODO CYRIL I AM HERE: switch between full generation based ond dataset and macro_like generation based on
+    //  if timeColumUnit is null or not - or do this downstream - or something like this - could be a risky change
+
     final String timeGroupExpression = sqlExpressionBuilder.getTimeGroupExpression(
         quoteIdentifierIfReserved(timeAggregationColumn, sqlParserConfig, dialect),
         timeAggregationColumnFormat,

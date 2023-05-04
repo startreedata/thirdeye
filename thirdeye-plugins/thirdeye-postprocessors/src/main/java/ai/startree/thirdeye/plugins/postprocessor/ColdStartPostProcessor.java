@@ -79,6 +79,11 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
     final DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(datasetDao.findByDataset(
         tableName), "Could not find dataset " + tableName);
     // don't fail if dataset min is not found - continue with a 0 minDateTime
+
+    // override timeColumn and timeformat?
+    // if customTomeColumn != dataset.getTimeColumn:
+    // TODO CYRIL I AM HERE: override timeColumn if necessary
+
     final long datasetMinTime = optional(minMaxTimeLoader.fetchMinTimeAsync(datasetConfigDTO, null)
         .get(TIMEOUT, TimeUnit.MILLISECONDS)).orElse(0L);
     final DateTime datasetMinDateTime = new DateTime(datasetMinTime,

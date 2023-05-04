@@ -175,6 +175,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                         <Grid item key={item.id}>
                             <Button
                                 color="primary"
+                                data-testid={item.id}
                                 variant="outlined"
                                 onClick={() =>
                                     handleShortcutCreateOnclick(item.id)

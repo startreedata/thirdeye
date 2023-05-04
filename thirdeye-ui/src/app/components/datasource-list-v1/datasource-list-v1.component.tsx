@@ -27,7 +27,10 @@ import {
     getDatasourcesUpdatePath,
     getDatasourcesViewPath,
 } from "../../utils/routes/routes.util";
-import { DatasourceListV1Props } from "./datasource-list-v1.interfaces";
+import {
+    DatasourceListV1Props,
+    TEST_IDS,
+} from "./datasource-list-v1.interfaces";
 import { DatasourceVerification } from "./datasource-verification/datasource-verification.component";
 
 export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
@@ -136,6 +139,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
                     hideBorder
                     columns={datasourceColumns}
                     data={props.datasources as UiDatasource[]}
+                    data-testId={TEST_IDS.TABLE}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {
@@ -145,6 +149,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item>
                                 <Button
+                                    data-testId={TEST_IDS.EDIT_BUTTON}
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleDatasourceEdit}
@@ -155,6 +160,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = (
 
                             <Grid>
                                 <Button
+                                    data-testId={TEST_IDS.DELETE_BUTTON}
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleDatasourceDelete}

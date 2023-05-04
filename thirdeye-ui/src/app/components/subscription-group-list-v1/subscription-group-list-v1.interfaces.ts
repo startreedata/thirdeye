@@ -18,3 +18,9 @@ export interface SubscriptionGroupListV1Props {
     subscriptionGroups: UiSubscriptionGroup[] | null;
     onDelete?: (uiSubscriptionGroups: UiSubscriptionGroup[]) => void;
 }
+
+export const TEST_IDS = {
+    TABLE: "subscription-groups-list-table",
+    EDIT_BUTTON: "subscription-groups-list-edit-button",
+    DELETE_BUTTON: "subscription-groups-list-delete-button",
+};

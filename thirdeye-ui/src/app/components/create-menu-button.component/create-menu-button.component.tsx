@@ -144,6 +144,7 @@ export const CreateMenuButton: FunctionComponent = () => {
     return (
         <DropdownButtonV1
             color="primary"
+            data-testid="create-menu-button"
             dropdownMenuItems={shortcutCreateMenuItems}
             type={DropdownButtonTypeV1.Regular}
             onClick={handleShortcutCreateOnclick}

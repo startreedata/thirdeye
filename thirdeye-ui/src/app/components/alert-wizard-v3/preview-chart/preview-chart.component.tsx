@@ -42,6 +42,7 @@ import {
     shouldHideTimeInDatetimeFormat,
 } from "../../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { PREVIEW_CHART_TEST_IDS } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";

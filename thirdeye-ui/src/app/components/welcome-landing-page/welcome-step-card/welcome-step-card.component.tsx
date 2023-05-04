@@ -28,6 +28,7 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
     disabled = false,
     isComplete = false,
     link,
+    btnTestId,
 }) => {
     const styles = useWelcomeStepCardStyles({ disabled });
 
@@ -69,6 +70,7 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
                     <Button
                         color={disabled ? "default" : "primary"}
                         component={RouterLink}
+                        data-testid={btnTestId}
                         disabled={disabled}
                         to={link}
                         variant={disabled ? "outlined" : "contained"}

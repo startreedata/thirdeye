@@ -95,7 +95,11 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     );
 
     useEffect(() => {
-        getDatasources();
+        getDatasources().then((data) => {
+            data &&
+                data.length === 0 &&
+                setSelectedDatasourceName(ADD_NEW_DATASOURCE);
+        });
     }, []);
 
     useEffect(() => {

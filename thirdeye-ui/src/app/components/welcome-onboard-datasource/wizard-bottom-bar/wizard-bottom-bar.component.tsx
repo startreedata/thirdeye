@@ -48,6 +48,7 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
                         <Button
                             color="secondary"
                             component={RouterLink}
+                            id="back-bottom-bar-btn"
                             to={backBtnLink}
                         >
                             {backButtonLabel || t("label.back")}
@@ -59,6 +60,7 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
                         <Button
                             color="primary"
                             disabled={nextButtonIsDisabled}
+                            id="next-bottom-bar-btn"
                             onClick={handleNextClick}
                         >
                             {nextButtonLabel || t("label.next")}
@@ -69,6 +71,7 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
                             color="primary"
                             component={RouterLink}
                             disabled={nextButtonIsDisabled}
+                            id="next-bottom-bar-btn"
                             to={nextBtnLink}
                         >
                             {nextButtonLabel || t("label.next")}

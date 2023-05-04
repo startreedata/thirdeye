@@ -20,6 +20,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { IframeVideoPlayerContainer } from "../../../components/iframe-video-player-container/iframe-video-player-container.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WelcomeStepCard } from "../../../components/welcome-landing-page/welcome-step-card/welcome-step-card.component";
+import { WELCOME_STEP_TEST_IDS } from "../../../components/welcome-landing-page/welcome-step-card/welcome-step-card.interfaces";
 import {
     LinkV1,
     PageContentsCardV1,
@@ -109,6 +110,9 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                 py={2}
                             >
                                 <WelcomeStepCard
+                                    btnTestId={
+                                        WELCOME_STEP_TEST_IDS.CONFIGURE_BUTTON
+                                    }
                                     ctaContent={t("message.configure-entity", {
                                         entity: t("label.data"),
                                     })}
@@ -122,6 +126,9 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                     )}
                                 />
                                 <WelcomeStepCard
+                                    btnTestId={
+                                        WELCOME_STEP_TEST_IDS.CREATE_ALERT
+                                    }
                                     ctaContent={t("message.create-entity", {
                                         entity: t("label.alert"),
                                     })}

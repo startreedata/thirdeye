@@ -96,6 +96,7 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                                                         disabled={
                                                             !option.hasAlertTemplate
                                                         }
+                                                        id={`${option.algorithmOption.alertTemplate}-basic-btn`}
                                                         size="small"
                                                         onClick={() =>
                                                             handleAlgorithmClick(
@@ -113,6 +114,7 @@ export const AlgorithmSelection: FunctionComponent<AlgorithmSelectionProps> = ({
                                                         disabled={
                                                             !option.hasMultidimension
                                                         }
+                                                        id={`${option.algorithmOption.alertTemplate}-dx-btn`}
                                                         size="small"
                                                         onClick={() =>
                                                             handleAlgorithmClick(

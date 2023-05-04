@@ -27,6 +27,7 @@ export interface DatasourceProperties {
     controllerHost: string;
     controllerPort: number;
     cacheLoaderClassName: string;
+    brokerUrl?: string;
 }
 
 export interface DatasourceMetaList {

@@ -12,18 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
-export interface WelcomeStepCardProps {
-    title: string;
-    subtitle: string;
-    ctaContent: string | JSX.Element;
-    link: string;
-    disabled?: boolean;
-    isComplete?: boolean;
-    btnTestId: string;
-}
-
-export const WELCOME_STEP_TEST_IDS = {
-    CREATE_ALERT: "create-alert-btn",
-    CONFIGURE_BUTTON: "configure-data-btn",
+export const ONBOARD_DATASETS_TEST_IDS = {
+    DATASETS_OPTIONS_CONTAINER: "datasets-options-container",
 };

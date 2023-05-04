@@ -36,6 +36,7 @@ export const createDefaultDatasource = (): Datasource => {
                 controllerConnectionScheme: "http",
                 controllerHost: "localhost",
                 controllerPort: 9000,
+                brokerUrl: "localhost:8000",
             } as DatasourceProperties,
         } as Datasource;
     }

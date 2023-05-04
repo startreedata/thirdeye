@@ -50,6 +50,7 @@ import {
     AppRoute,
     getWelcomeLandingPath,
 } from "../../../../utils/routes/routes.util";
+import { ONBOARD_DATASETS_TEST_IDS } from "./onboard-datasets-page.interface";
 
 export const WelcomeSelectDatasets: FunctionComponent = () => {
     const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
@@ -216,6 +217,9 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                     >
                                         <Box
                                             alignItems="flexStart"
+                                            data-testid={
+                                                ONBOARD_DATASETS_TEST_IDS.DATASETS_OPTIONS_CONTAINER
+                                            }
                                             display="flex"
                                             mt={2}
                                         >

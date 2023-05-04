@@ -103,6 +103,7 @@ const mockDefaultDatasource = {
     name: "mypinot",
     type: "pinot",
     properties: {
+        brokerUrl: "localhost:8000",
         clusterName: "QuickStartCluster",
         controllerConnectionScheme: "http",
         controllerHost: "localhost",

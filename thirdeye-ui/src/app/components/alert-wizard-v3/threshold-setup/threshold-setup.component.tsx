@@ -14,6 +14,7 @@
  */
 import { Box, Divider, Grid, TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import { toLower } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -224,6 +225,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                 inputComponent={
                                     <Autocomplete<DatasetInfo>
                                         fullWidth
+                                        data-testId="datasource-select"
                                         getOptionLabel={(option) =>
                                             option.dataset.name as string
                                         }
@@ -256,7 +258,11 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                             option: DatasetInfo
                                         ): JSX.Element => {
                                             return (
-                                                <li>
+                                                <Box
+                                                    data-testId={`${toLower(
+                                                        option.dataset.name
+                                                    )}-datasource-option`}
+                                                >
                                                     <Typography variant="h6">
                                                         {option.dataset.name}
                                                     </Typography>
@@ -270,7 +276,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                                             }
                                                         )}
                                                     </Typography>
-                                                </li>
+                                                </Box>
                                             );
                                         }}
                                         value={selectedTable}
@@ -291,6 +297,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                 inputComponent={
                                     <Autocomplete<string>
                                         fullWidth
+                                        data-testId="metric-select"
                                         disabled={!selectedTable}
                                         noOptionsText={t(
                                             "message.no-options-available-entity",

@@ -349,7 +349,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         <Grid item>
                                             <Button
                                                 color="primary"
-                                                data-testid="preview-chart-button"
+                                                data-testid={
+                                                    PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON
+                                                }
                                                 disabled={!showLoadButton}
                                                 variant="text"
                                                 onClick={handleAutoRangeClick}

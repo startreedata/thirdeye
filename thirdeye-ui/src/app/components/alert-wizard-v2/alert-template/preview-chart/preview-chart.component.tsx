@@ -60,6 +60,7 @@ import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
 import {
     MessageDisplayState,
     PreviewChartProps,
+    PREVIEW_CHART_TEST_IDS,
 } from "./preview-chart.interfaces";
 import { usePreviewChartStyles } from "./preview-chart.styles";
 
@@ -348,7 +349,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         <Grid item>
                                             <Button
                                                 color="primary"
-                                                data-testid="preview-chart-button"
+                                                data-testid={
+                                                    PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON
+                                                }
                                                 variant="text"
                                                 onClick={handleAutoRangeClick}
                                             >

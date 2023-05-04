@@ -26,3 +26,7 @@ export enum MessageDisplayState {
     FILL_TEMPLATE_PROPERTY_VALUES,
     GOOD_TO_PREVIEW,
 }
+
+export const PREVIEW_CHART_TEST_IDS = {
+    PREVIEW_BUTTON: "preview-chart-button",
+};

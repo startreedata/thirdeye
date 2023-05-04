@@ -108,6 +108,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
         if (fetchedAlertEvaluation === undefined) {
             setDetectionEvaluations(undefined);
+
+            return;
         }
 
         const evaluations = extractDetectionEvaluation(

@@ -83,6 +83,7 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
                 <Autocomplete
                     disableClearable
                     className={classes.autocomplete}
+                    data-testid="navigate-alert-creation-flows-dropdown-autocomplete"
                     getOptionLabel={(option) => option.text}
                     options={shortcutCreateMenuItems}
                     renderInput={(params) => (

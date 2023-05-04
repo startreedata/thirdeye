@@ -114,6 +114,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
         if (fetchedAlertEvaluation === undefined) {
             setDetectionEvaluations(undefined);
+
+            return;
         }
 
         const evaluations = extractDetectionEvaluation(
@@ -346,6 +348,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         <Grid item>
                                             <Button
                                                 color="primary"
+                                                data-testid="preview-chart-button"
                                                 variant="text"
                                                 onClick={handleAutoRangeClick}
                                             >

@@ -77,6 +77,7 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
         return (
             <TextField
                 fullWidth
+                data-testid={`${inputFieldConfig.templatePropertyName}-container`}
                 defaultValue={existingValue ?? undefined}
                 type={inputFieldConfig.type}
                 variant="outlined"

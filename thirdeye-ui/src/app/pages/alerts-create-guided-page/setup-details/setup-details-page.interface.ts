@@ -18,3 +18,8 @@ export interface SetupDetailsPageProps {
     createLabel: string;
     showEmailOnlyForSubscriptionGroup?: boolean;
 }
+
+export const SETUP_DETAILS_TEST_IDS = {
+    NAME_INPUT: "alert-name-input",
+    CONFIGURATION_SWITCH: "alert-configuration-switch",
+};

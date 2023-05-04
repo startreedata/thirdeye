@@ -18,6 +18,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
+import { ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS } from "./navigate-alert-creation-flows-dropdown.interface";
 import { useNavigateAlertCreationFlowsDropdownStyles } from "./navigate-alert-creation-flows-dropdown.styles";
 
 export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
@@ -83,7 +84,9 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
                 <Autocomplete
                     disableClearable
                     className={classes.autocomplete}
-                    data-testid="navigate-alert-creation-flows-dropdown-autocomplete"
+                    data-testid={
+                        ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS.DROPDOWN_CONTAINER
+                    }
                     getOptionLabel={(option) => option.text}
                     options={shortcutCreateMenuItems}
                     renderInput={(params) => (

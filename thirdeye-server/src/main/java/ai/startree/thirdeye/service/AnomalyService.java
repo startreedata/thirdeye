@@ -24,7 +24,6 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -95,10 +94,10 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     return anomalyApi;
   }
 
-  public void setFeedback(final Long id, final AnomalyFeedbackApi api) {
+  public void setFeedback(final ThirdEyePrincipal principal, final Long id, final AnomalyFeedbackApi api) {
     final AnomalyDTO dto = getDto(id);
-
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
+    feedbackDTO.setUpdatedBy(principal.getName());
     dto.setFeedback(feedbackDTO);
     anomalyManager.updateAnomalyFeedback(dto);
 

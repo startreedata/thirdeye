@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.google.inject.Injector;
 import java.sql.Timestamp;
@@ -124,14 +125,15 @@ public class TestAnomalyManager {
 
   private static AnomalyDTO findAnomalyById(final List<AnomalyDTO> anomalies, final Long id) {
     for (final AnomalyDTO anomaly : anomalies) {
-      if(anomaly.getId().equals(id)) {
+      if (anomaly.getId().equals(id)) {
         return anomaly;
       }
     }
     return null;
   }
 
-  private AnomalyDTO provideFeedbackToAnomaly(final Long anomalyId, final AnomalyFeedbackType type, final String comment) {
+  private AnomalyDTO provideFeedbackToAnomaly(final Long anomalyId, final AnomalyFeedbackType type,
+      final String comment) {
     final AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(anomalyId);
     final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
         .setComment(comment)
@@ -205,18 +207,49 @@ public class TestAnomalyManager {
 
   @Test(dependsOnMethods = {"testSaveChildren"})
   public void testFeedback() {
+    final String expectedComment = "this is a good find";
+    final String expectedUser = "test user";
     final AnomalyDTO anomalyMergedResult = mergedAnomalyResultDAO
         .findById(mergedResult.getId());
-    final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
-        .setComment("this is a good find")
-        .setFeedbackType(AnomalyFeedbackType.ANOMALY);
+    AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
+        .setComment(expectedComment)
+        .setFeedbackType(AnomalyFeedbackType.ANOMALY)
+        .setCause(AnomalyCause.FRAUD);
+    feedback = (AnomalyFeedbackDTO) feedback.setUpdatedBy(expectedUser);
+
     anomalyMergedResult.setFeedback(feedback);
     // now we need to make explicit call to anomaly update in order to update the feedback
     mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyMergedResult);
 
     //verify feedback
     final AnomalyDTO mergedResult1 = mergedAnomalyResultDAO.findById(mergedResult.getId());
-    Assert.assertEquals(mergedResult1.getFeedback().getFeedbackType(), AnomalyFeedbackType.ANOMALY);
+    AnomalyFeedbackDTO actualFeedback = (AnomalyFeedbackDTO) mergedResult1.getFeedback();
+    Assert.assertEquals(actualFeedback.getFeedbackType(), AnomalyFeedbackType.ANOMALY);
+    Assert.assertEquals(actualFeedback.getComment(), expectedComment);
+    Assert.assertEquals(actualFeedback.getUpdatedBy(), expectedUser);
+    Assert.assertEquals(actualFeedback.getCause(), AnomalyCause.FRAUD);
+  }
+
+  @Test(dependsOnMethods = {"testFeedback"})
+  public void testFeedback_updateWithoutOptionalFields() {
+    final String expectedUser = "test user 2";
+    final AnomalyDTO anomalyMergedResult = mergedAnomalyResultDAO
+        .findById(mergedResult.getId());
+    AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO()
+        .setFeedbackType(AnomalyFeedbackType.NOT_ANOMALY);
+    feedback = (AnomalyFeedbackDTO) feedback.setUpdatedBy(expectedUser);
+
+    anomalyMergedResult.setFeedback(feedback);
+    // now we need to make explicit call to anomaly update in order to update the feedback
+    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyMergedResult);
+
+    //verify feedback
+    final AnomalyDTO mergedResult1 = mergedAnomalyResultDAO.findById(mergedResult.getId());
+    AnomalyFeedbackDTO actualFeedback = (AnomalyFeedbackDTO) mergedResult1.getFeedback();
+    assertThat(actualFeedback.getFeedbackType()).isEqualTo(AnomalyFeedbackType.NOT_ANOMALY);
+    assertThat(actualFeedback.getUpdatedBy()).isEqualTo(expectedUser);
+    assertThat(actualFeedback.getComment()).isEmpty();
+    assertThat(actualFeedback.getCause()).isNull();
   }
 
   @Test
@@ -243,7 +276,8 @@ public class TestAnomalyManager {
     final DaoFilter filter = new DaoFilter()
         .setPredicate(Predicate.GE("startTime", 10000));
     final List<AnomalyDTO> filterAnomalies = mergedAnomalyResultDAO.filter(filter);
-    assertThat(findAnomalyById(filterAnomalies, id1).getFeedback().getComment()).isEqualTo(feedbackComment);
+    assertThat(findAnomalyById(filterAnomalies, id1).getFeedback().getComment()).isEqualTo(
+        feedbackComment);
     assertThat(findAnomalyById(filterAnomalies, id2).getFeedback()).isNull();
   }
 

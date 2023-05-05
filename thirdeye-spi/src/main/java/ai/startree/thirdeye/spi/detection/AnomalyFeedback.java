@@ -42,4 +42,18 @@ public interface AnomalyFeedback {
    * @return comment of this feedback.
    */
   String getComment();
+
+  /**
+   * Set cause for this anomaly.
+   *
+   * @param cause {@code AnomalyCause}
+   */
+  AnomalyFeedback setCause(AnomalyCause cause);
+
+  /**
+   * Get cause of this anomaly.
+   *
+   * @return reasons of this feedback.
+   */
+  AnomalyCause getCause();
 }

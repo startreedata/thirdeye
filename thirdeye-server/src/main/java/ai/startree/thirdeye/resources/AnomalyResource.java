@@ -60,7 +60,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
       @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       final AnomalyFeedbackApi api) {
-    anomalyService.setFeedback(id, api);
+    anomalyService.setFeedback(principal, id, api);
 
     return Response
         .ok()

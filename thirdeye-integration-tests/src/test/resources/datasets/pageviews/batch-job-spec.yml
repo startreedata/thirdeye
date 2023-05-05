@@ -36,3 +36,5 @@ tableSpec:
   tableConfigURI: 'http://localhost:9000/tables/pageviews'
 pinotClusterSpecs:
   - controllerURI: 'http://localhost:9000'
+pushJobSpec:
+  pushAttempts: 1

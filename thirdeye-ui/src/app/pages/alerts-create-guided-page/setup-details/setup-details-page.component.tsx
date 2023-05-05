@@ -33,7 +33,10 @@ import {
 import { generateGenericNameForAlert } from "../../../utils/alerts/alerts.util";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
-import { SetupDetailsPageProps } from "./setup-details-page.interface";
+import {
+    SetupDetailsPageProps,
+    SETUP_DETAILS_TEST_IDS,
+} from "./setup-details-page.interface";
 
 export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
     inProgressLabel,
@@ -112,6 +115,9 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                                 inputComponent={
                                     <TextField
                                         fullWidth
+                                        data-testid={
+                                            SETUP_DETAILS_TEST_IDS.NAME_INPUT
+                                        }
                                         defaultValue={
                                             alert.name ||
                                             generateGenericNameForAlert(
@@ -198,6 +204,9 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                                 <Switch
                                     checked={isNotificationsOn}
                                     color="primary"
+                                    data-testid={
+                                        SETUP_DETAILS_TEST_IDS.CONFIGURATION_SWITCH
+                                    }
                                     name="checked"
                                     onChange={() =>
                                         setIsNotificationsOn(!isNotificationsOn)

@@ -60,6 +60,7 @@ import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
 import {
     MessageDisplayState,
     PreviewChartProps,
+    PREVIEW_CHART_TEST_IDS,
 } from "./preview-chart.interfaces";
 import { usePreviewChartStyles } from "./preview-chart.styles";
 
@@ -114,6 +115,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
         if (fetchedAlertEvaluation === undefined) {
             setDetectionEvaluations(undefined);
+
+            return;
         }
 
         const evaluations = extractDetectionEvaluation(
@@ -346,6 +349,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                                         <Grid item>
                                             <Button
                                                 color="primary"
+                                                data-testid={
+                                                    PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON
+                                                }
                                                 variant="text"
                                                 onClick={handleAutoRangeClick}
                                             >

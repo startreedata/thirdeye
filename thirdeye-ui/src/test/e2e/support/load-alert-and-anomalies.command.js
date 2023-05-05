@@ -14,30 +14,29 @@
  */
 
 export const DEFAULT_ALERT_NAME = "UnitCost_SUM_mean-variance-rule-testing";
+export const DEFAULT_ALERT_CONFIG = {
+    name: DEFAULT_ALERT_NAME,
+    description: "",
+    cron: "0 0 5 ? * MON-FRI *",
+    template: { name: "startree-mean-variance" },
+    templateProperties: {
+        dataSource: "mypinot",
+        dataset: "USStoreSalesOrderData",
+        aggregationColumn: "UnitCost",
+        aggregationFunction: "SUM",
+        seasonalityPeriod: "P7D",
+        lookback: "P28D",
+        monitoringGranularity: "P1D",
+        sensitivity: "-18",
+        timezone: "UTC",
+    },
+};
 
 Cypress.Commands.add("loadAlertAndAnomalies", () => {
     cy.request({
         method: "POST",
         url: "http://localhost:7004/api/alerts",
-        json: [
-            {
-                name: DEFAULT_ALERT_NAME,
-                description: "",
-                cron: "0 0 5 ? * MON-FRI *",
-                template: { name: "startree-mean-variance" },
-                templateProperties: {
-                    dataSource: "mypinot",
-                    dataset: "USStoreSalesOrderData",
-                    aggregationColumn: "UnitCost",
-                    aggregationFunction: "SUM",
-                    seasonalityPeriod: "P7D",
-                    lookback: "P28D",
-                    monitoringGranularity: "P1D",
-                    sensitivity: "-18",
-                    timezone: "UTC",
-                },
-            },
-        ],
+        json: [DEFAULT_ALERT_CONFIG],
     }).then(({ body }) => {
         // Note that these get cleared out when the schedule runs a job
         cy.fixture("anomalies-for-us-store-sales-order.json").then(

@@ -22,7 +22,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
-import { every } from "lodash";
+import { camelCase, every } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import {
     PropertyConfigValueTypes,
@@ -121,6 +121,9 @@ export const FilterConfigurator: FunctionComponent<FilterConfiguratorProps> = ({
                         <Switch
                             checked={isOn}
                             color="primary"
+                            data-testid={`${camelCase(
+                                renderConfig.name
+                            )}-switch`}
                             onChange={(_, newFlag: boolean) =>
                                 handleOnOffClick(newFlag)
                             }

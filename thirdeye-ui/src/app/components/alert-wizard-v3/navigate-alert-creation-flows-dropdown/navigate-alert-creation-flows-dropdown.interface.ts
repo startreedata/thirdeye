@@ -12,21 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
-
-export interface PreviewChartProps {
-    alert: EditableAlert;
-    displayState: MessageDisplayState;
-    subtitle: string;
-    onChartDataLoadSuccess?: () => void;
-}
-
-export enum MessageDisplayState {
-    SELECT_TEMPLATE,
-    FILL_TEMPLATE_PROPERTY_VALUES,
-    GOOD_TO_PREVIEW,
-}
-
-export const PREVIEW_CHART_TEST_IDS = {
-    PREVIEW_BUTTON: "preview-chart-button",
+export const ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS = {
+    DROPDOWN_CONTAINER: "navigate-alert-creation-flows-dropdown-autocomplete",
 };

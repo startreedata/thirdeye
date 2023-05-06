@@ -75,7 +75,7 @@
     <guice.version>4.2.3</guice.version>
     <hsqldb.version>2.7.0</hsqldb.version>
     <jackson.version>2.10.5</jackson.version>
-    <jetty.version>9.4.48.v20220622</jetty.version>
+    <jetty.version>9.4.51.v20230217</jetty.version>
     <jodatime.version>2.7</jodatime.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <mockito.version>4.3.1</mockito.version>
@@ -1032,7 +1032,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check />
+          <check/>
         </configuration>
       </plugin>
       <plugin>

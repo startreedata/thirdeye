@@ -26,7 +26,10 @@ import {
 } from "../../platform/components/data-grid-v1/data-grid-v1";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { AnomalyListV1 } from "./anomaly-list-v1.component";
-import { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
+import {
+    AnomalyListV1Props,
+    ANOMALY_LIST_TEST_IDS,
+} from "./anomaly-list-v1.interfaces";
 
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
@@ -149,7 +152,9 @@ describe("AnomalyListV1", () => {
             render(<AnomalyListV1 {...props} />);
         });
 
-        expect(screen.getByTestId("button-delete")).toHaveAttribute("disabled");
+        expect(
+            screen.getByTestId(ANOMALY_LIST_TEST_IDS.DELETE_BUTTON)
+        ).toHaveAttribute("disabled");
 
         expect(mockMethod).not.toHaveBeenCalled();
     });
@@ -162,11 +167,13 @@ describe("AnomalyListV1", () => {
 
         fireEvent.click(screen.getByText("testSelection1"));
 
-        expect(screen.getByTestId("button-delete")).not.toHaveAttribute(
-            "disabled"
-        );
+        expect(
+            screen.getByTestId(ANOMALY_LIST_TEST_IDS.DELETE_BUTTON)
+        ).not.toHaveAttribute("disabled");
 
-        fireEvent.click(screen.getByTestId("button-delete"));
+        fireEvent.click(
+            screen.getByTestId(ANOMALY_LIST_TEST_IDS.DELETE_BUTTON)
+        );
 
         expect(mockMethod).toHaveBeenNthCalledWith(1, [mockUiAnomaly]);
     });

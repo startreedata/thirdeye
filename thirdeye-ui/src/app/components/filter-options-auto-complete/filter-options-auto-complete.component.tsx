@@ -33,6 +33,7 @@ function FilterOptionsAutoComplete<FetchedDataType>({
     onSelectionChange,
     selected,
     formatSelectedAfterOptionsFetch = (selected) => selected,
+    ...otherProps
 }: FilterOptionsAutoCompleteProps<FetchedDataType>): JSX.Element {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
@@ -85,6 +86,7 @@ function FilterOptionsAutoComplete<FetchedDataType>({
         <Autocomplete<FilterOption>
             autoSelect
             fullWidth
+            data-testid={otherProps["data-testid"]}
             getOptionLabel={(option) => option.label}
             noOptionsText={t("message.no-filter-options-available-entity", {
                 entity: label,

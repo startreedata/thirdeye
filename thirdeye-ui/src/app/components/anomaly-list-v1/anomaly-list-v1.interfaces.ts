@@ -31,3 +31,11 @@ export interface AnomalyListV1Props extends Partial<EnumerationDataProps> {
     toolbar?: ReactNode;
     timezone?: string;
 }
+
+export const ANOMALY_LIST_TEST_IDS = {
+    TABLE: "anomalies-list-table",
+    DELETE_BUTTON: "anomalies-list-delete-button",
+    METRIC_FILTER_CONTAINER: "anomalies-list-metric-filter-container",
+    DATASET_FILTER_CONTAINER: "anomalies-list-dataset-filter-container",
+    ALERT_FILTER_CONTAINER: "anomalies-list-alert-filter-container",
+};

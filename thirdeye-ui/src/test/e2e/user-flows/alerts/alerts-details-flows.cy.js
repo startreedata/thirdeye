@@ -14,6 +14,7 @@
  */
 
 import { TEST_IDS } from "../../../../app/components/alert-list-v1/alert-list-v1.interfaces";
+import { ANOMALY_LIST_TEST_IDS } from "../../../../app/components/anomaly-list-v1/anomaly-list-v1.interfaces";
 import { DEFAULT_ALERT_NAME } from "../../support/load-alert-and-anomalies.command";
 
 const CHECKBOX_SELECTOR =
@@ -127,7 +128,7 @@ describe("alert details flows", () => {
             .should("have.length.gt", 5);
 
         cy.get(CHECKBOX_SELECTOR).first().click();
-        cy.getByDataTestId("button-delete").click();
+        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.DELETE_BUTTON).click();
         cy.get("[role='dialog']").contains("Confirm").click();
         cy.get(".MuiAlert-message")
             .contains("Anomaly deleted successfully")

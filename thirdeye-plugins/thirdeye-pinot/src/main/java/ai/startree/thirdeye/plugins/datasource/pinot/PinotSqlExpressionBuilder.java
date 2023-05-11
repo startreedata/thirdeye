@@ -20,11 +20,14 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
@@ -35,7 +38,8 @@ import org.joda.time.format.DateTimeFormatter;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
-  public static final Pattern SIMPLE_DATE_FORMAT_PATTERN = Pattern.compile("^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:");
+  public static final Pattern SIMPLE_DATE_FORMAT_PATTERN = Pattern.compile(
+      "^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:");
   private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(
       Period.years(1), "year",
       Period.months(1), "month",
@@ -67,7 +71,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   @Override
   public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
       @NonNull final String timeColumnFormat) {
-    final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
+    final TimeFormat timeFormat = TimeFormat.of(timeColumnFormat);
 
     return timeColumn + " >= " + timeFormat.timeFormatter.apply(filterInterval.getStart()) + " AND "
         + timeColumn + " < " + timeFormat.timeFormatter.apply(filterInterval.getEnd());
@@ -104,7 +108,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   @Override
   public String getTimeGroupExpression(String timeColumn, @NonNull String timeColumnFormat,
       Period granularity, @Nullable final String timezone) {
-    final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
+    final TimeFormat timeFormat = TimeFormat.of(timeColumnFormat);
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
       return String.format(" DATETIMECONVERT(%s, '%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
@@ -194,18 +198,32 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     }
   }
 
+  @Override
+  public @Nullable Period granularityOfTimeFormat(final String timeFormat) {
+    final TimeFormat format = TimeFormat.of(timeFormat);
+    return format.exactGranularity;
+  }
+
   /**
    * Class that allows to match multiple user facing time format strings to a given time format.
    * Can return the timeformat for different Pinot functions.
    */
   private static class TimeFormat {
 
+    private static final Map<String, TimeFormat> cache = new HashMap<>();
+
     private final String dateTimeConvertString;
     private final String dateTruncString;
     private final boolean isEpochFormat;
     private final Function<DateTime, String> timeFormatter;
+    // set to null for epoch formats because nothing in Pinot ensures a LONG epoch time column respects a granularity
+    private final @Nullable Period exactGranularity;
 
-    TimeFormat(String userFacingTimeColumnFormat) {
+    static TimeFormat of(final String userFacingTimeColumnFormat) {
+      return cache.computeIfAbsent(userFacingTimeColumnFormat, TimeFormat::new);
+    }
+
+    private TimeFormat(final String userFacingTimeColumnFormat) {
       switch (userFacingTimeColumnFormat) {
         case "EPOCH_NANOS":
         case "1:NANOSECONDS:EPOCH":
@@ -213,6 +231,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "NANOSECONDS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis() * 1_000_000);
+          exactGranularity = null;
           break;
         case "EPOCH_MICROS":
         case "1:MICROSECONDS:EPOCH":
@@ -220,6 +239,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "MICROSECONDS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis() * 1000);
+          exactGranularity = null;
           break;
         case "EPOCH_MILLIS":
         case "1:MILLISECONDS:EPOCH":
@@ -227,6 +247,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "MILLISECONDS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis());
+          exactGranularity = null;
           break;
         case "EPOCH":
         case "1:SECONDS:EPOCH":
@@ -234,6 +255,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "SECONDS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis() / SECOND_MILLIS);
+          exactGranularity = null;
           break;
         case "EPOCH_MINUTES":
         case "1:MINUTES:EPOCH":
@@ -241,6 +263,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "MINUTES";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis() / MINUTE_MILLIS);
+          exactGranularity = null;
           break;
         case "EPOCH_HOURS":
         case "1:HOURS:EPOCH":
@@ -248,6 +271,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "HOURS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis() / HOUR_MILLIS);
+          exactGranularity = null;
           break;
         case "EPOCH_DAYS":
         case "1:DAYS:EPOCH":
@@ -255,6 +279,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "DAYS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis() / DAY_MILLIS);
+          exactGranularity = null;
           break;
         default:
           // assume simple date format
@@ -271,7 +296,36 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
             return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d)
                 + STRING_LITERAL_QUOTE;
           };
+          exactGranularity = simpleDateFormatGranularity(cleanSimpleDateFormat);
       }
+    }
+
+    // determines the granularity of a simpelDateFormat.
+    // for instance, 'yyyy-MM-dd' is daily = P1D
+    private Period simpleDateFormatGranularity(final String cleanSimpleDateFormat) {
+      final Set<Character> chars = cleanSimpleDateFormat.chars()
+          .mapToObj(chr -> (char) chr)
+          .collect(Collectors.toSet());
+
+      // see https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+      if (chars.contains('S')) {
+        return Period.millis(1);
+      } else if (chars.contains('s')) {
+        return Period.seconds(1);
+      } else if (chars.contains('m')) {
+        return Period.minutes(1);
+      } else if (chars.contains('h') || chars.contains('H') || chars.contains('k')
+          || chars.contains('K')) {
+        return Period.hours(1);
+      } else if (chars.contains('d')) {
+        return Period.days(1);
+      } // some fancy formats are skipped
+      else if (chars.contains('M') || chars.contains('L')) {
+        return Period.months(1);
+      } else if (chars.contains('y')) {
+        return Period.years(1);
+      }
+      return null;
     }
   }
 }

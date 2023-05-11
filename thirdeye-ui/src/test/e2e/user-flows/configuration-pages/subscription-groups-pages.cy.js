@@ -180,7 +180,10 @@ describe("configuration subscription groups pages", () => {
             .click();
         cy.get("button").contains("Delete").click();
         // Click confirm button in the dialog
-        cy.get("button .MuiButton-label").contains("Confirm").click();
+        // In Github env, the dialog takes a long time to show up
+        cy.get("button .MuiButton-label")
+            .contains("Confirm", { timeout: 10000 })
+            .click();
         cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
     });
 });

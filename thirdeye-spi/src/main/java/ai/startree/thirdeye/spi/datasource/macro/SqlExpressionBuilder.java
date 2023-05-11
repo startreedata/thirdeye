@@ -121,9 +121,9 @@ public interface SqlExpressionBuilder {
    * Returns the granularity of a timeFormat.
    * For instance:
    * if the timeFormat is yyyy-MM-dd, then the granularity is P1D.
-   * if the timeFormat is EPOCH_SECONDS, then the granularity is PT1S
    *
    * Used for SQL optimization. If any uncertainty, the method should return null.
+   * Should return null for epoch long formats.
    * Clients of this function must have a safe fallback if the return value is null.
    */
   default @Nullable Period granularityOfTimeFormat(final String timeFormat) {

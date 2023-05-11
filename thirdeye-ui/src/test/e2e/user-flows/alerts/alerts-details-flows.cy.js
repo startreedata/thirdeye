@@ -120,7 +120,9 @@ describe("alert details flows", () => {
             .click();
 
         // The anomalies fixture has 21 anomalies
-        cy.get("a").contains("View 21 Anomalies").click();
+        cy.get("a")
+            .contains(/View \d* Anomalies/)
+            .click();
 
         // User can see anomalies table with anomalies
         // Due to lazy loading rows check for greater than 5

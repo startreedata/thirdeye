@@ -52,6 +52,8 @@ import org.joda.time.Period;
  *
  * The granularity of a timeFormat is obtained via {@link ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder#granularityOfTimeFormat(String)}.
  *
+ * // TODO explain potential timezone issue
+ *
  * See https://docs.google.com/document/d/1ntSEuESUEEwpYQbaH8GwvWU204WB3eNE9v_-eb6f8CY/edit for more
  * info.
  */
@@ -83,9 +85,11 @@ public class TimeGroupKeyFunction implements MacroFunction {
     final Period timeColumnGranularity = context.getSqlExpressionBuilder()
         .granularityOfTimeFormat(timeColumnFormat);
     if (timeColumnGranularity != null && timeColumnGranularity.equals(granularity)) {
+      // optimization happens
       return timeColumn;
     }
 
+    // optimization does not happen
     return timeBucketMillisAlias;
   }
 }

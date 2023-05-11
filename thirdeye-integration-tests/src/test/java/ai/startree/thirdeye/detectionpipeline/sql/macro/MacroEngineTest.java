@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -146,6 +147,58 @@ public class MacroEngineTest {
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
   }
 
+  @DataProvider(name = "optimizationNotPossible")
+  public Object[][] optimizationNotPossible() {
+    return new Object[][]{
+        {"dd-MM-yyyy hh:mm", Period.hours(1)},
+        {"EPOCH_MILLIS", Period.days(1)},
+        // optimization should not happen if the time format is epoch long
+        {"EPOCH_HOURS", Period.hours(1)},
+        {"1:HOURS:EPOCH", Period.hours(1)},
+        {"yyyy-MM-dd", Period.days(2)},
+    };
+  }
+
+  @Test(dataProvider = "optimizationNotPossible")
+  public void testTimeGroupKeyMacroOptimizationNotPossible(final String timeFormat,
+      final Period granularity) {
+    final String inputQuery = String.format(
+        "SELECT timeConvert(timeCol) AS ts, COUNT(*) from tableName GROUP BY __timeGroupKey(timeCol, '%s', '%s', ts)",
+        timeFormat,
+        granularity);
+
+    // GROUP BY ts --> no optimization happens
+    final String expectedQuery = "SELECT timeConvert(timeCol) AS ts, COUNT(*) FROM tableName GROUP BY ts";
+    final Map<String, String> expectedProperties = ImmutableMap.of();
+
+    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
+  }
+
+  @DataProvider(name = "optimizationPossible")
+  public Object[][] optimizationPossible() {
+    return new Object[][]{
+        {"dd-MM-yyyy hh", Period.hours(1)},
+        {"yyyy-MM-dd", Period.days(1)},
+        {"dd-MM-yyyy", Period.days(1)},
+        {"1:DAYS:SIMPLE_DATE_FORMAT:dd-MM-yyyy hh", Period.hours(1)},
+        {"1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd", Period.days(1)},
+    };
+  }
+
+  @Test(dataProvider = "optimizationPossible")
+  public void testTimeGroupKeyMacroOptimizationPossible(final String timeFormat,
+      final Period granularity) {
+    final String inputQuery = String.format(
+        "SELECT timeConvert(timeCol) AS ts, COUNT(*) from tableName GROUP BY __timeGroupKey(timeCol, '%s', '%s', ts)",
+        timeFormat,
+        granularity);
+
+    // GROUP BY timeCol --> optimization happens
+    final String expectedQuery = "SELECT timeConvert(timeCol) AS ts, COUNT(*) FROM tableName GROUP BY timeCol";
+    final Map<String, String> expectedProperties = ImmutableMap.of();
+    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
+  }
+
   @Test
   public void testTimeGroupMacro() {
     // test if a macro with unquoted arguments work - eg: __timeGroup(timeCol, myTestFormat, P0D)
@@ -165,7 +218,8 @@ public class MacroEngineTest {
             granularityMacroArg,
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
-    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+    final Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
@@ -186,7 +240,8 @@ public class MacroEngineTest {
             DATASET_CONFIG_DTO.getTimeUnit().toString(),
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
-    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+    final Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
@@ -200,7 +255,8 @@ public class MacroEngineTest {
     final String timeColumnFormatMacroArgQuoted =
         LITERAL_QUOTE_STRING + timeColumnFormatMacroArg + LITERAL_QUOTE_STRING;
     final Period granularityMacroArg = HOUR_PERIOD;
-    final String granularityMacroArgQuoted = LITERAL_QUOTE_STRING + HOUR_PERIOD + LITERAL_QUOTE_STRING;
+    final String granularityMacroArgQuoted =
+        LITERAL_QUOTE_STRING + HOUR_PERIOD + LITERAL_QUOTE_STRING;
 
     final String inputQuery = String.format("select __timeGroup(%s,%s,%s) FROM tableName",
         timeColumnMacroArg,
@@ -213,7 +269,8 @@ public class MacroEngineTest {
             granularityMacroArg,
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
-    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+    final Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
@@ -242,7 +299,8 @@ public class MacroEngineTest {
             granularityMacroArg,
             timeZone));
 
-    final Map<String, String> expectedProperties = ImmutableMap.of(MacroMetadataKeys.GRANULARITY.toString(),
+    final Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery,
@@ -282,7 +340,8 @@ public class MacroEngineTest {
         MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
-    final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s", expectedNestedMacro);
+    final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
+        expectedNestedMacro);
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
   }

@@ -69,11 +69,11 @@ public class TimeGroupKeyFunction implements MacroFunction {
   public String expandMacro(final List<String> macroParams, final MacroFunctionContext context) {
     //parse params
     checkArgument(macroParams.size() == 4,
-        "__timeGroupKey macro requires 4 parameters. Eg: __timeGroup(timeColumn, 'timeFormat', 'granularity', timeBucketMillisAlias)");
+        "__timeGroupKey macro requires 4 parameters. Eg: __timeGroupKey(timeColumn, 'timeFormat', 'granularity', timeGroupAlias)");
     String timeColumn = macroParams.get(0);
     String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final Period granularity = isoPeriod(context.getLiteralUnquoter().apply(macroParams.get(2)));
-    final String timeBucketMillisAlias = macroParams.get(3);
+    final String timeGroupAlias = macroParams.get(3);
 
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
@@ -90,6 +90,6 @@ public class TimeGroupKeyFunction implements MacroFunction {
     }
 
     // optimization does not happen
-    return timeBucketMillisAlias;
+    return timeGroupAlias;
   }
 }

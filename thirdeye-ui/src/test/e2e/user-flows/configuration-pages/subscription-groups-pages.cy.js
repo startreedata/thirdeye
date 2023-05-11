@@ -139,6 +139,20 @@ describe("configuration subscription groups pages", () => {
         cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
     });
 
+    it("user goes to edit page from subscription group details page", () => {
+        cy.getByDataTestId(TEST_IDS.TABLE)
+            .find("a")
+            .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
+            .click();
+        cy.get("button").contains("Edit").click();
+
+        // Should match something like `/configuration/subscription-groups/44485/update/details`
+        cy.url().should(
+            "match",
+            /.*\/configuration\/subscription-groups\/\d.*\/update/
+        );
+    });
+
     it("user can create subscription group with an alert", () => {
         cy.getByDataTestId("create-menu-button").click();
 
@@ -159,20 +173,6 @@ describe("configuration subscription groups pages", () => {
         cy.get("h4").contains("test-subscription-group").should("be.visible");
     });
 
-    it("user goes to edit page from subscription group details page", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find("a")
-            .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
-            .click();
-        cy.get("button").contains("Edit").click();
-
-        // Should match something like `/configuration/subscription-groups/44485/update/details`
-        cy.url().should(
-            "match",
-            /.*\/configuration\/subscription-groups\/\d.*\/update/
-        );
-    });
-
     it("user can delete subscription group from details page", () => {
         cy.getByDataTestId(TEST_IDS.TABLE)
             .find("a")
@@ -180,7 +180,7 @@ describe("configuration subscription groups pages", () => {
             .click();
         cy.get("button").contains("Delete").click();
         // Click confirm button in the dialog
-        cy.get("[role='dialog']").contains("Confirm").click();
+        cy.get("button .MuiButton-label").contains("Confirm").click();
         cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
     });
 });

@@ -39,7 +39,7 @@ public class TimeGroupFunction implements MacroFunction {
     final String timeColumn = macroParams.get(0);
     final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
-    Period granularity = isoPeriod(granularityText);
+    final Period granularity = isoPeriod(granularityText);
     final String timezone = context.getDetectionInterval().getChronology().getZone().toString();
 
     //write granularity to metadata

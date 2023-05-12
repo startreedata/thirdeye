@@ -78,32 +78,13 @@ describe("configuration datasources pages", () => {
     });
 
     it("user can create datasource", () => {
+        cy.resetDatasets();
         cy.getByDataTestId("create-menu-button").click();
 
         cy.get("ul.MuiMenu-list")
             .find("li[role='menuitem']")
             .contains("Create Datasource")
             .click();
-
-        // eslint-disable-next-line jest/valid-expect-in-promise
-        cy.get(".CodeMirror")
-            .first()
-            .then((editor) => {
-                editor[0].CodeMirror.setValue(
-                    JSON.stringify({
-                        name: "test-pinot",
-                        type: "pinot",
-                        properties: {
-                            zookeeperUrl: "localhost:2123",
-                            clusterName: "QuickStartCluster",
-                            controllerConnectionScheme: "http",
-                            controllerHost: "localhost",
-                            controllerPort: 9000,
-                            brokerUrl: "localhost:8000",
-                        },
-                    })
-                );
-            });
 
         cy.get("input[type='checkbox']").click();
         cy.get("button").contains("Create Datasource").click();

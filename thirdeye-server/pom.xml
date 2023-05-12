@@ -59,10 +59,6 @@
     </dependency>
 
     <dependency>
-      <groupId>ai.startree.thirdeye</groupId>
-      <artifactId>thirdeye-scheduler</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-auth</artifactId>
     </dependency>

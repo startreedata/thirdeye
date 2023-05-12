@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ONBOARD_DATASETS_TEST_IDS } from "../../../app/pages/welcome-page/create-datasource/onboard-datasets/onboard-datasets-page.interface";
-import { ADD_NEW_DATASOURCE } from "../../../app/pages/welcome-page/create-datasource/onboard-datasource/onboard-datasource-page.utils";
+import { ONBOARD_DATASETS_TEST_IDS } from "../../../../app/pages/welcome-page/create-datasource/onboard-datasets/onboard-datasets-page.interface";
+import { ADD_NEW_DATASOURCE } from "../../../../app/pages/welcome-page/create-datasource/onboard-datasource/onboard-datasource-page.utils";
 
 describe("newly launched ThirdEye welcome flow", () => {
     beforeEach(() => {

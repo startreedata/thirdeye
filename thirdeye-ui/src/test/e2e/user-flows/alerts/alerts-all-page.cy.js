@@ -25,6 +25,9 @@ describe("all alerts page", () => {
         // Clear out any existing data sources
         cy.resetDatasets();
         cy.loadDatasource();
+        // In Github action env, TE backend throws java concurrent
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(100);
         cy.loadAlertAndAnomalies();
 
         cy.visit("http://localhost:7004/alerts");

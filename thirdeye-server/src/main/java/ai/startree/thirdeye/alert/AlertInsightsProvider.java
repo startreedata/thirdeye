@@ -213,9 +213,8 @@ public class AlertInsightsProvider {
       @NonNull final Period granularity) {
     final DateTime datasetEndTimeBucketStart = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
         granularity);
-    final DateTime datasetEndTimeBucketEnd = datasetEndTimeBucketStart.plus(granularity);
 
-    DateTime defaultStartTime = datasetEndTimeBucketEnd.minus(defaultChartTimeframe(granularity));
+    DateTime defaultStartTime = datasetEndTimeBucketStart.minus(defaultChartTimeframe(granularity));
     if (defaultStartTime.getMillis() < datasetInterval.getStartMillis()) {
       defaultStartTime = TimeUtils.floorByPeriod(datasetInterval.getStart(), granularity);
       // first bucket may be incomplete - start from second one
@@ -223,6 +222,7 @@ public class AlertInsightsProvider {
     }
 
     // FIXME CYRIL - TAKE INTO ACCOUNT COMPLETENESS_DELAY
+    final DateTime datasetEndTimeBucketEnd = datasetEndTimeBucketStart.plus(granularity);
     return new Interval(defaultStartTime, datasetEndTimeBucketEnd);
   }
 

@@ -41,7 +41,7 @@ Cypress.Commands.add("loadAlertAndAnomalies", () => {
 
     cy.request({
         method: "POST",
-        url: "http://localhost:7005/api/alerts",
+        url: "http://localhost:7004/api/alerts",
         json: [DEFAULT_ALERT_CONFIG],
     }).then(({ body }) => {
         // Note that these get cleared out when the schedule runs a job
@@ -62,7 +62,7 @@ Cypress.Commands.add("loadAlertAndAnomalies", () => {
                 });
                 cy.request({
                     method: "POST",
-                    url: "http://localhost:7005/api/anomalies",
+                    url: "http://localhost:7004/api/anomalies",
                     json: mockAnomalies,
                 });
             }

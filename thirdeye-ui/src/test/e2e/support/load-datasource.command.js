@@ -20,7 +20,7 @@ Cypress.Commands.add("loadDatasource", () => {
     }
     cy.request({
         method: "POST",
-        url: "http://localhost:7005/api/data-sources",
+        url: "http://localhost:7004/api/data-sources",
         json: [
             {
                 name: "mypinot",
@@ -38,7 +38,7 @@ Cypress.Commands.add("loadDatasource", () => {
     });
     cy.request({
         method: "POST",
-        url: "http://localhost:7005/api/data-sources/onboard-dataset",
+        url: "http://localhost:7004/api/data-sources/onboard-dataset",
         body: {
             dataSourceName: "mypinot",
             datasetName: "USStoreSalesOrderData",

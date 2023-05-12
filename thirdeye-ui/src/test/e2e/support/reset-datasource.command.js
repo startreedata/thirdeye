@@ -20,14 +20,14 @@ Cypress.Commands.add("resetDatasets", () => {
     }
     cy.request({
         method: "DELETE",
-        url: "http://localhost:7005/api/data-sources/all",
+        url: "http://localhost:7004/api/data-sources/all",
     });
     cy.request({
         method: "DELETE",
-        url: "http://localhost:7005/api/datasets/all",
+        url: "http://localhost:7004/api/datasets/all",
     });
     cy.request({
         method: "DELETE",
-        url: "http://localhost:7005/api/metrics/all",
+        url: "http://localhost:7004/api/metrics/all",
     });
 });

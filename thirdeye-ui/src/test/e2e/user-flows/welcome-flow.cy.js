@@ -24,12 +24,11 @@ describe("newly launched ThirdEye welcome flow", () => {
 
         // Clear out any existing alerts
         cy.resetAlerts();
+        // Clear out any existing data sources
+        cy.resetDatasets();
     });
 
     it("user is taken to the welcome landing page", () => {
-        // Clear out any existing data sources
-        cy.resetDatasets();
-
         cy.visit("http://localhost:7004/");
         // User should be taken to the welcome landing page when there
         // are no datasets onboarded
@@ -46,9 +45,6 @@ describe("newly launched ThirdEye welcome flow", () => {
     });
 
     it("user can setup a data source", () => {
-        // Clear out any existing data sources
-        cy.resetDatasets();
-
         cy.visit("http://localhost:7004/");
         // Click on `Configure Data` button should take user to onboard data source page
         cy.getByDataTestId("configure-data-btn").click();
@@ -87,7 +83,6 @@ describe("newly launched ThirdEye welcome flow", () => {
     });
 
     it("user can setup an alert", () => {
-        cy.resetDatasets();
         cy.loadDatasource();
 
         cy.visit("http://localhost:7004/");
@@ -108,11 +103,11 @@ describe("newly launched ThirdEye welcome flow", () => {
         // Open the metric autocomplete dropdown
         cy.getByDataTestId("metric-select").click();
 
+        cy.get('.MuiAutocomplete-popper li[data-option-index="2"]').click();
+
         // Make sure input value is propagated
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(100);
-
-        cy.get('.MuiAutocomplete-popper li[data-option-index="2"]').click();
 
         // Ensure preview button is enabled
         cy.getByDataTestId("preview-chart-button").should(

@@ -21,6 +21,15 @@ public class AlertInsightsApi {
 
   private AlertTemplateApi templateWithProperties;
   private Long datasetStartTime;
+  /**
+   * Biggest observed value. Does not necessarily correspond to the biggest event true physical
+   * time. Ie does not necessarilly correspond to the close time of the bucket.
+   * In a batch setting it will actually most often correspond to the last bucket start.
+   * For instance, if the timeColumn granularity is daily (eg format is yyyy-MM-dd),
+   * and data is loaded in batch, then if the biggest observed value is 2023-11-20,
+   * it's totally possible than an event was collected on 2023-11-20 13:00.
+   * This value should be used carefully, it is mostly present for debugging purpose.
+   */
   private Long datasetEndTime;
   /**
    * If the datasetEndTime fetched from the database looks incorrect, it is stored in this field. A
@@ -30,6 +39,7 @@ public class AlertInsightsApi {
   /**
    * Recommended start time and end time to use in the UI time selector if no time
    * is set.
+   * Takes care of all time gotchas, for instance the one described for datasetEndTime.
    */
   private Long defaultStartTime;
   private Long defaultEndTime;

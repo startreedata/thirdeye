@@ -107,6 +107,11 @@ describe("newly launched ThirdEye welcome flow", () => {
 
         // Open the metric autocomplete dropdown
         cy.getByDataTestId("metric-select").click();
+
+        // Make sure input value is propagated
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(100);
+
         cy.get('.MuiAutocomplete-popper li[data-option-index="2"]').click();
 
         // Ensure preview button is enabled

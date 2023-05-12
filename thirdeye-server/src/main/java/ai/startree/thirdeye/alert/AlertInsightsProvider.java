@@ -211,17 +211,19 @@ public class AlertInsightsProvider {
   @VisibleForTesting
   protected static Interval getDefaultChartInterval(final @NonNull Interval datasetInterval,
       @NonNull final Period granularity) {
-    final DateTime defaultEndDateTime = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
+    final DateTime datasetEndTimeBucketStart = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
         granularity);
+    final DateTime datasetEndTimeBucketEnd = datasetEndTimeBucketStart.plus(granularity);
 
-    DateTime defaultStartTime = defaultEndDateTime.minus(defaultChartTimeframe(granularity));
+    DateTime defaultStartTime = datasetEndTimeBucketEnd.minus(defaultChartTimeframe(granularity));
     if (defaultStartTime.getMillis() < datasetInterval.getStartMillis()) {
       defaultStartTime = TimeUtils.floorByPeriod(datasetInterval.getStart(), granularity);
       // first bucket may be incomplete - start from second one
       defaultStartTime = defaultStartTime.plus(granularity);
     }
 
-    return new Interval(defaultStartTime, defaultEndDateTime);
+    // FIXME CYRIL - TAKE INTO ACCOUNT COMPLETENESS_DELAY
+    return new Interval(defaultStartTime, datasetEndTimeBucketEnd);
   }
 
   /**

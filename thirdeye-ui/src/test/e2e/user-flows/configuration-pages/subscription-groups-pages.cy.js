@@ -141,6 +141,13 @@ describe("configuration subscription groups pages", () => {
             .find("a")
             .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
             .click();
+
+        /**
+         * In Github Action environment, slow data response may trigger after
+         * button click will cause reroute back to old page so wait for it to finish
+         */
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(500);
         cy.get("button").contains("Edit").click();
 
         // Should match something like `/configuration/subscription-groups/44485/update/details`
@@ -175,6 +182,14 @@ describe("configuration subscription groups pages", () => {
             .find("a")
             .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
             .click();
+
+        /**
+         * In Github Action environment, slow data response may trigger after
+         * button click will cause reroute back to old page so wait for it to finish
+         */
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(500);
+
         cy.get("button").contains("Delete").click();
         // Click confirm button in the dialog
         // In Github env, the dialog takes a long time to show up

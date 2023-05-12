@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.alert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.io.IOException;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.testng.annotations.BeforeMethod;
@@ -50,23 +52,21 @@ public class AlertDetectionIntervalCalculatorTest {
 
   @Test
   public void testGetCorrectedIntervalNoMetadata() throws IOException, ClassNotFoundException {
-    // test that timeframe is unchanged when there is no metadata
+    // metadata is required
     final DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     final DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
     final AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO();
     final AlertDTO inputAlertDto = (AlertDTO) new AlertDTO().setTemplate(inputAlertTemplate)
         .setId(ALERT_ID);
-    final Interval output = intervalCalculator.getCorrectedInterval(inputAlertDto,
-        inputTaskStart.getMillis(), inputTaskEnd.getMillis());
-    final Interval expected = new Interval(inputTaskStart, inputTaskEnd);
 
-    assertThat(output).isEqualTo(expected);
+    assertThatThrownBy(() -> intervalCalculator.getCorrectedInterval(inputAlertDto,
+        inputTaskStart.getMillis(), inputTaskEnd.getMillis())).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
-  public void testGetCorrectedIntervalNoDelayNorGranularity()
+  public void testGetCorrectedIntervalNoGranularity()
       throws IOException, ClassNotFoundException {
-    // test that timeframe is unchanged when there is no completenessDelay nor granularity
+    // metadata$granularity is required
     final DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
     final DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setDataset(DATASET_NAME);
@@ -75,33 +75,8 @@ public class AlertDetectionIntervalCalculatorTest {
             datasetConfigDTO));
     final AlertDTO inputAlertDto = (AlertDTO) new AlertDTO().setTemplate(inputAlertTemplate)
         .setId(ALERT_ID);
-    final Interval output = intervalCalculator.getCorrectedInterval(inputAlertDto,
-        inputTaskStart.getMillis(), inputTaskEnd.getMillis());
-    Interval expected = new Interval(inputTaskStart, inputTaskEnd);
-
-    assertThat(output).isEqualTo(expected);
-  }
-
-  @Test
-  public void testGetCorrectedIntervalWithDelay() throws IOException, ClassNotFoundException {
-    // test that endtime is changed when there is a delay
-    final DateTime inputTaskStart = DATE_PARSER.parseDateTime("2021-11-22 11:22:33.444 UTC");
-    final DateTime inputTaskEnd = DATE_PARSER.parseDateTime("2021-11-24 13:02:12.333 UTC");
-    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
-        .setDataset(DATASET_NAME)
-        .setCompletenessDelay("P1D"); // delay of 1 day
-    final AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
-        .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO));
-    final AlertDTO inputAlertDto = (AlertDTO) new AlertDTO().setTemplate(inputAlertTemplate)
-        .setId(ALERT_ID);
-    final Interval output = intervalCalculator.getCorrectedInterval(inputAlertDto,
-        inputTaskStart.getMillis(), inputTaskEnd.getMillis());
-
-    final Interval expected = new Interval(
-        inputTaskStart,  // unchanged
-        DATE_PARSER.parseDateTime("2021-11-23 13:02:12.333 UTC"));  // minus 1 day
-
-    assertThat(output).isEqualTo(expected);
+    assertThatThrownBy(() -> intervalCalculator.getCorrectedInterval(inputAlertDto,
+        inputTaskStart.getMillis(), inputTaskEnd.getMillis())).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -165,7 +140,8 @@ public class AlertDetectionIntervalCalculatorTest {
         .setDataset(DATASET_NAME)
         .setCompletenessDelay("P3D");   // delay of 3 day end - delay < start
     final AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
-        .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO));
+        .setMetadata(new AlertMetadataDTO().setDataset(datasetConfigDTO).setGranularity(
+            Period.millis(1).toString()));
     final AlertDTO inputAlertDto = (AlertDTO) new AlertDTO().setTemplate(inputAlertTemplate)
         .setId(ALERT_ID);
     final Interval output = intervalCalculator.getCorrectedInterval(inputAlertDto,

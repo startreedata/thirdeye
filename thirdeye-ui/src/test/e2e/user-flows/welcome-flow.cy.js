@@ -23,10 +23,7 @@ describe("newly launched ThirdEye welcome flow", () => {
         // we include it in our beforeEach function so that it runs before each test
 
         // Clear out any existing alerts
-        cy.request({
-            method: "DELETE",
-            url: "http://localhost:7004/api/alerts/all",
-        });
+        cy.resetAlerts();
     });
 
     it("user is taken to the welcome landing page", () => {

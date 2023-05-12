@@ -12,9 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import "./get-by-data-testid.command";
-import "./load-alert-and-anomalies.command";
-import "./load-datasource.command";
-import "./reset-alerts.command";
-import "./reset-datasource.command";
-import "./select-date-range-from-picker.command.js";
+Cypress.Commands.add("resetAlerts", () => {
+    if (process.env.TE_DEV_PROXY_SERVER !== undefined) {
+        throw new Error(
+            "TE_DEV_PROXY_SERVER is set. Failing in case it is linked to a dev server"
+        );
+    }
+    cy.request({
+        method: "DELETE",
+        url: "http://localhost:7004/api/alerts/all",
+    });
+});

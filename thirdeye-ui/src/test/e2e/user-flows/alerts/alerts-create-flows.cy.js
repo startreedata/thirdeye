@@ -21,10 +21,7 @@ import { DEFAULT_ALERT_CONFIG } from "../../support/load-alert-and-anomalies.com
 describe("alert create flows", () => {
     beforeEach(() => {
         // Clear out any existing alerts
-        cy.request({
-            method: "DELETE",
-            url: "http://localhost:7004/api/alerts/all",
-        });
+        cy.resetAlerts();
         // Clear out any existing subscription groups
         cy.request({
             method: "DELETE",

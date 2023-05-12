@@ -13,9 +13,14 @@
  * the License.
  */
 Cypress.Commands.add("loadDatasource", () => {
+    if (process.env.TE_DEV_PROXY_SERVER !== undefined) {
+        throw new Error(
+            "TE_DEV_PROXY_SERVER is set. Failing in case it is linked to a dev server"
+        );
+    }
     cy.request({
         method: "POST",
-        url: "http://localhost:7004/api/data-sources",
+        url: "http://localhost:7005/api/data-sources",
         json: [
             {
                 name: "mypinot",
@@ -33,7 +38,7 @@ Cypress.Commands.add("loadDatasource", () => {
     });
     cy.request({
         method: "POST",
-        url: "http://localhost:7004/api/data-sources/onboard-dataset",
+        url: "http://localhost:7005/api/data-sources/onboard-dataset",
         body: {
             dataSourceName: "mypinot",
             datasetName: "USStoreSalesOrderData",

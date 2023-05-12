@@ -33,9 +33,15 @@ export const DEFAULT_ALERT_CONFIG = {
 };
 
 Cypress.Commands.add("loadAlertAndAnomalies", () => {
+    if (process.env.TE_DEV_PROXY_SERVER !== undefined) {
+        throw new Error(
+            "TE_DEV_PROXY_SERVER is set. Failing in case it is linked to a dev server"
+        );
+    }
+
     cy.request({
         method: "POST",
-        url: "http://localhost:7004/api/alerts",
+        url: "http://localhost:7005/api/alerts",
         json: [DEFAULT_ALERT_CONFIG],
     }).then(({ body }) => {
         // Note that these get cleared out when the schedule runs a job
@@ -56,7 +62,7 @@ Cypress.Commands.add("loadAlertAndAnomalies", () => {
                 });
                 cy.request({
                     method: "POST",
-                    url: "http://localhost:7004/api/anomalies",
+                    url: "http://localhost:7005/api/anomalies",
                     json: mockAnomalies,
                 });
             }

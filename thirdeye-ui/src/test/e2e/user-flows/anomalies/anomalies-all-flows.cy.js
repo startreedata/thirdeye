@@ -18,10 +18,7 @@ import { ANOMALY_LIST_TEST_IDS } from "../../../../app/components/anomaly-list-v
 describe("anomalies list flows", () => {
     beforeEach(() => {
         // Clear out any existing alerts and anomalies
-        cy.request({
-            method: "DELETE",
-            url: "http://localhost:7004/api/alerts/all",
-        });
+        cy.resetAlerts();
         cy.request({
             method: "DELETE",
             url: "http://localhost:7004/api/anomalies/all",

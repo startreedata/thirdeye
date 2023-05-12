@@ -29,10 +29,7 @@ describe("configuration subscription groups pages", () => {
             url: "http://localhost:7004/api/subscription-groups/all",
         });
         // Clear out any existing alerts
-        cy.request({
-            method: "DELETE",
-            url: "http://localhost:7004/api/alerts/all",
-        });
+        cy.resetAlerts();
         cy.request({
             method: "POST",
             url: "http://localhost:7004/api/alerts",

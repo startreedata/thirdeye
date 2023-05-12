@@ -45,7 +45,8 @@ describe("newly launched ThirdEye welcome flow", () => {
     });
 
     it("user can setup a data source", () => {
-        cy.visit("http://localhost:7004/");
+        cy.visit("http://localhost:7004/welcome");
+
         // Click on `Configure Data` button should take user to onboard data source page
         cy.getByDataTestId("configure-data-btn").click();
         cy.url().should(
@@ -85,7 +86,7 @@ describe("newly launched ThirdEye welcome flow", () => {
     it("user can setup an alert", () => {
         cy.loadDatasource();
 
-        cy.visit("http://localhost:7004/");
+        cy.visit("http://localhost:7004/welcome");
 
         cy.getByDataTestId("create-alert-btn").click();
         cy.get("#startree-mean-variance-basic-btn").click();

@@ -40,7 +40,7 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY);
+        DAILY_GRANULARITY, Period.ZERO);
 
     final Interval expected = new Interval(
         // one year from end of bucket
@@ -57,7 +57,7 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         PARIS_TIMEZONE);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY);
+        DAILY_GRANULARITY, Period.ZERO);
 
     final Interval expected = new Interval(DECEMBER_31_2020_11PM,
         JAN_1_2022_11PM,
@@ -71,7 +71,7 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY);
+        DAILY_GRANULARITY, Period.ZERO);
 
     final Interval expected = new Interval(JULY_2_2021_0AM, JANUARY_2_2022_0AM, DateTimeZone.UTC);
     assertThat(res).isEqualTo(expected);

@@ -36,7 +36,7 @@ describe("all alerts page", () => {
          * This is expected to fail so that subsequent calls work.
          * #TODO root cause failure in backend
          */
-        cy.loadAlertAndAnomalies();
+        cy.loadAlertAndAnomalies(false);
     });
 
     it("user can filter alerts in table", () => {

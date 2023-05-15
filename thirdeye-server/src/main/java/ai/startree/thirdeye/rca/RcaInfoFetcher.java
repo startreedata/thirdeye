@@ -13,15 +13,14 @@
  */
 package ai.startree.thirdeye.rca;
 
-import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.metric.MetricAggFunction.COUNT;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -166,7 +165,7 @@ public class RcaInfoFetcher {
     addCustomFields(metricConfigDTO, metadataMetricDTO);
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
-    final Chronology chronology = optional(getDateTimeZone(templateWithProperties)).orElse(Constants.DEFAULT_CHRONOLOGY);
+    final Chronology chronology = getDateTimeZone(alertMetadataDto);
     EventContextDto eventContext = alertMetadataDto.getEventContext();
     if (eventContext == null || eventContext.equals(EMPTY_CONTEXT_DTO)) {
       // fixme suvodeep cyril findFromAlert is a quick hack for a client - to remove once templates are updated

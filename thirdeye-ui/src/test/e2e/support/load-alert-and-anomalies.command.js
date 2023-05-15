@@ -45,6 +45,10 @@ Cypress.Commands.add("loadAlertAndAnomalies", (failOnStatusCode = true) => {
         json: [DEFAULT_ALERT_CONFIG],
         failOnStatusCode: failOnStatusCode,
     }).then(({ body }) => {
+        if (!body || !body[0]) {
+            return;
+        }
+
         // Note that these get cleared out when the schedule runs a job
         cy.fixture("anomalies-for-us-store-sales-order.json").then(
             (anomalies) => {

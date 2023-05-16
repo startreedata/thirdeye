@@ -24,6 +24,7 @@ import {
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
+import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import {
@@ -31,6 +32,7 @@ import {
     DatasetInfo,
     STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
+import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -66,6 +68,8 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     } = useGetDatasets();
     const { metrics, getMetrics, status: getMetricsStatus } = useGetMetrics();
 
+    const [localAlertTemplateProperties, setLocalAlertTemplateProperties] =
+        useState<TemplatePropertiesObject>(alert.templateProperties);
     const [datasetsInfo, setDatasetsInfo] = useState<DatasetInfo[] | null>(
         null
     );
@@ -121,7 +125,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
         }
 
         return [];
-    }, [alertTemplate]);
+    }, [alertTemplate, localAlertTemplateProperties]);
 
     const handleMetricSelection = (metric: string): void => {
         if (!metric || !selectedTable) {
@@ -196,25 +200,62 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     >
                         <Grid container>
                             <Grid item xs={12}>
-                                <Typography variant="h5">
-                                    {algorithmOptionConfig &&
-                                        t("label.entity-setup", {
-                                            entity: algorithmOptionConfig
-                                                .algorithmOption.title,
-                                            multidimension:
-                                                algorithmOptionConfig
-                                                    .algorithmOption
-                                                    .alertTemplateForMultidimension ===
-                                                alert.template?.name
-                                                    ? `(${t(
-                                                          "label.multidimension"
-                                                      )})`
-                                                    : "",
-                                        })}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t("message.threshold-setup-description")}
-                                </Typography>
+                                <Grid
+                                    container
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                >
+                                    <Grid item>
+                                        <Typography variant="h5">
+                                            {algorithmOptionConfig &&
+                                                t("label.entity-setup", {
+                                                    entity: algorithmOptionConfig
+                                                        .algorithmOption.title,
+                                                    multidimension:
+                                                        algorithmOptionConfig
+                                                            .algorithmOption
+                                                            .alertTemplateForMultidimension ===
+                                                        alert.template?.name
+                                                            ? `(${t(
+                                                                  "label.multidimension"
+                                                              )})`
+                                                            : "",
+                                                })}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {t(
+                                                "message.threshold-setup-description"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <AlertJsonEditorModal
+                                            alert={alert}
+                                            onSubmitChanges={(
+                                                newAlert,
+                                                isTotalChange
+                                            ) => {
+                                                onAlertPropertyChange(
+                                                    newAlert,
+                                                    isTotalChange
+                                                );
+                                                datasetsInfo &&
+                                                    resetSelectedMetrics(
+                                                        datasetsInfo,
+                                                        newAlert,
+                                                        setSelectedTable,
+                                                        setSelectedMetric,
+                                                        setSelectedAggregationFunction
+                                                    );
+                                                setLocalAlertTemplateProperties(
+                                                    {
+                                                        ...newAlert.templateProperties,
+                                                    }
+                                                );
+                                            }}
+                                        />
+                                    </Grid>
+                                </Grid>
                             </Grid>
 
                             <Grid item xs={12}>
@@ -396,7 +437,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                 label={`${t("label.aggregation-function")}`}
                             />
 
-                            {inputFieldConfigs.length > 0 && inputFieldConfigs && (
+                            {inputFieldConfigs.length > 0 && (
                                 <Grid item xs={12}>
                                     <Box marginBottom={1} padding={1}>
                                         <Divider />
@@ -410,13 +451,22 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                             inputComponent={
                                                 <>
                                                     <SpecificPropertiesRenderer
-                                                        alert={alert}
                                                         inputFieldConfig={
                                                             config
                                                         }
-                                                        onAlertPropertyChange={
-                                                            onAlertPropertyChange
+                                                        selectedTemplateProperties={
+                                                            localAlertTemplateProperties
                                                         }
+                                                        onAlertPropertyChange={(
+                                                            newTemplateProperties
+                                                        ) => {
+                                                            setLocalAlertTemplateProperties(
+                                                                newTemplateProperties.templateProperties as TemplatePropertiesObject
+                                                            );
+                                                            onAlertPropertyChange(
+                                                                newTemplateProperties
+                                                            );
+                                                        }}
                                                     />
                                                     {!!config.description && (
                                                         <Typography variant="caption">

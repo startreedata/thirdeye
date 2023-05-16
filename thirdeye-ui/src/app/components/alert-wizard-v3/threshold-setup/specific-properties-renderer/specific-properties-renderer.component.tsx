@@ -19,10 +19,14 @@ import { SliderAlgorithmOptionInputFieldConfig } from "../threshold-setup.interf
 import { SpecificPropertiesRendererProps } from "./specific-properties-renderer.interfaces";
 
 export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRendererProps> =
-    ({ onAlertPropertyChange, alert, inputFieldConfig }) => {
+    ({
+        onAlertPropertyChange,
+        selectedTemplateProperties,
+        inputFieldConfig,
+    }) => {
         const { t } = useTranslation();
         const existingValue =
-            alert.templateProperties[inputFieldConfig.templatePropertyName];
+            selectedTemplateProperties[inputFieldConfig.templatePropertyName];
 
         const handlePropertyChange = (
             newValue: string,
@@ -30,7 +34,7 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
         ): void => {
             onAlertPropertyChange({
                 templateProperties: {
-                    ...alert.templateProperties,
+                    ...selectedTemplateProperties,
                     [propertyName]: newValue,
                 },
             });
@@ -78,8 +82,8 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
             <TextField
                 fullWidth
                 data-testid={`${inputFieldConfig.templatePropertyName}-container`}
-                defaultValue={existingValue ?? undefined}
                 type={inputFieldConfig.type}
+                value={existingValue ?? undefined}
                 variant="outlined"
                 onChange={(e) => {
                     handlePropertyChange(

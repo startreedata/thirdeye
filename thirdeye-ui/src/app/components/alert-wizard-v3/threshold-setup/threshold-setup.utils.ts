@@ -162,8 +162,9 @@ export function generateInputFieldConfigsForAlertTemplate(
 
     const propertyNameToMetadata: { [key: string]: MetadataProperty } = {};
 
-    alertTemplate.properties.forEach((alertTemplate) => {
-        propertyNameToMetadata[alertTemplate.name] = alertTemplate;
+    alertTemplate.properties.forEach((alertTemplatePropertyMeta) => {
+        propertyNameToMetadata[alertTemplatePropertyMeta.name] =
+            alertTemplatePropertyMeta;
     });
 
     Object.keys(SUPPORTED_SIMPLE_MODE_PROPERTIES).forEach((propertyName) => {

@@ -25,26 +25,12 @@ describe("all alerts page", () => {
         // Clear out any existing data sources
         cy.resetDatasets();
         cy.loadDatasource();
+        cy.loadAlertAndAnomalies();
 
         cy.visit("http://localhost:7004/alerts");
     });
 
-    it("force fail create alert on very test", () => {
-        /**
-         * When running in docker compose or github action env for:
-         * https://github.com/startreedata/thirdeye-e2e-testing
-         * This is expected to fail so that subsequent calls work.
-         * #TODO root cause failure in backend
-         */
-        cy.loadAlertAndAnomalies(false);
-    });
-
     it("user can filter alerts in table", () => {
-        /**
-         * There is a weird bug where this would fail on initial launch of TE,
-         * so we make it fail for the very first test case
-         */
-        cy.loadAlertAndAnomalies();
         const searchInputSelector = "input[placeholder='Search Alerts']";
 
         // There should be 1 alert (table should show something)
@@ -74,11 +60,6 @@ describe("all alerts page", () => {
     });
 
     it("user can duplicate alert", () => {
-        /**
-         * There is a weird bug where this would fail on initial launch of TE,
-         * so we make it fail for the very first test case
-         */
-        cy.loadAlertAndAnomalies();
         cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.DUPLICATE_BUTTON).click();
@@ -86,11 +67,6 @@ describe("all alerts page", () => {
     });
 
     it("user can edit alert", () => {
-        /**
-         * There is a weird bug where this would fail on initial launch of TE,
-         * so we make it fail for the very first test case
-         */
-        cy.loadAlertAndAnomalies();
         cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
@@ -100,11 +76,6 @@ describe("all alerts page", () => {
     });
 
     it("user can reset alert", () => {
-        /**
-         * There is a weird bug where this would fail on initial launch of TE,
-         * so we make it fail for the very first test case
-         */
-        cy.loadAlertAndAnomalies();
         cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.RESET_BUTTON).click();
@@ -118,11 +89,6 @@ describe("all alerts page", () => {
     });
 
     it("user can delete alert", () => {
-        /**
-         * There is a weird bug where this would fail on initial launch of TE,
-         * so we make it fail for the very first test case
-         */
-        cy.loadAlertAndAnomalies();
         cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.DELETE_BUTTON).click();

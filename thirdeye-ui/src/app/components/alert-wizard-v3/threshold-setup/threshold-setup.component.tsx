@@ -22,16 +22,13 @@ import {
     PageContentsGridV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
-import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
-import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import {
-    buildPinotDatasourcesTree,
     DatasetInfo,
     STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
+import { useGetDatasourcesTree } from "../../../utils/datasources/use-get-datasources-tree.util";
 import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
@@ -56,23 +53,8 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
 
-    const {
-        datasources,
-        getDatasources,
-        status: getDatasourcesStatus,
-    } = useGetDatasources();
-    const {
-        datasets,
-        getDatasets,
-        status: getDatasetsStatus,
-    } = useGetDatasets();
-    const { metrics, getMetrics, status: getMetricsStatus } = useGetMetrics();
-
     const [localAlertTemplateProperties, setLocalAlertTemplateProperties] =
         useState<TemplatePropertiesObject>(alert.templateProperties);
-    const [datasetsInfo, setDatasetsInfo] = useState<DatasetInfo[] | null>(
-        null
-    );
     const [isPinotInfraLoading, setIsPinotInfraLoading] = useState(true);
     const [selectedTable, setSelectedTable] = useState<DatasetInfo | null>(
         null
@@ -81,35 +63,23 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     const [selectedAggregationFunction, setSelectedAggregationFunction] =
         useState<MetricAggFunction>(MetricAggFunction.SUM);
 
-    useEffect(() => {
-        getDatasets();
-        getMetrics();
-        getDatasources();
-    }, []);
+    const {
+        datasetsInfo,
+        getDatasourcesHook,
+        getDatasetsHook,
+        getMetricsHook,
+    } = useGetDatasourcesTree();
 
     // Build the table configuration tree
     useEffect(() => {
-        if (!metrics || !datasets || !datasources) {
+        if (!datasetsInfo) {
             setIsPinotInfraLoading(true);
 
             return;
         }
 
-        const datasourceInfo = buildPinotDatasourcesTree(
-            datasources,
-            datasets,
-            metrics
-        );
-        const datasetInfo = datasourceInfo.reduce(
-            (previous: DatasetInfo[], dSource) => {
-                return [...previous, ...dSource.tables];
-            },
-            []
-        );
-
-        setDatasetsInfo(datasetInfo);
         resetSelectedMetrics(
-            datasetInfo,
+            datasetsInfo,
             alert,
             setSelectedTable,
             setSelectedMetric,
@@ -117,7 +87,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
         );
 
         setIsPinotInfraLoading(false);
-    }, [metrics, datasets, datasources]);
+    }, [datasetsInfo]);
 
     const inputFieldConfigs = useMemo(() => {
         if (alertTemplate) {
@@ -212,9 +182,9 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                 <PageContentsCardV1>
                     <LoadingErrorStateSwitch
                         isError={
-                            getDatasourcesStatus === ActionStatus.Error ||
-                            getDatasetsStatus === ActionStatus.Error ||
-                            getMetricsStatus === ActionStatus.Error
+                            getDatasourcesHook.status === ActionStatus.Error ||
+                            getDatasetsHook.status === ActionStatus.Error ||
+                            getMetricsHook.status === ActionStatus.Error
                         }
                         isLoading={isPinotInfraLoading}
                     >

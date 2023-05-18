@@ -36,7 +36,9 @@ import {
 } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
+import { deleteDatasetAndMetrics } from "../../utils/datasets/datasets.util";
 import { getUiDatasource } from "../../utils/datasources/datasources.util";
+import { useGetDatasourcesTree } from "../../utils/datasources/use-get-datasources-tree.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -44,12 +46,14 @@ import { getDatasourcesAllPath } from "../../utils/routes/routes.util";
 import { DatasourcesViewPageParams } from "./datasources-view-page.interfaces";
 
 export const DatasourcesViewPage: FunctionComponent = () => {
-    const [uiDatasource, setUiDatasource] = useState<UiDatasource | null>(null);
-    const { showDialog } = useDialogProviderV1();
-    const params = useParams<DatasourcesViewPageParams>();
-    const navigate = useNavigate();
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const params = useParams<DatasourcesViewPageParams>();
+    const { showDialog } = useDialogProviderV1();
     const { notify } = useNotificationProviderV1();
+    const { datasetsInfo } = useGetDatasourcesTree();
+
+    const [uiDatasource, setUiDatasource] = useState<UiDatasource | null>(null);
 
     useEffect(() => {
         // Time range refreshed, fetch datasource
@@ -115,6 +119,23 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                         entity: t("label.datasource"),
                     })
                 );
+
+                if (datasetsInfo) {
+                    // Delete datasets associated with datasource
+                    const datasetsInfoForDatasource = datasetsInfo.filter(
+                        (datasetInfo) =>
+                            datasetInfo.datasource === uiDatasource.name
+                    );
+
+                    if (datasetsInfoForDatasource) {
+                        datasetsInfoForDatasource.forEach((datasetsInfo) => {
+                            deleteDatasetAndMetrics(
+                                datasetsInfo.dataset,
+                                datasetsInfo.metrics
+                            );
+                        });
+                    }
+                }
 
                 // Redirect to datasources all path
                 navigate(getDatasourcesAllPath());

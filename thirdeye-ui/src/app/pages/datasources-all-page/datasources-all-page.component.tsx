@@ -31,47 +31,41 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetDatasources } from "../../rest/datasources/datasources.actions";
 import { deleteDatasource } from "../../rest/datasources/datasources.rest";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
+import { deleteDatasetAndMetrics } from "../../utils/datasets/datasets.util";
 import { getUiDatasources } from "../../utils/datasources/datasources.util";
+import { useGetDatasourcesTree } from "../../utils/datasources/use-get-datasources-tree.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getDatasourcesCreatePath } from "../../utils/routes/routes.util";
 
 export const DatasourcesAllPage: FunctionComponent = () => {
-    const { getDatasources, status, errorMessages } = useGetDatasources();
-    const [uiDatasources, setUiDatasources] = useState<UiDatasource[]>([]);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
-    useEffect(() => {
-        // Time range refreshed, fetch datasources
-        fetchAllDatasources();
-    }, []);
+    const { datasetsInfo, getDatasourcesHook } = useGetDatasourcesTree();
+
+    const [uiDatasources, setUiDatasources] = useState<UiDatasource[]>([]);
 
     useEffect(() => {
         notifyIfErrors(
-            status,
-            errorMessages,
+            getDatasourcesHook.status,
+            getDatasourcesHook.errorMessages,
             notify,
             t("message.error-while-fetching", {
                 entity: t("label.datasources"),
             })
         );
-    }, [status]);
+    }, [getDatasourcesHook.status]);
 
-    const fetchAllDatasources = (): void => {
-        setUiDatasources([]);
-
-        getDatasources().then((datasources) => {
-            if (datasources) {
-                setUiDatasources(getUiDatasources(datasources));
-            }
-        });
-    };
+    useEffect(() => {
+        if (getDatasourcesHook.datasources) {
+            setUiDatasources(getUiDatasources(getDatasourcesHook.datasources));
+        }
+    }, [getDatasourcesHook.datasources]);
 
     const handleDatasourceDelete = (uiDatasource: UiDatasource): void => {
         showDialog({
@@ -97,6 +91,25 @@ export const DatasourcesAllPage: FunctionComponent = () => {
 
                 // Remove deleted datasource from fetched datasources
                 removeUiDatasource(datasource);
+
+                if (!datasetsInfo) {
+                    return;
+                }
+
+                // Delete datasets associated with datasource
+                const datasetsInfoForDatasource = datasetsInfo.filter(
+                    (datasetInfo) =>
+                        datasetInfo.datasource === uiDatasource.name
+                );
+
+                if (datasetsInfoForDatasource) {
+                    datasetsInfoForDatasource.forEach((datasetsInfo) => {
+                        deleteDatasetAndMetrics(
+                            datasetsInfo.dataset,
+                            datasetsInfo.metrics
+                        );
+                    });
+                }
             })
             .catch((error: AxiosError) => {
                 notifyIfErrors(
@@ -131,10 +144,10 @@ export const DatasourcesAllPage: FunctionComponent = () => {
                 <LoadingErrorStateSwitch
                     wrapInCard
                     wrapInGrid
-                    isError={status === ActionStatus.Error}
+                    isError={getDatasourcesHook.status === ActionStatus.Error}
                     isLoading={
-                        status === ActionStatus.Working ||
-                        status === ActionStatus.Initial
+                        getDatasourcesHook.status === ActionStatus.Working ||
+                        getDatasourcesHook.status === ActionStatus.Initial
                     }
                 >
                     <EmptyStateSwitch

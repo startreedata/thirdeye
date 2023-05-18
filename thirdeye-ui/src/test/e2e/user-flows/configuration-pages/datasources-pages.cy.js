@@ -70,8 +70,19 @@ describe("configuration datasources pages", () => {
 
         cy.getByDataTestId(TEST_IDS.DELETE_BUTTON).click();
 
+        cy.intercept("DELETE", "/api/datasets/*").as("deleteDatasetRequest");
+        cy.intercept("DELETE", "/api/metrics/*").as("deleteMetricRequest");
+
         // Click confirm button in the dialog
         cy.get("[role='dialog']").contains("Confirm").click();
+
+        // Ensure datasets and metrics are also requested to be deleted
+        cy.wait("@deleteDatasetRequest")
+            .its("response.statusCode")
+            .should("eq", 200);
+        cy.wait("@deleteMetricRequest")
+            .its("response.statusCode")
+            .should("eq", 200);
 
         // Since there is only one datasource, the table should no longer exist after deleting
         cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");

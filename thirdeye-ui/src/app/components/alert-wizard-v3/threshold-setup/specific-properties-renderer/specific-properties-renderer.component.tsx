@@ -29,15 +29,10 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
             selectedTemplateProperties[inputFieldConfig.templatePropertyName];
 
         const handlePropertyChange = (
-            newValue: string,
-            propertyName: string
+            propertyName: string,
+            newValue: string
         ): void => {
-            onAlertPropertyChange({
-                templateProperties: {
-                    ...selectedTemplateProperties,
-                    [propertyName]: newValue,
-                },
-            });
+            onAlertPropertyChange(propertyName, newValue);
         };
 
         if (inputFieldConfig.type === "slider") {
@@ -70,8 +65,8 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
                     step={1}
                     onChange={(_, value) =>
                         handlePropertyChange(
-                            value.toString(),
-                            sliderFieldConfig.templatePropertyName
+                            sliderFieldConfig.templatePropertyName,
+                            value.toString()
                         )
                     }
                 />
@@ -87,8 +82,8 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
                 variant="outlined"
                 onChange={(e) => {
                     handlePropertyChange(
-                        e.currentTarget.value,
-                        inputFieldConfig.templatePropertyName
+                        inputFieldConfig.templatePropertyName,
+                        e.currentTarget.value
                     );
                 }}
             />

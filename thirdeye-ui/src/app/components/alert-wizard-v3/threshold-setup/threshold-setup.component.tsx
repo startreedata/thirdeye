@@ -167,6 +167,26 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
         });
     };
 
+    /**
+     * this is taken care of outseide so that the source of truth object from the
+     * alerts config is used
+     */
+    const handleExtraPropertyChange = (
+        propertyName: string,
+        newValue: string
+    ): void => {
+        const newTemplateProperties = {
+            templateProperties: {
+                ...alert.templateProperties,
+                [propertyName]: newValue,
+            },
+        };
+        setLocalAlertTemplateProperties(
+            newTemplateProperties.templateProperties as TemplatePropertiesObject
+        );
+        onAlertPropertyChange(newTemplateProperties);
+    };
+
     return (
         <PageContentsGridV1>
             <Grid item xs={12}>
@@ -457,16 +477,9 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                                         selectedTemplateProperties={
                                                             localAlertTemplateProperties
                                                         }
-                                                        onAlertPropertyChange={(
-                                                            newTemplateProperties
-                                                        ) => {
-                                                            setLocalAlertTemplateProperties(
-                                                                newTemplateProperties.templateProperties as TemplatePropertiesObject
-                                                            );
-                                                            onAlertPropertyChange(
-                                                                newTemplateProperties
-                                                            );
-                                                        }}
+                                                        onAlertPropertyChange={
+                                                            handleExtraPropertyChange
+                                                        }
                                                     />
                                                     {!!config.description && (
                                                         <Typography variant="caption">

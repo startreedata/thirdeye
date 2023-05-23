@@ -41,6 +41,15 @@ public class DatasetConfigDTO extends AbstractDTO {
   private Set<String> owners;
   private Boolean active;
   private List<MetricConfigDTO> metrics;
+  /**
+   * Maintain a map of (granularity, timeBucketColumnName).
+   * The timeBucketColumnName column should contain time buckets in milliseconds that
+   * correspond to the granularity.
+   * This info is used to optimize generated queries.
+   * For instance
+   * {"PT5M": "timeBucket5min", "PT1H": "timeBucket1hour"}
+   */
+  private Map<String, String> granularityToBucketTimeColumn;
 
   /**
    * Expected delay for data to be complete. In ISO 8601. Eg P1D
@@ -383,6 +392,16 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   public DatasetConfigDTO setMutabilityPeriod(final String mutabilityPeriod) {
     this.mutabilityPeriod = mutabilityPeriod;
+    return this;
+  }
+
+  public Map<String, String> getGranularityToBucketTimeColumn() {
+    return granularityToBucketTimeColumn;
+  }
+
+  public DatasetConfigDTO setGranularityToBucketTimeColumn(
+      final Map<String, String> granularityToBucketTimeColumn) {
+    this.granularityToBucketTimeColumn = granularityToBucketTimeColumn;
     return this;
   }
 }

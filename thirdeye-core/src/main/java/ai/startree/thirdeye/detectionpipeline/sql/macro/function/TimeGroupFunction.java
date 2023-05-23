@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -47,6 +48,13 @@ public class TimeGroupFunction implements MacroFunction {
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      // use directly an exact bucket time column if available
+      final String exactBucketTimeColumn = optional(datasetConfigDTO.getGranularityToBucketTimeColumn())
+          .map(m -> m.get(granularityText)).orElse(null);
+      if (exactBucketTimeColumn != null) {
+        return context.getIdentifierQuoter().apply(exactBucketTimeColumn);
+      }
+      // else use the main time column
       final String quotedTimeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
       return context.getSqlExpressionBuilder()
           .getTimeGroupExpression(quotedTimeColumn,

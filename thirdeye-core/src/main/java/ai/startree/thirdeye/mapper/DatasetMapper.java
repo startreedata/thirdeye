@@ -42,6 +42,7 @@ public interface DatasetMapper {
         .setDataSource(optional(api.getDataSource()).map(DataSourceApi::getName).orElse(null))
         .setDimensions(api.getDimensions())
         .setRcaExcludedDimensions(api.getRcaExcludedDimensions())
+        .setGranularityToBucketTimeColumn(api.getGranularityToBucketTimeColumn())
         ;
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
@@ -69,7 +70,8 @@ public interface DatasetMapper {
             .orElse(null))
         .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null))
         .setAuth(optional(dto.getAuth())
-            .map(ApiBeanMapper::toApi).orElse(null));
+            .map(ApiBeanMapper::toApi).orElse(null))
+        .setGranularityToBucketTimeColumn(dto.getGranularityToBucketTimeColumn());
     optional(dto.getRcaExcludedDimensions()).ifPresent(datasetApi::setRcaExcludedDimensions);
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
         new TimeColumnApi()

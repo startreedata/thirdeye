@@ -66,20 +66,29 @@ public class MacroEngineTest {
   public static final String SIMPLE_TIME_FORMAT = "dd-M-yyyy hh:mm:ss";
   public static final Period HOUR_PERIOD = Period.hours(1);
 
-  private void prepareRequestAndAssert(final String inputQuery, final Interval detectionInterval,
+  private static void prepareRequestAndAssert(final String inputQuery,
+      final Interval detectionInterval,
       final String expectedQuery,
-      final Map<String, String> expectedProperties) {
+      final Map<String, String> expectedProperties, final DatasetConfigDTO datasetConfigDTO) {
     final MacroEngine macroEngine = new MacroEngine(MOCK_SQL_LANGUAGE,
         MOCK_SQL_EXPRESSION_BUILDER,
         detectionInterval,
-        DATASET_CONFIG_DTO,
+        datasetConfigDTO,
         inputQuery);
     final DataSourceRequest output = macroEngine.prepareRequest();
-    assertThat(TABLE_NAME).isEqualTo(output.getTable());
+    assertThat(output.getTable()).isEqualTo(TABLE_NAME);
     assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
         IntegrationTestUtils.cleanSql(
             expectedQuery));
-    assertThat(expectedProperties).isEqualTo(output.getProperties());
+    assertThat(output.getProperties()).isEqualTo(expectedProperties);
+  }
+
+  private static void prepareRequestAndAssert(final String inputQuery,
+      final Interval detectionInterval,
+      final String expectedQuery,
+      final Map<String, String> expectedProperties) {
+    prepareRequestAndAssert(inputQuery, detectionInterval, expectedQuery, expectedProperties,
+        DATASET_CONFIG_DTO);
   }
 
   @Test
@@ -245,6 +254,44 @@ public class MacroEngineTest {
         HOUR_PERIOD.toString());
 
     prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties);
+  }
+
+  @Test
+  public void testTimeGroupMacroWithAutoTimeWithExactBucket() {
+    final String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
+        MacroFunction.AUTO_TIME_CONFIG,
+        "NOT_IMPORTANT_SHOULD_NOT_BE_USED",
+        HOUR_PERIOD);
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(TABLE_NAME)
+        .setGranularityToBucketTimeColumn(Map.of(HOUR_PERIOD.toString(), "hourlyBuckets"));
+    final String expectedQuery = "SELECT \"hourlyBuckets\" FROM tableName";
+
+    final Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.GRANULARITY.toString(),
+        HOUR_PERIOD.toString());
+
+    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties,
+        datasetConfigDTO);
+  }
+
+  @Test
+  public void testTimeGroupKeyMacroWithAutoTimeWithExactBucket() {
+    final String inputQuery = String.format(
+        "select COUNT(*) from tableName GROUP BY __timeGroupKey(%s, %s, %s, %s)",
+        MacroFunction.AUTO_TIME_CONFIG,
+        "NOT_IMPORTANT_SHOULD_NOT_BE_USED",
+        HOUR_PERIOD,
+        "UNUSED_ALIAS");
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(TABLE_NAME)
+        .setGranularityToBucketTimeColumn(Map.of(HOUR_PERIOD.toString(), "hourlyBuckets"));
+    final String expectedQuery = "SELECT COUNT(*) FROM tableName GROUP BY \"hourlyBuckets\"";
+
+    final Map<String, String> expectedProperties = ImmutableMap.of();
+
+    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties,
+        datasetConfigDTO);
   }
 
   @Test

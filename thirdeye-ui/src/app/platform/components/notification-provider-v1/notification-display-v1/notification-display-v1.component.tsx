@@ -65,6 +65,8 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                     <Snackbar
                         open
                         anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                        autoHideDuration={3000}
+                        onClose={handleClose}
                     >
                         <Alert
                             className="notification-display-v1-notification"

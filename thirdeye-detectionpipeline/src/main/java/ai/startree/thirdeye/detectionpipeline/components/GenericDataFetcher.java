@@ -131,8 +131,8 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           queryWithFilters).prepareRequest();
     }
 
-    final Map<String, String> queryOptions = Map.of(); // custom options not implemented in MinMaxTimeLoader
-    return new DataSourceRequest(tableName, query, queryOptions, ImmutableMap.of());
+    final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader
+    return new DataSourceRequest(tableName, query, customOptions, ImmutableMap.of());
   }
 
   @VisibleForTesting

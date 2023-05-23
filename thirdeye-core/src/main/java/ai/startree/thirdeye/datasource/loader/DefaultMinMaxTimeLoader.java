@@ -98,8 +98,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
         dataSource,
         extremum,
         timeFilterInterval);
-    final Map<String, String> queryOptions = Map.of(); // custom options not implemented in MinMaxTimeLoader
-    final DataSourceRequest request = new DataSourceRequest(null, sqlQuery, queryOptions, Map.of());
+    final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader
+    final DataSourceRequest request = new DataSourceRequest(null, sqlQuery, customOptions, Map.of());
     final DataFrame df = dataSource.fetchDataTable(request).getDataFrame();
     if (df == null || df.size() == 0) {
       LOG.warn(

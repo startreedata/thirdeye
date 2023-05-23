@@ -25,13 +25,20 @@ public class DataSourceRequest {
 
   private final String table;
   private final String query;
+  /**
+   * Query options.
+   * For instance with Pinot, see https://docs.pinot.apache.org/users/user-guide-query/query-options.
+   */
+  private final Map<String, String> options;
   private final Map<String, String> properties;
 
   public DataSourceRequest(final String table,
       final String query,
+      final Map<String, String> options,
       final Map<String, String> properties) {
     this.table = table;
     this.query = query;
+    this.options = options;
     this.properties = properties;
   }
 
@@ -47,6 +54,10 @@ public class DataSourceRequest {
     return properties;
   }
 
+  public Map<String, String> getOptions() {
+    return options;
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -58,12 +69,13 @@ public class DataSourceRequest {
     final DataSourceRequest that = (DataSourceRequest) o;
     return Objects.equals(table, that.table)
         && Objects.equals(query, that.query)
+        && Objects.equals(options, that.options)
         && Objects.equals(properties, that.properties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(table, query, properties);
+    return Objects.hash(table, query, options, properties);
   }
 
   @Override
@@ -71,6 +83,7 @@ public class DataSourceRequest {
     return "DataSourceRequest{" +
         "table='" + table + '\'' +
         ", query='" + query + '\'' +
+        ", options='" + options + '\'' +
         ", properties=" + properties +
         '}';
   }

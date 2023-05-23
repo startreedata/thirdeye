@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -161,7 +162,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       }
       return thirdEyeResultSetGroup;
     } catch (final ExecutionException e) {
-      LOG.error("Failed to execute SQL: {}", pinotQuery.getQuery());
+      LOG.error("Failed to execute SQL: {} with options {}", pinotQuery.getQuery(), pinotQuery.getOptions());
       LOG.error("queryCache.stats: {}", queryCache.stats());
       throw e;
     }
@@ -169,16 +170,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
-    try {
-      // Use pinot SQL.
-      final ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
-          request.getQuery(),
-          request.getTable(),
-          true)).get(0);
-      return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
-    } catch (final ExecutionException e) {
-      throw e;
-    }
+    // FIXME BEFORE MERGE CYRIL - set options correctly
+    final ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
+        request.getQuery(),
+        request.getTable(),
+        request.getOptions())).get(0);
+    return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
   }
 
   @Override
@@ -209,7 +206,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       return true;
     }
 
-    final PinotQuery pinotQuery = new PinotQuery(query, null, true);
+    // FIXME BEFORE MERGE CYRIL - set options correctly
+    final PinotQuery pinotQuery = new PinotQuery(query, null, Map.of());
 
     /* Disable caching for validate queries */
     queryCache.refresh(pinotQuery);

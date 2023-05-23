@@ -88,7 +88,8 @@ public class MacroEngine {
     final SqlNode appliedMacrosNode = applyMacros(rootNode);
     final String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
 
-    return new DataSourceRequest(tableName, preparedQuery, properties);
+    final Map<String, String> queryOptions = Map.of(); // custom options not implemented in MinMaxTimeLoader
+    return new DataSourceRequest(tableName, preparedQuery, queryOptions, properties);
   }
 
   private SqlNode applyMacros(SqlNode rootNode) {

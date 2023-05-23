@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * This class defines the config of a single datasource used in thirdeye
  * Eg: PinotThirdeyeDataSource
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DataSourceDTO extends AbstractDTO {
 
   private String name;

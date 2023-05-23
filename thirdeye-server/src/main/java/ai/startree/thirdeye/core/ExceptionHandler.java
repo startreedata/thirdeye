@@ -92,9 +92,5 @@ public class ExceptionHandler {
         break;
       }
     }
-
-    if (e.getCause() != null) {
-      populateStatusListApi(e.getCause(), statusListApi, handlers);
-    }
   }
 }

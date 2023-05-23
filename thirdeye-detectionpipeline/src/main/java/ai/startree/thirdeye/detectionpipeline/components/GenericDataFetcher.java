@@ -33,6 +33,7 @@ import ai.startree.thirdeye.spi.metric.DimensionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
@@ -129,7 +130,9 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
           datasetConfigDTO,
           queryWithFilters).prepareRequest();
     }
-    return new DataSourceRequest(tableName, query, ImmutableMap.of());
+
+    final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader
+    return new DataSourceRequest(tableName, query, customOptions, ImmutableMap.of());
   }
 
   @VisibleForTesting

@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.RelationalQuery;
@@ -34,7 +35,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -51,6 +54,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
 
   private final String name;
+  private final DataSourceDTO dataSourceDTO;
   private final SqlExpressionBuilder sqlExpressionBuilder;
   private final SqlLanguage sqlLanguage;
   private final PinotDatasetOnboarder datasetOnboarder;
@@ -74,6 +78,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     this.sqlLanguage = sqlLanguage;
     this.datasetOnboarder = datasetOnboarder;
 
+    this.dataSourceDTO = context.getDataSourceDTO();
     name = context.getDataSourceDTO().getName();
     this.connectionManager = connectionManager;
 
@@ -161,7 +166,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       }
       return thirdEyeResultSetGroup;
     } catch (final ExecutionException e) {
-      LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
+      LOG.error("Failed to execute SQL: {} with options {}", pinotQuery.getQuery(),
+          pinotQuery.getOptions());
       LOG.error("queryCache.stats: {}", queryCache.stats());
       throw e;
     }
@@ -169,16 +175,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
-    try {
-      // Use pinot SQL.
-      final ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
-          request.getQuery(),
-          request.getTable(),
-          true)).get(0);
-      return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
-    } catch (final ExecutionException e) {
-      throw e;
-    }
+    final Map<String, String> options = new HashMap<>(dataSourceDTO.getDefaultQueryOptions());
+    options.putAll(request.getOptions());
+    final ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
+        request.getQuery(),
+        request.getTable(),
+        options)).get(0);
+    return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
   }
 
   @Override
@@ -209,7 +212,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       return true;
     }
 
-    final PinotQuery pinotQuery = new PinotQuery(query, null, true);
+    final PinotQuery pinotQuery = new PinotQuery(query, null, dataSourceDTO.getDefaultQueryOptions());
 
     /* Disable caching for validate queries */
     queryCache.refresh(pinotQuery);

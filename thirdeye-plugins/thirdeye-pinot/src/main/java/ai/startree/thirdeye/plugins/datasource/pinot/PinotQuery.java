@@ -14,38 +14,34 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import ai.startree.thirdeye.spi.datasource.RelationalQuery;
+import java.util.Map;
 
+// TODO CYRIL - remove ? duplication of the DataSourceRequest
 public class PinotQuery extends RelationalQuery {
 
   private String tableName;
 
-  private boolean useSql = false;
+  private final Map<String, String> options;
 
-  public PinotQuery(String pql, String tableName) {
-    this(pql, tableName, false);
-  }
+  @Deprecated // TODO CYRIL always true - to remove
+  private final boolean useSql = true;
 
-  public PinotQuery(String query, String tableName, boolean useSql) {
+  public PinotQuery(final String query, final String tableName, final Map<String, String> options) {
     super(query);
     this.tableName = tableName;
-    this.useSql = useSql;
-  }
-
-  // TODO: Remove thirdeye-external's dependency on this method to getQuery() instead
-  public String getPql() {
-    return query;
+    this.options = options;
   }
 
   public String getTableName() {
     return tableName;
   }
 
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
-  }
-
   public boolean isUseSql() {
     return useSql;
+  }
+
+  public Map<String, String> getOptions() {
+    return options;
   }
 
   @Override

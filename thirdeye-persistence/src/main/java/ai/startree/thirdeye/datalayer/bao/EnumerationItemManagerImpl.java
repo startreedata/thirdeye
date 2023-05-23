@@ -177,7 +177,7 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     return filtered.stream().findFirst().orElse(null);
   }
 
-  private void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
+  public void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
     requireNonNull(from.getId(), "expecting a generated ID");
     requireNonNull(to.getId(), "expecting a generated ID");
     requireNonNull(to.getAlert(), "expecting a valid alert");

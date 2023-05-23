@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.util.Pair;
 import com.google.common.cache.CacheLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -199,22 +200,19 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
   public ThirdEyeResultSetGroup load(final PinotQuery pinotQuery) {
     try {
       final Connection connection = pinotConnectionManager.get();
-      final long start = System.currentTimeMillis();
+      final long start = System.nanoTime();
       final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
       final ResultSetGroup resultSetGroup = connection.execute(
           pinotQuery.getTableName(),
           new Request(queryFormat, pinotQuery.getQuery())
       );
 
-      /* Log slow queries. anything greater than 1s */
-      final long end = System.currentTimeMillis();
-      final long duration = end - start;
-      if (duration > 1000) {
-        LOG.info("Query:{} time:{}ms result stats(rows, cols): {}",
-            pinotQuery.getQuery().replace('\n', ' '),
-            duration,
-            toString(rowColCounts(resultSetGroup)));
-      }
+      final long end = System.nanoTime();
+      final long durationMillis = (end - start) / TimeUnit.MILLISECONDS.toNanos(1);
+      LOG.info("Query:{} time:{}ms result stats(rows, cols): {}",
+          pinotQuery.getQuery().replace('\n', ' '),
+          durationMillis,
+          toString(rowColCounts(resultSetGroup)));
 
       return toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {

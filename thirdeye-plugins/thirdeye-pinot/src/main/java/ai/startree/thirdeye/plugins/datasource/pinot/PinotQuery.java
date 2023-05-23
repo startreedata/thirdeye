@@ -21,10 +21,6 @@ public class PinotQuery extends RelationalQuery {
 
   private boolean useSql = false;
 
-  public PinotQuery(String pql, String tableName) {
-    this(pql, tableName, false);
-  }
-
   public PinotQuery(String query, String tableName, boolean useSql) {
     super(query);
     this.tableName = tableName;

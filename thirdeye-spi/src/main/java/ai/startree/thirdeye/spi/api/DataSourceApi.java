@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -26,6 +27,7 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
   private Long id;
   private String name;
   private String type;
+  private Map<String, String> defaultQueryOptions = new HashMap<>();
   private Map<String, Object> properties;
   private List<DataSourceMetaApi> metaList;
   private AuthorizationConfigurationApi auth;
@@ -91,5 +93,15 @@ public class DataSourceApi implements ThirdEyeCrudApi<DataSourceApi> {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
+  }
+
+  public Map<String, String> getDefaultQueryOptions() {
+    return defaultQueryOptions;
+  }
+
+  public DataSourceApi setDefaultQueryOptions(
+      final Map<String, String> defaultQueryOptions) {
+    this.defaultQueryOptions = defaultQueryOptions;
+    return this;
   }
 }

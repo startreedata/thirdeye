@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
@@ -42,21 +43,29 @@ public class ResourceUtils {
 
   private final static ObjectMapper J = new ObjectMapper();
 
-  public static Response respondOk(ThirdEyeApi api) {
+  public static Response respondOk(final ThirdEyeApi api) {
     return Response.ok(api).build();
   }
 
-  public static <T extends ThirdEyeApi> Response respondOk(Collection<T> api) {
+  public static <T extends ThirdEyeApi> Response respondOk(final Collection<T> api) {
     return Response.ok(api).build();
   }
 
-  public static <T extends ThirdEyeApi> Response respondOk(Stream<T> api) {
+  public static <T extends ThirdEyeApi> Response respondOk(final Stream<T> api) {
     return Response.ok(api).build();
   }
 
-  public static void authenticate(boolean condition) {
+  @SuppressWarnings("unused")
+  public static void authenticate(final boolean condition) {
     if (!condition) {
       throw unauthenticatedException();
+    }
+  }
+
+  @SuppressWarnings("unused")
+  public static void authorize(final boolean condition) {
+    if (!condition) {
+      throw new ForbiddenException("Access Denied.");  // throw 403
     }
   }
 
@@ -64,46 +73,47 @@ public class ResourceUtils {
     return new NotAuthorizedException("Authentication Failure.");  // throw 401
   }
 
-  public static <T> T ensureExists(T o) {
+  public static <T> T ensureExists(final T o) {
     return ensureExists(o, ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST, "");
   }
 
-  public static <T> T ensureExists(T o, Object... args) {
+  public static <T> T ensureExists(final T o, final Object... args) {
     return ensureExists(o, ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST, args);
   }
 
-  public static <T> T ensureExists(T o, ThirdEyeStatus status, Object... args) {
+  public static <T> T ensureExists(final T o, final ThirdEyeStatus status, final Object... args) {
     ensure(o != null, status, args);
     return o;
   }
 
-  public static void ensureNull(Object o, String message) {
+  public static void ensureNull(final Object o, final String message) {
     ensure(o == null, ERR_OBJECT_UNEXPECTED, message);
   }
 
-  public static void ensureNull(Object o, ThirdEyeStatus status, Object... args) {
+  public static void ensureNull(final Object o, final ThirdEyeStatus status, final Object... args) {
     ensure(o == null, status, args);
   }
 
-  public static void ensure(boolean condition, String message) {
+  public static void ensure(final boolean condition, final String message) {
     ensure(condition, ThirdEyeStatus.ERR_UNKNOWN, message);
   }
 
-  public static void ensure(boolean condition, ThirdEyeStatus status, Object... args) {
+  public static void ensure(final boolean condition, final ThirdEyeStatus status,
+      final Object... args) {
     if (!condition) {
       throw badRequest(status, args);
     }
   }
 
-  public static StatusListApi statusResponse(ThirdEyeException e) {
+  public static StatusListApi statusResponse(final ThirdEyeException e) {
     return statusListApi(e.getStatus(), e.getMessage());
   }
 
-  public static StatusListApi statusResponse(ThirdEyeStatus status, Object... args) {
+  public static StatusListApi statusResponse(final ThirdEyeStatus status, final Object... args) {
     return statusListApi(status, String.format(status.getMessage(), args));
   }
 
-  public static StatusListApi statusListApi(ThirdEyeStatus status, String msg) {
+  public static StatusListApi statusListApi(final ThirdEyeStatus status, final String msg) {
     return new StatusListApi()
         .setList(ImmutableList.of(new StatusApi()
             .setCode(status)
@@ -117,7 +127,7 @@ public class ResourceUtils {
         .setMsg(String.format(status.getMessage(), args));
   }
 
-  public static BadRequestException badRequest(ThirdEyeStatus status, Object... args) {
+  public static BadRequestException badRequest(final ThirdEyeStatus status, final Object... args) {
     return badRequest(statusResponse(status, args));
   }
 
@@ -129,7 +139,8 @@ public class ResourceUtils {
     );
   }
 
-  public static InternalServerErrorException serverError(ThirdEyeStatus status, Object... args) {
+  public static InternalServerErrorException serverError(final ThirdEyeStatus status,
+      final Object... args) {
     return serverError(statusResponse(status, args));
   }
 
@@ -142,8 +153,8 @@ public class ResourceUtils {
   }
 
   public static List<Map<String, Object>> resultSetToMap(final ResultSet rs) throws SQLException {
-    List<Map<String, Object>> list = new ArrayList<>();
-    ResultSetMetaData rsmd = rs.getMetaData();
+    final List<Map<String, Object>> list = new ArrayList<>();
+    final ResultSetMetaData rsmd = rs.getMetaData();
     while (rs.next()) {
       final Map<String, Object> map = new HashMap<>();
       for (int i = 1; i <= rsmd.getColumnCount(); i++) {
@@ -159,7 +170,7 @@ public class ResourceUtils {
     if (object instanceof String) {
       try {
         return J.readValue(object.toString(), Map.class);
-      } catch (JsonProcessingException e) {
+      } catch (final JsonProcessingException e) {
         return object;
       }
     }

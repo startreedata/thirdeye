@@ -40,7 +40,7 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
 
             const notificationTimerId = delay(
                 setNotification,
-                100,
+                500,
                 notifications[0]
             );
 

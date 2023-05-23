@@ -24,6 +24,9 @@ import { useNotificationDisplayV1Styles } from "./notification-display-v1.styles
 
 export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props> =
     ({ className, ...otherProps }) => {
+        const displayAfter = 500; // milliseconds
+        const hideAfter = 10_000; // milliseconds
+
         const notificationDisplayV1Classes = useNotificationDisplayV1Styles();
         const [notification, setNotification] = useState<NotificationV1 | null>(
             null
@@ -40,7 +43,7 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
 
             const notificationTimerId = delay(
                 setNotification,
-                500,
+                displayAfter,
                 notifications[0]
             );
 
@@ -65,7 +68,7 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                     <Snackbar
                         open
                         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                        autoHideDuration={3000}
+                        autoHideDuration={hideAfter}
                         onClose={handleClose}
                     >
                         <Alert

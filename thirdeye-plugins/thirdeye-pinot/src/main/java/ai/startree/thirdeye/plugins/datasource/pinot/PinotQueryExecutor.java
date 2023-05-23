@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetMetaData;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.util.Pair;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheLoader;
 import java.util.ArrayList;
 import java.util.List;
@@ -223,7 +224,8 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
     }
   }
 
-  private String buildQueryWithOptions(final PinotQuery pinotQuery) {
+  @VisibleForTesting
+  protected static String buildQueryWithOptions(final PinotQuery pinotQuery) {
     final StringBuilder optionsStatements = new StringBuilder();
     for (final Entry<String, String> option : pinotQuery.getOptions().entrySet()) {
       // SET optionKey = optionValue;

@@ -161,7 +161,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       }
       return thirdEyeResultSetGroup;
     } catch (final ExecutionException e) {
-      LOG.error("Failed to execute PQL: {}", pinotQuery.getQuery());
+      LOG.error("Failed to execute SQL: {}", pinotQuery.getQuery());
       LOG.error("queryCache.stats: {}", queryCache.stats());
       throw e;
     }

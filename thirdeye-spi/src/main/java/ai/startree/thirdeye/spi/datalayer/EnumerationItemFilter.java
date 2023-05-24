@@ -11,12 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.bao;
 
-import ai.startree.thirdeye.spi.datalayer.EnumerationItemFilter;
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import java.util.List;
+package ai.startree.thirdeye.spi.datalayer;
 
-public interface EnumerationItemManager extends AbstractManager<EnumerationItemDTO> {
-  List<EnumerationItemDTO> filter(EnumerationItemFilter filter);
+public class EnumerationItemFilter {
+
+  private Long alertId;
+
+  public Long getAlertId() {
+    return alertId;
+  }
+
+  public EnumerationItemFilter setAlertId(final Long alertId) {
+    this.alertId = alertId;
+    return this;
+  }
 }

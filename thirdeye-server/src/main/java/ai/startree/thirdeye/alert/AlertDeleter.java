@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.singleton;
 
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -28,7 +29,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -70,15 +73,19 @@ public class AlertDeleter {
   private void disassociateFromSubscriptionGroups(final Long alertId) {
     final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
 
-    final List<SubscriptionGroupDTO> updated = new ArrayList<>();
+    final Set<SubscriptionGroupDTO> updated = new HashSet<>();
     for (final SubscriptionGroupDTO sg : allSubscriptionGroups) {
       final List<Long> alertIds = (List<Long>) sg.getProperties().get("detectionConfigIds");
       if (alertIds.contains(alertId)) {
         alertIds.removeAll(singleton(alertId));
         updated.add(sg);
       }
+      optional(sg.getAlertAssociations())
+          .map(aas -> aas.removeIf(aa -> alertId.equals(aa.getAlert().getId())))
+          .filter(b -> b)
+          .ifPresent(b -> updated.add(sg));
     }
-    subscriptionGroupManager.update(updated);
+    subscriptionGroupManager.update(new ArrayList<>(updated));
   }
 
   private void deleteAssociatedEnumerationItems(final Long alertId) {

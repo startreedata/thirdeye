@@ -1,3 +1,17 @@
+## [2.19.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.18.0...thirdeye-ui-2.19.0) (2023-05-24)
+
+
+### Features
+
+* [TE-1497](https://cortexdata.atlassian.net/browse/TE-1497) deleting datasource and dataset now deletes metrics and datasets ([6a58f5466](https://github.com/startreedata/thirdeye/commit/6a58f5466a469b074e80c58b7bb54d836f6365ad))
+* [TE-1518](https://cortexdata.atlassian.net/browse/TE-1518) add json editor button to create alert setup threshold page ([60c462535](https://github.com/startreedata/thirdeye/commit/60c462535129f2f1db6b7f4f6a891fd379419bc9))
+
+
+### Bug Fixes
+
+* [TE-1518](https://cortexdata.atlassian.net/browse/TE-1518) fix bug introduced where old values being used for alert config ([bc2aac30a](https://github.com/startreedata/thirdeye/commit/bc2aac30a27f7b3bdae1df0b06b74362fc7d4577))
+* [TE-1587](https://cortexdata.atlassian.net/browse/TE-1587) escape button closes dialog not take to alert edit page ([be07bf9b0](https://github.com/startreedata/thirdeye/commit/be07bf9b03e236bdba37c37bebff798b409a9804))
+
 ## [2.18.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.17.1...thirdeye-ui-2.18.0) (2023-04-24)
 
 

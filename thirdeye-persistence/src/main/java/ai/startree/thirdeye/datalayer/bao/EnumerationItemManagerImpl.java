@@ -60,7 +60,7 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     this.subscriptionGroupManager = subscriptionGroupManager;
   }
 
-  private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
+  public static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
     return Objects.equals(o1.getName(), o2.getName())
         && Objects.equals(o1.getParams(), o2.getParams());
   }
@@ -77,7 +77,7 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     return enumerationItemDTO;
   }
 
-  private static Map<String, Object> key(final EnumerationItemDTO source,
+  public static Map<String, Object> key(final EnumerationItemDTO source,
       final List<String> idKeys) {
     final var p = source.getParams();
     return idKeys.stream()
@@ -177,6 +177,7 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     return filtered.stream().findFirst().orElse(null);
   }
 
+  @Override
   public void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
     requireNonNull(from.getId(), "expecting a generated ID");
     requireNonNull(to.getId(), "expecting a generated ID");

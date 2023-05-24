@@ -20,8 +20,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.enumerationitem.EnumerationItemMaintainer;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
@@ -49,7 +49,7 @@ public class PlanExecutor implements AutoCloseable {
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
   private final DetectionPipelineConfiguration detectionPipelineConfiguration;
-  private final EnumerationItemManager enumerationItemManager;
+  private final EnumerationItemMaintainer enumerationItemMaintainer;
 
   private final ExecutorService subTaskExecutor;
 
@@ -63,8 +63,8 @@ public class PlanExecutor implements AutoCloseable {
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
       final DatasetConfigManager datasetConfigManager,
-      final EnumerationItemManager enumerationItemManager,
-      final DetectionPipelineConfiguration detectionPipelineConfiguration) {
+      final DetectionPipelineConfiguration detectionPipelineConfiguration,
+      final EnumerationItemMaintainer enumerationItemMaintainer) {
     this.planNodeFactory = planNodeFactory;
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
@@ -72,7 +72,7 @@ public class PlanExecutor implements AutoCloseable {
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
     this.detectionPipelineConfiguration = detectionPipelineConfiguration;
-    this.enumerationItemManager = enumerationItemManager;
+    this.enumerationItemMaintainer = enumerationItemMaintainer;
 
     final int nThreads = detectionPipelineConfiguration.getForkjoin().getParallelism();
     subTaskExecutor = Executors.newFixedThreadPool(nThreads, threadsNamed("fork-join-%d"));
@@ -132,9 +132,8 @@ public class PlanExecutor implements AutoCloseable {
         eventManager,
         datasetConfigManager,
         subTaskExecutor,
-        enumerationItemManager,
-        detectionPipelineConfiguration
-    );
+        detectionPipelineConfiguration,
+        enumerationItemMaintainer);
   }
 
   /**

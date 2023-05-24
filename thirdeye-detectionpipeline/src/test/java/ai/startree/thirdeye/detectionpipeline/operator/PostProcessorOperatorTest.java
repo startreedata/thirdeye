@@ -30,9 +30,9 @@ import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult.Builder;
+import ai.startree.thirdeye.enumerationitem.EnumerationItemMaintainer;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
@@ -88,9 +88,8 @@ public class PostProcessorOperatorTest {
                 mock(EventManager.class),
                 mock(DatasetConfigManager.class),
                 mock(ExecutorService.class),
-                mock(EnumerationItemManager.class),
-                new DetectionPipelineConfiguration()
-        )));
+                new DetectionPipelineConfiguration(),
+                mock(EnumerationItemMaintainer.class))));
   }
 
   @Test
@@ -201,12 +200,12 @@ public class PostProcessorOperatorTest {
 
   private static class TestPostProcessor implements AnomalyPostProcessor {
 
-    private String labelName;
+    private final String labelName;
 
     public TestPostProcessor(final Map<String, Object> params) {
       final TestPostProcessorSpec spec = new ObjectMapper().convertValue(params,
           TestPostProcessorSpec.class);
-      this.labelName = spec.getLabelName();
+      labelName = spec.getLabelName();
     }
 
     @Override

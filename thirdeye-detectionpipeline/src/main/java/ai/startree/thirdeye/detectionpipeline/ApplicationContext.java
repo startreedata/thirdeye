@@ -15,8 +15,8 @@ package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
+import ai.startree.thirdeye.enumerationitem.EnumerationItemMaintainer;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import java.util.concurrent.ExecutorService;
 
@@ -29,7 +29,7 @@ public class ApplicationContext {
   private final DatasetConfigManager datasetConfigManager;
   private final ExecutorService subTaskExecutor;
   private final DetectionPipelineConfiguration configuration;
-  private final EnumerationItemManager enumerationItemManager;
+  private final EnumerationItemMaintainer enumerationItemMaintainer;
 
   public ApplicationContext(final DataSourceCache dataSourceCache,
       final DetectionRegistry detectionRegistry,
@@ -37,15 +37,15 @@ public class ApplicationContext {
       final EventManager eventManager,
       final DatasetConfigManager datasetConfigManager,
       final ExecutorService subTaskExecutor,
-      final EnumerationItemManager enumerationItemManager,
-      final DetectionPipelineConfiguration detectionPipelineConfiguration) {
+      final DetectionPipelineConfiguration detectionPipelineConfiguration,
+      final EnumerationItemMaintainer enumerationItemMaintainer) {
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
     this.subTaskExecutor = subTaskExecutor;
-    this.enumerationItemManager = enumerationItemManager;
-    this.configuration = detectionPipelineConfiguration;
+    this.enumerationItemMaintainer = enumerationItemMaintainer;
+    configuration = detectionPipelineConfiguration;
 
     /* Use a cached instance for pipeline execution */
     this.datasetConfigManager = new CachedDatasetConfigManager(datasetConfigManager);
@@ -79,7 +79,7 @@ public class ApplicationContext {
     return configuration;
   }
 
-  public EnumerationItemManager getEnumerationItemManager() {
-    return enumerationItemManager;
+  public EnumerationItemMaintainer getEnumerationItemMaintainer() {
+    return enumerationItemMaintainer;
   }
 }

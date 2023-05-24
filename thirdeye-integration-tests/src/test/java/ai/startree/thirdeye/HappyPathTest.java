@@ -88,6 +88,7 @@ public class HappyPathTest {
   private static final AlertApi MAIN_ALERT_API;
   private static final long EVALUATE_END_TIME = 1596326400000L;
   private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
+  private static final long PAGEVIEWS_DATASET_END_TIME_PLUS_ONE_DAY = 1596153600000L;
   private static final long PAGEVIEWS_DATASET_END_TIME = 1596067200000L;
   private static final long PAGEVIEWS_DATASET_START_TIME = 1580601600000L;
 
@@ -237,7 +238,7 @@ public class HappyPathTest {
     assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(
         "P1D");
     assertThat(insights.getDefaultStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY);
-    assertThat(insights.getDefaultEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
+    assertThat(insights.getDefaultEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME_PLUS_ONE_DAY);
     assertThat(insights.getDatasetStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
     assertThat(insights.getDatasetEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
   }

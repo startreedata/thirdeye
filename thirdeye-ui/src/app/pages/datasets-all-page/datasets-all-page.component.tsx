@@ -28,49 +28,47 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetDatasets } from "../../rest/datasets/datasets.actions";
 import { deleteDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
+import { deleteMetric } from "../../rest/metrics/metrics.rest";
 import {
     makeDeleteRequest,
     promptDeleteConfirmation,
 } from "../../utils/bulk-delete/bulk-delete.util";
 import { getUiDatasets } from "../../utils/datasets/datasets.util";
+import { useGetDatasourcesTree } from "../../utils/datasources/use-get-datasources-tree.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getDatasetsOnboardPath } from "../../utils/routes/routes.util";
 
 export const DatasetsAllPage: FunctionComponent = () => {
-    const { getDatasets, status, errorMessages } = useGetDatasets();
-    const [uiDatasets, setUiDatasets] = useState<UiDataset[]>([]);
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [uiDatasets, setUiDatasets] = useState<UiDataset[]>([]);
 
-    useEffect(() => {
-        // Time range refreshed, fetch datasets
-        fetchAllDatasets();
-    }, []);
+    const { datasetsInfo, getDatasetsHook } = useGetDatasourcesTree();
 
     useEffect(() => {
         notifyIfErrors(
-            status,
-            errorMessages,
+            getDatasetsHook.status,
+            getDatasetsHook.errorMessages,
             notify,
             t("message.error-while-fetching", {
                 entity: t("label.datasets"),
             })
         );
-    }, [status]);
+    }, [getDatasetsHook.status]);
 
-    const fetchAllDatasets = (): void => {
-        setUiDatasets([]);
+    useEffect(() => {
+        if (!datasetsInfo) {
+            return;
+        }
 
-        getDatasets().then((datasets) => {
-            if (datasets) {
-                setUiDatasets(getUiDatasets(datasets));
-            }
-        });
-    };
+        const flattenedDatasets = datasetsInfo.map(
+            (datasetIndo) => datasetIndo.dataset
+        );
+        setUiDatasets(getUiDatasets(flattenedDatasets));
+    }, [datasetsInfo]);
 
     const handleDatasetDelete = (uiDatasetsToDelete: UiDataset[]): void => {
         promptDeleteConfirmation(
@@ -85,6 +83,20 @@ export const DatasetsAllPage: FunctionComponent = () => {
                         t("label.dataset"),
                         t("label.datasets")
                     ).then((deleted) => {
+                        deleted.forEach((dataset) => {
+                            if (datasetsInfo) {
+                                const datasetInfo = datasetsInfo.find(
+                                    (c) => c.dataset.id === dataset.id
+                                );
+
+                                if (datasetInfo) {
+                                    datasetInfo.metrics.forEach((metric) => {
+                                        metric.id > 0 &&
+                                            deleteMetric(metric.id);
+                                    });
+                                }
+                            }
+                        });
                         setUiDatasets(() => {
                             return [...uiDatasets].filter((candidate) => {
                                 return (
@@ -109,10 +121,10 @@ export const DatasetsAllPage: FunctionComponent = () => {
                 <LoadingErrorStateSwitch
                     wrapInCard
                     wrapInGrid
-                    isError={status === ActionStatus.Error}
+                    isError={getDatasetsHook.status === ActionStatus.Error}
                     isLoading={
-                        status === ActionStatus.Working ||
-                        status === ActionStatus.Initial
+                        getDatasetsHook.status === ActionStatus.Working ||
+                        getDatasetsHook.status === ActionStatus.Initial
                     }
                 >
                     <EmptyStateSwitch

@@ -15,5 +15,6 @@
 import "./get-by-data-testid.command";
 import "./load-alert-and-anomalies.command";
 import "./load-datasource.command";
+import "./reset-alerts.command";
 import "./reset-datasource.command";
 import "./select-date-range-from-picker.command.js";

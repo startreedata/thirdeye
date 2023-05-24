@@ -13,19 +13,26 @@
  */
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.singleton;
 
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class AlertDeleter {
@@ -33,14 +40,17 @@ public class AlertDeleter {
   private final AlertManager alertManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final AnomalyManager anomalyManager;
+  private final EnumerationItemManager enumerationItemManager;
 
   @Inject
   public AlertDeleter(final AlertManager alertManager,
       final SubscriptionGroupManager subscriptionGroupManager,
-      final AnomalyManager anomalyManager) {
+      final AnomalyManager anomalyManager,
+      final EnumerationItemManager enumerationItemManager) {
     this.alertManager = alertManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.anomalyManager = anomalyManager;
+    this.enumerationItemManager = enumerationItemManager;
   }
 
   public void delete(final AlertDTO dto) {
@@ -48,6 +58,7 @@ public class AlertDeleter {
 
     disassociateFromSubscriptionGroups(alertId);
     deleteAssociatedAnomalies(alertId);
+    deleteAssociatedEnumerationItems(alertId);
 
     alertManager.delete(dto);
   }
@@ -62,14 +73,27 @@ public class AlertDeleter {
   private void disassociateFromSubscriptionGroups(final Long alertId) {
     final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
 
-    List<SubscriptionGroupDTO> updated = new ArrayList<>();
-    for (SubscriptionGroupDTO sg : allSubscriptionGroups) {
+    final Set<SubscriptionGroupDTO> updated = new HashSet<>();
+    for (final SubscriptionGroupDTO sg : allSubscriptionGroups) {
       final List<Long> alertIds = (List<Long>) sg.getProperties().get("detectionConfigIds");
       if (alertIds.contains(alertId)) {
         alertIds.removeAll(singleton(alertId));
         updated.add(sg);
       }
+      optional(sg.getAlertAssociations())
+          .map(aas -> aas.removeIf(aa -> alertId.equals(aa.getAlert().getId())))
+          .filter(b -> b)
+          .ifPresent(b -> updated.add(sg));
     }
-    subscriptionGroupManager.update(updated);
+    subscriptionGroupManager.update(new ArrayList<>(updated));
+  }
+
+  private void deleteAssociatedEnumerationItems(final Long alertId) {
+    final List<Long> ids = enumerationItemManager.filter(new DaoFilter()
+            .setPredicate(Predicate.EQ("alertId", alertId)))
+        .stream()
+        .map(AbstractDTO::getId)
+        .collect(Collectors.toList());
+    enumerationItemManager.deleteByIds(ids);
   }
 }

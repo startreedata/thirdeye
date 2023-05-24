@@ -31,7 +31,9 @@ import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
+import { deleteMetric } from "../../rest/metrics/metrics.rest";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
+import { useGetDatasourcesTree } from "../../utils/datasources/use-get-datasources-tree.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -42,12 +44,15 @@ import {
 import { DatasetsViewPageParams } from "./dataset-view-page.interfaces";
 
 export const DatasetsViewPage: FunctionComponent = () => {
-    const [uiDataset, setUiDataset] = useState<UiDataset | null>(null);
-    const { showDialog } = useDialogProviderV1();
-    const params = useParams<DatasetsViewPageParams>();
-    const navigate = useNavigate();
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const params = useParams<DatasetsViewPageParams>();
     const { notify } = useNotificationProviderV1();
+    const { showDialog } = useDialogProviderV1();
+
+    const [uiDataset, setUiDataset] = useState<UiDataset | null>(null);
+
+    const { datasetsInfo } = useGetDatasourcesTree();
 
     useEffect(() => {
         // Time range refreshed, fetch dataset
@@ -109,6 +114,18 @@ export const DatasetsViewPage: FunctionComponent = () => {
                     NotificationTypeV1.Success,
                     t("message.delete-success", { entity: t("label.dataset") })
                 );
+
+                if (datasetsInfo) {
+                    const datasetInfo = datasetsInfo.find(
+                        (c) => c.dataset.id === uiDataset.id
+                    );
+
+                    if (datasetInfo) {
+                        datasetInfo.metrics.forEach((metric) => {
+                            metric.id > 0 && deleteMetric(metric.id);
+                        });
+                    }
+                }
 
                 // Redirect to datasets all path
                 navigate(getDatasetsAllPath());

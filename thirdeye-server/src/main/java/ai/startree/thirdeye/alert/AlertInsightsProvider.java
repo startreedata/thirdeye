@@ -17,8 +17,9 @@ import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -197,9 +198,11 @@ public class AlertInsightsProvider {
         .map(e -> (Chronology) e)
         .orElse(Constants.DEFAULT_CHRONOLOGY);
     final Interval datasetInterval = new Interval(datasetStartTime, datasetEndTime, chronology);
-    final Period granularity = isoPeriod(metadata.getGranularity());
+    // FIXME CYRIL internalize this?
+    final Period granularity = getGranularity(metadata);
+    final Period delay = getDelay(metadata);
     // compute default chart interval
-    final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity);
+    final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity, delay);
     insights.setDefaultStartTime(defaultInterval.getStartMillis());
     insights.setDefaultEndTime(defaultInterval.getEndMillis());
   }
@@ -210,18 +213,21 @@ public class AlertInsightsProvider {
 
   @VisibleForTesting
   protected static Interval getDefaultChartInterval(final @NonNull Interval datasetInterval,
-      @NonNull final Period granularity) {
-    final DateTime defaultEndDateTime = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
+      @NonNull final Period granularity, @NonNull final Period delay) {
+    final DateTime datasetEndTimeBucketStart = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
         granularity);
 
-    DateTime defaultStartTime = defaultEndDateTime.minus(defaultChartTimeframe(granularity));
+    DateTime defaultStartTime = datasetEndTimeBucketStart.minus(defaultChartTimeframe(granularity));
     if (defaultStartTime.getMillis() < datasetInterval.getStartMillis()) {
       defaultStartTime = TimeUtils.floorByPeriod(datasetInterval.getStart(), granularity);
       // first bucket may be incomplete - start from second one
       defaultStartTime = defaultStartTime.plus(granularity);
     }
 
-    return new Interval(defaultStartTime, defaultEndDateTime);
+    final DateTime datasetEndTimeBucketEnd = datasetEndTimeBucketStart.plus(granularity);
+    // delay is applied in evaluate call - anticipate by adding it here to avoid hiding most recent points
+    final DateTime defaultEndTime = datasetEndTimeBucketEnd.plus(delay);
+    return new Interval(defaultStartTime, defaultEndTime);
   }
 
   /**

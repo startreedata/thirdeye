@@ -24,8 +24,9 @@ import org.testng.annotations.Test;
 public class AlertInsightsProviderTest {
 
   private final static long JANUARY_1_2022_2AM = 1641002400000L;
-  private final static long JANUARY_1_2022_0AM = 1640995200000L;
-  private final static long DECEMBER_31_2022_11PM = 1640991600000L;
+  private final static long JANUARY_2_2022_0AM = 1641081600000L;
+  private final static long JANUARY_3_2022_0AM = 1641168000000L;
+  private final static long JAN_1_2022_11PM = 1641078000000L;
   private final static long JULY_2_2021_0AM = 1625184000000L;
   private final static long JULY_1_2021_4AM = 1625112000000L;
   private final static long JANUARY_1_2021_0AM = 1609459200000L;
@@ -40,10 +41,30 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY);
+        DAILY_GRANULARITY, Period.ZERO);
 
-    final Interval expected = new Interval(JANUARY_1_2021_0AM,
-        JANUARY_1_2022_0AM,
+    final Interval expected = new Interval(
+        // one year from end of bucket
+        JANUARY_1_2021_0AM,
+        // end of bucket
+        JANUARY_2_2022_0AM,
+        DateTimeZone.UTC);
+    assertThat(res).isEqualTo(expected);
+  }
+
+  @Test
+  public void testDefaultIntervalWithDailyGranularityWithCompletenessDelay() {
+    final Interval datasetInterval = new Interval(JANUARY_1_2019_OAM,
+        JANUARY_1_2022_2AM,
+        DateTimeZone.UTC);
+    final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
+        DAILY_GRANULARITY, Period.days(1));
+
+    final Interval expected = new Interval(
+        // one year from end of bucket
+        JANUARY_1_2021_0AM,
+        // end of bucket = JANUARY_2_2022_0AM + delay
+        JANUARY_3_2022_0AM,
         DateTimeZone.UTC);
     assertThat(res).isEqualTo(expected);
   }
@@ -54,10 +75,10 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         PARIS_TIMEZONE);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY);
+        DAILY_GRANULARITY, Period.ZERO);
 
     final Interval expected = new Interval(DECEMBER_31_2020_11PM,
-        DECEMBER_31_2022_11PM,
+        JAN_1_2022_11PM,
         PARIS_TIMEZONE);
     assertThat(res).isEqualTo(expected);
   }
@@ -68,9 +89,9 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY);
+        DAILY_GRANULARITY, Period.ZERO);
 
-    final Interval expected = new Interval(JULY_2_2021_0AM, JANUARY_1_2022_0AM, DateTimeZone.UTC);
+    final Interval expected = new Interval(JULY_2_2021_0AM, JANUARY_2_2022_0AM, DateTimeZone.UTC);
     assertThat(res).isEqualTo(expected);
   }
 

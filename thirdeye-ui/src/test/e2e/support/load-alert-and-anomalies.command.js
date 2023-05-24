@@ -32,18 +32,35 @@ export const DEFAULT_ALERT_CONFIG = {
     },
 };
 
-Cypress.Commands.add("loadAlertAndAnomalies", () => {
+Cypress.Commands.add("loadAlertAndAnomalies", (failOnStatusCode = true) => {
+    if (process.env.TE_DEV_PROXY_SERVER !== undefined) {
+        throw new Error(
+            "TE_DEV_PROXY_SERVER is set. Failing in case it is linked to a dev server"
+        );
+    }
+
     cy.request({
         method: "POST",
         url: "http://localhost:7004/api/alerts",
         json: [DEFAULT_ALERT_CONFIG],
+        failOnStatusCode: failOnStatusCode,
     }).then(({ body }) => {
+        if (!body || !body[0]) {
+            return;
+        }
+
         // Note that these get cleared out when the schedule runs a job
         cy.fixture("anomalies-for-us-store-sales-order.json").then(
             (anomalies) => {
                 const mockAnomalies = anomalies.map((anomaly) => {
                     anomaly.alert = {
                         id: body[0].id,
+                    };
+                    anomaly.metadata = {
+                        dataset: { name: body[0].templateProperties.dataset },
+                        metric: {
+                            name: body[0].templateProperties.aggregationColumn,
+                        },
                     };
 
                     return anomaly;

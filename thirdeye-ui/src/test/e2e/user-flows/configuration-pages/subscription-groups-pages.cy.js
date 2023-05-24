@@ -29,10 +29,7 @@ describe("configuration subscription groups pages", () => {
             url: "http://localhost:7004/api/subscription-groups/all",
         });
         // Clear out any existing alerts
-        cy.request({
-            method: "DELETE",
-            url: "http://localhost:7004/api/alerts/all",
-        });
+        cy.resetAlerts();
         cy.request({
             method: "POST",
             url: "http://localhost:7004/api/alerts",
@@ -139,6 +136,27 @@ describe("configuration subscription groups pages", () => {
         cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
     });
 
+    it("user goes to edit page from subscription group details page", () => {
+        cy.getByDataTestId(TEST_IDS.TABLE)
+            .find("a")
+            .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
+            .click();
+
+        /**
+         * In Github Action environment, slow data response may trigger after
+         * button click will cause reroute back to old page so wait for it to finish
+         */
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(500);
+        cy.get("button").contains("Edit").click();
+
+        // Should match something like `/configuration/subscription-groups/44485/update/details`
+        cy.url().should(
+            "match",
+            /.*\/configuration\/subscription-groups\/\d.*\/update/
+        );
+    });
+
     it("user can create subscription group with an alert", () => {
         cy.getByDataTestId("create-menu-button").click();
 
@@ -159,28 +177,23 @@ describe("configuration subscription groups pages", () => {
         cy.get("h4").contains("test-subscription-group").should("be.visible");
     });
 
-    it("user goes to edit page from subscription group details page", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find("a")
-            .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
-            .click();
-        cy.get("button").contains("Edit").click();
-
-        // Should match something like `/configuration/subscription-groups/44485/update/details`
-        cy.url().should(
-            "match",
-            /.*\/configuration\/subscription-groups\/\d.*\/update/
-        );
-    });
-
     it("user can delete subscription group from details page", () => {
         cy.getByDataTestId(TEST_IDS.TABLE)
             .find("a")
             .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
             .click();
+
+        /**
+         * In Github Action environment, slow data response may trigger after
+         * button click will cause reroute back to old page so wait for it to finish
+         */
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(500);
+
         cy.get("button").contains("Delete").click();
         // Click confirm button in the dialog
-        cy.get("[role='dialog']").contains("Confirm").click();
+        // In Github env, the dialog takes a long time to show up
+        cy.get("button .MuiButton-label").contains("Confirm").click();
         cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
     });
 });

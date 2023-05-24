@@ -24,4 +24,6 @@ public interface EnumerationItemManager extends AbstractManager<EnumerationItemD
 
   EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
       final List<String> idKeys);
+
+  void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to);
 }

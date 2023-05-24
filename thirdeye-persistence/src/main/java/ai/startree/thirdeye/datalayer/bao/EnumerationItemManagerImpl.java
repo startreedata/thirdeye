@@ -101,7 +101,8 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     if (idKeys != null && !idKeys.isEmpty()) {
       final EnumerationItemDTO existing = findUsingIdKeys(source, idKeys);
       if (existing != null) {
-        if (!existing.getParams().equals(source.getParams())) {
+        if (!existing.getParams().equals(source.getParams()) ||
+            !existing.getName().equals(source.getName())) {
           /*
            * Overwrite existing params with new params for the same key. The alert is the
            * source of truth.
@@ -176,7 +177,7 @@ public class EnumerationItemManagerImpl extends AbstractManagerImpl<EnumerationI
     return filtered.stream().findFirst().orElse(null);
   }
 
-  private void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
+  public void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
     requireNonNull(from.getId(), "expecting a generated ID");
     requireNonNull(to.getId(), "expecting a generated ID");
     requireNonNull(to.getAlert(), "expecting a valid alert");

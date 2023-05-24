@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +24,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * This class defines the config of a single datasource used in thirdeye
  * Eg: PinotThirdeyeDataSource
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DataSourceDTO extends AbstractDTO {
 
   private String name;
   private String type;
+  private Map<String, String> defaultQueryOptions = new HashMap<>();
   private Map<String, Object> properties = new HashMap<>();
   private List<DataSourceMetaBean> metaList = new ArrayList<>();
 
@@ -71,5 +74,15 @@ public class DataSourceDTO extends AbstractDTO {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
+  }
+
+  public Map<String, String> getDefaultQueryOptions() {
+    return defaultQueryOptions;
+  }
+
+  public DataSourceDTO setDefaultQueryOptions(
+      final Map<String, String> defaultQueryOptions) {
+    this.defaultQueryOptions = defaultQueryOptions;
+    return this;
   }
 }

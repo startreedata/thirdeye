@@ -12,7 +12,7 @@
  * the License.
  */
 
-package ai.startree.thirdeye.enumerationitem;
+package ai.startree.thirdeye.datalayer.core;
 
 import static java.util.stream.Collectors.toList;
 

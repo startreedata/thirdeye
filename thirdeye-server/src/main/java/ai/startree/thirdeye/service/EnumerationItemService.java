@@ -19,7 +19,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.enumerationitem.EnumerationItemDeleter;
+import ai.startree.thirdeye.datalayer.core.EnumerationItemDeleter;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;

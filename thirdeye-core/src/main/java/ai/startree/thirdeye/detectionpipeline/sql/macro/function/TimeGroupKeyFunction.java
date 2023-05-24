@@ -13,14 +13,18 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.joda.time.Period;
 
 /**
@@ -72,12 +76,27 @@ public class TimeGroupKeyFunction implements MacroFunction {
         "__timeGroupKey macro requires 4 parameters. Eg: __timeGroupKey(timeColumn, 'timeFormat', 'granularity', timeGroupAlias)");
     String timeColumn = macroParams.get(0);
     String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
-    final Period granularity = isoPeriod(context.getLiteralUnquoter().apply(macroParams.get(2)));
+    final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
+    final Period granularity = isoPeriod(granularityText);
     final String timeGroupAlias = macroParams.get(3);
 
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      // use directly an exact bucket time column if available
+      final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getTimeColumns()).orElse(
+              Collections.emptyList())
+          .stream()
+          .filter(c -> c.getGranularity() != null && c.getGranularity().equals(granularityText))
+          // assume timezone is UTC TODO CYRIL IMPLEMENT TIMEZONE SUPPORT
+          // assume format is epoch milliseconds TODO CYRIL IMPLEMENT SUPPORT FOR OTHER FORMATS
+          .findFirst()
+          .map(TimeColumnApi::getName)
+          .map(context.getIdentifierQuoter());
+      if (exactBucketTimeColumn.isPresent()) {
+        return exactBucketTimeColumn.get();
+      }
+      // else use the main time column
       timeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
       timeColumnFormat = datasetConfigDTO.getTimeFormat();
     }

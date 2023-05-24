@@ -23,6 +23,7 @@ import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.joda.time.Period;
 
 public class TimeGroupFunction implements MacroFunction {
@@ -48,16 +49,15 @@ public class TimeGroupFunction implements MacroFunction {
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
-      // use directly an exact bucket time column if available
-      final String exactBucketTimeColumn = optional(datasetConfigDTO.getGranularityToBucketTimeColumn())
-          .map(m -> m.get(granularityText)).orElse(null);
-      if (exactBucketTimeColumn != null) {
-        return context.getIdentifierQuoter().apply(exactBucketTimeColumn);
+      final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getGranularityToBucketTimeColumn())
+          .map(m -> m.get(granularityText))
+          .map(context.getIdentifierQuoter());
+      if (exactBucketTimeColumn.isPresent()) {
+        return exactBucketTimeColumn.get();
       }
-      // else use the main time column
-      final String quotedTimeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
+      final String mainTimeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
       return context.getSqlExpressionBuilder()
-          .getTimeGroupExpression(quotedTimeColumn,
+          .getTimeGroupExpression(mainTimeColumn,
               datasetConfigDTO.getTimeFormat(),
               granularity,
               datasetConfigDTO.getTimeUnit().toString(),

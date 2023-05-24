@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.joda.time.Period;
 
 /**
@@ -81,10 +82,11 @@ public class TimeGroupKeyFunction implements MacroFunction {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
       // use directly an exact bucket time column if available
-      final String exactBucketTimeColumn = optional(datasetConfigDTO.getGranularityToBucketTimeColumn())
-          .map(m -> m.get(granularityText)).orElse(null);
-      if (exactBucketTimeColumn != null) {
-        return context.getIdentifierQuoter().apply(exactBucketTimeColumn);
+      final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getGranularityToBucketTimeColumn())
+          .map(m -> m.get(granularityText))
+          .map(context.getIdentifierQuoter());
+      if (exactBucketTimeColumn.isPresent()) {
+        return exactBucketTimeColumn.get();
       }
       // else use the main time column
       timeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());

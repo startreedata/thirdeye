@@ -16,12 +16,12 @@ package ai.startree.thirdeye.resources;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
-import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -66,18 +66,18 @@ public class MaintenanceResource {
 
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
-  private final SubscriptionGroupManager subscriptionGroupManager;
   private final AuthorizationManager authorizationManager;
+  private final EnumerationItemMaintainer enumerationItemMaintainer;
 
   @Inject
   public MaintenanceResource(final EnumerationItemManager enumerationItemManager,
       final AnomalyManager anomalyManager,
-      final SubscriptionGroupManager subscriptionGroupManager,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final EnumerationItemMaintainer enumerationItemMaintainer) {
     this.enumerationItemManager = enumerationItemManager;
     this.anomalyManager = anomalyManager;
-    this.subscriptionGroupManager = subscriptionGroupManager;
     this.authorizationManager = authorizationManager;
+    this.enumerationItemMaintainer = enumerationItemMaintainer;
   }
 
   @POST
@@ -88,8 +88,7 @@ public class MaintenanceResource {
   public Response migrateEnumerationItems(
       @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
       @FormParam("from") final long fromId,
-      @FormParam("to") final long toId,
-      @FormParam("dryRun") final boolean dryRun
+      @FormParam("to") final long toId
 
   ) {
     final EnumerationItemDTO from = enumerationItemManager.findById(fromId);
@@ -98,9 +97,8 @@ public class MaintenanceResource {
     final EnumerationItemDTO to = enumerationItemManager.findById(toId);
     authorizationManager.ensureCanDelete(principal, to);
 
-    enumerationItemManager.migrate(from, to);
-    enumerationItemManager.delete(from);
-    logDeleteOperation(from, principal, dryRun);
+    enumerationItemMaintainer.migrateAndRemove(from, to);
+    logDeleteOperation(from, principal, false);
 
     return Response.ok().build();
   }

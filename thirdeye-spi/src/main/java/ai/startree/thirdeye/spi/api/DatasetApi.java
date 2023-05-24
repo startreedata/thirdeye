@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
 @JsonInclude(Include.NON_NULL)
 public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
@@ -50,14 +49,21 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
   private AuthorizationConfigurationApi auth;
 
   /**
-   * Maintain a map of (granularity, timeBucketColumnName).
-   * The timeBucketColumnName column should contain time buckets in milliseconds that
-   * correspond to the granularity.
+   * List of timeColumn metadata.
    * This info is used to optimize generated queries.
    * For instance
-   * {"PT5M": "timeBucket5min", "PT1H": "timeBucket1hour"}
+   * [ {
+   *   "name": "timeBucket1hour",
+   *   "granularity": "PT1H",
+   *   "timezone: "UTC"
+   *   },
+   *   {
+   *   "name": "timeBucket5minute",
+   *   "granularity": "PT5M"
+   *   },
+   * ]
    */
-  private Map<String, String> granularityToBucketTimeColumn;
+  private List<TimeColumnApi> timeColumns;
 
   public Long getId() {
     return id;
@@ -179,13 +185,13 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
     return this;
   }
 
-  public Map<String, String> getGranularityToBucketTimeColumn() {
-    return granularityToBucketTimeColumn;
+  public List<TimeColumnApi> getTimeColumns() {
+    return timeColumns;
   }
 
-  public DatasetApi setGranularityToBucketTimeColumn(
-      final Map<String, String> granularityToBucketTimeColumn) {
-    this.granularityToBucketTimeColumn = granularityToBucketTimeColumn;
+  public DatasetApi setTimeColumns(
+      final List<TimeColumnApi> timeColumns) {
+    this.timeColumns = timeColumns;
     return this;
   }
 }

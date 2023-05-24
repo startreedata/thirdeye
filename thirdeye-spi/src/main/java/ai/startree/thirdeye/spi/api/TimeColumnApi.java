@@ -13,9 +13,6 @@
  */
 package ai.startree.thirdeye.spi.api;
 
-import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
-
-import ai.startree.thirdeye.spi.detection.TimeSpec;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.time.Duration;
@@ -24,9 +21,23 @@ import java.time.Duration;
 public class TimeColumnApi {
 
   private String name;
+  /**
+   * Exists because format is an incomplete definition of the time format.
+   * Eg for EPOCH_MILLIS, format=EPOCH and Duration=1ms.
+   * Do not confuse with granularity.
+   * TODO cyril refactor to simplify TimeSpec/TimeGranularity
+   */
   private Duration interval;
-  private String format = TimeSpec.SINCE_EPOCH_FORMAT;
-  private String timezone = DEFAULT_CHRONOLOGY.getZone().toString();
+  private String format;
+  private String timezone;
+  /**
+   * Granularity of the measurements.
+   * For instance, a time column can be in format epoch millis, but only have value corresponding to
+   * buckets of 1 minute.
+   * In this case, granularity would be 1-minute = PT1M.
+   */
+  // TODO CYRIL USE A Period - introduce jackson joda
+  private String granularity;
 
   public String getName() {
     return name;
@@ -61,6 +72,15 @@ public class TimeColumnApi {
 
   public TimeColumnApi setTimezone(final String timezone) {
     this.timezone = timezone;
+    return this;
+  }
+
+  public String getGranularity() {
+    return granularity;
+  }
+
+  public TimeColumnApi setGranularity(final String granularity) {
+    this.granularity = granularity;
     return this;
   }
 }

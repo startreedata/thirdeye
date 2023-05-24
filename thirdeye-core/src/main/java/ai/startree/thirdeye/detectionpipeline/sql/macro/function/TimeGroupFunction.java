@@ -18,9 +18,11 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -49,8 +51,14 @@ public class TimeGroupFunction implements MacroFunction {
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
-      final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getGranularityToBucketTimeColumn())
-          .map(m -> m.get(granularityText))
+      final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getTimeColumns()).orElse(
+              Collections.emptyList())
+          .stream()
+          .filter(c -> c.getGranularity() != null && c.getGranularity().equals(granularityText))
+          // assume timezone is UTC TODO CYRIL IMPLEMENT COMPLETE TIMEZONE SUPPORT
+          // assume format is epoch milliseconds TODO CYRIL IMPLEMENT SUPPORT FOR OTHER FORMATS
+          .findFirst()
+          .map(TimeColumnApi::getName)
           .map(context.getIdentifierQuoter());
       if (exactBucketTimeColumn.isPresent()) {
         return exactBucketTimeColumn.get();

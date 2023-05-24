@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,14 +43,21 @@ public class DatasetConfigDTO extends AbstractDTO {
   private Boolean active;
   private List<MetricConfigDTO> metrics;
   /**
-   * Maintain a map of (granularity, timeBucketColumnName).
-   * The timeBucketColumnName column should contain time buckets in milliseconds that
-   * correspond to the granularity.
+   * List of timeColumn metadata.
    * This info is used to optimize generated queries.
    * For instance
-   * {"PT5M": "timeBucket5min", "PT1H": "timeBucket1hour"}
+   * [ {
+   *   "name": "timeBucket1hour",
+   *   "granularity": "PT1H",
+   *   "timezone: "UTC"
+   *   },
+   *   {
+   *   "name": "timeBucket5minute",
+   *   "granularity": "PT5M"
+   *   },
+   * ]
    */
-  private Map<String, String> granularityToBucketTimeColumn;
+  private List<TimeColumnApi> timeColumns;
 
   /**
    * Expected delay for data to be complete. In ISO 8601. Eg P1D
@@ -395,13 +403,13 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public Map<String, String> getGranularityToBucketTimeColumn() {
-    return granularityToBucketTimeColumn;
+  public List<TimeColumnApi> getTimeColumns() {
+    return timeColumns;
   }
 
-  public DatasetConfigDTO setGranularityToBucketTimeColumn(
-      final Map<String, String> granularityToBucketTimeColumn) {
-    this.granularityToBucketTimeColumn = granularityToBucketTimeColumn;
+  public DatasetConfigDTO setTimeColumns(
+      final List<TimeColumnApi> timeColumns) {
+    this.timeColumns = timeColumns;
     return this;
   }
 }

@@ -42,11 +42,11 @@ public interface DatasetMapper {
         .setDataSource(optional(api.getDataSource()).map(DataSourceApi::getName).orElse(null))
         .setDimensions(api.getDimensions())
         .setRcaExcludedDimensions(api.getRcaExcludedDimensions())
-        .setGranularityToBucketTimeColumn(api.getGranularityToBucketTimeColumn())
+        .setTimeColumns(api.getTimeColumns())
         ;
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
-      updateTimeGranularityOnDataset(dto, timeColumn);
+      updateTimeSpecOnDataset(dto, timeColumn);
       optional(timeColumn.getFormat()).ifPresent(dto::setTimeFormat);
       optional(timeColumn.getTimezone()).ifPresent(dto::setTimezone);
     });
@@ -71,7 +71,7 @@ public interface DatasetMapper {
         .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null))
         .setAuth(optional(dto.getAuth())
             .map(ApiBeanMapper::toApi).orElse(null))
-        .setGranularityToBucketTimeColumn(dto.getGranularityToBucketTimeColumn());
+        .setTimeColumns(dto.getTimeColumns());
     optional(dto.getRcaExcludedDimensions()).ifPresent(datasetApi::setRcaExcludedDimensions);
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
         new TimeColumnApi()
@@ -85,7 +85,7 @@ public interface DatasetMapper {
   }
 
   @VisibleForTesting
-  static void updateTimeGranularityOnDataset(final DatasetConfigDTO dto,
+  static void updateTimeSpecOnDataset(final DatasetConfigDTO dto,
       final TimeColumnApi timeColumn) {
     /*
      * TODO cyril fixme. best would be to use a ISO-8601 period instead of a Duration, or directly expose the TimeDuration in the API.

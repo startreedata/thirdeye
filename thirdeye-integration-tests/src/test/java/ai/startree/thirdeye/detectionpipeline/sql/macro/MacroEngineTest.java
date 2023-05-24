@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.IntegrationTestUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlLanguage;
+import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
@@ -25,6 +26,7 @@ import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
@@ -264,7 +266,10 @@ public class MacroEngineTest {
         HOUR_PERIOD);
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
         .setDataset(TABLE_NAME)
-        .setGranularityToBucketTimeColumn(Map.of(HOUR_PERIOD.toString(), "hourlyBuckets"));
+        .setTimeColumns(
+            List.of(
+                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets"))
+        );
     final String expectedQuery = "SELECT \"hourlyBuckets\" FROM tableName";
 
     final Map<String, String> expectedProperties = ImmutableMap.of(
@@ -285,7 +290,8 @@ public class MacroEngineTest {
         "UNUSED_ALIAS");
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
         .setDataset(TABLE_NAME)
-        .setGranularityToBucketTimeColumn(Map.of(HOUR_PERIOD.toString(), "hourlyBuckets"));
+        .setTimeColumns(List.of(
+            new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets")));
     final String expectedQuery = "SELECT COUNT(*) FROM tableName GROUP BY \"hourlyBuckets\"";
 
     final Map<String, String> expectedProperties = ImmutableMap.of();

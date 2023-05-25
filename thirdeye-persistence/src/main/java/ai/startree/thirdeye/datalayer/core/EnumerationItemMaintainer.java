@@ -14,6 +14,8 @@
 
 package ai.startree.thirdeye.datalayer.core;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
+import static ai.startree.thirdeye.spi.util.SpiUtils.enumerationItemRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -25,7 +27,6 @@ import ai.startree.thirdeye.spi.datalayer.EnumerationItemFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.google.common.annotations.VisibleForTesting;
@@ -60,27 +61,9 @@ public class EnumerationItemMaintainer {
     this.enumerationItemDeleter = enumerationItemDeleter;
   }
 
-  public static AlertDTO alertRef(final Long alertId) {
-    final AlertDTO alert = new AlertDTO();
-    alert.setId(alertId);
-    return alert;
-  }
-
   public static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
     return Objects.equals(o1.getName(), o2.getName())
         && Objects.equals(o1.getParams(), o2.getParams());
-  }
-
-  public static AlertDTO toAlertDTO(final Long alertId) {
-    final AlertDTO alert = new AlertDTO();
-    alert.setId(alertId);
-    return alert;
-  }
-
-  public static EnumerationItemDTO eiRef(final long id) {
-    final EnumerationItemDTO enumerationItemDTO = new EnumerationItemDTO();
-    enumerationItemDTO.setId(id);
-    return enumerationItemDTO;
   }
 
   public static Map<String, Object> key(final EnumerationItemDTO source,
@@ -295,7 +278,7 @@ public class EnumerationItemMaintainer {
 
     anomalyManager.filter(filter).stream()
         .filter(Objects::nonNull)
-        .map(a -> a.setEnumerationItem(eiRef(toId)))
+        .map(a -> a.setEnumerationItem(enumerationItemRef(toId)))
         .forEach(anomalyManager::update);
 
     /* Migrate subscription groups */
@@ -317,7 +300,7 @@ public class EnumerationItemMaintainer {
               .filter(aa -> aa.getEnumerationItem() != null)
               .filter(aa -> fromId.equals(aa.getEnumerationItem().getId())
                   && alertId.equals(aa.getAlert().getId()))
-              .forEach(aa -> aa.setEnumerationItem(eiRef(toId)));
+              .forEach(aa -> aa.setEnumerationItem(enumerationItemRef(toId)));
           subscriptionGroupManager.update(sg);
         });
   }

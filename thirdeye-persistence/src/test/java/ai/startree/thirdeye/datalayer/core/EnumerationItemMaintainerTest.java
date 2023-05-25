@@ -14,7 +14,7 @@
 
 package ai.startree.thirdeye.datalayer.core;
 
-import static ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer.toAlertDTO;
+import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
@@ -50,7 +50,7 @@ public class EnumerationItemMaintainerTest {
 
   private static EnumerationItemDTO sourceEi() {
     return ei("ei1", Map.of("a", 1))
-        .setAlert(toAlertDTO(ALERT_ID));
+        .setAlert(alertRef(ALERT_ID));
   }
 
   private static AnomalyDTO anomaly(final long startTime, final long endTime) {
@@ -155,21 +155,21 @@ public class EnumerationItemMaintainerTest {
     final var sg1 = new SubscriptionGroupDTO()
         .setName("sg1")
         .setAlertAssociations(List.of(new AlertAssociationDto()
-            .setAlert(toAlertDTO(ALERT_ID))
+            .setAlert(alertRef(ALERT_ID))
             .setEnumerationItem(ei1)));
     subscriptionGroupManager.save(sg1);
 
     final var sg2 = new SubscriptionGroupDTO()
         .setName("sg2")
         .setAlertAssociations(List.of(new AlertAssociationDto()
-            .setAlert(toAlertDTO(ALERT_ID))
+            .setAlert(alertRef(ALERT_ID))
             .setEnumerationItem(ei2)));
     subscriptionGroupManager.save(sg2);
 
     final var sg3 = new SubscriptionGroupDTO()
         .setName("sg3")
         .setAlertAssociations(List.of(new AlertAssociationDto()
-            .setAlert(toAlertDTO(5678L))
+            .setAlert(alertRef(5678L))
             .setEnumerationItem(ei1)));
     subscriptionGroupManager.save(sg3);
 
@@ -231,11 +231,11 @@ public class EnumerationItemMaintainerTest {
     enumerationItemManager.save(ei3);
 
     final var ei4 = ei("ei4", Map.of("a", 1))
-        .setAlert(toAlertDTO(5678L));
+        .setAlert(alertRef(5678L));
     enumerationItemManager.save(ei4);
 
     final var ei5 = ei("ei5", Map.of("a", 2))
-        .setAlert(toAlertDTO(5678L));
+        .setAlert(alertRef(5678L));
     enumerationItemManager.save(ei5);
 
     final var ei6 = ei("ei6", Map.of("a", 1));
@@ -254,7 +254,7 @@ public class EnumerationItemMaintainerTest {
   public void testWithAugmentedParamsSameIdKeys() {
     final String key = "key";
     final EnumerationItemDTO source = ei("ei1", Map.of(key, 1))
-        .setAlert(toAlertDTO(ALERT_ID));
+        .setAlert(alertRef(ALERT_ID));
 
     final var ei1 = ei(source.getName(), source.getParams())
         .setAlert(source.getAlert());

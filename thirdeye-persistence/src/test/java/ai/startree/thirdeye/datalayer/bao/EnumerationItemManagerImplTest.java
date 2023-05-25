@@ -14,7 +14,7 @@
 
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer.toAlertDTO;
+import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -43,7 +43,7 @@ public class EnumerationItemManagerImplTest {
 
   private static EnumerationItemDTO sourceEi() {
     return ei("ei1", Map.of("a", 1))
-        .setAlert(toAlertDTO(ALERT_ID));
+        .setAlert(alertRef(ALERT_ID));
   }
 
   private static AnomalyDTO anomaly(final long startTime, final long endTime) {

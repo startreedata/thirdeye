@@ -1,3 +1,11 @@
+## [2.20.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.19.0...thirdeye-ui-2.20.0) (2023-05-25)
+
+
+### Features
+
+* [TE-1545](https://cortexdata.atlassian.net/browse/TE-1545) expose alert description in alert list, details page, and simple create mode ([4e7485683](https://github.com/startreedata/thirdeye/commit/4e74856835ed45e990f86657282e1bb034a7fbb5))
+* [TE-1584](https://cortexdata.atlassian.net/browse/TE-1584) display metric in anomaly card ([7fa29ec34](https://github.com/startreedata/thirdeye/commit/7fa29ec3456979be5182de1b08173234e8495b12))
+
 ## [2.19.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.18.0...thirdeye-ui-2.19.0) (2023-05-24)
 
 

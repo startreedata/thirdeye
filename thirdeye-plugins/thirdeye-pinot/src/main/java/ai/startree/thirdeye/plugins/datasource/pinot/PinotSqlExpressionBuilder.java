@@ -20,11 +20,12 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -210,7 +211,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
    */
   private static class TimeFormat {
 
-    private static final Map<String, TimeFormat> cache = new HashMap<>();
+    // a concurrent map is necessary because Map.computeIfAbsent used below could raise ConcurrentModificationException
+    private static final ConcurrentMap<String, TimeFormat> cache = new ConcurrentHashMap<>();
 
     private final String dateTimeConvertString;
     private final String dateTruncString;

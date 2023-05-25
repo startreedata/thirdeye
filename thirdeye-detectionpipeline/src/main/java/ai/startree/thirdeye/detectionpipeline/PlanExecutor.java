@@ -120,7 +120,8 @@ public class PlanExecutor implements AutoCloseable {
     return results;
   }
 
-  private ApplicationContext createApplicationContext() {
+  @VisibleForTesting
+  protected ApplicationContext createApplicationContext() {
     return new ApplicationContext(
         dataSourceCache,
         detectionRegistry,

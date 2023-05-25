@@ -30,8 +30,6 @@ public class AlertInsightsProviderTest {
   private final static long JAN_1_2022_11PM = 1641078000000L;
   private final static long JULY_2_2021_0AM = 1625184000000L;
   private final static long JULY_1_2021_4AM = 1625112000000L;
-  private final static long JANUARY_1_2021_0AM = 1609459200000L;
-  private final static long DECEMBER_31_2020_11PM = 1609455600000L;
   private final static long JANUARY_1_2019_OAM = 1546300800000L;
   private final static Period DAILY_GRANULARITY = Period.days(1);
   public static final DateTimeZone PARIS_TIMEZONE = DateTimeZone.forID("Europe/Paris");

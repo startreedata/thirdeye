@@ -21,6 +21,7 @@ import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -53,9 +54,6 @@ public class PlanExecutor implements AutoCloseable {
 
   private final ExecutorService subTaskExecutor;
 
-  @VisibleForTesting
-  final ApplicationContext applicationContext;
-
   @Inject
   public PlanExecutor(final PlanNodeFactory planNodeFactory,
       final DataSourceCache dataSourceCache,
@@ -76,8 +74,6 @@ public class PlanExecutor implements AutoCloseable {
 
     final int nThreads = detectionPipelineConfiguration.getForkjoin().getParallelism();
     subTaskExecutor = Executors.newFixedThreadPool(nThreads, threadsNamed("fork-join-%d"));
-
-    applicationContext = createApplicationContext();
   }
 
   @VisibleForTesting
@@ -130,7 +126,8 @@ public class PlanExecutor implements AutoCloseable {
         detectionRegistry,
         postProcessorRegistry,
         eventManager,
-        datasetConfigManager,
+        /* Use a caching instance for pipeline execution. Ensures dataset entity is consistent across nodes and is only fetched once. */
+        new CachedDatasetConfigManager(datasetConfigManager),
         subTaskExecutor,
         detectionPipelineConfiguration,
         enumerationItemMaintainer);
@@ -163,7 +160,7 @@ public class PlanExecutor implements AutoCloseable {
       final DetectionPipelineContext context) throws Exception {
 
     /* Set Application Context */
-    context.setApplicationContext(applicationContext);
+    context.setApplicationContext(createApplicationContext());
 
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(

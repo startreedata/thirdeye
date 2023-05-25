@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import argparse
 
 from setup_local.launch_backend import setup_and_launch_thirdeye_backend
 from setup_local.launch_frontend import launch_thirdeye_frontend
@@ -26,6 +27,9 @@ from setup_local.launch_frontend import launch_thirdeye_frontend
 PINOT = 'apachepinot/pinot:0.12.1'
 PINOT_ARM64 = 'apachepinot/pinot:0.12.1-arm64'
 TE_UI_DIR = 'thirdeye-ui'
+
+args_parser = argparse.ArgumentParser()
+args_parser.add_argument('-r', '--run-only', default=False, help='Use cypress run instead of open', action='store_true')
 
 def get_path_to_thirdeye_ui():
     path = Path.cwd()
@@ -105,9 +109,17 @@ if __name__ == '__main__':
             backend_process = setup_and_launch_thirdeye_backend(temp_dir_path)
             frontend_process = launch_thirdeye_frontend(get_path_to_thirdeye_ui())
 
+            args = args_parser.parse_args()
             print('[Setup Script] Sleeping 60 seconds wait for backend and frontend', flush=True)
             time.sleep(60)
-            subprocess.run(['npx', 'cypress', 'open'],
+
+            npx_command = ['npx', 'cypress']
+            if args.run_only:
+                npx_command.append('run')
+            else:
+                npx_command.append('open')
+
+            subprocess.run(npx_command,
                            cwd=get_path_to_thirdeye_ui(),
                            check=True)
     finally:

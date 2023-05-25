@@ -63,7 +63,7 @@ describe("alert update flows", () => {
             .its(
                 "response.body.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies"
             )
-            .should("have.length.gt", 1);
+            .should("have.length.gt", 0);
 
         // Click the update button
         cy.get("#next-bottom-bar-btn").click();

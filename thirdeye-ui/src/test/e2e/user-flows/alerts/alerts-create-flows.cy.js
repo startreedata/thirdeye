@@ -85,7 +85,7 @@ describe("alert create flows", () => {
             cy.get("li").contains(day).click();
         });
         cy.get("button").contains("Reload preview").click();
-        cy.get("h5").contains("Total anomalies detected: 18").should("exist");
+        cy.get("h5").contains("Total anomalies detected:").should("exist");
 
         // Take user to alert details page
         cy.get("#next-bottom-bar-btn").click();

@@ -614,3 +614,21 @@ export const getTimePaddingForGranularity = (
 
     return "P2W";
 };
+
+export const getMetricString = (
+    alert: EditableAlert,
+    anomaly: Anomaly
+): string => {
+    if (
+        alert.templateProperties.aggregationFunction &&
+        alert.templateProperties.aggregationColumn
+    ) {
+        return `${alert.templateProperties.aggregationFunction}(${alert.templateProperties.aggregationColumn})`;
+    }
+
+    if (anomaly.metadata.metric?.name) {
+        return anomaly.metadata.metric?.name;
+    }
+
+    return "";
+};

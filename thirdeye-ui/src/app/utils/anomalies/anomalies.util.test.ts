@@ -13,6 +13,7 @@
  * the License.
  */
 import i18n from "i18next";
+import { Alert } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import {
@@ -22,6 +23,7 @@ import {
     filterAnomaliesByTime,
     getAnomaliesAtTime,
     getAnomalyName,
+    getMetricString,
     getTimePaddingForGranularity,
     getUiAnomalies,
     getUiAnomaly,
@@ -220,7 +222,24 @@ describe("Anomalies Util", () => {
         expect(getTimePaddingForGranularity("P1W")).toEqual("P1M");
         expect(getTimePaddingForGranularity("P3M")).toEqual("P2W");
     });
+
+    it("getMetricString should return appropriate string for alert and anomaly", () => {
+        expect(getMetricString(mockAlert1, mockAnomaly1)).toEqual("bar(baz)");
+        expect(getMetricString(mockAlert2, mockAnomaly1)).toEqual("foo");
+        expect(getMetricString(mockAlert2, mockAnomaly2)).toEqual("");
+    });
 });
+
+const mockAlert1 = {
+    templateProperties: {
+        aggregationFunction: "bar",
+        aggregationColumn: "baz",
+    },
+} as unknown as Alert;
+
+const mockAlert2 = {
+    templateProperties: {},
+} as Alert;
 
 const mockEmptyUiAnomaly = {
     id: -1,
@@ -258,6 +277,11 @@ const mockAnomaly1 = {
         id: 6,
         name: "testNameAlert6",
     },
+    metadata: {
+        metric: {
+            name: "foo",
+        },
+    },
 } as Anomaly;
 
 const mockAnomaly2 = {
@@ -267,6 +291,7 @@ const mockAnomaly2 = {
     alert: {
         id: 10,
     },
+    metadata: {},
 } as Anomaly;
 
 const mockAnomaly3 = {

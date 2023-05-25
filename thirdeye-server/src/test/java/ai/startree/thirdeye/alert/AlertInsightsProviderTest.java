@@ -16,6 +16,7 @@ package ai.startree.thirdeye.alert;
 import static ai.startree.thirdeye.alert.AlertInsightsProvider.defaultChartTimeframe;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -43,12 +44,11 @@ public class AlertInsightsProviderTest {
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
         DAILY_GRANULARITY, Period.ZERO);
 
-    final Interval expected = new Interval(
-        // one year from end of bucket
-        JANUARY_1_2021_0AM,
-        // end of bucket
-        JANUARY_2_2022_0AM,
-        DateTimeZone.UTC);
+    // end of end bucket
+    final DateTime expectedEnd = new DateTime(JANUARY_2_2022_0AM, DateTimeZone.UTC);
+    // 6 months from start of end bucket
+    final DateTime expectedStart = expectedEnd.minus(DAILY_GRANULARITY).minus(Period.months(6));
+    final Interval expected = new Interval(expectedStart, expectedEnd);
     assertThat(res).isEqualTo(expected);
   }
 
@@ -60,12 +60,11 @@ public class AlertInsightsProviderTest {
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
         DAILY_GRANULARITY, Period.days(1));
 
-    final Interval expected = new Interval(
-        // one year from end of bucket
-        JANUARY_1_2021_0AM,
-        // end of bucket = JANUARY_2_2022_0AM + delay
-        JANUARY_3_2022_0AM,
-        DateTimeZone.UTC);
+    // end of bucket = JANUARY_2_2022_0AM then delay is added
+    final DateTime expectedEnd = new DateTime(JANUARY_3_2022_0AM, DateTimeZone.UTC);
+    // 6 months from start of end bucket
+    final DateTime expectedStart = new DateTime(JANUARY_2_2022_0AM, DateTimeZone.UTC).minus(DAILY_GRANULARITY).minus(Period.months(6));
+    final Interval expected = new Interval(expectedStart, expectedEnd);
     assertThat(res).isEqualTo(expected);
   }
 
@@ -77,9 +76,12 @@ public class AlertInsightsProviderTest {
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
         DAILY_GRANULARITY, Period.ZERO);
 
-    final Interval expected = new Interval(DECEMBER_31_2020_11PM,
-        JAN_1_2022_11PM,
-        PARIS_TIMEZONE);
+
+    // end of end bucket
+    final DateTime expectedEnd = new DateTime(JAN_1_2022_11PM, PARIS_TIMEZONE);
+    // 6 months from start of end bucket
+    final DateTime expectedStart = expectedEnd.minus(DAILY_GRANULARITY).minus(Period.months(6));
+    final Interval expected = new Interval(expectedStart, expectedEnd);
     assertThat(res).isEqualTo(expected);
   }
 
@@ -98,11 +100,13 @@ public class AlertInsightsProviderTest {
   @Test
   public void testDefaultChartTimeframe() {
     // test all possible output results
-    assertThat(defaultChartTimeframe(Period.minutes(15))).isEqualTo(Period.months(1));
-    assertThat(defaultChartTimeframe(Period.hours(1))).isEqualTo(Period.months(6));
-    assertThat(defaultChartTimeframe(Period.days(1))).isEqualTo(Period.years(1));
-    assertThat(defaultChartTimeframe(Period.days(14))).isEqualTo(Period.years(2));
-    assertThat(defaultChartTimeframe(Period.weeks(15))).isEqualTo(Period.years(4));
+    assertThat(defaultChartTimeframe(Period.minutes(1))).isEqualTo(Period.days(2));
+    assertThat(defaultChartTimeframe(Period.minutes(5))).isEqualTo(Period.days(7));
+    assertThat(defaultChartTimeframe(Period.minutes(15))).isEqualTo(Period.days(14));
+    assertThat(defaultChartTimeframe(Period.hours(1))).isEqualTo(Period.months(2));
+    assertThat(defaultChartTimeframe(Period.days(1))).isEqualTo(Period.months(6));
+    assertThat(defaultChartTimeframe(Period.days(14))).isEqualTo(Period.years(3));
+    assertThat(defaultChartTimeframe(Period.weeks(15))).isEqualTo(Period.years(3));
 
     // test input contains variable length period units: month and year
     assertThat(defaultChartTimeframe(Period.months(2))).isEqualTo(Period.years(4));

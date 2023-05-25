@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -124,16 +125,31 @@ public class EnumerationItemMaintainer {
   }
 
   public List<EnumerationItemDTO> sync(
-      final List<EnumerationItemDTO> enumerationItems, final List<String> idKeys,
+      final List<EnumerationItemDTO> enumerationItems,
+      final List<String> idKeys,
       final Long alertId) {
+    final List<EnumerationItemDTO> existingEnumerationItems = enumerationItemManager.filter(
+        new EnumerationItemFilter().setAlertId(alertId));
+
     return enumerationItems.stream()
         .map(source -> source.setAlert(alertRef(alertId)))
-        .map(source -> findExistingOrCreate(source, idKeys))
+        .map(source -> findExistingOrCreate(source, idKeys, existingEnumerationItems))
         .collect(toList());
   }
 
-  public EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
+  @VisibleForTesting
+  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
       final List<String> idKeys) {
+    final List<EnumerationItemDTO> enumerationItemsForAlert = enumerationItemManager.filter(
+        new EnumerationItemFilter().setAlertId(
+            source.getAlert().getId()));
+
+    return findExistingOrCreate(source, idKeys, enumerationItemsForAlert);
+  }
+
+  public EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
+      final List<String> idKeys,
+      final List<EnumerationItemDTO> existingEnumerationItems) {
     requireNonNull(source.getName(), "enumeration item name does not exist!");
     requireNonNull(source.getAlert(), "enumeration item needs a source alert!");
 
@@ -145,7 +161,7 @@ public class EnumerationItemMaintainer {
      * create. Either way, skip the rest of the logic including migration
      */
     if (idKeys != null && !idKeys.isEmpty()) {
-      final EnumerationItemDTO existing = findUsingIdKeys(source, idKeys);
+      final EnumerationItemDTO existing = findUsingIdKeys(source, idKeys, existingEnumerationItems);
       if (existing != null) {
         if (!existing.getParams().equals(source.getParams()) ||
             !existing.getName().equals(source.getName())) {
@@ -206,12 +222,20 @@ public class EnumerationItemMaintainer {
     return source;
   }
 
-  public EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
+  @VisibleForTesting
+  EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
       final List<String> idKeys) {
-    final EnumerationItemFilter filter = new EnumerationItemFilter().setAlertId(
-        source.getAlert().getId());
+    final List<EnumerationItemDTO> enumerationItemsForAlert = enumerationItemManager.filter(
+        new EnumerationItemFilter().setAlertId(
+            source.getAlert().getId()));
+    return findUsingIdKeys(source, idKeys, enumerationItemsForAlert);
+  }
+
+  private EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
+      final List<String> idKeys,
+      final List<EnumerationItemDTO> existingEnumerationItems) {
     final var sourceKey = key(source, idKeys);
-    final List<EnumerationItemDTO> filtered = enumerationItemManager.filter(filter).stream()
+    final List<EnumerationItemDTO> filtered = existingEnumerationItems.stream()
         .filter(e -> sourceKey.equals(key(e, idKeys)))
         .collect(toList());
 

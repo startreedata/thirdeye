@@ -250,6 +250,12 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
+    /*
+     * We don't want to delete subscription groups associated with the alert. Therefore, we don't
+     * also want to delete enumeration items associated with the alert since they are associated
+     * with subscription groups. This is taken care automatically after the reset when the pipeline
+     * is executed and the enumerator operator cleans the existing enumeration items
+     */
     alertDeleter.deleteAssociatedAnomalies(dto.getId());
     final AlertDTO resetAlert = alertCreater.reset(dto);
 
@@ -273,6 +279,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
-    return analyticsService.computeAnomalyStats(Predicate.AND(predicates.toArray(Predicate[]::new)));
+    return analyticsService.computeAnomalyStats(
+        Predicate.AND(predicates.toArray(Predicate[]::new)));
   }
 }

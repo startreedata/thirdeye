@@ -14,6 +14,8 @@
 
 package ai.startree.thirdeye.datalayer.core;
 
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.enumerationItemRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -30,6 +32,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import ai.startree.thirdeye.spi.util.ExceptionHandledRunnable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -38,7 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import org.slf4j.Logger;
@@ -55,7 +58,8 @@ public class EnumerationItemMaintainer {
   private final EnumerationItemDeleter enumerationItemDeleter;
 
   /* To perform clean up operations */
-  private final Executor executor = Executors.newSingleThreadExecutor();
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor(
+      threadsNamed("ei-maintainer-%d"));
 
   @Inject
   public EnumerationItemMaintainer(final EnumerationItemManager enumerationItemManager,
@@ -126,10 +130,12 @@ public class EnumerationItemMaintainer {
         .map(source -> findExistingOrCreate(source, idKeys, existing))
         .collect(toList());
 
-    performCleanup(existing, synced);
-
-    executor.execute(() -> performCleanup(existing, synced));
+    runAsync(() -> performCleanup(existing, synced));
     return synced;
+  }
+
+  private void runAsync(final Runnable runnable) {
+    executorService.submit(new ExceptionHandledRunnable(runnable));
   }
 
   private void performCleanup(final List<EnumerationItemDTO> existing,
@@ -332,5 +338,9 @@ public class EnumerationItemMaintainer {
   public void migrateAndRemove(final EnumerationItemDTO from, final EnumerationItemDTO to) {
     migrate(from, to);
     enumerationItemDeleter.delete(from);
+  }
+
+  public void close() throws Exception {
+    shutdownExecutionService(executorService);
   }
 }

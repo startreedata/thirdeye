@@ -23,6 +23,7 @@ import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
+import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.json.ThirdEyeJsonProcessingExceptionMapper;
@@ -73,7 +74,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
    * The integration-tests/tools module will load all the thirdeye jars including datasources
    * making it easier to debug.
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(final String[] args) throws Exception {
     ServerUtils.logJvmSettings();
 
     new ThirdEyeServer().run(args);
@@ -84,10 +85,10 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     bootstrap.setConfigurationSourceProvider(
         new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
             new EnvironmentVariableSubstitutor()));
-    bootstrap.addBundle(new SwaggerBundle<ThirdEyeServerConfiguration>() {
+    bootstrap.addBundle(new SwaggerBundle<>() {
       @Override
       protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
-          ThirdEyeServerConfiguration configuration) {
+          final ThirdEyeServerConfiguration configuration) {
         return configuration.getSwaggerBundleConfiguration();
       }
     });
@@ -118,7 +119,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
     // Expose dropwizard metrics in prometheus compatible format
     if (configuration.getPrometheusConfiguration().isEnabled()) {
-      CollectorRegistry collectorRegistry = new CollectorRegistry();
+      final CollectorRegistry collectorRegistry = new CollectorRegistry();
       collectorRegistry.register(new DropwizardExports(env.metrics()));
       env.admin()
           .addServlet("prometheus", new MetricsServlet(collectorRegistry))
@@ -146,7 +147,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     injector.getInstance(PluginLoader.class).loadPlugins();
   }
 
-  private Managed lifecycleManager(ThirdEyeServerConfiguration config) {
+  private Managed lifecycleManager(final ThirdEyeServerConfiguration config) {
     return new Managed() {
       @Override
       public void start() throws Exception {
@@ -185,6 +186,9 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
         /* Shutdown the Plan Executor threads */
         injector.getInstance(PlanExecutor.class).close();
+
+        /* Shutdown Enumeration Item Maintainer thread */
+        injector.getInstance(EnumerationItemMaintainer.class).close();
       }
     };
   }
@@ -221,7 +225,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       jersey.register(new AuthDynamicFeature(injector.getInstance(AuthFilter.class)));
       jersey.register(RolesAllowedDynamicFeature.class);
       jersey.register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new IllegalStateException("Failed to configure Authentication filter", e);
     }
   }

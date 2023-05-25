@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ThirdEyeUtils.shutdownExecutionService;
-import static ai.startree.thirdeye.util.ThirdEyeUtils.threadsNamed;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 

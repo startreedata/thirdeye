@@ -16,6 +16,7 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
@@ -25,11 +26,15 @@ import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
+import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
+import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
+import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
@@ -44,6 +49,7 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.SecurityDefinition;
 import io.swagger.annotations.SwaggerDefinition;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -74,6 +80,7 @@ public class InternalResource {
   private final TaskDriverConfiguration taskDriverConfiguration;
   private final TaskDriver taskDriver;
   private final SubscriptionGroupFilter subscriptionGroupFilter;
+  private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
 
   @Inject
   public InternalResource(
@@ -85,7 +92,8 @@ public class InternalResource {
       final SubscriptionGroupManager subscriptionGroupManager,
       final TaskDriverConfiguration taskDriverConfiguration,
       final TaskDriver taskDriver,
-      final SubscriptionGroupFilter subscriptionGroupFilter) {
+      final SubscriptionGroupFilter subscriptionGroupFilter,
+      final DetectionPipelineTaskRunner detectionPipelineTaskRunner) {
     this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
@@ -95,6 +103,7 @@ public class InternalResource {
     this.taskDriverConfiguration = taskDriverConfiguration;
     this.taskDriver = taskDriver;
     this.subscriptionGroupFilter = subscriptionGroupFilter;
+    this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
   }
 
   @Path("http-detector")
@@ -117,9 +126,9 @@ public class InternalResource {
   @Path("email/html")
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateHtmlEmail(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @QueryParam("subscriptionGroupId") Long subscriptionGroupManagerById,
-      @QueryParam("reset") Boolean reset) {
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @QueryParam("subscriptionGroupId") final Long subscriptionGroupManagerById,
+      @QueryParam("reset") final Boolean reset) {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
     if (reset == Boolean.TRUE) {
@@ -147,13 +156,13 @@ public class InternalResource {
   @GET
   @Path("package-info")
   @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
-  public Response getPackageInfo(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response getPackageInfo(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
     return Response.ok(PACKAGE).build();
   }
 
   @POST
   @Path("trigger/webhook")
-  public Response triggerWebhook(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response triggerWebhook(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
     final ImmutableMap<String, Object> properties = ImmutableMap.of(
         "url", "http://localhost:8080/internal/webhook"
     );
@@ -168,9 +177,9 @@ public class InternalResource {
 
   @POST
   @Path("notify")
-  public Response notify(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @FormParam("subscriptionGroupId") Long subscriptionGroupId,
-      @QueryParam("reset") Boolean reset) throws Exception {
+  public Response notify(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @FormParam("subscriptionGroupId") final Long subscriptionGroupId,
+      @QueryParam("reset") final Boolean reset) throws Exception {
     ensureExists(subscriptionGroupId, "Query parameter required: alertId !");
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupId);
     if (reset == Boolean.TRUE) {
@@ -184,13 +193,13 @@ public class InternalResource {
   @POST
   @Path("webhook")
   public Response webhookDummy(
-      Object payload,
-      @HeaderParam("X-Signature") String signature
+      final Object payload,
+      @HeaderParam("X-Signature") final String signature
   ) throws Exception {
     log.info("========================= Webhook request ==============================");
     //replace it with relevant secret key acquired during subscription group creation
-    String secretKey = "secretKey";
-    String result = hmacSHA512(payload, secretKey);
+    final String secretKey = "secretKey";
+    final String result = hmacSHA512(payload, secretKey);
     log.info("Header signature: {}", signature);
     log.info("Generated signature: {}", result);
     if (signature != null) {
@@ -203,11 +212,36 @@ public class InternalResource {
 
   @GET
   @Path("worker/id")
-  public Response workerId(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response workerId(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
     if (taskDriverConfiguration.isEnabled()) {
       return Response.ok(taskDriver.getWorkerId()).build();
     } else {
       return Response.ok(-1).build();
     }
+  }
+
+  @Path("run-detection-task-locally")
+  @POST
+  @Timed
+  public Response runTask(
+      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @FormParam("alertId") final Long alertId,
+      @FormParam("start") Long startTime,
+      @FormParam("end") Long endTime
+  ) throws Exception {
+    checkArgument(alertId != null && alertId >= 0);
+    if (endTime == null) {
+      endTime = System.currentTimeMillis();
+    }
+    if (startTime == null) {
+      startTime = endTime - TimeUnit.MINUTES.toMillis(1);
+    }
+
+    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, startTime,
+        endTime);
+
+    detectionPipelineTaskRunner.execute(info, new TaskContext());
+
+    return Response.ok().build();
   }
 }

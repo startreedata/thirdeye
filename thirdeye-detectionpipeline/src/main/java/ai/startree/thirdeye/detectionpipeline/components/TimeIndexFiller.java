@@ -180,7 +180,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
     // some series can be of type Object if the rawData had no value before the join
     // fix: transform these Series of Objects into series of Doubles - incorrect if String series was expected
-    for (String seriesName : filledData.getSeriesNames()) {
+    for (final String seriesName : filledData.getSeriesNames()) {
       Series series = filledData.get(seriesName);
       if (series.type() == OBJECT) {
         filledData.addSeries(seriesName, series.getDoubles());

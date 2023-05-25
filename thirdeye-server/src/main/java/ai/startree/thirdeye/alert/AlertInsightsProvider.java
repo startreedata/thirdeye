@@ -240,23 +240,38 @@ public class AlertInsightsProvider {
       return Period.years(4);
     }
     final long granularityMillis = alertGranularity.toStandardDuration().getMillis();
-    if (granularityMillis < Period.millis(100).toStandardDuration().getMillis()) {
-      return Period.minutes(15);
-    } else if (granularityMillis < Period.seconds(1).toStandardDuration().getMillis()) {
-      return Period.hours(2);
-    } else if (granularityMillis < Period.seconds(15).toStandardDuration().getMillis()) {
+    if (granularityMillis <= Period.millis(10).toStandardDuration().getMillis()) {
+      // for PT0.01S granularity: 2000 points
+      return Period.seconds(20);
+    } else if (granularityMillis <= Period.millis(100).toStandardDuration().getMillis()) {
+      // for PT0.1S granularity: 2400 points
+      return Period.minutes(4);
+    } else if (granularityMillis <= Period.seconds(1).toStandardDuration().getMillis()) {
+      // for PT1S granularity: 1800 points
+      return Period.minutes(30);
+    } else if (granularityMillis <= Period.seconds(15).toStandardDuration().getMillis()) {
+      // for PT15S granularity: 1920 points
+      return Period.hours(8);
+    } else if (granularityMillis <= Period.minutes(1).toStandardDuration().getMillis()) {
+      // for PT1M granularity: 2880 points
       return Period.days(2);
-    } else if (granularityMillis < Period.minutes(1).toStandardDuration().getMillis()) {
-      return Period.weeks(2);
-    } else if (granularityMillis < Period.hours(1).toStandardDuration().getMillis()) {
-      return Period.months(1);
-    } else if (granularityMillis < Period.days(1).toStandardDuration().getMillis()) {
+    } else if (granularityMillis <= Period.minutes(5).toStandardDuration().getMillis()) {
+      // for PT5M granularity: 2016 points
+      return Period.days(7);
+    } else if (granularityMillis <= Period.minutes(15).toStandardDuration().getMillis()) {
+      // for PT15M granularity: 1344 points
+      return Period.days(14);
+    } else if (granularityMillis <= Period.hours(1).toStandardDuration().getMillis()) {
+      // for PT1H granularity: 1440 points
+      return Period.months(2);
+    } else if (granularityMillis <= Period.days(1).toStandardDuration().getMillis()) {
+      // for P1D granularity: 180 points
       return Period.months(6);
-    } else if (granularityMillis < Period.weeks(1).toStandardDuration().getMillis()) {
-      return Period.years(1);
-    } else if (granularityMillis < Period.days(30).toStandardDuration().getMillis()) {
+    } else if (granularityMillis <= Period.weeks(1).toStandardDuration().getMillis()) {
+      // for P7D granularity: 52 points
       return Period.years(2);
     }
-    return Period.years(4);
+    // for monthly granularity: 36 points
+    return Period.years(3);
   }
 }

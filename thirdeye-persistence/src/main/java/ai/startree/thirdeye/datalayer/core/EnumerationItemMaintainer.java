@@ -15,25 +15,25 @@
 package ai.startree.thirdeye.datalayer.core;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.EnumerationItemFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +88,39 @@ public class EnumerationItemMaintainer {
     return idKeys.stream()
         .filter(p::containsKey)
         .collect(toMap(Function.identity(), p::get));
+  }
+
+  private static void logDeleteOperation(final EnumerationItemDTO ei) {
+    String eiString;
+    try {
+      eiString = ThirdEyeSerialization
+          .getObjectMapper()
+          .writeValueAsString(ei);
+    } catch (final Exception e) {
+      eiString = ei.toString();
+    }
+    LOG.warn("Deleting enumeration item(id: {}}) json: {}",
+        ei.getId(),
+        eiString);
+  }
+
+  private static EnumerationItemDTO findCandidate(final EnumerationItemDTO source,
+      final List<EnumerationItemDTO> eiList) {
+    // Find exact match
+    Optional<EnumerationItemDTO> candidate = eiList.stream()
+        .filter(e -> matches(source, e))
+        .findFirst();
+    if (candidate.isPresent()) {
+      return candidate.get();
+    }
+
+    // find one with same params
+    candidate = eiList.stream()
+        .filter(e -> e.getParams().equals(source.getParams()))
+        .findFirst();
+
+    // Just return the first one
+    return candidate.orElse(eiList.get(0));
   }
 
   public List<EnumerationItemDTO> sync(
@@ -175,19 +208,50 @@ public class EnumerationItemMaintainer {
 
   public EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
       final List<String> idKeys) {
-    final DaoFilter daoFilter = new DaoFilter()
-        .setPredicate(Predicate.EQ("alertId", source.getAlert().getId()));
+    final EnumerationItemFilter filter = new EnumerationItemFilter().setAlertId(
+        source.getAlert().getId());
     final var sourceKey = key(source, idKeys);
-    final List<EnumerationItemDTO> filtered = enumerationItemManager.filter(daoFilter).stream()
+    final List<EnumerationItemDTO> filtered = enumerationItemManager.filter(filter).stream()
         .filter(e -> sourceKey.equals(key(e, idKeys)))
         .collect(toList());
 
-    checkState(filtered.size() <= 1,
-        "Found multiple EnumerationItems for: %s ids: %s",
-        source,
-        filtered.stream().map(EnumerationItemDTO::getId).collect(toList()));
+    if (filtered.size() > 1) {
+      LOG.warn("Found more than one EnumerationItem for: {} ids: {}. Attempting to fix..",
+          source,
+          filtered.stream().map(EnumerationItemDTO::getId).collect(toList()));
 
+      return handleConflicts(source, filtered);
+    }
     return filtered.stream().findFirst().orElse(null);
+  }
+
+  /**
+   * These are enumeration items that have the same idKeys. In this case, we find the best candidate
+   * to keep and delete the rest. If a match isn't found, we keep the first one and delete the rest.
+   *
+   * @param source enumeration item to match with
+   * @param eiList list of conflicting enumeration items that have the same idKeys
+   */
+  private EnumerationItemDTO handleConflicts(final EnumerationItemDTO source,
+      final List<EnumerationItemDTO> eiList) {
+    // find the one with same params
+    final var matching = findCandidate(source, eiList);
+
+    // Migrate subscription groups to matching candidate
+    eiList.stream()
+        .filter(e -> !e.getId().equals(matching.getId()))
+        .forEach(e -> migrateSubscriptionGroups(
+            e.getId(),
+            matching.getId(),
+            source.getAlert().getId()));
+
+    // remove the rest
+    eiList.stream()
+        .filter(e -> !e.getId().equals(matching.getId()))
+        .peek(EnumerationItemMaintainer::logDeleteOperation)
+        .forEach(enumerationItemDeleter::delete);
+
+    return matching;
   }
 
   public void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
@@ -211,19 +275,23 @@ public class EnumerationItemMaintainer {
         .forEach(anomalyManager::update);
 
     /* Migrate subscription groups */
+    migrateSubscriptionGroups(from.getId(), toId, alertId);
+  }
+
+  private void migrateSubscriptionGroups(final Long fromId, final Long toId, final Long alertId) {
     subscriptionGroupManager.findAll().stream()
         .filter(Objects::nonNull)
         .filter(sg -> sg.getAlertAssociations() != null)
         .filter(sg -> sg.getAlertAssociations().stream()
             .filter(Objects::nonNull)
             .filter(aa -> aa.getEnumerationItem() != null)
-            .anyMatch(aa -> from.getId().equals(aa.getEnumerationItem().getId())
+            .anyMatch(aa -> fromId.equals(aa.getEnumerationItem().getId())
                 && alertId.equals(aa.getAlert().getId()))
         )
         .forEach(sg -> {
           sg.getAlertAssociations().stream()
               .filter(aa -> aa.getEnumerationItem() != null)
-              .filter(aa -> from.getId().equals(aa.getEnumerationItem().getId())
+              .filter(aa -> fromId.equals(aa.getEnumerationItem().getId())
                   && alertId.equals(aa.getAlert().getId()))
               .forEach(aa -> aa.setEnumerationItem(eiRef(toId)));
           subscriptionGroupManager.update(sg);

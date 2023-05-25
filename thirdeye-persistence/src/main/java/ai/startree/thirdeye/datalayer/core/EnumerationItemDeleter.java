@@ -44,12 +44,13 @@ public class EnumerationItemDeleter {
     this.enumerationItemManager = enumerationItemManager;
   }
 
-  public void delete(final EnumerationItemDTO dto) {
+  public EnumerationItemDTO delete(final EnumerationItemDTO dto) {
     requireNonNull(dto.getId(), "EnumerationItemDTO.id cannot be null for deletion");
     disassociateFromSubscriptionGroups(dto.getId());
     deleteAssociatedAnomalies(dto.getId());
 
     enumerationItemManager.delete(dto);
+    return dto;
   }
 
   public void deleteAssociatedAnomalies(final Long enumerationItemId) {

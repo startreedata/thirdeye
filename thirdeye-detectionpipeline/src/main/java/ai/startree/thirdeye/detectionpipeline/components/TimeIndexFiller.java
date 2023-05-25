@@ -139,12 +139,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     Objects.requireNonNull(detectionInterval);
     initWithRuntimeInfo(detectionInterval, dataTable);
 
-    DataFrame rawData = dataTable.getDataFrame();
+    final DataFrame rawData = dataTable.getDataFrame();
     checkArgument(rawData.contains(timeColumn),
         "'" + timeColumn + "' column not found in DataFrame");
-    DataFrame correctIndex = generateCorrectIndex(detectionInterval.getChronology());
-    DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
-    DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
+    final DataFrame correctIndex = generateCorrectIndex(detectionInterval.getChronology());
+    final DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
+    final DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
 
     return SimpleDataTable.fromDataFrame(nullReplacedData);
   }
@@ -176,7 +176,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   private DataFrame joinOnTimeIndex(DataFrame correctIndex, DataFrame rawData) {
-    DataFrame filledData = correctIndex.joinLeft(rawData, timeColumn, timeColumn);
+    final DataFrame filledData = correctIndex.joinLeft(rawData, timeColumn, timeColumn);
 
     // some series can be of type Object if the rawData had no value before the join
     // fix: transform these Series of Objects into series of Doubles - incorrect if String series was expected

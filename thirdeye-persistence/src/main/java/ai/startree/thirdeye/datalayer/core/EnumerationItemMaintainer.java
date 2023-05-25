@@ -21,6 +21,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.EnumerationItemFilter;
@@ -36,6 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +53,9 @@ public class EnumerationItemMaintainer {
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EnumerationItemDeleter enumerationItemDeleter;
+
+  /* To perform clean up operations */
+  private final Executor executor = Executors.newSingleThreadExecutor();
 
   @Inject
   public EnumerationItemMaintainer(final EnumerationItemManager enumerationItemManager,
@@ -111,13 +118,30 @@ public class EnumerationItemMaintainer {
       final List<EnumerationItemDTO> enumerationItems,
       final List<String> idKeys,
       final Long alertId) {
-    final List<EnumerationItemDTO> existingEnumerationItems = enumerationItemManager.filter(
+    final List<EnumerationItemDTO> existing = enumerationItemManager.filter(
         new EnumerationItemFilter().setAlertId(alertId));
 
-    return enumerationItems.stream()
+    final List<EnumerationItemDTO> synced = enumerationItems.stream()
         .map(source -> source.setAlert(alertRef(alertId)))
-        .map(source -> findExistingOrCreate(source, idKeys, existingEnumerationItems))
+        .map(source -> findExistingOrCreate(source, idKeys, existing))
         .collect(toList());
+
+    performCleanup(existing, synced);
+
+    executor.execute(() -> performCleanup(existing, synced));
+    return synced;
+  }
+
+  private void performCleanup(final List<EnumerationItemDTO> existing,
+      final List<EnumerationItemDTO> syncedEnumerationItems) {
+    final Set<Long> syncedEnumerationItemIds = syncedEnumerationItems.stream()
+        .map(EnumerationItemDTO::getId)
+        .collect(toSet());
+
+    existing.stream()
+        .filter(ei -> !syncedEnumerationItemIds.contains(ei.getId()))
+        .peek(EnumerationItemMaintainer::logDeleteOperation)
+        .forEach(enumerationItemDeleter::delete);
   }
 
   @VisibleForTesting

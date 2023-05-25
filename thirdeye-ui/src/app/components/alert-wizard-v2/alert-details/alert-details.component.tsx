@@ -109,12 +109,12 @@ function AlertDetails({
                 />
 
                 <InputSection
-                    helperLabel={t("label.optional")}
+                    helperLabel={`(${t("label.optional")})`}
                     inputComponent={
                         <TextField
                             fullWidth
                             multiline
-                            minRows={6}
+                            minRows={3}
                             value={description}
                             variant="outlined"
                             onChange={(

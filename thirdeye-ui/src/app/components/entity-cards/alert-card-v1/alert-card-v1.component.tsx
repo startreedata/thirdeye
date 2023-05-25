@@ -87,6 +87,21 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
                 </Grid>
             )}
 
+            {/* Description */}
+            <Grid item xs={12}>
+                <Grid item>
+                    <Typography className={classes.fontMedium} variant="body2">
+                        {t("label.description")}:
+                    </Typography>
+                </Grid>
+
+                <Grid item>
+                    <Typography variant="body2">
+                        {props.uiAlert?.alert?.description || t("label.none")}
+                    </Typography>
+                </Grid>
+            </Grid>
+
             {/* Subscription Groups */}
             <Grid item xs={6}>
                 <Grid item>
@@ -100,7 +115,7 @@ export const AlertCardV1: FunctionComponent<AlertCardV1Props> = (
                         {props.uiAlert.subscriptionGroups.length > 0 &&
                             getAllSubscriptionGroupsName(props.uiAlert)}
                         {props.uiAlert.subscriptionGroups.length === 0 && (
-                            <span>None</span>
+                            <span>{t("label.none")}</span>
                         )}
                     </Typography>
                 </Grid>

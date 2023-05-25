@@ -31,6 +31,16 @@ TE_UI_DIR = 'thirdeye-ui'
 args_parser = argparse.ArgumentParser()
 args_parser.add_argument('-r', '--run-only', default=False, help='Use cypress run instead of open', action='store_true')
 
+def retry(func, max_tries=3):
+    for i in range(max_tries):
+        try:
+           return func()
+        except Exception as e:
+            if not i < max_tries - 1:
+                raise e
+
+            continue
+
 def get_path_to_thirdeye_ui():
     path = Path.cwd()
     num_tries = 5
@@ -106,8 +116,8 @@ if __name__ == '__main__':
                            stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)
 
-            backend_process = setup_and_launch_thirdeye_backend(temp_dir_path)
-            frontend_process = launch_thirdeye_frontend(get_path_to_thirdeye_ui())
+            backend_process = retry(lambda: setup_and_launch_thirdeye_backend(temp_dir_path))
+            frontend_process = retry(lambda: launch_thirdeye_frontend(get_path_to_thirdeye_ui()))
 
             args = args_parser.parse_args()
             print('[Setup Script] Sleeping 60 seconds wait for backend and frontend', flush=True)

@@ -13,7 +13,11 @@
  */
 package ai.startree.thirdeye.detectionpipeline.components;
 
+import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.BOOLEAN;
+import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.DOUBLE;
+import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.LONG;
 import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.OBJECT;
+import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.STRING;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
@@ -22,18 +26,24 @@ import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.spec.TimeIndexFillerSpec;
+import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries.Builder;
+import ai.startree.thirdeye.spi.dataframe.ObjectSeries;
 import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
+import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.detection.IndexFiller;
 import ai.startree.thirdeye.spi.detection.NullReplacer;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import ai.startree.thirdeye.spi.util.TimeUtils;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -139,12 +149,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     Objects.requireNonNull(detectionInterval);
     initWithRuntimeInfo(detectionInterval, dataTable);
 
-    DataFrame rawData = dataTable.getDataFrame();
+    final DataFrame rawData = dataTable.getDataFrame();
     checkArgument(rawData.contains(timeColumn),
         "'" + timeColumn + "' column not found in DataFrame");
-    DataFrame correctIndex = generateCorrectIndex(detectionInterval.getChronology());
-    DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
-    DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
+    final DataFrame correctIndex = generateCorrectIndex(detectionInterval.getChronology());
+    final DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
+    final DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
 
     return SimpleDataTable.fromDataFrame(nullReplacedData);
   }
@@ -175,19 +185,106 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     return dataFrame;
   }
 
-  private DataFrame joinOnTimeIndex(DataFrame correctIndex, DataFrame rawData) {
-    DataFrame filledData = correctIndex.joinLeft(rawData, timeColumn, timeColumn);
+  private DataFrame joinOnTimeIndex(final DataFrame correctIndex, final DataFrame rawData) {
+    leftFill(correctIndex, rawData, timeColumn);
 
     // some series can be of type Object if the rawData had no value before the join
     // fix: transform these Series of Objects into series of Doubles - incorrect if String series was expected
-    for (String seriesName : filledData.getSeriesNames()) {
-      Series series = filledData.get(seriesName);
+    for (final String seriesName : correctIndex.getSeriesNames()) {
+      final Series series = correctIndex.get(seriesName);
       if (series.type() == OBJECT) {
-        filledData.addSeries(seriesName, series.getDoubles());
+        correctIndex.addSeries(seriesName, series.getDoubles());
       }
     }
 
-    return filledData;
+    return correctIndex;
+  }
+
+  /**
+   * Low level filling implementation - for performance.
+   * Pre-conditions:
+   * - correctIndex.timeColumn contains ~ at least ~ all values of rawData.timeColumn.
+   * - the timeColumn Series of both dataframes is sorted in ascending order
+   *
+   * Behaviour:
+   * join raw data into the correctIndex dataframe. Modifies correctIndex directly (no copy).
+   * Equivalent to correctIndex.joinLeft(rawData, timeColumn, timeColumn); but is O(n),
+   * whereas join is O(n*n).
+   */
+  private static void leftFill(final DataFrame correctIndex, final DataFrame rawData,
+      final String timeColumn) {
+    final long[] correctTimeIndex = correctIndex.getLongs(timeColumn).values();
+    final int correctSize = correctTimeIndex.length;
+    final long[] rawTimeIndex = rawData.getLongs(timeColumn).values();
+
+    for (final Entry<String, Series> entry : rawData.getSeries().entrySet()) {
+      final String seriesName = entry.getKey();
+      if (seriesName.equals(timeColumn)) {
+        // skip the rawData timeColumn
+        continue;
+      }
+
+      final Series series = entry.getValue();
+      if (series.type().equals(BOOLEAN)) {
+        final byte[] filledValues = new byte[correctSize];
+        Arrays.fill(filledValues, BooleanSeries.NULL);
+        final byte[] rawValues = series.getBooleans().values();
+        int rawIdx = 0;
+        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
+          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
+            filledValues[correctIdx] = rawValues[rawIdx++];
+          }
+        }
+        correctIndex.addSeries(seriesName, filledValues);
+      } else if (series.type().equals(DOUBLE)) {
+        final double[] filledValues = new double[correctSize];
+        Arrays.fill(filledValues, DoubleSeries.NULL);
+        final double[] rawValues = series.getDoubles().values();
+        int rawIdx = 0;
+        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
+          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
+            filledValues[correctIdx] = rawValues[rawIdx++];
+          }
+        }
+        correctIndex.addSeries(seriesName, filledValues);
+      } else if (series.type().equals(LONG)) {
+        final long[] filledValues = new long[correctSize];
+        Arrays.fill(filledValues, LongSeries.NULL);
+        final long[] rawValues = series.getLongs().values();
+        int rawIdx = 0;
+        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
+          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
+            filledValues[correctIdx] = rawValues[rawIdx++];
+          }
+        }
+        correctIndex.addSeries(seriesName, filledValues);
+      } else if (series.type().equals(STRING)) {
+        final String[] filledValues = new String[correctSize];
+        Arrays.fill(filledValues, StringSeries.NULL);
+        final String[] rawValues = series.getStrings().values();
+        int rawIdx = 0;
+        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
+          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
+            filledValues[correctIdx] = rawValues[rawIdx++];
+          }
+        }
+        correctIndex.addSeries(seriesName, filledValues);
+      } else if (series.type().equals(OBJECT)) {
+        final Object[] filledValues = new Object[correctSize];
+        Arrays.fill(filledValues, ObjectSeries.NULL);
+        final Object[] rawValues = series.getObjects().values();
+        int rawIdx = 0;
+        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
+          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
+            filledValues[correctIdx] = rawValues[rawIdx++];
+          }
+        }
+        correctIndex.addSeriesObjects(seriesName, filledValues);
+      } else {
+        throw new UnsupportedOperationException(
+            String.format("Unsupported Series type: %s", series.type()));
+      }
+    }
   }
 
   private long inferMinTime(final DateTime start, final Series timeColumnSeries,
@@ -221,7 +318,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   private Series generateSeries(final DateTime firstValue, final DateTime lastValueIncluded,
-      Period timePeriod) {
+      final Period timePeriod) {
     Builder correctIndexSeries = LongSeries.builder();
     DateTime indexValue = new DateTime(firstValue);
     while (!indexValue.isAfter(lastValueIncluded)) {

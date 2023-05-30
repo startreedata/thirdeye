@@ -14,14 +14,18 @@
 package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunctionContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.joda.time.Period;
 
 public class TimeGroupFunction implements MacroFunction {
@@ -39,7 +43,7 @@ public class TimeGroupFunction implements MacroFunction {
     final String timeColumn = macroParams.get(0);
     final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
-    Period granularity = isoPeriod(granularityText);
+    final Period granularity = isoPeriod(granularityText);
     final String timezone = context.getDetectionInterval().getChronology().getZone().toString();
 
     //write granularity to metadata
@@ -47,9 +51,21 @@ public class TimeGroupFunction implements MacroFunction {
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
-      final String quotedTimeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
+      final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getTimeColumns()).orElse(
+              Collections.emptyList())
+          .stream()
+          .filter(c -> c.getGranularity() != null && c.getGranularity().equals(granularityText))
+          // assume timezone is UTC TODO CYRIL IMPLEMENT COMPLETE TIMEZONE SUPPORT
+          // assume format is epoch milliseconds TODO CYRIL IMPLEMENT SUPPORT FOR OTHER FORMATS
+          .findFirst()
+          .map(TimeColumnApi::getName)
+          .map(context.getIdentifierQuoter());
+      if (exactBucketTimeColumn.isPresent()) {
+        return exactBucketTimeColumn.get();
+      }
+      final String mainTimeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
       return context.getSqlExpressionBuilder()
-          .getTimeGroupExpression(quotedTimeColumn,
+          .getTimeGroupExpression(mainTimeColumn,
               datasetConfigDTO.getTimeFormat(),
               granularity,
               datasetConfigDTO.getTimeUnit().toString(),

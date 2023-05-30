@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -41,6 +42,22 @@ public class DatasetConfigDTO extends AbstractDTO {
   private Set<String> owners;
   private Boolean active;
   private List<MetricConfigDTO> metrics;
+  /**
+   * List of timeColumn metadata.
+   * This info is used to optimize generated queries.
+   * For instance
+   * [ {
+   *   "name": "timeBucket1hour",
+   *   "granularity": "PT1H",
+   *   "timezone: "UTC"
+   *   },
+   *   {
+   *   "name": "timeBucket5minute",
+   *   "granularity": "PT5M"
+   *   },
+   * ]
+   */
+  private List<TimeColumnApi> timeColumns;
 
   /**
    * Expected delay for data to be complete. In ISO 8601. Eg P1D
@@ -383,6 +400,16 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   public DatasetConfigDTO setMutabilityPeriod(final String mutabilityPeriod) {
     this.mutabilityPeriod = mutabilityPeriod;
+    return this;
+  }
+
+  public List<TimeColumnApi> getTimeColumns() {
+    return timeColumns;
+  }
+
+  public DatasetConfigDTO setTimeColumns(
+      final List<TimeColumnApi> timeColumns) {
+    this.timeColumns = timeColumns;
     return this;
   }
 }

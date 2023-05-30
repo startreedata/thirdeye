@@ -221,6 +221,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                                 ONBOARD_DATASETS_TEST_IDS.DATASETS_OPTIONS_CONTAINER
                                             }
                                             display="flex"
+                                            id="datasets-options-container"
                                             mt={2}
                                         >
                                             <FormGroup>

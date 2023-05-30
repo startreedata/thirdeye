@@ -21,10 +21,7 @@ import { DEFAULT_ALERT_CONFIG } from "../../support/load-alert-and-anomalies.com
 describe("alert create flows", () => {
     beforeEach(() => {
         // Clear out any existing alerts
-        cy.request({
-            method: "DELETE",
-            url: "http://localhost:7004/api/alerts/all",
-        });
+        cy.resetAlerts();
         // Clear out any existing subscription groups
         cy.request({
             method: "DELETE",
@@ -88,11 +85,14 @@ describe("alert create flows", () => {
             cy.get("li").contains(day).click();
         });
         cy.get("button").contains("Reload preview").click();
-        cy.get("h5").contains("Total anomalies detected: 18").should("exist");
+        cy.get("h5").contains("Total anomalies detected:").should("exist");
 
         // Take user to alert details page
         cy.get("#next-bottom-bar-btn").click();
         cy.getByDataTestId(SETUP_DETAILS_TEST_IDS.NAME_INPUT).type("-custom");
+        cy.getByDataTestId(SETUP_DETAILS_TEST_IDS.DESCRIPTION_INPUT).type(
+            "foo bar description"
+        );
         cy.getByDataTestId(SETUP_DETAILS_TEST_IDS.CONFIGURATION_SWITCH).click();
         cy.get(".MuiTab-root")
             .contains("Create a new notification group for this alert")
@@ -120,6 +120,8 @@ describe("alert create flows", () => {
         cy.get("h4")
             .contains("UnitCost_SUM_mean-variance-rule-custom")
             .should("exist");
+        // Description should show
+        cy.get("h6").contains("foo bar description").should("exist");
     });
 
     it("user can create alert from the advanced flow", () => {

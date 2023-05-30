@@ -41,6 +41,7 @@ import {
 } from "../../utils/routes/routes.util";
 import { AnomalyQuickFilters } from "../anomaly-quick-filters/anomaly-quick-filters.component";
 import type { AnomalyListV1Props } from "./anomaly-list-v1.interfaces";
+import { ANOMALY_LIST_TEST_IDS } from "./anomaly-list-v1.interfaces";
 import { useAnomalyListV1Styles } from "./anomaly-list-v1.style";
 
 export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
@@ -431,6 +432,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             hideBorder
             columns={anomalyListColumns}
             data={anomalies as UiAnomaly[]}
+            data-testid={ANOMALY_LIST_TEST_IDS.TABLE}
             initialSortState={{
                 key: "startTime",
                 order: DataGridSortOrderV1.DESC,
@@ -441,7 +443,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                 <Box display="flex" gridGap={12}>
                     <Box display="flex">
                         <Button
-                            data-testid="button-delete"
+                            data-testid={ANOMALY_LIST_TEST_IDS.DELETE_BUTTON}
                             disabled={isActionButtonDisable}
                             variant="contained"
                             onClick={handleAnomalyDelete}

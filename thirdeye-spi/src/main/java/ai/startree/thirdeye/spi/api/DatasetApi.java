@@ -48,6 +48,23 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
   private Templatable<List<String>> rcaExcludedDimensions;
   private AuthorizationConfigurationApi auth;
 
+  /**
+   * List of timeColumn metadata.
+   * This info is used to optimize generated queries.
+   * For instance
+   * [ {
+   *   "name": "timeBucket1hour",
+   *   "granularity": "PT1H",
+   *   "timezone: "UTC"
+   *   },
+   *   {
+   *   "name": "timeBucket5minute",
+   *   "granularity": "PT5M"
+   *   },
+   * ]
+   */
+  private List<TimeColumnApi> timeColumns;
+
   public Long getId() {
     return id;
   }
@@ -165,6 +182,16 @@ public class DatasetApi implements ThirdEyeCrudApi<DatasetApi> {
 
   public DatasetApi setMutabilityPeriod(final String mutabilityPeriod) {
     this.mutabilityPeriod = mutabilityPeriod;
+    return this;
+  }
+
+  public List<TimeColumnApi> getTimeColumns() {
+    return timeColumns;
+  }
+
+  public DatasetApi setTimeColumns(
+      final List<TimeColumnApi> timeColumns) {
+    this.timeColumns = timeColumns;
     return this;
   }
 }

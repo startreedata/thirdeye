@@ -19,6 +19,7 @@ import {
     Card,
     CardContent,
     Grid,
+    Typography,
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import React, {
@@ -503,16 +504,28 @@ export const AlertsViewPage: FunctionComponent = () => {
                     )
                 }
                 subtitle={
-                    <AlertAccuracyColored
-                        alertId={Number(alertId) as number}
-                        end={endTime}
-                        label={t("label.overall-entity", {
-                            entity: t("label.accuracy"),
-                        })}
-                        start={startTime}
-                    />
+                    <>
+                        {alert?.description && (
+                            <Box paddingBottom={1}>
+                                <Typography
+                                    color="textSecondary"
+                                    variant="subtitle2"
+                                >
+                                    {alert?.description}
+                                </Typography>
+                            </Box>
+                        )}
+                        <AlertAccuracyColored
+                            alertId={Number(alertId) as number}
+                            end={endTime}
+                            label={t("label.overall-entity", {
+                                entity: t("label.accuracy"),
+                            })}
+                            start={startTime}
+                        />
+                    </>
                 }
-                title={alert ? alert.name : ""}
+                title={alert?.name || ""}
             >
                 {getAlertStatus === ActionStatus.Working && (
                     <SkeletonV1 width="512px" />

@@ -13,6 +13,11 @@
  * the License.
  */
 Cypress.Commands.add("resetDatasets", () => {
+    if (process.env.TE_DEV_PROXY_SERVER !== undefined) {
+        throw new Error(
+            "TE_DEV_PROXY_SERVER is set. Failing in case it is linked to a dev server"
+        );
+    }
     cy.request({
         method: "DELETE",
         url: "http://localhost:7004/api/data-sources/all",

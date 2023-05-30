@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task;
 
-import static ai.startree.thirdeye.util.ThirdEyeUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;

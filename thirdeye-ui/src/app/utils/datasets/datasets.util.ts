@@ -14,9 +14,12 @@
  */
 import i18n from "i18next";
 import { isEmpty } from "lodash";
+import { deleteDataset } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../rest/dto/datasource.interfaces";
+import { Metric } from "../../rest/dto/metric.interfaces";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
+import { deleteMetric } from "../../rest/metrics/metrics.rest";
 import { deepSearchStringProperty } from "../search/search.util";
 
 export const createEmptyUiDataset = (): UiDataset => {
@@ -116,4 +119,19 @@ export const filterDatasets = (
     }
 
     return filteredUiDatasets;
+};
+
+export const deleteDatasetAndMetrics = (
+    dataset: Dataset,
+    metrics: Metric[]
+): void => {
+    if (!dataset || !metrics) {
+        return;
+    }
+
+    deleteDataset(dataset.id);
+
+    metrics.forEach((metric) => {
+        metric.id > 0 && deleteMetric(metric.id);
+    });
 };

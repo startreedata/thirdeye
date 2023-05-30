@@ -21,5 +21,6 @@ export interface SetupDetailsPageProps {
 
 export const SETUP_DETAILS_TEST_IDS = {
     NAME_INPUT: "alert-name-input",
+    DESCRIPTION_INPUT: "alert-description-input",
     CONFIGURATION_SWITCH: "alert-configuration-switch",
 };

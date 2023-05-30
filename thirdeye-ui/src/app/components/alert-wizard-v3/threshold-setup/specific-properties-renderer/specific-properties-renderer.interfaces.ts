@@ -12,14 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
+import { TemplatePropertiesObject } from "../../../../rest/dto/alert.interfaces";
 import { AlgorithmOptionInputFieldConfig } from "../threshold-setup.interfaces";
 
 export interface SpecificPropertiesRendererProps {
     inputFieldConfig: AlgorithmOptionInputFieldConfig;
-    alert: EditableAlert;
-    onAlertPropertyChange: (
-        contents: Partial<EditableAlert>,
-        isTotalReplace?: boolean
-    ) => void;
+    selectedTemplateProperties: TemplatePropertiesObject;
+    onAlertPropertyChange: (propertyName: string, newValue: string) => void;
 }

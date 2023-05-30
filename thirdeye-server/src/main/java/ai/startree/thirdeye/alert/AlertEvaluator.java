@@ -77,49 +77,54 @@ public class AlertEvaluator {
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
-      final long startTime = request.getStart().getTime();
-      final long endTime = request.getEnd().getTime();
-      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
-          request.getAlert(),
-          startTime,
-          endTime);
-
-      // apply template properties
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
-          detectionInterval);
-
-      final DetectionPipelineContext context = new DetectionPipelineContext()
-          .setAlertId(request.getAlert().getId())
-          .setUsage(DetectionPipelineUsage.EVALUATION)
-          .setDetectionInterval(detectionInterval);
-
-      // inject custom evaluation context
-      evaluationContextProcessor.process(context,
-          request.getEvaluationContext(),
-          templateWithProperties);
-
-      if (bool(request.isDryRun())) {
-        return new AlertEvaluationApi()
-            .setDryRun(true)
-            .setAlert(new AlertApi()
-                .setTemplate(toAlertTemplateApi(templateWithProperties)));
-      }
-
-      final Map<String, OperatorResult> result = executorService
-          .submit(() -> planExecutor.runPipelineAndGetRootOutputs(templateWithProperties.getNodes(),
-              context))
-          .get(TIMEOUT, TimeUnit.MILLISECONDS);
-
-      final Map<String, OperatorResult> processed = new DetectionPipelineOutputPostProcessor()
-          .process(result, request);
-
-      return toAlertEvaluationApi(processed)
-          .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
+      return evaluate0(request);
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
       handleAlertEvaluationException(e);
     }
     return null;
+  }
+
+  private AlertEvaluationApi evaluate0(final AlertEvaluationApi request)
+      throws Exception {
+    final long startTime = request.getStart().getTime();
+    final long endTime = request.getEnd().getTime();
+    final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
+        request.getAlert(),
+        startTime,
+        endTime);
+
+    // apply template properties
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
+        detectionInterval);
+
+    final DetectionPipelineContext context = new DetectionPipelineContext()
+        .setAlertId(request.getAlert().getId())
+        .setUsage(DetectionPipelineUsage.EVALUATION)
+        .setDetectionInterval(detectionInterval);
+
+    // inject custom evaluation context
+    evaluationContextProcessor.process(context,
+        request.getEvaluationContext(),
+        templateWithProperties);
+
+    if (bool(request.isDryRun())) {
+      return new AlertEvaluationApi()
+          .setDryRun(true)
+          .setAlert(new AlertApi()
+              .setTemplate(toAlertTemplateApi(templateWithProperties)));
+    }
+
+    final Map<String, OperatorResult> result = executorService
+        .submit(() -> planExecutor.runPipelineAndGetRootOutputs(templateWithProperties.getNodes(),
+            context))
+        .get(TIMEOUT, TimeUnit.MILLISECONDS);
+
+    final Map<String, OperatorResult> processed = new DetectionPipelineOutputPostProcessor()
+        .process(result, request);
+
+    return toAlertEvaluationApi(processed)
+        .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
   }
 }

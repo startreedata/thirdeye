@@ -119,7 +119,7 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
                         <>
                             {/* Custom contents */}
                             {dialogData.customContents && (
-                                <>{dialogData.customContents}</>
+                                <>{dialogData.contents}</>
                             )}
 
                             {/* Default contents */}

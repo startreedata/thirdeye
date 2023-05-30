@@ -143,6 +143,30 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                                 }
                                 label={t("label.name")}
                             />
+                            <InputSection
+                                helperLabel={`(${t("label.optional")})`}
+                                inputComponent={
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        data-testid={
+                                            SETUP_DETAILS_TEST_IDS.DESCRIPTION_INPUT
+                                        }
+                                        defaultValue={alert.description}
+                                        minRows={3}
+                                        placeholder={t(
+                                            "message.provide-an-optional-description-for-this-alert"
+                                        )}
+                                        onChange={(e) =>
+                                            onAlertPropertyChange({
+                                                description:
+                                                    e.currentTarget.value,
+                                            })
+                                        }
+                                    />
+                                }
+                                label={t("label.description")}
+                            />
                         </Grid>
                     </PageContentsCardV1>
                 </Grid>

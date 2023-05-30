@@ -23,6 +23,7 @@ import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Metric } from "../../rest/dto/metric.interfaces";
 import { getAllMetrics } from "../../rest/metrics/metrics.rest";
 import { getTimeRangeDuration } from "../../utils/time-range/time-range.util";
+import { ANOMALY_LIST_TEST_IDS } from "../anomaly-list-v1/anomaly-list-v1.interfaces";
 import { FilterOptionsAutoComplete } from "../filter-options-auto-complete/filter-options-auto-complete.component";
 import { FilterOption } from "../filter-options-auto-complete/filter-options-auto-complete.interfaces";
 import { useTimeRange } from "../time-range/time-range-provider/time-range-provider.component";
@@ -156,6 +157,9 @@ export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
                         <>
                             <div className={classes.dataGridToolbarSearch}>
                                 <FilterOptionsAutoComplete<Metric>
+                                    data-testid={
+                                        ANOMALY_LIST_TEST_IDS.METRIC_FILTER_CONTAINER
+                                    }
                                     fetchOptions={getUniqMetrics}
                                     formatOptionFromServer={(rawOption) => {
                                         return {
@@ -177,6 +181,9 @@ export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
                             </div>
                             <div className={classes.dataGridToolbarSearch}>
                                 <FilterOptionsAutoComplete<Dataset>
+                                    data-testid={
+                                        ANOMALY_LIST_TEST_IDS.DATASET_FILTER_CONTAINER
+                                    }
                                     fetchOptions={getAllDatasets}
                                     formatOptionFromServer={(rawOption) => {
                                         return {
@@ -198,6 +205,9 @@ export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
                             </div>
                             <div className={classes.dataGridToolbarSearch}>
                                 <FilterOptionsAutoComplete<Alert>
+                                    data-testid={
+                                        ANOMALY_LIST_TEST_IDS.ALERT_FILTER_CONTAINER
+                                    }
                                     fetchOptions={getAllAlerts}
                                     formatOptionFromServer={(rawOption) => {
                                         return {

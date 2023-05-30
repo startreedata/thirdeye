@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import static ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator.getDateTimeZone;
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -102,8 +102,7 @@ public class JobSchedulerService {
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
           UNUSED_DETECTION_INTERVAL);
-      final Chronology chronology = optional(getDateTimeZone(templateWithProperties)).orElse(
-          DEFAULT_CHRONOLOGY);
+      final Chronology chronology = getDateTimeZone(templateWithProperties.getMetadata());
       final DateTime defaultStartTime = new DateTime(alert.getLastTimestamp(), chronology);
       final DateTime endDateTime = new DateTime(endTime, chronology);
       final Period mutabilityPeriod = getMutabilityPeriod(templateWithProperties);

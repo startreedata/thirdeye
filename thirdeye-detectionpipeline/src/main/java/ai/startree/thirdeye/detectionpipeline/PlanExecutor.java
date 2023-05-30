@@ -13,15 +13,16 @@
  */
 package ai.startree.thirdeye.detectionpipeline;
 
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ThirdEyeUtils.shutdownExecutionService;
-import static ai.startree.thirdeye.util.ThirdEyeUtils.threadsNamed;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
+import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
@@ -49,12 +50,9 @@ public class PlanExecutor implements AutoCloseable {
   private final EventManager eventManager;
   private final DatasetConfigManager datasetConfigManager;
   private final DetectionPipelineConfiguration detectionPipelineConfiguration;
-  private final EnumerationItemManager enumerationItemManager;
+  private final EnumerationItemMaintainer enumerationItemMaintainer;
 
   private final ExecutorService subTaskExecutor;
-
-  @VisibleForTesting
-  final ApplicationContext applicationContext;
 
   @Inject
   public PlanExecutor(final PlanNodeFactory planNodeFactory,
@@ -63,8 +61,8 @@ public class PlanExecutor implements AutoCloseable {
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
       final DatasetConfigManager datasetConfigManager,
-      final EnumerationItemManager enumerationItemManager,
-      final DetectionPipelineConfiguration detectionPipelineConfiguration) {
+      final DetectionPipelineConfiguration detectionPipelineConfiguration,
+      final EnumerationItemMaintainer enumerationItemMaintainer) {
     this.planNodeFactory = planNodeFactory;
     this.dataSourceCache = dataSourceCache;
     this.detectionRegistry = detectionRegistry;
@@ -72,12 +70,10 @@ public class PlanExecutor implements AutoCloseable {
     this.eventManager = eventManager;
     this.datasetConfigManager = datasetConfigManager;
     this.detectionPipelineConfiguration = detectionPipelineConfiguration;
-    this.enumerationItemManager = enumerationItemManager;
+    this.enumerationItemMaintainer = enumerationItemMaintainer;
 
     final int nThreads = detectionPipelineConfiguration.getForkjoin().getParallelism();
     subTaskExecutor = Executors.newFixedThreadPool(nThreads, threadsNamed("fork-join-%d"));
-
-    applicationContext = createApplicationContext();
   }
 
   @VisibleForTesting
@@ -124,17 +120,18 @@ public class PlanExecutor implements AutoCloseable {
     return results;
   }
 
-  private ApplicationContext createApplicationContext() {
+  @VisibleForTesting
+  protected ApplicationContext createApplicationContext() {
     return new ApplicationContext(
         dataSourceCache,
         detectionRegistry,
         postProcessorRegistry,
         eventManager,
-        datasetConfigManager,
+        /* Use a caching instance for pipeline execution. Ensures dataset entity is consistent across nodes and is only fetched once. */
+        new CachedDatasetConfigManager(datasetConfigManager),
         subTaskExecutor,
-        enumerationItemManager,
-        detectionPipelineConfiguration
-    );
+        detectionPipelineConfiguration,
+        enumerationItemMaintainer);
   }
 
   /**
@@ -164,7 +161,7 @@ public class PlanExecutor implements AutoCloseable {
       final DetectionPipelineContext context) throws Exception {
 
     /* Set Application Context */
-    context.setApplicationContext(applicationContext);
+    context.setApplicationContext(createApplicationContext());
 
     /* map of all the plan nodes constructed from beans(persisted objects) */
     final Map<String, PlanNode> pipelinePlanNodes = buildPlanNodeMap(

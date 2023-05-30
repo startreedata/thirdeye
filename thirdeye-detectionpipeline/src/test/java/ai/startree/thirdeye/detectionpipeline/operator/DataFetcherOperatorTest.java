@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
@@ -30,7 +31,6 @@ import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -72,10 +72,8 @@ public class DataFetcherOperatorTest {
                 mock(EventManager.class),
                 datasetDao,
                 mock(ExecutorService.class),
-                mock(EnumerationItemManager.class),
-                new DetectionPipelineConfiguration()
-
-        )
+                new DetectionPipelineConfiguration(),
+                mock(EnumerationItemMaintainer.class))
     ));
   }
 
@@ -99,7 +97,7 @@ public class DataFetcherOperatorTest {
 
   @Test
   public void testInitComponents() {
-    Map<String, Object> params = new HashMap<>();
+    final Map<String, Object> params = new HashMap<>();
 
     params.put("component.dataSource", dataSourceName);
     params.put("component.query", "SELECT * FROM " + TABLE_NAME);

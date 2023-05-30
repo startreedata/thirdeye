@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator.EchoResult;
@@ -62,8 +63,8 @@ public class PlanExecutorTest {
         postProcessorRegistry,
         eventManager,
         datasetConfigManager,
-        enumerationItemManager,
-        new DetectionPipelineConfiguration());
+        new DetectionPipelineConfiguration(),
+        mock(EnumerationItemMaintainer.class));
     enumerator = mock(Enumerator.class);
 
     when(detectionRegistry.buildEnumerator("default")).thenReturn(enumerator);

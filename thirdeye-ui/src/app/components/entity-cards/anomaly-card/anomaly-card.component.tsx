@@ -20,7 +20,10 @@ import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
 import { formatDateAndTimeV1, formatDateV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../rest/alerts/alerts.actions";
-import { getUiAnomaly } from "../../../utils/anomalies/anomalies.util";
+import {
+    getMetricString,
+    getUiAnomaly,
+} from "../../../utils/anomalies/anomalies.util";
 import { timezoneStringShort } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
@@ -41,6 +44,14 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
     const { alert, getAlert, status } = useGetAlert();
 
     const uiAnomaly = anomaly && getUiAnomaly(anomaly);
+
+    const metricString = useMemo(() => {
+        if (alert && anomaly) {
+            return getMetricString(alert, anomaly);
+        }
+
+        return "";
+    }, [alert, anomaly]);
 
     useEffect(() => {
         if (anomaly) {
@@ -97,6 +108,16 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                     )} (${timezoneStringShort(timezone)})`}
                                 />
                             </Grid>
+
+                            {/* Metric */}
+                            {metricString && (
+                                <Grid item>
+                                    <AnomalySummaryCardDetail
+                                        label="Metric"
+                                        value={metricString}
+                                    />
+                                </Grid>
+                            )}
 
                             {/* Duration */}
                             <Grid item>

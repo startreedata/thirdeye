@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.queryToNode;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeFilterFunction;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeGroupFunction;
+import ai.startree.thirdeye.detectionpipeline.sql.macro.function.TimeGroupKeyFunction;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.macro.MacroFunction;
@@ -48,7 +49,8 @@ public class MacroEngine {
   private static final Logger LOG = LoggerFactory.getLogger(MacroEngine.class);
   private final static List<MacroFunction> CORE_MACROS = ImmutableList.of(
       new TimeFilterFunction(),
-      new TimeGroupFunction()
+      new TimeGroupFunction(),
+      new TimeGroupKeyFunction()
   );
   public static final boolean QUOTE_IDENTIFIERS = false;
 
@@ -86,7 +88,8 @@ public class MacroEngine {
     final SqlNode appliedMacrosNode = applyMacros(rootNode);
     final String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
 
-    return new DataSourceRequest(tableName, preparedQuery, properties);
+    final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader
+    return new DataSourceRequest(tableName, preparedQuery, customOptions, properties);
   }
 
   private SqlNode applyMacros(SqlNode rootNode) {

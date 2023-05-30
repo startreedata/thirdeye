@@ -27,7 +27,7 @@ public class DatasetMapperTest {
   @Test
   public void testMillisecondsGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
-    DatasetMapper.updateTimeGranularityOnDataset(dto,
+    DatasetMapper.updateTimeSpecOnDataset(dto,
         new TimeColumnApi().setInterval(Duration.ofMillis(1)));
     assertThat(dto.getTimeDuration()).isEqualTo(1);
     assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.MILLISECONDS);
@@ -37,13 +37,13 @@ public class DatasetMapperTest {
   public void testSecondsGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
     // 1 sec granularity
-    DatasetMapper.updateTimeGranularityOnDataset(dto,
+    DatasetMapper.updateTimeSpecOnDataset(dto,
         new TimeColumnApi().setInterval(Duration.ofMillis(1000)));
     assertThat(dto.getTimeDuration()).isEqualTo(1);
     assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.SECONDS);
 
     // 34.xxx sec granularity is rounded - this kind of input should not happen
-    DatasetMapper.updateTimeGranularityOnDataset(dto,
+    DatasetMapper.updateTimeSpecOnDataset(dto,
         new TimeColumnApi().setInterval(Duration.ofMillis(34567)));
     assertThat(dto.getTimeDuration()).isEqualTo(34);
     assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.SECONDS);
@@ -53,7 +53,7 @@ public class DatasetMapperTest {
   @Test
   public void testMinutesGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
-    DatasetMapper.updateTimeGranularityOnDataset(dto,
+    DatasetMapper.updateTimeSpecOnDataset(dto,
         new TimeColumnApi().setInterval(Duration.ofMillis(60_000)));
     assertThat(dto.getTimeDuration()).isEqualTo(1);
     assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.MINUTES);
@@ -62,7 +62,7 @@ public class DatasetMapperTest {
   @Test
   public void testHoursGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
-    DatasetMapper.updateTimeGranularityOnDataset(dto,
+    DatasetMapper.updateTimeSpecOnDataset(dto,
         new TimeColumnApi().setInterval(Duration.ofMillis(3600_000)));
     assertThat(dto.getTimeDuration()).isEqualTo(1);
     assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.HOURS);
@@ -71,7 +71,7 @@ public class DatasetMapperTest {
   @Test
   public void testDaysGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
-    DatasetMapper.updateTimeGranularityOnDataset(dto,
+    DatasetMapper.updateTimeSpecOnDataset(dto,
         new TimeColumnApi().setInterval(Duration.ofMillis(86_400_000)));
     assertThat(dto.getTimeDuration()).isEqualTo(1);
     assertThat(dto.getTimeUnit()).isEqualTo(TimeUnit.DAYS);

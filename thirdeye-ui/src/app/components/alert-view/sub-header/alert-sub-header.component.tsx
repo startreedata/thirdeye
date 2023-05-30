@@ -12,7 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Typography, useTheme } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    DialogActions,
+    DialogContent,
+    Grid,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import React, { FunctionComponent } from "react";
@@ -41,14 +49,37 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
         showDialog({
             type: DialogType.CUSTOM,
             headerText: t("label.detection-configuration"),
+            customContents: true,
             contents: (
-                <JSONEditorV1<Alert> disableValidation readOnly value={alert} />
+                <>
+                    <DialogContent>
+                        <JSONEditorV1<Alert>
+                            disableValidation
+                            readOnly
+                            value={alert}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            className="dialog-provider-v1-cancel-button"
+                            onClick={() => {
+                                navigate(getAlertsUpdatePath(alert.id));
+                                hideDialog();
+                            }}
+                        >
+                            {t("label.edit")}
+                        </Button>
+                        <Button
+                            className="dialog-provider-v1-ok-button"
+                            color="primary"
+                            onClick={hideDialog}
+                        >
+                            {t("label.close")}
+                        </Button>
+                    </DialogActions>
+                </>
             ),
             width: "md",
-            cancelButtonText: t("label.edit"),
-            onCancel: () => navigate(getAlertsUpdatePath(alert.id)),
-            okButtonText: t("label.close"),
-            onOk: hideDialog,
         });
     };
 

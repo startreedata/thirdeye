@@ -13,9 +13,10 @@
  */
 package ai.startree.thirdeye.scheduler.monitor;
 
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
+
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
-import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -62,6 +63,6 @@ public class MonitorJobScheduler {
 
   public void shutdown() {
     LOG.info("Stopping monitor service");
-    ThirdEyeUtils.shutdownExecutionService(scheduledExecutorService);
+    shutdownExecutionService(scheduledExecutorService);
   }
 }

@@ -27,4 +27,6 @@ export default defineConfig({
     env: {
         clientId: "",
     },
+    viewportWidth: 1280,
+    viewportHeight: 720,
 });

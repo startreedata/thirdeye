@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 
@@ -21,7 +22,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
-import ai.startree.thirdeye.util.ThirdEyeUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -61,7 +61,7 @@ public class DetectionCronScheduler implements Runnable {
   @Inject
   public DetectionCronScheduler(final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration, final AlertManager alertManager) {
     this.alertManager = alertManager;
-    this.alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
+    alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
     executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -84,6 +84,7 @@ public class DetectionCronScheduler implements Runnable {
         .scheduleWithFixedDelay(this, 0, alertDelay, ALERT_DELAY_UNIT);
   }
 
+  @Override
   public void run() {
     try {
       alertManager.findAll().forEach(this::processAlert);
@@ -152,7 +153,7 @@ public class DetectionCronScheduler implements Runnable {
   }
 
   public void shutdown() throws SchedulerException {
-    ThirdEyeUtils.shutdownExecutionService(executorService);
+    shutdownExecutionService(executorService);
     scheduler.shutdown();
   }
 

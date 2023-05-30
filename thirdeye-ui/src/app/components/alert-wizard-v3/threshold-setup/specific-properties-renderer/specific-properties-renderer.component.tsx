@@ -19,21 +19,20 @@ import { SliderAlgorithmOptionInputFieldConfig } from "../threshold-setup.interf
 import { SpecificPropertiesRendererProps } from "./specific-properties-renderer.interfaces";
 
 export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRendererProps> =
-    ({ onAlertPropertyChange, alert, inputFieldConfig }) => {
+    ({
+        onAlertPropertyChange,
+        selectedTemplateProperties,
+        inputFieldConfig,
+    }) => {
         const { t } = useTranslation();
         const existingValue =
-            alert.templateProperties[inputFieldConfig.templatePropertyName];
+            selectedTemplateProperties[inputFieldConfig.templatePropertyName];
 
         const handlePropertyChange = (
-            newValue: string,
-            propertyName: string
+            propertyName: string,
+            newValue: string
         ): void => {
-            onAlertPropertyChange({
-                templateProperties: {
-                    ...alert.templateProperties,
-                    [propertyName]: newValue,
-                },
-            });
+            onAlertPropertyChange(propertyName, newValue);
         };
 
         if (inputFieldConfig.type === "slider") {
@@ -66,8 +65,8 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
                     step={1}
                     onChange={(_, value) =>
                         handlePropertyChange(
-                            value.toString(),
-                            sliderFieldConfig.templatePropertyName
+                            sliderFieldConfig.templatePropertyName,
+                            value.toString()
                         )
                     }
                 />
@@ -78,13 +77,13 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
             <TextField
                 fullWidth
                 data-testid={`${inputFieldConfig.templatePropertyName}-container`}
-                defaultValue={existingValue ?? undefined}
                 type={inputFieldConfig.type}
+                value={existingValue ?? undefined}
                 variant="outlined"
                 onChange={(e) => {
                     handlePropertyChange(
-                        e.currentTarget.value,
-                        inputFieldConfig.templatePropertyName
+                        inputFieldConfig.templatePropertyName,
+                        e.currentTarget.value
                     );
                 }}
             />

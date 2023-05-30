@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineConfiguration;
@@ -31,7 +32,6 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -101,9 +101,8 @@ public class EventFetcherOperatorTest {
                 eventDao,
                 mock(DatasetConfigManager.class),
                 mock(ExecutorService.class),
-                mock(EnumerationItemManager.class),
-                new DetectionPipelineConfiguration()
-            )
+                new DetectionPipelineConfiguration(),
+                mock(EnumerationItemMaintainer.class))
         ));
   }
 

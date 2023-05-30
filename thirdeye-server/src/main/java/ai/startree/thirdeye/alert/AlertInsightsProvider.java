@@ -17,8 +17,9 @@ import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -197,9 +198,11 @@ public class AlertInsightsProvider {
         .map(e -> (Chronology) e)
         .orElse(Constants.DEFAULT_CHRONOLOGY);
     final Interval datasetInterval = new Interval(datasetStartTime, datasetEndTime, chronology);
-    final Period granularity = isoPeriod(metadata.getGranularity());
+    // FIXME CYRIL internalize this?
+    final Period granularity = getGranularity(metadata);
+    final Period delay = getDelay(metadata);
     // compute default chart interval
-    final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity);
+    final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity, delay);
     insights.setDefaultStartTime(defaultInterval.getStartMillis());
     insights.setDefaultEndTime(defaultInterval.getEndMillis());
   }
@@ -210,18 +213,21 @@ public class AlertInsightsProvider {
 
   @VisibleForTesting
   protected static Interval getDefaultChartInterval(final @NonNull Interval datasetInterval,
-      @NonNull final Period granularity) {
-    final DateTime defaultEndDateTime = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
+      @NonNull final Period granularity, @NonNull final Period delay) {
+    final DateTime datasetEndTimeBucketStart = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
         granularity);
 
-    DateTime defaultStartTime = defaultEndDateTime.minus(defaultChartTimeframe(granularity));
+    DateTime defaultStartTime = datasetEndTimeBucketStart.minus(defaultChartTimeframe(granularity));
     if (defaultStartTime.getMillis() < datasetInterval.getStartMillis()) {
       defaultStartTime = TimeUtils.floorByPeriod(datasetInterval.getStart(), granularity);
       // first bucket may be incomplete - start from second one
       defaultStartTime = defaultStartTime.plus(granularity);
     }
 
-    return new Interval(defaultStartTime, defaultEndDateTime);
+    final DateTime datasetEndTimeBucketEnd = datasetEndTimeBucketStart.plus(granularity);
+    // delay is applied in evaluate call - anticipate by adding it here to avoid hiding most recent points
+    final DateTime defaultEndTime = datasetEndTimeBucketEnd.plus(delay);
+    return new Interval(defaultStartTime, defaultEndTime);
   }
 
   /**
@@ -234,23 +240,38 @@ public class AlertInsightsProvider {
       return Period.years(4);
     }
     final long granularityMillis = alertGranularity.toStandardDuration().getMillis();
-    if (granularityMillis < Period.millis(100).toStandardDuration().getMillis()) {
-      return Period.minutes(15);
-    } else if (granularityMillis < Period.seconds(1).toStandardDuration().getMillis()) {
-      return Period.hours(2);
-    } else if (granularityMillis < Period.seconds(15).toStandardDuration().getMillis()) {
+    if (granularityMillis <= Period.millis(10).toStandardDuration().getMillis()) {
+      // for PT0.01S granularity: 2000 points
+      return Period.seconds(20);
+    } else if (granularityMillis <= Period.millis(100).toStandardDuration().getMillis()) {
+      // for PT0.1S granularity: 2400 points
+      return Period.minutes(4);
+    } else if (granularityMillis <= Period.seconds(1).toStandardDuration().getMillis()) {
+      // for PT1S granularity: 1800 points
+      return Period.minutes(30);
+    } else if (granularityMillis <= Period.seconds(15).toStandardDuration().getMillis()) {
+      // for PT15S granularity: 1920 points
+      return Period.hours(8);
+    } else if (granularityMillis <= Period.minutes(1).toStandardDuration().getMillis()) {
+      // for PT1M granularity: 2880 points
       return Period.days(2);
-    } else if (granularityMillis < Period.minutes(1).toStandardDuration().getMillis()) {
-      return Period.weeks(2);
-    } else if (granularityMillis < Period.hours(1).toStandardDuration().getMillis()) {
-      return Period.months(1);
-    } else if (granularityMillis < Period.days(1).toStandardDuration().getMillis()) {
+    } else if (granularityMillis <= Period.minutes(5).toStandardDuration().getMillis()) {
+      // for PT5M granularity: 2016 points
+      return Period.days(7);
+    } else if (granularityMillis <= Period.minutes(15).toStandardDuration().getMillis()) {
+      // for PT15M granularity: 1344 points
+      return Period.days(14);
+    } else if (granularityMillis <= Period.hours(1).toStandardDuration().getMillis()) {
+      // for PT1H granularity: 1440 points
+      return Period.months(2);
+    } else if (granularityMillis <= Period.days(1).toStandardDuration().getMillis()) {
+      // for P1D granularity: 180 points
       return Period.months(6);
-    } else if (granularityMillis < Period.weeks(1).toStandardDuration().getMillis()) {
-      return Period.years(1);
-    } else if (granularityMillis < Period.days(30).toStandardDuration().getMillis()) {
+    } else if (granularityMillis <= Period.weeks(1).toStandardDuration().getMillis()) {
+      // for P7D granularity: 52 points
       return Period.years(2);
     }
-    return Period.years(4);
+    // for monthly granularity: 36 points
+    return Period.years(3);
   }
 }

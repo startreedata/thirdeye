@@ -45,7 +45,6 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -151,12 +150,10 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     return "AnomalyDetectorOperator";
   }
 
-  private OperatorResult buildDetectionResult(
-      final AnomalyDetectorResult detectorV2Result) {
+  private OperatorResult buildDetectionResult(final AnomalyDetectorResult detectorResult) {
 
-    final List<AnomalyDTO> anomalies = buildAnomaliesFromDetectorDf(
-        detectorV2Result.getDataFrame());
-    final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorV2Result.getDataFrame()
+    final List<AnomalyDTO> anomalies = buildAnomaliesFromDetectorDf(detectorResult.getDataFrame());
+    final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorResult.getDataFrame()
         .sortedBy(COL_TIME));
     return new Builder()
         .setAnomalies(anomalies)
@@ -166,7 +163,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
 
   private List<AnomalyDTO> buildAnomaliesFromDetectorDf(final DataFrame df) {
     if (df.isEmpty()) {
-      return Collections.emptyList();
+      // please keep this list mutable - see TE-1608
+      return new ArrayList<>();
     }
 
     final List<AnomalyDTO> anomalies = new ArrayList<>();

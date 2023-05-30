@@ -92,7 +92,7 @@
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger-annotation.version>1.6.0</swagger-annotation.version>
     <swagger.version>2.0.0-1</swagger.version>
-    <testcontainers.version>1.15.3</testcontainers.version>
+    <testcontainers.version>1.18.2</testcontainers.version>
   </properties>
 
   <licenses>

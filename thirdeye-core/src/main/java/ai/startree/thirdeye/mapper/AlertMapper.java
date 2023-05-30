@@ -21,16 +21,19 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import java.sql.Timestamp;
 import java.util.Date;
 import org.mapstruct.Mapper;
+import org.mapstruct.control.DeepClone;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(uses = {
     AlertTemplateMapper.class,
     DatasetMapper.class,
     DataSourceMapper.class,
-    MetricMapper.class})
+    MetricMapper.class}, mappingControl = DeepClone.class)
 public interface AlertMapper {
 
   AlertMapper INSTANCE = Mappers.getMapper(AlertMapper.class);
+
+  AlertApi clone(final AlertApi alertApi);
 
   default AlertApi toApi(final AlertDTO dto) {
     return new AlertApi()

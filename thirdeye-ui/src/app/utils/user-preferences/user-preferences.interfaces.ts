@@ -14,19 +14,25 @@
  */
 export enum UserPreferencesKeys {
     SHOW_DOCUMENTATION_RESOURCES = "showHomeDocumentationResources",
+    ANOMALIES_LIST_DEFAULT_ALERT_FILTERS = "anomaliesListDefaultAlertFilter",
+    ANOMALIES_LIST_DEFAULT_SUBSCRIPTION_FILTERS = "anomaliesListDefaultSubscriptionFilter",
 }
 
 export interface UserPreferences {
     showHomeDocumentationResources?: boolean;
+    anomaliesListDefaultAlertFilter?: number[];
+    anomaliesListDefaultSubscriptionFilter?: number[];
 }
+
+export type GetPreferenceFunction = (
+    key: keyof UserPreferences
+) => number[] | string | boolean | null | undefined;
 
 export interface UseUserPreferencesHook {
     setPreference: (
         key: keyof UserPreferences,
-        value: string | boolean
+        value: string | boolean | number[]
     ) => void;
-    getPreference: (
-        key: keyof UserPreferences
-    ) => string | boolean | null | undefined;
+    getPreference: GetPreferenceFunction;
     localPreferences: UserPreferences;
 }

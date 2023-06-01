@@ -14,6 +14,7 @@
  */
 import { default as React, FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { AnomalyFilterQueryStringKey } from "../../components/anomaly-filters-selection/anomaly-filters-selection.interface";
 import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AnomaliesListAllPage } from "../../pages/anomalies-list-page/anomalies-list-page.component";
@@ -23,10 +24,12 @@ import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { RedirectWithDefaultParams } from "../../utils/routes/redirect-with-default-params/redirect-with-default-params.component";
 import {
+    AppRoute,
     AppRouteRelative,
     generateDateRangeMonthsFromNow,
 } from "../../utils/routes/routes.util";
 import { SaveLastUsedSearchParams } from "../../utils/routes/save-last-used-search-params/save-last-used-search-params.component";
+import { UserPreferencesKeys } from "../../utils/user-preferences/user-preferences.interfaces";
 
 const AnomaliesAllPage = lazy(() =>
     import(
@@ -125,6 +128,42 @@ export const AnomaliesRouter: FunctionComponent = () => {
                                 customDurationGenerator={() => {
                                     return generateDateRangeMonthsFromNow(3);
                                 }}
+                                customSearchStringModifier={(
+                                    searchParams,
+                                    getPreference
+                                ) => {
+                                    const defaultAlertIds = getPreference(
+                                        UserPreferencesKeys.ANOMALIES_LIST_DEFAULT_ALERT_FILTERS
+                                    ) as number[];
+                                    const defaultSubGroupIds = getPreference(
+                                        UserPreferencesKeys.ANOMALIES_LIST_DEFAULT_SUBSCRIPTION_FILTERS
+                                    ) as number[];
+
+                                    if (
+                                        defaultAlertIds &&
+                                        defaultAlertIds.length > 0
+                                    ) {
+                                        defaultAlertIds.forEach((alertId) => {
+                                            searchParams.append(
+                                                AnomalyFilterQueryStringKey.ALERT,
+                                                alertId.toString()
+                                            );
+                                        });
+                                    }
+                                    if (
+                                        defaultSubGroupIds &&
+                                        defaultSubGroupIds.length > 0
+                                    ) {
+                                        defaultSubGroupIds.forEach((subId) => {
+                                            searchParams.append(
+                                                AnomalyFilterQueryStringKey.SUBSCRIPTION_GROUP,
+                                                subId.toString()
+                                            );
+                                        });
+                                    }
+                                }}
+                                // Ensure the default filters are used if user lands on index page
+                                pathKeyOverride={AppRoute.ANOMALIES_ALL}
                                 to={AppRouteRelative.ANOMALIES_ALL_RANGE}
                             />
                         }
@@ -139,7 +178,9 @@ export const AnomaliesRouter: FunctionComponent = () => {
                                 ]}
                                 to=".."
                             >
-                                <SaveLastUsedSearchParams>
+                                <SaveLastUsedSearchParams
+                                    pathKeyOverride={AppRoute.ANOMALIES_ALL}
+                                >
                                     <CancelAPICallsOnPageUnload
                                         key={
                                             AppRouteRelative.ANOMALIES_ALL_RANGE

@@ -12,14 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Alert } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 
-export interface AnomaliesAllPageContext {
-    anomalies: Anomaly[];
-    handleAnomalyDelete: (uiAnomalies: UiAnomaly[]) => void;
-    subscriptionGroups: SubscriptionGroup[] | null;
-    alerts: Alert[] | null;
+import { UiSubscriptionGroup } from "../../../../rest/dto/ui-subscription-group.interfaces";
+
+export interface ExpandedRowProps {
+    uiSubscriptionGroup: UiSubscriptionGroup;
 }

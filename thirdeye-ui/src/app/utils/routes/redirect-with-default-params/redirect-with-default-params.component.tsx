@@ -25,6 +25,7 @@ import {
     TimeRangeQueryStringKey,
 } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { useLastUsedSearchParams } from "../../../stores/last-used-params/last-used-search-params.store";
+import { useUserPreferences } from "../../user-preferences/user-preferences";
 import { RedirectWithDefaultParamsProps } from "./redirect-with-default-params.interfaces";
 
 /**
@@ -48,12 +49,14 @@ export const RedirectWithDefaultParams: FunctionComponent<RedirectWithDefaultPar
         useStoredLastUsedParamsPathKey,
         pathKeyOverride,
         customDurationGenerator,
+        customSearchStringModifier,
     }) => {
         const location = useLocation();
         const navigate = useNavigate();
         const [searchParams] = useSearchParams();
         const { getLastUsedForPath } = useLastUsedSearchParams();
         const { timeRangeDuration } = useTimeRange();
+        const { getPreference } = useUserPreferences();
         let searchString: string | undefined;
 
         if (useStoredLastUsedParamsPathKey) {
@@ -92,6 +95,8 @@ export const RedirectWithDefaultParams: FunctionComponent<RedirectWithDefaultPar
                     timeRangeDuration.endTime.toString()
                 );
             }
+            customSearchStringModifier &&
+                customSearchStringModifier(searchParams, getPreference);
             searchString = searchParams.toString();
         }
         useEffect(() => {

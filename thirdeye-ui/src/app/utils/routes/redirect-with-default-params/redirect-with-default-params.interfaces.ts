@@ -12,10 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { GetPreferenceFunction } from "../../user-preferences/user-preferences.interfaces";
+
 export interface RedirectWithDefaultParamsProps {
     to: string;
     replace?: boolean;
     useStoredLastUsedParamsPathKey?: boolean;
     pathKeyOverride?: string;
     customDurationGenerator?: () => [number, number];
+    customSearchStringModifier?: (
+        searchParams: URLSearchParams,
+        getPreference: GetPreferenceFunction
+    ) => void;
 }

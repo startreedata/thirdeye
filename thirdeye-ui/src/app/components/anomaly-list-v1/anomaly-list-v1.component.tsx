@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Typography, useTheme } from "@material-ui/core";
+import { Button, Grid, Typography, useTheme } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import React, {
@@ -440,8 +440,8 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
             rowKey="id"
             searchFilterValue={searchFilterValue}
             toolbarComponent={
-                <Box display="flex" gridGap={12}>
-                    <Box display="flex">
+                <Grid container alignItems="center">
+                    <Grid item>
                         <Button
                             data-testid={ANOMALY_LIST_TEST_IDS.DELETE_BUTTON}
                             disabled={isActionButtonDisable}
@@ -450,9 +450,13 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                         >
                             {t("label.delete")}
                         </Button>
-                    </Box>
-                    {toolbar}
-                </Box>
+                    </Grid>
+
+                    {/** xs tells container to take the rest of the width */}
+                    <Grid item xs>
+                        {toolbar}
+                    </Grid>
+                </Grid>
             }
             onSearchFilterValueChange={onSearchFilterValueChange}
             onSelectionChange={setSelectedAnomaly}

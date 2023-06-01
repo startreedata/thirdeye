@@ -54,11 +54,14 @@ export const useUserPreferences = (): UseUserPreferencesHook => {
                 return cloned;
             });
         },
-        []
+        [localPreferences]
     );
-    const getPreference = useCallback((prefKey: keyof UserPreferences) => {
-        return localPreferences[prefKey];
-    }, []);
+    const getPreference = useCallback(
+        (prefKey: keyof UserPreferences) => {
+            return localPreferences[prefKey];
+        },
+        [localPreferences]
+    );
 
     return { setPreference, getPreference, localPreferences };
 };

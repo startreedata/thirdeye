@@ -12,14 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Alert } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 
-export interface AnomaliesAllPageContext {
-    anomalies: Anomaly[];
-    handleAnomalyDelete: (uiAnomalies: UiAnomaly[]) => void;
-    subscriptionGroups: SubscriptionGroup[] | null;
-    alerts: Alert[] | null;
+import { ReactNode } from "react";
+
+export interface ModalProps {
+    trigger: (callBack: () => void) => ReactNode;
+    submitButtonLabel?: ReactNode;
+    cancelButtonLabel?: ReactNode;
+    footerActions?: ReactNode;
+    onSubmit?: () => boolean | void;
+    onCancel?: () => void;
+    onOpen?: () => void;
+    title?: ReactNode;
+    customTitle?: ReactNode;
+    children: ReactNode;
+    maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | false;
+    dividers?: boolean;
 }

@@ -13,13 +13,18 @@
  * the License.
  */
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 
-export interface AnomaliesAllPageContext {
-    anomalies: Anomaly[];
-    handleAnomalyDelete: (uiAnomalies: UiAnomaly[]) => void;
-    subscriptionGroups: SubscriptionGroup[] | null;
-    alerts: Alert[] | null;
+export enum AnomalyFilterQueryStringKey {
+    ALERT = "alert",
+    METRIC = "metric",
+    DATASET = "dataset",
+    SUBSCRIPTION_GROUP = "subscription",
+}
+
+export interface AnomalyFiltersSelectionProps {
+    subscriptionGroupData: SubscriptionGroup[] | null;
+    alertsData: Alert[] | null;
+    enumerationItemsData: EnumerationItem[] | null;
 }

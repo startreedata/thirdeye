@@ -67,7 +67,10 @@ export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
             initializeSelected(searchParams, AnomalyFilterQueryStringKey.ALERT)
         );
         const [selectedDataset, setSelectedDataset] = useState(
-            initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)
+            initializeSelected(
+                searchParams,
+                AnomalyFilterQueryStringKey.DATASET
+            )
         );
         const [selectedMetric, setSelectedMetric] = useState(
             initializeSelected(searchParams, AnomalyFilterQueryStringKey.METRIC)

@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { AnomalyListV1 } from "../../components/anomaly-list-v1/anomaly-list-v1.component";
+import { AnomalyQuickFilters } from "../../components/anomaly-quick-filters/anomaly-quick-filters.component";
 import { PageContentsCardV1 } from "../../platform/components";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
@@ -61,14 +62,17 @@ export const AnomaliesListAllPage: FunctionComponent = () => {
     return (
         <Grid item xs={12}>
             {/* Anomaly list */}
-            <PageContentsCardV1 disablePadding fullHeight>
-                <AnomalyListV1
-                    showEnumerationItem
-                    anomalies={uiAnomalies}
-                    enumerationItems={enumerationItems}
-                    enumerationItemsStatus={enumerationItemsStatus}
-                    onDelete={handleAnomalyDelete}
-                />
+            <PageContentsCardV1 disablePadding>
+                <Box height="90vh">
+                    <AnomalyListV1
+                        showEnumerationItem
+                        anomalies={uiAnomalies}
+                        enumerationItems={enumerationItems}
+                        enumerationItemsStatus={enumerationItemsStatus}
+                        toolbar={<AnomalyQuickFilters showTimeSelectorOnly />}
+                        onDelete={handleAnomalyDelete}
+                    />
+                </Box>
             </PageContentsCardV1>
         </Grid>
     );

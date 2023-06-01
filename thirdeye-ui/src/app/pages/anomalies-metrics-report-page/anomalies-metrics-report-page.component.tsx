@@ -36,7 +36,7 @@ export const MetricsReportAllPage: FunctionComponent = () => {
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
                 <Box padding="8px">
-                    <AnomalyQuickFilters />
+                    <AnomalyQuickFilters showTimeSelectorOnly />
                 </Box>
                 <MetricsReportList
                     anomalies={anomalies}

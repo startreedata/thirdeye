@@ -13,12 +13,13 @@
  * the License.
  */
 import { Box, Button, Grid } from "@material-ui/core";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { AnomaliesPageHeader } from "../../components/anomalies-page-header/anomalies-page-header.component";
-import { AnomalyFilterQueryStringKey } from "../../components/anomaly-quick-filters/anomaly-quick-filter.interface";
-import { AnomalyQuickFilters } from "../../components/anomaly-quick-filters/anomaly-quick-filters.component";
+import { AnomalyFiltersSelection } from "../../components/anomaly-filters-selection/anomaly-filters-selection.component";
+import { AnomalyFilterQueryStringKey } from "../../components/anomaly-filters-selection/anomaly-filters-selection.interface";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -31,11 +32,14 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
+import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
+import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import {
     makeDeleteRequest,
     promptDeleteConfirmation,
@@ -44,17 +48,23 @@ import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 
 export const AnomaliesAllPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    // Use state so we can remove anomalies locally without having to fetch again
-    const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
+    const { showDialog } = useDialogProviderV1();
+    const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
+
+    const { subscriptionGroups, getSubscriptionGroups } =
+        useGetSubscriptionGroups();
+    const { alerts, getAlerts } = useGetAlerts();
+    const { enumerationItems, getEnumerationItems } = useGetEnumerationItems();
     const {
         anomalies: anomaliesRequestDataResponse,
         getAnomalies,
         status: getAnomaliesRequestStatus,
         errorMessages: anomaliesRequestErrors,
     } = useGetAnomalies();
-    const { showDialog } = useDialogProviderV1();
-    const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
+    // Use state so we can remove anomalies locally without having to fetch again
+    const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
+
     const [startTime, endTime] = useMemo(
         () => [
             Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
@@ -85,10 +95,21 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         return params;
     }, [searchParams]);
 
-    useEffect(() => {
-        // isMounted ensures that the state updates are not run if the component has been unmounted
-        let isMounted = true;
+    const subscriptionGroupFilter = useMemo(() => {
+        return (
+            searchParams
+                .getAll(AnomalyFilterQueryStringKey.SUBSCRIPTION_GROUP)
+                .map((str) => Number(str)) || []
+        );
+    }, [searchParams]);
 
+    useEffect(() => {
+        getSubscriptionGroups();
+        getAlerts();
+        getEnumerationItems();
+    }, []);
+
+    useEffect(() => {
         // Time range refreshed, fetch anomalies
         setAnomalies([]);
 
@@ -98,20 +119,54 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             ...anomalyFilters,
         };
 
-        getAnomalies(params).then((anomalies) => {
-            if (isMounted) {
-                if (anomalies && anomalies.length > 0) {
-                    setAnomalies(anomalies);
-                } else {
-                    setAnomalies([]);
-                }
-            }
-        });
-
-        return () => {
-            isMounted = false;
-        };
+        getAnomalies(params);
     }, [startTime, endTime, anomalyFilters]);
+
+    useEffect(() => {
+        if (!anomaliesRequestDataResponse) {
+            setAnomalies([]);
+
+            return;
+        }
+
+        let filteredAnomalies = anomaliesRequestDataResponse;
+
+        if (
+            anomaliesRequestDataResponse &&
+            anomaliesRequestDataResponse.length > 0
+        ) {
+            if (subscriptionGroups && subscriptionGroupFilter.length > 0) {
+                const associatedAlertsEnumerationKey: string[] = [];
+                subscriptionGroups
+                    .filter((s) => subscriptionGroupFilter.includes(s.id))
+                    .forEach((subscriptionGroup) => {
+                        if (subscriptionGroup.alertAssociations) {
+                            subscriptionGroup.alertAssociations.forEach(
+                                (association) => {
+                                    associatedAlertsEnumerationKey.push(
+                                        `${association.alert.id}-${association?.enumerationItem?.id}`
+                                    );
+                                }
+                            );
+                        }
+                    });
+
+                filteredAnomalies = anomaliesRequestDataResponse.filter(
+                    (anomaly) => {
+                        return associatedAlertsEnumerationKey.includes(
+                            `${anomaly.alert.id}-${anomaly?.enumerationItem?.id}`
+                        );
+                    }
+                );
+            }
+        }
+
+        setAnomalies(filteredAnomalies);
+    }, [
+        anomaliesRequestDataResponse,
+        subscriptionGroups,
+        subscriptionGroupFilter,
+    ]);
 
     const handleAnomalyDelete = (uiAnomaliesToDelete: UiAnomaly[]): void => {
         promptDeleteConfirmation(
@@ -147,6 +202,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
         searchParams.delete(AnomalyFilterQueryStringKey.ALERT);
         searchParams.delete(AnomalyFilterQueryStringKey.DATASET);
         searchParams.delete(AnomalyFilterQueryStringKey.METRIC);
+        searchParams.delete(AnomalyFilterQueryStringKey.SUBSCRIPTION_GROUP);
         setSearchParams(searchParams, { replace: true });
     };
 
@@ -159,13 +215,20 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                 entity: t("label.anomalies"),
             })
         );
-    }, [getAnomaliesRequestStatus, anomaliesRequestErrors]);
+    }, [getAnomaliesRequestStatus]);
 
     return (
         <PageV1>
             <AnomaliesPageHeader />
 
-            <PageContentsGridV1 fullHeight>
+            <PageContentsGridV1>
+                <Grid item component={Box} xs={12}>
+                    <AnomalyFiltersSelection
+                        alertsData={alerts}
+                        enumerationItemsData={enumerationItems}
+                        subscriptionGroupData={subscriptionGroups}
+                    />
+                </Grid>
                 <LoadingErrorStateSwitch
                     wrapInCard
                     wrapInGrid
@@ -179,7 +242,6 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                         emptyState={
                             <Grid item xs={12}>
                                 <PageContentsCardV1>
-                                    <AnomalyQuickFilters />
                                     <Box pb={20} pt={20}>
                                         <NoDataIndicator>
                                             <Box>
@@ -192,8 +254,12 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                                                     }
                                                 )}
                                             </Box>
-                                            {Object.keys(anomalyFilters)
-                                                .length > 0 && (
+                                            {(!isEmpty(
+                                                Object.keys(anomalyFilters)
+                                            ) ||
+                                                !isEmpty(
+                                                    subscriptionGroupFilter
+                                                )) && (
                                                 <>
                                                     <Box
                                                         marginTop={3}
@@ -222,12 +288,14 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                                 </PageContentsCardV1>
                             </Grid>
                         }
-                        isEmpty={anomaliesRequestDataResponse?.length === 0}
+                        isEmpty={anomalies?.length === 0}
                     >
                         <Outlet
                             context={{
                                 anomalies,
                                 handleAnomalyDelete,
+                                subscriptionGroups,
+                                alerts,
                             }}
                         />
                     </EmptyStateSwitch>

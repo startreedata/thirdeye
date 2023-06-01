@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.fail;
 import ai.startree.thirdeye.detectionpipeline.components.TimeIndexFiller.TimeLimitInferenceStrategy;
 import ai.startree.thirdeye.detectionpipeline.spec.TimeIndexFillerSpec;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
+import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
@@ -27,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class TimeIndexFillerTest {
@@ -371,5 +374,44 @@ public class TimeIndexFillerTest {
       fail("Index filling failed: " + e);
     }
     assertThat(output.getDataFrame()).isEqualTo(expectedDataFrame);
+  }
+
+  @DataProvider(name = "testLeftFillEquivalentToLeftJoin")
+  public Object[][] leftFillCasesProvider() {
+    final Object[] oneValueNotInCorrectIndex = {
+        LongSeries.buildFrom(-100, 100, 200, 300),
+        DoubleSeries.buildFrom(1.1, 2., 3., 4.),
+        LongSeries.buildFrom(100, 200, 300),
+    };
+    final Object[] twoValuesNotInCorrectIndex = {
+        LongSeries.buildFrom(-100, 100, 200, 250, 300),
+        DoubleSeries.buildFrom(1.1, 2., 3., 4., 5.),
+        LongSeries.buildFrom(100, 200, 300),
+    };
+    final Object[] noIssues = {
+        LongSeries.buildFrom(100, 200, 250, 300, 400, 500, 600),
+        DoubleSeries.buildFrom(1.1, 2., 2.5, 3., 4., 5., 6),
+        LongSeries.buildFrom(100, 200, 250, 300, 400, 500, 600),
+    };
+
+    return new Object[][]{oneValueNotInCorrectIndex, twoValuesNotInCorrectIndex, noIssues};
+  }
+
+  @Test(dataProvider = "testLeftFillEquivalentToLeftJoin")
+  public void testLeftFillEquivalentToLeftJoin(final LongSeries rawTimeIndex, final DoubleSeries rawValues,
+      final LongSeries expectedIndex) {
+    final DataFrame rawData = new DataFrame();
+    rawData.addSeries("ts", rawTimeIndex);
+    rawData.addSeries("met", rawValues);
+
+    final DataFrame correctIndexForLeftJoin = new DataFrame();
+    correctIndexForLeftJoin.addSeries("ts", expectedIndex);
+    final DataFrame expected = correctIndexForLeftJoin.joinLeft(rawData, "ts");
+
+    final DataFrame output = new DataFrame();
+    output.addSeries("ts", expectedIndex);
+    TimeIndexFiller.leftFill(output, rawData, "ts");
+
+    assertThat(output).isEqualTo(expected);
   }
 }

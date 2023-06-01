@@ -40,6 +40,7 @@ import ai.startree.thirdeye.spi.detection.NullReplacer;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import ai.startree.thirdeye.spi.util.TimeUtils;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -203,15 +204,15 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   /**
    * Low level filling implementation - for performance.
    * Pre-conditions:
-   * - correctIndex.timeColumn contains ~ at least ~ all values of rawData.timeColumn.
-   * - the timeColumn Series of both dataframes is sorted in ascending order
+   * - the timeColumn Series of both dataframes are sorted in ascending order - this is not checked
    *
    * Behaviour:
    * join raw data into the correctIndex dataframe. Modifies correctIndex directly (no copy).
    * Equivalent to correctIndex.joinLeft(rawData, timeColumn, timeColumn); but is O(n),
    * whereas join is O(n*n).
    */
-  private static void leftFill(final DataFrame correctIndex, final DataFrame rawData,
+  @VisibleForTesting
+  protected static void leftFill(final DataFrame correctIndex, final DataFrame rawData,
       final String timeColumn) {
     final long[] correctTimeIndex = correctIndex.getLongs(timeColumn).values();
     final int correctSize = correctTimeIndex.length;
@@ -230,9 +231,15 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         Arrays.fill(filledValues, BooleanSeries.NULL);
         final byte[] rawValues = series.getBooleans().values();
         int rawIdx = 0;
-        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
-          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
-            filledValues[correctIdx] = rawValues[rawIdx++];
+        int correctIdx = 0;
+        while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          if (timeComparison == 0) {
+            filledValues[correctIdx++] = rawValues[rawIdx++];
+          } else if (timeComparison > 0) {
+            rawIdx++;
+          } else {
+            correctIdx++;
           }
         }
         correctIndex.addSeries(seriesName, filledValues);
@@ -241,9 +248,15 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         Arrays.fill(filledValues, DoubleSeries.NULL);
         final double[] rawValues = series.getDoubles().values();
         int rawIdx = 0;
-        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
-          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
-            filledValues[correctIdx] = rawValues[rawIdx++];
+        int correctIdx = 0;
+        while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          if (timeComparison == 0) {
+            filledValues[correctIdx++] = rawValues[rawIdx++];
+          } else if (timeComparison > 0) {
+            rawIdx++;
+          } else {
+            correctIdx++;
           }
         }
         correctIndex.addSeries(seriesName, filledValues);
@@ -252,9 +265,15 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         Arrays.fill(filledValues, LongSeries.NULL);
         final long[] rawValues = series.getLongs().values();
         int rawIdx = 0;
-        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
-          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
-            filledValues[correctIdx] = rawValues[rawIdx++];
+        int correctIdx = 0;
+        while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          if (timeComparison == 0) {
+            filledValues[correctIdx++] = rawValues[rawIdx++];
+          } else if (timeComparison > 0) {
+            rawIdx++;
+          } else {
+            correctIdx++;
           }
         }
         correctIndex.addSeries(seriesName, filledValues);
@@ -263,9 +282,15 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         Arrays.fill(filledValues, StringSeries.NULL);
         final String[] rawValues = series.getStrings().values();
         int rawIdx = 0;
-        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
-          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
-            filledValues[correctIdx] = rawValues[rawIdx++];
+        int correctIdx = 0;
+        while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          if (timeComparison == 0) {
+            filledValues[correctIdx++] = rawValues[rawIdx++];
+          } else if (timeComparison > 0) {
+            rawIdx++;
+          } else {
+            correctIdx++;
           }
         }
         correctIndex.addSeries(seriesName, filledValues);
@@ -274,9 +299,15 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         Arrays.fill(filledValues, ObjectSeries.NULL);
         final Object[] rawValues = series.getObjects().values();
         int rawIdx = 0;
-        for (int correctIdx = 0; correctIdx < correctSize && rawIdx < rawTimeIndex.length; correctIdx++) {
-          if (correctTimeIndex[correctIdx] == rawTimeIndex[rawIdx]) {
-            filledValues[correctIdx] = rawValues[rawIdx++];
+        int correctIdx = 0;
+        while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          if (timeComparison == 0) {
+            filledValues[correctIdx++] = rawValues[rawIdx++];
+          } else if (timeComparison > 0) {
+            rawIdx++;
+          } else {
+            correctIdx++;
           }
         }
         correctIndex.addSeriesObjects(seriesName, filledValues);

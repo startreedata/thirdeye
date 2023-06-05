@@ -1,3 +1,15 @@
+## [2.21.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.20.0...thirdeye-ui-2.21.0) (2023-06-05)
+
+
+### Features
+
+* [TE-1546](https://cortexdata.atlassian.net/browse/TE-1546) filter by subscription group and default anomalies filters ([e01932bde](https://github.com/startreedata/thirdeye/commit/e01932bdef26f410f240374ce4ce813932ddd903))
+
+
+### Bug Fixes
+
+* trigger ui release ([9310d6ba4](https://github.com/startreedata/thirdeye/commit/9310d6ba438ad9457c200b9d77b6e0aede416a78))
+
 ## [2.20.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.19.0...thirdeye-ui-2.20.0) (2023-05-25)
 
 

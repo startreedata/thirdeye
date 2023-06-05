@@ -25,7 +25,7 @@ export interface DropdownButtonV1Props {
     onClick?: (menuItemId: number | string, text: string) => void;
     children?: ReactNode;
     startIcon?: ReactNode;
-    size?: string;
+    size?: "small" | "medium" | "large" | undefined;
 }
 
 export enum DropdownButtonTypeV1 {

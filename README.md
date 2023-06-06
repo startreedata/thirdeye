@@ -91,12 +91,11 @@ ThirdEye is a maven project and uses standard maven commands.
 # To skip tests during build
 ./mvnw -T 1C install -DskipTests
 
-# If you are working on backend, You may skip the ui module
-./mvnw -T 1C install -pl '!thirdeye-ui'
-
 # To Skip Integration tests
 ./mvnw -T 1C install -pl '!thirdeye-integration-tests'
 ```
+
+To build the UI, see [thirdeye-ui](thirdeye-ui/README.md).
 
 ### Running ThirdEye from Distribution
 

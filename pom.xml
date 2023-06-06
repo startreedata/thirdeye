@@ -42,9 +42,6 @@
     <!--  Run the Integration test modules after building the distribution (required for plugins) -->
     <module>pinot-test-container</module>
     <module>thirdeye-integration-tests</module>
-
-    <!-- Build ThirdEye UI -->
-    <module>thirdeye-ui</module>
   </modules>
 
   <properties>

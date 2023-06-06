@@ -34,7 +34,7 @@ jobs:
         path: ~/.m2/repository
         key: tests-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
     - name: Build with Maven
-      run: ./mvnw -T 1C -B clean verify -pl '!thirdeye-ui'
+      run: ./mvnw -T 1C -B clean verify
       env:
         ARTIFACTORY_USERNAME_REF: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
         ARTIFACTORY_TOKEN_REF: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}

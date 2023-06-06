@@ -23,7 +23,10 @@ import { useUserPreferences } from "../../../utils/user-preferences/user-prefere
 import { UserPreferencesKeys } from "../../../utils/user-preferences/user-preferences.interfaces";
 import { Modal } from "../../modal/modal.component";
 import { AlertFilter } from "../alert-filter/alert-filter.component";
-import { AnomalyFilterQueryStringKey } from "../anomaly-filters-selection.interface";
+import {
+    AnomalyFilterQueryStringKey,
+    ANOMALY_FILTERS_TEST_IDS,
+} from "../anomaly-filters-selection.interface";
 import { SubscriptionGroupFilter } from "../subscription-group-filter/subscription-group-filter.component";
 import { AddFilterModalProps } from "./add-filter-modal.interface";
 
@@ -135,7 +138,12 @@ export const AddFilterModal: FunctionComponent<AddFilterModalProps> = ({
             submitButtonLabel={t("label.confirm")}
             trigger={(opeCallback) => {
                 return (
-                    <Button color="primary" size="small" onClick={opeCallback}>
+                    <Button
+                        color="primary"
+                        data-testid={ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN}
+                        size="small"
+                        onClick={opeCallback}
+                    >
                         {t("label.modify-filters")}
                     </Button>
                 );

@@ -24,6 +24,7 @@ import {
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 import { UiSubscriptionGroup } from "../../../rest/dto/ui-subscription-group.interfaces";
 import { getUiSubscriptionGroups } from "../../../utils/subscription-groups/subscription-groups.util";
+import { ANOMALY_FILTERS_TEST_IDS } from "../anomaly-filters-selection.interface";
 import { ExpandedRow } from "./expanded-row/expanded-row.component";
 import { SubscriptionGroupFilterProps } from "./subscription-group-filter.interface";
 
@@ -146,6 +147,7 @@ export const SubscriptionGroupFilter: FunctionComponent<SubscriptionGroupFilterP
             <DataGridV1<UiSubscriptionGroup>
                 columns={alertColumns}
                 data={uiSubscriptionGroups as UiSubscriptionGroup[]}
+                data-testid={ANOMALY_FILTERS_TEST_IDS.SUBSCRIPTION_GROUP_TABLE}
                 expandColumnKey="name"
                 initialSortState={{
                     key: "name",

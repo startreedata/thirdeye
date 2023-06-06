@@ -28,3 +28,11 @@ export interface AnomalyFiltersSelectionProps {
     alertsData: Alert[] | null;
     enumerationItemsData: EnumerationItem[] | null;
 }
+
+export const ANOMALY_FILTERS_TEST_IDS = {
+    MODIFY_BTN: "add-btn",
+    CLEAR_BTN: "clear-btn",
+    CONFIRM_BTN: "confirm-btn",
+    ALERTS_TABLE: "alerts-filter-table",
+    SUBSCRIPTION_GROUP_TABLE: "subscription-group-filters-table",
+};

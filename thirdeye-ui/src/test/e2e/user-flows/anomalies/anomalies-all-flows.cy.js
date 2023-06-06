@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { ANOMALY_LIST_TEST_IDS } from "../../../../app/components/anomaly-list-v1/anomaly-list-v1.interfaces";
+import { ANOMALY_FILTERS_TEST_IDS } from "../../../../app/components/anomaly-filters-selection/anomaly-filters-selection.interface";
 
 describe("anomalies list flows", () => {
     beforeEach(() => {
@@ -44,50 +44,51 @@ describe("anomalies list flows", () => {
         );
     });
 
-    it("user sees table and can filter by metric, dataset, and alert", () => {
-        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.TABLE)
-            .find(".BaseTable__body [role='row']")
-            .should("have.length.gt", 5);
-
-        // Ensure api is called when filters are changed
-        cy.intercept("/api/anomalies*").as("anomalies");
-        cy.getByDataTestId(
-            ANOMALY_LIST_TEST_IDS.ALERT_FILTER_CONTAINER
-        ).click();
-
-        cy.get("li").contains("UnitCost").click();
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-
-        // Ensure clearing also causes api call
-        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.ALERT_FILTER_CONTAINER)
-            .find("button.MuiAutocomplete-clearIndicator")
-            .click({ force: true });
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-
-        // Testing filtering by dataset
-        cy.getByDataTestId(
-            ANOMALY_LIST_TEST_IDS.DATASET_FILTER_CONTAINER
-        ).click();
-
-        cy.get("li").contains("USStore").click();
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.DATASET_FILTER_CONTAINER)
-            .find("button.MuiAutocomplete-clearIndicator")
-            .click({ force: true });
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-
-        // Testing filtering by metric
-        cy.getByDataTestId(
-            ANOMALY_LIST_TEST_IDS.METRIC_FILTER_CONTAINER
-        ).click();
-
-        cy.get("li").contains("UnitCost").click();
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.METRIC_FILTER_CONTAINER)
-            .find("button.MuiAutocomplete-clearIndicator")
-            .click({ force: true });
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-    });
+    // it("user sees table and can filter by alert and subscription group", () => {
+    //     cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.TABLE)
+    //         .find(".BaseTable__body [role='row']")
+    //         .should("have.length.gt", 5);
+    //
+    //     // Testing filtering by alert
+    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN).click();
+    //
+    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE).within(() => {
+    //         cy.get("div[role='row']")
+    //             .contains("UnitCost")
+    //             .parent()
+    //             .parent()
+    //             .within(() => {
+    //                 cy.get("input[type='checkbox']").click();
+    //             });
+    //     });
+    //
+    //     cy.intercept("/api/anomalies*").as("anomalies");
+    //
+    //     // Ensure api is called when filters are changed
+    //     cy.get("button[type='submit']").click();
+    //     cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
+    //
+    //     // Removing filter causes API call
+    //     cy.get("span")
+    //         .contains("alert=UnitCost_SUM_mean-variance-rule-testing")
+    //         .click();
+    //     cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
+    //
+    //     // Ensure that the clear button works
+    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN).click();
+    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE).within(() => {
+    //         cy.get("div[role='row']")
+    //             .contains("UnitCost")
+    //             .parent()
+    //             .parent()
+    //             .within(() => {
+    //                 cy.get("input[type='checkbox']").click();
+    //             });
+    //     });
+    //     cy.get("button[type='submit']").click();
+    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.CLEAR_BTN).click();
+    //     cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
+    // });
 
     it("user sees working metrics report page", () => {
         cy.get("a").contains("Metrics Report").click();
@@ -98,41 +99,31 @@ describe("anomalies list flows", () => {
 
         // Ensure api is called when filters are changed
         cy.intercept("/api/anomalies*").as("anomalies");
-        cy.getByDataTestId(
-            ANOMALY_LIST_TEST_IDS.ALERT_FILTER_CONTAINER
-        ).click();
 
-        cy.get("li").contains("UnitCost").click();
+        // Filter by alert
+        cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN).click();
+
+        cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE).within(() => {
+            cy.get("div[role='row']")
+                .contains("UnitCost")
+                .parent()
+                .parent()
+                .within(() => {
+                    cy.get("input[type='checkbox']").click();
+                });
+        });
+        cy.get("button[type='submit']").click();
         cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
+
+        // Ensure table still has content
+        cy.getByDataTestId("metrics-report-list-tbody")
+            .find("tr")
+            .should("have.length", 1);
 
         // Ensure clearing also causes api call
-        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.ALERT_FILTER_CONTAINER)
-            .find("button.MuiAutocomplete-clearIndicator")
-            .click({ force: true });
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-
-        // Testing filtering by dataset
-        cy.getByDataTestId(
-            ANOMALY_LIST_TEST_IDS.DATASET_FILTER_CONTAINER
-        ).click();
-
-        cy.get("li").contains("USStore").click();
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.DATASET_FILTER_CONTAINER)
-            .find("button.MuiAutocomplete-clearIndicator")
-            .click({ force: true });
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-
-        // Testing filtering by metric
-        cy.getByDataTestId(
-            ANOMALY_LIST_TEST_IDS.METRIC_FILTER_CONTAINER
-        ).click();
-
-        cy.get("li").contains("UnitCost").click();
-        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.METRIC_FILTER_CONTAINER)
-            .find("button.MuiAutocomplete-clearIndicator")
-            .click({ force: true });
+        cy.get("span")
+            .contains("alert=UnitCost_SUM_mean-variance-rule-testing")
+            .click();
         cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
     });
 });

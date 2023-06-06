@@ -26,6 +26,7 @@ import { AddFilterModal } from "./add-filter-modal/add-filter-modal.component";
 import {
     AnomalyFilterQueryStringKey,
     AnomalyFiltersSelectionProps,
+    ANOMALY_FILTERS_TEST_IDS,
 } from "./anomaly-filters-selection.interface";
 
 export const AnomalyFiltersSelection: FunctionComponent<AnomalyFiltersSelectionProps> =
@@ -186,6 +187,9 @@ export const AnomalyFiltersSelection: FunctionComponent<AnomalyFiltersSelectionP
                             <Grid item>
                                 <Button
                                     color="primary"
+                                    data-testid={
+                                        ANOMALY_FILTERS_TEST_IDS.CLEAR_BTN
+                                    }
                                     disabled={
                                         isEmpty(currentSelectedAlerts) &&
                                         isEmpty(currentSelectedSubGroups)

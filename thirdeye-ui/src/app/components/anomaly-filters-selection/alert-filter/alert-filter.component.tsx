@@ -23,6 +23,7 @@ import {
 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { ANOMALY_FILTERS_TEST_IDS } from "../anomaly-filters-selection.interface";
 import { AlertFilterProps } from "./alert-filter.interface";
 
 export const AlertFilter: FunctionComponent<AlertFilterProps> = ({
@@ -86,6 +87,7 @@ export const AlertFilter: FunctionComponent<AlertFilterProps> = ({
         <DataGridV1<Alert>
             columns={alertColumns}
             data={alertsData as Alert[]}
+            data-testid={ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE}
             initialSortState={{
                 key: "name",
                 order: DataGridSortOrderV1.ASC,

@@ -16,7 +16,7 @@ import { Icon } from "@iconify/react";
 import { Box, Button, Grid, Link } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Link as RouterLink,
@@ -24,6 +24,8 @@ import {
     useParams,
     useSearchParams,
 } from "react-router-dom";
+import { MetricRenderer } from "../../components/anomalies-view/metric-renderer/metric-renderer.component";
+import { Crumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { anomaliesInvestigateBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
@@ -40,6 +42,7 @@ import {
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageV1,
+    SkeletonV1,
     useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -233,8 +236,14 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
         );
     }, [anomalyRequestStatus, anomalyRequestErrors]);
 
-    const enumerationItemSearchParams =
-        anomaly && anomaly.enumerationItem && enumerationItem
+    const breadcrumbs = useMemo(() => {
+        const crumbs: Crumb[] = [
+            {
+                link: getAnomaliesAllPath(),
+                label: t("label.anomalies"),
+            },
+        ];
+        const enumerationItemSearchParams = enumerationItem
             ? new URLSearchParams([
                   [
                       QUERY_PARAM_KEY_FOR_EXPANDED,
@@ -242,6 +251,29 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
                   ],
               ])
             : undefined;
+
+        if (anomaly) {
+            crumbs.push({
+                link: getAlertsAlertPath(
+                    anomaly.alert.id,
+                    enumerationItemSearchParams
+                ),
+                label: enumerationItem
+                    ? `${anomaly.alert.name} (${enumerationItem.name})`
+                    : anomaly.alert.name,
+            });
+        } else {
+            crumbs.push({
+                label: <SkeletonV1 width={50} />,
+            });
+        }
+
+        crumbs.push({
+            label: anomaly?.id,
+        });
+
+        return crumbs;
+    }, [anomaly, enumerationItem]);
 
     /**
      * Chart data will have issues if the evaluation request errors or
@@ -253,20 +285,6 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
             anomaly.enumerationItem &&
             getEnumerationItemRequest === ActionStatus.Error);
 
-    const getSubtitle = (): string | undefined => {
-        if (anomaly && anomaly.enumerationItem && enumerationItem) {
-            return generateNameForEnumerationItem(enumerationItem);
-        }
-
-        if (uiAnomaly?.isIgnored) {
-            return t(
-                "message.this-anomaly-was-ignored-due-to-the-system-sensibility"
-            );
-        }
-
-        return undefined;
-    };
-
     const getAnomalyName = ({ name, isIgnored }: UiAnomaly): string =>
         `${name}${isIgnored ? `(${t("label.ignored")})` : ""}`;
 
@@ -274,15 +292,7 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
         <PageV1>
             <PageHeader
                 transparentBackground
-                breadcrumbs={[
-                    {
-                        link: getAnomaliesAllPath(),
-                        label: t("label.anomalies"),
-                    },
-                    {
-                        label: anomalyId,
-                    },
-                ]}
+                breadcrumbs={breadcrumbs}
                 customActions={
                     <PageHeaderActionsV1>
                         <Button
@@ -317,23 +327,12 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
                         />
                     </PageHeaderActionsV1>
                 }
-                subtitle={getSubtitle()}
+                subtitle={!!anomaly && <MetricRenderer anomaly={anomaly} />}
             >
                 {anomaly && uiAnomaly && (
-                    <>
-                        <PageHeaderTextV1>
-                            {getAnomalyName(uiAnomaly)}
-                        </PageHeaderTextV1>
-                        <Link
-                            component={RouterLink}
-                            to={getAlertsAlertPath(
-                                anomaly.alert.id,
-                                enumerationItemSearchParams
-                            )}
-                        >
-                            {anomaly.alert.name}
-                        </Link>
-                    </>
+                    <PageHeaderTextV1>
+                        {getAnomalyName(uiAnomaly)}
+                    </PageHeaderTextV1>
                 )}
             </PageHeader>
 

@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Alert } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
 export interface MetricRendererProps {
     anomaly: Anomaly;
+    alertData?: Alert | null;
 }

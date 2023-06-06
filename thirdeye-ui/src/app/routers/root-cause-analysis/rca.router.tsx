@@ -13,9 +13,8 @@
  * the License.
  */
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
-import { InvestigationStateTracker } from "../../pages/root-cause-analysis-investigation-state-tracker/investigation-state-tracker.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
@@ -32,6 +31,18 @@ const RootCauseAnalysisForAnomalyPage = lazy(() =>
     import(
         /* webpackChunkName: "root-analysis-for-anomaly-page" */ "../../pages/root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.component"
     ).then((module) => ({ default: module.RootCauseAnalysisForAnomalyPage }))
+);
+
+const InvestigationStateTracker = lazy(() =>
+    import(
+        /* webpackChunkName: "investigation-state-tracker" */ "../../pages/root-cause-analysis-investigation-state-tracker/investigation-state-tracker.component"
+    ).then((module) => ({ default: module.InvestigationStateTracker }))
+);
+
+const InvestigationStateTrackerV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "investigation-state-tracker-v2" */ "../../pages/rca-investigation-state-tracker/investigation-state-tracker.component"
+    ).then((module) => ({ default: module.InvestigationStateTracker }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -73,6 +84,26 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                         }
                     />
 
+                    <Route element={<PageNotFoundPage />} path="*" />
+                </Route>
+
+                <Route
+                    element={<InvestigationStateTrackerV2 />}
+                    path={`/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2}/*`}
+                >
+                    {/* Root cause for an anomaly index path. */}
+                    <Route
+                        index
+                        element={
+                            <Navigate
+                                replace
+                                to={AppRouteRelative.RCA_WHAT_WHERE}
+                            />
+                        }
+                    />
+                    <Route path={AppRouteRelative.RCA_WHAT_WHERE} />
+                    <Route path={AppRouteRelative.RCA_EVENTS} />
+                    <Route path={AppRouteRelative.RCA_REVIEW_SHARE} />
                     <Route element={<PageNotFoundPage />} path="*" />
                 </Route>
 

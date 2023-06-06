@@ -1,5 +1,8 @@
 {
     "label": {
+        "1-what-went-wrong-and-where": "1. What went wrong and where?",
+        "2-an-event-could-have-caused-it": "2. An event could have caused it?",
+        "3-review-investigation-share": "3. Review investigation & share",
         "404": "404",
         "about": "About",
         "absolute-change": "Absolute change",
@@ -284,6 +287,7 @@
         "no-stay": "No, stay",
         "non-filtered": "Non Filtered",
         "none": "None",
+        "not-saved": "not saved",
         "num-dimensions": "{{num}} dimensions",
         "ok": "Ok",
         "onboard": "Onboard",

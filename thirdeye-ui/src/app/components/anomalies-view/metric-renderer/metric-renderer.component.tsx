@@ -13,22 +13,33 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { SkeletonV1 } from "../../../platform/components";
 import { useGetAlert } from "../../../rest/alerts/alerts.actions";
+import { getMetricString } from "../../../utils/anomalies/anomalies.util";
 import { MetricRendererProps } from "./metric-renderer.interfaces";
 
 export const MetricRenderer: FunctionComponent<MetricRendererProps> = ({
     anomaly,
+    alertData,
 }) => {
     const { t } = useTranslation();
     const { alert, getAlert } = useGetAlert();
 
     useEffect(() => {
-        if (anomaly) {
+        if (anomaly && !alertData) {
             getAlert(anomaly.alert.id);
         }
     }, [anomaly]);
+
+    const alertDataToUse = useMemo(() => {
+        if (alertData) {
+            return alertData;
+        }
+
+        return alert;
+    }, [alert, alertData]);
 
     return (
         <Grid container spacing={1}>
@@ -44,9 +55,8 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = ({
             </Grid>
             <Grid item>
                 <Typography color="textPrimary" variant="body1">
-                    {alert?.templateProperties?.aggregationFunction
-                        ? `${alert?.templateProperties?.aggregationFunction}(${anomaly?.metadata.metric?.name})`
-                        : anomaly?.metadata.metric?.name}
+                    {alertDataToUse && getMetricString(alertDataToUse, anomaly)}
+                    {!alertDataToUse && <SkeletonV1 />}
                 </Typography>
             </Grid>
         </Grid>

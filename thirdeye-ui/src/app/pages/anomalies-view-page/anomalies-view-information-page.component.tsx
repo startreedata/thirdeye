@@ -63,6 +63,12 @@ import { AnomalyViewContainerPageOutletContext } from "./anomalies-view-page.int
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
 
 export const AnomaliesViewInformationPage: FunctionComponent = () => {
+    const { showDialog } = useDialogProviderV1();
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
+    const style = useAnomaliesViewPageStyles();
+
     const containerContext =
         useOutletContext<AnomalyViewContainerPageOutletContext>();
     const {
@@ -71,12 +77,6 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
         handleFeedbackUpdateSuccess,
         enumerationItem,
     } = containerContext;
-
-    const { showDialog } = useDialogProviderV1();
-    const navigate = useNavigate();
-    const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
-    const style = useAnomaliesViewPageStyles();
 
     const [showV1Link, setShowV1Link] = useState(true);
 

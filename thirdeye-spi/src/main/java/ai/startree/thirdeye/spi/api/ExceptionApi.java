@@ -11,43 +11,45 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package ai.startree.thirdeye.spi.api;
 
-import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
-public class StatusApi implements ThirdEyeApi {
+public class ExceptionApi {
 
-  private ThirdEyeStatus code;
-  private String msg;
-  private ExceptionApi exception;
+  private String message;
+  private ExceptionApi cause;
+  private List<StackTraceElementApi> stackTrace;
 
-  public ThirdEyeStatus getCode() {
-    return code;
+  public String getMessage() {
+    return message;
   }
 
-  public StatusApi setCode(final ThirdEyeStatus code) {
-    this.code = code;
+  public ExceptionApi setMessage(final String message) {
+    this.message = message;
     return this;
   }
 
-  public String getMsg() {
-    return msg;
+  public ExceptionApi getCause() {
+    return cause;
   }
 
-  public StatusApi setMsg(final String msg) {
-    this.msg = msg;
+  public ExceptionApi setCause(final ExceptionApi cause) {
+    this.cause = cause;
     return this;
   }
 
-  public ExceptionApi getException() {
-    return exception;
+  public List<StackTraceElementApi> getStackTrace() {
+    return stackTrace;
   }
 
-  public StatusApi setException(final ExceptionApi exception) {
-    this.exception = exception;
+  public ExceptionApi setStackTrace(
+      final List<StackTraceElementApi> stackTrace) {
+    this.stackTrace = stackTrace;
     return this;
   }
 }

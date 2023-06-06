@@ -20,18 +20,22 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN_RCA_ALGORITHM;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static ai.startree.thirdeye.util.ResourceUtils.statusApi;
+import static ai.startree.thirdeye.util.ResourceUtils.statusListApi;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DataProviderException;
 import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.api.ExceptionApi;
+import ai.startree.thirdeye.spi.api.StackTraceElementApi;
 import ai.startree.thirdeye.spi.api.StatusApi;
-import ai.startree.thirdeye.spi.api.StatusListApi;
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,34 +71,53 @@ public class ExceptionHandler {
 
   public static void handleAlertEvaluationException(final Exception e) {
     LOG.error("Error in Alert Evaluation", e);
-    final StatusListApi statusListApi = new StatusListApi().setList(new ArrayList<>());
-
-    populateStatusListApi(e, statusListApi, ALERT_HANDLERS);
-    throw serverError(statusListApi);
+    handleException(e, ALERT_HANDLERS);
   }
 
   public static void handleRcaAlgorithmException(final Exception e) {
     LOG.error("Error in RCA algorithm", e);
-    final StatusListApi statusListApi = new StatusListApi().setList(new ArrayList<>());
-
-    populateStatusListApi(e, statusListApi, RCA_HANDLERS);
-    throw serverError(statusListApi);
+    handleException(e, RCA_HANDLERS);
   }
 
-  private static void populateStatusListApi(final Throwable e, StatusListApi statusListApi,
-      Map<Class<?>, Function<Throwable, StatusApi>> handlers) {
-    final List<StatusApi> l = statusListApi.getList();
-    for (var h : handlers.entrySet()) {
+  private static void handleException(final Exception e,
+      final Map<Class<?>, Function<Throwable, StatusApi>> handlers) {
+    final StatusApi statusApi = requireNonNull(toStatusApi(e, handlers))
+        .setException(toExceptionApi(e));
+    throw serverError(statusListApi(statusApi));
+  }
+
+  private static StatusApi toStatusApi(final Throwable e,
+      final Map<Class<?>, Function<Throwable, StatusApi>> handlers) {
+    for (final var h : handlers.entrySet()) {
       final Class<?> handledClass = h.getKey();
       final Function<Throwable, StatusApi> handler = h.getValue();
       if (handledClass.isInstance(e)) {
-        l.add(handler.apply(e));
-        break;
+        return handler.apply(e);
       }
     }
+    return null;
+  }
 
-    if (e.getCause() != null) {
-      populateStatusListApi(e.getCause(), statusListApi, handlers);
+  public static ExceptionApi toExceptionApi(final Throwable t) {
+    if (t == null) {
+      return null;
     }
+
+    final List<StackTraceElementApi> stackTrace = Arrays.stream(t.getStackTrace())
+        .map(ExceptionHandler::stackTraceElementApi)
+        .collect(Collectors.toList());
+
+    return new ExceptionApi()
+        .setMessage(t.getMessage())
+        .setCause(toExceptionApi(t.getCause()))
+        .setStackTrace(stackTrace);
+  }
+
+  private static StackTraceElementApi stackTraceElementApi(final StackTraceElement ste) {
+    return new StackTraceElementApi()
+        .setClassName(ste.getClassName())
+        .setMethodName(ste.getMethodName())
+        .setFileName(ste.getFileName())
+        .setLineNumber(ste.getLineNumber());
   }
 }

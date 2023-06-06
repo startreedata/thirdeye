@@ -114,11 +114,14 @@ public class ResourceUtils {
   }
 
   public static StatusListApi statusListApi(final ThirdEyeStatus status, final String msg) {
-    return new StatusListApi()
-        .setList(ImmutableList.of(new StatusApi()
-            .setCode(status)
-            .setMsg(msg)
-        ));
+    final StatusApi statusApi = new StatusApi()
+        .setCode(status)
+        .setMsg(msg);
+    return statusListApi(statusApi);
+  }
+
+  public static StatusListApi statusListApi(final StatusApi statusApi) {
+    return new StatusListApi().setList(ImmutableList.of(statusApi));
   }
 
   public static StatusApi statusApi(final ThirdEyeStatus status, final Object... args) {

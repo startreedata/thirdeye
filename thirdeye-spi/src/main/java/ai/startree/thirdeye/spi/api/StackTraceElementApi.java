@@ -11,43 +11,53 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package ai.startree.thirdeye.spi.api;
 
-import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
-public class StatusApi implements ThirdEyeApi {
+public class StackTraceElementApi {
 
-  private ThirdEyeStatus code;
-  private String msg;
-  private ExceptionApi exception;
+  private String className;
+  private String methodName;
+  private String fileName;
+  private int lineNumber;
 
-  public ThirdEyeStatus getCode() {
-    return code;
+  public String getClassName() {
+    return className;
   }
 
-  public StatusApi setCode(final ThirdEyeStatus code) {
-    this.code = code;
+  public StackTraceElementApi setClassName(final String className) {
+    this.className = className;
     return this;
   }
 
-  public String getMsg() {
-    return msg;
+  public String getMethodName() {
+    return methodName;
   }
 
-  public StatusApi setMsg(final String msg) {
-    this.msg = msg;
+  public StackTraceElementApi setMethodName(final String methodName) {
+    this.methodName = methodName;
     return this;
   }
 
-  public ExceptionApi getException() {
-    return exception;
+  public String getFileName() {
+    return fileName;
   }
 
-  public StatusApi setException(final ExceptionApi exception) {
-    this.exception = exception;
+  public StackTraceElementApi setFileName(final String fileName) {
+    this.fileName = fileName;
+    return this;
+  }
+
+  public int getLineNumber() {
+    return lineNumber;
+  }
+
+  public StackTraceElementApi setLineNumber(final int lineNumber) {
+    this.lineNumber = lineNumber;
     return this;
   }
 }

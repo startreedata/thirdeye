@@ -432,6 +432,9 @@
 
               <!-- tmp directories -->
               <exclude>**/tmp/**</exclude>
+
+              <!-- ui directory -->
+              <exclude>thirdeye-ui/**</exclude>
             </excludes>
             <mapping>
               <ts>JAVADOC_STYLE</ts>

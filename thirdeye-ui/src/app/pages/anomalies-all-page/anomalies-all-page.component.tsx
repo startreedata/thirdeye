@@ -20,6 +20,7 @@ import { Outlet, useSearchParams } from "react-router-dom";
 import { AnomaliesPageHeader } from "../../components/anomalies-page-header/anomalies-page-header.component";
 import { AnomalyFiltersSelection } from "../../components/anomaly-filters-selection/anomaly-filters-selection.component";
 import { AnomalyFilterQueryStringKey } from "../../components/anomaly-filters-selection/anomaly-filters-selection.interface";
+import { AnomalyQuickFilters } from "../../components/anomaly-quick-filters/anomaly-quick-filters.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -242,6 +243,7 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                         emptyState={
                             <Grid item xs={12}>
                                 <PageContentsCardV1>
+                                    <AnomalyQuickFilters showTimeSelectorOnly />
                                     <Box pb={20} pt={20}>
                                         <NoDataIndicator>
                                             <Box>

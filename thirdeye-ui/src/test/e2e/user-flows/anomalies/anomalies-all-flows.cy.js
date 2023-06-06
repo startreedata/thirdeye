@@ -14,6 +14,7 @@
  */
 
 import { ANOMALY_FILTERS_TEST_IDS } from "../../../../app/components/anomaly-filters-selection/anomaly-filters-selection.interface";
+import { ANOMALY_LIST_TEST_IDS } from "../../../../app/components/anomaly-list-v1/anomaly-list-v1.interfaces";
 
 describe("anomalies list flows", () => {
     beforeEach(() => {
@@ -44,51 +45,51 @@ describe("anomalies list flows", () => {
         );
     });
 
-    // it("user sees table and can filter by alert and subscription group", () => {
-    //     cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.TABLE)
-    //         .find(".BaseTable__body [role='row']")
-    //         .should("have.length.gt", 5);
-    //
-    //     // Testing filtering by alert
-    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN).click();
-    //
-    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE).within(() => {
-    //         cy.get("div[role='row']")
-    //             .contains("UnitCost")
-    //             .parent()
-    //             .parent()
-    //             .within(() => {
-    //                 cy.get("input[type='checkbox']").click();
-    //             });
-    //     });
-    //
-    //     cy.intercept("/api/anomalies*").as("anomalies");
-    //
-    //     // Ensure api is called when filters are changed
-    //     cy.get("button[type='submit']").click();
-    //     cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-    //
-    //     // Removing filter causes API call
-    //     cy.get("span")
-    //         .contains("alert=UnitCost_SUM_mean-variance-rule-testing")
-    //         .click();
-    //     cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-    //
-    //     // Ensure that the clear button works
-    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN).click();
-    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE).within(() => {
-    //         cy.get("div[role='row']")
-    //             .contains("UnitCost")
-    //             .parent()
-    //             .parent()
-    //             .within(() => {
-    //                 cy.get("input[type='checkbox']").click();
-    //             });
-    //     });
-    //     cy.get("button[type='submit']").click();
-    //     cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.CLEAR_BTN).click();
-    //     cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
-    // });
+    it("user sees table and can filter by alert and subscription group", () => {
+        cy.getByDataTestId(ANOMALY_LIST_TEST_IDS.TABLE)
+            .find(".BaseTable__body [role='row']")
+            .should("have.length.gt", 5);
+
+        // Testing filtering by alert
+        cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN).click();
+
+        cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE).within(() => {
+            cy.get("div[role='row']")
+                .contains("UnitCost")
+                .parent()
+                .parent()
+                .within(() => {
+                    cy.get("input[type='checkbox']").click();
+                });
+        });
+
+        cy.intercept("/api/anomalies*").as("anomalies");
+
+        // Ensure api is called when filters are changed
+        cy.get("button[type='submit']").click();
+        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
+
+        // Removing filter causes API call
+        cy.get("span")
+            .contains("alert=UnitCost_SUM_mean-variance-rule-testing")
+            .click();
+        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
+
+        // Ensure that the clear button works
+        cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN).click();
+        cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.ALERTS_TABLE).within(() => {
+            cy.get("div[role='row']")
+                .contains("UnitCost")
+                .parent()
+                .parent()
+                .within(() => {
+                    cy.get("input[type='checkbox']").click();
+                });
+        });
+        cy.get("button[type='submit']").click();
+        cy.getByDataTestId(ANOMALY_FILTERS_TEST_IDS.CLEAR_BTN).click();
+        cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
+    });
 
     it("user sees working metrics report page", () => {
         cy.get("a").contains("Metrics Report").click();

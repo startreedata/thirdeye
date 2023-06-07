@@ -18,6 +18,8 @@
 
 package ai.startree.thirdeye.datasource.cache;
 
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
@@ -41,7 +43,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +63,12 @@ public class DataSourceCache {
 
   private final Map<String, Pair<DataSourceWrapper, Timestamp>> cache = new HashMap<>();
 
+  private final ExecutorService executorService = new ThreadPoolExecutor(0, 10,
+      60L,
+      TimeUnit.SECONDS,
+      new SynchronousQueue<>(),
+      threadsNamed("DataSourceCache-%d"));
+
   @Inject
   public DataSourceCache(
       final DataSourceManager dataSourceManager,
@@ -67,25 +80,35 @@ public class DataSourceCache {
 
     metricRegistry.register("healthyDatasourceCount",
         new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      protected Integer loadValue() {
-        return getHealthyDatasourceCount();
-      }
-    });
+          @Override
+          protected Integer loadValue() {
+            return getHealthyDatasourceCount();
+          }
+        });
     metricRegistry.register("cachedDatasourceCount", (Gauge<Integer>) cache::size);
   }
 
   private Integer getHealthyDatasourceCount() {
     return Math.toIntExact(dataSourceManager.findAll().stream()
         .map(dto -> getDataSource(dto.getName()))
-        .filter(ds -> {
-          try {
-            return ds.validate();
-          } catch (Exception e) {
-            return false;
-          }
-        })
+        .filter(this::validateWithTimeout)
         .count());
+  }
+
+  private boolean validateWithTimeout(final ThirdEyeDataSource ds) {
+    final Future<Boolean> future = executorService.submit(ds::validate);
+    try {
+      return future.get(2, TimeUnit.SECONDS);
+    } catch (final InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return false;
+    } catch (final TimeoutException e) {
+      // Cancel the task as it has timed out
+      future.cancel(true);
+      return false;
+    } catch (final Exception e) {
+      return false;
+    }
   }
 
   public synchronized ThirdEyeDataSource getDataSource(final String name) {
@@ -151,7 +174,8 @@ public class DataSourceCache {
   private void close(final ThirdEyeDataSource dataSource) {
     try {
       dataSource.close();
-    } catch (Exception e) {
+      shutdownExecutionService(executorService);
+    } catch (final Exception e) {
       LOG.error("Datasource {} was not flushed gracefully.", dataSource.getName());
     }
   }

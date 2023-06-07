@@ -1,3 +1,15 @@
+## [2.22.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.21.0...thirdeye-ui-2.22.0) (2023-06-07)
+
+
+### Features
+
+* [TE-1420](https://cortexdata.atlassian.net/browse/TE-1420) rca 2.0 information section ([02e7c2e69](https://github.com/startreedata/thirdeye/commit/02e7c2e69727d9489a3f49870172bbd88ab0bbd2))
+
+
+### Bug Fixes
+
+* [TE-1546](https://cortexdata.atlassian.net/browse/TE-1546) ensure date range picker shows when there is no data ([5163e296a](https://github.com/startreedata/thirdeye/commit/5163e296a2e6ecf4d467848f7c51376f39590e8c))
+
 ## [2.21.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.20.0...thirdeye-ui-2.21.0) (2023-06-05)
 
 

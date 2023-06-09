@@ -35,14 +35,26 @@ const RootCauseAnalysisForAnomalyPage = lazy(() =>
 
 const InvestigationStateTracker = lazy(() =>
     import(
-        /* webpackChunkName: "investigation-state-tracker" */ "../../pages/root-cause-analysis-investigation-state-tracker/investigation-state-tracker.component"
+        /* webpackChunkName: "investigation-state-tracker-container-page" */ "../../pages/root-cause-analysis-investigation-state-tracker/investigation-state-tracker.component"
     ).then((module) => ({ default: module.InvestigationStateTracker }))
 );
 
 const InvestigationStateTrackerV2 = lazy(() =>
     import(
-        /* webpackChunkName: "investigation-state-tracker-v2" */ "../../pages/rca-investigation-state-tracker/investigation-state-tracker.component"
+        /* webpackChunkName: "investigation-state-tracker-container-page-v2" */ "../../pages/rca/investigation-state-tracker-container-page/investigation-state-tracker.component"
     ).then((module) => ({ default: module.InvestigationStateTracker }))
+);
+
+const WhatWherePage = lazy(() =>
+    import(
+        /* webpackChunkName: "what-where-page" */ "../../pages/rca/what-where-page/what-where-page.component"
+    ).then((module) => ({ default: module.WhatWherePage }))
+);
+
+const TopContributors = lazy(() =>
+    import(
+        /* webpackChunkName: "top-contributors" */ "../../pages/rca/top-contributors/top-contributors.component"
+    ).then((module) => ({ default: module.TopContributors }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -101,7 +113,26 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                             />
                         }
                     />
-                    <Route path={AppRouteRelative.RCA_WHAT_WHERE} />
+                    <Route
+                        element={<WhatWherePage />}
+                        path={AppRouteRelative.RCA_WHAT_WHERE}
+                    >
+                        <Route
+                            index
+                            element={
+                                <Navigate
+                                    replace
+                                    to={AppRouteRelative.RCA_TOP_CONTRIBUTORS}
+                                />
+                            }
+                        />
+                        <Route
+                            element={<TopContributors />}
+                            path={AppRouteRelative.RCA_TOP_CONTRIBUTORS}
+                        />
+                        <Route path={AppRouteRelative.RCA_HEATMAP} />
+                        <Route path={AppRouteRelative.RCA_DIMENSION_ANALYSIS} />
+                    </Route>
                     <Route path={AppRouteRelative.RCA_EVENTS} />
                     <Route path={AppRouteRelative.RCA_REVIEW_SHARE} />
                     <Route element={<PageNotFoundPage />} path="*" />

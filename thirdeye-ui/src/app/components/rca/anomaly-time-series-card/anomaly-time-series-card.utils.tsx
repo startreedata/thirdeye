@@ -264,6 +264,42 @@ export const generateChartOptions = (
     return chartOptions;
 };
 
+export const generateAnomalyPointsForStartEnd = (
+    timestamps: number[],
+    valuesToTrackAgainst: number[],
+    startTime: number,
+    endTime: number,
+    defaultValue: number,
+    granularity: number
+): DataPoint[] => {
+    const anomalyRange = (endTime - startTime) / granularity;
+    const anomalySeriesData: DataPoint[] = [];
+
+    if (anomalyRange > 1) {
+        let idx;
+        for (idx = 0; idx < anomalyRange; idx++) {
+            const currentTimestamp = startTime + granularity * idx;
+            const currentTimestampIdx = timestamps.findIndex(
+                (ts) => ts === currentTimestamp
+            );
+
+            if (currentTimestampIdx > -1) {
+                anomalySeriesData.push({
+                    x: currentTimestamp,
+                    y: valuesToTrackAgainst[currentTimestampIdx],
+                });
+            }
+        }
+    } else {
+        anomalySeriesData.push({
+            x: startTime,
+            y: defaultValue,
+        });
+    }
+
+    return anomalySeriesData;
+};
+
 export const generateSeriesForAnomalies = (
     anomalies: Anomaly[],
     translation: (id: string) => string,
@@ -279,36 +315,23 @@ export const generateSeriesForAnomalies = (
     const pointerStyleOrNot = navigate ? CURSOR_POINTER_STYLE : {};
     const dataPointsByAnomalies: [Anomaly, DataPoint<Anomaly>[]][] =
         anomalies.map((anomaly) => {
-            const anomalyRange =
-                (anomaly.endTime - anomaly.startTime) / granularityBestGuess;
-            const anomalySeriesData: DataPoint<Anomaly>[] = [];
+            const anomalySeriesData = generateAnomalyPointsForStartEnd(
+                timestamps,
+                valuesToTrackAgainst,
+                anomaly.startTime,
+                anomaly.endTime,
+                anomaly.avgCurrentVal,
+                granularityBestGuess
+            );
 
-            if (anomalyRange > 1) {
-                let idx;
-                for (idx = 0; idx < anomalyRange; idx++) {
-                    const currentTimestamp =
-                        anomaly.startTime + granularityBestGuess * idx;
-                    const currentTimestampIdx = timestamps.findIndex(
-                        (ts) => ts === currentTimestamp
-                    );
+            anomalySeriesData.forEach(
+                (dataPoint) => (dataPoint.extraData = anomaly)
+            );
 
-                    if (currentTimestampIdx > -1) {
-                        anomalySeriesData.push({
-                            x: currentTimestamp,
-                            y: valuesToTrackAgainst[currentTimestampIdx],
-                            extraData: anomaly,
-                        });
-                    }
-                }
-            } else {
-                anomalySeriesData.push({
-                    x: anomaly.startTime,
-                    y: anomaly.avgCurrentVal,
-                    extraData: anomaly,
-                });
-            }
-
-            return [anomaly, anomalySeriesData];
+            return [
+                anomaly,
+                anomalySeriesData as unknown as DataPoint<Anomaly>[],
+            ];
         });
 
     return {

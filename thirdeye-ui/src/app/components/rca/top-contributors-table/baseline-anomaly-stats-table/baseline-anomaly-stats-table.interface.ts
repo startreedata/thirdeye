@@ -12,9 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import {
+    AnomalyDimensionAnalysisData,
+    AnomalyDimensionAnalysisMetricRow,
+} from "../../../../rest/dto/rca.interfaces";
 
-export interface BaselineOffsetSelectionProps {
-    baselineOffset: string;
-    onBaselineOffsetChange: (newBaselineOffset: string) => void;
-    label?: string;
+export interface BaselineAnomalyStatsTableProps {
+    row: AnomalyDimensionAnalysisMetricRow;
+    anomalyDimensionAnalysisData: AnomalyDimensionAnalysisData;
 }

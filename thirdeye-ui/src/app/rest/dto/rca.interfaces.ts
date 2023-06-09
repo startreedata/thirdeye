@@ -64,8 +64,8 @@ export interface AnomalyDimensionAnalysisMetricRow {
     currentValue: number;
     sizeFactor: number;
     changePercentage: number | string; // Can be "NaN"
-    contributionChange: number;
-    contributionToOverallChange: number;
+    contributionChangePercentage: number;
+    contributionToOverallChangePercentage: number;
     names: string[];
     otherDimensionValues: string[];
     moreOtherDimensionNumber: number;

@@ -24,7 +24,7 @@ import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakd
 import { BaselineOffsetSelectionProps } from "./baseline-offset-selection.interfaces";
 
 export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionProps> =
-    ({ baselineOffset, onBaselineOffsetChange }) => {
+    ({ baselineOffset, onBaselineOffsetChange, label }) => {
         const { t } = useTranslation();
         const classes = useAnomalyBreakdownComparisonHeatmapStyles();
 
@@ -81,7 +81,9 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
                         textAlign="right"
                     >
                         <label>
-                            <strong>{t("label.baseline-offset")}:</strong>
+                            <strong>
+                                {label ?? t("label.baseline-offset")}:
+                            </strong>
                         </label>
                     </Box>
                 </Grid>

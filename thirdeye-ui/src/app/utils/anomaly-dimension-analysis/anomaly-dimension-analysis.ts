@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { sortBy } from "lodash";
+import { AnomalyFilterOption } from "../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import {
     AnomalyDimensionAnalysisData,
     AnomalyDimensionAnalysisMetricRow,
@@ -33,4 +35,28 @@ export const getFilterDimensionAnalysisData = (
             })
         ),
     };
+};
+
+const FILTER_OPTION_SORT_KEYS = ["key", "value"];
+
+export const areFiltersEqual = (
+    filterOption: AnomalyFilterOption[],
+    otherFilterOption: AnomalyFilterOption[]
+): boolean => {
+    const sortedFilterOption = sortBy(filterOption, FILTER_OPTION_SORT_KEYS);
+    const sortedOtherFilterOption = sortBy(
+        otherFilterOption,
+        FILTER_OPTION_SORT_KEYS
+    );
+
+    for (let i = 0; i < sortedFilterOption.length; i++) {
+        if (
+            sortedFilterOption[i].key !== sortedOtherFilterOption[i].key ||
+            sortedFilterOption[i].value !== sortedOtherFilterOption[i].value
+        ) {
+            return false;
+        }
+    }
+
+    return true;
 };

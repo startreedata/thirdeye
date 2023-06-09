@@ -35,6 +35,7 @@ import { AnomalyFilterOption } from "../anomaly-dimension-analysis.interfaces";
 
 export const SERVER_VALUE_FOR_OTHERS = "(ALL_OTHERS)";
 export const SERVER_VALUE_ALL_VALUES = "(ALL)";
+export const SERVER_VALUE_FOR_NO_FILTER = "(NO_FILTER)";
 
 export const generateName = (
     rowData: AnomalyDimensionAnalysisMetricRow,
@@ -203,7 +204,10 @@ export const generateFilterOptions = (
             otherDimensionValues.forEach((otherValue) => {
                 filters.push({ key: dimensionColumns[idx], value: otherValue });
             });
-        } else if (dimensionValue !== SERVER_VALUE_ALL_VALUES) {
+        } else if (
+            dimensionValue !== SERVER_VALUE_ALL_VALUES &&
+            dimensionValue !== SERVER_VALUE_FOR_NO_FILTER
+        ) {
             // (All) means no filter on the column
             filters.push({ key: dimensionColumns[idx], value: dimensionValue });
         }

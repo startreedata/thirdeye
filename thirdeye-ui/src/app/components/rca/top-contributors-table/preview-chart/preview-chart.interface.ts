@@ -13,8 +13,12 @@
  * the License.
  */
 
-export interface BaselineOffsetSelectionProps {
-    baselineOffset: string;
-    onBaselineOffsetChange: (newBaselineOffset: string) => void;
-    label?: string;
+import { AlertInsight } from "../../../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
+import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
+
+export interface PreviewChartProps {
+    alertInsight: AlertInsight | null;
+    anomaly: Anomaly;
+    dimensionCombinations: AnomalyFilterOption[][];
 }

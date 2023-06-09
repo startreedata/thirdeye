@@ -17,13 +17,13 @@ import { cloneDeep, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams, useSearchParams } from "react-router-dom";
-import { MetricRenderer } from "../../components/anomalies-view/metric-renderer/metric-renderer.component";
-import { Crumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
-import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
-import { PageHeader } from "../../components/page-header/page-header.component";
-import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { InvestigationOptions } from "../../components/rca/investigation-options/investigation-options.component";
-import { InvestigationStepsNavigation } from "../../components/rca/investigation-steps-navigation/investigation-steps-navigation.component";
+import { MetricRenderer } from "../../../components/anomalies-view/metric-renderer/metric-renderer.component";
+import { Crumb } from "../../../components/breadcrumbs/breadcrumbs.interfaces";
+import { AnomalyCard } from "../../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { PageHeader } from "../../../components/page-header/page-header.component";
+import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { InvestigationOptions } from "../../../components/rca/investigation-options/investigation-options.component";
+import { InvestigationStepsNavigation } from "../../../components/rca/investigation-steps-navigation/investigation-steps-navigation.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -33,30 +33,36 @@ import {
     PageV1,
     SkeletonV1,
     useNotificationProviderV1,
-} from "../../platform/components";
-import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetAlert } from "../../rest/alerts/alerts.actions";
-import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
-import { EvaluatedTemplateMetadata } from "../../rest/dto/alert.interfaces";
-import { Investigation, SavedStateKeys } from "../../rest/dto/rca.interfaces";
-import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
-import { useGetInvestigation } from "../../rest/rca/rca.actions";
+} from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import {
+    useGetAlert,
+    useGetAlertInsight,
+} from "../../../rest/alerts/alerts.actions";
+import { useGetAnomaly } from "../../../rest/anomalies/anomaly.actions";
+import { EvaluatedTemplateMetadata } from "../../../rest/dto/alert.interfaces";
+import {
+    Investigation,
+    SavedStateKeys,
+} from "../../../rest/dto/rca.interfaces";
+import { useGetEnumerationItem } from "../../../rest/enumeration-items/enumeration-items.actions";
+import { useGetInvestigation } from "../../../rest/rca/rca.actions";
 import {
     determineTimezoneFromAlertInEvaluation,
     shouldHideTimeInDatetimeFormat,
-} from "../../utils/alerts/alerts.util";
-import { generateNameForEnumerationItem } from "../../utils/enumeration-items/enumeration-items.util";
+} from "../../../utils/alerts/alerts.util";
+import { generateNameForEnumerationItem } from "../../../utils/enumeration-items/enumeration-items.util";
 import {
     createNewInvestigation,
     determineInvestigationIDFromSearchParams,
     INVESTIGATION_ID_QUERY_PARAM,
-} from "../../utils/investigation/investigation.util";
-import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
+} from "../../../utils/investigation/investigation.util";
+import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../../utils/params/params.util";
 import {
     getAlertsAlertPath,
     getAnomaliesAnomalyViewPath,
-} from "../../utils/routes/routes.util";
-import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
+} from "../../../utils/routes/routes.util";
+import { RootCauseAnalysisForAnomalyPageParams } from "../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 
 export const InvestigationStateTracker: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -82,6 +88,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         status: getInvestigationRequestStatus,
         errorMessages: getInvestigationRequestErrors,
     } = useGetInvestigation();
+    const { alertInsight, getAlertInsight } = useGetAlertInsight();
 
     const [investigationId, setInvestigationId] = useState(
         determineInvestigationIDFromSearchParams(searchParams)
@@ -159,6 +166,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
             !!anomaly.enumerationItem &&
                 getEnumerationItem(anomaly.enumerationItem.id);
             getAlert(anomaly.alert.id);
+            getAlertInsight({ alertId: anomaly.alert.id });
         }
     }, [anomaly]);
 
@@ -351,7 +359,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         <Outlet
                             context={{
                                 investigation: localInvestigation,
-                                investigationHasChanged:
+                                onInvestigationChange:
                                     handleInvestigationChange,
                                 getEnumerationItemRequest,
                                 enumerationItem,
@@ -359,6 +367,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                 getAnomalyRequestStatus: getAnomalyStatus,
                                 anomalyRequestErrors: errorMessages,
                                 alert,
+                                alertInsight,
                             }}
                         />
                     </Grid>

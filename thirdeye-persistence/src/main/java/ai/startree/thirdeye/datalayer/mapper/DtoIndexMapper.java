@@ -15,7 +15,6 @@ package ai.startree.thirdeye.datalayer.mapper;
 
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.HasJsonVal;
-import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -30,13 +29,6 @@ public class DtoIndexMapper {
    */
   @Deprecated
   private static final ModelMapper MODEL_MAPPER = new ModelMapper();
-
-  static {
-    // add custom mapping from DTO to index
-    MODEL_MAPPER
-        .createTypeMap(RcaInvestigationDTO.class, RcaInvestigationIndex.class)
-        .addMappings(new RcaInvestigationIndexMapper());
-  }
 
   public static <E extends AbstractDTO> AbstractIndexEntity toAbstractIndexEntity(final E pojo,
       final Class<? extends AbstractIndexEntity> indexClass,
@@ -57,10 +49,13 @@ public class DtoIndexMapper {
       final Class<? extends AbstractIndexEntity> indexClass)
       throws InstantiationException, IllegalAccessException {
     if (pojo instanceof AnomalyDTO) {
-      return MergedAnomalyIndexMapper.INSTANCE.toIndexEntity((AnomalyDTO) pojo);
+      return IndexMapper.INSTANCE.toIndexEntity((AnomalyDTO) pojo);
     } else if (pojo instanceof EnumerationItemDTO) {
-      return EnumerationItemIndexMapper.INSTANCE.toIndexEntity((EnumerationItemDTO) pojo);
+      return IndexMapper.INSTANCE.toIndexEntity((EnumerationItemDTO) pojo);
+    } else if (pojo instanceof RcaInvestigationDTO) {
+      return IndexMapper.INSTANCE.toIndexEntity((RcaInvestigationDTO) pojo);
     }
+
     return buildWithLegacyModelMapper(pojo, indexClass);
   }
 

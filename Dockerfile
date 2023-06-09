@@ -12,7 +12,7 @@
 # the License.
 #
 
-FROM adoptopenjdk/openjdk11:alpine
+FROM eclipse-temurin:17-jre-alpine
 
 EXPOSE 8080
 EXPOSE 8081

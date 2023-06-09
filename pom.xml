@@ -45,13 +45,13 @@
   </modules>
 
   <properties>
-    <jdk.version>11</jdk.version>
+    <jdk.version>17</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!--  Dependency Versions -->
     <!--  Please maintain a sorted list -->
     <!--  Intellij: Search actions (Press shift twice), type "sort lines", then enter :-) -->
-    <aspectj.version>1.9.6</aspectj.version>
+    <aspectj.version>1.9.9.1</aspectj.version>
     <assertj.version>3.17.2</assertj.version>
     <auto-service.version>1.0.1</auto-service.version>
     <avro.version>1.7.7</avro.version>
@@ -254,10 +254,7 @@
           <configuration>
             <!-- See https://winterbe.com/posts/2018/08/29/migrate-maven-projects-to-java-11-jigsaw/ -->
             <argLine>
-              --illegal-access=permit
-            </argLine>
-            <argLine>
-              -javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar
+              -javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED
             </argLine>
             <threadCount>1</threadCount>
             <systemPropertyVariables>

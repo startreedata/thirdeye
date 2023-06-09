@@ -559,7 +559,18 @@ export const AlertsViewPage: FunctionComponent = () => {
                             <Card variant="outlined">
                                 <CardContent>
                                     <Box pb={20} pt={20}>
-                                        <NoDataIndicator />
+                                        <NoDataIndicator>
+                                            <Box p={1}>
+                                                <Button
+                                                    color="primary"
+                                                    onClick={fetchData}
+                                                >
+                                                    {t(
+                                                        "label.reload-chart-data"
+                                                    )}
+                                                </Button>
+                                            </Box>
+                                        </NoDataIndicator>
                                     </Box>
                                 </CardContent>
                             </Card>

@@ -84,7 +84,13 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
 
     if (!doNotWrapInContainer) {
         mainContent = (
-            <Box bottom={0} marginTop="auto" position="sticky" width="100%">
+            <Box
+                bottom={0}
+                marginTop="auto"
+                position="sticky"
+                width="100%"
+                zIndex={10}
+            >
                 {mainContent}
             </Box>
         );

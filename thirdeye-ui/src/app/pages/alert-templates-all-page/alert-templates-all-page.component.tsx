@@ -48,16 +48,21 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const [alertTemplates, setAlertTemplate] = useState<AlertTemplate[]>([]);
     const {
+        alertTemplates: alertTemplatesFromServer,
         getAlertTemplates,
         status: alertTemplatesRequestStatus,
         errorMessages,
     } = useGetAlertTemplates();
 
     useEffect(() => {
-        getAlertTemplates().then((data) => {
-            data && setAlertTemplate(data);
-        });
+        getAlertTemplates();
     }, []);
+
+    useEffect(() => {
+        if (alertTemplatesFromServer) {
+            setAlertTemplate(alertTemplatesFromServer);
+        }
+    }, [alertTemplatesFromServer]);
 
     const handleAlertTemplateChange = (
         alertTemplateToChange: AlertTemplate
@@ -142,7 +147,8 @@ export const AlertTemplatesAllPage: FunctionComponent = () => {
                 <LoadingErrorStateSwitch
                     isError={alertTemplatesRequestStatus === ActionStatus.Error}
                     isLoading={
-                        alertTemplatesRequestStatus === ActionStatus.Working
+                        alertTemplatesRequestStatus === ActionStatus.Working ||
+                        alertTemplatesRequestStatus === ActionStatus.Initial
                     }
                 >
                     <EmptyStateSwitch

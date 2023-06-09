@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { assign, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
@@ -20,10 +19,9 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertTemplateWizard } from "../../components/alert-template-wizard/altert-template-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
-    AppLoadingIndicatorV1,
     NotificationTypeV1,
-    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -104,10 +102,6 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
         }
     }, [alertTemplateRequestStatus, alertTemplateErrors]);
 
-    if (alertTemplateRequestStatus === ActionStatus.Working) {
-        return <AppLoadingIndicatorV1 />;
-    }
-
     return (
         <PageV1>
             <PageHeader
@@ -116,16 +110,23 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
                     entity: t("label.alert-template"),
                 })}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {alertTemplate && (
-                        <AlertTemplateWizard<AlertTemplate>
-                            alertTemplate={alertTemplate}
-                            onFinish={onAlertWizardFinish}
-                        />
-                    )}
-                </Grid>
-            </PageContentsGridV1>
+            <LoadingErrorStateSwitch
+                wrapInCard
+                wrapInGrid
+                wrapInGridContainer
+                isError={alertTemplateRequestStatus === ActionStatus.Error}
+                isLoading={
+                    alertTemplateRequestStatus === ActionStatus.Working ||
+                    alertTemplateRequestStatus === ActionStatus.Initial
+                }
+            >
+                {alertTemplate && (
+                    <AlertTemplateWizard<AlertTemplate>
+                        startingAlertTemplate={alertTemplate}
+                        onFinish={onAlertWizardFinish}
+                    />
+                )}
+            </LoadingErrorStateSwitch>
         </PageV1>
     );
 };

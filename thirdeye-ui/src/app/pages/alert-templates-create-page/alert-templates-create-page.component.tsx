@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,7 +21,6 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     HelpLinkIconV1,
     NotificationTypeV1,
-    PageContentsGridV1,
     PageHeaderTextV1,
     PageV1,
     TooltipV1,
@@ -98,14 +96,11 @@ export const AlertTemplatesCreatePage: FunctionComponent = () => {
                     </TooltipV1>
                 </PageHeaderTextV1>
             </PageHeader>
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <AlertTemplateWizard<NewAlertTemplate>
-                        alertTemplate={createDefaultAlertTemplate()}
-                        onFinish={onAlertTemplateWizardFinish}
-                    />
-                </Grid>
-            </PageContentsGridV1>
+
+            <AlertTemplateWizard<NewAlertTemplate>
+                startingAlertTemplate={createDefaultAlertTemplate()}
+                onFinish={onAlertTemplateWizardFinish}
+            />
         </PageV1>
     );
 };

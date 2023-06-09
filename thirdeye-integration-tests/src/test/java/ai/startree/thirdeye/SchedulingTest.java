@@ -55,7 +55,7 @@ import org.testng.annotations.Test;
  * - wait for detection task to run. Check lastTimestamp
  *
  * Note: if run within IntelliJ, run with the following JVM option:
- * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.9.1/aspectjweaver-1.9.9.1.jar --add-opens java.base/java.lang=ALL-UNNAMED
+ * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.19/aspectjweaver-1.9.19.jar --add-opens java.base/java.lang=ALL-UNNAMED
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  */
 public class SchedulingTest {

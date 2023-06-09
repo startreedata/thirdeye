@@ -15,12 +15,14 @@
 import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { DatasetCard } from "../../components/entity-cards/dataset-card/dataset-card.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
+    JSONEditorV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageV1,
@@ -29,13 +31,13 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { deleteDataset, getDataset } from "../../rest/datasets/datasets.rest";
+import { useGetDataset } from "../../rest/datasets/datasets.actions";
+import { deleteDataset } from "../../rest/datasets/datasets.rest";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import { deleteMetric } from "../../rest/metrics/metrics.rest";
 import { getUiDataset } from "../../utils/datasets/datasets.util";
 import { useGetDatasourcesTree } from "../../utils/datasources/use-get-datasources-tree.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getDatasetsAllPath,
@@ -46,54 +48,28 @@ import { DatasetsViewPageParams } from "./dataset-view-page.interfaces";
 export const DatasetsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const params = useParams<DatasetsViewPageParams>();
+    const { id: datasetId } = useParams<DatasetsViewPageParams>();
     const { notify } = useNotificationProviderV1();
     const { showDialog } = useDialogProviderV1();
 
-    const [uiDataset, setUiDataset] = useState<UiDataset | null>(null);
+    const { dataset, getDataset, status, errorMessages } = useGetDataset();
 
     const { datasetsInfo } = useGetDatasourcesTree();
 
     useEffect(() => {
-        // Time range refreshed, fetch dataset
-        fetchDataset();
-    }, []);
-
-    const fetchDataset = (): void => {
-        setUiDataset(null);
-        let fetchedUiDataset = {} as UiDataset;
-
-        if (params.id && !isValidNumberId(params.id)) {
-            // Invalid id
-            notify(
-                NotificationTypeV1.Error,
-                t("message.invalid-id", {
-                    entity: t("label.dataset"),
-                    id: params.id,
-                })
-            );
-
-            setUiDataset(fetchedUiDataset);
-
-            return;
-        }
-
-        getDataset(toNumber(params.id))
-            .then((dataset) => {
-                fetchedUiDataset = getUiDataset(dataset);
+        notifyIfErrors(
+            status,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.dataset"),
             })
-            .catch((error: AxiosError) => {
-                notifyIfErrors(
-                    ActionStatus.Error,
-                    getErrorMessages(error),
-                    notify,
-                    t("message.error-while-fetching", {
-                        entity: t("label.dataset"),
-                    })
-                );
-            })
-            .finally(() => setUiDataset(fetchedUiDataset));
-    };
+        );
+    }, [status]);
+
+    useEffect(() => {
+        getDataset(toNumber(datasetId));
+    }, [datasetId]);
 
     const handleDatasetDelete = (uiDataset: UiDataset): void => {
         showDialog({
@@ -148,19 +124,28 @@ export const DatasetsViewPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeader
-                showCreateButton
-                title={uiDataset ? uiDataset.name : ""}
-            />
+            <PageHeader showCreateButton title={dataset ? dataset.name : ""} />
             <PageContentsGridV1>
-                <Grid item xs={12}>
-                    {/* Dataset */}
-                    <DatasetCard
-                        uiDataset={uiDataset}
-                        onDelete={handleDatasetDelete}
-                        onEdit={handleDatasetEdit}
-                    />
-                </Grid>
+                <LoadingErrorStateSwitch
+                    isError={status === ActionStatus.Error}
+                    isLoading={
+                        status === ActionStatus.Initial ||
+                        status === ActionStatus.Working
+                    }
+                >
+                    <Grid item xs={12}>
+                        {dataset && (
+                            <DatasetCard
+                                uiDataset={getUiDataset(dataset)}
+                                onDelete={handleDatasetDelete}
+                                onEdit={handleDatasetEdit}
+                            />
+                        )}
+                    </Grid>
+                    <Grid item xs={12}>
+                        <JSONEditorV1 value={dataset} />
+                    </Grid>
+                </LoadingErrorStateSwitch>
             </PageContentsGridV1>
         </PageV1>
     );

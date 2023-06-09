@@ -12,17 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
+import { JSONEditorWithLocalCache } from "../../components/json-editor-with-local-cache/json-editor-with-local-cache.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
+    PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
@@ -33,23 +36,29 @@ import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import {
-    getDatasetsAllPath,
-    getDatasetsViewPath,
-} from "../../utils/routes/routes.util";
+import { getDatasetsViewPath } from "../../utils/routes/routes.util";
 import { DatasetsUpdatePageParams } from "./datasets-update-page.interfaces";
 
 export const DatasetsUpdatePage: FunctionComponent = () => {
-    const [loading, setLoading] = useState(true);
-    const { dataset, getDataset, status, errorMessages } = useGetDataset();
-    const params = useParams<DatasetsUpdatePageParams>();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const params = useParams<DatasetsUpdatePageParams>();
+
+    const { dataset, getDataset, status, errorMessages } = useGetDataset();
+
+    const [loading, setLoading] = useState(true);
+    const [modifiedDataset, setModifiedDataset] = useState<Dataset>();
 
     useEffect(() => {
         fetchDataset();
     }, []);
+
+    useEffect(() => {
+        if (dataset) {
+            setModifiedDataset(dataset);
+        }
+    }, [dataset]);
 
     useEffect(() => {
         notifyIfErrors(
@@ -62,10 +71,6 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
         );
     }, [status]);
 
-    const handleCancelClick = (): void => {
-        navigate(getDatasetsAllPath());
-    };
-
     const onDatasetWizardFinish = (dataset: Dataset): void => {
         if (!dataset) {
             return;
@@ -73,15 +78,15 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
 
         updateDataset(dataset)
             .then((dataset: Dataset): void => {
+                // Redirect to datasets detail path
+                navigate(getDatasetsViewPath(dataset.id));
+
                 notify(
                     NotificationTypeV1.Success,
                     t("message.update-success", {
                         entity: t("label.dataset"),
                     })
                 );
-
-                // Redirect to datasets detail path
-                navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((error: AxiosError): void => {
                 notifyIfErrors(
@@ -125,16 +130,31 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
                     entity: t("label.dataset"),
                 })}
             />
-            {dataset && (
-                <DatasetWizard
-                    dataset={dataset}
-                    submitBtnLabel={t("label.update-entity", {
-                        entity: t("label.dataset"),
-                    })}
-                    onCancel={handleCancelClick}
-                    onSubmit={onDatasetWizardFinish}
-                />
-            )}
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {dataset && (
+                        <JSONEditorWithLocalCache
+                            initialValue={
+                                modifiedDataset as unknown as Record<
+                                    string,
+                                    unknown
+                                >
+                            }
+                            onChange={(value: string) =>
+                                setModifiedDataset(JSON.parse(value))
+                            }
+                        />
+                    )}
+                </Grid>
+            </PageContentsGridV1>
+
+            <WizardBottomBar
+                backBtnLink={getDatasetsViewPath(Number(params.id))}
+                handleNextClick={() =>
+                    !!modifiedDataset && onDatasetWizardFinish(modifiedDataset)
+                }
+                nextButtonLabel={t("label.submit")}
+            />
 
             {/* No data available message */}
             {!dataset && <NoDataIndicator />}

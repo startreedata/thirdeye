@@ -60,7 +60,7 @@ def replace_after_substring(content, substring, to_replace, replace_to):
 def setup_thirdeye_backend(working_directory):
     print('[Setup Script] Setting up ThirdEye. Use "DEBUG_BACKEND=true; python3 launch_fresh_be_with_current_fe.py;" to output logs', flush=True)
     # Build ThirdEye
-    subprocess.run(['./mvnw', '-T', '1C', 'install', '-DskipTests', '-pl', '!thirdeye-ui'],
+    subprocess.run(['./mvnw', '-T', '1C', 'install', '-DskipTests'],
                    cwd=os.path.join(working_directory, 'thirdeye'),
                    check=True,
                    stdout=SUBPROCESS_OUTPUT,

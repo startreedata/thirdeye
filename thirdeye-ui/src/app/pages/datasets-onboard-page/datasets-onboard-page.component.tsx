@@ -13,10 +13,11 @@
  * the License.
  */
 import { AxiosError } from "axios";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { DatasetWizard } from "../../components/dataset-wizard/dataset-wizard.component";
+import { DatasetCreateWizard } from "../../components/dataset-create-wizard/dataset-create-wizard.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
@@ -24,9 +25,8 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { onBoardDataset } from "../../rest/datasets/datasets.rest";
+import { createDatasets } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
-import { createEmptyDataset } from "../../utils/datasets/datasets.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -39,26 +39,29 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
-    const handleCancelClick = (): void => {
-        navigate(getDatasetsAllPath());
-    };
-
-    const onDatasetWizardFinish = (dataset: Dataset): void => {
-        if (!dataset) {
+    const handleSubmit = (datasets: Dataset[]): void => {
+        if (isEmpty(datasets)) {
             return;
         }
 
-        onBoardDataset(dataset.name, dataset.dataSource.name)
-            .then((dataset: Dataset): void => {
+        createDatasets(datasets)
+            .then((datasets: Dataset[]): void => {
+                if (datasets.length === 1) {
+                    // Redirect to datasets detail path
+                    navigate(getDatasetsViewPath(datasets[0].id));
+                } else {
+                    navigate(getDatasetsAllPath());
+                }
+
                 notify(
                     NotificationTypeV1.Success,
                     t("message.onboard-success", {
-                        entity: t("label.dataset"),
+                        entity:
+                            datasets.length > 1
+                                ? t("label.datasets")
+                                : t("label.dataset"),
                     })
                 );
-
-                // Redirect to datasets detail path
-                navigate(getDatasetsViewPath(dataset.id));
             })
             .catch((error: AxiosError): void => {
                 notifyIfErrors(
@@ -79,14 +82,7 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                     entity: t("label.dataset"),
                 })}
             />
-            <DatasetWizard
-                dataset={createEmptyDataset()}
-                submitBtnLabel={t("label.onboard-entity", {
-                    entity: t("label.dataset"),
-                })}
-                onCancel={handleCancelClick}
-                onSubmit={onDatasetWizardFinish}
-            />
+            <DatasetCreateWizard onSubmit={handleSubmit} />
         </PageV1>
     );
 };

@@ -1,3 +1,11 @@
+## [2.23.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.22.0...thirdeye-ui-2.23.0) (2023-06-09)
+
+
+### Features
+
+* [TE-1422](https://cortexdata.atlassian.net/browse/TE-1422) rca 2.0 top contributors ([e541cf9a8](https://github.com/startreedata/thirdeye/commit/e541cf9a898d37de71df6b629b0e2d7eb3b80c3d))
+* [TE-1622](https://cortexdata.atlassian.net/browse/TE-1622) add reload button when anomaly and alerts charts fails in the respective details page ([fcd466b5f](https://github.com/startreedata/thirdeye/commit/fcd466b5f637ef2805f099a39f977a49cc1ff2af))
+
 ## [2.22.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.21.0...thirdeye-ui-2.22.0) (2023-06-07)
 
 

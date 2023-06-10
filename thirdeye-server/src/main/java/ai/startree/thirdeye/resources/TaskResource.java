@@ -21,14 +21,14 @@ import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,8 +42,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Api(tags = "Task", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "Task")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
@@ -62,11 +66,11 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   // Overridden to disable endpoint
   @Override
   @POST
-  @ApiOperation(value = "", hidden = true)
+  @Operation(summary = "", hidden = true)
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       final List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
@@ -74,11 +78,11 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   // Overridden to disable endpoint
   @Override
   @PUT
-  @ApiOperation(value = "", hidden = true)
+  @Operation(summary = "", hidden = true)
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       final List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
@@ -87,9 +91,9 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Path("/purge")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response purge(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
-      @ApiParam(value = "Older than (number of days)", defaultValue = N_DAYS_TO_DELETE) @QueryParam("olderThanInDays") Integer nDays,
-      @ApiParam(value = "Max Entries to delete", defaultValue = MAX_ENTRIES_TO_DELETE) @QueryParam("limit") Integer limitOptional
+  public Response purge(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(description = "Older than (number of days)", example = N_DAYS_TO_DELETE) @QueryParam("olderThanInDays") Integer nDays,
+      @Parameter(description = "Max Entries to delete", example = MAX_ENTRIES_TO_DELETE) @QueryParam("limit") Integer limitOptional
   ) {
     final int nDaysToDelete = optional(nDays).orElse(Integer.valueOf(N_DAYS_TO_DELETE));
     final int limit = optional(limitOptional).orElse(Integer.valueOf(MAX_ENTRIES_TO_DELETE));

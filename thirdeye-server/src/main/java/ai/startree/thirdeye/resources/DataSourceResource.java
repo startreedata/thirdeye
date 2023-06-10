@@ -28,13 +28,13 @@ import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,8 +50,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Api(tags = "Data Source", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "Data Source")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDTO> {
@@ -68,7 +72,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @GET
   @Path("/name/{name}/datasets")
   public Response getDatasets(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("name") String name) {
     return respondOk(dataSourceService.getDatasets(name));
   }
@@ -78,7 +82,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardDataset(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("dataSourceName") String dataSourceName,
       @FormParam("datasetName") String datasetName) {
 
@@ -93,7 +97,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardAll(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("name") String name) {
 
     ensureExists(name, "name is a required field");
@@ -106,7 +110,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response offboardAll(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("name") String name) {
     ensureExists(name, "name is a required field");
     return respondOk(dataSourceService.offboardAll(name));
@@ -117,7 +121,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response clearDataSourceCache(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
     dataSourceService.clearDataSourceCache();
     return Response.ok().build();
   }
@@ -126,7 +130,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Path("validate")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validate(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response validate(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("name") String name) {
     ensureExists(name, "name is a required field");
     try {

@@ -87,7 +87,6 @@
     <sendgrid.version>4.0.1</sendgrid.version>
     <slack.version>1.20.2</slack.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
-    <swagger-annotation.version>1.6.0</swagger-annotation.version>
     <swagger.version>2.1.6-1</swagger.version>
     <testcontainers.version>1.18.2</testcontainers.version>
   </properties>
@@ -940,11 +939,6 @@
             <artifactId>validation-api</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>io.swagger</groupId>
-        <artifactId>swagger-annotations</artifactId>
-        <version>${swagger-annotation.version}</version>
       </dependency>
 
       <!-- Google Calendar API -->

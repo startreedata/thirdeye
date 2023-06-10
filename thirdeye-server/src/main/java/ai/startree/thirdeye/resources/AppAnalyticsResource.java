@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.service.AppAnalyticsService;
 import com.codahale.metrics.annotation.Timed;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -28,7 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Api(tags = "App Analytics")
+@Tag(name = "App Analytics")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AppAnalyticsResource {

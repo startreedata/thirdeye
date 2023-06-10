@@ -24,13 +24,13 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +49,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = "Entity", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "Entity")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 public class EntityResource {
 
   private final GenericPojoDao genericPojoDao;
@@ -66,7 +70,7 @@ public class EntityResource {
   @GET
   @Path("{id}")
   public Response getRawEntity(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     authorizationManager.ensureHasRootAccess(principal);
     return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
@@ -74,7 +78,7 @@ public class EntityResource {
 
   @GET
   @Path("types")
-  public Response listEntities(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response listEntities(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
     authorizationManager.ensureHasRootAccess(principal);
     final Map<String, Long> entityCountMap = new TreeMap<>();
     final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
@@ -88,7 +92,7 @@ public class EntityResource {
   @GET
   @Path("types/{bean_class}/info")
   public Response getEntityInfo(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("bean_class") String beanClass) {
     authorizationManager.ensureHasRootAccess(principal);
     try {
@@ -103,7 +107,7 @@ public class EntityResource {
   @GET
   @Path("types/{bean_class}")
   public Response getEntity(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("bean_class") String beanClassRef,
       @Context UriInfo uriInfo
   ) {

@@ -24,14 +24,14 @@ import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
@@ -49,8 +49,12 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Api(tags = "Alert", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "Alert")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
@@ -70,7 +74,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   @Deprecated(forRemoval = true)
-  public Response getInsights(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+  public Response getInsights(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     return Response.ok(alertService.getInsightsById(principal, id)).build();
   }
@@ -79,7 +83,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getInsights(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+  public Response getInsights(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
@@ -90,7 +94,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response runTask(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
@@ -105,7 +109,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   // can be moved to CrudResource if /validate is needed for other entities.
   public Response validateMultiple(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       final List<AlertApi> list) {
     ensureExists(list, "Invalid request");
 
@@ -117,7 +121,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response evaluate(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       final AlertEvaluationApi request
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
@@ -127,13 +131,13 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     return Response.ok(alertService.evaluate(principal, request)).build();
   }
 
-  @ApiOperation(value = "Delete associated anomalies and rerun detection till present")
+  @Operation(summary = "Delete associated anomalies and rerun detection till present")
   @POST
   @Path("{id}/reset")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     return respondOk(alertService.reset(principal, id));
   }
@@ -143,7 +147,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Path("{id}/stats")
   @Produces(MediaType.APPLICATION_JSON)
   public Response stats(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @QueryParam("enumerationItem.id") final Long enumerationId,
       @QueryParam("startTime") final Long startTime,

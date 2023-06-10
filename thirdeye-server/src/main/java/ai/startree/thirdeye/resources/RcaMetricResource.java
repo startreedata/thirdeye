@@ -22,14 +22,13 @@ import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -48,14 +47,11 @@ import org.slf4j.LoggerFactory;
  * by the
  * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).</p>
  */
-@Api(authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(
-    securityDefinition = @SecurityDefinition(
-        apiKeyAuthDefinitions = @ApiKeyAuthDefinition(
-            name = HttpHeaders.AUTHORIZATION,
-            in = ApiKeyLocation.HEADER,
-            key = "oauth"
-        )))
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RcaMetricResource {
@@ -73,24 +69,24 @@ public class RcaMetricResource {
 
   @GET
   @Path("/heatmap")
-  @ApiOperation(value = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
-  public Response getAnomalyHeatmap(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly")
+  @Operation(summary = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
+  public Response getAnomalyHeatmap(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(description = "id of the anomaly")
       @QueryParam("id") long anomalyId,
 
-      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
+      @Parameter(description = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
       @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
 
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
+      @Parameter(description = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
 
-      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
+      @Parameter(description = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
       @QueryParam("dimensions") List<String> dimensions,
 
-      @ApiParam(value = "List of dimensions to exclude from the analysis.")
+      @Parameter(description = "List of dimensions to exclude from the analysis.")
       @QueryParam("excludedDimensions") List<String> excludedDimensions,
 
-      @ApiParam(value = "limit results to the top k elements, plus 'OTHER' rollup element")
+      @Parameter(description = "limit results to the top k elements, plus 'OTHER' rollup element")
       @QueryParam("limit") Integer limit
   ) {
     try {

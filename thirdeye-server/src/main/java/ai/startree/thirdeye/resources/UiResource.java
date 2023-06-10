@@ -19,7 +19,7 @@ import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.spi.api.UiConfigurationApi;
 import com.codahale.metrics.annotation.Timed;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -28,7 +28,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Api(tags = "UI Configuration")
+@Tag(name = "UI Configuration")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class UiResource {

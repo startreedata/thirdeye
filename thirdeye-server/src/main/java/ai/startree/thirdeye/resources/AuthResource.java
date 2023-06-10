@@ -22,13 +22,13 @@ import ai.startree.thirdeye.spi.api.UserApi;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -37,8 +37,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Singleton
-@Api(tags = "Auth", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "Auth")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
@@ -53,14 +57,14 @@ public class AuthResource {
   @Timed
   @Path("/login")
   @POST
-  public Response login(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response login(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
     return respondOk(authApi(principal));
   }
 
   @Timed
   @Path("/logout")
   @POST
-  public Response logout(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response logout(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
     // TODO spyne to be implemented.
     return Response.ok().build();
   }

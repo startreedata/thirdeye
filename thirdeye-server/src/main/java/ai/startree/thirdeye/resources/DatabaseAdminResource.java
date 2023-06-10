@@ -19,13 +19,12 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.DatabaseAdministrator;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -38,8 +37,11 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Api(authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Produces(MediaType.APPLICATION_JSON)
 public class DatabaseAdminResource {
 
@@ -55,7 +57,7 @@ public class DatabaseAdminResource {
 
   @GET
   @Path("tables")
-  public Response getTables(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response getTables(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
     return Response
         .ok(databaseAdministrator.getTables())
         .build();
@@ -64,7 +66,7 @@ public class DatabaseAdminResource {
   @GET
   @Path("execute-query")
   public Response executeQuery(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @QueryParam("sql") String sql
   ) throws Exception {
     return Response
@@ -74,14 +76,14 @@ public class DatabaseAdminResource {
 
   @POST
   @Path("create-all-tables")
-  public Response createAllTables(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response createAllTables(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
     databaseAdministrator.createAllTables();
     return Response.ok().build();
   }
 
   @DELETE
   @Path("truncate-all-tables")
-  public Response deleteAllData(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response deleteAllData(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
     log.warn("DELETING ALL DATABASE DATA!!! TRUNCATING TABLES!!!");
     databaseAdministrator.truncateTables();
     return Response.ok().build();
@@ -89,7 +91,7 @@ public class DatabaseAdminResource {
 
   @DELETE
   @Path("drop-all-tables")
-  public Response deleteAllTables(@ApiParam(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response deleteAllTables(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
     log.warn("DELETING ALL DATABASE TABLES!!! DROPPING TABLES!!!");
     databaseAdministrator.dropTables();
     return Response.ok().build();

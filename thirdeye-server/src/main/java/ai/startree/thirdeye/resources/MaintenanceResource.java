@@ -29,14 +29,14 @@ import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.inject.Singleton;
 import javax.ws.rs.FormParam;
@@ -49,15 +49,12 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Api(tags = "zzz Maintenance zzz",
-    authorizations = {
-        @Authorization(value = "oauth")
-    })
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(
-    apiKeyAuthDefinitions = @ApiKeyAuthDefinition(
-        name = HttpHeaders.AUTHORIZATION,
-        in = ApiKeyLocation.HEADER,
-        key = "oauth")))
+@Tag(name = "zzz Maintenance zzz")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class MaintenanceResource {
@@ -84,9 +81,9 @@ public class MaintenanceResource {
   @Path("/enumeration-items/migrate")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation("Update the ignored index based on anomaly labels for historical anomalies")
+  @Operation(summary = "Update the ignored index based on anomaly labels for historical anomalies")
   public Response migrateEnumerationItems(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @FormParam("from") final long fromId,
       @FormParam("to") final long toId
 
@@ -125,9 +122,9 @@ public class MaintenanceResource {
   @Path("/anomaly/index-ignored")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation("Update the ignored index based on anomaly labels for historical anomalies")
+  @Operation(summary = "Update the ignored index based on anomaly labels for historical anomalies")
   public Response updateIgnoreLabelIndex(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal
   ) {
     // skip already updated ignored index
     final DaoFilter filter = new DaoFilter().setPredicate(Predicate.NEQ("ignored", true));

@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.resources.RootResource;
+import ai.startree.thirdeye.resources.root.RootResource;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;

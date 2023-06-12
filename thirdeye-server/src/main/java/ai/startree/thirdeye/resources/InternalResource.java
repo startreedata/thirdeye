@@ -41,13 +41,13 @@ import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.FormParam;
@@ -64,8 +64,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = "zzz Internal zzz", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "zzz Internal zzz")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 public class InternalResource {
 
   private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
@@ -126,7 +130,7 @@ public class InternalResource {
   @Path("email/html")
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateHtmlEmail(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @QueryParam("subscriptionGroupId") final Long subscriptionGroupManagerById,
       @QueryParam("reset") final Boolean reset) {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
@@ -156,13 +160,13 @@ public class InternalResource {
   @GET
   @Path("package-info")
   @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
-  public Response getPackageInfo(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
+  public Response getPackageInfo(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal) {
     return Response.ok(PACKAGE).build();
   }
 
   @POST
   @Path("trigger/webhook")
-  public Response triggerWebhook(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
+  public Response triggerWebhook(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal) {
     final ImmutableMap<String, Object> properties = ImmutableMap.of(
         "url", "http://localhost:8080/internal/webhook"
     );
@@ -177,7 +181,7 @@ public class InternalResource {
 
   @POST
   @Path("notify")
-  public Response notify(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+  public Response notify(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @FormParam("subscriptionGroupId") final Long subscriptionGroupId,
       @QueryParam("reset") final Boolean reset) throws Exception {
     ensureExists(subscriptionGroupId, "Query parameter required: alertId !");
@@ -212,7 +216,7 @@ public class InternalResource {
 
   @GET
   @Path("worker/id")
-  public Response workerId(@ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal) {
+  public Response workerId(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal) {
     if (taskDriverConfiguration.isEnabled()) {
       return Response.ok(taskDriver.getWorkerId()).build();
     } else {
@@ -224,7 +228,7 @@ public class InternalResource {
   @POST
   @Timed
   public Response runTask(
-      @ApiParam(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @FormParam("alertId") final Long alertId,
       @FormParam("start") Long startTime,
       @FormParam("end") Long endTime

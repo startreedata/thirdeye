@@ -21,7 +21,7 @@ import ai.startree.thirdeye.service.AuthService;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import com.codahale.metrics.annotation.Timed;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -29,7 +29,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Api(tags = "Auth Info")
+@Tag(name = "Auth Info")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthInfoResource {

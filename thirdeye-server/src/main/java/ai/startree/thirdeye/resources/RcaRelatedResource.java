@@ -32,14 +32,13 @@ import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -59,8 +58,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
-@Api(authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RcaRelatedResource {
@@ -84,14 +86,14 @@ public class RcaRelatedResource {
 
   @GET
   @Path("/events")
-  @ApiOperation(value = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
+  @Operation(summary = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
   public Response getCalendarEvents(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
-      @ApiParam(value = "Type of event.") @QueryParam("type") @Nullable String type,
-      @ApiParam(value = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
-      @ApiParam(value = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
-      @ApiParam(value = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
+      @Parameter(description = "Type of event.") @QueryParam("type") @Nullable String type,
+      @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
+      @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
+      @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = isoPeriod(lookaround);
@@ -134,13 +136,13 @@ public class RcaRelatedResource {
 
   @GET
   @Path("/anomalies")
-  @ApiOperation(value = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
+  @Operation(summary = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
   public Response getAnomaliesEvents(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
-      @ApiParam(value = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
-      @ApiParam(value = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
-      @ApiParam(value = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
+      @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
+      @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
+      @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
     final Period lookaroundPeriod = isoPeriod(lookaround);

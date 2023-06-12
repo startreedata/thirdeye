@@ -27,7 +27,7 @@ import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.json.ThirdEyeJsonProcessingExceptionMapper;
-import ai.startree.thirdeye.resources.RootResource;
+import ai.startree.thirdeye.resources.root.RootResource;
 import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;

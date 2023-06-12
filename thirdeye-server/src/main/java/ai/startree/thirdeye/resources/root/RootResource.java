@@ -11,9 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.resources;
+package ai.startree.thirdeye.resources.root;
 
-import io.swagger.annotations.Api;
+import ai.startree.thirdeye.resources.ApiResource;
+import ai.startree.thirdeye.resources.InternalResource;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -21,9 +23,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/**
+ * Note: Root resource is in a different package to make swagger parsing work.
+ * See swagger in server.yaml.
+ */
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
-@Api(tags = "zzz All Endpoints zzz")
+@Tag(name = "zzz All Endpoints zzz")
 public class RootResource {
 
   private final ApiResource apiResource;

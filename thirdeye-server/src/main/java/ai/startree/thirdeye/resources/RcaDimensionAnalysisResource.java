@@ -21,14 +21,14 @@ import ai.startree.thirdeye.service.RcaDimensionAnalysisService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
@@ -42,8 +42,12 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Api(tags = "Root Cause Analysis", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "Root Cause Analysis")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RcaDimensionAnalysisResource {
@@ -66,25 +70,25 @@ public class RcaDimensionAnalysisResource {
   }
 
   @GET
-  @ApiOperation("Retrieve the likely root causes behind an anomaly")
+  @Operation(summary = "Retrieve the likely root causes behind an anomaly")
   public Response dataCubeSummary(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
-      @ApiParam(value = "id of the anomaly") @QueryParam("id") long anomalyId,
-      @ApiParam(value = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(description = "id of the anomaly") @QueryParam("id") long anomalyId,
+      @Parameter(description = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
       @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,
-      @ApiParam(value = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
+      @Parameter(description = "dimension filters (e.g. \"dim1=val1\", \"dim2!=val2\")")
       @QueryParam("filters") List<String> filters,
-      @ApiParam(value = "Number of entries to put in the summary.")
+      @Parameter(description = "Number of entries to put in the summary.")
       @QueryParam("summarySize") @DefaultValue(DEFAULT_CUBE_SUMMARY_SIZE_STRING) @Min(value = 1) int summarySize,
-      @ApiParam(value = "Maximum number of dimensions to drill down by.")
+      @Parameter(description = "Maximum number of dimensions to drill down by.")
       @QueryParam("depth") @DefaultValue(DEFAULT_CUBE_DEPTH_STRING) int depth,
-      @ApiParam(value = "If true, only returns changes that have the same direction as the global change.")
+      @Parameter(description = "If true, only returns changes that have the same direction as the global change.")
       @QueryParam("oneSideError") @DefaultValue(DEFAULT_ONE_SIDE_ERROR) boolean doOneSideError,
-      @ApiParam(value = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
+      @Parameter(description = "List of dimensions to use for the analysis. If empty, all dimensions of the datasets are used.")
       @QueryParam("dimensions") List<String> dimensions,
-      @ApiParam(value = "List of dimensions to exclude from the analysis.")
+      @Parameter(description = "List of dimensions to exclude from the analysis.")
       @QueryParam("excludedDimensions") List<String> excludedDimensions,
-      @ApiParam(value =
+      @Parameter(description =
           "Hierarchy among some dimensions. The order will be respected in the result. "
               + "An example of a hierarchical group is {continent, country}. "
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")

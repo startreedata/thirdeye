@@ -22,13 +22,13 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiKeyAuthDefinition;
-import io.swagger.annotations.ApiKeyAuthDefinition.ApiKeyLocation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
-import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.FormParam;
@@ -39,8 +39,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Api(tags = "Event", authorizations = {@Authorization(value = "oauth")})
-@SwaggerDefinition(securityDefinition = @SecurityDefinition(apiKeyAuthDefinitions = @ApiKeyAuthDefinition(name = HttpHeaders.AUTHORIZATION, in = ApiKeyLocation.HEADER, key = "oauth")))
+@Tag(name = "Event")
+@SecurityRequirement(name="oauth")
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth")
+})
+@SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 public class EventResource extends CrudResource<EventApi, EventDTO> {
@@ -66,7 +70,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
   @POST
   @Path("/holidays/load")
   public Response loadHolidays(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("start_time") long startTime,
       @FormParam("end_time") long endTime
   ) {
@@ -80,7 +84,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
   @POST
   @Path("/create-from-anomaly")
   public Response loadHolidays(
-      @ApiParam(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @FormParam("anomalyId") long anomalyId
   ) {
     return Response.ok(eventService.loadHolidays(anomalyId)).build();

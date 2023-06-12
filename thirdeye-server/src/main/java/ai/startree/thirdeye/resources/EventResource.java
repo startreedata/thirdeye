@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -68,6 +69,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
    * @param endTime the end time
    */
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("/holidays/load")
   public Response loadHolidays(
       @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
@@ -82,6 +84,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
   }
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("/create-from-anomaly")
   public Response loadHolidays(
       @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,

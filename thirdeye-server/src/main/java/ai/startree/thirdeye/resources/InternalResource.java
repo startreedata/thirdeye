@@ -50,6 +50,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -180,6 +181,7 @@ public class InternalResource {
   }
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("notify")
   public Response notify(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @FormParam("subscriptionGroupId") final Long subscriptionGroupId,
@@ -226,6 +228,7 @@ public class InternalResource {
 
   @Path("run-detection-task-locally")
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Timed
   public Response runTask(
       @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,

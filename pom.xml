@@ -252,7 +252,6 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M1</version>
           <configuration>
-            <!-- See https://winterbe.com/posts/2018/08/29/migrate-maven-projects-to-java-11-jigsaw/ -->
             <argLine>
               -javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED
             </argLine>

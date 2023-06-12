@@ -109,6 +109,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   }
 
   @DELETE
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("offboard-all")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)

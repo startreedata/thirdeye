@@ -39,6 +39,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -78,6 +79,7 @@ public class MaintenanceResource {
   }
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("/enumeration-items/migrate")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)

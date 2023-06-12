@@ -38,6 +38,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -78,6 +79,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   }
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("onboard-dataset")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
@@ -93,6 +95,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   }
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("onboard-all")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)

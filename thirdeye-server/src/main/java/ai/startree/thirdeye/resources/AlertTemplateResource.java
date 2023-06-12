@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -57,6 +58,7 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
   }
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("load-defaults")
   @Timed
   public Response loadRecommendedTemplates(

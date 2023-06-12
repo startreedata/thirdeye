@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -92,6 +93,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   @Path("{id}/run")
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Timed
   public Response runTask(
       @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,

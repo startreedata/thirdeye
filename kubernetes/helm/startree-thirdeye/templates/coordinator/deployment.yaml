@@ -53,7 +53,7 @@ spec:
         {{- toYaml .Values.coordinator.tolerations | nindent 8 }}
       initContainers:
       - name: init-keystore
-        image: eclipse-temurin:17-jdk
+        image: eclipse-temurin:17-jre
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         command:
         - /bin/sh

@@ -50,7 +50,7 @@ spec:
 {{ toYaml .Values.ui.tolerations | indent 8 }}
       initContainers:
       - name: init-config
-        image: adoptopenjdk/openjdk11:alpine
+        image: alpine:3.18
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         env:
         - name: NGINX_ENVSUBST_TEMPLATE_DIR

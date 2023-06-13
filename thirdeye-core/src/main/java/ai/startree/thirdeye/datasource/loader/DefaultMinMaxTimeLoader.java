@@ -61,51 +61,39 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
   @Inject
   public DefaultMinMaxTimeLoader(final DataSourceCache dataSourceCache) {
     this.dataSourceCache = dataSourceCache;
-    executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
-        "minmax-loader-%d").build());
+    executorService = Executors.newCachedThreadPool(
+        new ThreadFactoryBuilder().setNameFormat("minmax-loader-%d").build());
   }
 
   @Override
   public Future<@Nullable Long> fetchMinTimeAsync(final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception {
-    return executorService.submit(() -> fetchMinTime(datasetConfigDTO, timeFilterInterval));
+    return executorService.submit(() -> fetchExtremumTime(Extremum.MIN, datasetConfigDTO,
+        timeFilterInterval));
   }
 
   @Override
   public Future<@Nullable Long> fetchMaxTimeAsync(final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception {
-    return executorService.submit(() -> fetchMaxTime(datasetConfigDTO, timeFilterInterval));
-  }
-
-  @Override
-  public @Nullable Long fetchMinTime(final DatasetConfigDTO datasetConfigDTO,
-      final @Nullable Interval timeFilterInterval) throws Exception {
-    return fetchExtremumTime(Extremum.MIN, datasetConfigDTO, timeFilterInterval);
-  }
-
-  @Override
-  public @Nullable Long fetchMaxTime(final DatasetConfigDTO datasetConfigDTO,
-      final @Nullable Interval timeFilterInterval) throws Exception {
-    return fetchExtremumTime(Extremum.MAX, datasetConfigDTO, timeFilterInterval);
+    return executorService.submit(
+        () -> fetchExtremumTime(Extremum.MAX, datasetConfigDTO, timeFilterInterval));
   }
 
   private @Nullable Long fetchExtremumTime(final Extremum extremum,
-      final DatasetConfigDTO datasetConfigDTO,
-      final @Nullable Interval timeFilterInterval) throws Exception {
+      final DatasetConfigDTO datasetConfigDTO, final @Nullable Interval timeFilterInterval)
+      throws Exception {
     final String dataSourceName = Objects.requireNonNull(datasetConfigDTO.getDataSource());
     final @NonNull ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
-    final String sqlQuery = extremumTimeSqlQuery(datasetConfigDTO,
-        dataSource,
-        extremum,
+    final String sqlQuery = extremumTimeSqlQuery(datasetConfigDTO, dataSource, extremum,
         timeFilterInterval);
     final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader
-    final DataSourceRequest request = new DataSourceRequest(null, sqlQuery, customOptions, Map.of());
+    final DataSourceRequest request = new DataSourceRequest(null, sqlQuery, customOptions,
+        Map.of());
     final DataFrame df = dataSource.fetchDataTable(request).getDataFrame();
     if (df == null || df.size() == 0) {
       LOG.warn(
           "Empty dataframe for {} time query on dataset {} on interval {}. Dataset is empty or unknown SQL error. Could not fetch start time.",
-          extremum,
-          datasetConfigDTO.getDataset(),
+          extremum, datasetConfigDTO.getDataset(),
           timeFilterInterval == null ? "full dataset" : timeFilterInterval.toString());
       return null;
     }
@@ -144,21 +132,16 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
         sqlLanguage.getSqlParserConfig());
 
     final SqlNode projection = getTimeColumnToMillisProjection(datasetConfigDTO,
-        sqlExpressionBuilder,
-        dialect, sqlParserConfig);
+        sqlExpressionBuilder, dialect, sqlParserConfig);
 
     final SqlNode orderByNode = extremum.orderByNode(datasetConfigDTO.getTimeColumn());
 
-    final SelectQuery calciteRequestBuilder = new SelectQuery(datasetConfigDTO.getDataset())
-        .select(projection)
-        .orderBy(orderByNode)
-        .limit(1);
+    final SelectQuery calciteRequestBuilder = new SelectQuery(datasetConfigDTO.getDataset()).select(
+        projection).orderBy(orderByNode).limit(1);
 
     if (timeFilterInterval != null) {
-      calciteRequestBuilder.whereTimeFilter(timeFilterInterval,
-          datasetConfigDTO.getTimeColumn(),
-          datasetConfigDTO.getTimeFormat(),
-          datasetConfigDTO.getTimeUnit().name());
+      calciteRequestBuilder.whereTimeFilter(timeFilterInterval, datasetConfigDTO.getTimeColumn(),
+          datasetConfigDTO.getTimeFormat(), datasetConfigDTO.getTimeUnit().name());
     }
 
     return calciteRequestBuilder.build().getSql(sqlLanguage, sqlExpressionBuilder);
@@ -170,11 +153,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
       final SqlParser.Config sqlParserConfig) {
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
     final String timeGroupExpression = sqlExpressionBuilder.getTimeGroupExpression(
-        quoteSafeTimeColumn,
-        datasetConfigDTO.getTimeFormat(),
-        Period.millis(1),
-        datasetConfigDTO.getTimeUnit().toString(),
-        DateTimeZone.UTC.toString());
+        quoteSafeTimeColumn, datasetConfigDTO.getTimeFormat(), Period.millis(1),
+        datasetConfigDTO.getTimeUnit().toString(), DateTimeZone.UTC.toString());
 
     final SqlNode timeGroupNode = CalciteUtils.expressionToNode(timeGroupExpression,
         sqlParserConfig);

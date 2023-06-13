@@ -139,10 +139,13 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * Running the detection task after updating an alert ensures that enumeration items if
      * updated are reflected in the dtos as well. Enumeration Items are updated after executing
      * the Enumerator Operator node.
+     *
+     * In this case the start and end timestamp is the same to ensure that we update the enumeration
+     * items but we don't actually run the detection task.
      */
     alertCreater.createDetectionTask(dto.getId(),
         dto.getLastTimestamp(),
-        System.currentTimeMillis());
+        dto.getLastTimestamp());
   }
 
   @Override

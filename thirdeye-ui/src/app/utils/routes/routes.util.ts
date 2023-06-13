@@ -110,6 +110,7 @@ export const AppRouteRelative = {
     WELCOME_ONBOARD_DATASOURCE_DATASETS: `${PLACEHOLDER_ROUTE_NAME}/datasets`,
     WELCOME_CREATE_ALERT: "create-alert",
     WELCOME_CREATE_ALERT_SELECT_TYPE: "select-type",
+    WELCOME_CREATE_ALERT_SELECT_METRIC: "select-metric",
     WELCOME_CREATE_ALERT_ANOMALIES_FILTER: "setup-anomalies-filter",
     WELCOME_CREATE_ALERT_SETUP_MONITORING: "setup-monitoring",
     WELCOME_CREATE_ALERT_SETUP_DETAILS: "setup-details",

@@ -14,8 +14,9 @@
  */
 
 import { AvailableAlgorithmOption } from "../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
+import { AlertInsight, EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
 export interface AlertCreatedGuidedPageOutletContext {
@@ -37,4 +38,11 @@ export interface AlertCreatedGuidedPageOutletContext {
 
     selectedSubscriptionGroups: SubscriptionGroup[];
     handleSubscriptionGroupChange: (groups: SubscriptionGroup[]) => void;
+
+    alertInsight: AlertInsight | null;
+    getAlertInsight: (params: {
+        alertId?: number;
+        alert?: EditableAlert;
+    }) => Promise<AlertInsight | undefined>;
+    getAlertInsightStatus: ActionStatus;
 }

@@ -30,6 +30,10 @@ import { useAlertsCreateGuidedPage } from "./alerts-create-guided-page.styles";
 
 const STEPS = [
     {
+        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC,
+        translationLabel: "select-metric",
+    },
+    {
         subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE,
         translationLabel: "select-alert-type",
     },
@@ -70,6 +74,10 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
 
         newSubscriptionGroup,
         onNewSubscriptionGroupChange,
+
+        alertInsight,
+        getAlertInsight,
+        getAlertInsightStatus,
     } =
         useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
@@ -193,6 +201,10 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
                                 selectedSubscriptionGroups ?? [],
                             handleSubscriptionGroupChange:
                                 handleSubscriptionGroupChange ?? (() => null),
+
+                            alertInsight,
+                            getAlertInsight,
+                            getAlertInsightStatus,
                         }}
                     />
                 </Box>

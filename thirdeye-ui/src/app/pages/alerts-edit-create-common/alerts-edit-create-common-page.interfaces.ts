@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../rest/dto/alert.interfaces";
+import { AlertInsight, EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 
 export const BOTTOM_BAR_ELEMENT_ID = "bottom-bar-container";
@@ -66,4 +67,11 @@ export interface AlertsSimpleAdvancedJsonContainerPageOutletContextProps {
 
     isEditRequestInFlight: boolean;
     onPageExit?: () => void;
+
+    alertInsight: AlertInsight | null;
+    getAlertInsight: (params: {
+        alertId?: number;
+        alert?: EditableAlert;
+    }) => Promise<AlertInsight | undefined>;
+    getAlertInsightStatus: ActionStatus;
 }

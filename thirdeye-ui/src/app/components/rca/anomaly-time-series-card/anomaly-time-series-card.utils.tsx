@@ -517,7 +517,10 @@ export const generateChartOptionsForAlert = (
     translation: (id: string) => string,
     navigate?: NavigateFunction,
     timezone?: string,
-    hideTime?: boolean
+    hideTime?: boolean,
+    hideUpperLowerBound?: boolean,
+    hideActivity?: boolean,
+    hidePredicted?: boolean
 ): TimeSeriesChartProps => {
     let series: Series[] = [];
 
@@ -525,7 +528,10 @@ export const generateChartOptionsForAlert = (
         series = generateSeriesDataForDetectionEvaluation(
             detectionEvaluation,
             [],
-            translation
+            translation,
+            hideUpperLowerBound,
+            hideActivity,
+            hidePredicted
         );
     }
 

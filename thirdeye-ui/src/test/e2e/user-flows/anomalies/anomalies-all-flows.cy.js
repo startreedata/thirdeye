@@ -116,7 +116,7 @@ describe("anomalies list flows", () => {
         cy.get("button[type='submit']").click();
         cy.wait("@anomalies").its("response.body").should("have.length.gt", 5);
 
-        // Ensure table still has content
+        // Ensure table still has chart-content
         cy.getByDataTestId("metrics-report-list-tbody")
             .find("tr")
             .should("have.length", 1);

@@ -22,6 +22,7 @@ import {
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
+import { useGetAlertInsight } from "../../rest/alerts/alerts.actions";
 import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { validateTemplateProperties } from "../../utils/alerts/alerts-configuration-validator.util";
@@ -42,6 +43,13 @@ export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimp
     }) => {
         const { notify } = useNotificationProviderV1();
         const { t } = useTranslation();
+
+        // A child page is expected to call the `getAlertInsight` function
+        const {
+            alertInsight,
+            getAlertInsight,
+            status: getAlertInsightStatus,
+        } = useGetAlertInsight();
 
         const {
             getAlertTemplates,
@@ -154,6 +162,9 @@ export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimp
                         onNewSubscriptionGroupChange,
                         isEditRequestInFlight,
                         onPageExit,
+                        alertInsight,
+                        getAlertInsight,
+                        getAlertInsightStatus,
                     }}
                 />
             </LoadingErrorStateSwitch>

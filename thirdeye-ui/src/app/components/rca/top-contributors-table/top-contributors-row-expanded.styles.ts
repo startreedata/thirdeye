@@ -16,7 +16,7 @@ import { makeStyles } from "@material-ui/core";
 
 export const useAlgorithmRowExpandedStyles = makeStyles((theme) => ({
     /**
-     * Make the row on top of the one with expanded content blend by removing
+     * Make the row on top of the one with expanded chart-content blend by removing
      * the bottom border
      */
     root: {

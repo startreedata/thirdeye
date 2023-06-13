@@ -25,6 +25,12 @@ const CreateAlertGuidedPage = lazy(() =>
     ).then((module) => ({ default: module.CreateAlertGuidedPage }))
 );
 
+const SetupMetricPage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-metric" */ "../../pages/alerts-create-guided-page/setup-metric/setup-metric-page.component"
+    ).then((module) => ({ default: module.SetupMetricPage }))
+);
+
 const SelectTypePage = lazy(() =>
     import(
         /* webpackChunkName: "select-type-page" */ "../../pages/alerts-create-guided-page/select-type/select-type-page.component"
@@ -74,11 +80,26 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                                 <Navigate
                                     replace
                                     to={
-                                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
                                     }
                                 />
                             }
                         />
+                        <Route
+                            element={
+                                <CancelAPICallsOnPageUnload
+                                    key={
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
+                                    }
+                                >
+                                    <SetupMetricPage />
+                                </CancelAPICallsOnPageUnload>
+                            }
+                            path={
+                                AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
+                            }
+                        />
+
                         <Route
                             element={
                                 <CancelAPICallsOnPageUnload

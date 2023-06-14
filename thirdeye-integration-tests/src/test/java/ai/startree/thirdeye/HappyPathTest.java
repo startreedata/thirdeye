@@ -46,7 +46,9 @@ import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
-import com.google.api.client.json.Json;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
@@ -59,9 +61,9 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -152,20 +154,35 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testPing")
-  public void testSwaggerApiJson() {
+  public void testSwaggerApiJson() throws JsonProcessingException {
     final Response response = request("/openapi.json").get();
     assertThat(response.getStatus()).isEqualTo(200);
-    final JsonNode r  = response.readEntity(JsonNode.class);
-    assertThat(r.get("openapi").toString()).isEqualTo("3.0.1");
+    final JsonNode r = new ObjectMapper().readTree(
+        response.readEntity(JSONObject.class).toJSONString());
+    assertThat(r.get("openapi").textValue()).isEqualTo("3.0.1");
     final JsonNode oauthSecurityConfig = r.get("components").get("securitySchemes").get("oauth");
-    assertThat(oauthSecurityConfig.get("in").toString()).isEqualTo("header");
-    assertThat(oauthSecurityConfig.get("name").toString()).isEqualTo("Authorization");
+    assertThat(oauthSecurityConfig.get("in").textValue()).isEqualTo("header");
+    assertThat(oauthSecurityConfig.get("name").textValue()).isEqualTo("Authorization");
     // test a POST formData path
     final JsonNode alertRunPath = r.get("paths").get("/api/alerts/{id}/run");
-    assertThat(alertRunPath.get("post").get("requestBody").get("content").get("*/*").get("schema").get("properties").get("start").get("type").toString()).isEqualTo("integer");
+    assertThat(alertRunPath.get("post")
+        .get("requestBody")
+        .get("content")
+        .get("application/x-www-form-urlencoded")
+        .get("schema")
+        .get("properties")
+        .get("start")
+        .get("type")
+        .textValue()).isEqualTo("integer");
     // test a POST json data path
     final JsonNode evaluatePath = r.get("paths").get("/api/alerts/evaluate");
-    assertThat(evaluatePath.get("post").get("requestBody").get("content").get("*/*").get("schema").get("$ref").toString()).isEqualTo("#/components/schemas/AlertEvaluationApi");
+    assertThat(evaluatePath.get("post")
+        .get("requestBody")
+        .get("content")
+        .get("*/*")
+        .get("schema")
+        .get("$ref")
+        .textValue()).isEqualTo("#/components/schemas/AlertEvaluationApi");
   }
 
   @Test(dependsOnMethods = "testPing")

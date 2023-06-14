@@ -46,7 +46,24 @@ public interface OperatorResult {
     return null;
   }
 
+  /**
+   * Dimension Exploration Only
+   * This is set by the combiner output to generate the final detection result with the
+   * enumeration item tagged with the detection.
+   *
+   * @return Enumeration Item associated with the detection.
+   */
   default @Nullable EnumerationItemDTO getEnumerationItem() {
+    return null;
+  }
+
+  /**
+   * Dimension Exploration Only
+   * This is the output of the enumerator operator.
+   *
+   * @return List of enumeration items
+   */
+  default @Nullable List<EnumerationItemDTO> getEnumerationItems() {
     return null;
   }
 

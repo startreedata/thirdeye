@@ -16,22 +16,20 @@ package ai.startree.thirdeye.alert;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
-import ai.startree.thirdeye.detectionpipeline.operator.EnumeratorResult;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public abstract class AlertEvaluatorResponseMapper {
 
@@ -80,8 +78,8 @@ public abstract class AlertEvaluatorResponseMapper {
         final DetectionEvaluationApi api = toDetectionEvaluationApi(operatorResults.get(i));
         map.put(String.valueOf(i), api);
       }
-    } else if (result instanceof EnumeratorResult) {
-      final List<EnumerationItemDTO> enumerationItems = ((EnumeratorResult) result).getResults();
+    } else if (result.getEnumerationItems() != null) {
+      final List<EnumerationItemDTO> enumerationItems = result.getEnumerationItems();
       for (int i = 0; i < enumerationItems.size(); i++) {
         final EnumerationItemApi api = ApiBeanMapper.toApi(enumerationItems.get(i));
         map.put(String.valueOf(i), new DetectionEvaluationApi()
@@ -98,10 +96,10 @@ public abstract class AlertEvaluatorResponseMapper {
   private static DetectionEvaluationApi toDetectionEvaluationApi(
       final OperatorResult operatorResult) {
     final DetectionEvaluationApi api = new DetectionEvaluationApi();
-    final List<AnomalyApi> anomalyApis = new ArrayList<>();
-    for (final AnomalyDTO anomalyDto : operatorResult.getAnomalies()) {
-      anomalyApis.add(ApiBeanMapper.toApi(anomalyDto));
-    }
+    final List<AnomalyApi> anomalyApis = requireNonNull(operatorResult.getAnomalies(),
+        "operatorResult.anomalies is null").stream()
+        .map(ApiBeanMapper::toApi)
+        .collect(Collectors.toList());
     api.setAnomalies(anomalyApis);
     api.setData(getData(operatorResult));
     api.setEnumerationItem(ApiBeanMapper.toApi(operatorResult.getEnumerationItem()));

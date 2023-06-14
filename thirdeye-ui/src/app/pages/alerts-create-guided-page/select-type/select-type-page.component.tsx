@@ -13,49 +13,35 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import { AxiosError } from "axios";
-import { default as React, FunctionComponent } from "react";
+import { default as React, FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { AlgorithmSelection } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.component";
+import {
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
+import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { AlertTypeSelection } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.component";
 import { filterOptionWithTemplateNames } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
-import { SampleAlertSelection } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.component";
-import { SampleAlertOption } from "../../../components/alert-wizard-v3/sample-alert-selection/sample-alert-selection.interfaces";
-import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
-    useNotificationProviderV1,
 } from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
 import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
-import { createAlert } from "../../../rest/alerts/alerts.rest";
-import { QUERY_PARAM_KEYS } from "../../../utils/constants/constants.util";
-import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
-import { getErrorMessages } from "../../../utils/rest/rest.util";
-import {
-    AppRouteRelative,
-    getAlertsAlertPath,
-    getHomePath,
-} from "../../../utils/routes/routes.util";
-import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../../alerts-view-page/alerts-view-page.utils";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 import { SelectTypePageProps } from "./select-type-page.interface";
 
 export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
-    sampleAlertsBottom,
-    hideSampleAlerts,
-    navigateToAlertDetailAfterCreate,
     hideCurrentlySelected,
 }) => {
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const { setShowAppNavBar } = useAppBarConfigProvider();
-    const { notify } = useNotificationProviderV1();
 
     const {
         onAlertPropertyChange,
@@ -64,19 +50,27 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         getAlertTemplates,
         alertTemplates,
         selectedAlgorithmOption,
+        alert,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
-    const handleAlgorithmSelection = (
-        isDimensionExploration: boolean
-    ): void => {
-        if (isDimensionExploration) {
+    useEffect(() => {
+        // On initial render, ensure metric is selected
+        const newAlert = createNewStartingAlert();
+
+        const metricIsSelected =
+            newAlert.templateProperties.dataset !==
+                alert.templateProperties.dataset &&
+            newAlert.templateProperties.aggregationColumn !==
+                alert.templateProperties.aggregationColumn;
+
+        if (!metricIsSelected) {
             navigate(
-                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
+                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC}`
             );
-
-            return;
         }
+    }, []);
 
+    const handleAlgorithmSelection = (): void => {
         navigate(
             `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
         );
@@ -86,42 +80,6 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         createDefaultAlertTemplates().then(() => {
             getAlertTemplates();
         });
-    };
-
-    const handleSampleAlertSelect = (option: SampleAlertOption): void => {
-        const clonedConfiguration = { ...option.alertConfiguration };
-        clonedConfiguration.name +=
-            "-" + Math.random().toString(36).substring(2, 5);
-
-        createAlert(clonedConfiguration)
-            .then((alert) => {
-                if (navigateToAlertDetailAfterCreate) {
-                    navigate(
-                        getAlertsAlertPath(
-                            alert.id,
-                            new URLSearchParams([
-                                [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
-                            ])
-                        )
-                    );
-                } else {
-                    const queryParams = new URLSearchParams([
-                        [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
-                    ]);
-                    navigate(`${getHomePath()}?${queryParams.toString()}`);
-                }
-                setShowAppNavBar(true);
-            })
-            .catch((error: AxiosError): void => {
-                notifyIfErrors(
-                    ActionStatus.Error,
-                    getErrorMessages(error),
-                    notify,
-                    t("message.create-error", {
-                        entity: t("label.sample-alert"),
-                    })
-                );
-            });
     };
 
     return (
@@ -148,12 +106,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                         </Grid>
                     </Grid>
                 </Grid>
-                {!hideSampleAlerts && !sampleAlertsBottom && (
-                    <SampleAlertSelection
-                        alertTemplates={alertTemplates}
-                        onSampleAlertSelect={handleSampleAlertSelect}
-                    />
-                )}
+
                 <Grid item xs={12}>
                     <EmptyStateSwitch
                         emptyState={
@@ -186,25 +139,20 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                                 .length === 0
                         }
                     >
-                        <AlgorithmSelection
-                            advancedOptions={advancedOptions}
-                            simpleOptions={simpleOptions}
+                        <AlertTypeSelection
+                            alertTemplates={alertTemplates}
                             onAlertPropertyChange={onAlertPropertyChange}
                             onSelectionComplete={handleAlgorithmSelection}
                         />
                     </EmptyStateSwitch>
                 </Grid>
-
-                {!hideSampleAlerts && sampleAlertsBottom && (
-                    <SampleAlertSelection
-                        alertTemplates={alertTemplates}
-                        onSampleAlertSelect={handleSampleAlertSelect}
-                    />
-                )}
             </PageContentsGridV1>
 
             {!hideCurrentlySelected && selectedAlgorithmOption && (
                 <WizardBottomBar
+                    backBtnLink={`../${
+                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
+                    }?${searchParams.toString()}`}
                     nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
                     nextButtonLabel={t("label.continue-dont-change")}
                 >

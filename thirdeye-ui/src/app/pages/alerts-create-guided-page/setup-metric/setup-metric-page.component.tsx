@@ -176,6 +176,12 @@ export const SetupMetricPage: FunctionComponent = () => {
                     setSearchParams(searchParams);
                 }
             );
+            // If start or end is missing and there exists an alert insight
+        } else if ((!startTime || !endTime) && alertInsight) {
+            fetchAlertEvaluation(
+                alertInsight.defaultStartTime,
+                alertInsight.defaultEndTime
+            );
         } else {
             fetchAlertEvaluation(startTime, endTime);
         }
@@ -271,7 +277,10 @@ export const SetupMetricPage: FunctionComponent = () => {
             </PageContentsGridV1>
 
             <WizardBottomBar
-                nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`}
+                nextBtnLink={`../${
+                    AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
+                }?${searchParams.toString()}`}
+                nextButtonIsDisabled={!shouldShowLoadButton}
             />
         </>
     );

@@ -366,6 +366,7 @@
         "select-all": "Select All",
         "select-granularity": "Select granularity",
         "select-subscription-groups": "Select subscription groups",
+        "select-type": "Select type",
         "selected": "Selected",
         "selected-count": "{{count}} selected",
         "selected-time-range": "selected time range",

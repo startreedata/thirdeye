@@ -78,13 +78,35 @@ module.exports = {
                     },
                 ],
             },
+            // images files to be handled by file-loader
+            {
+                test: /\.png$/,
+                use: [
+                    {
+                        loader: "file-loader",
+                        options: {
+                            name: "[name].[ext]",
+                            outputPath: "images/",
+                        },
+                    },
+                ],
+            },
         ],
     },
 
     // Module resolution
     resolve: {
         // File types to be handled
-        extensions: [".ts", ".tsx", ".js", ".css", ".scss", ".svg", ".ttf"],
+        extensions: [
+            ".ts",
+            ".tsx",
+            ".js",
+            ".css",
+            ".scss",
+            ".svg",
+            ".ttf",
+            ".png",
+        ],
     },
 
     plugins: [

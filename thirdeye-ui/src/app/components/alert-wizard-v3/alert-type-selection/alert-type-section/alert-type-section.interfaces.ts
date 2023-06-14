@@ -13,6 +13,12 @@
  * the License.
  */
 
-export interface SelectTypePageProps {
-    hideCurrentlySelected?: boolean;
+import {
+    AlgorithmOption,
+    AvailableAlgorithmOption,
+} from "../alert-type-selection.interfaces";
+
+export interface AlertTypeSectionProps {
+    option: AvailableAlgorithmOption;
+    onClick: (algorithmOption: AlgorithmOption) => void;
 }

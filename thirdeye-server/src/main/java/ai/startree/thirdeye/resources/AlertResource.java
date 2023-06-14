@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,6 +62,28 @@ import org.slf4j.LoggerFactory;
 public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertResource.class);
+  public static final String EVALUATE_SWAGGER_EXAMPLE = "{\n"
+      + "  \"alert\": {\n"
+      + "    \"name\": \"alert-name\",\n"
+      + "    \"description\": \"\",\n"
+      + "    \"cron\": \"0 0 5 ? * * *\",\n"
+      + "    \"template\": {\n"
+      + "      \"name\": \"startree-ets\"\n"
+      + "    },\n"
+      + "    \"templateProperties\": {\n"
+      + "      \"dataSource\": \"pinot\",\n"
+      + "      \"dataset\": \"my-dataset\",\n"
+      + "      \"aggregationColumn\": \"columnName\",\n"
+      + "      \"aggregationFunction\": \"SUM\",\n"
+      + "      \"seasonalityPeriod\": \"P7D\",\n"
+      + "      \"lookback\": \"P28D\",\n"
+      + "      \"monitoringGranularity\": \"P1D\",\n"
+      + "      \"sensitivity\": \"3\"\n"
+      + "    }\n"
+      + "  },\n"
+      + "  \"start\": 1685491200000,\n"
+      + "  \"end\": 1686700800000\n"
+      + "}";
 
   private final AlertService alertService;
 
@@ -124,7 +147,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   public Response evaluate(
       @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
-      final AlertEvaluationApi request
+      @Schema(example = EVALUATE_SWAGGER_EXAMPLE) final AlertEvaluationApi request
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");

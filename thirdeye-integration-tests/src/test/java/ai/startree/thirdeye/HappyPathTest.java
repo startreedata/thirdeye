@@ -46,6 +46,7 @@ import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
+import com.google.api.client.json.Json;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
@@ -60,6 +61,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -147,6 +149,14 @@ public class HappyPathTest {
     final Response response = request(
         "api/data-sources/validate?name=" + pinotDataSourceApi.getName()).get();
     assertThat(response.getStatus()).isEqualTo(200);
+  }
+
+  @Test(dependsOnMethods = "testPing")
+  public void testSwaggerApiJson() {
+    final Response response = request("/openapi.json").get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    final JsonNode r  = response.readEntity(JsonNode.class);
+    assertThat(r.get("openapi").toString()).isEqualTo("3.0.1");
   }
 
   @Test(dependsOnMethods = "testPing")

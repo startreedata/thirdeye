@@ -162,8 +162,6 @@ export const AlertsRouter: FunctionComponent = () => {
                                     key={`${AppRouteRelative.ALERTS_CREATE_NEW_USER}/*`}
                                 >
                                     <AlertsCreateGuidedRouter
-                                        navigateToAlertDetailAfterSampleAlertCreate
-                                        sampleAlertsBottom
                                         createLabel={t("label.create")}
                                         inProgressLabel={t("label.creating")}
                                     />
@@ -205,8 +203,6 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={
                                 <AlertsCreateGuidedRouter
-                                    hideSampleAlerts
-                                    navigateToAlertDetailAfterSampleAlertCreate
                                     createLabel={t("label.create")}
                                     inProgressLabel={t("label.creating")}
                                 />
@@ -300,8 +296,6 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={
                                 <AlertsCreateGuidedRouter
-                                    hideSampleAlerts
-                                    navigateToAlertDetailAfterSampleAlertCreate
                                     createLabel={t("label.update-entity", {
                                         entity: t("label.alert"),
                                     })}

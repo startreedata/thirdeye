@@ -38,8 +38,8 @@ const STEPS = [
         translationLabel: "select-alert-type",
     },
     {
-        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING,
-        translationLabel: "setup-alert-monitoring",
+        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT,
+        translationLabel: "tune-alert",
     },
     {
         subPath: AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER,

@@ -215,7 +215,7 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                                             component={
                                                                 RouterLink
                                                             }
-                                                            to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
+                                                            to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`}
                                                         >
                                                             {t("label.go-back")}
                                                         </Button>
@@ -380,7 +380,7 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
 
                 {!hideCurrentlySelected && selectedAlgorithmOption && (
                     <WizardBottomBar
-                        backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
+                        backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`}
                         handleNextClick={() => {
                             onAlertPropertyChange({
                                 templateProperties:

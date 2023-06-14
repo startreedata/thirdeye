@@ -72,9 +72,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
             !alert.templateProperties.dataset ||
             !alert.templateProperties.dataSource
         ) {
-            navigate(
-                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
-            );
+            navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`);
         }
     }, []);
 

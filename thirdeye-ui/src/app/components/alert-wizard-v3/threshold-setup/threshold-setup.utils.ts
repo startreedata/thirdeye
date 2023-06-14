@@ -132,11 +132,6 @@ const SUPPORTED_SIMPLE_MODE_PROPERTIES: {
         label: i18n.t("label.maximum"),
         type: "number",
     },
-    monitoringGranularity: {
-        templatePropertyName: "monitoringGranularity",
-        label: i18n.t("label.monitoring-granularity"),
-        type: "string",
-    },
     seasonalityPeriod: {
         templatePropertyName: "seasonalityPeriod",
         label: i18n.t("label.seasonality-period"),

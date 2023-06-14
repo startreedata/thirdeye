@@ -37,10 +37,10 @@ const SelectTypePage = lazy(() =>
     ).then((module) => ({ default: module.SelectTypePage }))
 );
 
-const SetupMonitoringPage = lazy(() =>
+const TuneAlertPage = lazy(() =>
     import(
-        /* webpackChunkName: "setup-monitoring-page" */ "../../pages/alerts-create-guided-page/setup-monitoring/setup-monitoring-page.component"
-    ).then((module) => ({ default: module.SetupMonitoringPage }))
+        /* webpackChunkName: "tune-alert-page" */ "../../pages/alerts-create-guided-page/tune-alert/tune-alert-page.component"
+    ).then((module) => ({ default: module.TuneAlertPage }))
 );
 
 const SetupDetailsPage = lazy(() =>
@@ -62,14 +62,7 @@ const SetupDimensionGroupsPage = lazy(() =>
 );
 
 export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRouterProps> =
-    ({
-        sampleAlertsBottom,
-        hideSampleAlerts,
-        createLabel,
-        inProgressLabel,
-        hideCurrentlySelected,
-        navigateToAlertDetailAfterSampleAlertCreate,
-    }) => {
+    ({ createLabel, inProgressLabel, hideCurrentlySelected }) => {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
                 <Routes>
@@ -111,11 +104,6 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                                         hideCurrentlySelected={
                                             hideCurrentlySelected
                                         }
-                                        hideSampleAlerts={hideSampleAlerts}
-                                        navigateToAlertDetailAfterCreate={
-                                            navigateToAlertDetailAfterSampleAlertCreate
-                                        }
-                                        sampleAlertsBottom={sampleAlertsBottom}
                                     />
                                 </CancelAPICallsOnPageUnload>
                             }
@@ -143,14 +131,14 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                             element={
                                 <CancelAPICallsOnPageUnload
                                     key={
-                                        AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
+                                        AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
                                     }
                                 >
-                                    <SetupMonitoringPage />
+                                    <TuneAlertPage />
                                 </CancelAPICallsOnPageUnload>
                             }
                             path={
-                                AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING
+                                AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
                             }
                         />
 

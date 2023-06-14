@@ -48,7 +48,7 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
         {
             matcher: (path: string) =>
                 path.includes(AppRouteRelative.ALERTS_CREATE_NEW_USER),
-            navLink: `${AppRouteRelative.ALERTS_CREATE_NEW_USER}/${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`,
+            navLink: `${AppRouteRelative.ALERTS_CREATE_NEW_USER}/${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`,
             text: t("label.simple"),
         },
         {

@@ -13,14 +13,20 @@
  * the License.
  */
 import { default as React, FunctionComponent, useEffect, useMemo } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import {
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
+import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 
-export const SetupMonitoringPage: FunctionComponent = () => {
+export const TuneAlertPage: FunctionComponent = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const {
         alert,
@@ -33,6 +39,21 @@ export const SetupMonitoringPage: FunctionComponent = () => {
         // On initial render, ensure there is already an alert template selected
         if (!alert.template?.name) {
             navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`);
+        }
+
+        // On initial render, ensure metric is selected
+        const newAlert = createNewStartingAlert();
+
+        const metricIsSelected =
+            newAlert.templateProperties.dataset !==
+                alert.templateProperties.dataset &&
+            newAlert.templateProperties.aggregationColumn !==
+                alert.templateProperties.aggregationColumn;
+
+        if (!metricIsSelected) {
+            navigate(
+                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC}`
+            );
         }
     }, []);
 
@@ -55,10 +76,16 @@ export const SetupMonitoringPage: FunctionComponent = () => {
                 backBtnLink={
                     selectedAlgorithmOption.algorithmOption
                         .alertTemplateForMultidimension === alert.template?.name
-                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
-                        : `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
+                        ? `../${
+                              AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
+                          }?${searchParams.toString()}`
+                        : `../${
+                              AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
+                          }?${searchParams.toString()}`
                 }
-                nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
+                nextBtnLink={`../${
+                    AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER
+                }?${searchParams.toString()}`}
             />
         </>
     );

@@ -111,9 +111,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
             },
         });
 
-        navigate(
-            `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
-        );
+        navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`);
     };
 
     return (
@@ -207,7 +205,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                 backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`}
                 nextBtnLink={
                     alert.templateProperties?.enumerationItems
-                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`
                         : undefined
                 }
             />

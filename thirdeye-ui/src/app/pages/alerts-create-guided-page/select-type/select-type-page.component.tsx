@@ -72,7 +72,9 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
 
     const handleAlgorithmSelection = (): void => {
         navigate(
-            `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`
+            `../${
+                AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
+            }?${searchParams.toString()}`
         );
     };
 
@@ -153,7 +155,9 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                     backBtnLink={`../${
                         AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
                     }?${searchParams.toString()}`}
-                    nextBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_MONITORING}`}
+                    nextBtnLink={`../${
+                        AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
+                    }?${searchParams.toString()}`}
                     nextButtonLabel={t("label.continue-dont-change")}
                 >
                     {t(

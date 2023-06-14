@@ -157,6 +157,15 @@ public class HappyPathTest {
     assertThat(response.getStatus()).isEqualTo(200);
     final JsonNode r  = response.readEntity(JsonNode.class);
     assertThat(r.get("openapi").toString()).isEqualTo("3.0.1");
+    final JsonNode oauthSecurityConfig = r.get("components").get("securitySchemes").get("oauth");
+    assertThat(oauthSecurityConfig.get("in").toString()).isEqualTo("header");
+    assertThat(oauthSecurityConfig.get("name").toString()).isEqualTo("Authorization");
+    // test a POST formData path
+    final JsonNode alertRunPath = r.get("paths").get("/api/alerts/{id}/run");
+    assertThat(alertRunPath.get("post").get("requestBody").get("content").get("*/*").get("schema").get("properties").get("start").get("type").toString()).isEqualTo("integer");
+    // test a POST json data path
+    final JsonNode evaluatePath = r.get("paths").get("/api/alerts/evaluate");
+    assertThat(evaluatePath.get("post").get("requestBody").get("content").get("*/*").get("schema").get("$ref").toString()).isEqualTo("#/components/schemas/AlertEvaluationApi");
   }
 
   @Test(dependsOnMethods = "testPing")

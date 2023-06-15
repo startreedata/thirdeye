@@ -125,6 +125,7 @@
         "daily-anomalies": "Daily anomalies",
         "data": "Data",
         "dataset": "Dataset",
+        "dataset-configuration": "Dataset Configuration",
         "dataset-details": "Dataset details",
         "dataset-metric": "Dataset/Metric",
         "dataset-properties": "Dataset Properties",

@@ -24,7 +24,6 @@ import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     HelpLinkIconV1,
-    JSONEditorV1,
     PageContentsCardV1,
     PageContentsGridV1,
     TooltipV1,
@@ -32,6 +31,7 @@ import {
 import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { createDefaultDatasource } from "../../utils/datasources/datasources.util";
+import { JSONEditorWithLocalCache } from "../json-editor-with-local-cache/json-editor-with-local-cache.component";
 import { DatasourceWizardProps } from "./datasource-wizard.interfaces";
 
 export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = ({
@@ -97,9 +97,14 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = ({
                             {/* Datasource configuration */}
                             {/* Datasource configuration editor */}
                             <Grid item sm={12}>
-                                <JSONEditorV1<Datasource>
+                                <JSONEditorWithLocalCache
                                     hideValidationSuccessIcon
-                                    value={editedDatasource}
+                                    initialValue={
+                                        editedDatasource as unknown as Record<
+                                            string,
+                                            unknown
+                                        >
+                                    }
                                     onChange={onDatasourceConfigurationChange}
                                 />
                             </Grid>

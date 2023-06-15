@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -25,6 +25,7 @@ import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wiz
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
+    PageContentsCardV1,
     PageContentsGridV1,
     PageV1,
     useNotificationProviderV1,
@@ -132,19 +133,32 @@ export const DatasetsUpdatePage: FunctionComponent = () => {
             />
             <PageContentsGridV1>
                 <Grid item xs={12}>
-                    {dataset && (
-                        <JSONEditorWithLocalCache
-                            initialValue={
-                                modifiedDataset as unknown as Record<
-                                    string,
-                                    unknown
-                                >
-                            }
-                            onChange={(value: string) =>
-                                setModifiedDataset(JSON.parse(value))
-                            }
-                        />
-                    )}
+                    <PageContentsCardV1>
+                        <Grid container>
+                            <Grid item xs={12}>
+                                <Typography variant="h5">
+                                    {t("label.dataset-configuration")}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {dataset && (
+                                    <JSONEditorWithLocalCache
+                                        initialValue={
+                                            modifiedDataset as unknown as Record<
+                                                string,
+                                                unknown
+                                            >
+                                        }
+                                        onChange={(value: string) =>
+                                            setModifiedDataset(
+                                                JSON.parse(value)
+                                            )
+                                        }
+                                    />
+                                )}
+                            </Grid>
+                        </Grid>
+                    </PageContentsCardV1>
                 </Grid>
             </PageContentsGridV1>
 

@@ -62,7 +62,11 @@ export const AlertJsonEditorModal: FunctionComponent<AlertJsonEditorModalProps> 
 
         return (
             <>
-                <Button color="primary" onClick={handleAdvancedEditorBtnClick}>
+                <Button
+                    color="primary"
+                    variant="outlined"
+                    onClick={handleAdvancedEditorBtnClick}
+                >
                     {t("label.json-editor")}
                 </Button>
             </>

@@ -80,6 +80,7 @@ export const SampleAlertSelection: FunctionComponent<SampleAlertSelectionProps> 
                             <Grid item>
                                 <ButtonGroup color="primary">
                                     <Button
+                                        disabled={!filterOption}
                                         variant="outlined"
                                         onClick={() =>
                                             handleFilterClick(undefined)
@@ -88,6 +89,10 @@ export const SampleAlertSelection: FunctionComponent<SampleAlertSelectionProps> 
                                         {t("label.show-all")}
                                     </Button>
                                     <Button
+                                        disabled={
+                                            filterOption ===
+                                            SAMPLE_ALERT_TYPES.BASIC
+                                        }
                                         variant="outlined"
                                         onClick={() =>
                                             handleFilterClick(
@@ -98,6 +103,10 @@ export const SampleAlertSelection: FunctionComponent<SampleAlertSelectionProps> 
                                         {t("label.basic-alerts-only")}
                                     </Button>
                                     <Button
+                                        disabled={
+                                            filterOption ===
+                                            SAMPLE_ALERT_TYPES.MULTIDIMENSION
+                                        }
                                         variant="outlined"
                                         onClick={() =>
                                             handleFilterClick(

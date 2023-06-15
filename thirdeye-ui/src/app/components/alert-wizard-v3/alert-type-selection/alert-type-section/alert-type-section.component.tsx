@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Link, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTypeSectionProps } from "./alert-type-section.interfaces";
@@ -20,41 +20,54 @@ import { AlertTypeSectionProps } from "./alert-type-section.interfaces";
 export const AlertTypeSection: FunctionComponent<AlertTypeSectionProps> = ({
     option,
     onClick,
+    selected,
 }) => {
     const { t } = useTranslation();
+    const dataTestId = `${option.algorithmOption.title
+        .toLowerCase()
+        .split(" ")
+        .join("-")}-select-btn`;
 
     return (
         <Grid container>
-            <Grid item sm={10} xs={12}>
-                <Box>
-                    <Link
-                        gutterBottom
-                        variant="h5"
-                        onClick={() => onClick(option.algorithmOption)}
-                    >
-                        {option.algorithmOption.title}
-                    </Link>
-                    <Typography component="p" variant="body2">
-                        {option.algorithmOption.description}
-                    </Typography>
-                </Box>
+            <Grid item xs={12}>
+                <Grid
+                    container
+                    alignItems="center"
+                    justifyContent="space-between"
+                >
+                    <Grid item>
+                        <Typography
+                            gutterBottom
+                            color={selected ? "primary" : undefined}
+                            variant="h5"
+                            onClick={() => onClick(option.algorithmOption)}
+                        >
+                            {option.algorithmOption.title}
+                        </Typography>
+                        <Typography component="p" variant="body2">
+                            {option.algorithmOption.description}
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            color="primary"
+                            data-testid={dataTestId}
+                            variant="outlined"
+                            onClick={() => onClick(option.algorithmOption)}
+                        >
+                            {selected ? t("label.selected") : t("label.select")}
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Grid>
 
+            <Grid item xs={12}>
                 <Box>
                     <img
                         src={option.algorithmOption.exampleImage}
                         style={{ width: "100%", height: "auto" }}
                     />
-                </Box>
-            </Grid>
-
-            <Grid item sm={2} xs={12}>
-                <Box textAlign="right">
-                    <Button
-                        color="primary"
-                        onClick={() => onClick(option.algorithmOption)}
-                    >
-                        {t("label.select-type")}
-                    </Button>
                 </Box>
             </Grid>
         </Grid>

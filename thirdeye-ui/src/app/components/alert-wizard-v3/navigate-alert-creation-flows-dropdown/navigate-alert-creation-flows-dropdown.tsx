@@ -75,7 +75,7 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
         <Grid container alignContent="center">
             <Grid item>
                 <Box paddingTop={1}>
-                    {t("label.select-alert-editor")}
+                    {t("label.alert-editor")}
                     {": "}
                 </Box>
             </Grid>

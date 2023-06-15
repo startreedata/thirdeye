@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
@@ -26,9 +27,9 @@ import { generateAvailableAlgorithmOptions } from "./alert-type-selection.utils"
 
 export const AlertTypeSelection: FunctionComponent<AlertTypeSelectionProps> = ({
     onAlertPropertyChange,
-    onSelectionComplete,
     alertTemplates,
     isMultiDimensionAlert,
+    selectedAlertTemplateName,
 }) => {
     const { t } = useTranslation();
 
@@ -40,7 +41,6 @@ export const AlertTypeSelection: FunctionComponent<AlertTypeSelectionProps> = ({
                     : algorithmOption.alertTemplate,
             },
         });
-        onSelectionComplete();
     };
 
     const options = useMemo(() => {
@@ -66,12 +66,31 @@ export const AlertTypeSelection: FunctionComponent<AlertTypeSelectionProps> = ({
                 </Grid>
 
                 {options.map((option) => {
+                    const isSelected = isMultiDimensionAlert
+                        ? selectedAlertTemplateName ===
+                          option.algorithmOption.alertTemplateForMultidimension
+                        : selectedAlertTemplateName ===
+                          option.algorithmOption.alertTemplate;
+
                     return (
                         <Grid item key={option.algorithmOption.title} xs={12}>
-                            <AlertTypeSection
-                                option={option}
-                                onClick={handleAlgorithmClick}
-                            />
+                            {isSelected ? (
+                                <Alert color="info" variant="standard">
+                                    <Box pb={1} pt={1}>
+                                        <AlertTypeSection
+                                            option={option}
+                                            selected={isSelected}
+                                            onClick={handleAlgorithmClick}
+                                        />
+                                    </Box>
+                                </Alert>
+                            ) : (
+                                <AlertTypeSection
+                                    option={option}
+                                    selected={isSelected}
+                                    onClick={handleAlgorithmClick}
+                                />
+                            )}
                         </Grid>
                     );
                 })}

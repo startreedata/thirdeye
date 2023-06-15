@@ -81,6 +81,7 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                                     notificationDisplayV1Classes.snackBarContainer,
                             }}
                             severity={notification.type}
+                            variant="standard"
                             onClose={handleClose}
                         >
                             {notification.message}

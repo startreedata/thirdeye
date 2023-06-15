@@ -70,14 +70,6 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         }
     }, []);
 
-    const handleAlgorithmSelection = (): void => {
-        navigate(
-            `../${
-                AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
-            }?${searchParams.toString()}`
-        );
-    };
-
     const handleCreateDefaultAlertTemplates = (): void => {
         createDefaultAlertTemplates().then(() => {
             getAlertTemplates();
@@ -144,8 +136,8 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                         <AlertTypeSelection
                             alertTemplates={alertTemplates}
                             isMultiDimensionAlert={isMultiDimensionAlert}
+                            selectedAlertTemplateName={alert.template?.name}
                             onAlertPropertyChange={onAlertPropertyChange}
-                            onSelectionComplete={handleAlgorithmSelection}
                         />
                     </EmptyStateSwitch>
                 </Grid>
@@ -159,16 +151,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                     nextBtnLink={`../${
                         AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
                     }?${searchParams.toString()}`}
-                    nextButtonLabel={t("label.continue-dont-change")}
-                >
-                    {t(
-                        "message.algorithm-is-selected-for-current-configuration",
-                        {
-                            algorithmName:
-                                selectedAlgorithmOption.algorithmOption.title,
-                        }
-                    )}
-                </WizardBottomBar>
+                />
             )}
         </>
     );

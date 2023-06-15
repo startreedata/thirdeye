@@ -140,7 +140,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                         subtitle={t(
                             "message.automatically-detects-dimensions-based-on-your-selection"
                         )}
-                        title={t("label.automated-generator")}
+                        title={t("label.cohort-recommender")}
                         onAggregationFunctionSelect={(aggFunc) => {
                             onAlertPropertyChange({
                                 templateProperties: {
@@ -195,7 +195,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                 backBtnLink="../"
                 nextBtnLink={
                     alert.templateProperties?.enumerationItems
-                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
+                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC}`
                         : undefined
                 }
             />

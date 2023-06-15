@@ -482,14 +482,13 @@ export const AlertsViewPage: FunctionComponent = () => {
                             ) => {
                                 return (
                                     <ButtonGroup
+                                        color="primary"
                                         size="small"
-                                        variant="contained"
+                                        variant="outlined"
                                         onClick={clickHandler}
                                     >
-                                        <Button variant="contained">
-                                            {t("label.options")}
-                                        </Button>
-                                        <Button variant="contained">
+                                        <Button>{t("label.options")}</Button>
+                                        <Button>
                                             <KeyboardArrowDownIcon />
                                         </Button>
                                     </ButtonGroup>

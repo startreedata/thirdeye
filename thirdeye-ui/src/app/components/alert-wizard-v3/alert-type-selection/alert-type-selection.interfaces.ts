@@ -17,9 +17,9 @@ import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 
 export interface AlertTypeSelectionProps {
     onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
-    onSelectionComplete: () => void;
     alertTemplates: AlertTemplate[];
     isMultiDimensionAlert: boolean;
+    selectedAlertTemplateName?: string;
 }
 
 export interface AlgorithmOption {

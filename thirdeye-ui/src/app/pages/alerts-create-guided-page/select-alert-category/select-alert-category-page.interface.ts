@@ -13,9 +13,6 @@
  * the License.
  */
 
-export interface AlertsGuidedCreateRouterProps {
-    hideBottomBarForAlertCategorySelection?: boolean;
-    hideCurrentlySelected?: boolean;
-    createLabel: string;
-    inProgressLabel: string;
+export interface SelectAlertCategoryPageProps {
+    hideBottomBar?: boolean;
 }

@@ -80,7 +80,7 @@ export const SampleAlertSelection: FunctionComponent<SampleAlertSelectionProps> 
                             <Grid item>
                                 <ButtonGroup color="primary">
                                     <Button
-                                        variant="text"
+                                        variant="outlined"
                                         onClick={() =>
                                             handleFilterClick(undefined)
                                         }
@@ -88,7 +88,7 @@ export const SampleAlertSelection: FunctionComponent<SampleAlertSelectionProps> 
                                         {t("label.show-all")}
                                     </Button>
                                     <Button
-                                        variant="text"
+                                        variant="outlined"
                                         onClick={() =>
                                             handleFilterClick(
                                                 SAMPLE_ALERT_TYPES.BASIC
@@ -98,14 +98,14 @@ export const SampleAlertSelection: FunctionComponent<SampleAlertSelectionProps> 
                                         {t("label.basic-alerts-only")}
                                     </Button>
                                     <Button
-                                        variant="text"
+                                        variant="outlined"
                                         onClick={() =>
                                             handleFilterClick(
                                                 SAMPLE_ALERT_TYPES.MULTIDIMENSION
                                             )
                                         }
                                     >
-                                        Multi-Dimension Only
+                                        {t("label.multidimension-only")}
                                     </Button>
                                 </ButtonGroup>
                             </Grid>

@@ -18,11 +18,7 @@ import {
     autocompleteClassesV1,
     autocompletePropsV1,
 } from "./autocomplete.util";
-import {
-    buttonClassesV1,
-    buttonGroupPropsV1,
-    buttonPropsV1,
-} from "./button.util";
+import { buttonPropsV1 } from "./button.util";
 import { cardClassesV1, cardContentClassesV1, cardPropsV1 } from "./card.util";
 import { chipClassesV1, chipPropsV1 } from "./chip.util";
 import { cssBaselineClassesV1 } from "./css-baseline.util";
@@ -56,7 +52,6 @@ export const lightV1: Theme = createTheme({
         MuiAlert: alertPropsV1,
         MuiAutocomplete: autocompletePropsV1,
         MuiButton: buttonPropsV1,
-        MuiButtonGroup: buttonGroupPropsV1,
         MuiCard: cardPropsV1,
         MuiChip: chipPropsV1,
         MuiGrid: gridPropsV1,
@@ -71,7 +66,6 @@ export const lightV1: Theme = createTheme({
     overrides: {
         MuiAlert: alertClassesV1,
         MuiAutocomplete: autocompleteClassesV1,
-        MuiButton: buttonClassesV1,
         MuiCard: cardClassesV1,
         MuiCardContent: cardContentClassesV1,
         MuiCssBaseline: cssBaselineClassesV1,

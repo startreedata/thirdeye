@@ -74,12 +74,26 @@ const SetupDimensionGroupsPage = lazy(() =>
 );
 
 export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRouterProps> =
-    ({ createLabel, inProgressLabel, hideCurrentlySelected }) => {
+    ({
+        createLabel,
+        inProgressLabel,
+        hideCurrentlySelected,
+        hideBottomBarForAlertCategorySelection,
+    }) => {
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
                 <Routes>
                     <Route element={<CreateAlertGuidedPage />} path="*">
-                        <Route index element={<SelectAlertCategoryPage />} />
+                        <Route
+                            index
+                            element={
+                                <SelectAlertCategoryPage
+                                    hideBottomBar={
+                                        hideBottomBarForAlertCategorySelection
+                                    }
+                                />
+                            }
+                        />
                         <Route
                             element={
                                 <CancelAPICallsOnPageUnload

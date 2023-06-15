@@ -16,6 +16,7 @@
 import i18n from "i18next";
 import AbsoluteScreenshot from "../../../../assets/images/alert-type-examples/absolute.png";
 import ETSScreenshot from "../../../../assets/images/alert-type-examples/exponential_time_smoothing.png";
+import MatrixProfileScreenshot from "../../../../assets/images/alert-type-examples/matrix_profile.png";
 import MeanVarianceScreenshot from "../../../../assets/images/alert-type-examples/mean_variance.png";
 import PercentageRuleScreenshot from "../../../../assets/images/alert-type-examples/percentage_change.png";
 import ThresholdScreenshot from "../../../../assets/images/alert-type-examples/threshold.png";
@@ -71,6 +72,16 @@ export const generateOptions = (): AlgorithmOption[] => {
             alertTemplateForMultidimension: "startree-ets-dx",
             alertTemplateForPercentile: "startree-ets-percentile",
             exampleImage: ETSScreenshot,
+        },
+        {
+            title: i18n.t("label.matrix-profile"),
+            description: i18n.t(
+                "message.the-matrix-profile-method-is-a-direct-anomaly"
+            ),
+            alertTemplate: "startree-matrix-profile",
+            alertTemplateForMultidimension: "startree-matrix-profile-dx",
+            alertTemplateForPercentile: "startree-matrix-profile-percentile",
+            exampleImage: MatrixProfileScreenshot,
         },
     ];
 };

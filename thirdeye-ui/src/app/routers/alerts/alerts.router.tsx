@@ -45,10 +45,10 @@ const AlertsAnomaliesPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsAnomaliesPage }))
 );
 
-const AlertsCreateAdvancePage = lazy(() =>
+const AlertsCreateJSONPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.component"
-    ).then((module) => ({ default: module.AlertsCreateAdvancePage }))
+        /* webpackChunkName: "alerts-create-json-page" */ "../../pages/alerts-create-page/alerts-create-json-page/alerts-create-json-page.component"
+    ).then((module) => ({ default: module.AlertsCreateJSONPage }))
 );
 
 const AlertsCreatePageNew = lazy(() =>
@@ -63,22 +63,22 @@ const AlertsCreatePageCopy = lazy(() =>
     ).then((module) => ({ default: module.AlertsCreateCopyPage }))
 );
 
-const AlertsCreateSimplePage = lazy(() =>
+const AlertsCreateAdvancedPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component"
-    ).then((module) => ({ default: module.AlertsCreateSimplePage }))
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advanced-page/alerts-create-advanced-page.component"
+    ).then((module) => ({ default: module.AlertsCreateAdvancedPage }))
+);
+
+const AlertsUpdateJSONPage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-update-json-page" */ "../../pages/alerts-update-page/alerts-update-json-page.component"
+    ).then((module) => ({ default: module.AlertsUpdateJSONPage }))
 );
 
 const AlertsUpdateAdvancedPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-update-advanced-page" */ "../../pages/alerts-update-page/alerts-update-advanced-page.component"
     ).then((module) => ({ default: module.AlertsUpdateAdvancedPage }))
-);
-
-const AlertsUpdateSimplePage = lazy(() =>
-    import(
-        /* webpackChunkName: "alerts-update-simple-page" */ "../../pages/alerts-update-page/alerts-update-simple-page.component"
-    ).then((module) => ({ default: module.AlertsUpdateSimplePage }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -171,11 +171,11 @@ export const AlertsRouter: FunctionComponent = () => {
                         />
 
                         <Route
-                            element={<AlertsCreateSimplePage />}
+                            element={<AlertsCreateAdvancedPage />}
                             path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                         />
                         <Route
-                            element={<AlertsCreateAdvancePage />}
+                            element={<AlertsCreateJSONPage />}
                             path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
                         />
                     </Route>
@@ -211,11 +211,11 @@ export const AlertsRouter: FunctionComponent = () => {
                         />
 
                         <Route
-                            element={<AlertsCreateSimplePage />}
+                            element={<AlertsCreateAdvancedPage />}
                             path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                         />
                         <Route
-                            element={<AlertsCreateAdvancePage />}
+                            element={<AlertsCreateJSONPage />}
                             path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
                         />
                     </Route>
@@ -306,11 +306,11 @@ export const AlertsRouter: FunctionComponent = () => {
                         />
 
                         <Route
-                            element={<AlertsUpdateSimplePage />}
+                            element={<AlertsUpdateAdvancedPage />}
                             path={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
                         />
                         <Route
-                            element={<AlertsUpdateAdvancedPage />}
+                            element={<AlertsUpdateJSONPage />}
                             path={AppRouteRelative.ALERTS_UPDATE_JSON_EDITOR}
                         />
                     </Route>

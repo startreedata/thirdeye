@@ -55,16 +55,16 @@ const AlertsCreateGuidedRouter = lazy(() =>
     ).then((module) => ({ default: module.AlertsCreateGuidedRouter }))
 );
 
-const AlertsCreateSimplePage = lazy(() =>
+const AlertsCreateAdvancedPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-create-page" */ "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component"
-    ).then((module) => ({ default: module.AlertsCreateSimplePage }))
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advanced-page/alerts-create-advanced-page.component"
+    ).then((module) => ({ default: module.AlertsCreateAdvancedPage }))
 );
 
-const AlertsCreateAdvancePage = lazy(() =>
+const AlertsCreateJSONPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advance-page/alerts-create-advance-page.component"
-    ).then((module) => ({ default: module.AlertsCreateAdvancePage }))
+        /* webpackChunkName: "alerts-create-json-page" */ "../../pages/alerts-create-page/alerts-create-json-page/alerts-create-json-page.component"
+    ).then((module) => ({ default: module.AlertsCreateJSONPage }))
 );
 
 export const WelcomeRouter: FunctionComponent = () => {
@@ -173,11 +173,11 @@ export const WelcomeRouter: FunctionComponent = () => {
                     />
 
                     <Route
-                        element={<AlertsCreateSimplePage />}
+                        element={<AlertsCreateAdvancedPage />}
                         path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                     />
                     <Route
-                        element={<AlertsCreateAdvancePage />}
+                        element={<AlertsCreateJSONPage />}
                         path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
                     />
                 </Route>

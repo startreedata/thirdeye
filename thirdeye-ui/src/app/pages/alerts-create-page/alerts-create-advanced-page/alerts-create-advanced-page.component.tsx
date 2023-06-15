@@ -27,7 +27,7 @@ import {
     BOTTOM_BAR_ELEMENT_ID,
 } from "../../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
 
-export const AlertsCreateSimplePage: FunctionComponent = () => {
+export const AlertsCreateAdvancedPage: FunctionComponent = () => {
     const { t } = useTranslation();
 
     const {

@@ -69,7 +69,7 @@ jest.mock(
 );
 
 jest.mock(
-    "../../pages/alerts-create-page/alerts-create-simple-page/alerts-create-simple-page.component",
+    "../../pages/alerts-create-page/alerts-create-advanced-page/alerts-create-advanced-page.component",
     () => ({
         AlertsCreateNewPage: jest
             .fn()

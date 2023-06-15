@@ -44,9 +44,6 @@ public class PinotControllerRestClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotControllerRestClient.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final org.codehaus.jackson.map.ObjectMapper CODEHAUS_OBJECT_MAPPER =
-      new org.codehaus.jackson.map.ObjectMapper();
-
   private static final String PINOT_TABLES_ENDPOINT = "/tables/";
   private static final String PINOT_TABLES_ENDPOINT_TEMPLATE = "/tables/%s";
   private static final String PINOT_SCHEMA_ENDPOINT_TEMPLATE = "/schemas/%s";
@@ -125,7 +122,7 @@ public class PinotControllerRestClient {
         LOG.error("Schema {} not found, {}", dataset, schemaRes.getStatusLine().toString());
       } else {
         final InputStream schemaContent = schemaRes.getEntity().getContent();
-        schema = CODEHAUS_OBJECT_MAPPER.readValue(schemaContent, Schema.class);
+        schema = OBJECT_MAPPER.readValue(schemaContent, Schema.class);
       }
     } catch (final Exception e) {
       LOG.error("Exception in retrieving schema collections, skipping {}", dataset);

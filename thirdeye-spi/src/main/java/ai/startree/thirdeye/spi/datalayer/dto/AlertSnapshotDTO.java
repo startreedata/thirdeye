@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.detection.AnomalyNotifiedStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.io.IOException;
@@ -24,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

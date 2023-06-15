@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AxisScale, Orientation } from "@visx/axis";
+import { AxisScale } from "@visx/axis";
 import { ScaleOrdinal } from "d3-scale";
 import React, { FunctionComponent } from "react";
 import { Event } from "../../../rest/dto/event.interfaces";
@@ -135,7 +135,7 @@ export interface XAxisOptions {
 }
 
 export interface YAxisOptions {
-    position?: Orientation;
+    position?: string;
     enabled?: boolean;
 }
 

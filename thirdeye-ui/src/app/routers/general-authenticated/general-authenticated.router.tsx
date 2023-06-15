@@ -35,12 +35,6 @@ const AdminPage = lazy(() =>
     ).then((module) => ({ default: module.AdminPage }))
 );
 
-const CohortDetectorPage = lazy(() =>
-    import(
-        /* webpackChunkName: "cohort-detector-page" */ "../../pages/cohort-detector-page/cohort-detector-page.component"
-    ).then((module) => ({ default: module.CohortDetectorPage }))
-);
-
 const LogoutPage = lazy(() =>
     import(
         /* webpackChunkName: "logout-page" */ "../../pages/logout-page/logout-page.component"
@@ -84,12 +78,6 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
                         </CancelAPICallsOnPageUnload>
                     }
                     path={`${AppRouteRelative.ADMIN}`}
-                />
-
-                {/* Cohort detector path */}
-                <Route
-                    element={<CohortDetectorPage />}
-                    path={`${AppRouteRelative.COHORT_RECOMMENDER}`}
                 />
 
                 {/* Login path */}

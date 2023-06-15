@@ -23,7 +23,6 @@ const SEARCH_TERM_QUERY_PARAM_KEY = "search";
 
 export const AppRouteRelative = {
     ADMIN: "admin",
-    COHORT_RECOMMENDER: "cohort-recommender",
     HOME: "home",
     LOGIN: "login",
     LOGOUT: "logout",
@@ -122,7 +121,6 @@ export const AppRoute = {
     BASE: "/",
     HOME: `/${AppRouteRelative.HOME}`,
     ADMIN: `/${AppRouteRelative.ADMIN}`,
-    COHORT_RECOMMENDER: `/${AppRouteRelative.COHORT_RECOMMENDER}`,
     LOGIN: "/login",
     LOGOUT: "/logout",
     SWAGGER: `/swagger`,

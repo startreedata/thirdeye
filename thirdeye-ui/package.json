@@ -72,7 +72,7 @@
         "font-color-contrast": "^11.1.0",
         "i18next": "20.6.1",
         "i18next-browser-languagedetector": "6.1.2",
-        "immer": "^8.0.1",
+        "immer": "9.0.6",
         "lodash": "^4.17.21",
         "luxon": "3.2.0",
         "numbro": "^2.3.2",

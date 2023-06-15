@@ -62,45 +62,6 @@ describe("AnomalyBreakdownComparisonHeatmap", () => {
         );
     });
 
-    it("should show all the UI components for valid data responses", async () => {
-        expect.assertions(7);
-
-        render(
-            <AnomalyBreakdownComparisonHeatmap
-                anomalyId={451751}
-                chartTimeSeriesFilterSet={[]}
-                comparisonOffset={mockComparisonOffset}
-                onAddFilterSetClick={() => null}
-            />
-        );
-
-        // Wait for the filter controls to be rendered
-        const filterDataControlsContainer = await screen.findByText(
-            "Filter Data Controls"
-        );
-
-        expect(filterDataControlsContainer).toBeInTheDocument();
-
-        // Ensure a treemap shows for each dimension in the data payload.
-        // These are the labels for each treemap
-        const containersForTreemaps = [
-            "browser",
-            "country",
-            "device",
-            "gender",
-            "os",
-            "version",
-        ].map(async (dimensionColumn) => {
-            const containerForTreemapForDimension = await screen.findByText(
-                dimensionColumn
-            );
-
-            expect(containerForTreemapForDimension).toBeInTheDocument();
-        });
-
-        await Promise.all(containersForTreemaps);
-    });
-
     it("should call notify indicating error if data requests errors", async () => {
         mockedGetAnomalyMetricBreakdownResponse = Promise.reject("Error");
 

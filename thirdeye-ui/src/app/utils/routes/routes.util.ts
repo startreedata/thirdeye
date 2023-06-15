@@ -115,6 +115,7 @@ export const AppRouteRelative = {
     WELCOME_CREATE_ALERT_TUNE_ALERT: "tune-alert",
     WELCOME_CREATE_ALERT_SETUP_DETAILS: "setup-details",
     WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION: "setup-dimension-groups",
+    WELCOME_CREATE_ALERT_SAMPLE_ALERT: "sample-alerts",
 } as const;
 
 export const AppRoute = {

@@ -45,22 +45,10 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
     const { cohortsResponse, getCohorts, status, errorMessages } =
         useGetCohort();
 
-    const { alert, onAlertPropertyChange, selectedAlgorithmOption } =
+    const { alert, onAlertPropertyChange } =
         useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const [selectedCohorts, setSelectedCohorts] = useState<CohortResult[]>([]);
-
-    useEffect(() => {
-        // On initial render, ensure the alert template is a dimension exploration one
-        if (
-            selectedAlgorithmOption.algorithmOption
-                .alertTemplateForMultidimension !== alert.template?.name
-        ) {
-            return navigate(
-                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
-            );
-        }
-    }, []);
 
     useEffect(() => {
         notifyIfErrors(
@@ -119,9 +107,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
             <PageContentsGridV1>
                 <Grid item xs={12}>
                     <Typography variant="h5">
-                        {t("message.multidimension-setup", {
-                            algorithmName: `(${selectedAlgorithmOption.algorithmOption.title})`,
-                        })}
+                        {t("message.multidimension-setup")}
                     </Typography>
                     <Typography variant="body1">
                         {t(
@@ -202,10 +188,10 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
             </PageContentsGridV1>
 
             <WizardBottomBar
-                backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`}
+                backBtnLink="../"
                 nextBtnLink={
                     alert.templateProperties?.enumerationItems
-                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`
+                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE}`
                         : undefined
                 }
             />

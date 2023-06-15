@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { AvailableAlgorithmOption } from "../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.interfaces";
+import { AvailableAlgorithmOption } from "../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { AlertTemplate } from "../../rest/dto/alert-template.interfaces";
 import { AlertInsight, EditableAlert } from "../../rest/dto/alert.interfaces";
@@ -31,8 +31,7 @@ export interface AlertCreatedGuidedPageOutletContext {
     handleCreateAlertClick: (alert: EditableAlert) => void;
     isCreatingAlert: boolean;
 
-    simpleOptions: AvailableAlgorithmOption[];
-    advancedOptions: AvailableAlgorithmOption[];
+    alertTypeOptions: AvailableAlgorithmOption[];
     getAlertTemplates: () => void;
     alertTemplates: AlertTemplate[];
 
@@ -45,4 +44,6 @@ export interface AlertCreatedGuidedPageOutletContext {
         alert?: EditableAlert;
     }) => Promise<AlertInsight | undefined>;
     getAlertInsightStatus: ActionStatus;
+
+    setShouldShowStepper: (flag: boolean) => void;
 }

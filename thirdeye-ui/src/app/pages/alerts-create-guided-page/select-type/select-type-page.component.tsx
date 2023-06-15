@@ -22,7 +22,7 @@ import {
 } from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AlertTypeSelection } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.component";
-import { filterOptionWithTemplateNames } from "../../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
+import { filterOptionWithTemplateNames } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
@@ -45,8 +45,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
 
     const {
         onAlertPropertyChange,
-        simpleOptions,
-        advancedOptions,
+        alertTypeOptions,
         getAlertTemplates,
         alertTemplates,
         selectedAlgorithmOption,
@@ -135,9 +134,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                             </PageContentsCardV1>
                         }
                         isEmpty={
-                            filterOptionWithTemplateNames(advancedOptions)
-                                .length === 0 &&
-                            filterOptionWithTemplateNames(simpleOptions)
+                            filterOptionWithTemplateNames(alertTypeOptions)
                                 .length === 0
                         }
                     >

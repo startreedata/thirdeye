@@ -14,7 +14,7 @@
  */
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
-import { AvailableAlgorithmOption } from "../algorithm-selection/algorithm-selection.interfaces";
+import { AvailableAlgorithmOption } from "../alert-type-selection/alert-type-selection.interfaces";
 
 export interface ThresholdSetupProps {
     alert: EditableAlert;

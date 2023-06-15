@@ -13,6 +13,7 @@
  * the License.
  */
 
+import i18n from "i18next";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { SampleAlertOption } from "./sample-alert-selection.interfaces";
@@ -25,7 +26,6 @@ const STARTREE_PERCENTAGE_RULE = "startree-percentage-rule";
 const STARTREE_ETS_DX = "startree-ets-dx";
 
 export const generateOptions = (
-    t: (id: string) => string,
     datasets: Dataset[],
     alertTemplates: AlertTemplate[]
 ): SampleAlertOption[] => {
@@ -40,15 +40,18 @@ export const generateOptions = (
         alertTemplates.find((a) => a.name === STARTREE_PERCENTAGE_RULE)
     ) {
         availableOptions.push({
-            title: t("message.monitor-website-traffic-for-consumer-products"),
-            description: t(
+            isDimensionExploration: false,
+            title: i18n.t(
+                "message.monitor-website-traffic-for-consumer-products"
+            ),
+            description: i18n.t(
                 "message.monitor-number-of-page-views-across-multiple"
             ),
             recipeLink:
                 "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/consumer_product_user_experience",
             alertConfiguration: {
                 name: "Startree-percentage-rule-pageviews-sample-alert",
-                description: t(
+                description: i18n.t(
                     "message.monitor-number-of-page-views-across-multiple"
                 ),
                 template: {
@@ -79,15 +82,18 @@ export const generateOptions = (
         alertTemplates.find((a) => a.name === STARTREE_ETS_DX)
     ) {
         availableOptions.push({
-            title: t("message.monitor-store-sales-for-ecommerce-retail-stores"),
-            description: t(
+            isDimensionExploration: true,
+            title: i18n.t(
+                "message.monitor-store-sales-for-ecommerce-retail-stores"
+            ),
+            description: i18n.t(
                 "message.monitor-number-of-orders-across-multiple-dimension"
             ),
             recipeLink:
                 "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/eCommerce_store_sales",
             alertConfiguration: {
                 name: "USStoreSalesOrderData-seasonal-dx-sample-alert",
-                description: t(
+                description: i18n.t(
                     "message.monitor-number-of-orders-across-multiple-dimension"
                 ),
                 template: {
@@ -142,15 +148,16 @@ export const generateOptions = (
     const adsDataset = datasets.find((d) => d.name === ADS_DATASET_NAME);
     if (adsDataset && alertTemplates.find((a) => a.name === STARTREE_ETS_DX)) {
         availableOptions.push({
-            title: t("message.monitor-ad-campaign-performance"),
-            description: t(
+            isDimensionExploration: true,
+            title: i18n.t("message.monitor-ad-campaign-performance"),
+            description: i18n.t(
                 "message.monitor-number-of-clicks-across-multiple-dimension"
             ),
             recipeLink:
                 "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/ad_campaign_performance_monitoring",
             alertConfiguration: {
                 name: "AdCampaignData-seasonal-dx-sample-alert",
-                description: t(
+                description: i18n.t(
                     "message.monitor-number-of-clicks-across-multiple-dimension"
                 ),
                 template: {
@@ -200,15 +207,16 @@ export const generateOptions = (
         alertTemplates.find((a) => a.name === STARTREE_ETS_DX)
     ) {
         availableOptions.push({
-            title: t("message.monitor-driver-request-api-failures"),
-            description: t(
+            isDimensionExploration: true,
+            title: i18n.t("message.monitor-driver-request-api-failures"),
+            description: i18n.t(
                 "message.monitor-metrics-critical-to-rideshare-customer"
             ),
             recipeLink:
                 "https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/how-tos/thirdeye_recipes/rideshare_recipe",
             alertConfiguration: {
                 name: "LogisticsData-rideshare-dx-sample-alert",
-                description: t(
+                description: i18n.t(
                     "message.monitor-metrics-critical-to-rideshare-customer"
                 ),
                 template: {

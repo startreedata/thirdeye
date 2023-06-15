@@ -13,12 +13,12 @@
  * the License.
  */
 
-import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 
 export interface SampleAlertSelectionProps {
     onSampleAlertSelect: (sampleAlertOption: SampleAlertOption) => void;
-    alertTemplates: AlertTemplate[];
+    basicAlertOptions: SampleAlertOption[];
+    multiDimensionAlertOptions: SampleAlertOption[];
 }
 
 export interface SampleAlertOption {
@@ -26,4 +26,12 @@ export interface SampleAlertOption {
     description: string;
     alertConfiguration: EditableAlert;
     recipeLink?: string;
+    isDimensionExploration: boolean;
 }
+
+export const QUERY_PARAM_KEY_FOR_SAMPLE_ALERT_FILTER = "sampleAlertType";
+
+export const SAMPLE_ALERT_TYPES = {
+    MULTIDIMENSION: "multiDimension",
+    BASIC: "basic",
+};

@@ -13,10 +13,10 @@
  * the License.
  */
 import { Box, Grid, Typography } from "@material-ui/core";
-import { default as React, FunctionComponent, useMemo } from "react";
+import { default as React, FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useOutletContext } from "react-router-dom";
-import { generateAvailableAlgorithmOptions } from "../../components/alert-wizard-v3/algorithm-selection/algorithm-selection.utils";
+import { generateAvailableAlgorithmOptions } from "../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
@@ -81,23 +81,22 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
     } =
         useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
+    const [shouldShowStepper, setShouldShowStepper] = useState(true);
+
     // Ensure to filter for what is available on the server
-    const [simpleOptions, advancedOptions] = useMemo(() => {
+    const alertTypeOptions = useMemo(() => {
         if (!alertTemplateOptions) {
-            return [[], []];
+            return [];
         }
         const availableTemplateNames = alertTemplateOptions.map(
             (alertTemplate) => alertTemplate.name
         );
 
-        return generateAvailableAlgorithmOptions(t, availableTemplateNames);
+        return generateAvailableAlgorithmOptions(availableTemplateNames);
     }, [alertTemplateOptions]);
 
     const stepsToDisplay = useMemo(() => {
-        const matchingDimensionExploration = [
-            ...simpleOptions,
-            ...advancedOptions,
-        ].find(
+        const matchingDimensionExploration = alertTypeOptions.find(
             (c) =>
                 c.algorithmOption.alertTemplateForMultidimension ===
                 alert.template?.name
@@ -123,7 +122,7 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
     }, [pathname, stepsToDisplay]);
 
     const selectedAlgorithmOption = useMemo(() => {
-        return [...simpleOptions, ...advancedOptions].find(
+        return alertTypeOptions.find(
             (c) =>
                 c.algorithmOption.alertTemplate === alert.template?.name ||
                 c.algorithmOption.alertTemplateForPercentile ===
@@ -131,7 +130,7 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
                 c.algorithmOption.alertTemplateForMultidimension ===
                     alert.template?.name
         );
-    }, [alert, simpleOptions, advancedOptions]);
+    }, [alert, alertTypeOptions]);
 
     const handleCreateAlertClick = (alertFromChild: EditableAlert): void => {
         handleSubmitAlertClick(
@@ -150,39 +149,43 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
         <>
             <Box display="flex">
                 <Box flex="1 2 auto">
-                    <PageContentsGridV1>
-                        <Grid item xs={12}>
-                            <PageContentsCardV1>
-                                <Typography variant="h6">
-                                    {t("message.complete-the-following-steps")}
-                                </Typography>
-                                <StepperV1
-                                    activeStep={activeStep}
-                                    stepLabelFn={(step: string): string => {
-                                        const stepDefinition =
-                                            stepsToDisplay.find(
-                                                (candidate) =>
-                                                    candidate.subPath === step
-                                            );
+                    {shouldShowStepper && (
+                        <PageContentsGridV1>
+                            <Grid item xs={12}>
+                                <PageContentsCardV1>
+                                    <Typography variant="h6">
+                                        {t(
+                                            "message.complete-the-following-steps"
+                                        )}
+                                    </Typography>
+                                    <StepperV1
+                                        activeStep={activeStep}
+                                        stepLabelFn={(step: string): string => {
+                                            const stepDefinition =
+                                                stepsToDisplay.find(
+                                                    (candidate) =>
+                                                        candidate.subPath ===
+                                                        step
+                                                );
 
-                                        return t(
-                                            `message.${stepDefinition?.translationLabel}`
-                                        );
-                                    }}
-                                    steps={stepsToDisplay.map(
-                                        (item) => item.subPath
-                                    )}
-                                />
-                            </PageContentsCardV1>
-                        </Grid>
-                    </PageContentsGridV1>
+                                            return t(
+                                                `message.${stepDefinition?.translationLabel}`
+                                            );
+                                        }}
+                                        steps={stepsToDisplay.map(
+                                            (item) => item.subPath
+                                        )}
+                                    />
+                                </PageContentsCardV1>
+                            </Grid>
+                        </PageContentsGridV1>
+                    )}
 
                     <Outlet
                         context={{
                             alert,
                             onAlertPropertyChange: handleAlertPropertyChange,
-                            simpleOptions,
-                            advancedOptions,
+                            alertTypeOptions,
                             selectedAlgorithmOption,
                             handleCreateAlertClick,
                             isCreatingAlert: isEditRequestInFlight,
@@ -205,6 +208,8 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
                             alertInsight,
                             getAlertInsight,
                             getAlertInsightStatus,
+
+                            setShouldShowStepper,
                         }}
                     />
                 </Box>

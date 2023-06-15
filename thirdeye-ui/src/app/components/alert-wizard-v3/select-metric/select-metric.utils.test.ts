@@ -24,7 +24,7 @@ import { DatasetInfo } from "../../../utils/datasources/datasources.util";
 import {
     generateTemplateProperties,
     resetSelectedMetrics,
-} from "./threshold-setup.utils";
+} from "./select-metric.utils";
 
 describe("AlertWizardV3/Threshold Setup Utils", () => {
     it("generateTemplateProperties should return object with expected values extracted", () => {

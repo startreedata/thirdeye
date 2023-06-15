@@ -39,6 +39,7 @@ export const AlgorithmOptionCard: FunctionComponent<AlgorithmOptionCardProps> =
                 flexDirection="column"
                 height="100%"
                 justifyContent="space-between"
+                textAlign="center"
             >
                 <Box>
                     <CardContent>

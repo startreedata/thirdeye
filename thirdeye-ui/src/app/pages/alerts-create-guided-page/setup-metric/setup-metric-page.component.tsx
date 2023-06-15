@@ -13,7 +13,6 @@
  * the License.
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
-import { cloneDeep } from "lodash";
 import {
     default as React,
     FunctionComponent,
@@ -50,6 +49,14 @@ import {
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
+
+const PROPERTIES_TO_COPY = [
+    "dataSource",
+    "dataset",
+    "aggregationColumn",
+    "aggregationFunction",
+    "monitoringGranularity",
+];
 
 export const SetupMetricPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -99,16 +106,23 @@ export const SetupMetricPage: FunctionComponent = () => {
 
     const [alertConfigForPreview, setAlertConfigForPreview] =
         useState<EditableAlert>(() => {
-            const clone = cloneDeep(alert);
+            const workingAlert = createNewStartingAlert();
 
-            if (clone.template) {
-                clone.template.name = alertTemplateForEvaluate?.name;
+            PROPERTIES_TO_COPY.forEach((propKey) => {
+                if (alert.templateProperties[propKey]) {
+                    workingAlert.templateProperties[propKey] =
+                        alert.templateProperties[propKey];
+                }
+            });
+
+            if (workingAlert.template) {
+                workingAlert.template.name = alertTemplateForEvaluate?.name;
             }
 
-            clone.templateProperties.min = 0;
-            clone.templateProperties.max = 0;
+            workingAlert.templateProperties.min = 0;
+            workingAlert.templateProperties.max = 0;
 
-            return clone;
+            return workingAlert;
         });
 
     const shouldShowLoadButton = useMemo(() => {
@@ -277,6 +291,7 @@ export const SetupMetricPage: FunctionComponent = () => {
             </PageContentsGridV1>
 
             <WizardBottomBar
+                backBtnLink="../"
                 nextBtnLink={`../${
                     AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
                 }?${searchParams.toString()}`}

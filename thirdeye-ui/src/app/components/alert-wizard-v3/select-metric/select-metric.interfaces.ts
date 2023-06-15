@@ -13,7 +13,7 @@
  * the License.
  */
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
-import { AvailableAlgorithmOption } from "../algorithm-selection/algorithm-selection.interfaces";
+import { AvailableAlgorithmOption } from "../alert-type-selection/alert-type-selection.interfaces";
 
 export interface SelectMetricProps {
     alert: EditableAlert;

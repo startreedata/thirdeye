@@ -13,7 +13,7 @@
  * the License.
  */
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
@@ -23,6 +23,18 @@ const CreateAlertGuidedPage = lazy(() =>
     import(
         /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"
     ).then((module) => ({ default: module.CreateAlertGuidedPage }))
+);
+
+const SelectAlertCategoryPage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-alert-category" */ "../../pages/alerts-create-guided-page/select-alert-category/select-alert-category-page.component"
+    ).then((module) => ({ default: module.SelectAlertCategoryPage }))
+);
+
+const SelectSampleAlertPage = lazy(() =>
+    import(
+        /* webpackChunkName: "select-sample-alert-page" */ "../../pages/alerts-create-guided-page/select-sample-alert/select-sample-alert-page.component"
+    ).then((module) => ({ default: module.SelectSampleAlertPage }))
 );
 
 const SetupMetricPage = lazy(() =>
@@ -67,17 +79,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
                 <Routes>
                     <Route element={<CreateAlertGuidedPage />} path="*">
-                        <Route
-                            index
-                            element={
-                                <Navigate
-                                    replace
-                                    to={
-                                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
-                                    }
-                                />
-                            }
-                        />
+                        <Route index element={<SelectAlertCategoryPage />} />
                         <Route
                             element={
                                 <CancelAPICallsOnPageUnload
@@ -90,6 +92,13 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                             }
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
+                            }
+                        />
+
+                        <Route
+                            element={<SelectSampleAlertPage />}
+                            path={
+                                AppRouteRelative.WELCOME_CREATE_ALERT_SAMPLE_ALERT
                             }
                         />
 

@@ -79,7 +79,7 @@
     <modelmapper.version>3.1.1</modelmapper.version>
     <mysql.connector.version>8.0.28</mysql.connector.version>
     <org.mapstruct.version>1.5.4.Final</org.mapstruct.version>
-    <pinot.version>0.12.1</pinot.version>
+    <pinot.version>0.10.0</pinot.version>
     <prometheus.version>0.11.0</prometheus.version>
     <quartz.version>2.3.2</quartz.version>
     <reflections.version>0.10.2</reflections.version>
@@ -564,6 +564,10 @@
           <exclusion>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
